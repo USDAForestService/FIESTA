@@ -18,7 +18,7 @@ data filters."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/li
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -83,16 +83,16 @@ data filters.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">popFilters</span><span class="op">(</span>
-  evalid <span class="op">=</span> <span class="cn">NULL</span>,
-  invyrs <span class="op">=</span> <span class="cn">NULL</span>,
-  intensity <span class="op">=</span> <span class="cn">NULL</span>,
-  measCur <span class="op">=</span> <span class="cn">FALSE</span>,
-  measEndyr <span class="op">=</span> <span class="cn">NULL</span>,
-  measEndyr.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  ACI <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">popFilters</span><span class="op">(</span></span>
+<span>  evalid <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  invyrs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  intensity <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  measCur <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  measEndyr <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  measEndyr.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ACI <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -100,29 +100,46 @@ data filters.</p>
     <dl><dt>evalid</dt>
 <dd><p>Numeric. FIA Evaluation identifier for subsetting plots for
 population.</p></dd>
+
+
 <dt>invyrs</dt>
 <dd><p>Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).</p></dd>
+
+
 <dt>intensity</dt>
 <dd><p>Integer code. Code(s) indicating intensity to use for
 population.</p></dd>
+
+
 <dt>measCur</dt>
 <dd><p>Logical. Inventory span defining variable. If TRUE, extract
 plots with most current measurement for state(s).</p></dd>
+
+
 <dt>measEndyr</dt>
 <dd><p>Logical. Inventory span defining variable. If TRUE, extract
 plots with most current measurement for state(s) for years measured in or
 before measEndyr.</p></dd>
+
+
 <dt>measEndyr.filter</dt>
 <dd><p>Filter for extracting plots using measEndyr. Must be
 in R syntax (e.g., 'AOI == 1').</p></dd>
+
+
 <dt>ACI</dt>
 <dd><p>Logical. If TRUE, including All Condition Inventory (ACI) plots.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>For extendibility.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of user-supplied parameters and parameter values for population
+    
+
+<p>A list of user-supplied parameters and parameter values for population
 data filters.</p>
     </div>
     <div id="details">
@@ -136,7 +153,7 @@ data filters.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">popFilters</span><span class="op">(</span>ACI <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">popFilters</span><span class="op">(</span>ACI <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $evalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -172,7 +189,7 @@ data filters.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

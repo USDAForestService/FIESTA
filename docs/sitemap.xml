@@ -169,6 +169,9 @@
     <loc>/reference/datSumTreeDomRatio.html</loc>
   </url>
   <url>
+    <loc>/reference/dbTables.html</loc>
+  </url>
+  <url>
     <loc>/reference/ecomap.html</loc>
   </url>
   <url>
@@ -185,6 +188,9 @@
   </url>
   <url>
     <loc>/reference/modGBarea.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modGBdwm.html</loc>
   </url>
   <url>
     <loc>/reference/modGBlulc.html</loc>
@@ -287,6 +293,9 @@
   </url>
   <url>
     <loc>/reference/ref_plt.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ref_popType.html</loc>
   </url>
   <url>
     <loc>/reference/ref_shp.html</loc>

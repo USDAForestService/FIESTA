@@ -23,7 +23,7 @@ Area by domain (i.e., estimation unit) - Zonal statistics by domain
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -92,44 +92,44 @@ Area by domain (i.e., estimation unit)<br> - Zonal statistics by domain
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spGetAuxiliary</span><span class="op">(</span>
-  <span class="va">xyplt</span>,
-  xyplt_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  uniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,
-  unittype <span class="op">=</span> <span class="st">"POLY"</span>,
-  unit_layer <span class="op">=</span> <span class="cn">NULL</span>,
-  unit_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  unitvar <span class="op">=</span> <span class="cn">NULL</span>,
-  rastlst.cont <span class="op">=</span> <span class="cn">NULL</span>,
-  rastlst.cont.name <span class="op">=</span> <span class="cn">NULL</span>,
-  rastlst.cont.stat <span class="op">=</span> <span class="st">"mean"</span>,
-  rastlst.cont.NODATA <span class="op">=</span> <span class="cn">NULL</span>,
-  rastlst.cat <span class="op">=</span> <span class="cn">NULL</span>,
-  rastlst.cat.name <span class="op">=</span> <span class="cn">NULL</span>,
-  rastlst.cat.NODATA <span class="op">=</span> <span class="cn">NULL</span>,
-  rastfolder <span class="op">=</span> <span class="cn">NULL</span>,
-  asptransform <span class="op">=</span> <span class="cn">FALSE</span>,
-  rast.asp <span class="op">=</span> <span class="cn">NULL</span>,
-  rast.lut <span class="op">=</span> <span class="cn">NULL</span>,
-  rastlut <span class="op">=</span> <span class="cn">NULL</span>,
-  extract <span class="op">=</span> <span class="cn">TRUE</span>,
-  areacalc <span class="op">=</span> <span class="cn">TRUE</span>,
-  areaunits <span class="op">=</span> <span class="st">"ACRES"</span>,
-  keepNA <span class="op">=</span> <span class="cn">TRUE</span>,
-  ncores <span class="op">=</span> <span class="fl">1</span>,
-  NAto0 <span class="op">=</span> <span class="cn">TRUE</span>,
-  npixels <span class="op">=</span> <span class="cn">TRUE</span>,
-  addN <span class="op">=</span> <span class="cn">FALSE</span>,
-  showext <span class="op">=</span> <span class="cn">FALSE</span>,
-  returnxy <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,
-  exportNA <span class="op">=</span> <span class="cn">FALSE</span>,
-  spMakeSpatial_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  vars2keep <span class="op">=</span> <span class="cn">NULL</span>,
-  gui <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spGetAuxiliary</span><span class="op">(</span></span>
+<span>  xyplt <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xyplt_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  uniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,</span>
+<span>  unittype <span class="op">=</span> <span class="st">"POLY"</span>,</span>
+<span>  unit_layer <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  unit_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  unitvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rastlst.cont <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rastlst.cont.name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rastlst.cont.stat <span class="op">=</span> <span class="st">"mean"</span>,</span>
+<span>  rastlst.cont.NODATA <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rastlst.cat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rastlst.cat.name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rastlst.cat.NODATA <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rastfolder <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  asptransform <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  rast.asp <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rast.lut <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rastlut <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  extract <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  areacalc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  areaunits <span class="op">=</span> <span class="st">"ACRES"</span>,</span>
+<span>  keepNA <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ncores <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  NAto0 <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  npixels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  addN <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  showext <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  returnxy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  exportNA <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  spMakeSpatial_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vars2keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -138,153 +138,226 @@ Area by domain (i.e., estimation unit)<br> - Zonal statistics by domain
 <dd><p>Data frame object or String. Name of layer with xy coordinates
 and unique identifier. Can be layer with xy_dsn, full pathname, including
 extension, or file name (with extension) in xy_dsn folder.</p></dd>
+
+
 <dt>xyplt_dsn</dt>
 <dd><p>String. Name of database where xyplt is. The dsn varies by
 driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).</p></dd>
+
+
 <dt>uniqueid</dt>
 <dd><p>String.* Unique identifier of xyplt records.</p></dd>
+
+
 <dt>unittype</dt>
 <dd><p>String. Type of spatial layer unit_layer is ("POLY",
 "RASTER").</p></dd>
+
+
 <dt>unit_layer</dt>
 <dd><p>sf R object or String. Name of the domain spatial layer.
 Can be a spatial polygon object, full pathname to a shapefile, name of a
 polygon layer within a database, or a full pathname to raster file.</p></dd>
+
+
 <dt>unit_dsn</dt>
 <dd><p>String. The data source name (dsn; i.e., folder or database
 name) of unit_layer. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional.</p></dd>
+
+
 <dt>unitvar</dt>
 <dd><p>String. Name of domain variable in domlayer. If NULL,
 assuming one domain. An attribute names ONEUNIT is added to layer with
 value=1.</p></dd>
+
+
 <dt>rastlst.cont</dt>
 <dd><p>String vector or list. A list of raster(s) with
 continuous data values (e.g., DEM). The list may include file name of
 raster(s) or raster objects that are not InMemory.</p></dd>
+
+
 <dt>rastlst.cont.name</dt>
 <dd><p>String vector. Output names for continuous rasters.
 Optional. If NULL, name of raster is used as default or name+'_'+layer
 number for multi-band layers.</p></dd>
+
+
 <dt>rastlst.cont.stat</dt>
 <dd><p>String. Zonal statistic for continuous rasters.</p></dd>
+
+
 <dt>rastlst.cont.NODATA</dt>
 <dd><p>Numeric vector. NODATA value for continuous
 rasters (See notes). These values will be converted to NA and removed from
 output if keepNA=FALSE. If 1 number, the same value will be used for all
 categorical rasters. If more than 1 number, the number of values must be
 equal to the number of rasters in rastlst.cont.</p></dd>
+
+
 <dt>rastlst.cat</dt>
 <dd><p>String vector or list. A list of raster(s) with thematic
 (i.e., categorical) data values. The list may include file name of raster(s)
 or raster objects that are not InMemory.</p></dd>
+
+
 <dt>rastlst.cat.name</dt>
 <dd><p>String vector. Output names for categorical rasters.
 If NULL, name of raster is used as default or name+'_'+layer number for
 multi-band layers.</p></dd>
+
+
 <dt>rastlst.cat.NODATA</dt>
 <dd><p>Numeric vector. NODATA value for categorical
 rasters (See notes). These values will be converted to NA and removed from
 output if keepNA=FALSE. If 1 number, the same value will be used for all
 categorical rasters. If more than 1 number, the number of values must be
 equal to the number of rasters in rastlst.cat.</p></dd>
+
+
 <dt>rastfolder</dt>
 <dd><p>String. Name of the folder with raster layers. Optional.
 Useful if all raster layers are in same folder.</p></dd>
+
+
 <dt>asptransform</dt>
 <dd><p>Logical. If TRUE, transforms aspect to Northness and
 Eastness indices using sin and cosine functions.</p></dd>
+
+
 <dt>rast.asp</dt>
 <dd><p>String or raster object. The raster in rastlst.cont that is
 the aspect raster (Note: aspect must have units in degrees).</p></dd>
+
+
 <dt>rast.lut</dt>
 <dd><p>String. A raster in rastlst.cat to group class values. Only
 one raster is allowed.</p></dd>
+
+
 <dt>rastlut</dt>
 <dd><p>String or raster object. The raster look up table used for
 collapsing rast.lut values.</p></dd>
+
+
 <dt>extract</dt>
 <dd><p>Logical. If TRUE, extracts values from rastlst.cont and 
 rastlst.cat along with values from unit_layer. If FALSE, extracts only 
 values from unit_layer.</p></dd>
+
+
 <dt>areacalc</dt>
 <dd><p>Logical. If TRUE, returns area by domvar.</p></dd>
+
+
 <dt>areaunits</dt>
 <dd><p>String. Output area units ("ACRES", "HECTARES",
 "SQMETERS").</p></dd>
+
+
 <dt>keepNA</dt>
 <dd><p>Logical. If TRUE, returns data frame of NA values.</p></dd>
+
+
 <dt>ncores</dt>
 <dd><p>Integer. Number of cores to use for extracting values.</p></dd>
+
+
 <dt>NAto0</dt>
 <dd><p>Logical. If TRUE, converts extracted NA values to 0.</p></dd>
+
+
 <dt>npixels</dt>
 <dd><p>Logical. If TRUE, include number of pixels.</p></dd>
+
+
 <dt>addN</dt>
 <dd><p>Logical. If TRUE, adds N to unitzonal output with number of 
 plots by unit.</p></dd>
+
+
 <dt>showext</dt>
 <dd><p>Logical. If TRUE, layer extents are displayed in plot window.</p></dd>
+
+
 <dt>returnxy</dt>
 <dd><p>Logical. If TRUE, returns xy data as sf object (spxyplt).</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, the input data with extracted values are
 saved to outfolder.</p></dd>
+
+
 <dt>exportsp</dt>
 <dd><p>Logical. If savedata=TRUE and returnxy=TRUE, If TRUE, the
 extracted strata point data are exported to outfolder.</p></dd>
+
+
 <dt>exportNA</dt>
 <dd><p>Logical. If TRUE, NA values are exported to outfolder.</p></dd>
+
+
 <dt>spMakeSpatial_opts</dt>
 <dd><p>List. See help(spMakeSpatial_options()) for a list
 of options. Use to convert X/Y values to simple feature (sf) coordinates.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
+
+
 <dt>vars2keep</dt>
 <dd><p>String vector. Attributes in SAdoms, other than domvar to
 include in unitzonal output and extract to pltassgn points.</p></dd>
+
+
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>pltassgn</dt>
 <dd><p>sf object. xyplt data with extracted values from
 rastlst*.</p></dd>
-<dt>unitzonal</dt>
+ <dt>unitzonal</dt>
 <dd><p>Data frame. Number of pixels and zonal
 statistics from continuous rasters or zonal proportions from categorical
 raster for each domain (i.e., estimation unit).</p></dd>
-<dt>unitvar</dt>
+ <dt>unitvar</dt>
 <dd><p>Data
 frame. Domain (i.e., estimation unit) name.</p></dd>
-<dt>inputdf</dt>
+ <dt>inputdf</dt>
 <dd><p>Data frame.
 Raster information input to zonal summaries.</p></dd>
-<dt>prednames</dt>
+ <dt>prednames</dt>
 <dd><p>String
 vector. Name(s) of predictor variable(s).</p></dd>
-<dt>zonalnames</dt>
+ <dt>zonalnames</dt>
 <dd><p>String
 vector. Name(s) of zonal variable(s).</p></dd>
-<dt>predfac</dt>
+ <dt>predfac</dt>
 <dd><p>String vector.
 Name(s) of categorical (i.e. factor) variable(s).</p></dd>
-<dt>npixelvar</dt>
+ <dt>npixelvar</dt>
 <dd><p>String. Name of variable describing number of pixels.</p></dd>
-<dt>unitarea</dt>
+ <dt>unitarea</dt>
 <dd><p>Data frame. Area by domain (i.e., estimation unit).</p></dd>
-<dt>areavar</dt>
+ <dt>areavar</dt>
 <dd><p>String. Name of variable describing acres in domarea.</p></dd>
-<dt>pltassgnid</dt>
+ <dt>pltassgnid</dt>
 <dd><p>String. Unique identifier of plot.</p></dd>
-<dt>spxy</dt>
+ <dt>spxy</dt>
 <dd><p>Simple feature. If
 returnxy=TRUE, Spatial coordinates.</p></dd>
-<dt>xy.uniqueid</dt>
+ <dt>xy.uniqueid</dt>
 <dd><p>String. If
 returnxy=TRUE, unique identifier of spxy.</p></dd>
+
+
 </dl><p>If savedata=TRUE, datstrat and unitarea are saved to outfolder.  If
 exportsp=TRUE, the sf object is exported to outfolder.</p>
     </div>
@@ -329,31 +402,53 @@ documentation for more details.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co"># Get layers from FIESTA external data</span></span>
-<span class="r-in"><span class="co">## dem (continuous)</span></span>
-<span class="r-in"><span class="va">demfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                     <span class="st">"sp_data/WYbighorn_dem_250m.img"</span>,</span>
-<span class="r-in">                     package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span class="r-in">  </span>
-<span class="r-in"><span class="co">## tnt (categorical)                      </span></span>
-<span class="r-in"><span class="va">tntfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                     <span class="st">"sp_data/WYbighorn_forest_nonforest_250m.tif"</span>,</span>
-<span class="r-in">                     package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## unit layer</span></span>
-<span class="r-in"><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>, </span>
-<span class="r-in">                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># Get Auxiliary data                            </span></span>
-<span class="r-in"><span class="fu">spGetAuxiliary</span><span class="op">(</span>xyplt <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYplt.html">WYplt</a></span>,</span>
-<span class="r-in">               uniqueid <span class="op">=</span> <span class="st">"CN"</span>,</span>
-<span class="r-in">               unit_layer <span class="op">=</span> <span class="va">WYbhdistfn</span>,</span>
-<span class="r-in">               unitvar <span class="op">=</span> <span class="st">"DISTRICTNA"</span>,</span>
-<span class="r-in">               rastlst.cont <span class="op">=</span> <span class="va">demfn</span>,</span>
-<span class="r-in">               rastlst.cat <span class="op">=</span> <span class="va">tntfn</span>,</span>
-<span class="r-in">               spMakeSpatial_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>,</span>
-<span class="r-in">                                         yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Get layers from FIESTA external data</span></span></span>
+<span class="r-in"><span><span class="co">## dem (continuous)</span></span></span>
+<span class="r-in"><span><span class="va">demfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                     <span class="st">"sp_data/WYbighorn_dem_250m.img"</span>,</span></span>
+<span class="r-in"><span>                     package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span><span class="co">## tnt (categorical)                      </span></span></span>
+<span class="r-in"><span><span class="va">tntfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                     <span class="st">"sp_data/WYbighorn_forest_nonforest_250m.tif"</span>,</span></span>
+<span class="r-in"><span>                     package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## unit layer</span></span></span>
+<span class="r-in"><span><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>, </span></span>
+<span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Get Auxiliary data                            </span></span></span>
+<span class="r-in"><span><span class="fu">spGetAuxiliary</span><span class="op">(</span>xyplt <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYplt.html">WYplt</a></span>,</span></span>
+<span class="r-in"><span>               uniqueid <span class="op">=</span> <span class="st">"CN"</span>,</span></span>
+<span class="r-in"><span>               unit_layer <span class="op">=</span> <span class="va">WYbhdistfn</span>,</span></span>
+<span class="r-in"><span>               unitvar <span class="op">=</span> <span class="st">"DISTRICTNA"</span>,</span></span>
+<span class="r-in"><span>               rastlst.cont <span class="op">=</span> <span class="va">demfn</span>,</span></span>
+<span class="r-in"><span>               rastlst.cat <span class="op">=</span> <span class="va">tntfn</span>,</span></span>
+<span class="r-in"><span>               spMakeSpatial_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>,</span></span>
+<span class="r-in"><span>                                         yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> crs.default must be in a projected CRS... using US albers</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
@@ -361,39 +456,237 @@ documentation for more details.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>there are 2991 null values for poly1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> savedata=FALSE with savedata parameters... no data are saved</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>                                                                                                                                    rasterfile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 1: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>                                                                                rasterfile</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 1: /tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>    band           var.name interpolate windowsize statistic rast.NODATA</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1:    1 WYbighorn_dem_250m       FALSE          1      none          NA</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  from: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD27 +units=m +no_defs</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> extracting point values from WYbighorn_dem_250m ...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2926 missing values for WYbighorn_dem_250m</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> extracting zonal statistics...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  from: NAD83 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD27 +units=m +no_defs</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ================================================================================</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> savedata=FALSE with savedata parameters... no data are saved</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>                                                                                                                                                 rasterfile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 1: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>                                                                                             rasterfile</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 1: /tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>    band                        var.name interpolate windowsize statistic</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1:    1 WYbighorn_forest_nonforest_250m       FALSE          1      none</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>    rast.NODATA</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1:          NA</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  from: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD27 +units=m +no_defs</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> extracting point values from WYbighorn_forest_nonforest_250m ...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2929 missing values for WYbighorn_forest_nonforest_250m</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  from: NAD83 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD27 +units=m +no_defs</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ================================================================================</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> area can only be calculated with projected coordinate system... projecting layer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $unitvar</span>
@@ -9748,12 +10041,12 @@ documentation for more details.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 201                            &lt;NA&gt;                  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 202                            &lt;NA&gt;                  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 203                            &lt;NA&gt;                  0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 204  Medicine Wheel Ranger District               2799</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 204  Medicine Wheel Ranger District               2792</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 205    Powder River Ranger District               3046</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 206                            &lt;NA&gt;                  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 207                            &lt;NA&gt;                  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 208                            &lt;NA&gt;                  0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 209    Powder River Ranger District               2892</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 209    Powder River Ranger District               2853</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 210                            &lt;NA&gt;                  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 211                            &lt;NA&gt;                  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 212                            &lt;NA&gt;                  0</span>
@@ -11765,7 +12058,7 @@ documentation for more details.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2218         Tongue Ranger District               2485</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2219                           &lt;NA&gt;                  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2220                           &lt;NA&gt;                  0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2221         Tongue Ranger District               2207</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2221         Tongue Ranger District               2177</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2222                           &lt;NA&gt;                  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2223         Tongue Ranger District               2261</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2224                           &lt;NA&gt;                  0</span>
@@ -15655,19 +15948,19 @@ documentation for more details.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $unitzonal</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       DISTRICTNA npixels WYbighorn_dem_250m</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Medicine Wheel Ranger District   23617           2650.793</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   Powder River Ranger District   21649           2686.069</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3         Tongue Ranger District   26770           2538.865</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Medicine Wheel Ranger District   23616           2650.698</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   Powder River Ranger District   21645           2686.121</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         Tongue Ranger District   26769           2539.152</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   WYbighorn_forest_nonforest_250m.1 WYbighorn_forest_nonforest_250m.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                         0.6127789                         0.3872211</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2                         0.7044667                         0.2955333</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3                         0.8437804                         0.1562196</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                         0.6127625                         0.3872375</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                         0.7044121                         0.2955879</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                         0.8436251                         0.1563749</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $inputdf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                                                 rasterfile</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                             rasterfile</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              /tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: /tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: /tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    band                        var.name interpolate windowsize statistic</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:    1              WYbighorn_dem_250m       FALSE          1      none</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2:    1 WYbighorn_forest_nonforest_250m       FALSE          1      none</span>
@@ -15695,7 +15988,7 @@ documentation for more details.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -15710,7 +16003,7 @@ documentation for more details.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

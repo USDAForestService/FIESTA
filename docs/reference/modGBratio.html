@@ -21,7 +21,7 @@ to as Ratio of Means (ROM)."><!-- mathjax --><script src="https://cdnjs.cloudfla
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -89,85 +89,124 @@ to as Ratio of Means (ROM).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">modGBratio</span><span class="op">(</span>
-  <span class="va">GBpopdat</span>,
-  estseed <span class="op">=</span> <span class="st">"none"</span>,
-  ratiotype <span class="op">=</span> <span class="st">"PERACRE"</span>,
-  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,
-  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,
-  estvarn <span class="op">=</span> <span class="cn">NULL</span>,
-  estvarn.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  estvard <span class="op">=</span> <span class="cn">NULL</span>,
-  estvard.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  rowvar <span class="op">=</span> <span class="cn">NULL</span>,
-  colvar <span class="op">=</span> <span class="cn">NULL</span>,
-  sumunits <span class="op">=</span> <span class="cn">TRUE</span>,
-  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  table_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  title_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  gui <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">modGBratio</span><span class="op">(</span></span>
+<span>  <span class="va">GBpopdat</span>,</span>
+<span>  estseed <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  ratiotype <span class="op">=</span> <span class="st">"PERACRE"</span>,</span>
+<span>  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,</span>
+<span>  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  estvarn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  estvarn.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  estvard <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  estvard.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rowvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  colvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sumunits <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  table_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  title_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gui <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>GBpopdat</dt>
 <dd><p>List. Population data objects returned from modGBpop().</p></dd>
+
+
 <dt>estseed</dt>
 <dd><p>String. Use seedling data only or add to tree data. Seedling
 estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').</p></dd>
+
+
 <dt>ratiotype</dt>
 <dd><p>String. The type of ratio estimates ("PERACRE", "PERTREE").</p></dd>
+
+
 <dt>landarea</dt>
 <dd><p>String. The sample area filter for estimates ("FOREST",
 "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD = 1; If
 landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.</p></dd>
+
+
 <dt>pcfilter</dt>
 <dd><p>String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.</p></dd>
+
+
 <dt>estvarn</dt>
 <dd><p>String. Name of the tree estimate variable (numerator).</p></dd>
+
+
 <dt>estvarn.filter</dt>
 <dd><p>String. A tree filter for the estimate variable
 (numerator).  Must be R syntax (e.g., "STATUSCD == 1").</p></dd>
+
+
 <dt>estvard</dt>
 <dd><p>String. Name of the tree estimate variable (denominator).</p></dd>
+
+
 <dt>estvard.filter</dt>
 <dd><p>String. A tree filter for the estimate variable
 (denominator).  Must be R syntax (e.g., "STATUSCD == 1").</p></dd>
+
+
 <dt>rowvar</dt>
 <dd><p>String. Name of the row domain variable in cond or tree. If
 only one domain, rowvar = domain variable. If more than one domain, include
 colvar. If no domain, rowvar = NULL.</p></dd>
+
+
 <dt>colvar</dt>
 <dd><p>String. Name of the column domain variable in cond or tree.</p></dd>
+
+
 <dt>sumunits</dt>
 <dd><p>Logical. If TRUE, estimation units are summed and returned
 in one table.</p></dd>
+
+
 <dt>returntitle</dt>
 <dd><p>Logical. If TRUE, returns title(s) of the estimation
 table(s).</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves table(s) to outfolder.</p></dd>
+
+
 <dt>table_opts</dt>
 <dd><p>List. See help(table_options()) for a list of
 options.</p></dd>
+
+
 <dt>title_opts</dt>
 <dd><p>List. See help(title_options()) for a list of options.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
+
+
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Parameters for modGBpop() if GBpopdat is NULL.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list with estimates with percent sampling error for rowvar (and
+    
+
+<p>A list with estimates with percent sampling error for rowvar (and
 colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
 is returned.  Otherwise, a list object is returned with the following
 information.  If savedata=TRUE, all data frames are written to outfolder.</p>
@@ -175,39 +214,44 @@ information.  If savedata=TRUE, all data frames are written to outfolder.</p>
 <dd><p>Data frame. Tree estimates by rowvar, colvar (and estimation
 unit). If sumunits=TRUE or one estimation unit and colvar=NULL, estimates
 and percent sampling error are in one data frame.</p></dd>
-<dt>pse</dt>
+ <dt>pse</dt>
 <dd><p>Data frame.
 Percent sampling errors (Confidence level 68<!-- %) for estimates by rowvar and -->
 colvar (and estimation unit). Note: for 95<!-- % confidence level, multiply -->
 percent sampling error by 1.96.</p></dd>
-<dt>titlelst</dt>
+ <dt>titlelst</dt>
 <dd><p>List with 1 or 2 string
 vectors. If returntitle=TRUE a list with table title(s). The list contains
 one title if est and pse are in the same table and two titles if est and pse
 are in separate tables.</p></dd>
-<dt>raw</dt>
+ <dt>raw</dt>
 <dd><p>List of data frames. If rawdata=TRUE,
 a list including the processing data used for estimation including: number
 of plots and conditions; stratification information; and 1 to 8 tables with
 calculated values for table cells and totals (See processing data below).</p></dd>
+
+
 </dl><p>Raw data</p>
 <dl><dt>plotsampcnt</dt>
 <dd><p>Table. Number of plots by plot status (ex. sampled
 forest on plot, sampled nonforest, nonsampled).</p></dd>
-<dt>condsampcnt</dt>
+ <dt>condsampcnt</dt>
 <dd><p>DF.
 Number of conditions by condition status (forest land, nonforest land,
 noncensus water, census water, nonsampled).</p></dd>
-<dt>unitarea</dt>
+ <dt>unitarea</dt>
 <dd><p>DF. Area by
 estimation unit.</p></dd>
-<dt>expcondtab</dt>
+ <dt>expcondtab</dt>
 <dd><p>DF. Condition-level area expansion
 factors.</p></dd>
-<dt>tdomdat</dt>
+ <dt>tdomdat</dt>
 <dd><p>DF. Final data table used for estimation.</p></dd>
+
+
 <dt>stratdat</dt>
 <dd><p>Data frame. Strata information by estimation unit.</p></dd>
+
 </dl><table class="table table"><tr><td></td><td><b>Variable</b></td><td><b>Description</b></td></tr><tr><td></td><td>unitvar</td><td>estimation unit</td></tr><tr><td></td><td>strvar</td><td>stratum value</td></tr><tr><td></td><td>strwtvar</td><td>number of pixels by strata and estimation unit</td></tr><tr><td></td><td>n.strata</td><td>number of plots in strata (after totally nonsampled plots removed)</td></tr><tr><td></td><td>n.total</td><td>number of plots for estimation unit</td></tr><tr><td></td><td>strwt</td><td>proportion of area (or plots) by strata and estimation unit (i.e., strata
 weight)</td></tr><tr><td></td><td>CONDPROP_UNADJ_SUM</td><td>summed condition proportion by
 strata and estimation unit</td></tr><tr><td></td><td>CONDPROP_ADJFAC</td><td>adjusted condition
@@ -233,6 +277,8 @@ estimated area</td></tr><tr><td></td><td>CI95right</td><td>right tail of 95 perc
 interval for estimated area</td></tr><tr><td></td><td>CI67left</td><td>left tail of 67 percent
 confidence interval for estimated area</td></tr><tr><td></td><td>CI67right</td><td>right tail of
 67 percent confidence interval for estimated area</td></tr></table><p></p></dd>
+
+
 </dl><p>Table(s) are also written to outfolder.</p>
     </div>
     <div id="details">
@@ -348,34 +394,35 @@ Station, p.53-77.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">GBpopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="modGBpop.html">modGBpop</a></span><span class="op">(</span></span>
-<span class="r-in">popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span>,  </span>
-<span class="r-in">               tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,        </span>
-<span class="r-in">               seed <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYseed.html">WYseed</a></span><span class="op">)</span>,      </span>
-<span class="r-in">popTabIDs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cond <span class="op">=</span> <span class="st">"PLT_CN"</span><span class="op">)</span>,            </span>
-<span class="r-in">pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYpltassgn.html">WYpltassgn</a></span>,  </span>
-<span class="r-in">pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,        </span>
-<span class="r-in">pjoinid <span class="op">=</span> <span class="st">"PLT_CN"</span>,         </span>
-<span class="r-in">unitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitarea.html">WYunitarea</a></span>,</span>
-<span class="r-in">unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>,        </span>
-<span class="r-in">strata <span class="op">=</span> <span class="cn">TRUE</span>,           </span>
-<span class="r-in">stratalut <span class="op">=</span> <span class="va">WYstratalut</span>,    </span>
-<span class="r-in">strata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/strata_options.html" class="external-link">strata_options</a></span><span class="op">(</span>getwt <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>   </span>
-<span class="r-in"><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">GBpopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="modGBpop.html">modGBpop</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span>,  </span></span>
+<span class="r-in"><span>               tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,        </span></span>
+<span class="r-in"><span>               seed <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYseed.html">WYseed</a></span><span class="op">)</span>,      </span></span>
+<span class="r-in"><span>popTabIDs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cond <span class="op">=</span> <span class="st">"PLT_CN"</span><span class="op">)</span>,            </span></span>
+<span class="r-in"><span>pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYpltassgn.html">WYpltassgn</a></span>,  </span></span>
+<span class="r-in"><span>pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,        </span></span>
+<span class="r-in"><span>pjoinid <span class="op">=</span> <span class="st">"PLT_CN"</span>,         </span></span>
+<span class="r-in"><span>unitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitarea.html">WYunitarea</a></span>,</span></span>
+<span class="r-in"><span>unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>,        </span></span>
+<span class="r-in"><span>strata <span class="op">=</span> <span class="cn">TRUE</span>,           </span></span>
+<span class="r-in"><span>stratalut <span class="op">=</span> <span class="va">WYstratalut</span>,    </span></span>
+<span class="r-in"><span>strata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/strata_options.html" class="external-link">strata_options</a></span><span class="op">(</span>getwt <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>   </span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> INTENSITY not in dataset.. assuming single intensity plots</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> DESIGNCD not in dataset.. assuming DESIGNCD = 1 (annual inventory)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> removing 14 nonsampled forest conditions</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> For FIA estimation, adjustment factors are calculated to account for plots with partial nonresponse.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ...there are 14 nonsampled forest conditions in the dataset.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 14 records: COND_STATUS_CD != 5</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Total net cubic-foot volume of live trees (at least 5 inches diameter), Wyoming, 2011-2013 </span></span>
-<span class="r-in"><span class="va">ratio1.1</span> <span class="op">&lt;-</span> <span class="fu">modGBratio</span><span class="op">(</span></span>
-<span class="r-in">GBpopdat <span class="op">=</span> <span class="va">GBpopdat</span>,         <span class="co"># pop - population calculations</span></span>
-<span class="r-in">landarea <span class="op">=</span> <span class="st">"TIMBERLAND"</span>,     <span class="co"># est - forest land filter</span></span>
-<span class="r-in">sumunits <span class="op">=</span> <span class="cn">TRUE</span>,             <span class="co"># est - sum estimation units to population</span></span>
-<span class="r-in">estvarn <span class="op">=</span> <span class="st">"VOLCFNET"</span>,               <span class="co"># est - net cubic-foot volume, numerator</span></span>
-<span class="r-in">estvarn.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span>,   <span class="co"># est - live trees only, numerator</span></span>
-<span class="r-in">returntitle <span class="op">=</span> <span class="cn">TRUE</span>           <span class="co"># out - return title information</span></span>
-<span class="r-in"><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Total net cubic-foot volume of live trees (at least 5 inches diameter), Wyoming, 2011-2013 </span></span></span>
+<span class="r-in"><span><span class="va">ratio1.1</span> <span class="op">&lt;-</span> <span class="fu">modGBratio</span><span class="op">(</span></span></span>
+<span class="r-in"><span>GBpopdat <span class="op">=</span> <span class="va">GBpopdat</span>,         <span class="co"># pop - population calculations</span></span></span>
+<span class="r-in"><span>landarea <span class="op">=</span> <span class="st">"TIMBERLAND"</span>,     <span class="co"># est - forest land filter</span></span></span>
+<span class="r-in"><span>sumunits <span class="op">=</span> <span class="cn">TRUE</span>,             <span class="co"># est - sum estimation units to population</span></span></span>
+<span class="r-in"><span>estvarn <span class="op">=</span> <span class="st">"VOLCFNET"</span>,               <span class="co"># est - net cubic-foot volume, numerator</span></span></span>
+<span class="r-in"><span>estvarn.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span>,   <span class="co"># est - live trees only, numerator</span></span></span>
+<span class="r-in"><span>returntitle <span class="op">=</span> <span class="cn">TRUE</span>           <span class="co"># out - return title information</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2893 records: SITECLCD %in% c(1:6) &amp; RESERVCD == 0</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> there are 255 missing values in tree</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> subsetting 18380 rows of tree to 10907 rows</span>
@@ -385,23 +432,23 @@ Station, p.53-77.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1 values in tree not in cond: 40405822010690 2</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 3095 records: STATUSCD == 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> getting output...</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ratio1.1</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ratio1.1</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ est     :'data.frame':	1 obs. of  3 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ titlelst:List of 12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ raw     :List of 13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ statecd : int 56</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ invyr   : int [1:3] 2011 2012 2013</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ratio1.2</span> <span class="op">&lt;-</span> <span class="fu">modGBratio</span><span class="op">(</span></span>
-<span class="r-in">GBpopdat <span class="op">=</span> <span class="va">GBpopdat</span>,         <span class="co"># pop - population calculations</span></span>
-<span class="r-in">landarea <span class="op">=</span> <span class="st">"TIMBERLAND"</span>,     <span class="co"># est - forest land filter</span></span>
-<span class="r-in">sumunits <span class="op">=</span> <span class="cn">TRUE</span>,             <span class="co"># est - sum estimation units to population</span></span>
-<span class="r-in">estvarn <span class="op">=</span> <span class="st">"VOLCFNET"</span>,               <span class="co"># est - net cubic-foot volume</span></span>
-<span class="r-in">estvarn.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span>,   <span class="co"># est - live trees only</span></span>
-<span class="r-in">rowvar <span class="op">=</span> <span class="st">"FORTYPCD"</span>,         <span class="co"># est - row domain </span></span>
-<span class="r-in">returntitle <span class="op">=</span> <span class="cn">TRUE</span>           <span class="co"># out - return title information</span></span>
-<span class="r-in"><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ratio1.2</span> <span class="op">&lt;-</span> <span class="fu">modGBratio</span><span class="op">(</span></span></span>
+<span class="r-in"><span>GBpopdat <span class="op">=</span> <span class="va">GBpopdat</span>,         <span class="co"># pop - population calculations</span></span></span>
+<span class="r-in"><span>landarea <span class="op">=</span> <span class="st">"TIMBERLAND"</span>,     <span class="co"># est - forest land filter</span></span></span>
+<span class="r-in"><span>sumunits <span class="op">=</span> <span class="cn">TRUE</span>,             <span class="co"># est - sum estimation units to population</span></span></span>
+<span class="r-in"><span>estvarn <span class="op">=</span> <span class="st">"VOLCFNET"</span>,               <span class="co"># est - net cubic-foot volume</span></span></span>
+<span class="r-in"><span>estvarn.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span>,   <span class="co"># est - live trees only</span></span></span>
+<span class="r-in"><span>rowvar <span class="op">=</span> <span class="st">"FORTYPCD"</span>,         <span class="co"># est - row domain </span></span></span>
+<span class="r-in"><span>returntitle <span class="op">=</span> <span class="cn">TRUE</span>           <span class="co"># out - return title information</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2893 records: SITECLCD %in% c(1:6) &amp; RESERVCD == 0</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> there are 255 missing values in tree</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> subsetting 18380 rows of tree to 10907 rows</span>
@@ -410,7 +457,7 @@ Station, p.53-77.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> multiplying VOLCFNET by TPA</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 3086 records: STATUSCD == 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> getting output...</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ratio1.2</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ratio1.2</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ est     :'data.frame':	16 obs. of  3 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ titlelst:List of 13</span>
@@ -431,7 +478,7 @@ Station, p.53-77.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -18,7 +18,7 @@ tables to be supplied to *pop functions."><!-- mathjax --><script src="https://c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -83,20 +83,23 @@ tables to be supplied to *pop functions.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">popTables</span><span class="op">(</span>
-  cond <span class="op">=</span> <span class="cn">NULL</span>,
-  plt <span class="op">=</span> <span class="cn">NULL</span>,
-  tree <span class="op">=</span> <span class="cn">NULL</span>,
-  seed <span class="op">=</span> <span class="cn">NULL</span>,
-  vsubpspp <span class="op">=</span> <span class="cn">NULL</span>,
-  vsubpstr <span class="op">=</span> <span class="cn">NULL</span>,
-  invsubp <span class="op">=</span> <span class="cn">NULL</span>,
-  subplot <span class="op">=</span> <span class="cn">NULL</span>,
-  subp_cond <span class="op">=</span> <span class="cn">NULL</span>,
-  lulc <span class="op">=</span> <span class="cn">NULL</span>,
-  cond_dwm_calc <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">popTables</span><span class="op">(</span></span>
+<span>  cond <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plt <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tree <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vsubpspp <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vsubpstr <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  invsubp <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subplot <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subp_cond <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cond_dwm_calc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sccm <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  grm <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plot_pplot <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cond_pcond <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -107,50 +110,90 @@ Condition-level data with one record for each condition, including or
 excluding nonsampled conditions. Plot variables and strata/estimation unit
 variable(s) may be included if plt and pltassgn=NULL. See details for
 necessary variables to include.</p></dd>
+
+
 <dt>plt</dt>
 <dd><p>DF/DT, Optional. R object, sf R object, comma-delimited
 file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp).  Plot-level
 data with one record for each plot, including or excluding nonsampled
 conditions. If nonsampled plots are included, PLOT_STATUS_CD variable must
 be in table or a filter defined in plt.nonsamp.filter.</p></dd>
+
+
 <dt>tree</dt>
 <dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 Tree-level data with one record for each tree. Tree data are aggregated to
 condition-level. See details for necessary variables to include.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 Seedling data with one record for each seedling count.</p></dd>
+
+
 <dt>vsubpspp</dt>
 <dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in
 dsn.  Vegetation species-level data with one record for each species
 (P2VEG_SUBPLOT_SPP).</p></dd>
+
+
 <dt>vsubpstr</dt>
 <dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in
 dsn. Vegetation species-structure data with one record for each species
 (P2VEG_SUBP_STRUCTURE).</p></dd>
+
+
 <dt>invsubp</dt>
 <dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in
 dsn. Invasive species data with one record for each species
 (INVASIVE_SUBPLOT_SPP).</p></dd>
+
+
 <dt>subplot</dt>
 <dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in
 dsn. Subplot-level data with one record for each species (SUBPLOT).</p></dd>
+
+
 <dt>subp_cond</dt>
 <dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in
 dsn. Subplot condition-level data with one record for each species
 (SUBP_COND).</p></dd>
-<dt>lulc</dt>
-<dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Land use/Land cover data with current and previous observations.</p></dd>
+
+
 <dt>cond_dwm_calc</dt>
 <dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer 
 in dsn. Calculated down woody material.</p></dd>
+
+
+<dt>sccm</dt>
+<dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Subplot-level data (SUBP_COND_CHNG_MTRX).</p></dd>
+
+
+<dt>grm</dt>
+<dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Tree-level growth, removal, and mortality data (TREE_GRM_COMPONENT).</p></dd>
+
+
+<dt>plot_pplot</dt>
+<dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Plot-level data with previous and current plots.</p></dd>
+
+
+<dt>cond_pcond</dt>
+<dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Condition-level data with previous and current plots.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>For extendibility.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of user-supplied parameters and parameter values for strata.</p>
+    
+
+<p>A list of user-supplied parameters and parameter values for strata.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -163,7 +206,7 @@ in dsn. Calculated down woody material.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">popTables</span><span class="op">(</span>cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span>, seed <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYseed.html">WYseed</a></span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">popTables</span><span class="op">(</span>cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span>, seed <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYseed.html">WYseed</a></span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $cond</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    40404728010690      1                      NA       1.000000</span>
@@ -19530,10 +19573,19 @@ in dsn. Calculated down woody material.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $subp_cond</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $lulc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $cond_dwm_calc</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $cond_dwm_calc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $sccm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $grm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $plot_pplot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $cond_pcond</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
@@ -19550,7 +19602,7 @@ in dsn. Calculated down woody material.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -18,7 +18,7 @@ with another polygon vector layer."><!-- mathjax --><script src="https://cdnjs.c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -83,19 +83,19 @@ with another polygon vector layer.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spClipPoly</span><span class="op">(</span>
-  <span class="va">polyv</span>,
-  polyv_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">clippolyv</span>,
-  clippolyv_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  clippolyv.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  showext <span class="op">=</span> <span class="cn">FALSE</span>,
-  areacalc <span class="op">=</span> <span class="cn">FALSE</span>,
-  areaunits <span class="op">=</span> <span class="st">"ACRES"</span>,
-  nolonglat <span class="op">=</span> <span class="cn">TRUE</span>,
-  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spClipPoly</span><span class="op">(</span></span>
+<span>  <span class="va">polyv</span>,</span>
+<span>  polyv_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">clippolyv</span>,</span>
+<span>  clippolyv_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  clippolyv.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  showext <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  areacalc <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  areaunits <span class="op">=</span> <span class="st">"ACRES"</span>,</span>
+<span>  nolonglat <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -104,46 +104,71 @@ with another polygon vector layer.</p>
 <dd><p>sf R object or String. Polygon data to clip. Can be a spatial
 polygon object, full pathname to a shapefile, or name of a layer within a
 database.</p></dd>
+
+
 <dt>polyv_dsn</dt>
 <dd><p>String. Data source name (dsn; e.g., sqlite or shapefile
 pathname) of layer to clip. The dsn varies by driver. See gdal OGR vector
 formats (https://www.gdal.org/ogr_formats.html). Optional if polyv is sf
 object.</p></dd>
+
+
 <dt>clippolyv</dt>
 <dd><p>SpatialPolygons class R object or String. Name of the
 polygon spatial layer to use for clipping.</p></dd>
+
+
 <dt>clippolyv_dsn</dt>
 <dd><p>String. Data source name (dsn; i.e., pathname or
 database name) of clippolyv_layer. The dsn varies by driver. See gdal OGR
 vector formats (https://www.gdal.org/ogr_formats.html). Optional if
 clippolyv_layer is an R object.</p></dd>
+
+
 <dt>clippolyv.filter</dt>
 <dd><p>String. Filter to subset clippolyv spatial layer.</p></dd>
+
+
 <dt>showext</dt>
 <dd><p>Logical. If TRUE, layer extents are displayed in plot window.</p></dd>
+
+
 <dt>areacalc</dt>
 <dd><p>Logical. If TRUE, calculate area of clipped polygons and
 append to attribute table (See details).</p></dd>
+
+
 <dt>areaunits</dt>
 <dd><p>String. If TRUE, calculate area of clipped polygons and
 append to attribute table ("ACRES", "HECTARES", "SQKM"). If NULL, units of
 polyv.</p></dd>
+
+
 <dt>nolonglat</dt>
 <dd><p>Logical. If TRUE, and both layer's coordinate system is
 long/lat, the layers are converted to a projected CRS before clipping.</p></dd>
+
+
 <dt>exportsp</dt>
 <dd><p>Logical. If TRUE, the spatial clipped object is exported to
 outfolder (see spExportSpatial for details).</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options for saving data. If out_layer = NULL, default = 'polyclip'.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>sf object of clipped polygon. If polyv and clippolyv have different
+    
+
+<p>sf object of clipped polygon. If polyv and clippolyv have different
 projections, the projection of returned object will have the same projection
-as polyv (See note about on-the-fly projection conversion).
-If exportsp=TRUE, the sf object will be written to outfolder (See note).</p>
+as polyv (See note about on-the-fly projection conversion).</p>
+
+
+<p>If exportsp=TRUE, the sf object will be written to outfolder (See note).</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -177,19 +202,19 @@ has more than 1 record, it will be returned but not exported.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Load in USAco data from raster package</span></span>
-<span class="r-in"><span class="va">USAco</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/getData.html" class="external-link">getData</a></span><span class="op">(</span><span class="st">"GADM"</span>, country <span class="op">=</span> <span class="st">"USA"</span>, level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Set up data from FIESTA</span></span>
-<span class="r-in"><span class="va">WYbh</span> <span class="op">&lt;-</span> <span class="fu"><a href="spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                                    <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>,</span>
-<span class="r-in">                                    package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Clip polygon with WY Bighorn object from FIESTA</span></span>
-<span class="r-in"><span class="va">WYbhco</span> <span class="op">&lt;-</span> <span class="fu">spClipPoly</span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">USAco</span>,</span>
-<span class="r-in">                     clippolyv <span class="op">=</span> <span class="va">WYbh</span><span class="op">)</span>     </span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Load in USAco data from raster package</span></span></span>
+<span class="r-in"><span><span class="va">USAco</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/getData.html" class="external-link">getData</a></span><span class="op">(</span><span class="st">"GADM"</span>, country <span class="op">=</span> <span class="st">"USA"</span>, level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Set up data from FIESTA</span></span></span>
+<span class="r-in"><span><span class="va">WYbh</span> <span class="op">&lt;-</span> <span class="fu"><a href="spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                                    <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>,</span></span>
+<span class="r-in"><span>                                    package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Clip polygon with WY Bighorn object from FIESTA</span></span></span>
+<span class="r-in"><span><span class="va">WYbhco</span> <span class="op">&lt;-</span> <span class="fu">spClipPoly</span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">USAco</span>,</span></span>
+<span class="r-in"><span>                     clippolyv <span class="op">=</span> <span class="va">WYbh</span><span class="op">)</span>     </span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -204,7 +229,7 @@ has more than 1 record, it will be returned but not exported.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -81,20 +81,25 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spExportSpatial</span><span class="op">(</span><span class="va">sfobj</span>, savedata_opts <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spExportSpatial</span><span class="op">(</span><span class="va">sfobj</span>, savedata_opts <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>sfobj</dt>
 <dd><p>sf class R object. Spatial object to export.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options for saving data. If out_layer = NULL, default = 'datsp'.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An sf spatial object is written to outfolder.</p>
+    
+
+<p>An sf spatial object is written to outfolder.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -115,18 +120,19 @@ outfolder, 'out_layer'_newnames.csv.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Set up data from FIESTA</span></span>
-<span class="r-in"><span class="va">WYbh</span> <span class="op">&lt;-</span> <span class="fu"><a href="spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                                    <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>,</span>
-<span class="r-in">                                    package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Export data with spExportSpatial</span></span>
-<span class="r-in"><span class="fu">spExportSpatial</span><span class="op">(</span><span class="va">WYbh</span>,</span>
-<span class="r-in">                savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>out_dsn <span class="op">=</span> <span class="st">"WYbh.shp"</span>, </span>
-<span class="r-in">                                     outfolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span>
-<span class="r-in">                                     overwrite_dsn <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Set up data from FIESTA</span></span></span>
+<span class="r-in"><span><span class="va">WYbh</span> <span class="op">&lt;-</span> <span class="fu"><a href="spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                                    <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>,</span></span>
+<span class="r-in"><span>                                    package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Export data with spExportSpatial</span></span></span>
+<span class="r-in"><span><span class="fu">spExportSpatial</span><span class="op">(</span><span class="va">WYbh</span>,</span></span>
+<span class="r-in"><span>                savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>out_dsn <span class="op">=</span> <span class="st">"WYbh.shp"</span>, </span></span>
+<span class="r-in"><span>                                     outfolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>                                     overwrite_dsn <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deleting source `/tmp/RtmpNtUwrj/outdat.shp' failed</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Writing layer `outdat' to data source </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   `/private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpHeGUuy/outdat.shp' using driver `ESRI Shapefile'</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   `/tmp/RtmpNtUwrj/outdat.shp' using driver `ESRI Shapefile'</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Writing 1 features with 11 fields and geometry type Polygon.</span>
 </code></pre></div>
     </div>
@@ -142,7 +148,7 @@ outfolder, 'out_layer'_newnames.csv.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

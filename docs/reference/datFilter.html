@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -81,22 +81,22 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">datFilter</span><span class="op">(</span>
-  <span class="va">x</span>,
-  xfilter <span class="op">=</span> <span class="cn">NULL</span>,
-  xfiltervar <span class="op">=</span> <span class="cn">NULL</span>,
-  othertabnms <span class="op">=</span> <span class="cn">NULL</span>,
-  uniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,
-  vardelete <span class="op">=</span> <span class="cn">NULL</span>,
-  title.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  filternm <span class="op">=</span> <span class="cn">NULL</span>,
-  stopifnull <span class="op">=</span> <span class="cn">FALSE</span>,
-  returnDT <span class="op">=</span> <span class="cn">TRUE</span>,
-  xnm <span class="op">=</span> <span class="cn">NULL</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  gui <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">datFilter</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  xfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xfiltervar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  othertabnms <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  uniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,</span>
+<span>  vardelete <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  title.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  filternm <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  stopifnull <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  returnDT <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  xnm <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -104,52 +104,81 @@
     <dl><dt>x</dt>
 <dd><p>Data frame, sf data frame or comma-delimited file (*.csv). A data
 frame to filter.</p></dd>
+
+
 <dt>xfilter</dt>
 <dd><p>String. A filter expression. Must be R syntax.  (e.g.,
 "STATUSCD == 1", "INVYR <!-- %in% 2002:2005"). Use single quotes for strings -->
 within double quotes (e.g., "SPP == 'Lodgepole'"). If NULL, a window pops up
 to select filter variable(s) and filter value(s).</p></dd>
+
+
 <dt>xfiltervar</dt>
 <dd><p>String. The filtervar if you know what it is. If NULL, a
 window will pop up to select filter value(s).</p></dd>
+
+
 <dt>othertabnms</dt>
 <dd><p>String vector. Name(s) of the objects or comma-delimited
 files to subset.  Names must be in quotes (e.g., othertables=c('tree',
 'cond')).</p></dd>
+
+
 <dt>uniqueid</dt>
 <dd><p>String. Unique identifier of x. Only needed if othertables
 != NULL.  The uniqueid must be the same for all tables except if PLT_CN and
 CN.</p></dd>
+
+
 <dt>vardelete</dt>
 <dd><p>String vector. Vector of variables you would like deleted
 from filter list. Mostly used for internal queries.</p></dd>
+
+
 <dt>title.filter</dt>
 <dd><p>String. Title of the filter query window. Mostuly used
 for internal queries.</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, writes output data to outfolder.</p></dd>
+
+
 <dt>filternm</dt>
 <dd><p>String. Optional. Name of filter, for feedback purposes.</p></dd>
+
+
 <dt>stopifnull</dt>
 <dd><p>Logical. If TRUE, stop if output is NULL.</p></dd>
+
+
 <dt>returnDT</dt>
 <dd><p>Logical. If TRUE, returns a data table. If FALSE, returns a
 data frame.</p></dd>
+
+
 <dt>xnm</dt>
 <dd><p>String. Name for filter attribute. Used for warning messages.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.  If out_layer = NULL,
 default = 'datf'.</p></dd>
+
+
 <dt>gui</dt>
 <dd><p>Logical. If TRUE, pop-up windows will appear for user-interface.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of the following items:</p>
+    
+
+<p>A list of the following items:</p>
 <dl><dt>xf</dt>
 <dd><p>A data frame of filtered x.</p></dd>
-<dt>xfilter</dt>
+ <dt>xfilter</dt>
 <dd><p>The xfilter.</p></dd>
 </dl><p>If
 othertables != NULL, the other tables, named with 'in' prefix</p>
@@ -171,13 +200,13 @@ removed all records in x or the filter is incorrect.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Set up data for example</span></span>
-<span class="r-in"><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>CONDCLASS<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span class="r-in">                         FORTYPCD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">182</span>, <span class="fl">184</span>, <span class="fl">201</span>, <span class="fl">221</span>, <span class="fl">221</span>, <span class="fl">184</span>, <span class="fl">221</span>, <span class="fl">182</span>,</span>
-<span class="r-in">                                      <span class="fl">182</span>, <span class="fl">201</span>, <span class="fl">182</span>, <span class="fl">221</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">                          </span>
-<span class="r-in">  <span class="co"># Filter for value not equal to 182</span></span>
-<span class="r-in">  <span class="fu">datFilter</span><span class="op">(</span>x <span class="op">=</span> <span class="va">tab</span>, xfilter <span class="op">=</span> <span class="st">"FORTYPCD != 182"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Set up data for example</span></span></span>
+<span class="r-in"><span><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>CONDCLASS<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         FORTYPCD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">182</span>, <span class="fl">184</span>, <span class="fl">201</span>, <span class="fl">221</span>, <span class="fl">221</span>, <span class="fl">184</span>, <span class="fl">221</span>, <span class="fl">182</span>,</span></span>
+<span class="r-in"><span>                                      <span class="fl">182</span>, <span class="fl">201</span>, <span class="fl">182</span>, <span class="fl">221</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                          </span></span>
+<span class="r-in"><span>  <span class="co"># Filter for value not equal to 182</span></span></span>
+<span class="r-in"><span>  <span class="fu">datFilter</span><span class="op">(</span>x <span class="op">=</span> <span class="va">tab</span>, xfilter <span class="op">=</span> <span class="st">"FORTYPCD != 182"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 4 records: FORTYPCD != 182</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $xf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    CONDCLASS FORTYPCD</span>
@@ -193,9 +222,9 @@ removed all records in x or the filter is incorrect.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $xfilter</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "FORTYPCD != 182"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Filter on two conditions, grab xf object from list</span></span>
-<span class="r-in"><span class="fu">datFilter</span><span class="op">(</span>x <span class="op">=</span> <span class="va">WYcond</span>, xfilter <span class="op">=</span> <span class="st">"FORTYPCD == c(221) &amp; STDSZCD == 3"</span><span class="op">)</span><span class="op">$</span><span class="va">xf</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Filter on two conditions, grab xf object from list</span></span></span>
+<span class="r-in"><span><span class="fu">datFilter</span><span class="op">(</span>x <span class="op">=</span> <span class="va">WYcond</span>, xfilter <span class="op">=</span> <span class="st">"FORTYPCD == c(221) &amp; STDSZCD == 3"</span><span class="op">)</span><span class="op">$</span><span class="va">xf</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 3221 records: FORTYPCD == c(221) &amp; STDSZCD == 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: 40405070010690      1                      NA           1.00           1.00</span>
@@ -231,7 +260,7 @@ removed all records in x or the filter is incorrect.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -19,7 +19,7 @@ ArcGIS shapefile (*.shp)."><!-- mathjax --><script src="https://cdnjs.cloudflare
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -85,22 +85,22 @@ ArcGIS shapefile (*.shp).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spMakeSpatialPoints</span><span class="op">(</span>
-  <span class="va">xyplt</span>,
-  xyplt_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  xy.uniqueid <span class="op">=</span> <span class="cn">NULL</span>,
-  xvar <span class="op">=</span> <span class="cn">NULL</span>,
-  yvar <span class="op">=</span> <span class="cn">NULL</span>,
-  xy.crs <span class="op">=</span> <span class="fl">4269</span>,
-  prj <span class="op">=</span> <span class="cn">NULL</span>,
-  datum <span class="op">=</span> <span class="cn">NULL</span>,
-  zone <span class="op">=</span> <span class="cn">NULL</span>,
-  zoneS <span class="op">=</span> <span class="cn">FALSE</span>,
-  aea.param <span class="op">=</span> <span class="st">"USGS"</span>,
-  addxy <span class="op">=</span> <span class="cn">FALSE</span>,
-  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spMakeSpatialPoints</span><span class="op">(</span></span>
+<span>  <span class="va">xyplt</span>,</span>
+<span>  xyplt_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xy.uniqueid <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  yvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xy.crs <span class="op">=</span> <span class="fl">4269</span>,</span>
+<span>  prj <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  datum <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  zone <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  zoneS <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  aea.param <span class="op">=</span> <span class="st">"USGS"</span>,</span>
+<span>  addxy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -109,46 +109,75 @@ ArcGIS shapefile (*.shp).</p>
 <dd><p>Data frame object or String. Name of layer with xy coordinates
 and unique identifier. Can be layer with xy_dsn, full pathname, including
 extension, or file name (with extension) in xy_dsn folder.</p></dd>
+
+
 <dt>xyplt_dsn</dt>
 <dd><p>String. Name of database or folder were xyplt is. The dsn
 varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html).</p></dd>
+
+
 <dt>xy.uniqueid</dt>
 <dd><p>String. Unique identifier of xyplt rows.</p></dd>
+
+
 <dt>xvar</dt>
 <dd><p>String. Name of variable in xyplt defining x coordinate.</p></dd>
+
+
 <dt>yvar</dt>
 <dd><p>String. Name of variable in xyplt defining y coordinate.</p></dd>
+
+
 <dt>xy.crs</dt>
 <dd><p>PROJ.4 String or CRS object or Integer EPSG code defining
 Coordinate Reference System. (e.g., EPSG:4269-Geodetic coordinate system for
 North America, NAD83).</p></dd>
+
+
 <dt>prj</dt>
 <dd><p>String. Projection, or coordinate system of the X/Y coordinates
 ("longlat", "utm", "aea"). If other, include PROJ.4 string in prj4str.</p></dd>
+
+
 <dt>datum</dt>
 <dd><p>String. Datum of projection ("WGS84", "NAD83", "NAD27").</p></dd>
+
+
 <dt>zone</dt>
 <dd><p>Integer. If prj="utm", the UTM zone.</p></dd>
+
+
 <dt>zoneS</dt>
 <dd><p>Logical. If prj="utm", if the UTM zone is in the Southern
 hemisphere.</p></dd>
+
+
 <dt>aea.param</dt>
 <dd><p>String. If prj="aea", the associated lat/lon parameters
 (USGS: " +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0").  If
 other, include PROJ.4 string in prj4str.</p></dd>
+
+
 <dt>addxy</dt>
 <dd><p>Logical. If TRUE, adds x and y variables to spatial sf object.</p></dd>
+
+
 <dt>exportsp</dt>
 <dd><p>Logical. If TRUE, exports spatial object.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when exportsp = TRUE.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>spplt</dt>
 <dd><p>sf obect with spatial points and defined CRS.</p></dd>
+
+
 </dl><p>If exportsp = TRUE, the sf object is written to specified output.</p>
     </div>
     <div id="note">
@@ -172,14 +201,14 @@ spheroid<br></p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Generate an `sf` points object with `spMakeSpatialPoints` for Wyoming plot</span></span>
-<span class="r-in"><span class="co"># data, stored in `FIESTA`</span></span>
-<span class="r-in"><span class="fu">spMakeSpatialPoints</span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span class="r-in">                    xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span class="r-in">                    xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span class="r-in">                    yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span class="r-in">                    prj <span class="op">=</span> <span class="st">"longlat"</span>, </span>
-<span class="r-in">                    datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Generate an `sf` points object with `spMakeSpatialPoints` for Wyoming plot</span></span></span>
+<span class="r-in"><span><span class="co"># data, stored in `FIESTA`</span></span></span>
+<span class="r-in"><span><span class="fu">spMakeSpatialPoints</span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span></span>
+<span class="r-in"><span>                    xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span></span>
+<span class="r-in"><span>                    xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span></span>
+<span class="r-in"><span>                    yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span></span>
+<span class="r-in"><span>                    prj <span class="op">=</span> <span class="st">"longlat"</span>, </span></span>
+<span class="r-in"><span>                    datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Simple feature collection with 3047 features and 18 fields</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Attribute-geometry relationship: 0 constant, 0 aggregate, 18 identity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Geometry type: POINT</span>
@@ -245,7 +274,7 @@ spheroid<br></p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

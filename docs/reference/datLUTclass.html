@@ -19,7 +19,7 @@ DIA).  Adds a variable (LUTclassnm) to x, defining as: xvar &amp;gt;= MIN (and x
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -85,23 +85,23 @@ DIA).  Adds a variable (LUTclassnm) to x, defining as: xvar &gt;= MIN (and xvar
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">datLUTclass</span><span class="op">(</span>
-  <span class="va">x</span>,
-  xvar <span class="op">=</span> <span class="cn">NULL</span>,
-  LUT <span class="op">=</span> <span class="cn">NULL</span>,
-  minvar <span class="op">=</span> <span class="cn">NULL</span>,
-  maxvar <span class="op">=</span> <span class="cn">NULL</span>,
-  cutbreaks <span class="op">=</span> <span class="cn">NULL</span>,
-  cutlabels <span class="op">=</span> <span class="cn">NULL</span>,
-  LUTclassnm <span class="op">=</span> <span class="cn">NULL</span>,
-  label.dec <span class="op">=</span> <span class="fl">1</span>,
-  NAto0 <span class="op">=</span> <span class="cn">FALSE</span>,
-  vars2keep <span class="op">=</span> <span class="cn">NULL</span>,
-  keepcutbreaks <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  gui <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">datLUTclass</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  xvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  LUT <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  minvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  maxvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cutbreaks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cutlabels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  LUTclassnm <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  label.dec <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  NAto0 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  vars2keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keepcutbreaks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -109,58 +109,90 @@ DIA).  Adds a variable (LUTclassnm) to x, defining as: xvar &gt;= MIN (and xvar
     <dl><dt>x</dt>
 <dd><p>Data frame or comma-delimited file (*.csv). The data table with
 variable to classify.</p></dd>
+
+
 <dt>xvar</dt>
 <dd><p>String. Name of variable in the data table to join to.</p></dd>
+
+
 <dt>LUT</dt>
 <dd><p>Data frame or comma-delimited file (*.csv). Name of the look-up
 table with collapsed classes. Lookup table should include minimum values for
 classes, maximum values for classes, and a name of class (i.e., LUTclassnm).
 Maximum values and names are optional.</p></dd>
+
+
 <dt>minvar</dt>
 <dd><p>String. If LUT is not null, name of variable with minimimum
 class value (&gt;= minvar).</p></dd>
+
+
 <dt>maxvar</dt>
 <dd><p>String. Optional. If LUT is not null, name of variable with
 maximum class value (&lt;= maxvar).</p></dd>
+
+
 <dt>cutbreaks</dt>
 <dd><p>Numeric vector. Vector of numbers for minimum class values.</p></dd>
+
+
 <dt>cutlabels</dt>
 <dd><p>String vector. Optional. Vector of names for classes. If
 NULL, class names are generated from cutbreaks.</p></dd>
+
+
 <dt>LUTclassnm</dt>
 <dd><p>String. Optional. Name of classified variable in x. If LUT
 is not null and class names are included, this is the name of variable with
 class names. If NULL, a class names are generated from minvar or minvar and
 maxvar with default name equal to 'xvar'CL.</p></dd>
+
+
 <dt>label.dec</dt>
 <dd><p>Integer. Number of decimals to include in label.</p></dd>
+
+
 <dt>NAto0</dt>
 <dd><p>Logical. If TRUE, converts NA values to 0 before
 classification.</p></dd>
+
+
 <dt>vars2keep</dt>
 <dd><p>String vector. Variable names from LUT to keep (append) to
 x.</p></dd>
+
+
 <dt>keepcutbreaks</dt>
 <dd><p>Logical. If TRUE, the cutbreaks used for creating
 classes are appended to dataset.</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves data to outfolder.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'datlutcl'.</p></dd>
+
+
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>xLUT</dt>
 <dd><p>Input data table with look-up table variable(s).</p></dd>
+
 <dt>LUTclassnm</dt>
 <dd><p>Name of the classified variable.</p></dd>
-<dt>LUT</dt>
+ <dt>LUT</dt>
 <dd><p>Look-up
 table with categories.</p></dd>
+
+
 </dl><p>If savedata = TRUE, a comma-delimited file is output to the outfolder as
 outfn.  If outfn = NULL, the name of the file will be datlut_'date'.csv.</p>
     </div>
@@ -180,7 +212,7 @@ LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="ref_diacl2in.html">ref_diacl2in</a></span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="ref_diacl2in.html">ref_diacl2in</a></span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   MIN  MAX  DIACL2IN</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   1  2.9   1.0-2.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   3  4.9   3.0-4.9</span>
@@ -188,13 +220,13 @@ LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4   7  8.9   7.0-8.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5   9 10.9  9.0-10.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6  11 12.9 11.0-12.9</span>
-<span class="r-in"><span class="va">WYtreelut</span> <span class="op">&lt;-</span> <span class="fu">datLUTclass</span><span class="op">(</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span>
-<span class="r-in">                         xvar <span class="op">=</span> <span class="st">"DIA"</span>,</span>
-<span class="r-in">                         LUT <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="ref_diacl2in.html">ref_diacl2in</a></span>,</span>
-<span class="r-in">                         LUTclassnm <span class="op">=</span> <span class="st">"DIACL2IN"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYtreelut</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">WYtreelut</span> <span class="op">&lt;-</span> <span class="fu">datLUTclass</span><span class="op">(</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span></span>
+<span class="r-in"><span>                         xvar <span class="op">=</span> <span class="st">"DIA"</span>,</span></span>
+<span class="r-in"><span>                         LUT <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="ref_diacl2in.html">ref_diacl2in</a></span>,</span></span>
+<span class="r-in"><span>                         LUTclassnm <span class="op">=</span> <span class="st">"DIACL2IN"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYtreelut</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "xLUT"       "LUTclassnm" "LUT"       </span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYtreelut</span><span class="op">$</span><span class="va">xLUT</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYtreelut</span><span class="op">$</span><span class="va">xLUT</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           PLT_CN CONDID SUBP TREE STATUSCD SPCD SPGRPCD DIA HT TREECLCD AGENTCD</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 40404738010690      1    2    3        2   19      12  NA NA       NA      70</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 40404738010690      1    2    4        2   19      12  NA NA       NA      70</span>
@@ -216,7 +248,7 @@ LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.1898537  5.0-6.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.3578369  7.0-8.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6        NA     &lt;NA&gt;</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">WYtreelut</span><span class="op">$</span><span class="va">xLUT</span><span class="op">$</span><span class="va">DIACL2IN</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">WYtreelut</span><span class="op">$</span><span class="va">xLUT</span><span class="op">$</span><span class="va">DIACL2IN</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   1.0-2.9   3.0-4.9   5.0-6.9   7.0-8.9  9.0-10.9 11.0-12.9 13.0-14.9 15.0-16.9 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      1353       524      5335      3932      2689      1604       929       545 </span>
@@ -228,14 +260,14 @@ LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         0         0         0         0         0         0         0         1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 65.0-66.9 67.0-68.9 69.0-70.9 71.0-72.9 73.0-74.9 75.0-76.9 77.0-78.9 79.0-80.9 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         0         0         0         0         0         0         0         0 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">WYtreelut2</span> <span class="op">&lt;-</span> <span class="fu">datLUTclass</span><span class="op">(</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span>
-<span class="r-in">                          xvar <span class="op">=</span> <span class="st">"DIA"</span>,</span>
-<span class="r-in">                          cutbreaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span class="r-in">                          LUTclassnm <span class="op">=</span> <span class="st">"DIACL2IN"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYtreelut2</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">WYtreelut2</span> <span class="op">&lt;-</span> <span class="fu">datLUTclass</span><span class="op">(</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span></span>
+<span class="r-in"><span>                          xvar <span class="op">=</span> <span class="st">"DIA"</span>,</span></span>
+<span class="r-in"><span>                          cutbreaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                          LUTclassnm <span class="op">=</span> <span class="st">"DIACL2IN"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYtreelut2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "xLUT"       "LUTclassnm" "LUT"       </span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYtreelut2</span><span class="op">$</span><span class="va">xLUT</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYtreelut2</span><span class="op">$</span><span class="va">xLUT</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           PLT_CN CONDID SUBP TREE STATUSCD SPCD SPGRPCD DIA HT TREECLCD AGENTCD</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 40404738010690      1    2    3        2   19      12  NA NA       NA      70</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 40404738010690      1    2    4        2   19      12  NA NA       NA      70</span>
@@ -257,16 +289,16 @@ LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.1898537   5-24.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.3578369   5-24.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6        NA     &lt;NA&gt;</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">WYtreelut2</span><span class="op">$</span><span class="va">xLUT</span><span class="op">$</span><span class="va">DIACL2IN</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">WYtreelut2</span><span class="op">$</span><span class="va">xLUT</span><span class="op">$</span><span class="va">DIACL2IN</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   1-4.9  5-24.9 25-49.9     50+ </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    1877   15771     107       1 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#' Create look-up table of stand age classes</span></span>
-<span class="r-in"><span class="va">MIN</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, <span class="fl">40</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">101</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">STDAGENM</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0-20"</span>, <span class="st">"21-40"</span>, <span class="st">"41-60"</span>, <span class="st">"61-80"</span>, <span class="st">"81-100"</span>, <span class="st">"101+"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">stdagelut</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>MIN <span class="op">=</span> <span class="va">MIN</span>, STDAGENM <span class="op">=</span> <span class="va">STDAGENM</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">stdagelut</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#' Create look-up table of stand age classes</span></span></span>
+<span class="r-in"><span><span class="va">MIN</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, <span class="fl">40</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">101</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">STDAGENM</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0-20"</span>, <span class="st">"21-40"</span>, <span class="st">"41-60"</span>, <span class="st">"61-80"</span>, <span class="st">"81-100"</span>, <span class="st">"101+"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">stdagelut</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>MIN <span class="op">=</span> <span class="va">MIN</span>, STDAGENM <span class="op">=</span> <span class="va">STDAGENM</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">stdagelut</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   MIN STDAGENM</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   0     0-20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2  20    21-40</span>
@@ -274,14 +306,14 @@ LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4  60    61-80</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5  80   81-100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 101     101+</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">WYcondlut</span> <span class="op">&lt;-</span> <span class="fu">datLUTclass</span><span class="op">(</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span>,</span>
-<span class="r-in">                         xvar <span class="op">=</span> <span class="st">"STDAGE"</span>,</span>
-<span class="r-in">                         LUT <span class="op">=</span> <span class="va">stdagelut</span>,</span>
-<span class="r-in">                         LUTclassnm <span class="op">=</span> <span class="st">"STDAGENM"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYcondlut</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">WYcondlut</span> <span class="op">&lt;-</span> <span class="fu">datLUTclass</span><span class="op">(</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span>,</span></span>
+<span class="r-in"><span>                         xvar <span class="op">=</span> <span class="st">"STDAGE"</span>,</span></span>
+<span class="r-in"><span>                         LUT <span class="op">=</span> <span class="va">stdagelut</span>,</span></span>
+<span class="r-in"><span>                         LUTclassnm <span class="op">=</span> <span class="st">"STDAGENM"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYcondlut</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "xLUT"       "LUTclassnm" "LUT"       </span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcondlut</span><span class="op">$</span><span class="va">xLUT</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcondlut</span><span class="op">$</span><span class="va">xLUT</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 40404728010690      1                      NA              1              1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 40404729010690      1                      NA              1              1</span>
@@ -317,7 +349,7 @@ LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4     &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5     &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6     &lt;NA&gt;</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">WYcondlut</span><span class="op">$</span><span class="va">xLUT</span><span class="op">$</span><span class="va">STDAGENM</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">WYcondlut</span><span class="op">$</span><span class="va">xLUT</span><span class="op">$</span><span class="va">STDAGENM</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   0-20  21-40  41-60  61-80 81-100   101+ </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    144     42     14     43     89    258 </span>
@@ -335,7 +367,7 @@ LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

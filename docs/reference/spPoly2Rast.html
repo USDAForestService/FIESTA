@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -81,20 +81,20 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spPoly2Rast</span><span class="op">(</span>
-  <span class="va">polyv</span>,
-  polyv_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">polyv.att</span>,
-  polyv.lut <span class="op">=</span> <span class="cn">NULL</span>,
-  rastfn.template <span class="op">=</span> <span class="cn">NULL</span>,
-  NODATA <span class="op">=</span> <span class="cn">NULL</span>,
-  outfolder <span class="op">=</span> <span class="cn">NULL</span>,
-  outfn <span class="op">=</span> <span class="st">"polyrast"</span>,
-  outext <span class="op">=</span> <span class="st">"img"</span>,
-  outfn.pre <span class="op">=</span> <span class="cn">NULL</span>,
-  outfn.date <span class="op">=</span> <span class="cn">TRUE</span>,
-  overwrite <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spPoly2Rast</span><span class="op">(</span></span>
+<span>  <span class="va">polyv</span>,</span>
+<span>  polyv_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">polyv.att</span>,</span>
+<span>  polyv.lut <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rastfn.template <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  NODATA <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outfolder <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outfn <span class="op">=</span> <span class="st">"polyrast"</span>,</span>
+<span>  outext <span class="op">=</span> <span class="st">"img"</span>,</span>
+<span>  outfn.pre <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outfn.date <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -103,43 +103,68 @@
 <dd><p>sf R object or String. Polygon data to convert to raster.  Can
 be a spatial polygon object, full pathname to a shapefile, or name of a
 layer within a database.</p></dd>
+
+
 <dt>polyv_dsn</dt>
 <dd><p>String. Data source name (dsn; e.g., sqlite or shapefile
 pathname) of layer to convert. The dsn varies by driver. See gdal OGR vector
 formats (https://www.gdal.org/ogr_formats.html). Optional if polyv is sf
 object.</p></dd>
+
+
 <dt>polyv.att</dt>
 <dd><p>String. Name of attribute in polyv to rasterize.</p></dd>
+
+
 <dt>polyv.lut</dt>
 <dd><p>Data frame. Look up table of codes, if polyv.att is
 character or want to group codes.</p></dd>
+
+
 <dt>rastfn.template</dt>
 <dd><p>String. Full path name of raster to use as template
 for new raster.</p></dd>
+
+
 <dt>NODATA</dt>
 <dd><p>Number. The NODATA value for background values. If NODATA is
 NULL, and a NODATA value is defined on the rastfn.template raster, the 
 default is the defined NODATA value, else it is defined based on its datatype 
 (see DEFAULT_NODATA for default data values).</p></dd>
+
+
 <dt>outfolder</dt>
 <dd><p>String. If exportshp=TRUE, name of output folder. If NULL,
 the working directory is used.</p></dd>
+
+
 <dt>outfn</dt>
 <dd><p>String. Name of output raster. If NULL, default is 'polyrast'.</p></dd>
+
+
 <dt>outext</dt>
 <dd><p>String. Name of raster extension (fmt).</p></dd>
+
+
 <dt>outfn.pre</dt>
 <dd><p>String. Add a prefix to output name (e.g., "01").</p></dd>
+
+
 <dt>outfn.date</dt>
 <dd><p>Logical. If TRUE, add date to end of outfile (e.g.,
 outfn_'date'.csv).</p></dd>
+
+
 <dt>overwrite</dt>
 <dd><p>Logical. If TRUE and exportshp=TRUE, overwrite files in
 outfolder.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list containing raster and raster information derived from the
+    
+
+<p>A list containing raster and raster information derived from the
 original polygon.</p>
     </div>
     <div id="note">
@@ -165,26 +190,37 @@ object has more than 1 record, it will be returned but not exported.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co"># Get polygon vector layer from FIESTA external data</span></span>
-<span class="r-in"><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>, </span>
-<span class="r-in">                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Turn polygon into raster</span></span>
-<span class="r-in"><span class="co"># Note: raster values must be numeric, therefore names were changed to</span></span>
-<span class="r-in"><span class="co"># numeric codes based on lookup table produced from the following code.                      </span></span>
-<span class="r-in"><span class="va">new_rast</span> <span class="op">&lt;-</span> <span class="fu">spPoly2Rast</span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">WYbhdistfn</span>,</span>
-<span class="r-in">                        polyv.att <span class="op">=</span> <span class="st">"DISTRICTNA"</span>,</span>
-<span class="r-in">                        outfolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Get polygon vector layer from FIESTA external data</span></span></span>
+<span class="r-in"><span><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>, </span></span>
+<span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Turn polygon into raster</span></span></span>
+<span class="r-in"><span><span class="co"># Note: raster values must be numeric, therefore names were changed to</span></span></span>
+<span class="r-in"><span><span class="co"># numeric codes based on lookup table produced from the following code.                      </span></span></span>
+<span class="r-in"><span><span class="va">new_rast</span> <span class="op">&lt;-</span> <span class="fu">spPoly2Rast</span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">WYbhdistfn</span>,</span></span>
+<span class="r-in"><span>                        polyv.att <span class="op">=</span> <span class="st">"DISTRICTNA"</span>,</span></span>
+<span class="r-in"><span>                        outfolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> creating lookup table of codes</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NOT UPDATED FOR PROJ &gt;= 6</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ================================================================================</span>
-<span class="r-in">                    </span>
-<span class="r-in"><span class="co"># Plot result with raster package                     </span></span>
-<span class="r-in"><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">new_rast</span><span class="op">$</span><span class="va">rastfn</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span>                    </span></span>
+<span class="r-in"><span><span class="co"># Plot result with raster package                     </span></span></span>
+<span class="r-in"><span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">new_rast</span><span class="op">$</span><span class="va">rastfn</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="spPoly2Rast-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -199,7 +235,7 @@ object has more than 1 record, it will be returned but not exported.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

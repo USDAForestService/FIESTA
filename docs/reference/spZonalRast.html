@@ -18,7 +18,7 @@ multi-band)."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/lib
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -83,23 +83,23 @@ multi-band).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spZonalRast</span><span class="op">(</span>
-  <span class="va">polyv</span>,
-  polyv_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  polyv.att <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">rastfn</span>,
-  rastfolder <span class="op">=</span> <span class="cn">NULL</span>,
-  bands <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">zonalstat</span>,
-  pixelfun <span class="op">=</span> <span class="cn">NULL</span>,
-  outname <span class="op">=</span> <span class="cn">NULL</span>,
-  showext <span class="op">=</span> <span class="cn">FALSE</span>,
-  rastlut <span class="op">=</span> <span class="cn">NULL</span>,
-  rast.NODATA <span class="op">=</span> <span class="cn">NULL</span>,
-  na.rm <span class="op">=</span> <span class="cn">TRUE</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spZonalRast</span><span class="op">(</span></span>
+<span>  <span class="va">polyv</span>,</span>
+<span>  polyv_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  polyv.att <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">rastfn</span>,</span>
+<span>  rastfolder <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bands <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">zonalstat</span>,</span>
+<span>  pixelfun <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outname <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  showext <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  rastlut <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rast.NODATA <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -108,65 +108,96 @@ multi-band).</p>
 <dd><p>sf R object or String. Polygon data to identify zones. Can be a
 spatial polygon object, full pathname to a shapefile, or name of a layer
 within a database.</p></dd>
+
+
 <dt>polyv_dsn</dt>
 <dd><p>String. Data source name (dsn; e.g., sqlite or shapefile
 pathname) of zonal layer. The dsn varies by driver. See gdal OGR vector
 formats (https://www.gdal.org/ogr_formats.html). Optional if polyv is sf
 object.</p></dd>
+
+
 <dt>polyv.att</dt>
 <dd><p>String. Name of attribute in polyv to identify zones for
 summarizing raster statistics.</p></dd>
+
+
 <dt>rastfn</dt>
 <dd><p>String or Raster. File name(s) with extensions, or raster
 object(s).  Note: raster objects must be written to file.</p></dd>
+
+
 <dt>rastfolder</dt>
 <dd><p>String. Name of the folder with raster layers. Optional.
 Useful if all raster layers are in same folder.</p></dd>
+
+
 <dt>bands</dt>
 <dd><p>Numeric vector. If rast is a multi-layer raster and only 1 or
 some layers are desired, specify layer number(s) in a vector format. If
 NULL, all layers are summed.</p></dd>
+
+
 <dt>zonalstat</dt>
 <dd><p>String vector. Zonal statistic(s) to return for rasters
 with continuous data ("mean", "sum", "majority", "minority", "variety",
 "npixels") or rasters with discrete data ("count", "proportion").</p></dd>
+
+
 <dt>pixelfun</dt>
 <dd><p>Function. A function to apply to the individual pixel values
 before calculating sum and mean. The function should accept a single numeric
 argument (pixel value) and return a single numeric argument.</p></dd>
+
+
 <dt>outname</dt>
 <dd><p>String. Variable name for output. The output names will use
 outname as a prefix to summary statistics (i.e., 'outname'.mean,
 'outname'.sum).</p></dd>
+
+
 <dt>showext</dt>
 <dd><p>Logical. If TRUE, layer extents are displayed in plot window.</p></dd>
+
+
 <dt>rastlut</dt>
 <dd><p>Data frame. A look up table to recode raster values. Must be
 2 columns: Column 1 with raster values and column 2 with recode values.</p></dd>
+
+
 <dt>rast.NODATA</dt>
 <dd><p>Numeric. NODATA value or other values to ignore. These
 values will be removed from output zonal table. See notes below.</p></dd>
+
+
 <dt>na.rm</dt>
 <dd><p>Logical. If TRUE, Null values are removed before zonal
 statistic calculations.</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, the zonal data are saved to outfolder.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'zonalext'.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>zonalext</dt>
 <dd><p>Data frame. Zonal statistics by polygon attribute
 (attribute).</p></dd>
-<dt>outname</dt>
+ <dt>outname</dt>
 <dd><p>String vector. Names of zonal statistic
 variables generated in zonalext data frame.</p></dd>
-<dt>rasterfile</dt>
+ <dt>rasterfile</dt>
 <dd><p>String
 vector. Names of raster file(s) associated with zonal statistic.</p></dd>
+
+
 </dl><p>If savedata=TRUE, outdat data frame is saved to outfolder (Default name:
 zonalext_'date'.csv).</p>
     </div>
@@ -205,39 +236,105 @@ documentation for more details.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Set up data from `FIESTA`</span></span>
-<span class="r-in"><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>,</span>
-<span class="r-in">                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">demfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                     <span class="st">"sp_data/WYbighorn_dem_250m.img"</span>,</span>
-<span class="r-in">                     package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Import spatial data with `spImportSpatial`</span></span>
-<span class="r-in"><span class="va">WYbhdist</span> <span class="op">&lt;-</span> <span class="fu"><a href="spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhdistfn</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Extract mean and sum in `WYbhdist`</span></span>
-<span class="r-in"><span class="fu">spZonalRast</span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">WYbhdist</span>, </span>
-<span class="r-in">            polyv.att <span class="op">=</span> <span class="st">"DISTRICTNA"</span>, </span>
-<span class="r-in">            rastfn <span class="op">=</span> <span class="va">demfn</span>, </span>
-<span class="r-in">            zonalstat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"sum"</span><span class="op">)</span><span class="op">)</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Set up data from `FIESTA`</span></span></span>
+<span class="r-in"><span><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>,</span></span>
+<span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">demfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                     <span class="st">"sp_data/WYbighorn_dem_250m.img"</span>,</span></span>
+<span class="r-in"><span>                     package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Import spatial data with `spImportSpatial`</span></span></span>
+<span class="r-in"><span><span class="va">WYbhdist</span> <span class="op">&lt;-</span> <span class="fu"><a href="spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhdistfn</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Extract mean and sum in `WYbhdist`</span></span></span>
+<span class="r-in"><span><span class="fu">spZonalRast</span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">WYbhdist</span>, </span></span>
+<span class="r-in"><span>            polyv.att <span class="op">=</span> <span class="st">"DISTRICTNA"</span>, </span></span>
+<span class="r-in"><span>            rastfn <span class="op">=</span> <span class="va">demfn</span>, </span></span>
+<span class="r-in"><span>            zonalstat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"sum"</span><span class="op">)</span><span class="op">)</span> </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  from: NAD83 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD27 +units=m +no_defs</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL support is provided by the sf and terra packages among others</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ================================================================================</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $zonalext</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       DISTRICTNA WYbighorn_dem_250m.mean WYbighorn_dem_250m.sum</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Medicine Wheel Ranger District                2650.793               62603774</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   Powder River Ranger District                2686.069               58150700</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3         Tongue Ranger District                2538.865               67965407</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Medicine Wheel Ranger District                2650.698               62598879</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   Powder River Ranger District                2686.121               58141084</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         Tongue Ranger District                2539.152               67970570</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $outname</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "WYbighorn_dem_250m.mean" "WYbighorn_dem_250m.sum" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rasterfile</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "/private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "/tmp/RtmpY5Z7Y5/temp_libpath1bef3cba94b9/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
@@ -253,7 +350,7 @@ documentation for more details.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
       </span>
     </div>
 
@@ -81,13 +81,13 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spReprojectVector</span><span class="op">(</span>
-  <span class="va">layer</span>,
-  dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">crs.new</span>,
-  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spReprojectVector</span><span class="op">(</span></span>
+<span>  <span class="va">layer</span>,</span>
+<span>  dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">crs.new</span>,</span>
+<span>  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -95,26 +95,37 @@
     <dl><dt>layer</dt>
 <dd><p>sf class R object or String. The spatial layer must have a
 defined projection (test using sf::st_crs(layer)).</p></dd>
+
+
 <dt>dsn</dt>
 <dd><p>String. Data source name (dsn; i.e., folder or database name) of
 splayer. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional if layer is an R object.</p></dd>
+
+
 <dt>crs.new</dt>
 <dd><p>EPSG Integer or PROJ.4 String. New EPSG Geodetic Parameter
 Dataset definition or gdal PROJ.4 string identifying the new coordinate
 system (e.g., "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80
 +towgs84=0,0,0").</p></dd>
+
+
 <dt>exportsp</dt>
 <dd><p>Logical. If TRUE, the spatial reprojected object is exported
 to outfolder (see spExportSpatial for details).</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options for saving data. If out_layer = NULL, default = 'layerprj'.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>layerprj</dt>
 <dd><p>sf object. Reprojected spatial layer.</p></dd>
+
+
 </dl><p>If exportsp = TRUE, a spatial layer is written to outfolder (See note).</p>
     </div>
     <div id="note">
@@ -161,16 +172,16 @@ record, it will be returned but not exported.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co"># Set up `SpatialPoints` object</span></span>
-<span class="r-in"><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span class="r-in">                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span class="r-in">                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span class="r-in">                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span class="r-in">                               prj <span class="op">=</span> <span class="st">"longlat"</span>, </span>
-<span class="r-in">                               datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># Check CRS</span></span>
-<span class="r-in"><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Set up `SpatialPoints` object</span></span></span>
+<span class="r-in"><span><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span></span>
+<span class="r-in"><span>                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span></span>
+<span class="r-in"><span>                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span></span>
+<span class="r-in"><span>                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span></span>
+<span class="r-in"><span>                               prj <span class="op">=</span> <span class="st">"longlat"</span>, </span></span>
+<span class="r-in"><span>                               datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Check CRS</span></span></span>
+<span class="r-in"><span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Coordinate Reference System:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   User input: EPSG:4269 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   wkt:</span>
@@ -192,15 +203,15 @@ record, it will be returned but not exported.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         AREA["North America - onshore and offshore: Canada - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon. Puerto Rico. United States (USA) - Alabama; Alaska; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Hawaii; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Virgin Islands. British Virgin Islands."],</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         BBOX[14.92,167.65,86.46,-47.74]],</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     ID["EPSG",4269]]</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Set up projection</span></span>
-<span class="r-in"><span class="va">prj</span> <span class="op">&lt;-</span> <span class="st">"+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Use `spReprojectVector` to reproject the vector</span></span>
-<span class="r-in"><span class="va">WYspplt.utm12</span> <span class="op">&lt;-</span> <span class="fu">spReprojectVector</span><span class="op">(</span>layer <span class="op">=</span> <span class="va">WYspplt</span>, </span>
-<span class="r-in">                                   crs.new <span class="op">=</span> <span class="va">prj</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># Check results</span></span>
-<span class="r-in"><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">WYspplt.utm12</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Set up projection</span></span></span>
+<span class="r-in"><span><span class="va">prj</span> <span class="op">&lt;-</span> <span class="st">"+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Use `spReprojectVector` to reproject the vector</span></span></span>
+<span class="r-in"><span><span class="va">WYspplt.utm12</span> <span class="op">&lt;-</span> <span class="fu">spReprojectVector</span><span class="op">(</span>layer <span class="op">=</span> <span class="va">WYspplt</span>, </span></span>
+<span class="r-in"><span>                                   crs.new <span class="op">=</span> <span class="va">prj</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Check results</span></span></span>
+<span class="r-in"><span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">WYspplt.utm12</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Coordinate Reference System:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   User input: +proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   wkt:</span>
@@ -241,7 +252,7 @@ record, it will be returned but not exported.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             ORDER[2],</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             LENGTHUNIT["metre",1,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 ID["EPSG",9001]]]]</span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -256,7 +267,7 @@ record, it will be returned but not exported.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
