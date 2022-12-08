@@ -1917,21 +1917,6 @@ DBgetPlots <- function (states = NULL,
         ## Get TREE fields
         treeflds <- DBI::dbListFields(dbconn, treenm)
 
-        if (!is.null(sppvars)) {
-          refsppnm <- chkdbtab(dbtablst, refspp_layer)
-          if (is.null(refsppnm)) {
-            sppvars <- NULL
-          } else {
-            REF_SPECIES <- tryCatch( DBI::dbReadTable(dbconn, "REF_SPECIES"),
-			error = function(e) {
-                  message(e, "\n")
-                  return(NULL) })
-            if (is.null(REF_SPECIES)) {
-              message("no REF_SPECIES in database... cannot get: ", toString(sppvars))
-              sppvars <- NULL 
-            }
-          }
-        }
       } else if (datsource == "datamart") {
         ## TREE table
         if (istree || !is.null(alltFilter)) {
@@ -1943,14 +1928,6 @@ DBgetPlots <- function (states = NULL,
             treeflds <- names(TREE)
           }
         }
-        ## REF_SPECIES table 
-        if (!is.null(sppvars)) {
-          REF_SPECIES <- DBgetCSV("REF_SPECIES", returnDT=TRUE, stopifnull=FALSE)
-          if (is.null(REF_SPECIES)) {
-            message("no REF_SPECIES in datamart... cannot get: ", toString(sppvars))
-            sppvars <- NULL
-          }
-        }
       } else if (datsource %in% c("csv", "obj")) {
         TREE <- pcheck.table(tree_layer, stopifnull=TRUE, stopifinvalid=TRUE)
         if (is.null(TREE)) {
@@ -1959,14 +1936,6 @@ DBgetPlots <- function (states = NULL,
           treenm <- "TREE"
           names(TREE) <- toupper(names(TREE))
           treeflds <- names(TREE)
-        }
-
-        if (!is.null(sppvars)) {
-          REF_SPECIES <- pcheck.table(refspp_layer, stopifnull=FALSE, stopifinvalid=FALSE)
-            if (is.null(REF_SPECIES)) {
-              message("no REF_SPECIES table... cannot get: ", toString(sppvars))
-              sppvars <- NULL
-            }
         }
       }
  
@@ -1977,15 +1946,15 @@ DBgetPlots <- function (states = NULL,
         istree <- FALSE
       } else {
 
-        ## Check if sppvars are in REF_SPECIES table
+        ## Check if sppvars are in ref_species table
         if (!is.null(sppvars)) {
-          if (!all(sppvars %in% names(REF_SPECIES))) {
-            missvars <- sppvars[!sppvars %in% names(REF_SPECIES)]
+          if (!all(sppvars %in% names(ref_species))) {
+            missvars <- sppvars[!sppvars %in% names(ref_species)]
             message("variables are not in ref_species table: ", toString(missvars))
             sppvars <- NULL
           } else {
             refspp.qry <- paste("select SPCD,", paste(sppvars, collapse=","), 
-				          "from REF_SPECIES")
+				          "from ref_species")
             refspp <- sqldf::sqldf(refspp.qry)
           }
         }
