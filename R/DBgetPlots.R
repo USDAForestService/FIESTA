@@ -1948,8 +1948,8 @@ DBgetPlots <- function (states = NULL,
 
         ## Check if sppvars are in ref_species table
         if (!is.null(sppvars)) {
-          if (!all(sppvars %in% names(ref_species))) {
-            missvars <- sppvars[!sppvars %in% names(ref_species)]
+          if (!all(sppvars %in% names(FIESTA::ref_species))) {
+            missvars <- sppvars[!sppvars %in% names(FIESTA::ref_species)]
             message("variables are not in ref_species table: ", toString(missvars))
             sppvars <- NULL
           } else {
