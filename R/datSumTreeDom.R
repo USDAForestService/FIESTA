@@ -160,6 +160,7 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples 
+#' \donttest{
 #' # Sum of Live Basal Area Per Acre by Species
 #' datSumTreeDom(tree = FIESTA::WYtree, 
 #'               cond = FIESTA::WYcond, 
@@ -198,6 +199,7 @@
 #'               tdomtot = TRUE, 
 #'               tdomprefix = "CNT", 
 #'               tround = 0)
+#' }
 #' @export datSumTreeDom
 datSumTreeDom <- function(tree = NULL, 
                           seed = NULL, 

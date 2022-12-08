@@ -263,6 +263,7 @@ This function can be used to get tree domain data. This data can be
 used for mapping tree domain distributions.
 }
 \examples{
+\donttest{
 # Sum of Live Basal Area Per Acre by Species
 datSumTreeDom(tree = FIESTA::WYtree, 
               cond = FIESTA::WYcond, 
@@ -301,6 +302,7 @@ datSumTreeDom(cond = WYcond,
               tdomtot = TRUE, 
               tdomprefix = "CNT", 
               tround = 0)
+}
 }
 \author{
 Tracey S. Frescino
