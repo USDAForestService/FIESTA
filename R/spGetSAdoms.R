@@ -666,7 +666,7 @@ spGetSAdoms <- function(smallbnd,
     smallbndxlst <- autoselectlst$smallbndxlst
     largebndx <- autoselectlst$largebndx.int
     maxbndx <- autoselectlst$maxbndx.int
- 
+
   } else {
 
     ## Add DOMAIN column to all rows
@@ -774,19 +774,12 @@ spGetSAdoms <- function(smallbnd,
   #  par(mar=mar)
   #}
 
-  rm(smallbndx)
-  rm(helperbndx)
-  rm(largebndx)
-  rm(maxbndx)
-  if (helper_autoselect) rm(autoselectlst)
-  gc()
 
   #if (!multiSAdoms) {
   #  SAdoms <- SAdomdat$SAdomlst[[1]]
   #  smallbnd <- SAdomdat$smallbndlst[[1]]
   #} 
 
-  
   message("Number of model domains generated: ", length(SAdomslst), "\n") 
 
   returnlst <- list(SAdomlst=SAdomslst, smallbndlst=smallbndxlst, 
@@ -801,8 +794,16 @@ spGetSAdoms <- function(smallbnd,
     returnlst$largebndlst <- unique(unlist(lapply(SAdomslst, function(x, largebnd.unique)
  		unique(x[[largebnd.unique]]), largebnd.unique)))
     returnlst$largebndsf <- 
-		largebnd[largebnd[[largebnd.unique]] %in% returnlst$largebndlst, ]
+		largebndx[largebndx[[largebnd.unique]] %in% returnlst$largebndlst, ]
   }
+
+  rm(smallbndx)
+  rm(helperbndx)
+  rm(largebndx)
+  rm(maxbndx)
+  if (helper_autoselect) rm(autoselectlst)
+  gc()
+
 
   if (saveobj) {
     objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
