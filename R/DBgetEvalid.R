@@ -293,7 +293,7 @@ DBgetEvalid <- function(states = NULL,
   if (datsource == "sqlite") {
     ## Check states in database
     ###############################################
-    plotnm <- chkdbtab(dbtablst, plot_layer)
+    plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=TRUE)
     pltflds <- names(DBI::dbGetQuery(dbconn, 
 				paste("select * from", plotnm, "where 1=2")))
     stcdlstdb <- DBI::dbGetQuery(dbconn, 

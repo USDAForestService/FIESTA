@@ -1308,6 +1308,10 @@ DBgetPlots <- function (states = NULL,
     } else if (measCur) {
       popSURVEY <- ifelse(is.null(surveynm), FALSE, TRUE)
       subcycle99 <- ifelse(is.null(subcyclenm), FALSE, TRUE)
+      plotobj <- NULL
+      if (exists(plotnm)) {
+        plotobj <- get(plotnm)
+      }
 
       pfromqry <- getpfromqry(Endyr = measEndyr, SCHEMA. = SCHEMA., 
                               allyrs = allyrs,
@@ -1316,13 +1320,12 @@ DBgetPlots <- function (states = NULL,
                               popSURVEY = popSURVEY,
                               plotnm = plotnm, 
                               surveynm = surveynm,
-                              plotobj = get(plotnm))
-
+                              plotobj = plotobj)
     } else {
       if (is.null(plotnm)) {
-        pfromqry <- paste(SCHEMA., "COND p")
+        pfromqry <- paste0(SCHEMA., condnm, " p")
       } else {
-        pfromqry <- paste0(SCHEMA., "PLOT p")
+        pfromqry <- paste0(SCHEMA., plotnm, " p")
       }
     }
 
@@ -1334,7 +1337,6 @@ DBgetPlots <- function (states = NULL,
       pcgeomfromqry <- paste0(pcfromqry, " JOIN ", SCHEMA., 
 				plotgeomnm, " pg ON (pg.CN = p.", puniqueid, ")")
     }
-
 
     ###########################################################################
     ## State filter 
@@ -1540,6 +1542,8 @@ DBgetPlots <- function (states = NULL,
       dbqueries$pltcond <- pltcond.qry
 
       ## Run pltcond query
+      message(pltcond.qry)
+
       if (datsource == "sqlite") {
         tryCatch( pltcondx <- DBI::dbGetQuery(dbconn, pltcond.qry),
 			error=function(e) message("pltcond query is invalid"))
@@ -1547,7 +1551,6 @@ DBgetPlots <- function (states = NULL,
         tryCatch( pltcondx <- setDT(sqldf::sqldf(pltcond.qry, stringsAsFactors=FALSE)),
 			error=function(e) message("pltcond query is invalid"))
       }
-      message(pltcond.qry)
 
       ## Write query to outfolder
       if (saveqry) {
