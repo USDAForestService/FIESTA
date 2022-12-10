@@ -698,7 +698,6 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
   } ## End while i - sbnd
 
-
   names(SAdomslst) <- SAdomsnmlst
   names(smallbndxlst) <- SAdomsnmlst
 
