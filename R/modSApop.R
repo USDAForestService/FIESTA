@@ -701,13 +701,23 @@ modSApop <- function(popType="VOL",
   ## Save list object
   ##################################################################
   if (saveobj) {
-    #if (append_layer) {
-    #  message("appending list object to: ", objfn)
-    #} else {
+    if (getext(objfn) == "llo") {
+      if (append_layer) {
+        message("appending list object to: ", objfn)
+        largeList::saveList(returnlst, file=objfn, append=append_layer, compress=TRUE)
+      } else {
+        message("saving list object to: ", objfn)
+        largeList::saveList(returnlst, file=objfn, compress=TRUE)
+      }
+    } else if (getext(objfn) == "rds") {
       message("saving list object to: ", objfn)
-    #}
-    #saveList(list(returnlst), file=objfn, append=append_layer, compress=TRUE)
-    largeList::saveList(returnlst, file=objfn, compress=TRUE)
+      saveRDS(returnlst, objfn)
+    } else if (getext(objfn) == "rda") {
+      message("saving list object to: ", objfn)
+      save(returnlst, objfn)
+    } else {
+      message("invalid object name... must end in: ", toString(c("rds", "rda", "llo")))
+    } 
   } 
 
   ## Save data frames

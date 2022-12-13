@@ -434,13 +434,13 @@
 #'                     eval = "FIA",
 #'                     eval_opts = list(Cur = TRUE))
 #' names(UTdat)
-#' head(UTdat$plt)
+#' head(UTdat$plot)
 #' UTdat$pltcnt
 #' 
 #' # Look at number of plots by inventory year
-#' table(UTdat$plt$INVYR)
+#' table(UTdat$plot$INVYR)
 #' 
-#' # Note: see FIESTA::ref_plt and FIESTA::ref_cond for variable descriptions
+#' # Note: see FIESTA::ref_plot and FIESTA::ref_cond for variable descriptions
 #' # Or consult FIA Database documentation
 #' # \link{https://www.fia.fs.fed.us/library/database-documentation/index.php}
 #' 
@@ -855,6 +855,7 @@ DBgetPlots <- function (states = NULL,
   if (length(evalidlist) > 0) {
     invyrs <- evalInfo$invyrs
     iseval <- TRUE
+    savePOP <- TRUE
   }
   ppsanm <- evalInfo$ppsanm
   dbconn <- evalInfo$dbconn
@@ -867,7 +868,7 @@ DBgetPlots <- function (states = NULL,
   if (!is.null(PLOT)) {
     plotnm <- "PLOT"
   }
-
+ 
   ### GET RS & rscd
   ###########################################################
   #isRMRS <- ifelse(length(rslst) == 1 && rslst == "RMRS", TRUE, FALSE) 
@@ -1647,7 +1648,7 @@ DBgetPlots <- function (states = NULL,
         rm(nbrcndfor)
         rm(nbrcndftyp)
 
-        ## Merge to plt table
+        ## Merge to plot table
         pltx <- nbrcnd[pltx]
 
         nbrcndlst <- c("NBRCND", "NBRCNDSAMP", "NBRCNDFOR", "NBRCNDFTYP")
@@ -3337,7 +3338,7 @@ DBgetPlots <- function (states = NULL,
     }
  
     if (returndata) {
-      tabs$plt <- rbind(tabs$plt, data.frame(pltx))
+      tabs$plt <- rbind(tabs$plot, data.frame(pltx))
       tabIDs$plt <- "CN"
       tabs$cond <- rbind(tabs$cond, data.frame(condx))
       tabIDs$cond <- "PLT_CN"
@@ -3373,7 +3374,7 @@ DBgetPlots <- function (states = NULL,
         }
         if (!is.null(xyplt)) {
           if (!is.null(pltx) && length(unique(xyplt$PLT_CN)) != nrow(pltx))
-            warning("number of plots in ", spxynm, " does not match plt table")            
+            warning("number of plots in ", spxynm, " does not match plot table")            
 
           ## Generate spatial output
           out_fmt_sp <- ifelse(out_fmt == "csv", "shp", out_fmt)
@@ -3646,7 +3647,8 @@ DBgetPlots <- function (states = NULL,
     if (!is.null(spconddat)) {
       returnlst$spconddat <- setDF(spconddatx)
     }
-    if (savePOP || (iseval && length(evalidlist) > 1) && !is.null(ppsa)) {
+ 
+    if (savePOP) {
       returnlst$pop_plot_stratum_assgn <- setDF(ppsa)
     }
     if (saveSURVEY && !is.null(SURVEY)) {

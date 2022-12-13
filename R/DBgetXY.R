@@ -415,6 +415,7 @@ DBgetXY <- function (states = NULL,
   if (length(evalidlist) > 0) {
     invyrlst <- evalInfo$invyrs
     iseval <- TRUE
+    savePOP <- TRUE
   }
   ppsanm <- evalInfo$ppsanm
   dbconn <- evalInfo$dbconn
@@ -918,7 +919,7 @@ DBgetXY <- function (states = NULL,
   }
   if (!is.null(yrvarnm) && !is.null(stcdnm)) {
     invarsA <- toString(paste0("p.", c(stcdnm, yrvarnm)))
-    invyrtab.qry <- paste0("SELECT ", invarsA, ", COUNT(*)", 
+    invyrtab.qry <- paste0("SELECT distinct ", invarsA, ", COUNT(*)", 
 		           " from ", xyfromqry,
 				" GROUP BY statecd, ", yrvar, 
 				" ORDER BY statecd, ", yrvar) 
@@ -926,7 +927,7 @@ DBgetXY <- function (states = NULL,
 
   ## Create invyrtab query 
   ###########################################################
-  xycoords.qry <- paste0("select ", toString(xyvarsA), 
+  xycoords.qry <- paste0("select distinct ", toString(xyvarsA), 
 		" from ", xyfromqry,
 		" where ", evalFilter)
   message(xycoords.qry)

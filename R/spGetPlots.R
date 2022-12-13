@@ -235,7 +235,7 @@ spGetPlots <- function(bnd = NULL,
 
   gui <- FALSE
   coordtype <- "public"
-  evalresp <- FALSE 
+  iseval <- FALSE 
   pltassgnid = "PLT_CN"
 
   ##################################################################
@@ -771,7 +771,7 @@ spGetPlots <- function(bnd = NULL,
 
   msg <- "getting data for... "
   if (!is.null(evalid)) {
-    evalresp=savePOP <- TRUE
+    iseval=savePOP <- TRUE
     evalid <- unlist(evalid)
     msg <- paste0(msg, "for evaluation: ", toString(evalid))
     savePOP <- TRUE
@@ -786,10 +786,10 @@ spGetPlots <- function(bnd = NULL,
       }
     }
   } else if (evalCur) {
-    evalresp=savePOP <- TRUE
+    iseval=savePOP <- TRUE
     msg <- paste0(msg, "for most current evaluation")
     if (!is.null(evalEndyr)) {
-      evalresp=savePOP <- TRUE
+      iseval=savePOP <- TRUE
       msg <- paste0(msg, ", ending in ", evalEndyr)
     }
   } else if (!is.null(invyrs)) {
@@ -921,7 +921,8 @@ spGetPlots <- function(bnd = NULL,
       tabs1 <- dat1$tabs
       tabIDs <- dat1$tabIDs
       PLOT1 <- tabs1$plt
-      pop_plot_stratum_assgn1 <- tabs1$pop_plot_stratum_assgn
+      pop_plot_stratum_assgn1 <- dat1$pop_plot_stratum_assgn
+      evalid1 <- dat1$evalid
       puniqueid <- dat1$puniqueid
       dbqueries <- dat1$dbqueries
 
@@ -1004,7 +1005,8 @@ spGetPlots <- function(bnd = NULL,
                          evalInfo = evalInfo2st
                          )
       tabs2 <- dat2$tabs
-      pop_plot_stratum_assgn2 <- tabs2$pop_plot_stratum_assgn
+      pop_plot_stratum_assgn2 <- dat2$pop_plot_stratum_assgn
+      evalid2 <- dat2$evalid
       PLOT2 <- tabs2$plt
 
       if (nrow(PLOT2) > length(unique(PLOT2[[puniqueid]]))) {
@@ -1093,7 +1095,8 @@ spGetPlots <- function(bnd = NULL,
                          )
       tabs <- dat$tabs
       tabIDs <- dat$tabIDs
-      pop_plot_stratum_assgn <- tabs$pop_plot_stratum_assgn
+      pop_plot_stratum_assgn <- dat$pop_plot_stratum_assgn
+      evalid <- dat$evalid
       PLOT <- tabs$plt
       puniqueid <- dat$puniqueid
       dbqueries <- dat$dbqueries
@@ -1172,6 +1175,7 @@ spGetPlots <- function(bnd = NULL,
 
         for (tabnm in names(stcliptabs)) {
           tab <- stcliptabs[[tabnm]]
+          if (tabnm == "plt") tabnm <- "plot"
 
           indx <- ifelse(tabnm == "plt", "CN", 
 		  ifelse(tabnm %in% c("cond", "vsubpspp", "vsubpstr", 
@@ -1323,11 +1327,11 @@ spGetPlots <- function(bnd = NULL,
         }
       }
     }
-
+ 
     if (savePOP) {
       returnlst$pop_plot_stratum_assgn <- pop_plot_stratum_assgn
     }
-    if (evalresp) {
+    if (iseval) {
       returnlst$evalid <- evalid
     }
     return(returnlst)
