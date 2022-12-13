@@ -52,4 +52,4 @@ Copyright: See file COPYRIGHTS for details.
 LazyData: true
 SystemRequirements: C++11
 Encoding: UTF-8
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3

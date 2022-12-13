@@ -515,13 +515,13 @@ UTdat <- DBgetPlots(states = "Utah",
                     eval = "FIA",
                     eval_opts = list(Cur = TRUE))
 names(UTdat)
-head(UTdat$plt)
+head(UTdat$plot)
 UTdat$pltcnt
 
 # Look at number of plots by inventory year
-table(UTdat$plt$INVYR)
+table(UTdat$plot$INVYR)
 
-# Note: see FIESTA::ref_plt and FIESTA::ref_cond for variable descriptions
+# Note: see FIESTA::ref_plot and FIESTA::ref_cond for variable descriptions
 # Or consult FIA Database documentation
 # \link{https://www.fia.fs.fed.us/library/database-documentation/index.php}
 

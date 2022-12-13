@@ -496,7 +496,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 			ypoly.att=largebnd.unique, returnsf=FALSE)
         largebndxlst <- unique(c(largebnd.ltthres, largebnd.lt0, names(largebndx.dist)))
       }
-
+ 
       while (!end) {
         ## Get intersecting helper polygons
         helperbndx.tmp <- suppressWarnings(sf::st_join(helperbndx,
