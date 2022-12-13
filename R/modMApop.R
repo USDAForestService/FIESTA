@@ -619,7 +619,7 @@ modMApop <- function(popType="VOL",
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
 
-  if (popType %in% c("ALL", "AREA", "VOL")) {
+  if (popType %in% c("ALL", "CURR", "AREA", "VOL")) {
  
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
