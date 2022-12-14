@@ -679,18 +679,6 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 #            text(coords[,"X"], coords[,"Y"], SAdoms[["DOMAIN"]], cex=.4)
 #          }
 
-
-    if (!largeishelper && !is.null(largebndx) && !largebnd.unique %in% names(SAdoms)) {
-      SAdoms <- suppressWarnings(sf::st_join(SAdoms, 
-			largebndx.intd[, largebnd.unique], largest=TRUE))
-    }
-
-    ## Join maxbndx and largebndx attributes (using largest overlap)
-    if (maxislarge && !is.null(maxbndx) && !maxbnd.unique %in% names(SAdoms)) {
-      SAdoms <- suppressWarnings(sf::st_join(SAdoms, 
-					maxbndx[, maxbnd.unique], largest=TRUE))
-    }
-
     SAdomslst[[i]] <- SAdoms
     helperbndxlst[[i]] <- helperbndx.tmp
     sbnd$AOI <- NULL
@@ -703,14 +691,6 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
   returnlst <- list(SAdomslst=SAdomslst, helperbndxlst=helperbndxlst,
 				smallbndxlst=smallbndxlst)
-  if (!is.null(maxbndx)) {
-    returnlst$maxbndx.int <- maxbndx.intd
-    #returnlst$maxbndx.pct <- maxbndx.pct
-  }
-  if (!is.null(largebndx)) {
-    returnlst$largebndx.int <- largebndx.intd
-    #returnlst$largebndx.pct <- largebndx.pct
-  }
 
   return(returnlst)
 }
