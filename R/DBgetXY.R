@@ -499,7 +499,7 @@ DBgetXY <- function (states = NULL,
     if (!is.null(xynm)) {
       xyflds <- DBI::dbListFields(xyconn, xynm)
     } else {
-      stop(xy, " does not exist in database")
+      stop(xy, " does not exist in database\n ", toString(xytablst))
     }
   } else {
     XYdf <- pcheck.table(xy, stopifnull=TRUE, stopifinvalid=TRUE)
