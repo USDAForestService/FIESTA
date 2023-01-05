@@ -747,7 +747,7 @@ modMApop <- function(popType="VOL",
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
              cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter,
              unitarea=unitarea, areavar=areavar, areaunits=areaunits,
-             unitvar=unitvar, unitvars=unitvars, unitlut=unitlut, 
+             unitvar=unitvar, unitvars=unitvars, unitlut=data.table(unitlut), 
              plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
              npixels=npixels, npixelvar=npixelvar,
              states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
