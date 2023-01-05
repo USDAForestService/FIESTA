@@ -76,7 +76,7 @@
 #' (e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is
 #' prompted.  Use tfilter="NONE" if no filters.
 #' @param lbs2tons Logical. If TRUE, converts biomass or carbon variables from
-#' pounds to tons.
+#' pounds to tons. If metric=TRUE, converts to metric tons, else short tons.
 #' @param metric Logical. If TRUE, converts response to metric units based on
 #' FIESTA::ref_conversion, if tsumvar is in FIESTAutils::ref_estvar. Note: if TPA,
 #' TPA is converted to trees per hectare (TPH: 1 / (1/ tpavar * 0.4046860)).
@@ -731,8 +731,9 @@ datSumTreeDom <- function(tree = NULL,
 
   ## Convert variables from pound to tons if lbs2tons=TRUE
   if (lbs2tons && tsumvar %in% vars2convert) {
+    convfac <- ifelse(metric, 0.00045359237, 0.0005)
     message("converting from pounds to tons")
-    treex[[tsumvar]] <- treex[[tsumvar]] * 0.0005
+    treex[[tsumvar]] <- treex[[tsumvar]] * convfac
   }
 
   ## Convert to metric

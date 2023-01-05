@@ -71,7 +71,7 @@
 #' @param addseed Logical. If TRUE, add seedling data to tree counts (if TPA
 #' variable in tsumvarlst).
 #' @param lbs2tons Logical. If TRUE, converts biomass or carbon variables from
-#' pounds to tons.
+#' pounds to tons. If metric=TRUE, converts to metric tons, else short tons.
 #' @param metric Logical. If TRUE, converts response to metric units based on
 #' FIESTA::ref_conversion, if any variable in tsumvarlst is in
 #' FIESTAutils::ref_estvar.  Note: if TPA, TPA is converted to trees per hectare
@@ -604,9 +604,10 @@ datSumTree <- function(tree = NULL,
   
   ### Convert variables from pound to tons if lbs2tons=TRUE
   if (lbs2tons && any(tsumvarlst %in% vars2convert)) {
+    convfac <- ifelse(metric, 0.00045359237, 0.0005)
     vars2convert <- tsumvarlst[which(tsumvarlst %in% vars2convert)]
     message("converting from pounds to tons: ", paste(vars2convert, collapse=", "))
-    for (j in vars2convert) set(treex, i=NULL, j=j, value=treex[[j]] * 0.0005)
+    for (j in vars2convert) set(treex, i=NULL, j=j, value=treex[[j]] * convfac)
   }
 
   ## Check metric and convert
