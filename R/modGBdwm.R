@@ -38,6 +38,8 @@
 #' @param dwmtype String. Type of dwm estimate ('CWD', 'FWD_LG', "FWD_MD", "FWD_SM").
 #' @param dwmvar String. Type of dwm estimate ('VOLCF', 'BIOMASS', "CARBON").
 #' @param peracre Logical. If TRUE, generates per-acre estimates.
+#' @param lbs2tons Logical. If TRUE, converts biomass or carbon variables from
+#' pounds to tons. If metric=TRUE, converts to metric tons, else short tons.
 #' @param landarea String. The sample area filter for estimates ("ALL",
 #' "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
 #' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.
@@ -212,22 +214,23 @@
 #' @keywords data
 #' @export modGBdwm
 modGBdwm <- function(GBpopdat = NULL, 
-                       dwmtype = "CWD",
-                       dwmvar = "VOLCF", 
-                       peracre = FALSE,
-                       landarea = "FOREST", 
-                       pcfilter = NULL, 
-                       vfilter = NULL, 
-                       rowvar = NULL, 
-                       colvar = NULL,
-                       sumunits = TRUE,
-                       returntitle = FALSE, 
-                       savedata = FALSE,
-                       table_opts = NULL, 
-                       title_opts = NULL,
-                       savedata_opts = NULL,
-                       gui = FALSE, 
-                       ...){
+                     dwmtype = "CWD",
+                     dwmvar = "VOLCF", 
+                     peracre = FALSE,
+                     lbs2tons = FALSE,
+                     landarea = "FOREST", 
+                     pcfilter = NULL, 
+                     vfilter = NULL, 
+                     rowvar = NULL, 
+                     colvar = NULL,
+                     sumunits = TRUE,
+                     returntitle = FALSE, 
+                     savedata = FALSE,
+                     table_opts = NULL, 
+                     title_opts = NULL,
+                     savedata_opts = NULL,
+                     gui = FALSE, 
+                     ...){
 
   ###################################################################################
   ## DESCRIPTION: 
@@ -269,7 +272,7 @@ modGBdwm <- function(GBpopdat = NULL,
   
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(modGBp2veg)),
+  formallst <- c(names(formals(modGBdwm)),
                  names(formals(modGBpop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
@@ -338,7 +341,12 @@ modGBdwm <- function(GBpopdat = NULL,
     }
   }
   
-  
+  ## Check lbs2tons
+  ###################################################################################
+  lbs2tons <- pcheck.logical(lbs2tons, varnm="lbs2tons", title="Pounds to tons?", 
+		first="YES", gui=gui, stopifnull=TRUE)
+
+
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -505,9 +513,17 @@ modGBdwm <- function(GBpopdat = NULL,
   ## Adjust estvar
   cdomdat[, (estvar.name) := get(estvar_unadj) * get(adjvar)]
 
+  if (lbs2tons) {
+    convfac <- ifelse(metric, 0.00045359237, 0.0005)
+    cdomdat[, (estvar.name) := get(estvar.name) * convfac]
+  }
+
   if (peracre) {
     estvard.name <- areawt
     esttype <- "RATIO"
+    estunitsd <- areaunits
+  } else {
+    estunitsn <- ifelse(dwmvar == "VOLCF", "cuft", "oven-dry pounds")
   }
 
 
@@ -767,7 +783,7 @@ modGBdwm <- function(GBpopdat = NULL,
   ## GENERATE OUTPUT TABLES
   ###################################################################################
   message("getting output...")
-  estnm <- "estn" 
+  estnm <- ifelse (esttype == "RATIO", "estn", "est") 
  
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
 	      unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
