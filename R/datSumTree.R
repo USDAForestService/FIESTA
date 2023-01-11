@@ -1011,7 +1011,7 @@ datSumTree <- function(tree = NULL,
         seedcountvar=treecountvar <- newname
       }
     } else {
-      if (!is.null(fname)) {
+      if (!is.null(fname) && !is.na(fname)) {
         newname <- paste0(tvar, "_", fname)
         setnames(treef, tvar, newname)
       } else {
