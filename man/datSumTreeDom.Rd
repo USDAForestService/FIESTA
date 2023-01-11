@@ -118,7 +118,7 @@ include condition table.}
 prompted.  Use tfilter="NONE" if no filters.}
 
 \item{lbs2tons}{Logical. If TRUE, converts biomass or carbon variables from
-pounds to tons.}
+pounds to tons. If metric=TRUE, converts to metric tons, else short tons.}
 
 \item{metric}{Logical. If TRUE, converts response to metric units based on
 FIESTA::ref_conversion, if tsumvar is in FIESTAutils::ref_estvar. Note: if TPA,
