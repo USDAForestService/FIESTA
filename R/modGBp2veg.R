@@ -260,7 +260,6 @@ modGBp2veg <- function(GBpopdat = NULL,
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter=
     rawfolder=estvard.name <- NULL
-  #estvar <- "CONDPROP_ADJ"
   
   
   ##################################################################
@@ -385,6 +384,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   vcondstrx <- GBpopdat$vcondstrx
   varadjP2VEG <- GBpopdat$varadjP2VEG
   vuniqueid <- "PLT_CN"
+  estvar <- "COVER_PCT_SUM"
 
 
   ## Check p2vegtype 
@@ -499,7 +499,7 @@ modGBp2veg <- function(GBpopdat = NULL,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-
+ 
   #####################################################################################
   ### Get estimation data from tree table
   #####################################################################################
