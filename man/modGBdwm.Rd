@@ -9,6 +9,7 @@ modGBdwm(
   dwmtype = "CWD",
   dwmvar = "VOLCF",
   peracre = FALSE,
+  lbs2tons = FALSE,
   landarea = "FOREST",
   pcfilter = NULL,
   vfilter = NULL,
@@ -32,6 +33,9 @@ modGBdwm(
 \item{dwmvar}{String. Type of dwm estimate ('VOLCF', 'BIOMASS', "CARBON").}
 
 \item{peracre}{Logical. If TRUE, generates per-acre estimates.}
+
+\item{lbs2tons}{Logical. If TRUE, converts biomass or carbon variables from
+pounds to tons. If metric=TRUE, converts to metric tons, else short tons.}
 
 \item{landarea}{String. The sample area filter for estimates ("ALL",
 "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =

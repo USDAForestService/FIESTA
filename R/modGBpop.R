@@ -727,6 +727,8 @@ modGBpop <- function(popType = "VOL",
     vcondx <- popcheck$vcondx
     vcondsppf <- popcheck$vcondsppf
     vcondstrf <- popcheck$vcondstrf
+    ACI.filter <- popcheck$ACI.filter
+    condsampcnt <- popcheck$condsampcnt
     areawt <- popcheck$areawt
     vareawt <- popcheck$vareawt
     vuniqueid <- popcheck$vcondstrid
@@ -924,9 +926,12 @@ modGBpop <- function(popType = "VOL",
   if (!is.null(bndx)) {
     returnlst$bndx <- bndx
   }
+ 
   if (is.null(key(unitarea))) {
-     setkeyv(unitarea, unitvar)
+    setkeyv(unitarea, unitvars)
   }
+  setorderv(stratalut, c(unitvars, strvar))
+
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
             cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
             unitarea=unitarea, areavar=areavar, 

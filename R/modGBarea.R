@@ -539,7 +539,7 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
-  unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=tdomdattot <- NULL
+  unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
   #estvar.name <- estvar 
   stratalut <- setDT(stratalut)
@@ -588,7 +588,8 @@ modGBarea <- function(GBpopdat,
                         uniqueid=cuniqueid, stratalut=stratalut, 
                         unitvar=unitvar, strvar=strvar, domain=grpvar)
   }
-   ###################################################################################
+
+  ###################################################################################
   ## Check add0 and Add area
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE

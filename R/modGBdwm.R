@@ -360,6 +360,10 @@ modGBdwm <- function(GBpopdat = NULL,
     GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   }
   if (is.null(GBpopdat)) return(NULL)
+  popType <- GBpopdat$popType
+  if (popType != esttype) {
+    stop("GBpopdat is invalid for generating DWM estimates: ", popType)
+  }
   condx <- GBpopdat$condx
   pltcondx <- GBpopdat$pltcondx
   cuniqueid <- GBpopdat$cuniqueid
@@ -534,12 +538,12 @@ modGBdwm <- function(GBpopdat = NULL,
                   sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
                   title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
                   title.colvar=title.colvar, title.unitvar=title.unitvar, 
-                  title.filter=title.filter, title.unitsn=estunits, 
+                  title.filter=title.filter, title.unitsn=estunitsn, 
                   unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
-                  addtitle=addtitle, returntitle=returntitle, 
-                  rawdata=rawdata, states=states, invyrs=invyrs, 
-                  landarea=landarea, pcfilter=pcfilter, 
-                  allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
+                  addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
+                  states=states, invyrs=invyrs, landarea=landarea, 
+                  pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
+                  outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse

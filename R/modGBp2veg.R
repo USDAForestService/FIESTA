@@ -35,7 +35,7 @@
 #' For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
 #' 
 #' @param GBpopdat List. Population data objects returned from modGBpop().
-#' @param p2vegtype String. Type of p2veg estimate ('spp', 'str').
+#' @param p2vegtype String. Type of p2veg estimate ('str', 'spp').
 #' @param peracre Logical. If TRUE, generates per-acre estimates.
 #' @param landarea String. The sample area filter for estimates ("ALL",
 #' "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
@@ -44,9 +44,11 @@
 #' pltassgn).  Must be R logical syntax.
 #' @param vfilter String. A filter for the P2 vegetation table used for
 #' estimate.  Must be R logical syntax.
-#' @param rowvar String. Name of row domain variable in cond. If only one
-#' domain, rowvar = domain variable. If more than one domain, include colvar.
-#' If no domain, rowvar = NULL.
+#' @param rowvar String. Name of row domain variable in cond (e.g., 'FORTYPCD') 
+#' or P2VEG_SUBP_STRUCTURE (e.g., 'GROWTH_HABIT_CD', 'LAYER') or 
+#' P2VEG_SUBPLOT_SPP (e.g., 'VEG_FLDSPCD', 'VEG_SPCD', 'GROWTH_HABIT_CD', 'LAYER'). 
+#' If only one domain, rowvar = domain variable. If more than one domain, include 
+#' colvar. If no domain, rowvar = NULL.
 #' @param colvar String. Name of column domain variable in cond.
 #' @param sumunits Logical. If TRUE, estimation units are summed and returned
 #' in one table.
@@ -350,6 +352,10 @@ modGBp2veg <- function(GBpopdat = NULL,
     GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   }
   if (is.null(GBpopdat)) return(NULL)
+  popType <- GBpopdat$popType
+  if (popType != esttype) {
+    stop("GBpopdat is invalid for generating P2VEG estimates: ", popType)
+  }
   condx <- GBpopdat$condx
   pltcondx <- GBpopdat$pltcondx
   cuniqueid <- GBpopdat$cuniqueid
@@ -378,7 +384,6 @@ modGBp2veg <- function(GBpopdat = NULL,
   vcondsppx <- GBpopdat$vcondsppx
   vcondstrx <- GBpopdat$vcondstrx
   varadjP2VEG <- GBpopdat$varadjP2VEG
-  estvar <- "COVER_PCT_SUM"
   vuniqueid <- "PLT_CN"
 
 
@@ -392,6 +397,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   } else {
     vcondx <- vcondsppx
   }
+
 
   ########################################
   ## Check stratalut
@@ -445,7 +451,6 @@ modGBp2veg <- function(GBpopdat = NULL,
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
   rawfolder <- estdat$rawfolder
-  esttype <- "TREE"
 
   if ("STATECD" %in% names(pltcondf)) {
     states <- pcheck.states(sort(unique(pltcondf$STATECD)))
@@ -534,17 +539,15 @@ modGBp2veg <- function(GBpopdat = NULL,
   xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
   condx <- xchk$tab1
   tdomdat <- xchk$tab2
+  cdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
   
-  tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
-  
-  if (!is.null(tdomvar)) {
-    ## Merge condf with condx
-    xchk <- check.matchclass(condx, condf, c(cuniqueid, condid))
-    condx <- xchk$tab1
-    condf <- xchk$tab2
-    
-    cdomdat <- merge(condx, condf, by=c(cuniqueid, condid))
-  }
+#  if (!is.null(tdomvar)) {
+#    ## Merge condf with condx
+#    xchk <- check.matchclass(cdomdat, condf, c(cuniqueid, condid))
+#    cdomdat <- xchk$tab1
+#    condf <- xchk$tab2
+#    cdomdat <- merge(cdomdat, condf, by=c(cuniqueid, condid))
+#  }
 
   if (peracre) {
     estvar.filter <- treedat$estvarn.filter
@@ -569,9 +572,9 @@ modGBp2veg <- function(GBpopdat = NULL,
                     sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
                     title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
                     title.colvar=title.colvar, title.unitvar=title.unitvar, 
-                    title.filter=title.filter, unitvar=unitvar, 
-                    rowvar=rowvar, colvar=colvar, addtitle=addtitle, 
-                    returntitle=returntitle, rawdata=rawdata, 
+                    title.filter=title.filter, 
+                    unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
+                    addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
                     states=states, invyrs=invyrs, landarea=landarea, 
                     pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
                     outfn.pre=outfn.pre)
@@ -589,179 +592,57 @@ modGBp2veg <- function(GBpopdat = NULL,
   ############################################################################
   ## GENERATE ESTIMATES
   ############################################################################
-  unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=tdomdattot <- NULL
-  addtotal <- ifelse(((rowvar == "TOTAL" || length(unique(tdomdat[[rowvar]])) > 1) ||
-		(!is.null(tdomvarlst) && length(tdomvarlst) > 1)), TRUE, FALSE)
+  unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
+  addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
+  #estvar.name <- estvar 
+  stratalut <- setDT(stratalut)
 
-  ## Transpose rows if tdomvar2 is not NULL
-  if (!is.null(tdomvar2)) {
-    ddomvar <- "TOTAL"
-    tdomdat <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, ddomvar), .SDcols=tdomvarlst]
-    tdomdat <- transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid, ddomvar),
- 		tvars=tdomvarlst)
-    setnames(tdomdat, "value", estvarn.name)
-    suppressWarnings(tdomdat[, (grpvar) := tstrsplit(variable, "#")])[, variable := NULL]
+  ## Define estvar.name
+  estvar.name <- names(cdomdat)[grep("COVER_PCT_SUM", names(cdomdat))]
 
+  message("getting estimates using GB...")
+#  if (addtotal) {
+    ## Get total estimate and merge area
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvard.name]   
-    tdomdat <- merge(tdomdat, cdomdattot, by=c(strunitvars, cuniqueid, "TOTAL"))
-  }
-
-  ## Note: tdomdat is the summed response by condition (not domain)
-  #if (addtotal) {
-    ## Get estimate for total
-    if (!is.null(tdomvar)) {
-      tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                        by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvarn.name]
-      cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                        by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvard.name]   
-      tdomdattot <- merge(tdomdattot, cdomdattot, by=c(strunitvars, cuniqueid, "TOTAL"))
-    } else {
-      tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                        by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
-    }
-    unit_totest <- GBest.pbar(sumyn = estvarn.name, 
-                              sumyd = estvard.name, 
-                              ysum = tdomdattot, 
-                              esttype = esttype, 
-                              uniqueid = cuniqueid,
-                              stratalut = stratalut, 
-                              unitvar = unitvar, 
-                              strvar = strvar, 
-                              domain = "TOTAL")
+		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
+    unit_totest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdattot, 
+                        uniqueid=cuniqueid, stratalut=stratalut, 
+                        unitvar=unitvar, strvar=strvar, domain="TOTAL")
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
-    setkeyv(unit_totest, unitvar)
+    setkeyv(unit_totest, unitvar)     
     unit_totest <- unit_totest[unitarea, nomatch=0]
+
     if (totals) {
       unit_totest <- getpse(unit_totest, areavar=areavar, esttype=esttype)
     } else {
       unit_totest <- getpse(unit_totest, esttype=esttype)
-    }      
-  #}
+    } 
+#  }
 
-  ## Get row, column, cell estimate and merge area if row or column in cond table 
+  ## Get row estimate  
   if (rowvar != "TOTAL") {
-    if (!is.null(tdomvar)) {
-      if (!is.null(tdomvar2)) {
-        tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		          by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]    
-      } else {
-        if (tdomvar == rowvar) {
-          tdomdatsum <- transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid),
- 			        tvars=tdomvarlst)
-          setnames(tdomdatsum, c("variable", "value"), c(rowvar, estvarn.name))
-          tdomdatsum <- tdomdatsum[, lapply(.SD, sum, na.rm=TRUE), 
-              by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]
-        } else {  
-          tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-              by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]
-        }
-      }
-      if (rowvar %in% names(cdomdat)) {
-        cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-            by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvard.name]
-        tdomdatsum <- merge(tdomdatsum, cdomdatsum, 
-                            by=c(strunitvars, cuniqueid, rowvar))
-      } else {
-        cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE),
-            by=c(strunitvars, cuniqueid), .SDcols=estvard.name]
-        tdomdatsum <- merge(tdomdatsum, cdomdatsum, 
-                            by=c(strunitvars, cuniqueid))
-      }
-    } else {
-      tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		        by=c(strunitvars, cuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
-    }
-    unit_rowest <- GBest.pbar(sumyn = estvarn.name,
-                              sumyd = estvard.name,  
-                              ysum = tdomdatsum,
-                              esttype = esttype, 
-                              uniqueid = cuniqueid,
-                              stratalut = stratalut, 
-                              unitvar = unitvar, 
-                              strvar = strvar, 
-                              domain = rowvar)
-    if (colvar != "NONE") {
-      if (!is.null(tdomvar)) {
-        if (!is.null(tdomvar2)) {
-          tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                  by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]    
-        } else {
-          if (tdomvar == colvar) {
-            tdomdatsum <- transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid),
-                  tvars=tdomvarlst)
-            setnames(tdomdatsum, c("variable", "value"), c(colvar, estvarn.name))
-            tdomdatsum <- tdomdatsum[, lapply(.SD, sum, na.rm=TRUE), 
-                  by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]
-          } else {     
-            tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE),
-                  by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]
-          }
-        }
-        if (colvar %in% names(cdomdat)) {
-          cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE),
-                  by=c(strunitvars, cuniqueid, colvar), .SDcols=estvard.name]
-          tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(strunitvars, cuniqueid, colvar))
-        } else {
-          cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                  by=c(strunitvars, cuniqueid), .SDcols=estvard.name]
-          tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(strunitvars, cuniqueid))
-        }
-      } else {
-        tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                  by=c(strunitvars, cuniqueid, colvar), .SDcols=c(estvarn.name, estvard.name)]
-      }
-      unit_colest <- GBest.pbar(sumyn = estvarn.name, 
-                                sumyd = estvard.name,  
-                                ysum = tdomdatsum,
-                                esttype = esttype, 
-                                uniqueid = cuniqueid,
-                                stratalut= stratalut,
-                                unitvar = unitvar,
-                                strvar = strvar,
-                                domain = colvar)
+    cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
+    unit_rowest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
+                        uniqueid=cuniqueid, stratalut=stratalut, 
+                        unitvar=unitvar, strvar=strvar, domain=rowvar)
+  }
 
-      if (!is.null(tdomvar)) {
-        if (!is.null(tdomvar2)) {
-          tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
-        } else {
-          ddomvar <- grpvar[grpvar != tdomvar]
-          tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-              by=c(strunitvars, cuniqueid, ddomvar), .SDcols=tdomvarlst]
-          tdomdatsum <- transpose2row(tdomdatsum, 
-                                      uniqueid=c(strunitvars, cuniqueid, ddomvar), 
-                                      tvars=tdomvarlst)
-          setnames(tdomdatsum, c("variable", "value"), c(tdomvar, estvarn.name))      
+  ## Get column (and cell) estimate  
+  if (colvar != "NONE") {
+    cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
+    unit_colest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
+                        uniqueid=cuniqueid, stratalut=stratalut, 
+                        unitvar=unitvar, strvar=strvar, domain=colvar)
 
-          if (any(grpvar %in% names(cdomdat))) {
-            mergevar <- grpvar[grpvar %in% names(cdomdat)]
-            cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                  by=c(strunitvars, cuniqueid, mergevar), .SDcols=estvard.name]
-            tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(strunitvars, cuniqueid, mergevar))
-          } else {
-            cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                  by=c(strunitvars, cuniqueid), .SDcols=estvard.name]
-            tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(strunitvars, cuniqueid))
-          }
-        }
-      } else {
-        tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-            by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
-      }
-      unit_grpest <- GBest.pbar(sumyn = estvarn.name, 
-                                sumyd = estvard.name,  
-                                ysum = tdomdatsum, 
-                                esttype = esttype, 
-                                uniqueid = cuniqueid,
-                                stratalut = stratalut, 
-                                unitvar = unitvar, 
-                                strvar = strvar, 
-                                domain = grpvar)
-    }
+    cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
+    unit_grpest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
+                        uniqueid=cuniqueid, stratalut=stratalut, 
+                        unitvar=unitvar, strvar=strvar, domain=grpvar)
   }
 
   ###################################################################################
@@ -769,13 +650,19 @@ modGBp2veg <- function(GBpopdat = NULL,
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit_rowest)) {
-    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
-		unitvar=unitvar, xvar.add0=row.add0)
+    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, 
+                            uniquex=uniquerow, unitvar=unitvar, 
+                            xvar.add0=row.add0)
     tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
+
+    if (!is.null(row.orderby) && row.orderby != "NONE") {
+      setorderv(unit_rowest, c(row.orderby))
+    }
     setkeyv(unit_rowest, unitvar)
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
+
     if (totals) {
       unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
     } else {
@@ -785,13 +672,19 @@ modGBp2veg <- function(GBpopdat = NULL,
   }
 
   if (!is.null(unit_colest)) {
-    unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
-		unitvar=unitvar, xvar.add0=col.add0)
+    unit_colest <- add0unit(x=unit_colest, xvar=colvar, 
+                            uniquex=uniquecol,unitvar=unitvar, 
+                            xvar.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
+
+    if (!is.null(col.orderby) && col.orderby != "NONE") {
+      setorderv(unit_colest, c(col.orderby))
+    }
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
+
     if (totals) {
       unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
     } else {
@@ -799,16 +692,28 @@ modGBp2veg <- function(GBpopdat = NULL,
     }      
     setkeyv(unit_colest, c(unitvar, colvar))
   }
-
+ 
   if (!is.null(unit_grpest)) {
-    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
-		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
-		xvar2.add0=col.add0)
+    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, 
+                            uniquex=uniquerow, unitvar=unitvar, 
+                            xvar.add0=row.add0, xvar2=colvar, 
+                            uniquex2=uniquecol, xvar2.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
     unit_grpest <- tabs$tab2
+
+    if (!is.null(row.orderby) && row.orderby != "NONE") {
+      if (!is.null(col.orderby) && col.orderby != "NONE") {
+        setorderv(unit_grpest, c(row.orderby, col.orderby))
+      } else {
+        setorderv(unit_grpest, c(row.orderby))
+      }         
+    } else if (!is.null(col.orderby) && col.orderby != "NONE") {
+      setorderv(unit_grpest, c(col.orderby))
+    }         
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
+
     if (totals) {
       unit_grpest <- getpse(unit_grpest, areavar=areavar, esttype=esttype)
     } else {
@@ -820,9 +725,9 @@ modGBp2veg <- function(GBpopdat = NULL,
   ###################################################################################
   ## Get row and column totals for units if sumunits=FALSE
   ###################################################################################
-
   ## For sumunits=FALSE, get estimation unit totals
-  if (!sumunits && (length(unique(unitarea[[unitvar]])) > 1 && rowvar != "TOTAL")) {
+  if (!sumunits && (length(unique(unitarea[[unitvar]])) > 1 && !is.null(grpvar))) {
+
     ## AGGREGATE UNIT stratalut FOR ROWVAR and GRAND TOTAL
     stratalut2 <- data.table(stratalut, ONEUNIT=1)
     strunitvars2 <- c("ONEUNIT", strvar)
@@ -837,21 +742,14 @@ modGBp2veg <- function(GBpopdat = NULL,
 		.SDcols=areavar]
     setkey(unitacres2, "ONEUNIT")
 
-    tdomdat[, ONEUNIT := 1]
+    cdomdat[, ONEUNIT := 1]
 
-    ## Calculate unit totals for rowvar
-    tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars2, vuniqueid, rowvar), .SDcols=estvarn.name]
-    rowunit <- GBest.pbar(sumyn = estvarn.name, 
-                          sumyd = estvard.name, 
-                          ysum = tdomdatsum,
-                          esttype = esttype, 
-                          uniqueid = vuniqueid,
-                          stratalut = stratalut2, 
-                          unitvar = "ONEUNIT",
-                          strvar = strvar, 
-                          domain = rowvar)
-
+    ## CALCULATE UNIT TOTALS FOR ROWVAR
+    cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(strunitvars2, cuniqueid, rowvar), .SDcols=estvar.name]
+    rowunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
+                    uniqueid=cuniqueid, stratalut=stratalut2, 
+                    unitvar="ONEUNIT", strvar=strvar, domain=rowvar)
     rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
 		unitvar="ONEUNIT", xvar.add0=row.add0)
     tabs <- check.matchclass(unitacres2, rowunit, "ONEUNIT")
@@ -866,18 +764,12 @@ modGBp2veg <- function(GBpopdat = NULL,
     }      
     setkeyv(rowunit, c("ONEUNIT", rowvar))
 
-    ## Calculate grand total for all units
-    tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars2, vuniqueid, "TOTAL"), .SDcols=estvarn.name]
-    totunit <- GBest.pbar(sumyn = estvarn.name,
-                          sumyd = estvard.name, 
-                          ysum = tdomdatsum, 
-                          esttype = esttype, 
-                          uniqueid = vuniqueid,
-                          stratalut = stratalut2, 
-                          unitvar = "ONEUNIT",
-                          strvar = strvar,
-                          domain = "TOTAL")
+    ## CALCULATE GRAND TOTAL FOR ALL UNITS
+    cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(strunitvars2, cuniqueid, "TOTAL"), .SDcols=estvar.name]
+    totunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
+                    uniqueid=cuniqueid, stratalut=stratalut2, 
+                    unitvar="ONEUNIT", strvar=strvar, domain="TOTAL")
     tabs <- check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     totunit <- tabs$tab2
@@ -894,8 +786,8 @@ modGBp2veg <- function(GBpopdat = NULL,
   ## GENERATE OUTPUT TABLES
   ###################################################################################
   message("getting output...")
-  estnm <- "estn"
-  esttype = "RATIO"
+  estnm <- ifelse (esttype == "RATIO", "estn", "est") 
+
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
                 unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
                 unit_rowest=unit_rowest, unit_colest=unit_colest, 

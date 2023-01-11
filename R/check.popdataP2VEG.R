@@ -45,15 +45,6 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   datindb <- FALSE
   nonsamp.vfilter.fixed <- TRUE
 
-  ###################################################################################
-  ## Check module, adj
-  ###################################################################################
-
-  ## Check estimator module
-  ########################################################
-  modulelst <- c("GB", "MA", "SA")
-  module <- pcheck.varchar(var2check=module, varnm="module", gui=gui,
-		checklst=modulelst, caption="FIESTA module", stopifnull=TRUE)
 
   ## Get tables from tabs
   ##########################################################  

@@ -26,7 +26,7 @@ modGBp2veg(
 \arguments{
 \item{GBpopdat}{List. Population data objects returned from modGBpop().}
 
-\item{p2vegtype}{String. Type of p2veg estimate ('spp', 'str').}
+\item{p2vegtype}{String. Type of p2veg estimate ('str', 'spp').}
 
 \item{peracre}{Logical. If TRUE, generates per-acre estimates.}
 
@@ -40,9 +40,11 @@ pltassgn).  Must be R logical syntax.}
 \item{vfilter}{String. A filter for the P2 vegetation table used for
 estimate.  Must be R logical syntax.}
 
-\item{rowvar}{String. Name of row domain variable in cond. If only one
-domain, rowvar = domain variable. If more than one domain, include colvar.
-If no domain, rowvar = NULL.}
+\item{rowvar}{String. Name of row domain variable in cond (e.g., 'FORTYPCD') 
+or P2VEG_SUBP_STRUCTURE (e.g., 'GROWTH_HABIT_CD', 'LAYER') or 
+P2VEG_SUBPLOT_SPP (e.g., 'VEG_FLDSPCD', 'VEG_SPCD', 'GROWTH_HABIT_CD', 'LAYER'). 
+If only one domain, rowvar = domain variable. If more than one domain, include 
+colvar. If no domain, rowvar = NULL.}
 
 \item{colvar}{String. Name of column domain variable in cond.}
 
