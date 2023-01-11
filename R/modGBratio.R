@@ -601,16 +601,14 @@ modGBratio <- function(GBpopdat,
   ## Merge tdomdat with condx
   xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
   condx <- xchk$tab1
-  tdomdat <- xchk$tab2
-  
+  tdomdat <- xchk$tab2  
   tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
   
   if (!is.null(tdomvar)) {
     ## Merge condf with condx
     xchk <- check.matchclass(condx, condf, c(cuniqueid, condid))
     condx <- xchk$tab1
-    condf <- xchk$tab2
-    
+    condf <- xchk$tab2   
     cdomdat <- merge(condx, condf, by=c(cuniqueid, condid))
   }
   estvarn <- treedat$estvarn
@@ -636,7 +634,7 @@ modGBratio <- function(GBpopdat,
   alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
                     ratiotype=ratiotype, sumunits=sumunits, 
                     title.main=title.main, title.ref=title.ref,
- 	                  title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+                    title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
                     title.colvar=title.colvar, title.unitvar=title.unitvar, 
                     title.filter=title.filter, title.unitsn=estunitsn,
                     title.unitsd=estunitsd, title.estvarn=title.estvarn,
@@ -696,16 +694,16 @@ modGBratio <- function(GBpopdat,
 #saveRDS(tdomdattot, "E:/workspace/FIESTA/FIESTA_MA/data_v1/tdomdattot_volcf_ndead_dlive.rds")
 #saveRDS(stratalut, "E:/workspace/FIESTA/FIESTA_MA/data_v1/stratalut.rds")
 
-    unit_totest <- GBest.pbar(sumyn=estvarn.name, 
-                              sumyd=estvard.name, 
-                              ysum=tdomdattot, 
-                              esttype=esttype, 
-                              ratiotype=ratiotype, 
-                              uniqueid=cuniqueid, 
-                              stratalut=stratalut, 
-                              unitvar=unitvar, 
-                              strvar=strvar, 
-                              domain="TOTAL")
+    unit_totest <- GBest.pbar(sumyn = estvarn.name, 
+                              sumyd = estvard.name, 
+                              ysum = tdomdattot, 
+                              esttype = esttype, 
+                              ratiotype = ratiotype, 
+                              uniqueid = cuniqueid, 
+                              stratalut = stratalut, 
+                              unitvar = unitvar, 
+                              strvar = strvar, 
+                              domain = "TOTAL")
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -754,16 +752,16 @@ modGBratio <- function(GBpopdat,
     }
 
     #tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
-    unit_rowest <- GBest.pbar(sumyn=estvarn.name, 
-                              sumyd=estvard.name, 
-                              ysum=tdomdatsum, 
-                              esttype=esttype, 
-                              ratiotype=ratiotype, 
-                              uniqueid=cuniqueid, 
-                              stratalut=stratalut, 
-                              unitvar=unitvar, 
-                              strvar=strvar, 
-                              domain=rowvar)
+    unit_rowest <- GBest.pbar(sumyn = estvarn.name, 
+                              sumyd = estvard.name, 
+                              ysum = tdomdatsum, 
+                              esttype = esttype, 
+                              ratiotype = ratiotype, 
+                              uniqueid = cuniqueid, 
+                              stratalut = stratalut, 
+                              unitvar = unitvar, 
+                              strvar = strvar, 
+                              domain = rowvar)
  
     if (colvar != "NONE") {
       if (!is.null(tdomvar)) {
@@ -796,16 +794,16 @@ modGBratio <- function(GBpopdat,
                   by=c(strunitvars, cuniqueid, colvar), .SDcols=c(estvarn.name, estvard.name)]
       }
       #tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]),]
-      unit_colest <- GBest.pbar(sumyn=estvarn.name, 
-                                sumyd=estvard.name, 
-                                ysum=tdomdatsum, 
-                                esttype=esttype, 
-                                ratiotype=ratiotype, 
-                                uniqueid=cuniqueid, 
-                                stratalut=stratalut, 
-                                unitvar=unitvar, 
-                                strvar=strvar, 
-                                domain=colvar)
+      unit_colest <- GBest.pbar(sumyn = estvarn.name, 
+                                sumyd = estvard.name, 
+                                ysum = tdomdatsum, 
+                                esttype = esttype, 
+                                ratiotype = ratiotype, 
+                                uniqueid = cuniqueid, 
+                                stratalut = stratalut, 
+                                unitvar = unitvar, 
+                                strvar = strvar, 
+                                domain = colvar)
 
       if (!is.null(tdomvar)) {
         if (!is.null(tdomvar2)) {
@@ -835,16 +833,16 @@ modGBratio <- function(GBpopdat,
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
             by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
       }
-      unit_grpest <- GBest.pbar(sumyn=estvarn.name, 
-                                sumyd=estvard.name, 
-                                ysum=tdomdatsum, 
-                                esttype=esttype, 
-                                ratiotype=ratiotype, 
-                                uniqueid=cuniqueid, 
-                                stratalut=stratalut, 
-                                unitvar=unitvar, 
-                                strvar=strvar, 
-                                domain=grpvar)
+      unit_grpest <- GBest.pbar(sumyn = estvarn.name, 
+                                sumyd = estvard.name, 
+                                ysum = tdomdatsum, 
+                                esttype =esttype, 
+                                ratiotype = ratiotype, 
+                                uniqueid = cuniqueid, 
+                                stratalut = stratalut, 
+                                unitvar = unitvar, 
+                                strvar = strvar, 
+                                domain = grpvar)
     }
   }
 
@@ -853,8 +851,9 @@ modGBratio <- function(GBpopdat,
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit_rowest)) {
-    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
-		unitvar=unitvar, xvar.add0=row.add0)
+    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, 
+                            uniquex=uniquerow, unitvar=unitvar, 
+                            xvar.add0=row.add0)
     tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
@@ -873,8 +872,9 @@ modGBratio <- function(GBpopdat,
     setkeyv(unit_rowest, c(unitvar, rowvar))
   }
   if (!is.null(unit_colest)) {
-    unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
-		unitvar=unitvar, xvar.add0=col.add0)
+    unit_colest <- add0unit(x=unit_colest, xvar=colvar, 
+                            uniquex=uniquecol, unitvar=unitvar, 
+                            xvar.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
@@ -924,6 +924,7 @@ modGBratio <- function(GBpopdat,
 
   ## For sumunits=FALSE, get estimation unit totals
   if (!sumunits && (length(unique(unitarea[[unitvar]])) > 1 && rowvar != "TOTAL")) {
+
     ## AGGREGATE UNIT stratalut FOR ROWVAR and GRAND TOTAL
     stratalut2 <- data.table(stratalut, ONEUNIT=1)
     strunitvars2 <- c("ONEUNIT", strvar)
@@ -943,16 +944,18 @@ modGBratio <- function(GBpopdat,
     ## Calculate unit totals for rowvar
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, tuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
-
-    rowunit <- GBest.pbar(sumyn=estvarn.name, 
-                          sumyd=estvard.name, 
-                          ysum=tdomdatsum, esttype=esttype, 
-                          uniqueid=tuniqueid, 
-                          stratalut=stratalut2, 
-                          unitvar="ONEUNIT", 
-                          strvar=strvar, domain=rowvar)
-    
-    rowunit <- add0unit(rowunit, rowvar, uniquerow, "ONEUNIT", row.add0)
+    rowunit <- GBest.pbar(sumyn = estvarn.name, 
+                          sumyd = estvard.name, 
+                          ysum = tdomdatsum, 
+                          esttype = esttype, 
+                          uniqueid = tuniqueid, 
+                          stratalut = stratalut2, 
+                          unitvar = "ONEUNIT", 
+                          strvar = strvar, 
+                          domain = rowvar)  
+    rowunit <- add0unit(x=rowunit, xvar=rowvar, 
+                        uniquex=uniquerow, unitvar="ONEUNIT", 
+                        xvar.add0=row.add0)
     tabs <- check.matchclass(unitacres2, rowunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     rowunit <- tabs$tab2
@@ -968,13 +971,15 @@ modGBratio <- function(GBpopdat,
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, tuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
-
-    totunit <- GBest.pbar(sumyn=estvarn.name, 
-                          sumyd=estvard.name, ysum=tdomdatsum, 
-                          esttype=esttype, uniqueid=tuniqueid, 
-                          stratalut=stratalut2, 
-                          unitvar="ONEUNIT", 
-                          strvar=strvar, domain="TOTAL")
+    totunit <- GBest.pbar(sumyn = estvarn.name, 
+                          sumyd = estvard.name, 
+                          ysum = tdomdatsum, 
+                          esttype = esttype, 
+                          uniqueid = tuniqueid, 
+                          stratalut = stratalut2, 
+                          unitvar = "ONEUNIT", 
+                          strvar = strvar, 
+                          domain = "TOTAL")
     tabs <- check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     totunit <- tabs$tab2

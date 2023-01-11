@@ -579,7 +579,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     }
     if (!rowvar %in% c("NONE", "TOTAL")) {
       if (!is.null(unit_rowest)) {
-        setorderv(unit_rowest, c(unitvar, rowvar))
 
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
@@ -588,6 +587,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           setcolorder(unit_rowest, c(unitvars,
 			names(unit_rowest)[!names(unit_rowest) %in% unitvars]))
         }
+        ## Set order of table
+        setorderv(unit_rowest, c(unitvars, rowvar))
 
         setnames(unit_rowest, rowvar, title.rowvar)
         rawdat$unit_rowest <- setDF(unit_rowest)
@@ -602,7 +603,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     }
     if (colvar != "NONE") {
       if (!is.null(unit_colest)) {
-        setorderv(unit_colest, c(unitvar, colvar))
 
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
@@ -611,6 +611,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           setcolorder(unit_colest, c(unitvars,
 			names(unit_colest)[!names(unit_colest) %in% unitvars]))
         }
+        ## Set order of table
+        setorderv(unit_colest, c(unitvars, colvar))
+
         setnames(unit_colest, colvar, title.colvar)
         rawdat$unit_colest <- setDF(unit_colest)
         rawdat.tabs <- c(rawdat.tabs, "unit_colest")
@@ -626,7 +629,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         if (!raw.keep0 && "NBRPLT.gt0" %in% names(unit_grpest)) {
           unit_grpest <- unit_grpest[unit_grpest[["NBRPLT.gt0"]] > 0,]
         }
-        setorderv(unit_grpest, c(unitvar, rowvar, colvar))
 
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
@@ -635,6 +637,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           setcolorder(unit_grpest, c(unitvars,
 			names(unit_grpest)[!names(unit_grpest) %in% unitvars]))
         }
+        ## Set order of table
+        setorderv(unit_grpest, c(unitvars, rowvar, colvar))
+
         setnames(unit_grpest, rowvar, title.rowvar)
         setnames(unit_grpest, colvar, title.colvar)
         rawdat$unit_grpest <- setDF(unit_grpest)

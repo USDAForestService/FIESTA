@@ -577,8 +577,8 @@ modGBtree <- function(GBpopdat,
   xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
   condx <- xchk$tab1
   tdomdat <- xchk$tab2
-
   tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
+
   estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
@@ -623,9 +623,14 @@ modGBtree <- function(GBpopdat,
     ## Get estimate for total
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		    by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
-    unit_totest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdattot, 
-		    esttype=esttype, uniqueid=cuniqueid, stratalut=stratalut, 
-		    unitvar=unitvar, strvar=strvar, domain="TOTAL")
+    unit_totest <- GBest.pbar(sumyn = estvar.name, 
+                              ysum = tdomdattot,
+                              esttype = esttype, 
+                              uniqueid = cuniqueid, 
+                              stratalut = stratalut,
+                              unitvar = unitvar, 
+                              strvar = strvar, 
+                              domain = "TOTAL")
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -645,22 +650,35 @@ modGBtree <- function(GBpopdat,
 		    by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
     tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
 
-    unit_rowest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, 
-		    uniqueid=cuniqueid, stratalut=stratalut, 
-		    unitvar=unitvar, strvar=strvar, domain=rowvar)
+    unit_rowest <- GBest.pbar(sumyn = estvar.name, 
+                              ysum = tdomdatsum,
+                              uniqueid = cuniqueid, 
+                              stratalut = stratalut,
+                              unitvar = unitvar, 
+                              strvar = strvar, 
+                              domain = rowvar)
+
     if (colvar != "NONE") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		      by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
       tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]),]
-      unit_colest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, 
-		      uniqueid=cuniqueid, stratalut=stratalut, 
-		      unitvar=unitvar, strvar=strvar, domain=colvar)
+      unit_colest <- GBest.pbar(sumyn = estvar.name, 
+                                ysum = tdomdatsum,
+                                uniqueid = cuniqueid, 
+                                stratalut = stratalut,
+                                unitvar = unitvar, 
+                                strvar = strvar, 
+                                domain = colvar)
 
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		      by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
-      unit_grpest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, 
-		      uniqueid=cuniqueid, stratalut=stratalut, 
-		      unitvar=unitvar, strvar=strvar, domain=grpvar)
+      unit_grpest <- GBest.pbar(sumyn =estvar.name, 
+                                ysum = tdomdatsum,
+                                uniqueid = cuniqueid, 
+                                stratalut = stratalut,
+                                unitvar = unitvar, 
+                                strvar = strvar, 
+                                domain = grpvar)
     }
   }
 
@@ -747,6 +765,7 @@ modGBtree <- function(GBpopdat,
 
   ## For sumunits=FALSE, get estimation unit totals
   if (!sumunits && (length(unique(unitarea[[unitvar]])) > 1 && rowvar != "TOTAL")) {
+
     ## AGGREGATE UNIT stratalut FOR ROWVAR and GRAND TOTAL
     stratalut2 <- data.table(stratalut, ONEUNIT=1)
     strunitvars2 <- c("ONEUNIT", strvar)
@@ -766,12 +785,17 @@ modGBtree <- function(GBpopdat,
     ## Calculate unit totals for rowvar
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, tuniqueid, rowvar), .SDcols=estvar.name]
-    rowunit <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, esttype=esttype, 
-			            uniqueid=tuniqueid, stratalut=stratalut2, 
-			            unitvar="ONEUNIT", strvar=strvar, domain=rowvar)
-
-    rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
-		unitvar="ONEUNIT", xvar.add0=row.add0)
+    rowunit <- GBest.pbar(sumyn = estvar.name, 
+                          ysum = tdomdatsum, 
+                          esttype = esttype,
+                          uniqueid = tuniqueid, 
+                          stratalut = stratalut2,
+                          unitvar = "ONEUNIT", 
+                          strvar = strvar, 
+                          domain = rowvar)
+    rowunit <- add0unit(x=rowunit, xvar=rowvar, 
+                        uniquex=uniquerow, unitvar="ONEUNIT", 
+                        xvar.add0=row.add0)
     tabs <- check.matchclass(unitacres2, rowunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     rowunit <- tabs$tab2
@@ -787,9 +811,14 @@ modGBtree <- function(GBpopdat,
     ## Calculate grand total for all units
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, tuniqueid, "TOTAL"), .SDcols=estvar.name]
-    totunit <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, esttype=esttype, 
-			            uniqueid=tuniqueid, stratalut=stratalut2, 
-			            unitvar="ONEUNIT", strvar=strvar, domain="TOTAL")
+    totunit <- GBest.pbar(sumyn = estvar.name, 
+                          ysum = tdomdatsum, 
+                          esttype = esttype,
+                          uniqueid = tuniqueid, 
+                          stratalut = stratalut2,
+                          unitvar = "ONEUNIT", 
+                          strvar = strvar, 
+                          domain = "TOTAL")
     tabs <- check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     totunit <- tabs$tab2
