@@ -386,6 +386,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   varadjP2VEG <- GBpopdat$varadjP2VEG
   vuniqueid <- "PLT_CN"
   estvar.name <- GBpopdat$estvar.area
+  estvar <- "COVER_PCT_SUM"
 
 
   ## Check p2vegtype 
@@ -501,7 +502,6 @@ modGBp2veg <- function(GBpopdat = NULL,
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
 
-
   #####################################################################################
   ### Get estimation data from tree table
   #####################################################################################
@@ -563,8 +563,8 @@ modGBp2veg <- function(GBpopdat = NULL,
   } else {
 
     estvar <- treedat$estvar
-    estvar.name <- treedat$estvar.name
-    estvar.filter <- treedat$estvar.filter
+    estvarn.name <- treedat$estvar.name
+    estvarn.filter <- treedat$estvar.filter
     tdomvarlst <- treedat$tdomvarlst
     estunits <- treedat$estunits
 
@@ -675,21 +675,21 @@ modGBp2veg <- function(GBpopdat = NULL,
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		        by=c(strunitvars, cuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
       }
-      unit_rowest <- GBest.pbar(sumyn=estvarn.name, 
-                                sumyd=estvard.name, 
-                                ysum=tdomdatsum, 
-                                esttype=esttype, 
-                                uniqueid=cuniqueid, 
-                                stratalut=stratalut, 
-                                unitvar=unitvar, 
-                                strvar=strvar, 
-                                domain=rowvar)
+      unit_rowest <- GBest.pbar(sumyn = estvarn.name, 
+                                sumyd = estvard.name, 
+                                ysum = tdomdatsum, 
+                                esttype = esttype, 
+                                uniqueid = cuniqueid, 
+                                stratalut = stratalut, 
+                                unitvar = unitvar, 
+                                strvar = strvar, 
+                                domain = rowvar)
     } else {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		    by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
+		    by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]
       tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
 
-      unit_rowest <- GBest.pbar(sumyn = estvar.name, 
+      unit_rowest <- GBest.pbar(sumyn = estvarn.name, 
                                 ysum = tdomdatsum,
                                 uniqueid = cuniqueid, 
                                 stratalut = stratalut,
@@ -762,7 +762,7 @@ modGBp2veg <- function(GBpopdat = NULL,
 
     } else {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		      by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
+		      by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]
       tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]),]
       unit_colest <- GBest.pbar(sumyn = estvar.name, 
                                 ysum = tdomdatsum,
@@ -773,7 +773,7 @@ modGBp2veg <- function(GBpopdat = NULL,
                                 domain = colvar)
 
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		      by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
+		      by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvarn.name]
       unit_grpest <- GBest.pbar(sumyn =estvar.name, 
                                 ysum = tdomdatsum,
                                 uniqueid = cuniqueid, 
@@ -803,7 +803,13 @@ modGBp2veg <- function(GBpopdat = NULL,
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
 
     if (totals) {
-      unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
+      if (esttype == "RATIO") {
+        unit_rowest[, nhat := nhat * 100][, 
+                       nhat.var := nhat.var * 100]
+        getpse(unit_rowest, esttype=esttype)
+      } else {                      
+        unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
+      }
     } else {
       unit_rowest <- getpse(unit_rowest, esttype=esttype)
     }      
@@ -825,7 +831,13 @@ modGBp2veg <- function(GBpopdat = NULL,
     unit_colest <- unit_colest[unitarea, nomatch=0]
 
     if (totals) {
-      unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
+      if (esttype == "RATIO") {
+        unit_colest[, nhat := nhat * 100][, 
+                       nhat.var := nhat.var * 100]
+        getpse(unit_colest, esttype=esttype)
+      } else {                      
+        unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
+      }
     } else {
       unit_colest <- getpse(unit_colest, esttype=esttype)
     }      
@@ -854,7 +866,13 @@ modGBp2veg <- function(GBpopdat = NULL,
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
 
     if (totals) {
-      unit_grpest <- getpse(unit_grpest, areavar=areavar, esttype=esttype)
+      if (esttype == "RATIO") {
+        unit_grpest[, nhat := nhat * 100][, 
+                       nhat.var := nhat.var * 100]
+        getpse(unit_grpest, esttype=esttype)
+      } else {                      
+        unit_grpest <- getpse(unit_grpest, areavar=areavar, esttype=esttype)
+      }
     } else {
       unit_grpest <- getpse(unit_grpest, esttype=esttype)
     }      
@@ -972,7 +990,7 @@ modGBp2veg <- function(GBpopdat = NULL,
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(tdomdat) 
     rawdat$estvar <- estvarn.name
-    rawdat$estvar.filter <- estvar.filter
+    rawdat$estvar.filter <- estvarn.filter
     if (savedata) {
       if (!is.null(title.estpse)) {
         title.raw <- paste(title.estpse, title.ref)

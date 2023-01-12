@@ -526,6 +526,7 @@ modGBdwm <- function(GBpopdat = NULL,
     estvard.name <- areawt
     esttype <- "RATIO"
     estunitsd <- areaunits
+    estunitsn <- NULL
   } else {
     estunitsn <- ifelse(dwmvar == "VOLCF", "cuft", "oven-dry pounds")
   }

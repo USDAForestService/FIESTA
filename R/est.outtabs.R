@@ -25,9 +25,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   ## Check if a total table exists
   if (!is.null(unit_totest)) gtotal <- TRUE
 
-  if (!is.null(title.ref) && title.ref != "")
+  if (!is.null(title.ref) && title.ref != "") {
     title.ref <- paste(";", title.ref)
-
+  }
 
   ## Define est.var name
   estnm.var <- paste0(estnm, ".var")
