@@ -259,7 +259,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter=
-    rawfolder=estvard.name <- NULL
+    rawfolder=estvard.name=nhat=nhat.var <- NULL
   
   
   ##################################################################
@@ -903,12 +903,12 @@ modGBp2veg <- function(GBpopdat = NULL,
 
     ## Calculate unit totals for rowvar
     vdomdatsum <- vdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars2, tuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
+		by=c(strunitvars2, vuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
     rowunit <- GBest.pbar(sumyn = estvarn.name, 
                           sumyd = estvard.name, 
                           ysum = vdomdatsum, 
                           esttype = esttype, 
-                          uniqueid = tuniqueid, 
+                          uniqueid = vuniqueid, 
                           stratalut = stratalut2, 
                           unitvar = "ONEUNIT", 
                           strvar = strvar, 
@@ -930,12 +930,12 @@ modGBp2veg <- function(GBpopdat = NULL,
 
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
     vdomdatsum <- vdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars2, tuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
+		by=c(strunitvars2, vuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
     totunit <- GBest.pbar(sumyn = estvarn.name, 
                           sumyd = estvard.name, 
                           ysum = vdomdatsum, 
                           esttype = esttype, 
-                          uniqueid = tuniqueid, 
+                          uniqueid = vuniqueid, 
                           stratalut = stratalut2, 
                           unitvar = "ONEUNIT", 
                           strvar = strvar, 
