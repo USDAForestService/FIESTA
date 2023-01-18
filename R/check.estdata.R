@@ -286,7 +286,7 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
   if (esttype == "P2VEG") {
     if (!is.null(vcondx)) {
       ## Check that the values of vuniqueid in vcondsppx are all in cuniqueid in condf
-      vcondf <- check.matchval(vcondx, pltcondf, vuniqueid, cuniqueid,
+      vcondf <- check.matchval(vcondx, pltcondf, c(vuniqueid, condid), c(cuniqueid, condid),
 		tab1txt="vcondx", tab2txt="cond", subsetrows=TRUE)
      returnlst$vcondf <- vcondf
      returnlst$vuniqueid <- vuniqueid

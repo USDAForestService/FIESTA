@@ -181,7 +181,8 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 				ppsanm=ppsanm, ppsaid=pltassgnid, pjoinid=pjoinid))
       }
       whereqry <- paste0("where evalid in(", toString(evalid), ")")
-      pltassgnqry <- paste("select distinct ppsa.* from", pfromqry, whereqry)
+      popwhereqry <- paste0("where evalid in(", toString(popevalid), ")")
+      pltassgnqry <- paste("select distinct ppsa.* from", pfromqry, popwhereqry)
     } else if (measCur) {
       palias <- "p"
       pfromqry <- getpfromqry(varCur="MEASYEAR", Endyr=measEndyr, dsn=dsn,

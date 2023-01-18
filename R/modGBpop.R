@@ -498,7 +498,8 @@ modGBpop <- function(popType = "VOL",
     substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
 		FIESTA::ref_popType[FIESTA::ref_popType$popType %in% popType, "EVAL_TYP_CD"]
   } 
-
+  evalid <- as.character(evalid)
+  substr(evalid, nchar(evalid)-1, nchar(evalid)) <- "01"
 
  
   ###################################################################################
@@ -645,6 +646,7 @@ modGBpop <- function(popType = "VOL",
   ## Remove nonsampled plots (if nonsamp.pfilter != "NONE")
   ## Applies plot filters
   ###################################################################################
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\check.popdataPLT.R")
   pltcheck <- check.popdataPLT(dsn=dsn, tabs=popTabs, tabIDs=popTabIDs, 
       pltassgn=pltassgn, pltassgnid=pltassgnid, pjoinid=pjoinid, 
       module="GB", popType=popType, popevalid=popevalid, adj=adj, ACI=ACI, 
@@ -719,7 +721,7 @@ modGBpop <- function(popType = "VOL",
     popcheck <- check.popdataP2VEG(gui=gui, 
                tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
                pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
-               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, 
+               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn, 
                condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
     pltcondx <- popcheck$pltcondx
     pltassgnx <- popcheck$pltassgnx
