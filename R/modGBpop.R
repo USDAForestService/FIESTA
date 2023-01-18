@@ -646,7 +646,6 @@ modGBpop <- function(popType = "VOL",
   ## Remove nonsampled plots (if nonsamp.pfilter != "NONE")
   ## Applies plot filters
   ###################################################################################
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\check.popdataPLT.R")
   pltcheck <- check.popdataPLT(dsn=dsn, tabs=popTabs, tabIDs=popTabIDs, 
       pltassgn=pltassgn, pltassgnid=pltassgnid, pjoinid=pjoinid, 
       module="GB", popType=popType, popevalid=popevalid, adj=adj, ACI=ACI, 

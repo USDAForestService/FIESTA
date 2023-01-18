@@ -245,9 +245,6 @@ For `FIESTA`'s GB Module, the `modGBpop` function calculates and outputs: number
   
 In this example, we use the sample Wyoming data (2013 Evaluation) stored in `FIESTA` to generate population data for the GB module. We check this output with the FIADB pop_stratum table from FIA DataMart for 561301 Evalid, using the `FIESTA::DBqryCSV` function.
 
-```{r, results = FALSE, message = F}
-```
-
 
 ```{r, results = FALSE, message = F}
 
