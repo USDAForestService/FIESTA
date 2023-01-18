@@ -294,7 +294,7 @@ modGBpop <- function(popType = "VOL",
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
     	treef=seedf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=
-	sccmx=cond_pcondx=lulcx <- NULL
+	sccmx=cond_pcondx=lulcx=popevalid <- NULL
   condid <- "CONDID"
   
   
