@@ -493,13 +493,13 @@ modGBpop <- function(popType = "VOL",
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "CHNG", "GRM")
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
 		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
-  popevalid <- as.character(evalid)
   if (!is.null(evalid)) {
+    popevalid <- as.character(evalid)
     substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
 		FIESTA::ref_popType[FIESTA::ref_popType$popType %in% popType, "EVAL_TYP_CD"]
+    evalid <- as.character(evalid)
+    substr(evalid, nchar(evalid)-1, nchar(evalid)) <- "01"
   } 
-  evalid <- as.character(evalid)
-  substr(evalid, nchar(evalid)-1, nchar(evalid)) <- "01"
 
  
   ###################################################################################
