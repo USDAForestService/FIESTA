@@ -26,7 +26,7 @@ population."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
       </span>
     </div>
 
@@ -104,6 +104,7 @@ population.</p>
 <span>  dwmtype <span class="op">=</span> <span class="st">"CWD"</span>,</span>
 <span>  dwmvar <span class="op">=</span> <span class="st">"VOLCF"</span>,</span>
 <span>  peracre <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  lbs2tons <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,</span>
 <span>  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  vfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -136,6 +137,11 @@ population.</p>
 
 <dt>peracre</dt>
 <dd><p>Logical. If TRUE, generates per-acre estimates.</p></dd>
+
+
+<dt>lbs2tons</dt>
+<dd><p>Logical. If TRUE, converts biomass or carbon variables from
+pounds to tons. If metric=TRUE, converts to metric tons, else short tons.</p></dd>
 
 
 <dt>landarea</dt>

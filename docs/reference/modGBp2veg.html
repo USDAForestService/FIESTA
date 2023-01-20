@@ -26,7 +26,7 @@ population."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
       </span>
     </div>
 
@@ -126,7 +126,7 @@ population.</p>
 
 
 <dt>p2vegtype</dt>
-<dd><p>String. Type of p2veg estimate ('spp', 'str').</p></dd>
+<dd><p>String. Type of p2veg estimate ('str', 'spp').</p></dd>
 
 
 <dt>peracre</dt>
@@ -150,9 +150,11 @@ estimate.  Must be R logical syntax.</p></dd>
 
 
 <dt>rowvar</dt>
-<dd><p>String. Name of row domain variable in cond. If only one
-domain, rowvar = domain variable. If more than one domain, include colvar.
-If no domain, rowvar = NULL.</p></dd>
+<dd><p>String. Name of row domain variable in cond (e.g., 'FORTYPCD') 
+or P2VEG_SUBP_STRUCTURE (e.g., 'GROWTH_HABIT_CD', 'LAYER') or 
+P2VEG_SUBPLOT_SPP (e.g., 'VEG_FLDSPCD', 'VEG_SPCD', 'GROWTH_HABIT_CD', 'LAYER'). 
+If only one domain, rowvar = domain variable. If more than one domain, include 
+colvar. If no domain, rowvar = NULL.</p></dd>
 
 
 <dt>colvar</dt>

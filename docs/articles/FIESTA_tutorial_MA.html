@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
       </span>
     </div>
 
@@ -510,8 +510,8 @@ output
 </summary><pre><code><span><span class="co">## List of 4</span></span>
 <span><span class="co">##  $ est    :Classes 'data.table' and 'data.frame':    1 obs. of  3 variables:</span></span>
 <span><span class="co">##   ..$ ONEUNIT               : num 1</span></span>
-<span><span class="co">##   ..$ Estimate              : num 666672</span></span>
-<span><span class="co">##   ..$ Percent Sampling Error: num 10.2</span></span>
+<span><span class="co">##   ..$ Estimate              : num 669219</span></span>
+<span><span class="co">##   ..$ Percent Sampling Error: num 9.36</span></span>
 <span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
 <span><span class="co">##   ..- attr(*, "sorted")= chr "ONEUNIT"</span></span>
 <span><span class="co">##  $ raw    :List of 9</span></span>
@@ -532,8 +532,8 @@ output
 <code class="sourceCode R"><span><span class="va">area2</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">predselectlst</span><span class="op">$</span><span class="va">totest</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##    ONEUNIT TOTAL           dem slp asp_cos asp_sin fornf2</span></span>
-<span><span class="co">## 1:       1     1 -0.0002583806   0       0       0      0</span></span></code></pre>
+</summary><pre><code><span><span class="co">##    ONEUNIT TOTAL           dem         slp     asp_cos asp_sin     fornf2</span></span>
+<span><span class="co">## 1:       1     1 -0.0001558203 0.008902244 0.001901744       0 -0.3313874</span></span></code></pre>
 </details><p>Notably, we can see that <code>dem</code>, <code>slp</code>,
 <code>asp_cos</code>, and <code>asp_sin</code> were removed from the
 model.</p>
@@ -1029,8 +1029,8 @@ output
 </summary><pre><code><span><span class="co">## List of 5</span></span>
 <span><span class="co">##  $ est     :Classes 'data.table' and 'data.frame':   1 obs. of  3 variables:</span></span>
 <span><span class="co">##   ..$ ONEUNIT               : num 1</span></span>
-<span><span class="co">##   ..$ Estimate              : num 1.32e+09</span></span>
-<span><span class="co">##   ..$ Percent Sampling Error: num 14.9</span></span>
+<span><span class="co">##   ..$ Estimate              : num 1.33e+09</span></span>
+<span><span class="co">##   ..$ Percent Sampling Error: num 14.8</span></span>
 <span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
 <span><span class="co">##   ..- attr(*, "sorted")= chr "ONEUNIT"</span></span>
 <span><span class="co">##  $ titlelst:List of 10</span></span>
@@ -1067,8 +1067,8 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">## $totest</span></span>
-<span><span class="co">##    ONEUNIT TOTAL       dem       slp  asp_cos asp_sin    fornf2</span></span>
-<span><span class="co">## 1:       1     1 0.6174634 -62.02041 19.55278  -507.6 -1313.762</span></span></code></pre>
+<span><span class="co">##    ONEUNIT TOTAL       dem       slp asp_cos   asp_sin    fornf2</span></span>
+<span><span class="co">## 1:       1     1 0.5448419 -58.45015       0 -438.4226 -1172.696</span></span></code></pre>
 </details><p>Notably, we can see that [INSERT CORRECT PREDS] <code>dem</code>,
 <code>slp</code>, <code>asp_cos</code>, and <code>asp_sin</code> were
 removed from the model.</p>
