@@ -1010,9 +1010,9 @@ DBgetEvalid <- function(states = NULL,
   ## Return population information
   returnlst$SURVEY <- SURVEY
   returnlst$PLOT <- PLOT
-  #if (is.null(POP_PLOT_STRATUM_ASSGN)) {
-  #  returnlst$POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGN
-  #}
+  if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
+    returnlst$POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGN
+  }
   #returnlst$POP_EVAL <- POP_EVAL[EVALID %in% unlist(evalidlist),]
 
   if (datsource == "sqlite" && !dbconnopen) {

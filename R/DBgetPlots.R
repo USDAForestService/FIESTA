@@ -767,10 +767,6 @@ DBgetPlots <- function (states = NULL,
     istree <- TRUE
   }
 
-  ## Check intensity1
-  intensity1 <- pcheck.logical(intensity1, varnm="intensity1",
-                               title="Intensity = 1?", first="YES", gui=gui)
-
   ## Check coordType
   ####################################################################
   coordTypelst <- c("PUBLIC", "ACTUAL")
@@ -822,10 +818,11 @@ DBgetPlots <- function (states = NULL,
 
   ## Get states, Evalid and/or invyrs info
   ##########################################################
-  if (is.null(evalInfo)) {
-
+  if (!is.null(evalInfo)) {
     list.items <- c("states", "evalidlist", "invtype", "invyrtab")
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
+
+  } else {
     evalInfo <- tryCatch( DBgetEvalid(states = states, 
                           RS = RS, 
                           datsource = datsource, 
@@ -857,21 +854,23 @@ DBgetPlots <- function (states = NULL,
     iseval <- TRUE
     savePOP <- TRUE
   }
-  ppsanm <- evalInfo$ppsanm
   dbconn <- evalInfo$dbconn
   SURVEY <- evalInfo$SURVEY
   PLOT <- evalInfo$PLOT
-  POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
   if (!is.null(SURVEY)) {
     surveynm <- "SURVEY"
   }
   if (!is.null(PLOT)) {
     plotnm <- "PLOT"
   }
- 
-  ### GET RS & rscd
-  ###########################################################
-  #isRMRS <- ifelse(length(rslst) == 1 && rslst == "RMRS", TRUE, FALSE) 
+
+  if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
+    ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+  } else if (!is.null(evalInfo$POP_PLOT_STRATUM_ASSGN)) {
+    POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
+    ppsanm <- evalInfo$ppsanm
+  }
+
      
   ## Get state abbreviations and codes 
   ###########################################################
@@ -881,11 +880,10 @@ DBgetPlots <- function (states = NULL,
   ## Get number of states 
   nbrstates <- length(states)  ##  Check whether to return tree data
 
-  ## If using EVALID, you don't need to get INVYRS, intensity, or subcycle
+  ####################################################################
+  ## Check custom Evaluation data
+  ####################################################################
   if (!iseval) {
-  
-    ## Check custom Evaluation data
-    #############################################
     evalchk <- customEvalchk(states = states, 
                              measCur = measCur, 
                              measEndyr = measEndyr, 
@@ -2160,7 +2158,7 @@ DBgetPlots <- function (states = NULL,
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
-                           evalInfo=evalInfo) 
+                           evalInfo = evalInfo) 
           assign(paste0("xyx_", coordType), xydat[[1]])
           if (returndata) { 
             assign(paste0("xy_", coordType), 

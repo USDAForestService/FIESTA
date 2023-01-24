@@ -417,18 +417,23 @@ DBgetXY <- function (states = NULL,
     iseval <- TRUE
     savePOP <- TRUE
   }
-  ppsanm <- evalInfo$ppsanm
   dbconn <- evalInfo$dbconn
   SURVEY <- evalInfo$SURVEY
   PLOT <- evalInfo$PLOT
-  POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
   if (!is.null(SURVEY)) {
     surveynm <- "SURVEY"
   }
   if (!is.null(PLOT)) {
     plotnm <- "PLOT"
   }
- 
+
+  if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
+    ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+  } else if (!is.null(evalInfo$POP_PLOT_STRATUM_ASSGN)) {
+    POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
+    ppsanm <- evalInfo$ppsanm
+  }
+
   ####################################################################
   ## Check custom Evaluation data
   ####################################################################
@@ -477,6 +482,16 @@ DBgetXY <- function (states = NULL,
   ## Check xy table
   ####################################################################
   if (xy_datsource == "datamart") {
+    if (is.null(POP_PLOT_STRATUM_ASSGN)) {
+      POP_PLOT_STRATUM_ASSGN <- tryCatch( DBgetCSV("POP_PLOT_STRATUM_ASSGN", 
+                             stabbrlst,
+                             returnDT = TRUE, 
+                             stopifnull = FALSE),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
+    }
+
     XYdf <- pcheck.table(xy, stopifnull=FALSE)
     if (is.null(XYdf)) {
       XYdf <- tryCatch( DBgetCSV(xy, 

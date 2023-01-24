@@ -315,6 +315,11 @@ spGetXY <- function(bnd,
   } else {
     clipxy <- FALSE
   }
+
+  ## Check measEndyr.filter
+  #############################################################################
+  measEndyr.filter <- check.logic(bnd, measEndyr.filter)
+
     
   ## Check intensity1
   #############################################################################
@@ -494,39 +499,39 @@ spGetXY <- function(bnd,
   if (savedata) {
     if (returnxy) {
       datExportData(sf::st_drop_geometry(spxy), 
-         savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="xyplt",
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            add_layer=TRUE)) 
+         savedata_opts=list(outfolder = outfolder, 
+                            out_fmt = out_fmt, 
+                            out_dsn = out_dsn, 
+                            out_layer = "xyplt",
+                            outfn.pre = outfn.pre, 
+                            outfn.date = outfn.date, 
+                            overwrite_layer = overwrite_layer,
+                            append_layer = append_layer,
+                            add_layer = TRUE)) 
    
       if (exportsp) {
         spExportSpatial(spxy, 
             savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="spxyplt",
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer, 
+                            out_fmt = out_fmt, 
+                            out_dsn = out_dsn, 
+                            out_layer = "spxyplt",
+                            outfn.pre = outfn.pre, 
+                            outfn.date = outfn.date, 
+                            overwrite_layer = overwrite_layer,
+                            append_layer = append_layer, 
                             add_layer=TRUE))
       }
     } else {
       datExportData(pltids, 
-            savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="pltids",
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            add_layer=TRUE)) 
+            savedata_opts=list(outfolder = outfolder, 
+                            out_fmt = out_fmt, 
+                            out_dsn = out_dsn, 
+                            out_layer = "pltids",
+                            outfn.pre = outfn.pre, 
+                            outfn.date = outfn.date, 
+                            overwrite_layer = overwrite_layer,
+                            append_layer = append_layer,
+                            add_layer = TRUE)) 
     }
   }
 
