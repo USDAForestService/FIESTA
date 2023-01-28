@@ -3622,6 +3622,7 @@ DBgetPlots <- function (states = NULL,
         } else {  
           #spxynm <- paste0("spxy_", coordType)
           spxynm <- paste0("xy_", coordType)
+
           assign(spxynm, 
 		        spMakeSpatialPoints(xyplt=get(paste0("xy_", coordType)), 
 		              xvar=xycoords[1], yvar=xycoords[2], 
@@ -3641,7 +3642,6 @@ DBgetPlots <- function (states = NULL,
         }  
       }
     }
-
     if (!is.null(spconddat)) {
       returnlst$spconddat <- setDF(spconddatx)
     }
