@@ -63,7 +63,7 @@
 #' @keywords data
 #' @examples 
 #' \dontrun{
-#' # Load in USAco data from terra package
+#' # Load in USAco data from geodata package
 #' USAco <- geodata::gadm(country="United States", level=2, path=tempdir())
 #' 
 #' # Set up data from FIESTA
