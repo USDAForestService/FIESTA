@@ -4,7 +4,7 @@
 #' Wrapper to get point attribute values and area from a simple feature or
 #' raster layer of estimation units and calculates area. Points are reprojected
 #' on-the-fly to projection of unit_layer using PROJ.4 transformation parameters
-#' and rgdal spTransform function.  - Point attribute extraction from
+#' and sf spTransform function.  - Point attribute extraction from
 #' simple feature (spExtractPoly) or from raster (spExtractRast) - Calculate
 #' area by estimation unit(s) (areacalc.poly/areacalc.pixel)
 #' 
@@ -66,13 +66,13 @@
 #' output to 'outfn'_newnames_'data'.csv in outfolder.
 #' @note
 #' 
-#' If exportsp=TRUE:\cr If out_fmt="shp", the writeOGR (rgdal) function is
+#' If exportsp=TRUE:\cr If out_fmt="shp", the st_write (sf) function is
 #' called. The ArcGIS driver truncates variable names to 10 characters or less.
 #' Variable names are changed before export using an internal function
 #' (trunc10shp). If Spatial object has more than 1 record, it will be returned
 #' but not exported.
 #' 
-#' On-the-fly projection conversion\cr The spTransform (rgdal) method is used
+#' On-the-fly projection conversion\cr The spTransform (sf) method is used
 #' for on-the-fly map projection conversion and datum transformation using
 #' PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
 #' present in the both the from and to PROJ.4 strings. The +towgs84 tag is used

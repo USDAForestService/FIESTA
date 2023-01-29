@@ -2,7 +2,7 @@
 #' 
 #' Extracts values from one or more raster layers and appends to input
 #' SpatialPoints layer or data frame. Points are reprojected on-the-fly to
-#' projection of raster(s) using PROJ.4 transformation parameters and rgdal
+#' projection of raster(s) using PROJ.4 transformation parameters and sf
 #' spTransform function. Includes options to use bilinear interpolation or
 #' summarize over a window of n pixels using a specified statistic.
 #' 
@@ -79,7 +79,7 @@
 #' be added to the zonal statistic calculations if not specified in
 #' rast.NODATA.
 #' 
-#' The spTransform (rgdal) method is used for on-the-fly map projection
+#' The spTransform (sf) method is used for on-the-fly map projection
 #' conversion and datum transformation using PROJ.4 arguments. Datum
 #' transformation only occurs if the +datum tag is present in the both the from
 #' and to PROJ.4 strings. The +towgs84 tag is used when no datum transformation
@@ -146,7 +146,7 @@ spExtractRast <- function(xyplt,
   ## DESCRIPTION: 
   ## Extracts values from one or more raster layers and appends to input spatial layer 
   ## or data frame. Points are reprojected on-the-fly to projection of rasters using
-  ## PROJ.4 transformation parameters and rgdal spTransform function. Includes options
+  ## PROJ.4 transformation parameters and sf spTransform function. Includes options
   ## to use bilinear interpolation or summarize over a window of n pixels using
   ## a specified statistic.
   #####################################################################################

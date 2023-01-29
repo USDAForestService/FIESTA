@@ -61,6 +61,9 @@
 #' @param SURVEY Data frame. The name of the SURVEY data frame object
 #' if it has been already downloaded and stored in environment.
 #' @param POP_PLOT_STRATUM_ASSGN Data frame. The name of the 
+#' PLOT data frame object if it is already downloaded and stored in
+#' environment. 
+#' @param POP_PLOT_STRATUM_ASSGN Data frame. The name of the 
 #' POP_PLOT_STRATUM_ASSGN data frame object if it is already downloaded 
 #' and stored in environment. 
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
@@ -120,6 +123,7 @@ DBgetXY <- function (states = NULL,
                      savedata = FALSE, 
                      exportsp = FALSE,
                      savedata_opts = NULL,
+                     PLOT = NULL,
                      POP_PLOT_STRATUM_ASSGN = NULL,
                      SURVEY = NULL,
                      dbconnopen = FALSE,
@@ -241,7 +245,6 @@ DBgetXY <- function (states = NULL,
   nbrstates <- length(states)
 
 
-
   ###########################################################################
   ## Check XY database 
   ###########################################################################
@@ -359,7 +362,6 @@ DBgetXY <- function (states = NULL,
     }
   } 
 
-
   ## Get DBgetEvalid parameters from eval_opts
   ####################################################################
   if (eval == "FIA") {
@@ -418,19 +420,21 @@ DBgetXY <- function (states = NULL,
   }
   dbconn <- evalInfo$dbconn
   SURVEY <- evalInfo$SURVEY
-  PLOT <- evalInfo$PLOT
   if (!is.null(SURVEY)) {
     surveynm <- "SURVEY"
   }
+
   if (!is.null(PLOT)) {
     plotnm <- "PLOT"
+  } else if (!is.null(evalInfo$PLOT)) {
+    PLOT <- evalInfo$PLOT
+    plotnm <- "PLOT"
   }
-
   if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
     ppsanm <- "POP_PLOT_STRATUM_ASSGN"
   } else if (!is.null(evalInfo$POP_PLOT_STRATUM_ASSGN)) {
     POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
-    ppsanm <- evalInfo$ppsanm
+    ppsanm <- "POP_PLOT_STRATUM_ASSGN"
   }
 
   ####################################################################
@@ -481,7 +485,7 @@ DBgetXY <- function (states = NULL,
   ## Check xy table
   ####################################################################
   if (xy_datsource == "datamart") {
-    if (is.null(POP_PLOT_STRATUM_ASSGN)) {
+    if (iseval && is.null(POP_PLOT_STRATUM_ASSGN)) {
       POP_PLOT_STRATUM_ASSGN <- tryCatch( DBgetCSV("POP_PLOT_STRATUM_ASSGN", 
                              stabbrlst,
                              returnDT = TRUE, 
@@ -493,7 +497,7 @@ DBgetXY <- function (states = NULL,
 
     XYdf <- pcheck.table(xy, stopifnull=FALSE)
     if (is.null(XYdf)) {
-      if (is.character(xy) && exists(xy)) {
+      if (is.character(xy) && exists(xy) && !is.null(get(xy))) {
         XYdf <- get(xy)
       } else { 
         XYdf <- tryCatch( DBgetCSV(xy, 
@@ -943,7 +947,7 @@ DBgetXY <- function (states = NULL,
 				" GROUP BY statecd, ", yrvar, 
 				" ORDER BY statecd, ", yrvar) 
   }
-
+ 
   ## Create invyrtab query 
   ###########################################################
   xycoords.qry <- paste0("select distinct ", toString(xyvarsA), 

@@ -94,10 +94,10 @@
 #'                      package = "FIESTA")
 #' 
 #' # Plot original projection
-#' raster::plot(raster::raster(demfn))
+#' terra::plot(terra::rast(demfn))
 #' 
 #' # Check original projection
-#' sf::st_crs(raster::raster(demfn))$proj4string
+#' sf::st_crs(terra::rast(demfn))$proj4string
 #' 
 #' # Reproject raster
 #' reprojected <- spReprojectRaster(rastfn = demfn,
@@ -105,10 +105,10 @@
 #'                                  outfolder = tempdir())
 #'                                  
 #' # Plot new projection
-#' raster::plot(raster::raster(reprojected))
+#' terra::plot(terra::raster(reprojected))
 #' 
 #' # Check new projection
-#' sf::st_crs(raster::raster(reprojected))$proj4string
+#' sf::st_crs(terra::rast(demfn))$proj4string
 #' }
 #' @export spReprojectRaster
 spReprojectRaster <- function(rastfn, 
