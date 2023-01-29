@@ -550,7 +550,7 @@ DBgetPlots <- function (states = NULL,
 	SITECLCD=RESERVCD=JENKINS_TOTAL_B1=JENKINS_TOTAL_B2=POP_PLOT_STRATUM_ASSGN=
 	NF_SAMPLING_STATUS_CD=NF_COND_STATUS_CD=ACI_NFS=OWNCD=OWNGRPCD=INVYR=
 	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=SEEDSUBP6=
-	PREV_PLT_CN=dbqueries=REF_SPECIES <- NULL
+	PREV_PLT_CN=dbqueries=REF_SPECIES=PLOTe=POP_PLOT_STRATUM_ASSGNe <- NULL
   plotnm=plotgeomnm=ppsanm=condnm=treenm=seednm=vsubpsppnm=vsubpstrnm=invsubpnm=
 	subplotnm=subpcondnm=sccmnm=grmnm=dwmnm=othertablenm=surveynm=evalidnm <- NULL
 
@@ -856,7 +856,7 @@ DBgetPlots <- function (states = NULL,
   }
   dbconn <- evalInfo$dbconn
   SURVEY <- evalInfo$SURVEY
-  PLOT <- evalInfo$PLOT
+  PLOTe <- evalInfo$PLOT
   if (!is.null(SURVEY)) {
     surveynm <- "SURVEY"
   }
@@ -865,13 +865,13 @@ DBgetPlots <- function (states = NULL,
   }
 
   if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
+    POP_PLOT_STRATUM_ASSGNe <- POP_PLOT_STRATUM_ASSGN
     ppsanm <- "POP_PLOT_STRATUM_ASSGN"
   } else if (!is.null(evalInfo$POP_PLOT_STRATUM_ASSGN)) {
-    POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
-    ppsanm <- evalInfo$ppsanm
+    POP_PLOT_STRATUM_ASSGNe <- evalInfo$POP_PLOT_STRATUM_ASSGN
+    ppsanm <- "POP_PLOT_STRATUM_ASSGN"
   }
 
-     
   ## Get state abbreviations and codes 
   ###########################################################
   stabbrlst <- pcheck.states(states, statereturn="ABBR")
@@ -1116,6 +1116,16 @@ DBgetPlots <- function (states = NULL,
   ## Loop through states
   ###################################################################################
   for (i in 1:length(states)) {
+    if (!is.null(PLOTe)) {
+      PLOT <- PLOTe
+    } else {
+      plotnm <- NULL
+    }
+    if (!is.null(POP_PLOT_STRATUM_ASSGNe)) {
+      POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGNe
+    } else {
+      ppsanm <- NULL
+    }
     evalid <- NULL
     state <- states[i]
     message("getting data for ", state)
@@ -1176,7 +1186,7 @@ DBgetPlots <- function (states = NULL,
 
       ## PLOT table
       if (datamartType == "CSV") { 
-        if (is.null(PLOT)) { 
+        if (is.null(plotnm)) { 
           PLOT <- DBgetCSV("PLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
         }
         if (is.null(PLOT)) {
@@ -1208,10 +1218,12 @@ DBgetPlots <- function (states = NULL,
       }
  
       if (iseval || savePOP) {
-        ## POP_PLOT_STRATUM_ASSGN table (ZIP FILE) - 
-        ## To get estimation unit & stratum assignment for each plot. 
-        POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbr, 
+        if (is.null(ppsanm)) {
+          ## POP_PLOT_STRATUM_ASSGN table (ZIP FILE) - 
+          ## To get estimation unit & stratum assignment for each plot. 
+          POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbr, 
 		      returnDT=TRUE, stopifnull=FALSE) 
+        }
         ppsanm <- "POP_PLOT_STRATUM_ASSGN"
         ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
       }   
@@ -2137,8 +2149,8 @@ DBgetPlots <- function (states = NULL,
                            eval_opts = eval_options(Cur = TRUE),
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
-                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
-                           evalInfo=evalInfo)
+                           evalInfo = evalInfo,
+                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
           assign(paste0("xyCurx_", coordType), xydat[[1]])
           if (returndata) { 
             assign(paste0("xyCur_", coordType), 
@@ -2157,8 +2169,8 @@ DBgetPlots <- function (states = NULL,
                            eval_opts = eval_options(All = TRUE),
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
-                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
-                           evalInfo = evalInfo) 
+                           evalInfo = evalInfo,
+                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN) 
           assign(paste0("xyx_", coordType), xydat[[1]])
           if (returndata) { 
             assign(paste0("xy_", coordType), 

@@ -257,7 +257,6 @@ DBgetXY <- function (states = NULL,
     }
   }
 
-
   ## Check xy database
   ####################################################################
   if (all(list(class(xy), class(plot_layer)) == "character") && 
@@ -380,7 +379,7 @@ DBgetXY <- function (states = NULL,
     evalCur=evalAll <- FALSE
     evalEndyr <- NULL
   }
-
+ 
   ####################################################################
   ## Get states, Evalid and/or invyrs info
   ####################################################################
@@ -494,14 +493,18 @@ DBgetXY <- function (states = NULL,
 
     XYdf <- pcheck.table(xy, stopifnull=FALSE)
     if (is.null(XYdf)) {
-      XYdf <- tryCatch( DBgetCSV(xy, 
+      if (is.character(xy) && exists(xy)) {
+        XYdf <- get(xy)
+      } else { 
+        XYdf <- tryCatch( DBgetCSV(xy, 
                              stabbrlst,
                              returnDT = TRUE, 
                              stopifnull = FALSE),
 			error = function(e) {
                   message(e, "\n")
                   return(NULL) })
-    }
+      }
+    } 
     if (!is.null(XYdf)) {
       xynm <- "XYdf"
       xyflds <- names(XYdf)
@@ -587,14 +590,15 @@ DBgetXY <- function (states = NULL,
           xy_datsource <- "datamart"
         }
       }
- 
-      PLOT <- tryCatch( DBgetCSV("PLOT", 
+      if (is.null(PLOT)) {
+        PLOT <- tryCatch( DBgetCSV("PLOT", 
                              stabbrlst,
                              returnDT = TRUE, 
                              stopifnull = FALSE),
 			error = function(e) {
                   message(e, "\n")
                   return(NULL) })
+      }
       if (!is.null(PLOT)) {
         plotnm <- "PLOT"
         pltflds <- names(PLOT)
