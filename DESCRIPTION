@@ -44,7 +44,8 @@ Imports:
     largeList
 Suggests: 
     knitr,
-    raster,
+    geodata,
+    terra,
     rmarkdown
 VignetteBuilder: knitr
 License: GPL-3
