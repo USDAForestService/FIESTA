@@ -856,20 +856,15 @@ DBgetPlots <- function (states = NULL,
   }
   dbconn <- evalInfo$dbconn
   SURVEY <- evalInfo$SURVEY
-  PLOTe <- evalInfo$PLOT
   if (!is.null(SURVEY)) {
     surveynm <- "SURVEY"
   }
-  if (!is.null(PLOT)) {
-    plotnm <- "PLOT"
-  }
-
   if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
     POP_PLOT_STRATUM_ASSGNe <- POP_PLOT_STRATUM_ASSGN
     ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-  } else if (!is.null(evalInfo$POP_PLOT_STRATUM_ASSGN)) {
-    POP_PLOT_STRATUM_ASSGNe <- evalInfo$POP_PLOT_STRATUM_ASSGN
-    ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+  } else if (!is.null(evalInfo$PLOT)) {
+    PLOTe <- evalInfo$PLOT
+    plotnm <- "PLOTe"
   }
 
   ## Get state abbreviations and codes 
