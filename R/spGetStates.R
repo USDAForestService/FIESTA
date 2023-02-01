@@ -129,10 +129,10 @@ spGetStates <- function(bnd_layer,
   geotype <- unique(sf::st_geometry_type(bndx))
 
   ## Check geometry type
-  if (!geotype %in% gtypes || geotype == "GEOMETRYCOLLECTION" &&
-	length(sf::st_collection_extract(bndx, "POLYGON") == 0)) {
-    stop("invalid geometry type")
-  }
+#  if (!geotype %in% gtypes || geotype == "GEOMETRYCOLLECTION" &&
+#	length(sf::st_collection_extract(bndx, "POLYGON") == 0)) {
+#    #stop("invalid geometry type")
+#  }
 
   ## bnd.filter
   bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
