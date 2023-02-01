@@ -316,9 +316,9 @@ spGetXY <- function(bnd,
     clipxy <- FALSE
   }
 
-  ## Check measEndyr.filter
+  ## Check Endyr.filter
   #############################################################################
-  measEndyr.filter <- check.logic(bnd, measEndyr.filter)
+  Endyr.filter <- check.logic(bnd, Endyr.filter)
 
     
   ## Check intensity1
