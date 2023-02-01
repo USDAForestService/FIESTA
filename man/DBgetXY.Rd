@@ -26,6 +26,7 @@ DBgetXY(
   savedata = FALSE,
   exportsp = FALSE,
   savedata_opts = NULL,
+  PLOT = NULL,
   POP_PLOT_STRATUM_ASSGN = NULL,
   SURVEY = NULL,
   dbconnopen = FALSE,

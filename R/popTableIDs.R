@@ -17,8 +17,8 @@
 #' @param cond_dwm_calc String. 
 #' @param sccm String. 
 #' @param grm String. 
-#' @param plot_pplot String. 
-#' @param cond_pcond String. 
+#' @param pltu String. 
+#' @param condu String. 
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for strata.
 #' @author Grayson W. White
@@ -39,8 +39,8 @@ popTableIDs <- function(cond = "PLT_CN",
                         cond_dwm_calc = "PLT_CN",
                         sccm = "PLT_CN", 
                         grm = "PLT_CN",
-                        plot_pplot = "PLT_CN", 
-                        cond_pcond = "PLT_CN",
+                        pltu = "PLT_CN", 
+                        condu = "PLT_CN",
                         ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]

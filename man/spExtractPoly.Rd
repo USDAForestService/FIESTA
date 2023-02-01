@@ -86,7 +86,7 @@ to 'outfn'_newnames_'data'.csv in outfolder.
 Extracts values from one or more polygon layers and appends to input
 SpatialPoints layer or data frame. Points are reprojected on-the-fly to
 projection of SpatialPolygons using PROJ.4 transformation parameters and
-rgdal spTransform function.
+sf spTransform function.
 }
 \details{
 *If variable = NULL, then it will prompt user for input.
@@ -96,12 +96,12 @@ variables from any one SpatialPolygons are NULL, returning the points that
 fall within the ' intersecting polygons.
 }
 \note{
-If exportshp=TRUE:\cr The writeOGR (rgdal) function is called. The ArcGIS
+If exportshp=TRUE:\cr The st_write (sf) function is called. The ArcGIS
 driver truncates variable names to 10 characters or less. Variable names are
 changed before export using an internal function (trunc10shp). If Spatial
 object has more than 1 record, it will be returned but not exported.
 
-The spTransform (rgdal) method is used for on-the-fly map projection
+The spTransform (sf) method is used for on-the-fly map projection
 conversion and datum transformation using PROJ.4 arguments. Datum
 transformation only occurs if the +datum tag is present in the both the from
 and to PROJ.4 strings. The +towgs84 tag is used when no datum transformation

@@ -40,10 +40,10 @@
 #' Subplot-level data (SUBP_COND_CHNG_MTRX).
 #' @param grm DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Tree-level growth, removal, and mortality data (TREE_GRM_COMPONENT).
-#' @param plot_pplot DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Plot-level data with previous and current plots.
-#' @param cond_pcond DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Condition-level data with previous and current plots.
+#' @param pltu DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Plot-level data with unioned previous and current plots.
+#' @param condu DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Condition-level data with unioned previous and current plots.
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for strata.
 #' @author Grayson W. White
@@ -64,8 +64,8 @@ popTables <- function(cond = NULL,
                       cond_dwm_calc = NULL,
                       sccm = NULL,
                       grm = NULL,
-                      plot_pplot = NULL, 
-                      cond_pcond = NULL, 
+                      pltu = NULL, 
+                      condu = NULL, 
                       ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]

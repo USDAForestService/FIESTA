@@ -105,7 +105,7 @@ min=-32,768; max=32,768) or byte size (1 byte: min=0; max=255).  These
 NODATA values will be added to the zonal statistic calculations if not
 specified in rast.NODATA.
 
-On-the-fly projection conversion\cr The spTransform (rgdal) method is used
+On-the-fly projection conversion\cr The spTransform (sf) method is used
 for on-the-fly map projection conversion and datum transformation using
 PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
 present in the both the from and to PROJ.4 strings. The +towgs84 tag is used

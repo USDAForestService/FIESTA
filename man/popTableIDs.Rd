@@ -17,8 +17,8 @@ popTableIDs(
   cond_dwm_calc = "PLT_CN",
   sccm = "PLT_CN",
   grm = "PLT_CN",
-  plot_pplot = "PLT_CN",
-  cond_pcond = "PLT_CN",
+  pltu = "PLT_CN",
+  condu = "PLT_CN",
   ...
 )
 }
@@ -47,9 +47,9 @@ popTableIDs(
 
 \item{grm}{String.}
 
-\item{plot_pplot}{String.}
+\item{pltu}{String.}
 
-\item{cond_pcond}{String.}
+\item{condu}{String.}
 
 \item{...}{For extendibility.}
 }

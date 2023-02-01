@@ -83,10 +83,8 @@ strata/estimation unit. Include a data frame of plots, states, or evaluation
 information.
 }
 \details{
-Dependent packages: DBI, rgdal
-
 The following variables must be present in dat: STATECD, UNITCD, INVYR, a
-uniqueid (ex. "PLT_CN"), and PLOT_STATUS_CD (if nonsampled plots in
+uniqueid (e.g. "PLT_CN"), and PLOT_STATUS_CD (if nonsampled plots in
 dataset).
 
 FIADB TABLES USED: \tabular{lll}{ \tab FS_FIADB.SURVEY \tab To get latest

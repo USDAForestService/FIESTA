@@ -75,7 +75,7 @@ transformation parameters are specified. Be aware, providing inaccurate or
 incomplete CRS information may lead to erroneous data shifts when
 reprojecting. See spTransform help documentation for more details.
 
-ESRI Shapefile Driver\cr If exportsp=TRUE:\cr The writeOGR (rgdal) function
+ESRI Shapefile Driver\cr If exportsp=TRUE:\cr The st_write (sf) function
 is called. If out_fmt="shp", the ESRI Shapefile driver truncates variable
 names to 10 characters or less. Variable names are changed before export
 using an internal function (trunc10shp). If sf object has more than 1

@@ -154,7 +154,7 @@ measEndyr\cr \tab Endyr.filter - a filter for bnd that specifies the
 boundary where measEndyr should be applied\cr }
 }
 \note{
-If savebnd=TRUE:\cr If out_fmt=c('csv','shp'), the writeOGR (rgdal) function
+If savebnd=TRUE:\cr If out_fmt=c('csv','shp'), the st_write (sf) function
 is called. The ArcGIS driver truncates variable names to 10 characters or
 less. Variable names are changed before export using an internal function
 (trunc10shp). If Spatial object has more than 1 record, it will be returned

@@ -76,7 +76,7 @@ projected coordinate system (i.e., longlat), the object will be reprojected
 to the Albers Equal Area projection before area is calculated.
 }
 \note{
-On-the-fly projection conversion\cr The spTransform (rgdal) method is used
+On-the-fly projection conversion\cr The spTransform (sf) method is used
 for on-the-fly map projection conversion and datum transformation using
 PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
 present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
@@ -86,7 +86,7 @@ specified.  Be aware, providing inaccurate or incomplete CRS information may
 lead to erroneous data shifts when reprojecting. See spTransform help
 documentation for more details.
 
-ESRI Shapefile Driver\cr If exportsp=TRUE:\cr The writeOGR (rgdal) function
+ESRI Shapefile Driver\cr If exportsp=TRUE:\cr The st_write (sf) function
 is called. If out_fmt="shp", the ESRI Shapefile driver truncates variable
 names to 10 characters or less. Variable names are changed before export
 using an internal function (trunc10shp). If sf object has more than 1
@@ -99,7 +99,9 @@ WYbhfn <- system.file("extdata",
                       "sp_data/WYbighorn_adminbnd.shp",
                       package = "FIESTA")
 WYbh <- spImportSpatial(WYbhfn)
-USAco <- raster::getData("GADM", country = "USA", level = 2)    
+
+# Load in USAco data from geodata package
+USAco <- geodata::gadm(country="United States", level=2, path=tempdir())    
 
 # Generate unioned `sf` object
 polyUnion <- spUnionPoly(polyv1 = USAco[USAco$NAME_1 == "Wyoming",], 

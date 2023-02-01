@@ -100,7 +100,7 @@ note about on-the-fly projection conversion).
 }
 \note{
 On-the-fly projection conversion\cr 
-The spTransform (rgdal) method is
+The spTransform (sf) method is
 used for on-the-fly map projection conversion and datum transformation using
 PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
 present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
@@ -127,7 +127,7 @@ WYbhdist
 demfn <- system.file("extdata",
                      "sp_data/WYbighorn_dem_250m.img",
                      package = "FIESTA")
-raster::plot(raster::raster(demfn))
+terra::plot(terra::rast(demfn))
 
 # Clip raster to district = '03'
 dem03 <- spClipRast(rast = demfn,
@@ -135,7 +135,7 @@ dem03 <- spClipRast(rast = demfn,
                     clippolyv.filter = "DISTRICTNU == '03'",
                     overwrite = TRUE,
                     outfolder = tempdir())
-raster::plot(raster::raster(dem03))
+terra::plot(terra::rast(dem03))
 
 # Clip raster to district = '06'
 dem06 <- spClipRast(rast = demfn,
@@ -145,7 +145,7 @@ dem06 <- spClipRast(rast = demfn,
                     outfolder = tempdir())
 
 # Plot extracted values of national forest district
-raster::plot(raster::raster(dem06))
+terra::plot(terra::rast(dem06))
 }
 }
 \author{

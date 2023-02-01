@@ -206,13 +206,13 @@ distinguish between the small area of interest polygons and the helper
 domain units.
 }
 \note{
-If exportsp=TRUE and out_fmt="shp":\cr The writeOGR (rgdal) function is
+If exportsp=TRUE and out_fmt="shp":\cr The st_write (sf) function is
 called. The ArcGIS driver truncates variable names to 10 characters or less.
 Variable names are changed before export using an internal function
 (trunc10shp). If Spatial object has more than 1 record, it will be returned
 but not exported.
 
-The spTransform (rgdal) method is used for on-the-fly map projection
+The spTransform (sf) method is used for on-the-fly map projection
 conversion and datum transformation using PROJ.4 arguments. Datum
 transformation only occurs if the +datum tag is present in the both the from
 and to PROJ.4 strings. The +towgs84 tag is used when no datum transformation
