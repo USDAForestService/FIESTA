@@ -793,7 +793,9 @@ DBgetXY <- function (states = NULL,
         }
         ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
       }
-    } 
+    } else {
+      ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
+    }
     
     pfromqry <- paste0(SCHEMA., ppsanm, " ppsa")
     xyfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., xynm, 

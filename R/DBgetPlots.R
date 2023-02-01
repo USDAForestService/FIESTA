@@ -2317,7 +2317,7 @@ DBgetPlots <- function (states = NULL,
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
                            evalInfo = evalInfo,
-                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN) 
+                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
           assign(paste0("xyx_", coordType), xydat[[1]])
           if (returndata) { 
             assign(paste0("xy_", coordType), 
@@ -3523,11 +3523,11 @@ DBgetPlots <- function (states = NULL,
         if (xymeasCur) {
           #spxynm <- paste0("spxyCur_", coordType)
           xyplt <- get(paste0("xyCurx_", coordType))
-          spxynm <- xyplt
+          spxynm <- paste0("xyCurx_", coordType)
         } else {
           #spxynm <- paste0("spxy_", coordType)
           xyplt <- get(paste0("xyx_", coordType))
-          spxynm <- xyplt
+          spxynm <- paste0("xyx_", coordType)
         }
         if (!is.null(xyplt)) {
           if (!is.null(pltx) && length(unique(xyplt$PLT_CN)) != nrow(pltx))
