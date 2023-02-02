@@ -265,6 +265,8 @@ DBgetXY <- function (states = NULL,
   if (all(list(class(xy), class(plot_layer)) == "character") && 
 		(is.null(datsource) || xy_datsource == datsource)) {
     xyisplot <- ifelse (identical(tolower(xy), tolower(plot_layer)), TRUE, FALSE)
+  } else if (!identical(xy_datsource, datsource)) {
+    xyisplot <- FALSE
   } else {
     xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
   }
@@ -958,6 +960,7 @@ DBgetXY <- function (states = NULL,
   message(xycoords.qry)
 
   if (xy_datsource == "sqlite") {
+    if (is.null(dbconn)) dbconn <- xyconn
     xyx <- tryCatch( DBI::dbGetQuery(dbconn, xycoords.qry),
 			error = function(e) {
                   message(e, "\n")
