@@ -491,6 +491,18 @@ spGetXY <- function(bnd,
 
 
   #############################################################################
+  ## Endyr.filter
+  #############################################################################
+  if (!is.null(Endyr.filter)) {
+    filternames <- check.logic(bnd, Endyr.filter, returnvar=TRUE)
+    if (length(filternames) > 0) {
+      spxy <- spExtractPoly(spxy, polyvlst=bndx, polyvarlst=filternames)$spxyext
+    } else {
+      spxy <- spExtractPoly(spxy, polyvlst=bndx)$spxyext
+    }
+  }
+
+  #############################################################################
   ## Save tables
   #############################################################################
   pltids <- sf::st_drop_geometry(spxy)

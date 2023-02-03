@@ -225,7 +225,7 @@ spGetPlots <- function(bnd = NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilter=countyfips=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=
+  xydat=stateFilter=countyfips=xypltx=evalidst=PLOT_ID=INVYR=
 	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc=dbconn=
 	bndx=evalInfo <- NULL
   cuniqueid=tuniqueid=duniqueid <- "PLT_CN"
@@ -904,8 +904,9 @@ spGetPlots <- function(bnd = NULL,
                          pjoinid = pjoinid, 
                          istree = istree,
                          isseed = isseed,
-                         issubp = issubp,
                          isveg = isveg,
+                         issubp = issubp,
+                         ischng = ischng,
                          isdwm = isdwm,
                          plotgeom = plotgeom, 
                          othertables = othertables, 
@@ -990,8 +991,9 @@ spGetPlots <- function(bnd = NULL,
                          pjoinid = pjoinid, 
                          istree = istree,
                          isseed = isseed,
-                         issubp = issubp,
                          isveg = isveg,
+                         issubp = issubp,
+                         ischng = ischng,
                          isdwm = isdwm,
                          plotgeom = plotgeom, 
                          othertables = othertables, 
@@ -1080,8 +1082,9 @@ spGetPlots <- function(bnd = NULL,
                          pjoinid = pjoinid, 
                          istree = istree,
                          isseed = isseed,
-                         issubp = issubp,
                          isveg = isveg,
+                         issubp = issubp,
+                         ischng = ischng,
                          isdwm = isdwm,
                          plotgeom = plotgeom, 
                          othertables = othertables, 
@@ -1107,16 +1110,6 @@ spGetPlots <- function(bnd = NULL,
         break
       }
 
-      ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
-      if (nrow(PLOT) > length(unique(PLOT[[puniqueid]]))) {
-        if ("INVYR" %in% names(PLOT)) {
-          setorder(PLOT, -INVYR)
-        } else {
-          setorderv(PLOT, -puniqueid)
-        }
-        PLOT <- PLOT[, head(.SD, 1), by=pjoinid]
-      }
-
       ## Check pjoinid
       ##############################################
       pltfields <- names(PLOT)
@@ -1134,6 +1127,16 @@ spGetPlots <- function(bnd = NULL,
             stop(xyjoinid, " not in plt")
           }
         }
+      }
+
+      ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
+      if (nrow(PLOT) > length(unique(PLOT[[puniqueid]]))) {
+        if ("INVYR" %in% names(PLOT)) {
+          setorder(PLOT, -INVYR)
+        } else {
+          setorderv(PLOT, -puniqueid)
+        }
+        PLOT <- PLOT[, head(.SD, 1), by=pjoinid]
       }
 
       if (nrow(stpltids) > 0) {
