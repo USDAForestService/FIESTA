@@ -500,12 +500,6 @@ modGBarea <- function(GBpopdat,
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
 
-#  ## Add a column for totals
-#  addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
-#  if (addtotal) {
-#    condf$TOTAL <- 1
-#  }
-
   ## Merge filtered condition data (condf) to all conditions (condx)
   ###################################################################################
   setkeyv(condx, c(cuniqueid, condid))
@@ -549,9 +543,13 @@ modGBarea <- function(GBpopdat,
     ## Get total estimate and merge area
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
-    unit_totest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdattot, 
-                        uniqueid=cuniqueid, stratalut=stratalut, 
-                        unitvar=unitvar, strvar=strvar, domain="TOTAL")
+    unit_totest <- GBest.pbar(sumyn = estvar.name, 
+                              ysum = cdomdattot,
+                              uniqueid = cuniqueid, 
+                              stratalut = stratalut,
+                              unitvar = unitvar, 
+                              strvar = strvar, 
+                              domain = "TOTAL")
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -569,24 +567,36 @@ modGBarea <- function(GBpopdat,
   if (rowvar != "TOTAL") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
-    unit_rowest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-                        uniqueid=cuniqueid, stratalut=stratalut, 
-                        unitvar=unitvar, strvar=strvar, domain=rowvar)
+    unit_rowest <- GBest.pbar(sumyn = estvar.name, 
+                              ysum = cdomdatsum,
+                              uniqueid = cuniqueid, 
+                              stratalut = stratalut,
+                              unitvar = unitvar, 
+                              strvar = strvar, 
+                              domain = rowvar)
   }
 
   ## Get column (and cell) estimate  
   if (colvar != "NONE") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
-    unit_colest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-                        uniqueid=cuniqueid, stratalut=stratalut, 
-                        unitvar=unitvar, strvar=strvar, domain=colvar)
+    unit_colest <- GBest.pbar(sumyn = estvar.name, 
+                              ysum = cdomdatsum, 
+                              uniqueid = cuniqueid, 
+                              stratalut = stratalut,
+                              unitvar = unitvar, 
+                              strvar = strvar, 
+                              domain = colvar)
 
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
-    unit_grpest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-                        uniqueid=cuniqueid, stratalut=stratalut, 
-                        unitvar=unitvar, strvar=strvar, domain=grpvar)
+    unit_grpest <- GBest.pbar(sumyn = estvar.name, 
+                              ysum = cdomdatsum,
+                              uniqueid = cuniqueid, 
+                              stratalut = stratalut,
+                              unitvar = unitvar, 
+                              strvar = strvar, 
+                              domain = grpvar)
   }
 
   ###################################################################################
@@ -681,26 +691,30 @@ modGBarea <- function(GBpopdat,
     stratalut2[, n.total := sum(n.strata)]
     setkeyv(stratalut2, strunitvars2)
 
-    unitacres2 <- data.table(unitarea, ONEUNIT=1)
-    unitacres2 <- unitacres2[, lapply(.SD, sum, na.rm=TRUE), by="ONEUNIT", 
+    unitarea2 <- data.table(unitarea, ONEUNIT=1)
+    unitarea2 <- unitarea2[, lapply(.SD, sum, na.rm=TRUE), by="ONEUNIT", 
 		.SDcols=areavar]
-    setkey(unitacres2, "ONEUNIT")
+    setkey(unitarea2, "ONEUNIT")
 
     cdomdat[, ONEUNIT := 1]
 
     ## CALCULATE UNIT TOTALS FOR ROWVAR
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, cuniqueid, rowvar), .SDcols=estvar.name]
-    rowunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-                    uniqueid=cuniqueid, stratalut=stratalut2, 
-                    unitvar="ONEUNIT", strvar=strvar, domain=rowvar)
+    rowunit <- GBest.pbar(sumyn = estvar.name, 
+                          ysum = cdomdatsum,
+                          uniqueid = cuniqueid, 
+                          stratalut = stratalut2,
+                          unitvar = "ONEUNIT", 
+                          strvar = strvar, 
+                          domain = rowvar)
     rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
 		unitvar="ONEUNIT", xvar.add0=row.add0)
-    tabs <- check.matchclass(unitacres2, rowunit, "ONEUNIT")
-    unitacres2 <- tabs$tab1
+    tabs <- check.matchclass(unitarea2, rowunit, "ONEUNIT")
+    unitarea2 <- tabs$tab1
     rowunit <- tabs$tab2
     setkeyv(rowunit, "ONEUNIT")
-    rowunit <- rowunit[unitacres2, nomatch=0]
+    rowunit <- rowunit[unitarea2, nomatch=0]
     if (totals) {
       rowunit <- getpse(rowunit, areavar=areavar, esttype=esttype)
     } else {
@@ -711,14 +725,18 @@ modGBarea <- function(GBpopdat,
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, cuniqueid, "TOTAL"), .SDcols=estvar.name]
-    totunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-                    uniqueid=cuniqueid, stratalut=stratalut2, 
-                    unitvar="ONEUNIT", strvar=strvar, domain="TOTAL")
-    tabs <- check.matchclass(unitacres2, totunit, "ONEUNIT")
-    unitacres2 <- tabs$tab1
+    totunit <- GBest.pbar(sumyn = estvar.name, 
+                          ysum = cdomdatsum,
+                          uniqueid = cuniqueid, 
+                          stratalut = stratalut2,
+                          unitvar = "ONEUNIT", 
+                          strvar = strvar, 
+                          domain = "TOTAL")
+    tabs <- check.matchclass(unitarea2, totunit, "ONEUNIT")
+    unitarea2 <- tabs$tab1
     totunit <- tabs$tab2
     setkeyv(totunit, "ONEUNIT")
-    totunit <- totunit[unitacres2, nomatch=0]
+    totunit <- totunit[unitarea2, nomatch=0]
     if (totals) {
       totunit <- getpse(totunit, areavar=areavar, esttype=esttype)
     } else {

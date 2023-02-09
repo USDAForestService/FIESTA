@@ -210,7 +210,20 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     }
 
     if (!is.null(pfromqry)) {
-      plotqry <- paste("select distinct", palias, ".* from", pfromqry, whereqry)
+      pvars <- paste0(palias, ".*")
+      ppvars <- paste0("pplot", ".*")
+      plotqry <- paste("select distinct", palias, ".* from", pfromqry)
+      if (popType == "CHNG") {
+        plot1qry <- paste0("select distinct ", pvars, " from ", pfromqry, 
+        		" JOIN ", plt, " pplot ON (pplot", ".", puniqueid, " = ", 
+				palias, ".PREV_PLT_CN) ", whereqry)
+        plot2qry <- paste0("select distinct ", ppvars, " from ", pfromqry, 
+        		" JOIN ", plt, " pplot ON (pplot", ".", puniqueid, " = ", 
+				palias, ".PREV_PLT_CN) ", whereqry)
+        plotqry <- paste(plot1qry, "UNION", plot2qry)
+      } else {
+        plotqry <- paste("select distinct", pvars, "from", pfromqry, whereqry)
+      }
       #dbqueries$plot <- plotqry
     }
 

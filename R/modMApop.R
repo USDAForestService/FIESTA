@@ -267,7 +267,7 @@ modMApop <- function(popType="VOL",
   adjtree <- FALSE
   popType <- "VOL"
   nonsamp.pfilter=nonsamp.cfilter <- NULL
-  returnlst <- list()
+  returnlst <- list(module = "MA")
 
   ## Set global variables
   ONEUNIT=n.total=expcondtab=bndx <- NULL

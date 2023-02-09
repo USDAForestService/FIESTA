@@ -228,7 +228,7 @@ modSApop <- function(popType="VOL",
   adjtree <- FALSE
   returnSApopdat <- FALSE
   nonsamp.pfilter=nonsamp.cfilter <- NULL 
-  returnlst <- list()
+  returnlst <- list(module = "SA")
   pvars2keep=cvars2keep=NULL
   adj <- ifelse(adjplot, "plot", "none")
 

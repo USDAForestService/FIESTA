@@ -179,7 +179,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     pltnmlst <- names(pltx)
     puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", gui=gui,
 		checklst=pltnmlst, caption="UniqueID variable of plot",
-		warn=paste(puniqueid, "not in plot_pplot table"), stopifnull=TRUE)
+		warn=paste(puniqueid, "not in plt table"), stopifnull=TRUE)
     if (any(duplicated(pltx[[puniqueid]]))) {
       dups <- pltx[[puniqueid]][duplicated(pltx[[puniqueid]])]
       warning(paste("plt records are not unique in: plt:", toString(dups)))

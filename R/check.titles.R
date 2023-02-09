@@ -87,6 +87,9 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
       } else if (esttype %in% c("AREA", "LULC", "P2VEG")) {
         if (is.null(title.estvarn)) {
           title.estvarn <- "Area"
+          if (tabtype == "CHNG") {
+            title.estvarn <- paste(title.estvarn, "change")
+          }
         }
         title.part1 <- title.estvarn
         title.landarea <- paste("on", title.landarea)

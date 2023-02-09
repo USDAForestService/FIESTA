@@ -288,7 +288,7 @@ modGBpop <- function(popType = "VOL",
   adjtree <- FALSE
   nonsamp.pfilter=nonsamp.cfilter <- NULL
   #nonsamp.vfilter.fixed <- FALSE
-  returnlst <- list()
+  returnlst <- list(module = "GB")
   
   
   ## Set global variables
@@ -441,7 +441,7 @@ modGBpop <- function(popType = "VOL",
       }
     }
   } 
-  
+ 
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -654,7 +654,7 @@ modGBpop <- function(popType = "VOL",
       nonsamp.pfilter=nonsamp.pfilter, unitarea=unitarea, areavar=areavar, 
       unitvar=unitvar, unitvar2=unitvar2, areaunits=areaunits, 
       unit.action=unit.action, strata=strata, stratalut=stratalut, 
-      strvar=strvar, pivot=pivot, nonresp=nonresp)
+      strvar=strvar, pivot=pivot)
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
@@ -681,18 +681,10 @@ modGBpop <- function(popType = "VOL",
   invyrs <- pltcheck$invyrs
   dbconn <- pltcheck$dbconn
 
-  if (strata) {
-    nonresp <- pltcheck$nonresp
-    if (nonresp) {
-      RHGlut <- pltcheck$RHGlut
-      nonresplut <- pltcheck$nonresplut
-    }
-  }
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
-
-
+ 
   if (popType %in% c("ALL", "CURR", "AREA", "VOL")) {
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
@@ -716,6 +708,30 @@ modGBpop <- function(popType = "VOL",
     tpropvars <- popcheck$tpropvars
   }
  
+  if (popType %in% c("CHNG")) {
+    ###################################################################################
+    ## Check parameters and data for popType AREA/VOL
+    ###################################################################################
+    popcheck <- check.popdataCHNG(gui=gui, 
+               tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
+               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
+               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
+               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, cvars2keep="REMPER")
+    if (is.null(popcheck)) return(NULL)
+    condx <- popcheck$condx
+    sccmx <- popcheck$sccmx
+    pltcondx <- popcheck$pltcondx
+    treef <- popcheck$treef
+    seedf <- popcheck$seedf
+    cuniqueid <- popcheck$cuniqueid
+    condid <- popcheck$condid
+    tuniqueid <- popcheck$tuniqueid
+    ACI.filter <- popcheck$ACI.filter
+    condsampcnt <- popcheck$condsampcnt
+    areawt <- popcheck$areawt
+    tpropvars <- popcheck$tpropvars
+  }
+
   if (popType == "P2VEG") {
     popcheck <- check.popdataP2VEG(gui=gui, 
                tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
@@ -761,7 +777,7 @@ modGBpop <- function(popType = "VOL",
 #  if (popType == "LULC") {
 #    lulcx <- popcheck$lulcx
 #  }
-
+ 
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
@@ -777,7 +793,6 @@ modGBpop <- function(popType = "VOL",
                     unitarea=unitarea, areavar=areavar, 
                     minplotnum.unit=minplotnum.unit, unit.action=unit.action, 
                     strata=strata, auxlut=stratalut, strvar=strvar, 
-                    nonresp=nonresp, RHGlut=RHGlut, 
                     stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
                     removeifnostrata=TRUE, getwt=getwt, 
                     getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT,
@@ -790,15 +805,9 @@ modGBpop <- function(popType = "VOL",
   strvar <- auxdat$strvar
   strwtvar <- auxdat$strwtvar
   stratcombinelut <- auxdat$stratcombinelut
-  if (nonresp) nonsampplots <- auxdat$nonsampplots
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
-
   strunitvars <- c(unitvar, strvar)
-  if (nonresp) {
-    adj <- "none"
-    RHGlut <- auxdat$RHGlut
-    strunitvars <- c(strunitvars, "RHG")
-  }
+
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
@@ -825,8 +834,12 @@ modGBpop <- function(popType = "VOL",
 
   if (adj == "none") {
     setkeyv(condx, c(cuniqueid, condid))
+    areawtnm <- areawt
+
   } else {
-    if (popType %in% c("ALL", "VOL", "CURR")) {
+    if (popType %in% c("ALL", "VOL", "CURR", "CHNG")) {
+      if (popType == "CHNG") areawt <- "SUBPTYP_PROP_CHNG"
+
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 
                         treex = treef, 
@@ -843,10 +856,21 @@ modGBpop <- function(popType = "VOL",
       condx <- adjfacdata$condx
       treef <- adjfacdata$treex
       seedf <- adjfacdata$seedx
+      areaadj <- adjfacdata$areaadj
       varadjlst <- adjfacdata$varadjlst
       areawtnm <- adjfacdata$areawtnm
       stratalut <- adjfacdata$unitlut
       expcondtab <- adjfacdata$expcondtab
+    }
+
+    if (popType == "CHNG") {
+      strunitvars <- key(stratalut)
+      if (is.null(key(sccmx))) setkeyv(sccmx, c(cuniqueid, condid))
+      sccmx <- sccmx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
+      setkeyv(sccmx, strunitvars)
+      sccmx <- sccmx[stratalut[,c(strunitvars, areaadj), with=FALSE]]
+      sccmx$SUBPTYP_PROP_ADJ <- sccmx$SUBPTYP_PROP_CHNG * sccmx[[areaadj]]
+      areawtnm <- "SUBPTYP_PROP_ADJ"
     }
 
     if (popType == "DWM") {
@@ -864,7 +888,7 @@ modGBpop <- function(popType = "VOL",
                         )
       condx <- adjfacdata$condx
       varadjlst <- adjfacdata$varadjlst
-      areawt <- adjfacdata$areawtnm
+      areawtnm <- adjfacdata$areawtnm
       stratalut <- adjfacdata$unitlut
       expcondtab <- adjfacdata$expcondtab
     }
@@ -893,7 +917,7 @@ modGBpop <- function(popType = "VOL",
                         )
       condx <- adjfacdata$condx
       stratalut1 <- adjfacdata$unitlut
-      areawt <- adjfacdata$areawtnm
+      areawtnm <- adjfacdata$areawtnm
       varadjlst1 <- adjfacdata$varadjlst
 
       adjfacdataP2VEG <- getadjfactorP2VEG(adj=adj, 
@@ -941,7 +965,7 @@ modGBpop <- function(popType = "VOL",
             strvar=strvar, strwtvar=strwtvar, expcondtab=expcondtab, 
             plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
             states=states, invyrs=invyrs, estvar.area=estvar.area, 
-            adj=adj, areawt=areawt, P2POINTCNT=P2POINTCNT))
+            adj=adj, areawt=areawtnm, P2POINTCNT=P2POINTCNT))
 
   if (popType == "VOL") {
     if (!is.null(treef)) {
@@ -967,18 +991,12 @@ modGBpop <- function(popType = "VOL",
     returnlst$vcondstrx <- vcondstrf
     returnlst$varadjP2VEG <- varadjP2VEG
   }
-#  if (popType %in% c("GRM", "CHNG", "LULC")) {
-#    returnlst$sccmx <- sccmx
-#    #returnlst$sccm_condx <- sccm_condx
-#    returnlst$cond_pcondx <- cond_pcondx
-#  }
+  if (popType %in% c("GRM", "CHNG", "LULC")) {
+    returnlst$sccmx <- sccmx
+  }
 
   if (popType == "LULC") {
     returnlst$lulcx <- lulcx
-  }
-  if (nonresp) {
-    returnlst$nonresplut <- nonresplut
-    returnlst$RHGlut <- RHGlut
   }
 
 
@@ -1012,6 +1030,16 @@ modGBpop <- function(popType = "VOL",
                               out_fmt=out_fmt, 
 		                          out_dsn=out_dsn, 
 		                          out_layer="condx",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE))
+    datExportData(sccmx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="sccmx",
 		                          outfn.pre=outfn.pre, 
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
@@ -1132,18 +1160,6 @@ modGBpop <- function(popType = "VOL",
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
 		                          add_layer=TRUE))
-    if (nonresp) {
-      datExportData(RHGlut, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="RHGlut",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-    }
   }
 
   return(returnlst)

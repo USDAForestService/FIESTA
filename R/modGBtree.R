@@ -775,10 +775,10 @@ modGBtree <- function(GBpopdat,
     stratalut2[, n.total := sum(n.strata)]
     setkeyv(stratalut2, strunitvars2)
 
-    unitacres2 <- data.table(unitarea, ONEUNIT=1)
-    unitacres2 <- unitacres2[, lapply(.SD, sum, na.rm=TRUE), by="ONEUNIT", 
+    unitarea2 <- data.table(unitarea, ONEUNIT=1)
+    unitarea2 <- unitarea2[, lapply(.SD, sum, na.rm=TRUE), by="ONEUNIT", 
 		.SDcols=areavar]
-    setkey(unitacres2, "ONEUNIT")
+    setkey(unitarea2, "ONEUNIT")
 
     tdomdat[, ONEUNIT := 1]
 
@@ -796,11 +796,11 @@ modGBtree <- function(GBpopdat,
     rowunit <- add0unit(x=rowunit, xvar=rowvar, 
                         uniquex=uniquerow, unitvar="ONEUNIT", 
                         xvar.add0=row.add0)
-    tabs <- check.matchclass(unitacres2, rowunit, "ONEUNIT")
-    unitacres2 <- tabs$tab1
+    tabs <- check.matchclass(unitarea2, rowunit, "ONEUNIT")
+    unitarea2 <- tabs$tab1
     rowunit <- tabs$tab2
     setkeyv(rowunit, "ONEUNIT")
-    rowunit <- rowunit[unitacres2, nomatch=0]
+    rowunit <- rowunit[unitarea2, nomatch=0]
     if (totals) {
       rowunit <- getpse(rowunit, areavar=areavar, esttype=esttype)
     } else {
@@ -819,11 +819,11 @@ modGBtree <- function(GBpopdat,
                           unitvar = "ONEUNIT", 
                           strvar = strvar, 
                           domain = "TOTAL")
-    tabs <- check.matchclass(unitacres2, totunit, "ONEUNIT")
-    unitacres2 <- tabs$tab1
+    tabs <- check.matchclass(unitarea2, totunit, "ONEUNIT")
+    unitarea2 <- tabs$tab1
     totunit <- tabs$tab2
     setkeyv(totunit, "ONEUNIT")
-    totunit <- totunit[unitacres2, nomatch=0]
+    totunit <- totunit[unitarea2, nomatch=0]
     if (totals) {
       totunit <- getpse(totunit, areavar=areavar, esttype=esttype)
     } else {

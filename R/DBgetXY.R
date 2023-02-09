@@ -63,6 +63,8 @@
 #' @param POP_PLOT_STRATUM_ASSGN Data frame. The name of the 
 #' PLOT data frame object if it is already downloaded and stored in
 #' environment. 
+#' @param PLOT Data frame. The name of the PLOT data frame object if 
+#' it is already downloaded and stored in environment. 
 #' @param POP_PLOT_STRATUM_ASSGN Data frame. The name of the 
 #' POP_PLOT_STRATUM_ASSGN data frame object if it is already downloaded 
 #' and stored in environment. 
