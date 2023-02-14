@@ -593,7 +593,7 @@ modWFtree <- function(WFpopdat,
   if (nrow(treefmicr) > 0) {
     pmeasmicr <- condx[, list(MICR_MEASPROP_UNADJ = sum(MICRPROP_UNADJ)), 
 				by=c(strunitvars, "RHG", cuniqueid)]
-    pmeasmicr.name <- "SUBP_MEASPROP_UNADJ"
+    pmeasmicr.name <- "MICR_MEASPROP_UNADJ"
     treedatmicr <- check.tree(gui=gui, treef=treefmicr, seedf=seedf, estseed=estseed,
                      bycond=TRUE, condf=condf, bytdom=bytdom, 
                      tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
@@ -727,6 +727,18 @@ modWFtree <- function(WFpopdat,
       setnames(tdomdat, estvar.name, estvar.name.micr)
     }
 
+
+yn = estvar.name.subp
+y2n = estvar.name.micr
+yd = pmeassubp.name
+y2d = pmeasmicr.name
+ysum = tdomdat
+dsum = pmeasprop
+esttype = esttype
+uniqueid = cuniqueid
+domain = "TOTAL"
+
+
     unit_totest <- Ratio2Size(yn = estvar.name.subp, 
                               y2n = estvar.name.micr,
                               yd = pmeassubp.name, 
@@ -781,6 +793,17 @@ modWFtree <- function(WFpopdat,
       tdomdat <- tdomdatmicrsum
       setnames(tdomdat, estvar.name, estvar.name.micr)
     }
+
+yn = estvar.name.subp
+y2n = estvar.name.micr
+yd = pmeassubp.name
+y2d = pmeasmicr.name
+ysum = tdomdat
+dsum = pmeasprop
+uniqueid = cuniqueid
+domain = rowvar
+
+
     unit_rowest <- Ratio2Size(yn = estvar.name.subp, 
                               y2n = estvar.name.micr,
                               yd = pmeassubp.name, 

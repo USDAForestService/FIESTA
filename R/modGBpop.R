@@ -1035,16 +1035,6 @@ modGBpop <- function(popType = "VOL",
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
 		                          add_layer=TRUE))
-    datExportData(sccmx, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="sccmx",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
     datExportData(pltcondx, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
@@ -1055,6 +1045,19 @@ modGBpop <- function(popType = "VOL",
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
 		                          add_layer=TRUE))
+
+    if (!is.null(sccmx)) {
+      datExportData(sccmx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="sccmx",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE))
+    }
 
     if (!is.null(treef)) {
       datExportData(treef, 

@@ -87,6 +87,10 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
   if (!"sf" %in% class(sfobj)) {
     stop("the object must be of class sf")
   }
+
+  if (out_fmt == "sqlite" && !is.null(out_dsn) && outsp_fmt == "shp") {
+    outsp_fmt <- out_fmt
+  }
  
   ## Check out_fmt
   ###########################################################

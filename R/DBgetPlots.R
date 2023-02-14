@@ -1067,7 +1067,6 @@ DBgetPlots <- function (states = NULL,
   if (biojenk) sppvars <- c(sppvars, "JENKINS_TOTAL_B1", "JENKINS_TOTAL_B2")
   if (greenwt) sppvars <- c(sppvars, "DRYWT_TO_GREENWT_CONVERSION")
 
-  
 
 ##############################################################################
 ##############################################################################
@@ -1163,7 +1162,7 @@ DBgetPlots <- function (states = NULL,
         } else {
           ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
         }
-      }           
+      } 
       if ((iseval || measCur) && is.null(surveynm)) {
         surveynm <- chkdbtab(dbtablst, survey_layer)
       }
@@ -1344,7 +1343,7 @@ DBgetPlots <- function (states = NULL,
       pcgeomfromqry <- paste0(pcfromqry, " JOIN ", SCHEMA., 
 				plotgeomnm, " pg ON (pg.CN = p.", puniqueid, ")")
     }
-
+ 
     ###########################################################################
     ## State filter 
     ###########################################################################
@@ -1550,7 +1549,7 @@ DBgetPlots <- function (states = NULL,
 
       ## Run pltcond query
       message(pltcond.qry)
-
+ 
       if (datsource == "sqlite") {
         tryCatch( pltcondx <- DBI::dbGetQuery(dbconn, pltcond.qry),
 			error=function(e) message("pltcond query is invalid"))
@@ -3806,8 +3805,8 @@ DBgetPlots <- function (states = NULL,
       returnlst$spconddat <- setDF(spconddatx)
     }
  
-    if (savePOP) {
-      returnlst$pop_plot_stratum_assgn <- setDF(ppsa)
+    if (savePOP && exists(ppsanm)) {
+      returnlst$pop_plot_stratum_assgn <- setDF(get(ppsanm))
     }
     if (saveSURVEY && !is.null(SURVEY)) {
       returnlst$SURVEY <- setDF(SURVEY)
