@@ -79,14 +79,15 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
 
   ## Check sfobj
   ###########################################################
-  if (is.null(sfobj)) {
-    sfnm <- select.list(ls(pos=1, all.names=TRUE), title="sf object?", 
-		multiple=FALSE)
-    sfobj <- get(sfnm)
-  }
-  if (!"sf" %in% class(sfobj)) {
-    stop("the object must be of class sf")
-  }
+#  if (is.null(sfobj)) {
+#    sfnm <- select.list(ls(pos=1, all.names=TRUE), title="sf object?", 
+#		multiple=FALSE)
+#    sfobj <- get(sfnm)
+#  }
+#  if (!"sf" %in% class(sfobj)) {
+#    stop("the object must be of class sf")
+#  }
+  sfobj <- pcheck.spatial(sfobj)
 
   if (out_fmt == "sqlite" && !is.null(out_dsn) && outsp_fmt == "shp") {
     outsp_fmt <- out_fmt
