@@ -1557,7 +1557,7 @@ DBgetPlots <- function (states = NULL,
         tryCatch( pltcondx <- setDT(sqldf::sqldf(pltcond.qry, stringsAsFactors=FALSE)),
 			error=function(e) message("pltcond query is invalid"))
       }
-
+ 
       ## Write query to outfolder
       if (saveqry) {
         pltcondqryfn <- DBgetfn("pltcond", invtype, outfn.pre, stabbr, 
@@ -3342,7 +3342,7 @@ DBgetPlots <- function (states = NULL,
         isref <- FALSE
         othertable <- othertables[j]
         othertablexnm <- paste0("otherx", j)
-    
+
         if (!is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
           xfromqryx <- paste0(SCHEMA., othertable, " x")
           if (!iseval) {
@@ -3429,18 +3429,21 @@ DBgetPlots <- function (states = NULL,
             tabs[[tolower(othertable)]] <- rbind(tabs[[tolower(othertable)]], get(othertablexnm))
           }
           if (savedata) {
+            other_overwrite <- ifelse (j == 1, TRUE, FALSE)
+            other_append <- ifelse (j == 1, TRUE, FALSE)
+
             index.unique.other <- NULL
             datExportData(get(othertablexnm),
                 index.unique = index.unique.other,
-                savedata_opts = list(outfolder=outfolder, 
-                                    out_fmt=out_fmt, 
-                                    out_dsn=out_dsn, 
-                                    out_layer=tolower(othertable),
-                                    outfn.pre=outfn.pre, 
-                                    overwrite_layer=overwrite_layer,
-                                    append_layer=append_layer,
-                                    outfn.date=outfn.date, 
-                                    add_layer=TRUE))
+                savedata_opts = list(outfolder = outfolder, 
+                                    out_fmt = out_fmt, 
+                                    out_dsn = out_dsn, 
+                                    out_layer = tolower(othertable),
+                                    outfn.pre = outfn.pre, 
+                                    overwrite_layer = other_overwrite,
+                                    append_layer = other_append,
+                                    outfn.date = outfn.date, 
+                                    add_layer = TRUE))
           }
         }
       }
