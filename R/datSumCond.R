@@ -259,12 +259,12 @@ datSumCond <- function(cond = NULL,
     } else {
       message("assuming no nonsampled condition in dataset")
     }
-    adjfacdata <- getadjfactorVOL(condx=condx, cuniqueid=cuniqueid, adj="plot")
+    adjfacdata <- getadjfactorPLOT(condx=condx, cuniqueid=cuniqueid)
     condx <- adjfacdata$condx
   }
 
   ## Filter cond
-  cdat <- FIESTA::datFilter(x=condx, xfilter=cfilter, title.filter="tfilter",
+  cdat <- datFilter(x=condx, xfilter=cfilter, title.filter="tfilter",
 			 stopifnull=TRUE, gui=gui)
   condf <- cdat$xf
   cfilter <- cdat$xfilter
