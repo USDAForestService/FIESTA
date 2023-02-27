@@ -39,15 +39,18 @@
 #' may be used for condition proportion or strata variables used if adjcond or
 #' adjstrata = TRUE (See details below).  This table is optional. If included,
 #' CONDID must be present in table.
+#' @param plt Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+#' Plot-level table to join the aggregated tree data to, if bycond=FALSE. This
+#' table is optional.
+#' @param subp_cond Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+#' Subplot condition-level table to use to sum condition proportions, 
+#' if bysubp=TRUE. 
+#' @param subplot Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+#' Subplot-level table to used to calculate adjustment factors, to remove 
+#' nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.
 #' @param datsource String. Source of data ('obj', 'csv', 'sqlite', 'gdb').
 #' @param data_dsn String. If datsource='sqlite', the name of SQLite database
 #' (*.sqlite).
-#' @param plt Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
-#' database file. Plot-level table to join the aggregated tree data to (if
-#' bycond=FALSE). Nonsampled plots (PLOT_STATUS_CD = 3) are removed. Optional.
-#' @param plt_dsn String. The data source name (dsn; i.e., folder or database
-#' name) of plt. The dsn varies by driver. See gdal OGR vector formats
-#' (https://www.gdal.org/ogr_formats.html). Optional.
 #' @param tuniqueid String. Unique identifier of the tree table.  If including
 #' seedling table, this should be the same for seed.
 #' @param cuniqueid String. Unique identifier of the cond table if cond is NOT
@@ -204,10 +207,11 @@
 datSumTreeDom <- function(tree = NULL, 
                           seed = NULL, 
                           cond = NULL, 
+                          plt = NULL,  
+                          subp_cond = NULL,
+                          subplot = NULL, 
                           datsource = "obj", 
                           data_dsn = NULL, 
-                          plt = NULL, 
-                          plt_dsn = NULL,
                           tuniqueid = "PLT_CN", 
                           cuniqueid = "PLT_CN", 
                           puniqueid = "CN", 
@@ -270,7 +274,6 @@ datSumTreeDom <- function(tree = NULL,
   seedclnm <- "<1"
   seedonly=parameters <- FALSE
   ref_estvar <- FIESTAutils::ref_estvar
-  subplot=subpcond <- NULL
 
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
@@ -504,6 +507,7 @@ datSumTreeDom <- function(tree = NULL,
           stop("cuniqueid is invalid")
         }
       }
+
       ## Check if class of tuniqueid matches class of cuniqueid
       tabs <- check.matchclass(treex, condx, tuniqueid, cuniqueid)
       treex <- tabs$tab1
@@ -535,6 +539,7 @@ datSumTreeDom <- function(tree = NULL,
   } else {   ## byplt
     tsumuniqueid <- tuniqueid
   }
+
   if (bysubp) {
     pltshp <- FALSE
     noplt <- TRUE
@@ -546,31 +551,34 @@ datSumTreeDom <- function(tree = NULL,
 		warn=paste(subpid, "not in tree table"))
     if (is.null(subpid)) {
       warning("assuming only 1 subplot")
-      treex$SUBPID <- 1
-      subpid <- "SUBPID"
+      treex[[subpid]] <- 1
 
       if (addseed) {
         if (!subpid %in% names(seedx)) {
-          seedx$SUBPID <- 1
-        } else {
-          stop(subpid, "in seed but not in cond")
-        }
+          seedx[[subpid]] <- 1
+        } 
       }  
     } else {
-      if (!subpid %in% names(seedx)) {
-        stop(subpid, "not in seed") 
+      if (addseed) {
+        if (!subpid %in% names(seedx)) {
+          stop(subpid, "not in seed")
+        } 
       }
     }
+
     tsumuniqueid <- c(tsumuniqueid, subpid)
     setkeyv(treex, tsumuniqueid)
     checkNAtvars <- c(checkNAtvars, subpid)
     if (addseed) {
       setkeyv(seedx, tsumuniqueid)
     }
+
+    ## Set pltx to NULL   
+    pltx <- NULL
   }
  
   ## Check plt
-  pltx <- pcheck.table(plt, tab_dsn=plt_dsn, gui=gui, tabnm="plt", 
+  pltx <- pcheck.table(plt, tab_dsn=data_dsn, gui=gui, tabnm="plt", 
 			caption="Plot table?")
 
   if (!is.null(pltx)) {
@@ -687,10 +695,12 @@ datSumTreeDom <- function(tree = NULL,
   }
   if (getadjplot) {
     if (bysubp) {
-      stop("not available yet")
-      if (is.null(subplotx) || is.null(subpcondx)) {
-        stop("must include subplotx and subpcondx to adjust to subplot")
-      }
+      if (sum(is.null(subpcondx), is.null(condx)) < 3) {
+        missing <- c("subp_cond", "cond")[which(is.null(subpcondx), is.null(condx))]
+        if (length(missing) > 0) {
+          stop("must include following tables to calculate adjustments: ", toString(missing))
+        }
+      } 
     } else {
       if (is.null(condx)) {
         stop("must include condx to adjust to plot")
@@ -866,18 +876,13 @@ datSumTreeDom <- function(tree = NULL,
   treef <- tdat$xf
   tree.filter <- tdat$xfilter
 
-  if (addseed || seedonly) {
-    xfilter <- tryCatch( check.logic(seedx, tfilter, removeinvalid=TRUE),
+  if (addseed) {
+    xfilter <- tryCatch( check.logic(seedx, tfilter),
 		error=function(e) return(NULL))
     if (!is.null(xfilter)) {
       ## Seed filter
-      sdat <- datFilter(x=seedx, xfilter=xfilter, title.filter="tfilter", xnm="seed")
+      sdat <- datFilter(x=seedx, xfilter=tfilter, title.filter="tfilter", xnm="seed")
       seedf <- sdat$xf
-      if (is.null(seedf)) {
-        message(paste(xfilter, "removed all records in seed"))
-        return(NULL)
-      }
-
     } else {
       seedf <- seedx
     }
@@ -1175,41 +1180,70 @@ datSumTreeDom <- function(tree = NULL,
   ################################################################################  
 
   if (getadjplot) {
-    ## Remove nonsampled plots 
-    if ("COND_STATUS_CD" %in% names(condx)) {
-      cond.nonsamp.filter <- "COND_STATUS_CD != 5"
-      nonsampn <- sum(condx$COND_STATUS_CD == 5, na.rm=TRUE)
-      if (length(nonsampn) > 0) {
-        message("removing ", nonsampn, " nonsampled forest conditions")
+
+    if (bysubp) {
+      ## Remove nonsampled conditions by subplot and summarize to condition-level
+      subpcx <- subpsamp(cond = condx, 
+                         subp_cond = subpcondx, 
+                         subplot = subplotx, 
+                         subpuniqueid = subpuniqueid, 
+                         subpid = subpid)
+
+      ## Check if class of tuniqueid matches class of cuniqueid
+      tabs <- check.matchclass(treex, subpcx, c(tuniqueid, subpid), c(subpuniqueid, subpid))
+      treex <- tabs$tab1
+      subpcx <- tabs$tab2
+
+      adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=subpcx, 
+		tuniqueid=c(tuniqueid, subpid), cuniqueid=c(subpuniqueid, subpid),
+		areawt="CONDPROP_UNADJ")
+      condx <- adjfacdata$condx
+      cuniqueid <- c(subpuniqueid, subpid)
+ 
+      varadjlst <- c("ADJ_FACTOR_COND", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
+      if (any(varadjlst %in% names(condx))) {
+        varadjlst <- varadjlst[varadjlst %in% names(condx)]
+        condx[, (varadjlst) := NULL]
+      }
+    
+    } else {
+
+      ## Remove nonsampled plots 
+      if ("COND_STATUS_CD" %in% names(condx)) {
+        cond.nonsamp.filter <- "COND_STATUS_CD != 5"
+        nonsampn <- sum(condx$COND_STATUS_CD == 5, na.rm=TRUE)
+        if (length(nonsampn) > 0) {
+          message("removing ", nonsampn, " nonsampled forest conditions")
+        } else {
+          message("assuming all sampled conditions in cond")
+        }
       } else {
         message("assuming all sampled conditions in cond")
       }
-    } else {
-      message("assuming all sampled conditions in cond")
-    }
-    if (ACI && "NF_COND_STATUS_CD" %in% names(condx)) {
-      cond.nonsamp.filter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
-      message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE), 
+      if (ACI && "NF_COND_STATUS_CD" %in% names(condx)) {
+        cond.nonsamp.filter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
+        message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE), 
 		" nonsampled nonforest conditions")
-      if (!is.null(cond.nonsamp.filter)) 
-        cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.ACI)
-    }
-    condx <- datFilter(x=condx, xfilter=cond.nonsamp.filter, 
+        if (!is.null(cond.nonsamp.filter)) 
+          cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.ACI)
+      }
+      condx <- datFilter(x=condx, xfilter=cond.nonsamp.filter, 
 		title.filter="cond.nonsamp.filter")$xf
 
-    adjfacdata <- getadjfactorVOL(treex=treef, seedx=seedf, condx=condx, 
+      adjfacdata <- getadjfactorVOL(treex=treef, seedx=seedf, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, adj=TRUE)
-    condx <- adjfacdata$condx
-    varadjlst <- c("ADJ_FACTOR_COND", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
-    if (any(varadjlst %in% names(condx))) {
-      varadjlst <- varadjlst[varadjlst %in% names(condx)]
-      condx[, (varadjlst) := NULL]
+      condx <- adjfacdata$condx
+      varadjlst <- c("ADJ_FACTOR_COND", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
+      if (any(varadjlst %in% names(condx))) {
+        varadjlst <- varadjlst[varadjlst %in% names(condx)]
+        condx[, (varadjlst) := NULL]
+      }
     }
+    
     treef <- adjfacdata$treex
     if (addseed) {
       seedf <- adjfacdata$seedx
-    }
-   
+    }  
     adjtree <- TRUE
   }
  
