@@ -922,6 +922,8 @@ DBgetPlots <- function (states = NULL,
 		title="ACI conditions?", first="NO", gui=gui)
 
   } else {
+    message(evalidlist)
+
     subsetPOP <- TRUE
 
     if (!is.null(subcycle99) && subcycle99) 
