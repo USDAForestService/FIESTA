@@ -323,7 +323,7 @@ datSumTree <- function(tree = NULL,
 
     ## Check subplot
     subpcondx <- pcheck.table(subpcond, tab_dsn=data_dsn, tabnm="subp_cond", gui=gui, 
-			caption="Subpcond table?")
+			caption="Subpcond table?", stopifnull=TRUE)
     if (!all(subpids %in% names(subpcondx))) {
       stop("uniqueids not in subp_cond: ", toString(subpids))
     }
@@ -481,7 +481,7 @@ datSumTree <- function(tree = NULL,
     pltx <- pcheck.table(plt, tab_dsn=data_dsn, gui=gui, tabnm="plt", 
 			caption="Plot table?")
   }
-
+ 
   if (!is.null(pltx)) {
     noplt <- FALSE
 
@@ -493,8 +493,9 @@ datSumTree <- function(tree = NULL,
       }
     }
 
-    if ("sf" %in% class(pltx))
+    if ("sf" %in% class(pltx)) {
       pltsp <- TRUE
+    }
 
     ## Check puniqueid
     pltnmlst <- names(pltx)
@@ -515,7 +516,7 @@ datSumTree <- function(tree = NULL,
 
     ## Check that the values of tuniqueid in treex are all in puniqueid in pltx
     treex <- check.matchval(treex, pltx, tuniqueid, puniqueid)
-
+ 
     if (addseed) {
       ## Check if class of tuniqueid matches class of puniqueid
       tabs <- check.matchclass(seedx, pltx, tuniqueid, puniqueid)
@@ -525,7 +526,7 @@ datSumTree <- function(tree = NULL,
       ## Check that the values of tuniqueid in seedx are all in puniqueid in pltx
       check.matchval(seedx, pltx, tuniqueid, puniqueid)
     }
- 
+
     ## Check that the values of cuniqueid in condx are all in puniqueid in pltx
     if (!is.null(condx)) 
       ## Check that the values of tuniqueid in treex are all in puniqueid in pltx
@@ -537,10 +538,12 @@ datSumTree <- function(tree = NULL,
 #      puniqueid <- tuniqueid
 #    }
 
-    setkeyv(pltx, puniqueid)
+    if (is.data.table(pltx)) {
+      setkeyv(pltx, puniqueid)
+    }
     checkNApvars <- c(checkNApvars, puniqueid)
   } 
-
+ 
   ## Check ACI. If TRUE, include all trees, If FALSE, filter for forested plots only 
   ## (COND_STATUS_CD = 1)
   ######################################################################################

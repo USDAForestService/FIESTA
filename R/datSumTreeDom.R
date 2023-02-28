@@ -410,13 +410,28 @@ datSumTreeDom <- function(tree = NULL,
 		first="YES", gui=gui, stopifnull=TRUE)
 
   if (bysubp) {
+    subpuniqueid <- "PLT_CN"
+    subpids <- c(subpuniqueid, subpid)
+
     ## Check subplot
     subplotx <- pcheck.table(subplot, tab_dsn=data_dsn, tabnm="subplot", gui=gui, 
 			caption="Subplot table?")
+  
+    ## Check subpid
+    if (!is.null(subplotx)) {
+      if (!all(subpids %in% names(subplotx))) {
+        stop("uniqueids not in subplot: ", toString(subpids))
+      }
+      setkeyv(subplotx, subpids)
+    }
 
     ## Check subplot
     subpcondx <- pcheck.table(subpcond, tab_dsn=data_dsn, tabnm="subp_cond", gui=gui, 
-			caption="Subpcond table?")
+			caption="Subpcond table?", stopifnull=TRUE)
+    if (!all(subpids %in% names(subpcondx))) {
+      stop("uniqueids not in subp_cond: ", toString(subpids))
+    }
+    setkeyv(subpcondx, subpids)
   }
 
   ## Check lbs2tons
@@ -575,11 +590,11 @@ datSumTreeDom <- function(tree = NULL,
 
     ## Set pltx to NULL   
     pltx <- NULL
-  }
- 
-  ## Check plt
-  pltx <- pcheck.table(plt, tab_dsn=data_dsn, gui=gui, tabnm="plt", 
+  } else {
+
+    pltx <- pcheck.table(plt, tab_dsn=data_dsn, gui=gui, tabnm="plt", 
 			caption="Plot table?")
+  }
 
   if (!is.null(pltx)) {
     noplt <- FALSE
@@ -635,7 +650,10 @@ datSumTreeDom <- function(tree = NULL,
 #      names(pltx)[names(pltx) == puniqueid] <- tuniqueid
 #      puniqueid <- tuniqueid
 #    }
-    setkeyv(pltx, puniqueid)
+
+    if (is.data.table(pltx)) {
+      setkeyv(pltx, puniqueid)
+    }
     checkNApvars <- c(checkNApvars, puniqueid)
   } 
 
@@ -1467,7 +1485,6 @@ datSumTreeDom <- function(tree = NULL,
     }
 
   } else if (!noplt) {  ## Plot-level
-    setkeyv(pltx, puniqueid)
 
     ## Check for duplicate names
     matchnames <- sapply(tdomscolstot, checknm, names(pltx)) 

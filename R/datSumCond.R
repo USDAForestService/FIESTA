@@ -15,11 +15,17 @@
 #' @param plt Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
 #' database file. Plot-level table to join the aggregated tree data to (if
 #' bycond=FALSE). Nonsampled plots (PLOT_STATUS_CD = 3) are removed. Optional.
-#' @param plt_dsn String. The data source name (dsn; i.e., folder or database
-#' name) of plt. The dsn varies by driver. See gdal OGR vector formats
-#' (https://www.gdal.org/ogr_formats.html). Optional.
+#' @param subp_cond Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+#' Subplot condition-level table to use to sum condition proportions, 
+#' if bysubp=TRUE. 
+#' @param subplot Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+#' Subplot-level table to used to calculate adjustment factors, to remove 
+#' nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.
 #' @param cuniqueid String. Unique identifier of cond (default = "PLT_CN").
 #' @param puniqueid String. Unique identifier of plt (default = "CN").
+#' @param condid String. Unique identifier for conditions.
+#' @param bysubp Logical. If TRUE, data are aggregated to the subplot level.
+#' @param subpid String. Unique identifier of each subplot.
 #' @param csumvar String. One or more variable names to sum to plot level.
 #' @param csumvarnm String. Name of the resulting aggregated plot-level
 #' variable(s).  Default = csumvar + '_PLT'.
@@ -59,9 +65,13 @@ datSumCond <- function(cond = NULL,
                        datsource = "obj", 
                        data_dsn = NULL, 
                        plt = NULL, 
-                       plt_dsn = NULL, 
+                       subp_cond = NULL,  
+                       subplot = NULL, 
                        cuniqueid = "PLT_CN",
                        puniqueid = "CN", 
+                       condid = "CONDID", 
+                       bysubp = FALSE, 
+                       subpid = "SUBP", 
                        csumvar = NULL, 
                        csumvarnm = NULL, 
                        cfilter = NULL, 
@@ -164,10 +174,40 @@ datSumCond <- function(cond = NULL,
   if (!"CONDPROP_UNADJ" %in% condnmlst) stop("CONDPROP_UNADJ not in cond")
 
 
+  ## Check bysubp
+  ###################################################################################
+  bysubp <- pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
+		first="YES", gui=gui, stopifnull=TRUE)
+
+  if (bysubp) {
+    subpuniqueid <- "PLT_CN"
+    subpids <- c(subpuniqueid, subpid)
+
+    ## Check subplot
+    subplotx <- pcheck.table(subplot, tab_dsn=data_dsn, tabnm="subplot", gui=gui, 
+			caption="Subplot table?")
+  
+    ## Check subpid
+    if (!is.null(subplotx)) {
+      if (!all(subpids %in% names(subplotx))) {
+        stop("uniqueids not in subplot: ", toString(subpids))
+      }
+      setkeyv(subplotx, subpids)
+    }
+
+    ## Check subplot
+    subpcondx <- pcheck.table(subpcond, tab_dsn=data_dsn, tabnm="subp_cond", gui=gui, 
+			caption="Subpcond table?", stopifnull=TRUE)
+    if (!all(subpids %in% names(subpcondx))) {
+      stop("uniqueids not in subp_cond: ", toString(subpids))
+    }
+    setkeyv(subpcondx, subpids)
+  }
+
   ## Check plt table
   noplt <- TRUE
   pltsp <- FALSE
-  pltx <- pcheck.table(plt, tab_dsn=plt_dsn, gui=gui, tabnm="plt", 
+  pltx <- pcheck.table(plt, tab_dsn=data_dsn, gui=gui, tabnm="plt", 
 			caption="Plot table?")
   if (!is.null(pltx)) {
     noplt <- FALSE
@@ -248,19 +288,36 @@ datSumCond <- function(cond = NULL,
   }
   
 
-
   ################################################################################  
   ### DO WORK
   ################################################################################  
 
   if (getadjplot) {
-    if ("COND_STATUS_CD" %in% names(condx)) {
-      condx <- condx[condx$COND_STATUS_CD != 5,]
+
+    if (bysubp) {
+      ## Remove nonsampled conditions by subplot and summarize to condition-level
+      subpcx <- subpsamp(cond = condx, 
+                         subp_cond = subpcondx, 
+                         subplot = subplotx, 
+                         subpuniqueid = subpuniqueid, 
+                         subpid = subpid)
+
+      adjfacdata <- getadjfactorPLOT(condx=subpcx, 
+		    cuniqueid=c(subpuniqueid, subpid), areawt="CONDPROP_UNADJ")
+      condx <- adjfacdata$condx
+      cuniqueid <- c(subpuniqueid, subpid)
+
     } else {
-      message("assuming no nonsampled condition in dataset")
+
+      if ("COND_STATUS_CD" %in% names(condx)) {
+        condx <- condx[condx$COND_STATUS_CD != 5,]
+      } else {
+        message("assuming no nonsampled condition in dataset")
+      }
+      adjfacdata <- getadjfactorPLOT(condx=condx, cuniqueid=cuniqueid, 
+                areawt="CONDPROP_UNADJ")
+      condx <- adjfacdata$condx
     }
-    adjfacdata <- getadjfactorPLOT(condx=condx, cuniqueid=cuniqueid)
-    condx <- adjfacdata$condx
   }
 
   ## Filter cond
