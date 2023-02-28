@@ -426,7 +426,7 @@ datSumTreeDom <- function(tree = NULL,
     }
 
     ## Check subplot
-    subpcondx <- pcheck.table(subpcond, tab_dsn=data_dsn, tabnm="subp_cond", gui=gui, 
+    subpcondx <- pcheck.table(subp_cond, tab_dsn=data_dsn, tabnm="subp_cond", gui=gui, 
 			caption="Subpcond table?", stopifnull=TRUE)
     if (!all(subpids %in% names(subpcondx))) {
       stop("uniqueids not in subp_cond: ", toString(subpids))
