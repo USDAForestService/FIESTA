@@ -9,10 +9,11 @@ datSumTreeDom(
   tree = NULL,
   seed = NULL,
   cond = NULL,
+  plt = NULL,
+  subp_cond = NULL,
+  subplot = NULL,
   datsource = "obj",
   data_dsn = NULL,
-  plt = NULL,
-  plt_dsn = NULL,
   tuniqueid = "PLT_CN",
   cuniqueid = "PLT_CN",
   puniqueid = "CN",
@@ -67,18 +68,22 @@ may be used for condition proportion or strata variables used if adjcond or
 adjstrata = TRUE (See details below).  This table is optional. If included,
 CONDID must be present in table.}
 
+\item{plt}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+Plot-level table to join the aggregated tree data to, if bycond=FALSE. This
+table is optional.}
+
+\item{subp_cond}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+Subplot condition-level table to use to sum condition proportions, 
+if bysubp=TRUE.}
+
+\item{subplot}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+Subplot-level table to used to calculate adjustment factors, to remove 
+nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.}
+
 \item{datsource}{String. Source of data ('obj', 'csv', 'sqlite', 'gdb').}
 
 \item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).}
-
-\item{plt}{Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
-database file. Plot-level table to join the aggregated tree data to (if
-bycond=FALSE). Nonsampled plots (PLOT_STATUS_CD = 3) are removed. Optional.}
-
-\item{plt_dsn}{String. The data source name (dsn; i.e., folder or database
-name) of plt. The dsn varies by driver. See gdal OGR vector formats
-(https://www.gdal.org/ogr_formats.html). Optional.}
 
 \item{tuniqueid}{String. Unique identifier of the tree table.  If including
 seedling table, this should be the same for seed.}

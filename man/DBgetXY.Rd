@@ -107,6 +107,9 @@ format using savedata_opts.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE or exportsp = TRUE.}
 
+\item{PLOT}{Data frame. The name of the PLOT data frame object if 
+it is already downloaded and stored in environment.}
+
 \item{POP_PLOT_STRATUM_ASSGN}{Data frame. The name of the 
 POP_PLOT_STRATUM_ASSGN data frame object if it is already downloaded 
 and stored in environment.}

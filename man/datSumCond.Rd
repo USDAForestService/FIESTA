@@ -9,9 +9,13 @@ datSumCond(
   datsource = "obj",
   data_dsn = NULL,
   plt = NULL,
-  plt_dsn = NULL,
+  subp_cond = NULL,
+  subplot = NULL,
   cuniqueid = "PLT_CN",
   puniqueid = "CN",
+  condid = "CONDID",
+  bysubp = FALSE,
+  subpid = "SUBP",
   csumvar = NULL,
   csumvarnm = NULL,
   cfilter = NULL,
@@ -37,13 +41,23 @@ table with aggregate variable and CONDPROP_UNADJ.}
 database file. Plot-level table to join the aggregated tree data to (if
 bycond=FALSE). Nonsampled plots (PLOT_STATUS_CD = 3) are removed. Optional.}
 
-\item{plt_dsn}{String. The data source name (dsn; i.e., folder or database
-name) of plt. The dsn varies by driver. See gdal OGR vector formats
-(https://www.gdal.org/ogr_formats.html). Optional.}
+\item{subp_cond}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+Subplot condition-level table to use to sum condition proportions, 
+if bysubp=TRUE.}
+
+\item{subplot}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+Subplot-level table to used to calculate adjustment factors, to remove 
+nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.}
 
 \item{cuniqueid}{String. Unique identifier of cond (default = "PLT_CN").}
 
 \item{puniqueid}{String. Unique identifier of plt (default = "CN").}
+
+\item{condid}{String. Unique identifier for conditions.}
+
+\item{bysubp}{Logical. If TRUE, data are aggregated to the subplot level.}
+
+\item{subpid}{String. Unique identifier of each subplot.}
 
 \item{csumvar}{String. One or more variable names to sum to plot level.}
 

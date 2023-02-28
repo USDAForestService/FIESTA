@@ -8,10 +8,11 @@ datSumTree(
   tree = NULL,
   seed = NULL,
   cond = NULL,
+  plt = NULL,
+  subp_cond = NULL,
+  subplot = NULL,
   datsource = "obj",
   data_dsn = NULL,
-  plt = NULL,
-  plt_dsn = NULL,
   tuniqueid = "PLT_CN",
   cuniqueid = "PLT_CN",
   puniqueid = "CN",
@@ -51,18 +52,22 @@ to join the aggregated tree data to, if bycond=TRUE. This table also may be
 used for condition proportion or strata variables used if adjcond or
 adjstrata = TRUE (See details below).  This table is optional.}
 
-\item{datsource}{String. Source of data ('obj', 'csv', 'sqlite', 'gdb').}
-
-\item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
-(*.sqlite).}
-
 \item{plt}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
 Plot-level table to join the aggregated tree data to, if bycond=FALSE. This
 table is optional.}
 
-\item{plt_dsn}{String. The data source name (dsn; i.e., folder or database
-name) of plt. The dsn varies by driver. See gdal OGR vector formats
-(https://www.gdal.org/ogr_formats.html). Optional.}
+\item{subp_cond}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+Subplot condition-level table to use to sum condition proportions, 
+if bysubp=TRUE.}
+
+\item{subplot}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+Subplot-level table to used to calculate adjustment factors, to remove 
+nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.}
+
+\item{datsource}{String. Source of data ('obj', 'csv', 'sqlite', 'gdb').}
+
+\item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
+(*.sqlite).}
 
 \item{tuniqueid}{String. Unique identifier of plt in tree table.}
 
@@ -168,7 +173,7 @@ If variable = NULL, then it will prompt user for input.
 Dependent external functions: datFilter Dependent internal functions:
 addcommas, fileexistsnm, getadjfactor
 
-For adjcond (bycond=FALSE): \cr If you want to get trees-per-acre
+For adjcond (bycond=FALSE): \cr If you want to summarize trees-per-acre
 information aggregated to plot or condition level, you need to include a TPA
 variable in tree table. \cr For tsumvars = GROWCFGS, GROWBFSL, GROWCFAL,
 FGROWCFGS, FGROWBFSL, or FGROWCFAL, you must have TPAGROW_UNADJ \cr For
@@ -176,13 +181,9 @@ tsumvars = MORTCFGS, MORTBFSL, MORTCFAL, FMORTCFGS, FMORTBFSL, or FMORTCFAL,
 you must have TPAMORT_UNADJ \cr For tsumvars = REMVCFGS, REMVBFSL, REMVCFAL,
 FREMVCFGS, FREMVBFSL, or FREMVCFAL, you must have TPAREMV_UNADJ \cr
 
-If you want to adjust plot-level information by condition proportions
-(adjplot), you need to include CONDID & CONDPROP_UNADJ in cond or tree table
-and COND_STATUS_CD and FORTYPCD if adjplot="FVS". For adjplot="WEIGHTED" -
-each tree is weighted (or multiplied) by the condition proportions
-(CONDPROP_UNADJ). For adjplot="FVS", each tree is weighted (or multiplied)
-by the sum of the condition proportions (CONDPROP_UNADJ) that are forested
-and not nonstocked (COND_STATUS_CD = 1 and FORTYPCD != 999).  \cr
+If you want to adjust plot-level or subplot-level information by condition 
+proportions (adjplot), you need to include CONDID & CONDPROP_UNADJ in cond 
+or tree table and COND_STATUS_CD. \cr
 }
 \note{
 If a dat table is provided, the aggregated tree data will be merged to
