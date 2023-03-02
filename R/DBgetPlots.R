@@ -2516,15 +2516,19 @@ DBgetPlots <- function (states = NULL,
           message("there is no P2VEG_SUBPLOT_SPP table in datamart")
         } else {
           vsubpsppnm <- "P2VEG_SUBPLOT_SPP"
+          names(P2VEG_SUBPLOT_SPP) <- toupper(names(P2VEG_SUBPLOT_SPP))
+          vsppflds <- names(P2VEG_SUBPLOT_SPP)
         }
 
         P2VEG_SUBP_STRUCTURE <- 
 		      DBgetCSV("P2VEG_SUBP_STRUCTURE", stabbr, returnDT=TRUE, 
 		      stopifnull=FALSE)
-        if (is.null(P2VEG_SUBPLOT_SPP)) {
+        if (is.null(P2VEG_SUBP_STRUCTURE)) {
           message("there is no P2VEG_SUBP_STRUCTURE table in datamart")
         } else {
           vsubpstrnm <- "P2VEG_SUBP_STRUCTURE"
+          names(P2VEG_SUBP_STRUCTURE) <- toupper(names(P2VEG_SUBP_STRUCTURE))
+          vstrflds <- names(P2VEG_SUBP_STRUCTURE)
         }
 
         INVASIVE_SUBPLOT_SPP <- 
@@ -2534,6 +2538,8 @@ DBgetPlots <- function (states = NULL,
           message("there is no INVASIVE_SUBPLOT_SPP table in datamart")
         } else {
           invsubpnm <- "INVASIVE_SUBPLOT_SPP"
+          names(INVASIVE_SUBPLOT_SPP) <- toupper(names(INVASIVE_SUBPLOT_SPP))
+          invflds <- names(INVASIVE_SUBPLOT_SPP)
         }
 
       } else if (datsource %in% c("csv", "obj")) {

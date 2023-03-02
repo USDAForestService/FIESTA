@@ -384,6 +384,10 @@ datSumTreeDom <- function(tree = NULL,
   addseed <- pcheck.logical(addseed, varnm="addseed", title="Add seeds?", 
 		first="NO", gui=gui)
 
+  ## Check seedonly
+  seedonly <- pcheck.logical(seedonly, varnm="seedonly", title="Seed only?", 
+		first="NO", gui=gui)
+
   if (is.null(treex) && is.null(seedx)) {
     stop("must include tree and/or seed table")
   }
@@ -582,7 +586,11 @@ datSumTreeDom <- function(tree = NULL,
     }
 
     tsumuniqueid <- c(tsumuniqueid, subpid)
+    if (bycond) {
+      tsumuniqueid <- c(tuniqueid, subpid, condid)
+    }
     setkeyv(treex, tsumuniqueid)
+
     checkNAtvars <- c(checkNAtvars, subpid)
     if (addseed) {
       setkeyv(seedx, tsumuniqueid)
@@ -746,6 +754,11 @@ datSumTreeDom <- function(tree = NULL,
     tsumvar <- select.list(names(treex), title="Tree aggregate variable", multiple=FALSE)
     if (tsumvar == "") stop("")
   }
+  ## Check seedonly
+  if (seedonly && tsumvar != "TPA_UNADJ") {
+    stop("tsumvar must be TPA_UNADJ for seedonly")
+  }
+
   ## If tsumvar is a TPA* variable, add a variable, COUNT=1 to tree table
   if (tsumvar %in% c(tuniqueid, tpavars)) {
     treex[, COUNT := 1]

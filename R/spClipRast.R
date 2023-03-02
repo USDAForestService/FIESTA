@@ -37,8 +37,9 @@
 #' @param fmt String. Format for exported raster. Default is format of unput
 #' raster.  ("raster", "ascii", "SAGA", "IDRISI", "CDF", "GTiff", "ENVI",
 #' "EHdr", "HFA", "VRT").  VRT is a virtual raster (See note below).
-#' @param compress String. An optional compression type ('LZW', "DEFLATE',
-#' "PACKBITS').
+#' @param compress Logical. If TRUE, compress the final output.
+#' @param compressType String. An optional compression type ('LZW', "DEFLATE',
+#' "PACKBITS'). Note: If format = 'HFA', a default compression type is used.
 #' @param outfolder String. The output folder.
 #' @param outfn String. Name of output data file. If NULL, default is
 #' 'rastclip'.  If no extension, a default is provided to match output format.
@@ -112,8 +113,9 @@ spClipRast <- function(rast,
                        buffdist = NULL,
                        maskByPolygons = TRUE, 
                        showext = FALSE, 
-                       fmt = "HFA", 
-                       compress = NULL, 
+                       fmt = "GTiff", 
+                       compress = FALSE, 
+                       compressType = "DEFLATE",
                        outfolder = NULL,
                        outfn = "rastclip", 
                        outfn.pre = NULL, 
@@ -229,7 +231,7 @@ spClipRast <- function(rast,
   
   ## Check maskByPolygons
   maskByPolygons <- pcheck.logical(maskByPolygons, varnm="maskByPolygons", 
-                                   title="Mask by polygon?", first="NO", gui=gui)
+                           title="Mask by polygon?", first="NO", gui=gui)
   
   ## Check showext
   showext <- pcheck.logical(showext, varnm="showext", title="Show Extents?", 
@@ -249,13 +251,22 @@ spClipRast <- function(rast,
   fmt.ext <- drivers[match(fmt, drivers$fmt), "DefaultExt"]
   
   ## Check compression
+  compress <- pcheck.logical(compress, varnm="compress", 
+                             title="Compress?", first="NO", gui=gui)
+
+  ## Check compression type
   co <- NULL
-  compresslst <- c("LZW", "PACKBITS", "DEFLATE")
-  compress <- pcheck.varchar(var2check=compress, 
-                             varnm="compress", gui=gui,
-                             checklst=compresslst, caption="Compress output?")
-  if (!is.null(compress)) {
-    co <- paste0("COMPRESS=", compress)
+  if (compress) {
+    if (fmt == "HFA") {
+      co <- paste0("COMPRESSION=", TRUE)
+    } else {
+      compresslst <- c("LZW", "PACKBITS", "DEFLATE")
+      compress <- pcheck.varchar(var2check=compress, varnm="compress", 
+                        checklst=compresslst, caption="Compress output?", gui=gui)
+      if (!is.null(compress)) {
+        co <- paste0("COMPRESS=", compress)
+      }
+    }
   }  
   
   ## Check overwrite, outfn.date, outfolder, outfn 

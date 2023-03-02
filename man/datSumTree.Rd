@@ -19,6 +19,7 @@ datSumTree(
   bycond = FALSE,
   condid = "CONDID",
   bysubp = FALSE,
+  subpuniqueid = "PLT_CN",
   subpid = "SUBP",
   tsumvarlst = NULL,
   tsumvarnmlst = NULL,
@@ -62,7 +63,8 @@ if bysubp=TRUE.}
 
 \item{subplot}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
 Subplot-level table to used to calculate adjustment factors, to remove 
-nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.}
+nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional. If 
+included the aggregated tree data are joined to subplot before returning.}
 
 \item{datsource}{String. Source of data ('obj', 'csv', 'sqlite', 'gdb').}
 
@@ -78,11 +80,15 @@ NOT NULL.}
 
 \item{bycond}{Logical. If TRUE, the data are aggregated to the condition
 level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
-level (by: puniqueid).}
+level (by: puniqueid). If bysubp = TRUE and bycond = TRUE, data are 
+aggregated by subpuniqueid, subpid, condid.}
 
 \item{condid}{String. Unique identifier for conditions.}
 
 \item{bysubp}{Logical. If TRUE, data are aggregated to the subplot level.}
+
+\item{subpuniqueid}{String. Unique identifier of plot in subplot and 
+subp_cond table.}
 
 \item{subpid}{String. Unique identifier of each subplot.}
 

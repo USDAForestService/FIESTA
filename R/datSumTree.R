@@ -35,7 +35,8 @@
 #' if bysubp=TRUE. 
 #' @param subplot Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
 #' Subplot-level table to used to calculate adjustment factors, to remove 
-#' nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.
+#' nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional. If 
+#' included the aggregated tree data are joined to subplot before returning.
 #' @param datsource String. Source of data ('obj', 'csv', 'sqlite', 'gdb').
 #' @param data_dsn String. If datsource='sqlite', the name of SQLite database
 #' (*.sqlite).
@@ -45,9 +46,12 @@
 #' @param puniqueid String. Unique identifier of plt table if plt is NOT NULL.
 #' @param bycond Logical. If TRUE, the data are aggregated to the condition
 #' level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
-#' level (by: puniqueid).
+#' level (by: puniqueid). If bysubp = TRUE and bycond = TRUE, data are 
+#' aggregated by subpuniqueid, subpid, condid.
 #' @param condid String. Unique identifier for conditions.
 #' @param bysubp Logical. If TRUE, data are aggregated to the subplot level.
+#' @param subpuniqueid String. Unique identifier of plot in subplot and 
+#' subp_cond table.
 #' @param subpid String. Unique identifier of each subplot.
 #' @param tsumvarlst String (vector). Tree-level variable(s) to aggregate
 #' (e.g., "TPA_UNADJ", "BA"). Use tsumvar="PLT_CN" (tfun=sum) for summed tree
@@ -131,6 +135,7 @@ datSumTree <- function(tree = NULL,
                        bycond = FALSE, 
                        condid = "CONDID", 
                        bysubp = FALSE, 
+                       subpuniqueid = "PLT_CN",
                        subpid = "SUBP", 
                        tsumvarlst = NULL, 
                        tsumvarnmlst = NULL, 
@@ -164,7 +169,6 @@ datSumTree <- function(tree = NULL,
   COND_STATUS_CD=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
 	seedf=TREECOUNT_CALC=estunits=fname=NF_SUBP_STATUS_CD=
 	CONDPROP_UNADJ=MACRPROP_UNADJ=SUBPPROP_UNADJ=sumbcvars=treef <- NULL
-  subpuniqueid <- "PLT_CN"
 
 
   ## If gui.. set variables to NULL
@@ -278,6 +282,10 @@ datSumTree <- function(tree = NULL,
 
   ## Check addseed
   addseed <- pcheck.logical(addseed, varnm="addseed", title="Add seeds?", 
+		first="NO", gui=gui)
+
+  ## Check seedonly
+  seedonly <- pcheck.logical(seedonly, varnm="seedonly", title="Seed only?", 
 		first="NO", gui=gui)
 
   if (is.null(treex) && is.null(seedx)) {
@@ -467,8 +475,12 @@ datSumTree <- function(tree = NULL,
       }
     }
 
-    tsumuniqueid <- c(tuniqueid, subpid, condid)
+    tsumuniqueid <- c(tuniqueid, subpid)
+    if (bycond) {
+      tsumuniqueid <- c(tuniqueid, subpid, condid)
+    }
     setkeyv(treex, tsumuniqueid)
+
     checkNAtvars <- c(checkNAtvars, subpid)
     if (addseed) {
       setkeyv(seedx, tsumuniqueid)
@@ -621,6 +633,11 @@ datSumTree <- function(tree = NULL,
 	multiple=TRUE, stopifnull=TRUE, gui=gui)
   if (any(tsumvarlst == tuniqueid)) {
     tsumvarlst[tsumvarlst == tuniqueid] <- "TPA_UNADJ"
+  }
+
+  ## Check seedonly
+  if (seedonly && !"TPA_UNADJ" %in% tsumvarlst) {
+    stop("tsumvarlst must be TPA_UNADJ for seedonly")
   }
  
   ### Convert variables from pound to tons if lbs2tons=TRUE
@@ -795,7 +812,7 @@ datSumTree <- function(tree = NULL,
                          subp_cond = subpcondx, 
                          subplot = subplotx, 
                          subpuniqueid = subpuniqueid, 
-                         subpid = subpid)
+                         subpid = subpid, ACI=ACI)
 
       ## Check if class of tuniqueid matches class of cuniqueid
       tabs <- check.matchclass(treex, subpcx, c(tuniqueid, subpid), c(subpuniqueid, subpid))
@@ -1062,6 +1079,8 @@ datSumTree <- function(tree = NULL,
       setkeyv(pltx, puniqueid)
     }
     sumdat <- merge(pltx, datvars, by.x=puniqueid, by.y=tuniqueid, all.x=TRUE)
+  } else if (bysubp && !is.null(subplotx)) {
+    sumdat <- merge(subplotx, datvars, by=tsumuniqueid, all.x=TRUE)
   } else {
     sumdat <- datvars
   }

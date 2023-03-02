@@ -16,8 +16,9 @@ spClipRast(
   buffdist = NULL,
   maskByPolygons = TRUE,
   showext = FALSE,
-  fmt = "HFA",
-  compress = NULL,
+  fmt = "GTiff",
+  compress = FALSE,
+  compressType = "DEFLATE",
   outfolder = NULL,
   outfn = "rastclip",
   outfn.pre = NULL,
@@ -65,8 +66,10 @@ polygon.  If FALSE, rast is clipped to extent of polygon.}
 raster.  ("raster", "ascii", "SAGA", "IDRISI", "CDF", "GTiff", "ENVI",
 "EHdr", "HFA", "VRT").  VRT is a virtual raster (See note below).}
 
-\item{compress}{String. An optional compression type ('LZW', "DEFLATE',
-"PACKBITS').}
+\item{compress}{Logical. If TRUE, compress the final output.}
+
+\item{compressType}{String. An optional compression type ('LZW', "DEFLATE',
+"PACKBITS'). Note: If format = 'HFA', a default compression type is used.}
 
 \item{outfolder}{String. The output folder.}
 
