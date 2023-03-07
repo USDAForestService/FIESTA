@@ -286,7 +286,7 @@ modWFarea <- function(WFpopdat,
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter=
-    rawfolder=n.resp=n.nonresp=SUBPROP_UNADJ=pmeasprop <- NULL
+    rawfolder=n.resp=n.nonresp=SUBPPROP_UNADJ=pmeasprop <- NULL
   #estvar <- "CONDPROP_ADJ"
   
   ##################################################################

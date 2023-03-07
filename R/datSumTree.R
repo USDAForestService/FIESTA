@@ -636,7 +636,7 @@ datSumTree <- function(tree = NULL,
   }
 
   ## Check seedonly
-  if (seedonly && !tsumvar %in% c("TPA_UNADJ", "PLT_CN")) {
+  if (seedonly && !any(tsumvarlst %in% c("TPA_UNADJ", "PLT_CN"))) {
     stop("tsumvarlst must be TPA_UNADJ for seedonly")
   }
  
