@@ -270,24 +270,6 @@ continuing until the number of plots equals 10. If there are no strata
 classes following in order, it is combined with the estimation unit previous
 in order.
 }
-\examples{
-WFpopdat <- modWFpop(
-popTabs = list(cond = FIESTA::WYcond,  
-               tree = FIESTA::WYtree,        
-               seed = FIESTA::WYseed),      
-popTabIDs = list(cond = "PLT_CN"),            
-pltassgn = FIESTA::WYpltassgn,  
-pltassgnid = "CN",        
-pjoinid = "PLT_CN",         
-unitarea = FIESTA::WYunitarea,
-unitvar = "ESTN_UNIT",        
-strata = TRUE,           
-stratalut = WYstratalut,    
-strata_opts = strata_options(getwt = TRUE)   
-)
-
-str(WFpopdat, max.level = 1)
-}
 \references{
 Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.;
 Smith, William D.; Westfall, James A.; Hansen, Mark H.; Moisen, Gretchen G.
