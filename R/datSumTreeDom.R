@@ -1033,7 +1033,7 @@ datSumTreeDom <- function(tree = NULL,
     #treef[, (tdomvarnm) := paste0(tdomprefix, get(eval(tdomvar)))]
     #tdomvarlst2 <- paste0(tdomprefix, tdomvarlst)
 
-    if (addseed || seedonly) {
+    if (addseed) {
       seedf[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
 			width=maxchar, flag="0"))]
     }
@@ -1339,7 +1339,7 @@ datSumTreeDom <- function(tree = NULL,
   byvars <- unique(c(tsumuniqueid, tdomvar, tdomvarnm))
 
   if (seedonly) {
-    tdomtreef <- seedf[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seed_newname]
+    tdomtreef <- treef[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=newname]
     setnames(tdomtreef, "V1", newname)
     setkeyv(tdomtreef, byvars)
   } else {
