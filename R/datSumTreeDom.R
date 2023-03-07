@@ -755,7 +755,7 @@ datSumTreeDom <- function(tree = NULL,
     if (tsumvar == "") stop("")
   }
   ## Check seedonly
-  if (seedonly && tsumvar != "TPA_UNADJ") {
+  if (seedonly && !tsumvar %in% c("TPA_UNADJ", "PLT_CN")) {
     stop("tsumvar must be TPA_UNADJ for seedonly")
   }
 
