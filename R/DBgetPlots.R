@@ -3506,7 +3506,7 @@ DBgetPlots <- function (states = NULL,
     }
  
     if (returndata) {
-      tabs$plt <- rbind(tabs$plot, data.frame(pltx))
+      tabs$plt <- rbind(tabs$plt, data.frame(pltx))
       tabIDs$plt <- "CN"
       tabs$cond <- rbind(tabs$cond, data.frame(condx))
       tabIDs$cond <- "PLT_CN"

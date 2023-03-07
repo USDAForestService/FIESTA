@@ -1316,7 +1316,7 @@ datSumTreeDom <- function(tree = NULL,
       if (TPA) {
         seedf[, (seed_newname) := get(eval(tsumvar)) * get(eval(tpavar))]
       } else {
-        seedf[, (seed_newname) := get(eval(tsumvar)) * get(eval(adjvar))]
+        seedf[, (seed_newname) := get(eval(tsumvar)) * TREECOUNT_CALC]
       }
     }
   }

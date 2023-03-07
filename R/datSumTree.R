@@ -979,7 +979,7 @@ datSumTree <- function(tree = NULL,
       }
       treef[, (newname) := get(eval(tvar)) * get(eval(tpavar))]
 
-      if ((addseed) && tvar=="COUNT" && tpavar %in% names(seedf)) {
+      if (addseed && tvar=="COUNT" && tpavar %in% names(seedf)) {
         #seedf[, COUNT := TREECOUNT_CALC]
         if (adjTPA > 1) {
           seedf[, (tpavar) := get(eval(tpavar)) * adjTPA]
@@ -993,6 +993,11 @@ datSumTree <- function(tree = NULL,
         setnames(treef, tvar, newname)
       } else {
         newname <- tvar
+      }
+      if (addseed && tvar=="COUNT") {
+        #seedf[, COUNT := TREECOUNT_CALC]
+        seedf[, (newname) := get(eval(tvar)) * TREECOUNT_CALC]
+        seedcountvar=treecountvar <- newname
       }
     }
 
