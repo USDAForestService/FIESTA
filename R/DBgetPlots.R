@@ -867,7 +867,7 @@ DBgetPlots <- function (states = NULL,
     PLOTe <- evalInfo$PLOT
     plotnm <- "PLOTe"
   }
-
+ 
   ## Get state abbreviations and codes 
   ###########################################################
   stabbrlst <- pcheck.states(states, statereturn="ABBR")
@@ -3466,6 +3466,7 @@ DBgetPlots <- function (states = NULL,
     
       ppsavars <- toString(c("PLT_CN", "STRATUM_CN", "EVALID", "STATECD", "ESTN_UNIT", "STRATUMCD"))
       ppsaqry <- paste("select", ppsavars, "from", ppsafromqry, "where statecd =", stcd)
+      ppsanm <- "ppsa"
 
       if (iseval) {
         if (subsetPOP) {
