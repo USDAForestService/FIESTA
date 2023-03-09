@@ -497,6 +497,7 @@ DBgetXY <- function (states = NULL,
 			error = function(e) {
                   message(e, "\n")
                   return(NULL) })
+      ppsanm <- "POP_PLOT_STRATUM_ASSGN"
     }
 
     XYdf <- pcheck.table(xy, stopifnull=FALSE)
