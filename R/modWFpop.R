@@ -210,7 +210,6 @@
 #' NC: U.S. Department of Agriculture, Forest Service, Southern Research
 #' Station, p.53-77.
 #' @keywords data
-#' @examples 
 #' @export modWFpop
 modWFpop <- function(popType = "VOL",
                      popTabs = popTables(),

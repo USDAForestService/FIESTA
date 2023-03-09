@@ -212,36 +212,6 @@
 #' NC: U.S. Department of Agriculture, Forest Service, Southern Research
 #' Station, p.53-77.
 #' @keywords data
-#' @examples
-#' WFpopdat <- modWFpop(
-#' popTabs = list(cond = FIESTA::WYcond,  
-#'                tree = FIESTA::WYtree,        
-#'                seed = FIESTA::WYseed),      
-#' popTabIDs = list(cond = "PLT_CN"),            
-#' pltassgn = FIESTA::WYpltassgn,  
-#' pltassgnid = "CN",        
-#' pjoinid = "PLT_CN",         
-#' unitarea = FIESTA::WYunitarea,
-#' unitvar = "ESTN_UNIT",        
-#' strata = TRUE,           
-#' stratalut = WYstratalut,    
-#' strata_opts = strata_options(getwt = TRUE)   
-#' )
-#' 
-#' forest_area <- modWFarea(
-#' WFpopdat = WFpopdat, 
-#' landarea = "FOREST",  
-#' sumunits = TRUE,      
-#' )
-#' str(forest_area, max.level = 1)
-#' 
-#' forest_area_by_forest_type <- modWFarea(
-#' WFpopdat = WFpopdat,        
-#' landarea = "FOREST",       
-#' rowvar = "FORTYPCD",        
-#' sumunits = TRUE            
-#' )
-#' str(forest_area_by_forest_type, max.level = 1)
 #' @export modWFarea
 modWFarea <- function(WFpopdat, 
                       landarea = "FOREST", 

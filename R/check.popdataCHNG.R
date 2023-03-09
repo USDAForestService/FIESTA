@@ -79,7 +79,6 @@ check.popdataCHNG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     SCHEMA.<- NULL
     dbqueries <- list()
 
-
     ## Create query for remeasured plots
     ##########################################################################
     if (!all(!is.null(plt), is.character(plt), plt %in% tablst)) {    
@@ -336,18 +335,6 @@ check.popdataCHNG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Merge pltx with condx
   ###########################################################
   if (!is.null(pltx)) {
-    pltnmlst <- names(pltx)
-    puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", gui=gui,
-		checklst=pltnmlst, caption="UniqueID variable of plot",
-		warn=paste(puniqueid, "not in plt table"), stopifnull=TRUE)
-    if (any(duplicated(pltx[[puniqueid]]))) {
-      dups <- pltx[[puniqueid]][duplicated(pltx[[puniqueid]])]
-      warning(paste("plt records are not unique in: plt:", toString(dups)))
-    }
-
-    ## Check for NA values in necessary variables in plt table
-    pltx.na <- sum(is.na(pltx[[puniqueid]]))
-    if (pltx.na > 0) stop("NA values in ", puniqueid)
 
     ## Set key
     setkeyv(pltx, puniqueid)
@@ -355,7 +342,6 @@ check.popdataCHNG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     ## Subset condition columns
     cvars <- unique(c(cuniqueid, names(condx)[!names(condx) %in% names(pltx)])) 
     condx <- condx[, cvars, with=FALSE]
-
 
     ## Check if class of puniqueid in pltx matches class of puniqueid in condx
     tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)

@@ -1780,11 +1780,21 @@ DBgetPlots <- function (states = NULL,
       pcondID <- condx[, paste(PLT_CN, CONDID)]
     }
 
+    ## Check if change is possible
+    if (ischng && (!"PREV_PLT_CN" %in% names(pltx) || all(is.na(pltx$PREV_PLT_CN)))) {
+      if (!"PREV_PLT_CN" %in% names(pltx)) {
+        message("must include PREV_PLT_CN in data")
+      } else {
+        message("no previous plots exist for this dataset")
+      }
+      ischng <- FALSE
+    }
+
     ###############################################################
     ## Get unioned change tables 
     ###############################################################
     if (all(ischng, !is.null(pltx))) {
-
+     
       pcvarsa <- toString(c(paste0("p.", pltvarlst), paste0("c.", condvarlst)))
       pcvarsb <- toString(c(paste0("pplot.", pltvarlst), paste0("pcond.", condvarlst)))
 
@@ -2933,7 +2943,7 @@ DBgetPlots <- function (states = NULL,
                     return(NULL) })
         }
         if(!is.null(subpcx) && nrow(subpcx) != 0){
-          dbqueries$subpcond <- subpcqry
+          dbqueries$subp_cond <- subpcqry
 
           subpcx <- setDT(subpcx)
           subpcx[, PLT_CN := as.character(PLT_CN)]
@@ -2943,8 +2953,8 @@ DBgetPlots <- function (states = NULL,
           subpcx <- subpcx[paste(subpcx$PLT_CN, subpcx$CONDID) %in% pcondID,]
 
           if (returndata) {
-            tabs$subpcond <- rbind(tabs$subpcond, data.frame(subpcx))
-            tabIDs$subpcond <- "PLT_CN"
+            tabs$subp_cond <- rbind(tabs$subp_cond, data.frame(subpcx))
+            tabIDs$subp_cond <- "PLT_CN"
           }
           if (savedata) {
             if (!append_layer) index.unique.subpcx <- c("PLT_CN", "CONDID")

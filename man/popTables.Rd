@@ -14,7 +14,7 @@ popTables(
   invsubp = NULL,
   subplot = NULL,
   subp_cond = NULL,
-  cond_dwm_calc = NULL,
+  dwm = NULL,
   sccm = NULL,
   grm = NULL,
   pltu = NULL,
@@ -61,7 +61,7 @@ dsn. Subplot-level data with one record for each species (SUBPLOT).}
 dsn. Subplot condition-level data with one record for each species
 (SUBP_COND).}
 
-\item{cond_dwm_calc}{DF/DT, R object, comma-delimited file(*.csv), or layer 
+\item{dwm}{DF/DT, R object, comma-delimited file(*.csv), or layer 
 in dsn. Calculated down woody material.}
 
 \item{sccm}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.

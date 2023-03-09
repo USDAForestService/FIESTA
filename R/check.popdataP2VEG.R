@@ -73,6 +73,7 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     SCHEMA. <- NULL
     dbqueries <- list()
 
+
     ## Create query for cond
     #########################################
     if (all(!is.null(cond), is.character(cond), cond %in% tablst)) {
@@ -84,7 +85,7 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
         cfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., cond,
 				" c ON (c.", cuniqueid, " = ", palias, ".", pjoinid, ")")
       }
-#      condqry <- paste("select distinct", toString(paste0("c.", condvars)), 
+#     condqry <- paste("select distinct", toString(paste0("c.", condvars)), 
 #				"from", cfromqry, whereqry)
       condqry <- paste("select distinct c.* from", cfromqry, whereqry)
       dbqueries$cond <- condqry   
@@ -141,14 +142,17 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   }
   condx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
            tabnm="cond", caption="cond table?",
-		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE))
+		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE,
+           stopifnull=FALSE))
 
   subplotx <- suppressMessages(pcheck.table(subplot, tab_dsn=dsn, 
            tabnm="subplot", caption="subplot table?", 
-           nullcheck=nullcheck, tabqry=subplotqry, returnsf=FALSE))
+           nullcheck=nullcheck, tabqry=subplotqry, returnsf=FALSE,
+           stopifnull=FALSE))
   subp_condx <- suppressMessages(pcheck.table(subp_cond, tab_dsn=dsn, 
            tabnm="subp_cond", caption="subp_cond table?", 
-           nullcheck=nullcheck, tabqry=subp_condqry, returnsf=FALSE))
+           nullcheck=nullcheck, tabqry=subp_condqry, returnsf=FALSE,
+           stopifnull=FALSE))
 
   vsubpsppx <- suppressMessages(pcheck.table(vsubpspp, tab_dsn=dsn, 
            tabnm="vsubpspp", caption="Veg Species table?", 
@@ -207,57 +211,47 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
 
   ## Merge pltx to condx
   ###################################################################
-  if (!is.null(pltx)) {
 
-    ## Set key
-    setkeyv(pltx, puniqueid)
+  # Set key
+  setkeyv(pltx, puniqueid)
 
-    ## Subset condition columns
-    cvars <- unique(c(cuniqueid, names(condx)[!names(condx) %in% names(pltx)])) 
-    condx <- condx[, cvars, with=FALSE]
+  ## Subset condition columns
+  cvars <- unique(c(cuniqueid, names(condx)[!names(condx) %in% names(pltx)])) 
+  condx <- condx[, cvars, with=FALSE]
 
+  ## Check if class of puniqueid in pltx matches class of puniqueid in condx
+  tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
+  condx <- tabchk$tab1
+  pltx <- tabchk$tab2
 
-    ## Check if class of puniqueid in pltx matches class of puniqueid in condx
-    tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
-    condx <- tabchk$tab1
-    pltx <- tabchk$tab2
-
-    ## Check for matching unique identifiers of condx and pltx
-    condx <- check.matchval(condx, pltx, cuniqueid, puniqueid,
+  ## Check for matching unique identifiers of condx and pltx
+  condx <- check.matchval(condx, pltx, cuniqueid, puniqueid,
 			tab1txt=paste0("cond-", cuniqueid),
 			tab2txt=paste0("plt-", puniqueid), subsetrows=TRUE)
 
-    nrow.before <- nrow(pltx)
+  nrow.before <- nrow(pltx)
 
-    ## Merge cond to plt (Note: inner join to use only plots with sampled conditions)
-    pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
-    pltcondx <- tryCatch(merge(pltx[, pltcols, with=FALSE], condx,
+  ## Merge cond to plt (Note: inner join to use only plots with sampled conditions)
+  pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
+  pltcondx <- tryCatch(merge(pltx[, pltcols, with=FALSE], condx,
 				by.x=puniqueid, by.y=cuniqueid),
      	 	error=function(e) {
 			return(NULL) })
-    if (is.null(pltcondx)) {
-      stop("invalid dataset")
-    }
+  if (is.null(pltcondx)) {
+    stop("invalid dataset")
+  }
 
-    if ("CN" %in% names(pltcondx) && !"PLT_CN" %in% names(pltcondx)) {
-      setnames(pltcondx, "CN", cuniqueid)
-    }
-    if (!cuniqueid %in% names(pltcondx) && puniqueid %in% names(pltcondx)) {
-      setnames(pltcondx, puniqueid, cuniqueid)
-    }
-    setkeyv(pltcondx, c(cuniqueid, condid))
+  if ("CN" %in% names(pltcondx) && !"PLT_CN" %in% names(pltcondx)) {
+    setnames(pltcondx, "CN", cuniqueid)
+  }
+  if (!cuniqueid %in% names(pltcondx) && puniqueid %in% names(pltcondx)) {
+    setnames(pltcondx, puniqueid, cuniqueid)
+  }
+  setkeyv(pltcondx, c(cuniqueid, condid))
 
-    nrow.after <- length(unique(pltcondx[[cuniqueid]]))
-    if (nrow.after < nrow.before) {
-      message(abs(nrow.after - nrow.before), " plots were removed from population")
-    }
-  } else {
-    pltcondx <- condx
-
-    ## Check for matching unique identifiers of pltcondx with pltassgnx
-    ## Subset pltx to pltassgnx ids
-    pltcondx <- check.matchval(pltcondx, pltassgnx, cuniqueid, pltassgnid, 
-			tab1txt="cond", tab2txt="pltassgn", subsetrows=TRUE)
+  nrow.after <- length(unique(pltcondx[[cuniqueid]]))
+  if (nrow.after < nrow.before) {
+    message(abs(nrow.after - nrow.before), " plots were removed from population")
   }
 
   ###################################################################################
@@ -268,8 +262,7 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Check for COND_STATUS_CD and create ACI filter
   #############################################################################
   if (!"COND_STATUS_CD" %in% pltcondnmlst) {
-    message("COND_STATUS_CD not in dataset.. assuming all sampled conditions")
-    cvars2keep <- cvars2keep[cvars2keep != "COND_STATUS_CD"]
+    stop("COND_STATUS_CD must be included in dataset...")
   }
 
   #############################################################################
@@ -306,7 +299,7 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
       message("NF_COND_STATUS_CD not in dataset.. assuming all sampled nonforest conditions")
     }
   }
-
+ 
   #############################################################################
   ## Generate and apply nonsamp.cfilter
   #############################################################################
@@ -358,8 +351,6 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   pltcondx[[areawt]] <- check.numeric(pltcondx[[areawt]])
 
 
-
-
   ########################################################################
   ## Separate tables for estimation
   ########################################################################
@@ -387,9 +378,13 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Subset pltassgn to sampled P2VEG and merge to subp_condx
   #############################################################################
   pltassgnx <- merge(pltassgnx, 
-		unique(pltcondx[P2VEG_SAMPLING_STATUS_CD < 3, pltassgnvars, with=FALSE]))
+		unique(pltcondx[P2VEG_SAMPLING_STATUS_CD < 3, pltassgnvars, with=FALSE]),
+		by.x=key(pltassgnx), by.y=cuniqueid)
+  if (key(pltassgnx) != cuniqueid) {
+    setnames(pltassgnx, key(pltassgnx), cuniqueid)
+  }
   pltassgnid <- cuniqueid
-
+  setkeyv(pltassgnx, pltassgnid)
 
   ## Define subplot ids
   subpuniqueid <- "PLT_CN"
@@ -460,7 +455,6 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Subset subp_condx table
   subpvars2keep <- subpvars2keep[subpvars2keep %in% names(subp_condx)]
   subp_condx <- subp_condx[, c(subpuniqueid, subpid, condid, subpvars2keep), with=FALSE]
-
 
   ## Merge pltassgnx to subp_condx - inner join
   ##########################################################
@@ -592,6 +586,7 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
 
 
   returnlst$pltassgnx <- pltassgnx
+  returnlst$pltassgnid <- pltassgnid
   returnlst$condx <- condx
   returnlst$vcondx <- vcondx
   returnlst$areawt <- "CONDPROP_UNADJ"

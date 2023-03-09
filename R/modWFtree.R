@@ -226,42 +226,6 @@
 #' NC: U.S. Department of Agriculture, Forest Service, Southern Research
 #' Station, p.53-77.
 #' @keywords data
-#' @examples
-#' WFpopdat <- modWFpop(
-#'   popTabs = list(cond = FIESTA::WYcond,  
-#'                  tree = FIESTA::WYtree,        
-#'                  seed = FIESTA::WYseed),      
-#'   popTabIDs = list(cond = "PLT_CN"),            
-#'   pltassgn = FIESTA::WYpltassgn,  
-#'   pltassgnid = "CN",        
-#'   pjoinid = "PLT_CN",         
-#'   unitarea = FIESTA::WYunitarea,
-#'   unitvar = "ESTN_UNIT",        
-#'   strata = TRUE,           
-#'   stratalut = WYstratalut,    
-#'   strata_opts = strata_options(getwt = TRUE)   
-#' )
-#' 
-#' tree1.1 <- modWFtree(
-#'   WFpopdat = WFpopdat,         # pop - population calculations
-#'   landarea = "FOREST",         # est - forest land filter
-#'   sumunits = TRUE,             # est - sum estimation units to population
-#'   estvar = "VOLCFNET",               # est - net cubic-foot volume
-#'   estvar.filter = "STATUSCD == 1",   # est - live trees only
-#'   returntitle = TRUE           # out - return title information
-#' )
-#' str(tree1.1, max.level = 1)
-#' 
-#' tree1.2 <- modWFtree(
-#'   WFpopdat = WFpopdat,         # pop - population calculations
-#'   landarea = "FOREST",         # est - forest land filter
-#'   sumunits = TRUE,             # est - sum estimation units to population
-#'   estvar = "VOLCFNET",               # est - net cubic-foot volume
-#'   estvar.filter = "STATUSCD == 1",   # est - live trees only
-#'   rowvar = "FORTYPCD",         # est - row domain 
-#'   returntitle = TRUE           # out - return title information
-#' )
-#' str(tree1.2, max.level = 1)
 #' @export modWFtree
 modWFtree <- function(WFpopdat, 
                       estvar, 

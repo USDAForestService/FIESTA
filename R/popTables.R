@@ -34,7 +34,7 @@
 #' @param subp_cond DF/DT, R object, comma-delimited file(*.csv), or layer in
 #' dsn. Subplot condition-level data with one record for each species
 #' (SUBP_COND).
-#' @param cond_dwm_calc DF/DT, R object, comma-delimited file(*.csv), or layer 
+#' @param dwm DF/DT, R object, comma-delimited file(*.csv), or layer 
 #' in dsn. Calculated down woody material.
 #' @param sccm DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Subplot-level data (SUBP_COND_CHNG_MTRX).
@@ -61,7 +61,7 @@ popTables <- function(cond = NULL,
                       invsubp = NULL,
                       subplot = NULL, 
                       subp_cond = NULL, 
-                      cond_dwm_calc = NULL,
+                      dwm = NULL,
                       sccm = NULL,
                       grm = NULL,
                       pltu = NULL, 

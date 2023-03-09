@@ -5,21 +5,18 @@
 \alias{WYunitarea}
 \title{FIA data. Acres data from FIA public database.}
 \format{
-A data table with 4 columns and 23 rows.
+A data table with 5 columns and 23 rows.
 }
 \source{
-FIA Database.
+FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
 }
 \description{
-FIA acres by estimation unit for the state of Wyoming, inventory years
-2011-2012 and was downloaded Sept 8, 2017 from FIADB_1.7.0.00.
+FIA acres by estimation unit for the state of Wyoming, FIA Evaluation 561301, 
+including inventory years 2011-2013.
 }
 \references{
-O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-Forest Inventory and Analysis Database: Database Description and Users
-Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-(http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-manual_5-1-2_p2_07_2012.pdf)
+Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+Analysis Database: Database description and user guide version 8.0 for Phase 2.
 }
 \keyword{datasets}

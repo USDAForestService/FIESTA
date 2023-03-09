@@ -267,7 +267,7 @@ datSumTreeDom <- function(tree = NULL,
 
   ## Set global variables  
   COND_STATUS_CD=COUNT=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=
-	seedf=estunits <- NULL
+	seedf=estunits=TREECOUNT_CALC <- NULL
   checkNApvars <- {}
   checkNAcvars <- {}
   checkNAtvars <- {}

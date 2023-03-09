@@ -740,6 +740,7 @@ modGBpop <- function(popType = "VOL",
                condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
     pltcondx <- popcheck$pltcondx
     pltassgnx <- popcheck$pltassgnx
+    pltassgnid <- popcheck$pltassgnid
     condx <- popcheck$condx
     vcondx <- popcheck$vcondx
     vcondsppf <- popcheck$vcondsppf
@@ -750,6 +751,7 @@ modGBpop <- function(popType = "VOL",
     vareawt <- popcheck$vareawt
     vuniqueid <- popcheck$vcondstrid
   }
+
   if (popType == "DWM") {
     popcheck <- check.popdataDWM(gui=gui, 
                tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 

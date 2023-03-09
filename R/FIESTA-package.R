@@ -22,23 +22,6 @@
 #' Albers (EPSG:5070)\cr Saved to R object, with compression='xz'
 #' 
 #' 
-#' @name ecomap
-#' @docType data
-#' @format A SpatialPolygonsDataFrame with 1233 features and 3 attributes
-#' PROVINCE - Ecomap Province SECTION - EcoMap Section SUBSECTION - Ecomap
-#' Subsection
-#' @references Cleland, D.T.; Freeouf, J.A.; Keys, J.E., Jr.; Nowacki, G.J.;
-#' Carpenter, C; McNab, W.H. 2007. Ecological Subregions: Sections and
-#' Subsections of the Conterminous United States [1:3,500,000] [CD-ROM]. Sloan,
-#' A.M., cartog. Gen. Tech. Report WO-76. Washington, DC: U.S. Department of
-#' Agriculture, Forest Service.
-#' @source Downloaded from the FSGeodata Clearinghouse on 2019 October 30,
-#' format ESRI geodatabase (https://data.fs.usda.gov/geodata/edw/datasets.php)
-#' @keywords datasets
-NULL
-
-
-
 
 
 #' FIESTA - Forest Inventory Estimation for Analysis
@@ -117,8 +100,6 @@ NULL
 
 
 
-
-
 #' Reference table - Metadata for cond default variables output from
 #' DBgetPlots()
 #' 
@@ -139,8 +120,6 @@ NULL
 #' @source FIA look-up table
 #' @keywords datasets
 NULL
-
-
 
 
 
@@ -277,36 +256,84 @@ NULL
 NULL
 
 
-
-
-
-#' FIA data. Condition-level data from FIA public database.
+#' FIA data. Plot assignment data from FIA public database.
 #' 
-#' FIA condition-level data for the state of Wyoming, inventory years 2011-2012
-#' and was downloaded Sept 8, 2017 from FIADB_1.7.0.00.
+#' FIA plot-level stratification assignments for the state of Wyoming, FIA 
+#' Evaluation 561301, including inventory years 2011-2013.
 #' 
 #' 
-#' @name WYcond
+#' @name WYpltassgn
 #' @docType data
-#' @format A dataframe with 26 columns and 6710 rows.
-#' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-#' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-#' Forest Inventory and Analysis Database: Database Description and Users
-#' Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-#' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-#' manual_5-1-2_p2_07_2012.pdf)
-#' @source FIA Database.
+#' @format A dataframe with 24 columns and 3047 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
 #' @keywords datasets
 NULL
 
 
 
+#' FIA data. Post-stratification data from FIA public database.
+#' 
+#' FIA stratification data for the state of Wyoming, FIA Evaluation 561301, 
+#' including inventory years 2011-2013.
+#' 
+#' 
+#' @name WYstratalut
+#' @docType data
+#' @format A dataframe with 7 columns and 35 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
+#' @keywords datasets
+NULL
+
+
+#' FIA data. Acres data from FIA public database.
+#' 
+#' FIA acres by estimation unit for the state of Wyoming, FIA Evaluation 561301, 
+#' including inventory years 2011-2013.
+#' 
+#' 
+#' @name WYunitarea
+#' @docType data
+#' @format A data table with 5 columns and 23 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
+#' @keywords datasets
+NULL
+
+
+
+#' Zonal data. Zonal means for auxiliary data in counties in Wyoming.
+#' 
+#' Zonal means and pixel counts for certain auxiliary data in counties in
+#' Wyoming. Includes county code variable to distinguish counties, and state
+#' code variable to distinguish states. 
+#' 
+#' 
+#' @name WYunitzonal
+#' @docType data
+#' @format A dataframe with 9 columns and 23 rows.
+#' @keywords datasets
+NULL
+
 
 
 #' FIA data. Plot-level data from FIA public database.
 #' 
-#' FIA plot-level data for the state of Wyoming, inventory years 2011-2012 and
-#' was downloaded Sept 8, 2017 from FIADB_1.7.0.00.
+#' FIA plot-level data for the state of Wyoming, FIA Evaluation 561301, 
+#' including inventory years 2011-2013.
 #' 
 #' 
 #' \tabular{lll}{ \tab \bold{VARIABLE} \tab \bold{DESCRIPTION} \cr \tab CN \tab
@@ -342,148 +369,172 @@ NULL
 #' 
 #' @name WYplt
 #' @docType data
-#' @format A data frame with 24 columns and 6336 rows.
-#' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-#' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-#' Forest Inventory and Analysis Database: Database Description and Users
-#' Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-#' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-#' manual_5-1-2_p2_07_2012.pdf)
-#' @source FIA national database (FIADB_1.6.0.02), downloaded September 18,
-#' 2016.
+#' @format A data frame with 20 columns and 3047 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
 #' @keywords datasets
 NULL
 
 
 
-
-
-#' FIA data. Plot-level data from FIA public database.
+#' FIA data. Condition-level data from FIA public database.
 #' 
-#' FIA plot-level data for the state of Wyoming, inventory years 2011-2012 and
-#' was downloaded Sept 8, 2017 from FIADB_1.7.0.00. It includes strata
-#' assignments for FIA plot center location (1:GREEN; 2:BROWN).
+#' FIA condition-level data for the state of Wyoming, FIA Evaluation 561301, 
+#' including inventory years 2011-2013.
+#'
 #' 
-#' 
-#' @name WYpltassgn
+#' @name WYcond
 #' @docType data
-#' @format A dataframe with 24 columns and 3047 rows.
-#' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-#' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-#' Forest Inventory and Analysis Database: Database Description and Users
-#' Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-#' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-#' manual_5-1-2_p2_07_2012.pdf)
-#' @source FIA Database.
+#' @format A dataframe with 26 columns and 3224 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
 #' @keywords datasets
 NULL
 
 
+#' FIA data. Tree-level data from FIA public database.
+#' 
+#' FIA tree-level data for the state of Wyoming, FIA Evaluation 561301, 
+#' including inventory years 2011-2013.
+#' 
+#' 
+#' @name WYtree
+#' @docType data
+#' @format A dataframe with 19 columns and 18380 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
+#' @keywords datasets
+NULL
 
 
 
 #' FIA data. Seedling data from FIA public database.
 #' 
-#' FIA seedling data for the state of Wyoming, inventory years 2011-2012 and
-#' was downloaded May 17, 2017 from FIADB_1.7.0.00.
+#' FIA seedling data for the state of Wyoming, FIA Evaluation 561301, 
+#' including inventory years 2011-2013.
 #' 
 #' 
 #' @name WYseed
 #' @docType data
-#' @format A dataframe with 10 columns and 1039 rows.
-#' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-#' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-#' Forest Inventory and Analysis Database: Database Description and Users
-#' Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-#' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-#' manual_5-1-2_p2_07_2012.pdf)
-#' @source FIA Database.
+#' @format A dataframe with 10 columns and 1607 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
 #' @keywords datasets
 NULL
 
 
 
-
-
-#' FIA data. Strata data from FIA public database.
+#' FIA data. Subplot data from FIA public database.
 #' 
-#' FIA condition-level data for the state of Wyoming, inventory years 2011-2012
-#' and was downloaded Sept 8, 2017 from FIADB_1.7.0.00. It includes P1POINTCNT
-#' and number of FIA plots by strata (1:GREEN; 2:BROWN) and by estimation unit
-#' (ESTN_UNIT).
+#' FIA subplot-level data for the state of Wyoming, FIA Evaluation 561301, 
+#' including inventory years 2011-2013.
 #' 
 #' 
-#' @name WYstratalut
+#' @name WYsubplot
 #' @docType data
-#' @format A dataframe with 6 columns and 39 rows.
-#' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-#' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-#' Forest Inventory and Analysis Database: Database Description and Users
-#' Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-#' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-#' manual_5-1-2_p2_07_2012.pdf)
-#' @source FIA Database.
+#' @format A dataframe with 9 columns and 20596 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
 #' @keywords datasets
 NULL
 
 
-
-
-
-#' FIA data. Tree-level data from FIA public database.
+#' FIA data. Subplot condition data from FIA public database.
 #' 
-#' FIA tree-level data for the state of Wyoming, inventory years 2011-2012 and
-#' was downloaded Sept 8, 2017 from FIADB_1.7.0.00.
+#' FIA subplot condition-level data for the state of Wyoming, FIA Evaluation  
+#' 561301, including inventory years 2011-2013.
 #' 
 #' 
-#' @name WYtree
+#' @name WYsubp_cond
 #' @docType data
-#' @format A dataframe with 45 columns and 37312 rows.
-#' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-#' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-#' Forest Inventory and Analysis Database: Database Description and Users
-#' Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-#' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-#' manual_5-1-2_p2_07_2012.pdf)
-#' @source FIA Database.
+#' @format A dataframe with 6 columns and 20641 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
 #' @keywords datasets
 NULL
 
 
-
-
-
-#' FIA data. Acres data from FIA public database.
+#' FIA data. P2 vegetation structure data from FIA public database.
 #' 
-#' FIA acres by estimation unit for the state of Wyoming, inventory years
-#' 2011-2012 and was downloaded Sept 8, 2017 from FIADB_1.7.0.00.
+#' FIA subplot-level P2 vegetation structure data for the state of Wyoming,  
+#' FIA Evaluation 561301, including inventory years 2011-2013.
 #' 
 #' 
-#' @name WYunitarea
+#' @name WYp2veg_subp_structure
 #' @docType data
-#' @format A data table with 4 columns and 23 rows.
-#' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-#' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-#' Forest Inventory and Analysis Database: Database Description and Users
-#' Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-#' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-#' manual_5-1-2_p2_07_2012.pdf)
-#' @source FIA Database.
+#' @format A dataframe with 6 columns and 96775 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
 #' @keywords datasets
 NULL
 
 
-
-#' Zonal data. Zonal means for auxiliary data in counties in Wyoming.
+#' FIA data. P2 vegetation species data from FIA public database.
 #' 
-#' Zonal means and pixel counts for certain auxiliary data in counties in
-#' Wyoming. Includes county code variable to distinguish counties, and state
-#' code variable to distinguish states. 
+#' FIA subplot-level P2 vegetation species data for the state of Wyoming,  
+#' FIA Evaluation 561301, including inventory years 2011-2013.
 #' 
 #' 
-#' @name WYunitzonal
+#' @name WYp2veg_subplot_spp
 #' @docType data
-#' @format A dataframe with 9 columns and 23 rows.
+#' @format A dataframe with 9 columns and 14616 rows.
+#' @references Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+#' Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+#' Analysis Database: Database description and user guide version 8.0 for Phase 2. 
+#. USDA Forest Service. 946 p. Available online at 
+#. http://www.fia.fs.fed.us/library/database-documentation/.
+#' @source FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
 #' @keywords datasets
 NULL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

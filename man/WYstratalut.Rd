@@ -3,25 +3,20 @@
 \docType{data}
 \name{WYstratalut}
 \alias{WYstratalut}
-\title{FIA data. Strata data from FIA public database.}
+\title{FIA data. Post-stratification data from FIA public database.}
 \format{
-A dataframe with 6 columns and 39 rows.
+A dataframe with 7 columns and 35 rows.
 }
 \source{
-FIA Database.
+FIA national database (FIADB_1.7.0.00), downloaded September 18, 2016.
 }
 \description{
-FIA condition-level data for the state of Wyoming, inventory years 2011-2012
-and was downloaded Sept 8, 2017 from FIADB_1.7.0.00. It includes P1POINTCNT
-and number of FIA plots by strata (1:GREEN; 2:BROWN) and by estimation unit
-(ESTN_UNIT).
+FIA stratification data for the state of Wyoming, FIA Evaluation 561301, 
+including inventory years 2011-2013.
 }
 \references{
-O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-Forest Inventory and Analysis Database: Database Description and Users
-Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-(http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-manual_5-1-2_p2_07_2012.pdf)
+Burrill, E.A.; Wilson, A.M.; Turner, J.A.; Pugh, S.A.; Menlove, J.; 
+Christiansen, G.; B.L. Conkling, B.L.: David, W. 2018. The Forest Inventory and 
+Analysis Database: Database description and user guide version 8.0 for Phase 2.
 }
 \keyword{datasets}
