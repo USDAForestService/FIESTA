@@ -97,8 +97,6 @@
 #' @param showsteps Logical. If TRUE, display data in device window.
 #' @param returndata Logical. If TRUE, returns data objects.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
-#' @param savePOP Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN
-#' table.
 #' @param savebnd Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a
 #' SpatiaLite database.
 #' @param returnxy Logical. If TRUE, save xy coordinates to outfolder.
@@ -199,7 +197,6 @@ spGetPlots <- function(bnd = NULL,
                        showsteps = FALSE, 
                        returndata = TRUE,
                        savedata = FALSE,
-                       savePOP = FALSE, 
                        savebnd = FALSE, 
                        returnxy = TRUE, 
                        exportsp = FALSE, 
@@ -583,6 +580,7 @@ spGetPlots <- function(bnd = NULL,
           xyjoinid = xydat1$xyjoinid       
           bndx1 <- xydat1$bndx
           evalInfo1 <- xydat1$evalInfo
+          #pop_plot_stratum_assgn1 <- xydat1$pop_plot_stratum_assgn
 
           ## Get plots outside filter
           #######################################
@@ -610,6 +608,7 @@ spGetPlots <- function(bnd = NULL,
           countyfips2 <- xydat2$countyfips
           bndx2 <- xydat2$bndx
           evalInfo2 <- xydat2$evalInfo
+          #pop_plot_stratum_assgn2 <- xydat1$pop_plot_stratum_assgn
 
           ## Combine XYdata inside and outside filter
           spxy <- rbind(spxy1, spxy2)
@@ -617,6 +616,7 @@ spGetPlots <- function(bnd = NULL,
           states <- unique(states1, states2)
           countyfips <- unique(countyfips1, countyfips2)
           bndx <- rbind(bndx1, bndx2)
+          #pop_plot_stratum_assgn <- rbind(pop_plot_stratum_assgn1, pop_plot_stratum_assgn2)
 
         } else {
           xydat <- spGetXY(bnd = bndx, 
@@ -646,7 +646,8 @@ spGetPlots <- function(bnd = NULL,
           xy.uniqueid <- xydat$xy.uniqueid
           pjoinid = xydat$pjoinid 
           xyjoinid = xydat$xyjoinid 
-          evalInfo <- xydat$evalInfo             
+          evalInfo <- xydat$evalInfo  
+          #pop_plot_stratum_assgn <- xydat$pop_plot_stratum_assgn           
         }
  
         ## Check xyjoinid
@@ -1332,9 +1333,9 @@ spGetPlots <- function(bnd = NULL,
       }
     }
  
-    if (savePOP) {
-      returnlst$pop_plot_stratum_assgn <- pop_plot_stratum_assgn
-    }
+    #if (savePOP && !is.null(pop_plot_stratum_assgn)) {
+    #  returnlst$pop_plot_stratum_assgn <- get(ppsanm)
+    #}
     if (iseval) {
       returnlst$evalid <- evalid
     }

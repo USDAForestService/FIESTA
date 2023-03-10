@@ -1101,6 +1101,10 @@ DBgetXY <- function (states = NULL,
     }
     returnlst$evalInfo <- evalInfo
 
+    if (!is.null(ppsanm)) {
+      returnlst$pop_plot_stratum_assgn <- get(ppsanm)
+    }
+
     ## Return data list
     return(returnlst)
   } 

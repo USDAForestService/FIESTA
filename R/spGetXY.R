@@ -451,6 +451,7 @@ spGetXY <- function(bnd,
     xyjoinid <- xydat$xyjoinid
     pjoinid <- xydat$pjoinid 
     evalInfo <- xydat$evalInfo
+    pop_plot_stratum_assgn <- xydat$pop_plot_stratum_assgn
   }
 
   if (clipxy) {
@@ -576,5 +577,9 @@ spGetXY <- function(bnd,
   returnlst$xyjoinid <- xyjoinid
   returnlst$states <- statenames
   returnlst$countyfips <- countyfips
+
+  #if (!is.null(pop_plot_stratum_assgn)) {
+  #  returnlst$pop_plot_stratum_assgn <- pop_plot_stratum_assgn
+  #}
   return(returnlst)
 }

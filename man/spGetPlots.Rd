@@ -39,7 +39,6 @@ spGetPlots(
   showsteps = FALSE,
   returndata = TRUE,
   savedata = FALSE,
-  savePOP = FALSE,
   savebnd = FALSE,
   returnxy = TRUE,
   exportsp = FALSE,
@@ -154,9 +153,6 @@ be unique. If using most current XY coordinates, use identifier for a plot
 \item{returndata}{Logical. If TRUE, returns data objects.}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
-
-\item{savePOP}{Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN
-table.}
 
 \item{savebnd}{Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a
 SpatiaLite database.}
