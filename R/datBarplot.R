@@ -267,8 +267,9 @@ datBarplot <- function(x,
   datx <- DT_NAto0(datx, yvar)
  
   ## Divide by 
-  if (!is.null(divideby))
+  if (!is.null(divideby)) {
     datx[, (yvar) := lapply(.SD, function(x) x / dividebynum), .SDcols=yvar]
+  }
 
   ## sevar/psevar
   ######################
@@ -503,7 +504,7 @@ datBarplot <- function(x,
       mar[2] <- xlinenum + (10/xlinenum)		## left mar
       mar[4] <- 2.5						## right mar
     } else {
-      mar[1] <- xlinenum * cex.names + 2.5		## bottom mar
+      mar[1] <- xlinenum * cex.names + 2.8		## bottom mar
       mar[2] <- ylinenum + 1.6				## left mar
       mar[4] <- 0.5						## right mar
     }
