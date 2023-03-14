@@ -249,7 +249,7 @@ DBgetEvalid <- function(states = NULL,
       stop("invyrtab must be a data frame or data table") 
     }
     statenm <- findnm("STATECD", names(invyrtab), returnNULL=FALSE) 
-    if (!is.null(statenm)) {
+    if (is.null(statenm)) {
       stop("STATECD must be in invyrtab")
     } else {
       stcdlst <- unique(invyrtab[[statenm]])

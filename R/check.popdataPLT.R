@@ -66,7 +66,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     assign(tabnm, tabs[[tabnm]])
   }
   puniqueid <- tabIDs[["plt"]]
-
+ 
   ###################################################################################
   ## Check parameters
   ###################################################################################
@@ -485,7 +485,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 			"partially sampled")
     plotsampcnt <- pltx[, list(NBRPLOT=uniqueN(get(puniqueid)))]
   }
-
+ 
   if (ACI) {
     if (any(c("NF_PLOT_STATUS_CD", "PSTATUSNF") %in% pltnmlst)) {
       if ("PSTATUSNF" %in% names(pltx))

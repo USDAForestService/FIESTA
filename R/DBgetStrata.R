@@ -220,12 +220,16 @@ DBgetStrata <- function(dat = NULL,
   datsourcelst <- c("datamart", "sqlite")
   datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
-  if (!is.null(data_dsn)) {
-    if (getext(data_dsn) %in% c("sqlite", "db", "db3")) {
-      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-      dsn_tables <- DBI::dbListTables(dbconn)
+  if (datsource == "sqlite") {
+    if (!is.null(data_dsn)) {
+      if (getext(data_dsn) %in% c("sqlite", "db", "db3")) {
+        dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+        dsn_tables <- DBI::dbListTables(dbconn)
+      } else {
+        stop("only sqlite databases available currently")
+      }
     } else {
-      stop("only sqlite databases available currently")
+      stop("invalid data_dsn")
     }     
   }
   

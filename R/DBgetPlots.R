@@ -1550,7 +1550,7 @@ DBgetPlots <- function (states = NULL,
       dbqueries$pltcond <- pltcond.qry
 
       ## Run pltcond query
-      message(pltcond.qry)
+      #message(pltcond.qry)
  
       if (datsource == "sqlite") {
         tryCatch( pltcondx <- DBI::dbGetQuery(dbconn, pltcond.qry),
