@@ -764,7 +764,7 @@ modGBp2veg <- function(GBpopdat = NULL,
       vdomdatsum <- vdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		      by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]
       vdomdatsum <- vdomdatsum[!is.na(vdomdatsum[[colvar]]),]
-      unit_colest <- GBest.pbar(sumyn = estvar.name, 
+      unit_colest <- GBest.pbar(sumyn = estvarn.name, 
                                 ysum = vdomdatsum,
                                 uniqueid = cuniqueid, 
                                 stratalut = stratalut,
@@ -774,7 +774,7 @@ modGBp2veg <- function(GBpopdat = NULL,
 
       vdomdatsum <- vdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		      by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvarn.name]
-      unit_grpest <- GBest.pbar(sumyn =estvar.name, 
+      unit_grpest <- GBest.pbar(sumyn =estvarn.name, 
                                 ysum = vdomdatsum,
                                 uniqueid = cuniqueid, 
                                 stratalut = stratalut,
