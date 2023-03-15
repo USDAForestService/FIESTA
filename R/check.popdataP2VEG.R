@@ -488,8 +488,9 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Sum subplot conditions and append to condx table
   #############################################################################
   SUBP_CONDPROP_UNADJ <- subp_condf[, list(SUBP_CONDPROP_UNADJ =
-      sum(ifelse(MACRCOND_PROP > 0, MACRCOND_PROP, SUBPCOND_PROP), na.rm=TRUE)/4),
-			by=c("PLT_CN", "CONDID")]
+      sum(ifelse((!is.na(MACRCOND_PROP) & MACRCOND_PROP > 0),
+                 MACRCOND_PROP, SUBPCOND_PROP), na.rm=TRUE)/4),
+                       by=c("PLT_CN", "CONDID")]
   setkeyv(SUBP_CONDPROP_UNADJ, c(subpuniqueid, condid))
   setkeyv(condx, c(cuniqueid, condid))
 

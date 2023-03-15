@@ -648,10 +648,14 @@ modGBp2veg <- function(GBpopdat = NULL,
     unit_totest <- unit_totest[unitarea, nomatch=0]
 
     if (totals) {
+      if (esttype == "RATIO") {
+        unit_totest[, nhat := nhat * 100][, 
+                       nhat.var := nhat.var * 100]
+      } 
       unit_totest <- getpse(unit_totest, areavar=areavar, esttype=esttype)
     } else {
       unit_totest <- getpse(unit_totest, esttype=esttype)
-    } 
+    }       
   }
 
   ## Get row estimate  
@@ -806,13 +810,11 @@ modGBp2veg <- function(GBpopdat = NULL,
       if (esttype == "RATIO") {
         unit_rowest[, nhat := nhat * 100][, 
                        nhat.var := nhat.var * 100]
-        getpse(unit_rowest, esttype=esttype)
-      } else {                      
-        unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
       }
+      unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
     } else {
       unit_rowest <- getpse(unit_rowest, esttype=esttype)
-    }      
+    }     
     setkeyv(unit_rowest, c(unitvar, rowvar))
   }
 
@@ -834,13 +836,11 @@ modGBp2veg <- function(GBpopdat = NULL,
       if (esttype == "RATIO") {
         unit_colest[, nhat := nhat * 100][, 
                        nhat.var := nhat.var * 100]
-        getpse(unit_colest, esttype=esttype)
-      } else {                      
-        unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
       }
+      unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
     } else {
       unit_colest <- getpse(unit_colest, esttype=esttype)
-    }      
+    }     
     setkeyv(unit_colest, c(unitvar, colvar))
   }
  

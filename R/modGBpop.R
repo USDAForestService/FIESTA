@@ -905,7 +905,6 @@ modGBpop <- function(popType = "VOL",
       if (!is.null(unitvar2)) {
         vcondx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
       }
-
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 
                         cuniqueid = cuniqueid, 
