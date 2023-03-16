@@ -233,7 +233,8 @@ spGetPlots <- function(bnd = NULL,
   gui <- FALSE
   coordtype <- "public"
   iseval <- FALSE 
-  pltassgnid = "PLT_CN"
+  pltassgnid <- "PLT_CN"
+  savePOP <- FALSE
 
   ##################################################################
   ## CHECK PARAMETER NAMES

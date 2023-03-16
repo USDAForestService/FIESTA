@@ -573,7 +573,8 @@ datBarplot <- function(x,
         }
       }     
     } else {
-      xmat <- tapply(datxbp[,yvar, with=FALSE], list(datxbp[[xvar]], datxbp[[grpvar]]), I)
+      xmat <- tapply(datxbp[,yvar, with=FALSE][[1]], 
+			list(datxbp[[xvar]], datxbp[[grpvar]]), I)
       xmat[is.na(xmat)] <- 0
 
       if (addlegend) {
@@ -610,9 +611,16 @@ datBarplot <- function(x,
     ## ADD ERROR BARS
     ######################################################
     if (errbars) {
-      if(length(yvar) == 1){
-        y <- datxbp[[yvar]]
-        lower <- upper <- datxbp[[sevar]]
+      if (length(yvar) == 1) {
+        if (!is.null(grpvar)) {
+          y <- xmat
+          semat <- tapply(datxbp[,sevar, with=FALSE][[1]], 
+					list(as.character(datxbp[[xvar]]), 															as.character(datxbp[[grpvar]])), I)
+          lower <- upper <- semat
+        } else {
+          y <- datxbp[[yvar]]
+          lower <- upper <- datxbp[[sevar]]
+        }
       } else {
         y <- xmat
         semat <- as.matrix(t(datxbp[,sevar, with=FALSE]))
