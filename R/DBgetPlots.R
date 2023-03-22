@@ -312,6 +312,7 @@
 #' @param dbconn Open database connection.
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
 #' @param evalInfo List. List object output from DBgetEvalid or DBgetXY 
+#' @param ... For extendibility.
 #' FIESTA functions. 
 #' 
 #' @return if returndata=TRUE, a list of the following objects: 
@@ -490,7 +491,8 @@ DBgetPlots <- function (states = NULL,
                         savedata_opts = NULL,
                         dbconn = NULL,
                         dbconnopen = FALSE,
-                        evalInfo = NULL
+                        evalInfo = NULL,
+                        ...
                         ) {
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
@@ -551,6 +553,13 @@ DBgetPlots <- function (states = NULL,
     stop("invalid parameter: ", toString(miss))
   }
  
+  if ("istree" %in% input.params) {
+    message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
+  }
+  if ("isseed" %in% input.params) {
+    message("the parameter isseed is deprecated... use eval_options(Type='VOL'))\n")
+  }
+
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts,
 				xy_opts=xy_opts)
