@@ -151,7 +151,7 @@ DBgetXY <- function (states = NULL,
 
   ## Check arguments
   input.params <- names(as.list(match.call()))[-1]
-  if (!all(input.params %in% names(formals(DBgetXY)))) {
+  if (!all(input.params %in% c(names(formals(DBgetXY)), "istree", "isseed", "isP2VEG"))) {
     miss <- input.params[!input.params %in% formals(DBgetXY)]
     stop("invalid parameter: ", toString(miss))
   } 
@@ -366,6 +366,44 @@ DBgetXY <- function (states = NULL,
     }
   } 
 
+
+  ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
+  ###########################################################
+  if (gui) {
+    Typelst <- c("CURR", "VOL", "P2VEG", "DWM", "GRM")
+    Type <- select.list(Typelst, title="eval type", 
+		preselect="VOL", multiple=TRUE)
+    if (length(Type)==0) Type <- "VOL"
+  } 
+
+  if (Type == "VOL") {
+    istree=isseed <- TRUE
+  } 
+  if (Type == "P2VEG") {
+    # understory vegetation tables 
+    # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP)
+    isveg=issubp <- TRUE
+  } 
+  if (Type == "DWM") {
+    # summarized condition-level down woody debris table (COND_DWM_CALC)
+    isdwm <- TRUE
+  }
+  if (Type == "CHNG") {
+    # current and previous conditions, subplot-level - sccm (SUBP_COND_CHNG_MTRX) 
+    ischng=issubp <- TRUE
+  }
+  if (Type == "GRM") {
+    ischng=issubp=isgrm <- TRUE
+  }
+  if (isveg && invtype == "PERIODIC") {
+    message("understory vegetation data only available for annual data\n")
+    isveg <- FALSE
+  } 
+
+  ########################################################################
+  ### DBgetEvalid()
+  ########################################################################
+
   ## Get DBgetEvalid parameters from eval_opts
   ####################################################################
   if (eval == "FIA") {
@@ -389,7 +427,13 @@ DBgetXY <- function (states = NULL,
   ####################################################################
   ## Get states, Evalid and/or invyrs info
   ####################################################################
-  if (is.null(evalInfo)) {
+  ## Get states, Evalid and/or invyrs info
+  ##########################################################
+  if (!is.null(evalInfo)) {
+    list.items <- c("states", "evalidlist", "invtype", "invyrtab")
+    evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
+
+  } else {
     evalInfo <- tryCatch( DBgetEvalid(states = states, 
                           RS = RS, 
                           datsource = datsource,

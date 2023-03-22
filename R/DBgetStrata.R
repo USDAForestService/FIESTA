@@ -18,7 +18,7 @@
 #' FS_FIADB.POP_PLOT_STRATUM_ASSGN \tab To get estimation unit & stratum
 #' assignment for each plot.\cr }
 #' 
-#' Area by estimation unit includes total area for all plots (evaltype="all").
+#' Area by estimation unit includes total area for all plots (Type="CURR").
 #' 
 #' @param dat Data frame, comma-delimited file (*.csv), or shapefile (*.shp).
 #' The strata value is merged to this table and returned as a data frame. See
@@ -163,7 +163,7 @@ DBgetStrata <- function(dat = NULL,
   
   ## Check arguments
   input.params <- names(as.list(match.call()))[-1]
-  if (!all(input.params %in% names(formals(DBgetStrata)))) {
+  if (!all(input.params %in% c(names(formals(DBgetStrata)), "istree", "isseed", "isP2VEG"))) {
     miss <- input.params[!input.params %in% formals(DBgetStrata)]
     stop("invalid parameter: ", toString(miss))
   } 
@@ -344,12 +344,13 @@ DBgetStrata <- function(dat = NULL,
   }
 
 
-  ## Get Evalid
+  ## Get states, Evalid and/or invyrs info
   ##########################################################
-  if (is.null(evalInfo)) {
-
+  if (!is.null(evalInfo)) {
     list.items <- c("states", "evalidlist", "invtype", "invyrtab")
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
+
+  } else {
     evalInfo <- tryCatch( DBgetEvalid(states = states, 
                           datsource = datsource, 
                           data_dsn = data_dsn, 

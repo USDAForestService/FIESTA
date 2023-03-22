@@ -44,21 +44,12 @@
 #' of Other Wooded Land (OWL), including >= 5 percent cover...\cr
 #' }
 #' 
-#' *FIADB Table Extraction*\cr \tabular{lll}{ 
-#' \tab \bold{Argument} \tab \bold{Table Name(s)}\cr 
-#' \tab istree \tab TREE\cr 
-#' \tab isveg \tab P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP\cr 
-#' \tab issubp \tab SUBPLOT, SUBP_COND\cr 
-#' \tab isdwm \tab COND_DWM_CALC\cr 
-#' \tab isgrm \tab TREE_GRM_COMPONENT\cr 
-#' \tab issccm \tab SUBP_COND_CHNG_MTRX\cr }
-#' 
 #' \bold{FIA Evaluations}
 #' 
 #' An evaluation is a group of plots within the FIA database that is used for
 #' generating population estimates, representing different inventory spans of
 #' data with different stratification or area adjustments. Each evaluation is
-#' determined by the type of estimation (evalType) including: area and tree
+#' determined by the type of estimation (Type) including: area and tree
 #' estimates; growth, removal, and mortality estimates; and area change
 #' estimates (EVAL_TYPE). These plots are identified by an evalid, which is a
 #' unique identifier in the format of a 2-digit State code, a 2-digit year
@@ -67,10 +58,10 @@
 #' 
 #' \bold{FIA Evaluation Types}
 #' 
-#' Define one or more Evaluation Type for evalCur=TRUE or evalEndyr=YYYY. An
+#' Define one or more Evaluation Type for Cur=TRUE or Endyr=YYYY. An
 #' Evaluation type is used to identify a specific set of plots for a particular
 #' response that can be used to a make a statistically valid sample-based
-#' estimate. If evalType="ALL", the evaluation includes all sampled and
+#' estimate. If Type='CURR', the evaluation includes all sampled and
 #' nonsampled plots or plots that were missed in an inventory year.
 #' 
 #' Regional differences may occur on how missed plots are represented in a FIA
@@ -79,7 +70,7 @@
 #' a following Evaluation.  Therefore, the number of nonsampled plots in
 #' previous Evaluations may change, depending on when missed plot are measured.
 #' In the PNW Research Station, plots are brought forward to replace missed
-#' plots in an evaluation, depending on the evalType.
+#' plots in an evaluation, depending on the Type.
 #' 
 #' EVAL_TYP\cr 
 #' \tabular{llll}{ 
@@ -98,20 +89,21 @@
 #' for one or more states, one or more FIA Research Stations (RS), or all
 #' available states in database (states=NULL, RS=NULL).
 #' 
-#' *FIA Evaluation*\cr 
-#' \tabular{lll}{ \tab \bold{Argument} \tab \bold{Description}\cr 
-#' \tab EVALID \tab Specified FIA EVALID (e.g., 491801)\cr 
-#' \tab evalCur \tab Most current FIA Evaluation\cr 
-#' \tab evalEndyr \tab End year of an FIA Evaluation (e.g., 2018)\cr 
-#' \tab evalAll \tab All evaluations in database\cr 
-#' \tab evalType \tab Type of FIA Evaluation (response)\cr }
-#' 
-#' *Custom evaluation*\cr 
-#' \tabular{lll}{ \tab \bold{Argument} \tab \bold{Description}\cr 
-#' \tab measCur \tab Most current measurement of plot in database\cr 
-#' \tab measEndyr \tab Most current measurement of plot in database in or 
-#' before year\cr 
-#' \tab allyrs \tab All years for invtype (ANNUAL/PERIODIC)\cr 
+#' *FIA Evaluation (eval=FIA)*\cr
+#' \tabular{lll}{ \tab \bold{eval_option} \tab \bold{Description}\cr
+#' \tab evalid \tab Specified FIA EVALID (e.g., 491801)\cr
+#' \tab Cur \tab Most current FIA Evaluation\cr
+#' \tab Endyr \tab End year of an FIA Evaluation (e.g., 2018)\cr
+#' \tab All \tab All evaluations in database\cr
+#' \tab Type \tab Type of FIA Evaluation (response)\cr }
+#'
+#' *Custom evaluation (eval="custom")*\cr
+#' \tabular{lll}{ \tab \bold{eval_option} \tab \bold{Description}\cr
+#' \tab Cur \tab Most current measurement of plot in database\cr
+#' \tab Endyr \tab Most current measurement of plot in database in or
+#' before year\cr
+#' \tab All \tab All years for invtype (ANNUAL or PERIODIC)\cr
+#' \tab Type \tab Type of custom Evaluation (response)\cr 
 #' \tab invyrs \tab Specified inventory years (e.g., 2015:2018)\cr }
 #' 
 #' \bold{Spatial data}
@@ -254,18 +246,8 @@
 #' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
 #' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
 #' INTENSITY = 1 (FIA base grid).
-#' @param istree Logical. If TRUE, tree data are extracted from TREE table in
-#' database.
-#' @param isseed Logical. If TRUE, seedling data are extracted from SEEDLING
-#' table in database.
-#' @param isveg Logical. If TRUE, understory vegetation tables are extracted
-#' from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).
 #' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
 #' database (SUBPLOT, SUBP_COND).
-#' @param ischng Logical. If TRUE, sccm (SUBP_COND_CHNG_MTRX) table is returned 
-#' that includes current and previous conditions. 
-#' @param isdwm Logical. If TRUE, summarized condition-level down woody debris
-#' data are extracted from FIA database (COND_DWM_CALC).
 #' @param biojenk Logical. If TRUE, Jenkins biomass is calculated.
 #' @param greenwt Logical. If TRUE, green weight biomass is calculated.
 #' @param plotgeom Logical. If TRUE, variables from the PLOTGEOM table are
@@ -356,9 +338,9 @@
 #' inventory year, and plot status. }
 #' \item{pop_plot_stratum_assgn}{ Data frame. If savePOP=TRUE, and FIA Evaluations
 #' are used to extract data from database, return the POP_PLOT_STRATUM_ASSGN
-#' table or, if more than one evalType and savePOP=FALSE. If more than one
-#' evalType, only the records for the evalTypes are returned, otherwise all
-#' evalTypes for the state evaluation are returned. }
+#' table or, if more than one Type and savePOP=FALSE. If more than one
+#' Type, only the records for the evalTypes are returned, otherwise all
+#' Types for the state evaluation are returned. }
 #' 
 #' *Output Tables - FIA Table Names*\cr \tabular{lll}{ 
 #' \tab \bold{tab} \tab \bold{FIA Table}\cr 
@@ -477,12 +459,7 @@ DBgetPlots <- function (states = NULL,
                         puniqueid = "CN", 
                         invtype = "ANNUAL", 
                         intensity1 = FALSE, 
-                        istree = FALSE, 
-                        isseed = FALSE, 
-                        isveg = FALSE, 
-                        issubp = FALSE, 
-                        ischng = FALSE,
-                        isdwm = FALSE, 
+                        issubp = FALSE,
                         biojenk = FALSE,
                         greenwt = FALSE,
                         plotgeom = FALSE, 
@@ -518,7 +495,7 @@ DBgetPlots <- function (states = NULL,
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-  saveSURVEY <- FALSE
+  saveSURVEY=istree=isseed=isveg=ischng=isdwm <- FALSE
 
   other_tables <- c("BOUNDARY", "COND_DWM_CALC", "COUNTY", "DWM_COARSE_WOODY_DEBRIS", 
 	"DWM_DUFF_LITTER_FUEL", "DWM_FINE_WOODY_DEBRIS", "DWM_MICROPLOT_FUEL", 
@@ -568,7 +545,8 @@ DBgetPlots <- function (states = NULL,
   ## CHECK PARAMETER NAMES
   ##################################################################
   input.params <- names(as.list(match.call()))[-1]
-  if (!all(input.params %in% names(formals(DBgetPlots)))) {
+ 
+  if (!all(input.params %in% c(names(formals(DBgetPlots)), "istree", "isseed", "isP2VEG"))) {
     miss <- input.params[!input.params %in% formals(DBgetPlots)]
     stop("invalid parameter: ", toString(miss))
   }
@@ -707,56 +685,35 @@ DBgetPlots <- function (states = NULL,
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
   if (gui) {
-    datatablst <- c("tree", "seed", "veg", "subp", "dwm", "lulc", "grm")
-    datatabs <- select.list(c("NONE", datatablst), title="Other tables??", 
-		preselect="NONE", multiple=TRUE)
-    if (length(datatabs)==0) datatabs <- "NONE"
-    istree <- ifelse(any(datatabs == "tree"), TRUE, FALSE)
-    isseed <- ifelse(any(datatabs == "seed"), TRUE, FALSE)
-    isgrm <- ifelse(any(datatabs == "grm"), TRUE, FALSE)
-    isveg <- ifelse(any(datatabs == "veg"), TRUE, FALSE)
-    if (isveg) {
-      issubp <- TRUE
-    } else {
-      issubp <- ifelse(any(datatabs == "subp"), TRUE, FALSE)
-    }
-    isdwm <- ifelse(any(datatabs == "dwm"), TRUE, FALSE)
-    isgrm <- ifelse(any(datatabs == "grm"), TRUE, FALSE)
-    islulc <- ifelse(any(datatabs == "lulc"), TRUE, FALSE)
-    ischng <- ifelse(any(datatabs == "chng"), TRUE, FALSE)
-  } else {
-    istree <- pcheck.logical(istree, varnm="istree", 
-		title="Tree variables?", first="YES", gui=gui)
-    isseed <- pcheck.logical(isseed, varnm="isseed", 
-		title="Seedling variables?", first="YES", gui=gui)
-    isgrm <- pcheck.logical(isgrm, varnm="isgrm", 
-		title="GRM variables?", first="YES", gui=gui)
-    isveg <- pcheck.logical(isveg, varnm="isveg", 
-		title="Understory veg variables?", first="YES", gui=gui)
-    if (isveg && invtype == "PERIODIC") {
-      message("understory vegetation data only available for annual data\n")
-      isveg <- FALSE
-    }
- 
-    if (isveg) {
-      issubp <- TRUE
-    } else {
-      issubp <- pcheck.logical(issubp, varnm="issubp", 
-		title="Subplot tables?", first="YES", gui=gui)
-    }
-    isdwm <- pcheck.logical(isdwm, varnm="isdwm", 
-		title="DWM variables?", first="YES", gui=gui)
-    isgrm <- pcheck.logical(isgrm, varnm="isgrm", 
-		title="GRM variables?", first="YES", gui=gui)
-    islulc <- pcheck.logical(islulc, varnm="islulc", 
-		title="Land Use/Land Cover variables?", first="YES", gui=gui)
-    ischng <- pcheck.logical(ischng, varnm="ischng", 
-		title="Area Change?", first="YES", gui=gui)
-  }
+    Typelst <- c("CURR", "VOL", "P2VEG", "DWM", "GRM")
+    Type <- select.list(Typelst, title="eval type", 
+		preselect="VOL", multiple=TRUE)
+    if (length(Type)==0) Type <- "VOL"
+  } 
 
-  if (isgrm || islulc) {
-    ischng <- TRUE
+  if (Type == "VOL") {
+    istree=isseed <- TRUE
+  } 
+  if (Type == "P2VEG") {
+    # understory vegetation tables 
+    # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP)
+    isveg=issubp <- TRUE
+  } 
+  if (Type == "DWM") {
+    # summarized condition-level down woody debris table (COND_DWM_CALC)
+    isdwm <- TRUE
   }
+  if (Type == "CHNG") {
+    # current and previous conditions, subplot-level - sccm (SUBP_COND_CHNG_MTRX) 
+    ischng=issubp <- TRUE
+  }
+  if (Type == "GRM") {
+    ischng=issubp=isgrm <- TRUE
+  }
+  if (isveg && invtype == "PERIODIC") {
+    message("understory vegetation data only available for annual data\n")
+    isveg <- FALSE
+  } 
 
   biojenk <- pcheck.logical(biojenk, varnm="biojenk", 
 		title="Jenkins biomass?", first="NO", gui=gui)
@@ -775,7 +732,6 @@ DBgetPlots <- function (states = NULL,
 		gui=gui, checklst=coordTypelst, caption="Coordinate Type?")
 
 
-
   ########################################################################
   ### DBgetEvalid()
   ########################################################################
@@ -784,15 +740,6 @@ DBgetPlots <- function (states = NULL,
   ## Note: Periodic data in database includes forested plots >= 5% cover 
   ## Note: Annual data in database includes forested plots >=10% cover
 
-#  if (isdwm) {
-#    evalType <- c(evalType, "DWM")
-#  }
-#  if (isveg) {
-#    evalType <- c(evalType, "P2VEG")
-#  }
-#  if (isgrm || issccm) {
-#    evalType <- c(evalType, "CHNG")
-#  }
  
   ## Get DBgetEvalid parameters from eval_opts
   ################################################
@@ -835,7 +782,7 @@ DBgetPlots <- function (states = NULL,
                           evalCur = evalCur, 
                           evalEndyr = evalEndyr, 
                           evalAll = evalAll, 
-                          evalType = evalType, 
+                          evalType = Type, 
                           dbTabs = dbTabs,
                           gui = gui),
 			error = function(e) {

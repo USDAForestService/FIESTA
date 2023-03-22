@@ -95,7 +95,7 @@ pixel counts by stratum and estimation unit.\cr \tab
 FS_FIADB.POP_PLOT_STRATUM_ASSGN \tab To get estimation unit & stratum
 assignment for each plot.\cr }
 
-Area by estimation unit includes total area for all plots (evaltype="all").
+Area by estimation unit includes total area for all plots (Type="CURR").
 }
 \note{
 Steps used in data extraction:

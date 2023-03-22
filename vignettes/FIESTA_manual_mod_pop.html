@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>FIESTA Manual - Population Data</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore"><code>FIESTA</code> Manual - Population
+Data</h1>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p><code>FIESTA</code>’s Estimation Modules combine multiple functions
+from <code>FIESTA</code> or other packages to generate estimates across
+a user-defined population(s) using different estimation strategies. Each
+module has an associated <code>mod*pop</code> function for compiling the
+population data and calculations, including adjustments for nonresponse
+and standardizing auxiliary data. The output form the
+<code>mod*pop</code> functions are input directly into the
+<code>mod*estimation</code> modules.</p>
+<p>All Population functions require similar data inputs, including a set
+of inventory response data and summarized auxiliary data for
+post-stratification or other model-assisted and model-based (i.e., small
+area) estimation strategies.</p>
+<p>This vignette describes the required input data sets, parameter
+inputs, and outputs from the <code>mod*pop</code> functions. Refer to
+the FIESTA_module_estimates vignette for more information on other
+parameter inputs to the <code>mod*</code> Estimation Modules and the
+following vignettes for running specific examples:</p>
+<ul>
+<li><a href="FIESTA_tutorial_GB.html">FIESTA_tutorial_GB</a></li>
+<li><a href="FIESTA_tutorial_MA.html">FIESTA_tutorial_MA</a></li>
+<li><a href="FIESTA_tutorial_SA.html">FIESTA_tutorial_SA</a></li>
+</ul>
+</div>
+<div id="input" class="section level2">
+<h2>Module Parameters</h2>
+<p>The parameters for <code>FIESTA</code> modules are organized by
+different categories based on population data and resulting
+estimates.</p>
+<p><a href="#popdat">Population data</a>:</p>
+<ol style="list-style-type: decimal">
+<li><a href="#ptyp">Population type</a><br />
+</li>
+<li><a href="#dtab">Population data tables and unique
+identifiers</a><br />
+</li>
+<li><a href="#edata">Estimation area info</a></li>
+<li><a href="#popfilters">Population filters</a></li>
+<li><a href="#estunit">Estimation unit info</a></li>
+<li><a href="#other">Other</a></li>
+<li><a href="#strata_opts">Post-stratification information
+(strata_opts)</a></li>
+<li><a href="#model_opts">Model-Assisted/Small Area information</a></li>
+<li><a href="#dataobjects">Input data objects</a></li>
+</ol>
+<div id="popdat" class="section level3">
+<h3>Population Data</h3>
+<div id="ptyp" class="section level4">
+<h4>Population type</h4>
+<p>The population types (i.e., Eval_Type) currently available for
+<code>FIESTA</code> estimation. The population type defines the set of
+sampled plots and data used for estimation. For example, if you are only
+interested in area estimates (popType=‘CURR’), you do not need the tree
+data. Other population types will be available in the future, including
+GRM (Growth, mortality, removals), P2VEG (understory vegetation), CHNG
+(Change), and DWM (down woody material). These population types may have
+different sets of plots based on what was sampled.</p>
+<ul>
+<li><strong>popType</strong> - Population type (‘ALL’, ‘CURR’,
+‘VOL’).</li>
+</ul>
+</div>
+<div id="dtab" class="section level4">
+<h4>Population data tables and unique identifiers</h4>
+<p>The required data tables include forest inventory data from the FIA
+national database (Burrill et al. 2018). Data table inputs can be the
+name of a comma-delimited file (*.csv), a layer within a database,
+(e.g., SQLite), or an R data frame or data table object already loaded
+into R. The <code>pltassgn</code> table can also be a point shapefile
+(*.shp), a spatial layer within a database, or an <code>sf</code> R
+object with one point per plot. The unique identifier for a plot must be
+provided in the corresponding parameter for each input table, match
+default variable names. See required variables section for a list of
+variables necessary to include for estimation. All modules require at
+least one table.</p>
+<ul>
+<li><p><strong>popTables</strong> - A named list of data tables used for
+estimates (cond, plt, tree, seed, vsubpspp, vsubpstr, subplot,
+subp_cond). See below for more details about tables.</p>
+<ul>
+<li><strong>cond</strong> - Condition-level data, with 1 record per
+condition, including nonsampled conditions. May include estimation unit
+and strata assignment if plt=NULL and pltassgn=NULL - <em>required for
+all estimates</em>.</li>
+<li><strong>tree</strong> - Tree-level data, with 1 record per tree -
+<em>required for modGBtree() or modGBratio() tree estimates</em>.</li>
+<li><strong>plt</strong> - Plot-level data, with 1 record per plot,
+including nonsampled conditions. May include nonsampled plots if
+PLOT_STATUS_CD variable is in dataset. May include estimation unit and
+strata assignment if pltassgn=NULL - <em>optional for all
+estimates</em>.</li>
+<li><strong>seed</strong> - Seedling data, with 1 record per seedling
+count - <em>required for modGBtree() or modGBratio() seedling
+estimates</em>.</li>
+</ul></li>
+<li><p><strong>popTableIDs</strong> - A named list of variable names
+defining unique plot identifiers in each table listed in popTables. See
+below for more details about tables.</p>
+<ul>
+<li><strong>cond</strong> - Unique identifier for plot in cond
+(default=“PLT_CN”).</li>
+<li><strong>plt</strong> - Unique identifier for plot in plt
+(default=“CN”).</li>
+<li><strong>tree</strong> - Unique identifier for plot in tree
+(default=“PLT_CN”).</li>
+<li><strong>seed</strong> - Unique identifier for plot in seed
+(default=“PLT_CN”).</li>
+<li><strong>vsubpspp</strong> - Unique identifier for plot in vsubpspp
+(default=“PLT_CN”).</li>
+<li><strong>vsubpstr</strong> - Unique identifier for plot in vsubpstr
+(default=“PLT_CN”).</li>
+<li><strong>subplot</strong> - Unique identifier for plot in subplot
+(default=“PLT_CN”).</li>
+<li><strong>subp_cond</strong> - Unique identifier for plot in subp_cond
+(default=“PLT_CN”).</li>
+</ul></li>
+<li><p><strong>pltassgn</strong> - Plot-level data, with 1 record per
+plot and plot assignment of estimation unit and strata, if applying
+stratification. If nonsampled plots are included, PLOT_STATUS_CD
+variable must be in table. These plots are excluded from the analysis. -
+<em>optional for all estimates</em>.</p></li>
+<li><p><strong>pltassgnid</strong>- Unique identifier for plot in
+pltassgn (default=“PLT_CN”).</p></li>
+<li><p><strong>pjoinid</strong> - Join variable in plot (or cond) to
+match pltassgnid. Does not need to be unique.</p></li>
+<li><p><strong>dsn</strong> - Data source name of database where data
+table layers reside.</p></li>
+</ul>
+</div>
+<div id="edata" class="section level4">
+<h4>Estimation area info</h4>
+<p>Define information for area estimation.</p>
+<ul>
+<li><strong>areawt</strong> - Variable to use for calculating area
+estimates (e.g., CONDPROP_UNADJ). This may be different for other
+population types.</li>
+<li><strong>adj</strong> - Adjustment for nonresponse (‘none’, ‘samp’,
+‘plot’). Note: adj=‘samp’, expands area across strata and estimation
+unit(s), based on the summed proportions of sampled conditions divided
+by the total plots in the strata/estimation unit; adj=‘plot’, expands
+area across plot based on 1 divided by the summed proportions of sampled
+conditions in plot.</li>
+</ul>
+</div>
+<div id="popfilters" class="section level4">
+<h4>Population filters</h4>
+<p>Population filters subset the plot data set before population
+calculations are generated.</p>
+<ul>
+<li><strong>evalid</strong> - If multiple evaluations are in dataset,
+select evalid for estimation.</li>
+<li><strong>invyrs</strong> - If want to subset inventory years in
+dataset for estimation.</li>
+<li><strong>intensity</strong> - If want to specify intensification
+number of code to use for estimation.</li>
+<li><strong>ACI</strong> - Logical. If TRUE, includes All Condition
+Inventory (ACI) conditions and associated tree data in estimates. If
+FALSE, a filter, is applied to remove nonsampled nonforest conditions
+(see cond.nonsamp.filter).</li>
+</ul>
+</div>
+<div id="estunit" class="section level4">
+<h4>Estimation unit information</h4>
+<p>An estimation unit is a population, or area of interest, with known
+area and number of plots. As an example, for RMRS FIA, an estimation
+unit is generally an individual county. An estimation unit may be a
+sub-population of a larger population (e.g., Counties within a State).
+For post-stratified estimation, sub-populations are mutually exclusive
+and independent within a population, therefore estimated totals and
+variances are additive. Each plot is assigned to only one estimation
+unit based on plot center and can be stored in either
+<code>pltassgn</code> or <code>cond</code>. For model-based, small area
+estimators, an estimation unit is a sub-population, referred to as a
+model domain unit, where each domain unit is a component in a model.</p>
+<ul>
+<li><strong>unitvar/dunitvar</strong> - Name of the estimation/domain
+unit variable in cond or pltassgn with assignment for each plot (e.g.,
+‘ESTN_UNIT’).</li>
+<li><strong>unitvar2</strong> - Name of a second estimation unit
+variable in cond or pltassgn with assignment for each plot (e.g.,
+‘STATECD’).</li>
+<li><strong>unitarea/dunitarea</strong> - Total acres by
+estimation/domain unit. If only 1 estimation unit, include a number
+representing total acreage for the area of interest. If more than one
+estimation unit, provide a data frame/data table of total acres by
+estimation unit, with variables defined by unitvar and areavar.</li>
+<li><strong>areavar</strong> - Name of acre variable in unitarea
+(Default = “ACRES”).</li>
+<li><strong>areaunits</strong> - Units of areavar in unitarea (‘acres’,
+‘hectares’).</li>
+<li><strong>minplotnum.unit</strong> - Minimum number of plots for
+estimation unit (Default=10).</li>
+<li><strong>unit.action/dunit.action</strong> - What to do if number of
+plots in an estimation/domain unit is less than minplotnum.unit (‘keep’,
+‘remove’ ‘combine’). If unit.action=‘combine’, combines
+estimation/domain unit to the following estimation/domain unit in
+unitzonal/dunitzonal.</li>
+</ul>
+<p>Note: If there are less than minplotnum.unit plots in an
+estimation/domain unit: if unit.action/dunit.action=‘keep’, NA is
+returned for the estimation/domain unit; if
+unit.action/dunit.action=‘remove’, the estimation/domain unit is removed
+from the returned output; if unit.action/dunit.action=‘combine’, an
+automated procedure occurs to group estimation/domain units with less
+than minplotnum.unit plots with the next estimation/domain unit in the
+stratalut or unitzonal table. If it is the last estimation/domain unit
+in the table, it is grouped with the estimation/domain unit preceding in
+the table. A recommended number of plots for post-stratified estimation
+is provided as defaults (Westfall and others, 2011).</p>
+</div>
+<div id="other" class="section level4">
+<h4>Other</h4>
+<ul>
+<li><strong>strata</strong> - TRUE, use post-stratification for reducing
+variance in estimates (see strata_opts for strata parameters). For use
+in GB or MA modules.</li>
+<li><strong>savedata</strong> - TRUE, save data to outfolder (See
+savedata_opts for savedata parameters).</li>
+</ul>
+</div>
+<div id="strata_opts" class="section level4">
+<h4>Post-stratification information (strata_opts)</h4>
+<p>Post-stratification is used to reduce variance in population
+estimates by partitioning the population into homogenous classes
+(strata), such as forest and nonforest. For stratified sampling methods,
+the strata sizes (weights) must be either known or estimated.
+Remotely-sensed data is often used to generate strata weights with
+proporation of pixels by strata. If stratification is desired
+(strata=TRUE), the required data include: stratum assignment for the
+center location of each plot, stored in either pltassgn or cond; and a
+look-up table with the area, pixel count, or proportion of the total
+area (strwt) of each strata value by estimation unit, making sure the
+name of the strata (and estimation unit) variable and values match the
+plot assignment name(s) and value(s). If strata (and estimation unit)
+variables are included in cond, all conditions in a plot must have the
+same strata (and estimation unit) value.</p>
+<p>In FIESTA, the plot assignments, strata proportions, and area are
+provided by the user and may be obtained through FIESTA or other means,
+given the proper format. These parameters are set by supplying a list to
+the <code>strata_opts</code> parameter. The possible parameters that can
+be set within the <code>strata_opts</code> parameter can be seen by
+running <code>help(strata_options)</code></p>
+<ul>
+<li><strong>stratalut</strong> - Look-up table with pixel counts, area,
+or proportions (strwt) by strata (and estimation unit).</li>
+<li><strong>strvar</strong> - Name of strata variable in stratalut and
+pltassgn or cond table with strata assignment for each plot.</li>
+<li><strong>getwt</strong> - If TRUE, calculates strata weights from
+getwtvar in stratalut.</li>
+<li><strong>getwtvar</strong> - If getwt=TRUE, name of variable in
+stratalut to calculate weights Default=“P1POINTCNT”.</li>
+<li><strong>strwtvar</strong> - If getwt=FALSE, name of variable in
+stratalut with calculated weights (Default = ‘strwt’).</li>
+<li><strong>stratcombine</strong> - TRUE, and strata=TRUE, an automated
+procedure occurs to combine strata within estimation units if less than
+minplotnum.strat (See note below for more details).</li>
+<li><strong>minplotnum.strat</strong> - Integer. Minimum number of plots
+for a stratum within an estimation unit (Default=2).</li>
+</ul>
+<p>Note: If there are less than minplotnum.strat plots (default=2 plots)
+in any strata/estimation unit combination: if stratcombine=FALSE, an
+error occurs with a message to collapse classes; if stratcombine=TRUE,
+an automated procedure occurs to collapse all strata less than
+minplotnum.strat. The function collapses classes based on the order of
+strata in stratatlut. If a strata within in estimation unit is less than
+minplotnum.strat, it is grouped with the next strata class in
+stratalut.</p>
+</div>
+<div id="model_opts" class="section level4">
+<h4>Model-Assisted/Small Area information</h4>
+<p>Other Model-Assisted and Small Area estimation strategies require
+unit/dunit-level information, including auxiliary data summaries and
+predictor names. The following parameters are used to provide this
+information in the MA and SA <code>FIESTA</code> modules.</p>
+<ul>
+<li><strong>unitzonal</strong> - Table with zonal statistics (e.g.,
+mean, area, proportions) by estimation/domain unit.</li>
+<li><strong>npixelvar</strong> - Name of variable in unitzonal
+referencing total pixels by estimation unit (MA module only).</li>
+<li><strong>prednames</strong> - Name(s) of predictors in unitzonal to
+use in models. If NULL, all variables in table are used.</li>
+<li><strong>predfac</strong> - Name(s) of predictors in unitzonal that
+are categorical (or factor) variables.</li>
+</ul>
+</div>
+<div id="dataobjects" class="section level4">
+<h4>Input data objects</h4>
+<p>Data object parameters allow a user to use other functions from
+FIESTA to input parameters directly.</p>
+<ul>
+<li><strong>*data</strong> - Output data list components from
+<code>FIESTA::an*data</code> functions.</li>
+<li><strong>pltdat</strong> - Output data list components from
+<code>FIESTA::pltdat</code> function.</li>
+<li><strong>GBstratdat</strong> - Output data list components from
+<code>FIESTA::spGetStrata</code> function (GB module only).</li>
+<li><strong>auxdat</strong> - Output data list components from
+<code>FIESTA::spGetAuxiliary</code> function (MA and SA modules
+only).</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="populationoutput" class="section level2">
+<h2>Output values from <code>FIESTA</code> module population functions
+(<code>mod*pop</code>)</h2>
+<ul>
+<li><strong>condx</strong> - Data frame of condition data within
+population, including plot assignments, condition proportion adjustment
+factor (cadjfac), and adjusted condition proportions
+(CONDPROP_ADJ).</li>
+<li><strong>pltcondx</strong> - Data frame of plot/condition data within
+population, used for estimation.</li>
+<li><strong>treex</strong> - Data frame of tree data within population,
+used for estimation, including trees per acre adjustment factor
+(tadjfac), and adjusted trees per acre (TPA_ADJ).</li>
+<li><strong>cuniqueid</strong> - Unique identifier of plot in condx and
+pltcondx.</li>
+<li><strong>tuniqueid</strong> - Unique identifier of plot in
+treex.</li>
+<li><strong>condid</strong> - Unique identifier of condition in condx
+and pltcondx.</li>
+<li><strong>ACI.filter</strong> - Filter used for excluding ACI plots if
+ACI=FALSE.</li>
+<li><strong>unitvar</strong> - Name of estimation unit variable in
+unitarea and condx.</li>
+<li><strong>unitarea</strong> - Data frame with area by estimation
+unit.</li>
+<li><strong>areavar</strong> - Name of area variable in unitarea.</li>
+<li><strong>stratalut</strong> - Data frame of stratification
+information by estimation unit. See below for variable
+descriptions.</li>
+<li><strong>strvar</strong> - Name of strata variable in stratalut and
+condx</li>
+<li><strong>expcondtab</strong> - Data frame of condition-level area
+expansion factors.</li>
+<li><strong>plotsampcnt</strong> - Number of plots by plot status.</li>
+<li><strong>condsampcnt</strong> - Number of conditions by condition
+status.</li>
+<li><strong>states</strong> - States of FIA plot data used in estimation
+(for title reference).</li>
+<li><strong>invyrs</strong> - Inventory years of FIA plot data used in
+estimation (for title reference).</li>
+</ul>
+<table>
+<caption>Description of variables in stratdat.</caption>
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ESTN_UNIT</td>
+<td align="left">Estimation unit</td>
+</tr>
+<tr class="even">
+<td align="left">STRATUMCD</td>
+<td align="left">Strata value</td>
+</tr>
+<tr class="odd">
+<td align="left">P1POINTCNT</td>
+<td align="left">Number of pixels by strata and estimation unit</td>
+</tr>
+<tr class="even">
+<td align="left">P2POINTCNT</td>
+<td align="left">Number of P2 plots in population data</td>
+</tr>
+<tr class="odd">
+<td align="left">n.strata</td>
+<td align="left">Number of sampled plots in strata</td>
+</tr>
+<tr class="even">
+<td align="left">n.total</td>
+<td align="left">Number of sampled plots for estimation unit</td>
+</tr>
+<tr class="odd">
+<td align="left">strwt</td>
+<td align="left">Proportion of pixels in strata (strata weight)</td>
+</tr>
+<tr class="even">
+<td align="left">CONDPROP_UNADJ_SUM</td>
+<td align="left">Summed condition proportion in strata</td>
+</tr>
+<tr class="odd">
+<td align="left">cadjfac</td>
+<td align="left">Adjustment factor for nonsampled plots in strata
+(CONDPROP_UNADJ_SUM/n.strata)</td>
+</tr>
+<tr class="even">
+<td align="left">ACRES</td>
+<td align="left">Total acres for estimation unit</td>
+</tr>
+<tr class="odd">
+<td align="left">expfac</td>
+<td align="left">Expansion factor, in acres, area in strata divided by
+number of sampled plots</td>
+</tr>
+<tr class="even">
+<td align="left">EXPNS</td>
+<td align="left">Expanded area, in acres, expfac multiplied by
+strwt</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="required" class="section level2">
+<h2>Required variables in input data tables</h2>
+<p>The following variables by data table are required for successful
+<code>FIESTA</code> output.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Table</th>
+<th align="left">Variable</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">tree</td>
+<td align="left">PLT_CN</td>
+<td align="left">popTableIDs - Unique identifier for each plot, for
+joining tables (e.g. PLT_CN)</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">TPA_UNADJ</td>
+<td align="left">Number of trees per acre each sample tree represents
+(e.g. DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for
+trees on microplot)</td>
+</tr>
+<tr class="odd">
+<td align="left">cond</td>
+<td align="left">PLT_CN</td>
+<td align="left">popTableIDs - Unique identifier for each plot, for
+joining tables (e.g., PLT_CN)</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">CONDPROP_UNADJ</td>
+<td align="left">Unadjusted proportion of condition on each plot.
+Optional if only 1 condition (record) per plot</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">COND_STATUS_CD</td>
+<td align="left">Status of each forested condition on plot
+(i.e. accessible forest, nonforest, water, etc.)</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">NF_COND_STATUS_CD</td>
+<td align="left">Only if ACI=TRUE. Status of each nonforest condition
+plot (i.e. accessible nonforest, nonsampled nonforest)</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">SITECLCD</td>
+<td align="left">Only if landarea=TIMBERLAND. Measure of site
+productivity</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">RESERVCD</td>
+<td align="left">If landarea=TIMBERLAND. Reserved status</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">SUBPROP_UNADJ</td>
+<td align="left">Unadjusted proportion of subplot conditions on each
+plot. Optional if only 1 condition (record) per plot</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">MICRPROP_UNADJ</td>
+<td align="left">If microplot tree attributes. Unadjusted proportion of
+microplot conditions on each plot. Optional if only 1 condition (record)
+per plot</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">MACRPROP_UNADJ</td>
+<td align="left">If macroplot tree attributes. Unadjusted proportion of
+macroplot conditions on each plot. Optional if only 1 condition (record)
+per plot</td>
+</tr>
+<tr class="even">
+<td align="left">plot</td>
+<td align="left">CN</td>
+<td align="left">popTableIDs - Unique identifier for each plot, for
+joining tables (e.g. CN)</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">STATECD</td>
+<td align="left">Identifies state each plot is located in. Optional if
+only 1 state</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">INVYR</td>
+<td align="left">Identifies inventory year of each plot. Optional.
+Assumes estimation time span is less than inventory cycle</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Burrill, E.A., Wilson, A.M., Turner, J.A., Pugh, S.A., Menlove, J.,
+Christiansen, G., Conkling, B.L., Winnie, D., 2018. Forest Inventory and
+Analysis Database [WWW Document]. St Paul MN US Dep. Agric. For. Serv.
+North. Res. Stn. URL <a href="https://apps.fs.usda.gov/fia/datamart/" class="uri">https://apps.fs.usda.gov/fia/datamart/</a> (accessed
+3.6.21).</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

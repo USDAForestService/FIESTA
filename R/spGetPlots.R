@@ -69,18 +69,8 @@
 #' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
 #' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
 #' INTENSITY = 1 (FIA base grid).
-#' @param istree Logical. If TRUE, tree data are extracted from TREE table in
-#' database.
-#' @param isseed Logical. If TRUE, seedling data are extracted from SEEDLING
-#' table in database.
-#' @param isveg Logical. If TRUE, understory vegetation tables are extracted
-#' from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).
 #' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
 #' database (SUBPLOT, SUBP_COND).
-#' @param ischng Logical. If TRUE, sccm (SUBP_COND_CHNG_MTRX) table is returned 
-#' that includes current and previous conditions. 
-#' @param isdwm Logical. If TRUE, summarized condition-level down woody debris
-#' data are extracted from FIA database (COND_DWM_CALC).
 #' @param biojenk Logical. If TRUE, Jenkins biomass is calculated.
 #' @param greenwt Logical. If TRUE, green weight biomass is calculated.
 #' @param plotgeom Logical. If TRUE, variables from the PLOTGEOM table are
@@ -181,12 +171,7 @@ spGetPlots <- function(bnd = NULL,
                        puniqueid = "CN", 
                        invtype = "ANNUAL", 
                        intensity1 = FALSE, 
-                       istree = FALSE, 
-                       isseed = FALSE, 
-                       isveg = FALSE, 
                        issubp = FALSE, 
-                       ischng = FALSE,
-                       isdwm = FALSE, 
                        biojenk = FALSE,
                        greenwt = FALSE,
                        plotgeom = FALSE, 
@@ -242,7 +227,7 @@ spGetPlots <- function(bnd = NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- unique(names(formals(spGetPlots)))
+  formallst <- unique(c(names(formals(spGetPlots)), "istree", "isseed", "isP2VEG"))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -406,6 +391,42 @@ spGetPlots <- function(bnd = NULL,
       stop("no data in ", datsource)
     }
   }
+
+
+  ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
+  ###########################################################
+  if (gui) {
+    Typelst <- c("CURR", "VOL", "P2VEG", "DWM", "GRM")
+    Type <- select.list(Typelst, title="eval type", 
+		preselect="VOL", multiple=TRUE)
+    if (length(Type)==0) Type <- "VOL"
+  } 
+
+  if (Type == "VOL") {
+    istree=isseed <- TRUE
+  } 
+  if (Type == "P2VEG") {
+    # understory vegetation tables 
+    # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP)
+    isveg=issubp <- TRUE
+  } 
+  if (Type == "DWM") {
+    # summarized condition-level down woody debris table (COND_DWM_CALC)
+    isdwm <- TRUE
+  }
+  if (Type == "CHNG") {
+    # current and previous conditions, subplot-level - sccm (SUBP_COND_CHNG_MTRX) 
+    ischng=issubp <- TRUE
+  }
+  if (Type == "GRM") {
+    ischng=issubp=isgrm <- TRUE
+  }
+  if (isveg && invtype == "PERIODIC") {
+    message("understory vegetation data only available for annual data\n")
+    isveg <- FALSE
+  } 
+
+
 
   ## Get DBgetEvalid parameters from eval_opts
   ################################################

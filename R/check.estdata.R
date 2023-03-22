@@ -250,9 +250,7 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
 	outfolder=outfolder, overwrite_layer=overwrite_layer, append_layer=append_layer,
 	rawfolder=rawfolder, raw_fmt=raw_fmt, raw_dsn=raw_dsn)
 
-  if (esttype %in% c("AREA", "TREE")) {
-    returnlst$totals <- totals
-  }
+
   if (esttype %in% c("TREE", "RATIO", "SEED")) {
 
     ## Check that the values of tuniqueid in treex are all in cuniqueid in condf
@@ -263,7 +261,7 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
 
     if (!is.null(seedx)) {
       seedf <- check.matchval(seedx, pltcondf, tuniqueid, cuniqueid, tab1txt="seed",
-		tab2txt="seed", subsetrows=TRUE)
+		tab2txt="cond", subsetrows=TRUE)
       returnlst$seedf <- setDT(seedf)
       returnlst$tuniqueid <- tuniqueid
     }
@@ -291,6 +289,10 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
      returnlst$vcondf <- vcondf
      returnlst$vuniqueid <- vuniqueid
     }
+  }
+
+  if (esttype %in% c("AREA", "TREE")) {
+    returnlst$totals <- totals
   }
 
   return(returnlst)
