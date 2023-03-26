@@ -163,6 +163,17 @@ DBgetCSV <- function(DBtable,
     return(NULL)
   }
   names(csvtable) <- toupper(names(csvtable))
+
+  if (noIDate) {
+    ## Change columns of type POSIX* to character before writing to database
+    if (any(grepl("POSIX", lapply(csvtable, class)))) {
+      POSIXcols <- names(csvtable)[grepl("POSIX", lapply(csvtable, class))]
+      csvtable <- setDF(csvtable)
+      csvtable[POSIXcols] <- lapply(csvtable[POSIXcols], as.character)
+      csvtable <- setDT(csvtable)
+    }
+  }
+    
   if (!returnDT) {
     csvtable <- data.frame(csvtable, stringsAsFactors=FALSE)
   }
