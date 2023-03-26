@@ -3513,16 +3513,23 @@ DBgetPlots <- function (states = NULL,
 
           ## Generate spatial output
           out_fmt_sp <- ifelse(out_fmt == "csv", "shp", out_fmt)
-          assign(spxynm, spMakeSpatialPoints(xyplt=xyplt, 
-                              xvar=xycoords[1], yvar=xycoords[2], 
-                              xy.uniqueid="PLT_CN", xy.crs=4269, 
-                              addxy=TRUE, exportsp=savedata, 
-                              savedata_opts=list(
-                                out_dsn=out_dsn, out_fmt=out_fmt_sp, 
-                                outfolder=outfolder, out_layer=spxynm, 
-                                outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
-                                append_layer=append_layer, outfn.pre=outfn.pre, 
-                                overwrite_dsn=overwrite_dsn)))
+          assign(spxynm, spMakeSpatialPoints(xyplt = xyplt, 
+                              xvar = xycoords[1], 
+                              yvar = xycoords[2], 
+                              xy.uniqueid = "PLT_CN", 
+                              xy.crs = 4269, 
+                              addxy = TRUE, 
+                              exportsp = savedata, 
+                              savedata_opts = list(
+                                out_dsn = out_dsn, 
+                                out_fmt = out_fmt_sp, 
+                                outfolder = outfolder, 
+                                out_layer = spxynm, 
+                                outfn.date = outfn.date, 
+                                overwrite_layer = overwrite_layer, 
+                                append_layer = append_layer, 
+                                outfn.pre = outfn.pre, 
+                                overwrite_dsn = overwrite_dsn)))
         }
       # } else {
       #   ## output parameters
@@ -3552,15 +3559,15 @@ DBgetPlots <- function (states = NULL,
           if (!append_layer) index.unique.xyplt <- "PLT_CN"
           datExportData(xyplt, 
               index.unique = index.unique.xyplt,
-              savedata_opts = list(outfolder=outfolder, 
-                                  out_fmt=out_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer=xynm,
-                                  outfn.pre=outfn.pre, 
-                                  outfn.date=outfn.date, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer,
-                                  add_layer=TRUE)) 
+              savedata_opts = list(outfolder = outfolder, 
+                                   out_fmt = out_fmt, 
+                                   out_dsn = out_dsn, 
+                                   out_layer = xynm,
+                                   outfn.pre = outfn.pre, 
+                                   outfn.date = outfn.date, 
+                                   overwrite_layer = overwrite_layer,
+                                   append_layer = append_layer,
+                                   add_layer = TRUE)) 
         }
       }  
  
@@ -3570,30 +3577,30 @@ DBgetPlots <- function (states = NULL,
         index.unique.spconddatx <- "PLT_CN"
         datExportData(spconddatx, 
               index.unique = index.unique.spconddatx,
-              savedata_opts = list(outfolder=outfolder, 
-                                  out_fmt=out_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer="spconddat",
-                                  outfn.pre=outfn.pre, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer,
-                                  outfn.date=outfn.date, 
-                                  add_layer=TRUE)) 
+              savedata_opts = list(outfolder = outfolder, 
+                                   out_fmt = out_fmt, 
+                                   out_dsn = out_dsn, 
+                                   out_layer = "spconddat",
+                                   outfn.pre = outfn.pre, 
+                                   overwrite_layer = overwrite_layer,
+                                   append_layer = append_layer,
+                                   outfn.date = outfn.date, 
+                                   add_layer = TRUE)) 
       }
       if (savedata && !is.null(pltx)) {
         index.unique.pltx <- NULL
         if (i == 1) index.unique.pltx <- "CN"
         datExportData(pltx, 
               index.unique = index.unique.pltx,
-              savedata_opts = list(outfolder=outfolder, 
-                                    out_fmt=out_fmt, 
-                                    out_dsn=out_dsn, 
-                                    out_layer="plot",
-                                    outfn.pre=outfn.pre, 
-                                    overwrite_layer=overwrite_layer,
-                                    append_layer=append_layer,
-                                    outfn.date=outfn.date, 
-                                    add_layer=TRUE))
+              savedata_opts = list(outfolder = outfolder, 
+                                   out_fmt = out_fmt, 
+                                   out_dsn = out_dsn, 
+                                   out_layer = "plot",
+                                   outfn.pre = outfn.pre, 
+                                   overwrite_layer = overwrite_layer,
+                                   append_layer = append_layer,
+                                   outfn.date = outfn.date, 
+                                   add_layer = TRUE))
         rm(pltx)
         gc() 
       }
@@ -3602,15 +3609,15 @@ DBgetPlots <- function (states = NULL,
         if (!append_layer) index.unique.condx <- c("PLT_CN", "CONDID")
         datExportData(condx, 
               index.unique = index.unique.condx,
-              savedata_opts = list(outfolder=outfolder, 
-                                  out_fmt=out_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer="cond",
-                                  outfn.pre=outfn.pre, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer,
-                                  outfn.date=outfn.date, 
-                                  add_layer=TRUE)) 
+              savedata_opts = list(outfolder = outfolder, 
+                                   out_fmt = out_fmt, 
+                                   out_dsn = out_dsn, 
+                                   out_layer = "cond",
+                                   outfn.pre = outfn.pre, 
+                                   overwrite_layer = overwrite_layer,
+                                   append_layer = append_layer,
+                                   outfn.date = outfn.date, 
+                                   add_layer = TRUE)) 
         rm(condx)
         gc()
       }  
@@ -3618,15 +3625,15 @@ DBgetPlots <- function (states = NULL,
         #index.unique.ppsax <- NULL
         #if (i == 1) index.unique.ppsax <- "PLT_CN"
         datExportData(ppsax, 
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="pop_plot_stratum_assgn",
-                                outfn.pre=outfn.pre, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                outfn.date=outfn.date, 
-                                add_layer=TRUE)) 
+            savedata_opts=list(outfolder = outfolder, 
+                               out_fmt = out_fmt, 
+                               out_dsn = out_dsn, 
+                               out_layer = "pop_plot_stratum_assgn",
+                               outfn.pre = outfn.pre, 
+                               overwrite_layer = overwrite_layer,
+                               append_layer = append_layer,
+                               outfn.date = outfn.date, 
+                               add_layer = TRUE)) 
         rm(ppsax)
         gc()
       }
@@ -3643,15 +3650,15 @@ DBgetPlots <- function (states = NULL,
 
   if (savedata && saveSURVEY) {
     datExportData(SURVEY, 
-        savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="survey",
-                                outfn.pre=outfn.pre, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                outfn.date=outfn.date, 
-                                add_layer=TRUE)) 
+        savedata_opts=list(outfolder = outfolder, 
+                           out_fmt = out_fmt, 
+                           out_dsn = out_dsn, 
+                           out_layer = "survey",
+                           outfn.pre = outfn.pre, 
+                           overwrite_layer = overwrite_layer,
+                           append_layer = append_layer,
+                           outfn.date = outfn.date, 
+                           add_layer = TRUE)) 
   }
 
   if (parameters) {
