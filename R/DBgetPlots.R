@@ -513,10 +513,9 @@ DBgetPlots <- function (states = NULL,
 
 
   if (gui) {
-    invtype=evalCur=evalAll=evalType=measCur=allyrs=istree=isseed=issubp=
-	isveg=isdwm=isgrm=issccm=issp=spcondid1=defaultVars=regionVars=ACI=
+    invtype=issp=spcondid1=defaultVars=regionVars=ACI=
 	subcycle99=intensity1=allFilter=savedata=saveqry=parameters=out_fmt=
-	overwrite=BIOJENK_kg=BIOJENK_lb=PREV_PLTCN=savePOP=xymeasCur <- NULL
+	overwrite=BIOJENK_kg=BIOJENK_lb=PREV_PLTCN=savePOP=xymeasCur=eval <- NULL
   }
 
   ## Set global variables  
@@ -548,7 +547,7 @@ DBgetPlots <- function (states = NULL,
   ##################################################################
   input.params <- names(as.list(match.call()))[-1]
  
-  if (!all(input.params %in% c(names(formals(DBgetPlots)), "istree", "isseed", "isP2VEG"))) {
+  if (!all(input.params %in% c(names(formals(DBgetPlots)), "istree", "isseed", "isveg"))) {
     miss <- input.params[!input.params %in% formals(DBgetPlots)]
     stop("invalid parameter: ", toString(miss))
   }
@@ -569,6 +568,7 @@ DBgetPlots <- function (states = NULL,
   for (i in 1:length(eval_defaults_list)) {
     assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
   } 
+
   ## Set user-supplied eval_opts values
   if (length(eval_opts) > 0) {
     for (i in 1:length(eval_opts)) {
@@ -579,9 +579,21 @@ DBgetPlots <- function (states = NULL,
       }
     }
   } else {
-    message("no evaluation timeframe specified...")
-    message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
-    stop()
+    if (gui) {
+      evallst <- c("FIA", "custom")
+      eval <- pcheck.varchar(var2check=eval, varnm="eval", 
+		checklst=evallst, gui=gui, caption="Evaluation type?")
+      if (eval == "FIA") {
+        message("getting most current FIA evaluation")       
+      } else {
+        message("getting most current measurement in database")
+      }
+      eval_opts <- eval_options(Cur = TRUE)
+    } else {
+      message("no evaluation timeframe specified...")
+      message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
+      stop()
+    }
   }
 
   ## Set xy_options defaults
@@ -699,24 +711,23 @@ DBgetPlots <- function (states = NULL,
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
   } 
-
-  if (Type == "VOL") {
+  if (any(Type == "VOL")) {
     istree=isseed <- TRUE
   } 
-  if (Type == "P2VEG") {
+  if (any(Type == "P2VEG")) {
     # understory vegetation tables 
     # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP)
     isveg=issubp <- TRUE
   } 
-  if (Type == "DWM") {
+  if (any(Type == "DWM")) {
     # summarized condition-level down woody debris table (COND_DWM_CALC)
     isdwm <- TRUE
   }
-  if (Type == "CHNG") {
+  if (any(Type == "CHNG")) {
     # current and previous conditions, subplot-level - sccm (SUBP_COND_CHNG_MTRX) 
     ischng=issubp <- TRUE
   }
-  if (Type == "GRM") {
+  if (any(Type == "GRM")) {
     ischng=issubp=isgrm <- TRUE
   }
   if (isveg && invtype == "PERIODIC") {
@@ -2266,7 +2277,8 @@ DBgetPlots <- function (states = NULL,
                            intensity1 = intensity1,
                            evalInfo = evalInfo,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
-          assign(paste0("xyCurx_", coordType), xydat[[1]])
+          assign(paste0("xyCurx_", coordType), 
+			xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ])
           if (returndata) { 
             assign(paste0("xyCur_", coordType), 
 				  rbind(get(paste0("xyCur_", coordType)), get(paste0("xyCurx_", coordType))))
@@ -2286,7 +2298,8 @@ DBgetPlots <- function (states = NULL,
                            intensity1 = intensity1,
                            evalInfo = evalInfo,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
-          assign(paste0("xyx_", coordType), xydat[[1]])
+          assign(paste0("xyx_", coordType), 
+			xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ])
           if (returndata) { 
             assign(paste0("xy_", coordType), 
 				  rbind(get(paste0("xy_", coordType)), get(paste0("xyx_", coordType))))
