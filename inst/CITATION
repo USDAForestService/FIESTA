@@ -11,5 +11,4 @@ citEntry(	entry="Manual",
   		textVersion =  paste(	"Frescino, Tracey S.; Patterson, Paul L.; Moisen, Gretchen G.; Toney, Chris;
 					White, Grayson W. (2023). ",
 					"FIESTA: A forest inventory estimation and analysis R package. ",
-					"Ecography 2023: e06428 (ver. 1.0).",
-   					sep="")
+					"Ecography 2023: e06428 (ver. 1.0).", sep="")
