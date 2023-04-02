@@ -545,20 +545,36 @@ DBgetPlots <- function (states = NULL,
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
-  input.params <- names(as.list(match.call()))[-1]
- 
-  if (!all(input.params %in% c(names(formals(DBgetPlots)), "istree", "isseed", "isveg"))) {
-    miss <- input.params[!input.params %in% formals(DBgetPlots)]
+  matchargs <- as.list(match.call()[-1])
+
+  dotargs <- c(list(...))
+  args <- as.list(environment())
+  args <- args[!names(args) %in% names(dotargs)]
+  args <- args[names(args) %in% names(matchargs)]
+  args <- append(args, dotargs)
+
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1] 
+  formallst <- unique(c(names(formals(DBgetPlots)), "istree", "isseed", "isveg", "ischng", "isdwm"))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
  
-  if ("istree" %in% input.params) {
+  if ("istree" %in% names(args)) {
     message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
+    istree <- args$istree
   }
-  if ("isseed" %in% input.params) {
+  if ("isseed" %in% names(args)) {
     message("the parameter isseed is deprecated... use eval_options(Type='VOL'))\n")
+    isseed <- args$isseed
   }
 
+  if ("isveg" %in% names(args)) {
+    message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
+    isveg <- args$isveg
+  }
+ 
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts,
 				xy_opts=xy_opts)
@@ -705,13 +721,14 @@ DBgetPlots <- function (states = NULL,
 
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
+  getType <- ifelse (!is.null(evalid), TRUE, FALSE)
   if (gui) {
-    Typelst <- c("CURR", "VOL", "P2VEG", "DWM", "GRM")
+    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "CHNG", "GRM")
     Type <- select.list(Typelst, title="eval type", 
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
   } 
-  if (any(Type == "VOL")) {
+  if (any(Type %in% c("CURR", "VOL"))) {
     istree=isseed <- TRUE
   } 
   if (any(Type == "P2VEG")) {
@@ -730,6 +747,7 @@ DBgetPlots <- function (states = NULL,
   if (any(Type == "GRM")) {
     ischng=issubp=isgrm <- TRUE
   }
+ 
   if (isveg && invtype == "PERIODIC") {
     message("understory vegetation data only available for annual data\n")
     isveg <- FALSE
@@ -783,7 +801,7 @@ DBgetPlots <- function (states = NULL,
   if (allyrs) {
     saveSURVEY <- TRUE
   }
-
+ 
   ## Get states, Evalid and/or invyrs info
   ##########################################################
   if (!is.null(evalInfo)) {
@@ -834,6 +852,26 @@ DBgetPlots <- function (states = NULL,
     PLOTe <- evalInfo$PLOT
     plotnm <- "PLOTe"
   }
+ 
+  if (getType) {
+    evalTypelist <- unlist(evalInfo$evalTypelist)
+    Typelist <- sub("EXP", "", evalTypelist)
+    if (any(c("VOL","CURR") %in% Typelist)) {
+      istree=isseed <- TRUE
+    }
+    if ("P2VEG" %in% Typelist) {
+      isveg=issubp <- TRUE
+    } 
+    if ("DWM" %in% Typelist) {
+      isdwm <- TRUE
+    }
+    if ("CHNG" %in% Typelist) {
+      ischng=issubp <- TRUE
+    }
+    if ("GRM" %in% Typelist) {
+      ischng=issubp=isgrm <- TRUE
+    }
+  } 
  
   ## Get state abbreviations and codes 
   ###########################################################
@@ -889,7 +927,7 @@ DBgetPlots <- function (states = NULL,
 		title="ACI conditions?", first="NO", gui=gui)
 
   } else {
-    message(evalidlist)
+    #message(evalidlist)
 
     subsetPOP <- TRUE
 
@@ -955,12 +993,15 @@ DBgetPlots <- function (states = NULL,
   getxy <- pcheck.logical(getxy, varnm="getxy",
     title="Save XY?", first="YES", gui=gui)
   if (getxy) {
-    ## Check xymeasCur
-    xymeasCur <- pcheck.logical(xymeasCur, varnm="xymeasCur", 
-                         title="Most current XY?", first="YES", gui=gui)
-    if (measCur && !xymeasCur) {
-      message("getting most current data for XY")
+    if (evalCur || measCur) {
+      if (!xymeasCur) {
+        message("getting most current data for XY")
+      }
       xymeasCur <- TRUE
+    } else {
+      ## Check xymeasCur
+      xymeasCur <- pcheck.logical(xymeasCur, varnm="xymeasCur", 
+                         title="Most current XY?", first="YES", gui=gui)
     }
   }
   
@@ -1180,7 +1221,7 @@ DBgetPlots <- function (states = NULL,
       } else {
         pltcondflds <- names(COND)
       }
- 
+
       if (iseval || savePOP) {
         if (is.null(ppsanm)) {
           ## POP_PLOT_STRATUM_ASSGN table (ZIP FILE) - 
@@ -2275,6 +2316,7 @@ DBgetPlots <- function (states = NULL,
                            eval_opts = eval_options(Cur = TRUE),
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
+                           pvars2keep = "PLOT_STATUS_CD",
                            evalInfo = evalInfo,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
           assign(paste0("xyCurx_", coordType), 
@@ -2296,6 +2338,7 @@ DBgetPlots <- function (states = NULL,
                            eval_opts = eval_options(All = TRUE),
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
+                           pvars2keep = "PLOT_STATUS_CD",
                            evalInfo = evalInfo,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
           assign(paste0("xyx_", coordType), 
@@ -3839,6 +3882,7 @@ DBgetPlots <- function (states = NULL,
 
   ## Return data list
   if (returndata) {
+    returnlst$args <- args
     return(returnlst)
   }
 }

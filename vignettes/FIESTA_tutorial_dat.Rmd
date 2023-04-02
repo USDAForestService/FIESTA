@@ -63,7 +63,7 @@ Functions are organized by type or objective and are named with a corresponding 
 ### Overview of FIESTA data (dat) tools
 FIESTA's dat tools assist with customizing variables as well as summarizing and visualizing FIA data. The datLUTclass and datLUTnm functions help with merging look-up tables to support new variables, standard FIA code names or unique names, or groupings of discrete or continuous data values. The datSum* functions provide tools for aggregating FIA data for estimation, mapping, or exploratory data analyses. 
 
-The Green-Book (GB) tree estimators require tree data summarized to the condition (base unit) level and extrapolated to an acre to account for trees sampled from different plot sizes. An adjustment factor is applied (adjsamp=TRUE) to adjust for nonsampled plots within the area of interest. 
+FIESTA's tree estimates require tree data summarized to the condition (base unit) domain level and extrapolated to an acre to account for trees sampled from different plot sizes. An adjustment factor is applied to adjust for nonsampled plots across different strata (adj='samp') within the area of interest for GB estimates or within each plot (adj='plot') for MA and SA estimates. 
 
 ### Objective of tutorial
 The objective of this tutorial is to demonstrate the use of FIESTA's dat tools for customizing, summarizing, and visualizing FIA data. The examples use data from two inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.

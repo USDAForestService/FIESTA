@@ -48,7 +48,7 @@
 #' @param evalid Integer. One or more EVALID to check if exists.
 #' @param evalAll Logical. If TRUE, gets all EVALIDs for invtype.
 #' @param evalType String vector. The type(s) of evaluation of interest ('ALL',
-#' 'CURR', VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
+#' 'CURR', 'VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
 #' 'ALL' includes nonsampled plots; 'CURR' includes plots used for area
 #' estimates; 'VOL' includes plots used for area and/or tree estimates; The
 #' evalType 'GRM' includes plots used for growth, removals, mortality, and
@@ -480,7 +480,13 @@ DBgetEvalid <- function(states = NULL,
 		"ANN_INVENTORY"][[1]]
           invtype <- ifelse(ann_inventory == "Y", "ANNUAL", "PERIODIC")
           stinvyr <- startyr:endyr
-          evalTypelist[[state]] <- unique(pop_eval$EVAL_TYP)[1]
+          if (length(unique(pop_eval$EVAL_TYP)) > 1 && 
+			all(unique(pop_eval$EVAL_TYP) %in% c("EXPCURR", "EXPVOL"))) { 
+            poptyp <- "EXPVOL"
+          } else {
+            poptyp <- unique(pop_eval$EVAL_TYP)
+          }
+          evalTypelist[[state]] <- unique(c(evalTypelist[[state]], poptyp))
           evalEndyrlist[[state]] <- endyr
           if (state %in% names(invyrs)) {
             invyrs[[state]] <- sort(unique(c(invyrs[[state]], stinvyr)))

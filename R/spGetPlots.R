@@ -210,6 +210,7 @@ spGetPlots <- function(bnd = NULL,
   xydat=stateFilter=countyfips=xypltx=evalidst=PLOT_ID=INVYR=
 	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc=dbconn=
 	bndx=evalInfo <- NULL
+  istree=isseed=isveg=ischng=isdwm <- FALSE
   cuniqueid=tuniqueid=duniqueid <- "PLT_CN"
   stbnd.att <- "COUNTYFIPS"
   returnlst <- list()
@@ -224,15 +225,30 @@ spGetPlots <- function(bnd = NULL,
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
+  args <- as.list(match.call()[-1])
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- unique(c(names(formals(spGetPlots)), "istree", "isseed", "isP2VEG"))
+  formallst <- unique(c(names(formals(spGetPlots)), "istree", "isseed", "isveg", "ischng", "isdwm"))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-  
+
+  if ("istree" %in% names(args)) {
+    message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
+    istree <- args$istree
+  }
+  if ("isseed" %in% names(args)) {
+    message("the parameter isseed is deprecated... use eval_options(Type='VOL'))\n")
+    isseed <- args$isseed
+  }
+  if ("isveg" %in% names(args)) {
+    message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
+    isveg <- args$isveg
+  }
+
+
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts,
 			xy_opts=xy_opts)
@@ -392,17 +408,16 @@ spGetPlots <- function(bnd = NULL,
     }
   }
 
-
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
   if (gui) {
-    Typelst <- c("CURR", "VOL", "P2VEG", "DWM", "GRM")
+    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "CHNG", "DWM", "GRM")
     Type <- select.list(Typelst, title="eval type", 
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
   } 
 
-  if (Type == "VOL") {
+  if (Type %in% c("CURR", "VOL")) {
     istree=isseed <- TRUE
   } 
   if (Type == "P2VEG") {
@@ -425,7 +440,6 @@ spGetPlots <- function(bnd = NULL,
     message("understory vegetation data only available for annual data\n")
     isveg <- FALSE
   } 
-
 
 
   ## Get DBgetEvalid parameters from eval_opts
@@ -1092,7 +1106,6 @@ spGetPlots <- function(bnd = NULL,
       } else {
         evalInfost <- NULL
       }
- 
       dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 
@@ -1361,7 +1374,11 @@ spGetPlots <- function(bnd = NULL,
     if (iseval) {
       returnlst$evalid <- evalid
     }
-    return(returnlst)
+    
+    if (returndata) {
+      returnlst$args <- args
+      return(returnlst)
+    }
   } 
 }
 
