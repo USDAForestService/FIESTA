@@ -24,6 +24,7 @@ spGetPlots(
   invtype = "ANNUAL",
   intensity1 = FALSE,
   issubp = FALSE,
+  isseed = TRUE,
   biojenk = FALSE,
   greenwt = FALSE,
   plotgeom = FALSE,
@@ -107,6 +108,8 @@ INTENSITY = 1 (FIA base grid).}
 
 \item{issubp}{Logical. If TRUE, subplot tables are extracted from FIA
 database (SUBPLOT, SUBP_COND).}
+
+\item{isseed}{Logical. If TRUE, include seedling data.}
 
 \item{biojenk}{Logical. If TRUE, Jenkins biomass is calculated.}
 

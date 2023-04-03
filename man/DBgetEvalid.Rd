@@ -54,7 +54,7 @@ each state (e.g., list(Utah=2014, Colorado=2013).}
 \item{evalAll}{Logical. If TRUE, gets all EVALIDs for invtype.}
 
 \item{evalType}{String vector. The type(s) of evaluation of interest ('ALL',
-'CURR', VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
+'CURR', 'VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
 'ALL' includes nonsampled plots; 'CURR' includes plots used for area
 estimates; 'VOL' includes plots used for area and/or tree estimates; The
 evalType 'GRM' includes plots used for growth, removals, mortality, and
