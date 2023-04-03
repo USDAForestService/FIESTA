@@ -248,6 +248,7 @@
 #' INTENSITY = 1 (FIA base grid).
 #' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
 #' database (SUBPLOT, SUBP_COND).
+#' @param isseed Logical. If TRUE, include seedling data.
 #' @param biojenk Logical. If TRUE, Jenkins biomass is calculated.
 #' @param greenwt Logical. If TRUE, green weight biomass is calculated.
 #' @param plotgeom Logical. If TRUE, variables from the PLOTGEOM table are
@@ -460,7 +461,8 @@ DBgetPlots <- function (states = NULL,
                         puniqueid = "CN", 
                         invtype = "ANNUAL", 
                         intensity1 = FALSE, 
-                        issubp = FALSE,
+                        issubp = FALSE, 
+                        isseed = TRUE,                      
                         biojenk = FALSE,
                         greenwt = FALSE,
                         plotgeom = FALSE, 
@@ -497,7 +499,7 @@ DBgetPlots <- function (states = NULL,
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-  saveSURVEY=istree=isseed=isveg=ischng=isdwm <- FALSE
+  saveSURVEY=istree=isveg=ischng=isdwm <- FALSE
 
   other_tables <- c("BOUNDARY", "COND_DWM_CALC", "COUNTY", "DWM_COARSE_WOODY_DEBRIS", 
 	"DWM_DUFF_LITTER_FUEL", "DWM_FINE_WOODY_DEBRIS", "DWM_MICROPLOT_FUEL", 
@@ -553,6 +555,9 @@ DBgetPlots <- function (states = NULL,
   args <- args[names(args) %in% names(matchargs)]
   args <- append(args, dotargs)
 
+  #params <- formals(DBgetPlots)
+  #params <- mget(names(params),ifnotfound="NULL",envir=as.environment(-1))
+
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1] 
   formallst <- unique(c(names(formals(DBgetPlots)), "istree", "isseed", "isveg", "ischng", "isdwm"))
@@ -560,21 +565,7 @@ DBgetPlots <- function (states = NULL,
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
- 
-  if ("istree" %in% names(args)) {
-    message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
-    istree <- args$istree
-  }
-  if ("isseed" %in% names(args)) {
-    message("the parameter isseed is deprecated... use eval_options(Type='VOL'))\n")
-    isseed <- args$isseed
-  }
-
-  if ("isveg" %in% names(args)) {
-    message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
-    isveg <- args$isveg
-  }
- 
+  
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts,
 				xy_opts=xy_opts)
@@ -610,6 +601,24 @@ DBgetPlots <- function (states = NULL,
       message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
       stop()
     }
+  }
+
+  if ("istree" %in% names(args)) {
+    message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
+    istree <- args$istree
+
+    if (!istree) {
+      Type <- c("ALL", Type[!Type %in% c("CURR", "VOL")])
+    } 
+  }
+  if ("isseed" %in% names(args)) {
+    message("the parameter isseed is deprecated... use eval_options(Type='VOL'))\n")
+    isseed <- args$isseed
+  }
+
+  if ("isveg" %in% names(args)) {
+    message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
+    isveg <- args$isveg
   }
 
   ## Set xy_options defaults
@@ -728,8 +737,9 @@ DBgetPlots <- function (states = NULL,
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
   } 
+
   if (any(Type %in% c("CURR", "VOL"))) {
-    istree=isseed <- TRUE
+    istree <- TRUE
   } 
   if (any(Type == "P2VEG")) {
     # understory vegetation tables 
@@ -1105,15 +1115,10 @@ DBgetPlots <- function (states = NULL,
         } else {
           assign(paste0("xy_", coordType), {})
         }
-
-        if (issp) {
-          if (xymeasCur) {
-            assign(paste0("spxyCur_", coordType), {})
-          } else {
-            assign(paste0("spxy_", coordType), {})
-          }
-        }
       } 
+      if (issp) {
+        assign(paste0("spxyCur_", coordType), {})
+      }
     }
   }
 
@@ -2364,13 +2369,16 @@ DBgetPlots <- function (states = NULL,
           stest <- dbtablst[grepl("seed", dbtablst)]
           if (length(stest) == 1) {
             seednm <- stest
+
+            ## Get seedling fields
+            seedflds <- DBI::dbListFields(dbconn, seednm)
+
           } else {
             message("there is no seedling table in database")
             isseed <- FALSE 
+            seednm <- NULL
           }
         }
-        ## Get seedling fields
-        seedflds <- DBI::dbListFields(dbconn, seednm)
 
       } else if (datsource == "datamart") {
         SEEDLING <- DBgetCSV("SEEDLING", stabbr, returnDT=TRUE, 
@@ -3555,14 +3563,12 @@ DBgetPlots <- function (states = NULL,
         xycoords <- getcoords(coordType)
 
         if (xymeasCur) {
-          #spxynm <- paste0("spxyCur_", coordType)
           xyplt <- get(paste0("xyCurx_", coordType))
-          spxynm <- paste0("xyCurx_", coordType)
         } else {
-          #spxynm <- paste0("spxy_", coordType)
           xyplt <- get(paste0("xyx_", coordType))
-          spxynm <- paste0("xyx_", coordType)
         }
+        spxynm <- "spxy"
+
         if (!is.null(xyplt)) {
           if (!is.null(pltx) && length(unique(xyplt$PLT_CN)) != nrow(pltx))
             warning("number of plots in ", spxynm, " does not match plot table")            
@@ -3716,74 +3722,6 @@ DBgetPlots <- function (states = NULL,
                            outfn.date = outfn.date, 
                            add_layer = TRUE)) 
   }
-
-  if (parameters) {
-    ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
-    ###########################################################
-
-    params <- formals(DBgetPlots)
-    params <- mget(names(params),ifnotfound="NULL",envir=as.environment(-1))
-
-    outparamfn <- paste0("DBgetPlots_parameters_", stabbrfn, "_", 
-		format(Sys.time(), "%Y%m%d"))
-    if (!overwrite)
-      outparamfn <- fileexistsnm(outfolder, outparamfn, "txt")  
-    statesout <- toString(paste0("'", params$states, "'"))
-    rsout <- toString(paste0("'", params$RS, "'"))
-    stateFilter <- ifelse(is.null(params$stateFilter), FALSE, TRUE)
-
-    outfile <- file(paste0(outfolder, "/", outparamfn, ".txt"), "w")
-    cat(  "states <- c(", statesout, ")", "\n", 
-      "RS <- c(", rsout, ")", "\n", 
-      "invtype <- \"", params$invtype, "\"", "\n",
-      "evalid <- ", getlistparam(params$evalid), "\n",  
-      "evalCur <- ", params$evalCur, "\n",
-      "evalEndyr <- ", getlistparam(params$evalEndyr), "\n",
-      "evalAll <- ", params$evalAll, "\n",    
-      "evalType <- \"", getlistparam(params$evalType), "\"", "\n",
-      "measCur <- ", params$measCur, "\n",
-      "measEndyr <- ", getlistparam(params$measEndyr), "\n",
-      "allyrs <- ", params$allyrs, "\n",
-      "invyrs <- ", getlistparam(params$invyrs), "\n",  
-      "istree <- ", params$istree, "\n",
-      "isseed <- ", params$isseed, "\n",
-      "isveg <- ", params$isveg, "\n",
-      "issubp <- ", params$issubp, "\n",
-      "isdwm <- ", params$isdwm, "\n",
-      "issp <- ", params$issp, "\n",
-      "spcond <- ", params$spcond, "\n", 
-      "spcondid1 <- ", params$spcondid1, "\n",
-      "defaultVars <- ", params$defaultVars, "\n",
-      "regionVars <- ", params$regionVars, "\n",
-      "ACI <- ", params$ACI, "\n",
-      "subcycle99 <- ", params$subcycle99, "\n",
-      "intensity1 <- ", params$intensity1, "\n",
-      "allFilter <- \"", params$xfilters, "\"", "\n",
-      "savedata <- ", params$savedata, "\n",
-      "saveqry <- ", params$saveqry, "\n",
-      "outfolder <- \"", params$outfolder, "\"", "\n",
-      "out_dsn <- \"", params$out_dsn, "\"", "\n",
-      "gpkg <- ", params$gpkg, "\n",
-      "outfn.pre <- \"", params$outfn.pre, "\"", "\n",
-      "outfn.date <- ", params$outfn.date, "\n",
-      "overwrite <- ", params$overwrite, "\n",
-      "savePOP <- ", params$savePOP, "\n",
-     "\n",
-    file = outfile, sep="")
-
-    cat(  "fiadat <- DBgetPlots(states=states, RS=RS, invtype=invtype, evalid=evalid, 
-	evalCur=evalCur, evalEndyr=evalEndyr, evalAll=evalAll, evalType=evalType, 
-	measCur=measCur, measEndyr=measEndyr, allyrs=allyrs, invyrs=invyrlst, istree=istree, 
-	isseed=isseed, isveg=isveg, issubp=issubp, isdwm=isdwm, 
-	issp=issp, spcondid1=spcondid1, defaultVars=defaultVars, regionVars=regionVars, 
-	ACI=ACI, subcycle99=FALSE, intensity1=TRUE, allFilter=allFilter, 
-	savedata=savedata, saveqry=saveqry, parameters=parameters, outfolder=outfolder, 
-	out_dsn=out_dsn, gpkg=gkpg, outfn.pre=outfn.pre, outfn.date=outfn.date,
-	overwrite=overwrite, savePOP=savePOP)",
-    file = outfile, sep="")
-
-    close(outfile)
-  }
  
   ## Write out plot/condition counts to comma-delimited file.
   if (savedata) {
@@ -3808,38 +3746,24 @@ DBgetPlots <- function (states = NULL,
     returnlst$puniqueid <- puniqueid
 
     if (getxy) {
-      if (issp) {
-        xycoords <- getcoords(coordType)
-        if (xymeasCur) {
-          #spxyCurnm <- paste0("spxyCur_", coordType)
-          spxyCurnm <- paste0("xyCur_", coordType)
-        
-          assign(spxyCurnm, 
-		        spMakeSpatialPoints(xyplt=get(paste0("xyCur_", coordType)), 
-		              xvar=xycoords[1], yvar=xycoords[2], 
-		              xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE))
-          returnlst[[spxyCurnm]] <- get(spxyCurnm)
-        } else {  
-          #spxynm <- paste0("spxy_", coordType)
-          spxynm <- paste0("xy_", coordType)
-
-          assign(spxynm, 
-		        spMakeSpatialPoints(xyplt=get(paste0("xy_", coordType)), 
-		              xvar=xycoords[1], yvar=xycoords[2], 
-		              xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE))
-          returnlst[[spxynm]] <- get(spxynm)
-        }
+      xycoords <- getcoords(coordType)
+      if (xymeasCur) {
+        xynm <- paste0("xyCur_", coordType)
+        #assign(xynm, get(paste0("xyCur_", coordType))) 
+        returnlst[[xynm]] <- get(paste0("xyCur_", coordType))
       } else {
-        xycoords <- getcoords(coordType)
-        if (xymeasCur) {
-          xyCurnm <- paste0("xyCur_", coordType)
-          #assign(xyCurnm, get(paste0("xyCur_", coordType))) 
-          returnlst[[xyCurnm]] <- get(paste0("xyCur_", coordType))
-        } else {
-          xynm <- paste0("xy_", coordType)
-          #assign(xynm, get(paste0("xy_", coordType))) 
-          returnlst[[xynm]] <- get(paste0("xy_", coordType))
-        }  
+        xynm <- paste0("xy_", coordType)
+        #assign(xynm, get(paste0("xy_", coordType))) 
+        returnlst[[xynm]] <- get(paste0("xy_", coordType))
+      } 
+      spxynm <- "spxy"
+ 
+      if (issp) {
+        assign(spxynm, 
+		     spMakeSpatialPoints(xyplt=get(xynm), 
+		              xvar=xycoords[1], yvar=xycoords[2], 
+		              xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE))
+        returnlst[[spxynm]] <- get(spxynm)
       }
     }
     if (!is.null(spconddat)) {
