@@ -71,6 +71,7 @@
 #' INTENSITY = 1 (FIA base grid).
 #' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
 #' database (SUBPLOT, SUBP_COND).
+#' @param isseed Logical. If TRUE, include seedling data.
 #' @param biojenk Logical. If TRUE, Jenkins biomass is calculated.
 #' @param greenwt Logical. If TRUE, green weight biomass is calculated.
 #' @param plotgeom Logical. If TRUE, variables from the PLOTGEOM table are
@@ -172,6 +173,7 @@ spGetPlots <- function(bnd = NULL,
                        invtype = "ANNUAL", 
                        intensity1 = FALSE, 
                        issubp = FALSE, 
+                       isseed = TRUE,
                        biojenk = FALSE,
                        greenwt = FALSE,
                        plotgeom = FALSE, 
@@ -210,7 +212,7 @@ spGetPlots <- function(bnd = NULL,
   xydat=stateFilter=countyfips=xypltx=evalidst=PLOT_ID=INVYR=
 	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc=dbconn=
 	bndx=evalInfo <- NULL
-  istree=isseed=isveg=ischng=isdwm <- FALSE
+  istree=isveg=ischng=isdwm <- FALSE
   cuniqueid=tuniqueid=duniqueid <- "PLT_CN"
   stbnd.att <- "COUNTYFIPS"
   returnlst <- list()
@@ -234,20 +236,6 @@ spGetPlots <- function(bnd = NULL,
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-
-  if ("istree" %in% names(args)) {
-    message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
-    istree <- args$istree
-  }
-  if ("isseed" %in% names(args)) {
-    message("the parameter isseed is deprecated... use eval_options(Type='VOL'))\n")
-    isseed <- args$isseed
-  }
-  if ("isveg" %in% names(args)) {
-    message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
-    isveg <- args$isveg
-  }
-
 
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts,
@@ -292,6 +280,23 @@ spGetPlots <- function(bnd = NULL,
     message("no evaluation timeframe specified...")
     message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
     stop()
+  }
+
+  if ("istree" %in% names(args)) {
+    message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
+    istree <- args$istree
+
+    if (!istree) {
+      Type <- c("ALL", Type[!Type %in% c("CURR", "VOL")])
+    } 
+  }
+  if ("isseed" %in% names(args)) {
+    message("the parameter isseed is deprecated... use eval_options(Type='VOL'))\n")
+    isseed <- args$isseed
+  }
+  if ("isveg" %in% names(args)) {
+    message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
+    isveg <- args$isveg
   }
 
   ## Set xy_options defaults
@@ -418,7 +423,7 @@ spGetPlots <- function(bnd = NULL,
   } 
 
   if (Type %in% c("CURR", "VOL")) {
-    istree=isseed <- TRUE
+    istree <- TRUE
   } 
   if (Type == "P2VEG") {
     # understory vegetation tables 
