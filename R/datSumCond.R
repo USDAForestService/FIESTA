@@ -24,6 +24,9 @@
 #' @param cuniqueid String. Unique identifier of cond (default = "PLT_CN").
 #' @param puniqueid String. Unique identifier of plt (default = "CN").
 #' @param condid String. Unique identifier for conditions.
+#' @param bycond Logical. If TRUE, the data are aggregated to the condition
+#' level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
+#' level (by: puniqueid). 
 #' @param bysubp Logical. If TRUE, data are aggregated to the subplot level.
 #' @param subpid String. Unique identifier of each subplot.
 #' @param csumvar String. One or more variable names to sum to plot level.
@@ -140,6 +143,8 @@ datSumCond <- function(cond = NULL,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
+  noplt <- TRUE
+  nocond=pltsp <- FALSE
 
   ## Set datsource
   ########################################################
@@ -159,7 +164,6 @@ datSumCond <- function(cond = NULL,
       stop("datsource is invalid")
     }
   }
-
 
   ## Check cond table
   condx <- pcheck.table(cond, tab_dsn=data_dsn, caption="Condition table?", 
@@ -197,12 +201,15 @@ datSumCond <- function(cond = NULL,
   bysubp <- pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
 		first="YES", gui=gui, stopifnull=TRUE)
 
+  ## Check checkNA
+  ###################################################################################
+  NAto0 <- pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
+		first="YES", gui=gui)
+  if (is.null(NAto0)) NAto0 <- FALSE
+
 
   ## Check unique ids and set keys
   if (bycond) {
-    pltsp <- FALSE
-    noplt <- TRUE
-
     csumuniqueid <- c(cuniqueid, condid)
     setkeyv(condx, csumuniqueid)
            
@@ -234,13 +241,15 @@ datSumCond <- function(cond = NULL,
       stop("uniqueids not in subp_cond: ", toString(subpids))
     }
     setkeyv(subpcondx, subpids)
+
+    ## Set pltx to NULL   
+    pltx <- NULL
+  } else {
+
+    pltx <- pcheck.table(plt, tab_dsn=data_dsn, gui=gui, tabnm="plt", 
+			caption="Plot table?")
   }
 
-  ## Check plt table
-  noplt <- TRUE
-  pltsp <- FALSE
-  pltx <- pcheck.table(plt, tab_dsn=data_dsn, gui=gui, tabnm="plt", 
-			caption="Plot table?")
   if (!is.null(pltx)) {
     noplt <- FALSE
 
@@ -296,6 +305,14 @@ datSumCond <- function(cond = NULL,
 		title="Adjust conditions?", first="NO", gui=gui)
 
 
+  ### Filter cond data 
+  ###########################################################  
+  cdat <- datFilter(x=condx, xfilter=cfilter, title.filter="cfilter",
+			 stopifnull=TRUE, gui=gui)
+  condf <- cdat$xf
+  cfilter <- cdat$xfilter
+
+
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
                              first="NO", gui=gui)
@@ -335,7 +352,7 @@ datSumCond <- function(cond = NULL,
 
       adjfacdata <- getadjfactorPLOT(condx=subpcx, 
 		    cuniqueid=c(subpuniqueid, subpid), areawt="CONDPROP_UNADJ")
-      condx <- adjfacdata$condx
+      condf <- adjfacdata$condx
       cuniqueid <- c(subpuniqueid, subpid)
 
     } else {
@@ -351,11 +368,6 @@ datSumCond <- function(cond = NULL,
     }
   }
  
-  ## Filter cond
-  cdat <- datFilter(x=condx, xfilter=cfilter, title.filter="tfilter",
-			 stopifnull=TRUE, gui=gui)
-  condf <- cdat$xf
-  cfilter <- cdat$xfilter
 
   if (getadjplot) {
     if ("cadjcnd" %in% names(condf))
@@ -369,16 +381,30 @@ datSumCond <- function(cond = NULL,
   }
   names(condf.sum) <- c(csumuniqueid, csumvarnm)
 
-  ## Merge to plt
-  if (!noplt) {
+
+  ######################################################################## 
+  ######################################################################## 
+ 
+  ## Merge to cond or plot
+  ###################################
+  if (bycond && !nocond) {
+    ## Merge to cond
+    sumdat <- merge(condx, condf.sum, by=csumuniqueid, all.x=TRUE)
+  } else if (!noplt) {
     if (is.data.table(pltx)) {
       setkeyv(condf.sum, cuniqueid)
       setkeyv(pltx, puniqueid)
     }
-    condf.sum <- merge(pltx, condf.sum, by.x=puniqueid, by.y=cuniqueid, all.x=TRUE)
-    if (NAto0) {
-      for (col in csumvarnm) set(condf.sum, which(is.na(condf.sum[[col]])), col, 0)
-    }
+    sumdat <- merge(pltx, condf.sum, by.x=puniqueid, by.y=cuniqueid, all.x=TRUE)
+  } else if (bysubp && !is.null(subplotx)) {
+    sumdat <- merge(subplotx, condf.sum, by=csumuniqueid, all.x=TRUE)
+  } else {
+    sumdat <- condf.sum
+  }
+
+  ## Change NA values TO 0
+  if (NAto0) {
+    for (col in csumvarnm) set(sumdat, which(is.na(sumdat[[col]])), col, 0)
   }
 
 
@@ -386,36 +412,36 @@ datSumCond <- function(cond = NULL,
   #############################################################
   if (savedata) {
     if (pltsp) {
-      spExportSpatial(condf.sum, 
-              savedata_opts=list(outfolder=outfolder, 
-                                  out_fmt=out_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer=out_layer,
-                                  outfn.pre=outfn.pre, 
-                                  outfn.date=outfn.date, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer, 
-                                  add_layer=TRUE))
+      spExportSpatial(sumdat, 
+              savedata_opts=list(outfolder = outfolder, 
+                                  out_fmt = out_fmt, 
+                                  out_dsn = out_dsn, 
+                                  out_layer = out_layer,
+                                  outfn.pre = outfn.pre, 
+                                  outfn.date = outfn.date, 
+                                  overwrite_layer = overwrite_layer,
+                                  append_layer = append_layer, 
+                                  add_layer = TRUE))
     } else {
-      datExportData(condf.sum, 
-              savedata_opts=list(outfolder=outfolder, 
-                                  out_fmt=out_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer=out_layer,
-                                  outfn.pre=outfn.pre, 
-                                  outfn.date=outfn.date, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer,
-                                  add_layer=TRUE)) 
+      datExportData(sumdat, 
+              savedata_opts=list(outfolder = outfolder, 
+                                  out_fmt = out_fmt, 
+                                  out_dsn = out_dsn, 
+                                  out_layer = out_layer,
+                                  outfn.pre = outfn.pre, 
+                                  outfn.date = outfn.date, 
+                                  overwrite_layer = overwrite_layer,
+                                  append_layer = append_layer,
+                                  add_layer = TRUE)) 
     }
   }  
 
   if (!returnDT) {     
-    condf.sum <- setDF(condf.sum)
+    sumdat <- data.frame(sumdat)
   }
-  sumcondlst <- list(condsum=condf.sum, csumvarnm=csumvarnm)
-  if (!is.null(cfilter))
+  sumcondlst <- list(condsum=sumdat, csumvarnm=csumvarnm)
+  if (!is.null(cfilter)) {
     sumcondlst$cfilter <- cfilter
-
+  }
   return(sumcondlst)
 } 

@@ -167,8 +167,9 @@ datSumTree <- function(tree = NULL,
 
   ## Set global variables  
   COND_STATUS_CD=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
-	seedf=TREECOUNT_CALC=estunits=fname=NF_SUBP_STATUS_CD=
-	CONDPROP_UNADJ=MACRPROP_UNADJ=SUBPPROP_UNADJ=sumbcvars=treef <- NULL
+      seedf=TREECOUNT_CALC=estunits=fname=NF_SUBP_STATUS_CD=
+      CONDPROP_UNADJ=MACRPROP_UNADJ=SUBPPROP_UNADJ=sumbcvars=treef=
+      cond.nonsamp.filter  <- NULL
 
 
   ## If gui.. set variables to NULL
@@ -833,7 +834,6 @@ datSumTree <- function(tree = NULL,
       }
     
     } else {
-
       ## Remove nonsampled conditions  
       if ("COND_STATUS_CD" %in% names(condx)) {
         cond.nonsamp.filter <- "COND_STATUS_CD != 5"
@@ -1090,62 +1090,10 @@ datSumTree <- function(tree = NULL,
     sumdat <- datvars
   }
 
-  if (NAto0) 
-    ## Change NA values TO 0
+  ## Change NA values TO 0
+  if (NAto0) {
     for (col in tsumvarnmlst2) set(sumdat, which(is.na(sumdat[[col]])), col, 0) 
-
-#   if (savedata && parameters) {
-#     ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
-#     ###########################################################
-#     outfn.param <- paste(out_layer, "parameters", sep="_")
-#     outparamfnbase <- paste(outfn.param, format(Sys.time(), "%Y%m%d"), sep="_")
-#     outparamfn <- fileexistsnm(outfolder, outparamfnbase, "txt")
-# 
-#     tsumvarlstout <- addcommas(sapply(tsumvarlst, function(x) {paste0("'", x, "'")}))
-#     tsumvarnmlstout <- addcommas(sapply(tsumvarnmlst, function(x) {paste0("'", x, "'")}))
-#     strunitvars <- addcommas(sapply(strunitvars, function(x) {paste0("'", x, "'")}))
-# 
-#     outfile <- file(paste0(outfolder, "/", outparamfn, ".txt"), "w")
-#     cat(  "tree = ", as.character(bquote(tree)), "\n",
-#       "cond = ", as.character(bquote(cond)), "\n",
-#       "plt = ", as.character(bquote(plt)), "\n",
-#       "plt_dsn = \"", plt_dsn, "\"", "\n",
-#       "tuniqueid = \"", tuniqueid, "\"", "\n",
-#       "cuniqueid = \"", cuniqueid, "\"", "\n",
-#       "puniqueid = \"", puniqueid, "\"", "\n",
-#       "bycond = ", bycond, "\n",
-#       "condid = \"", condid, "\"", "\n",
-#       "bysubp = ", bysubp, "\n",
-#       "subpid = \"", subpid, "\"", "\n",
-#       "tsumvarlst = c(", tsumvarlstout, ")", "\n",
-#       "tsumvarnmlst = c(", tsumvarnmlstout, ")", "\n",  
-#       "TPA = ", TPA, "\n",
-#       "tfun = ", noquote(tfunstr), "\n",
-#       "ACI = ", ACI, "\n",
-#       "tfilter = \"", tfilter, "\"", "\n",
-#       "lbs2tons = ", lbs2tons, "\n",
-#       "getadjplot = ", getadjplot, "\n",
-#       "adjtree = ", adjtree, "\n",
-#       "adjTPA = ", adjTPA, "\n",
-#       "NAto0 = ", NAto0, "\n",
-#       "savedata = ", savedata, "\n",
-#       "outfolder = \"", outfolder, "\"", "\n",
-#       "out_layer = ", out_layer, "\n",
-#       "outfn.date = ", outfn.date, "\n",
-#       "overwrite_dsn = ", overwrite_dsn, "\n",
-#       "tround = \"", tround, "\"", "\n", "\n",
-#     file = outfile, sep="")
-# 
-#     cat(  "sumdat <- datSumTree(tree=tree, cond=cond, plt=plt, plt_dsn=plt_dsn,
-# 	tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, 
-# 	condid=condid, bysubp=bysubp, subpid=subpid, tsumvarlst=tsumvarlst, 
-# 	tsumvarnmlst=tsumvarnmlst, TPA=TPA, tfun=tfun, ACI=ACI, tfilter=tfilter, 
-# 	lbs2tons=lbs2tons, getadjplot=getadjplot, adjtree=adjtree, adjTPA=adjTPA, 
-# 	NAto0=NAto0, savedata=savedata, outfolder=outfolder, out_layer=out_layer, 
-# 	outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, tround=tround)",
-#     file = outfile, sep="")
-#     close(outfile)
-#   }
+  }
 
   ## Get metadata
   #############################################################  

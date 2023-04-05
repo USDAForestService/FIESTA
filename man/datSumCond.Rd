@@ -14,6 +14,7 @@ datSumCond(
   cuniqueid = "PLT_CN",
   puniqueid = "CN",
   condid = "CONDID",
+  bycond = FALSE,
   bysubp = FALSE,
   subpid = "SUBP",
   csumvar = NULL,
@@ -54,6 +55,10 @@ nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.}
 \item{puniqueid}{String. Unique identifier of plt (default = "CN").}
 
 \item{condid}{String. Unique identifier for conditions.}
+
+\item{bycond}{Logical. If TRUE, the data are aggregated to the condition
+level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
+level (by: puniqueid).}
 
 \item{bysubp}{Logical. If TRUE, data are aggregated to the subplot level.}
 
