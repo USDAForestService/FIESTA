@@ -3767,14 +3767,14 @@ DBgetPlots <- function (states = NULL,
       }
     }
     if (!is.null(spconddat)) {
-      returnlst$spconddat <- setDF(spconddatx)
+      returnlst$spconddat <- data.frame(spconddatx)
     }
  
-    if (savePOP && exists(ppsanm)) {
-      returnlst$pop_plot_stratum_assgn <- setDF(get(ppsanm))
+    if (savePOP && exists(ppsanm) && is.data.frame(ppsanm)) {
+      returnlst$pop_plot_stratum_assgn <- data.frame(get(ppsanm))
     }
     if (saveSURVEY && !is.null(SURVEY)) {
-      returnlst$SURVEY <- setDF(SURVEY)
+      returnlst$SURVEY <- data.frame(SURVEY)
     }
  
     if (length(evalidlist) > 0) {

@@ -70,6 +70,7 @@ datSumCond <- function(cond = NULL,
                        cuniqueid = "PLT_CN",
                        puniqueid = "CN", 
                        condid = "CONDID", 
+                       bycond = FALSE,                        
                        bysubp = FALSE, 
                        subpid = "SUBP", 
                        csumvar = NULL, 
@@ -174,10 +175,41 @@ datSumCond <- function(cond = NULL,
   if (!"CONDPROP_UNADJ" %in% condnmlst) stop("CONDPROP_UNADJ not in cond")
 
 
+  ## Check condid in tree table and setkey to tuniqueid, condid
+  condid <- pcheck.varchar(var2check=condid, varnm="condid", 
+		checklst=names(condx), caption="cond ID - tree", 
+		warn=paste(condid, "not in tree table"))
+ 
+  if (is.null(condid)) {
+    message("assuming all 1 condition plots")
+    condx$CONDID <- 1
+    condid <- "CONDID"
+  }
+
+
+  ## Check bycond
+  ###################################################################################
+  bycond <- pcheck.logical(bycond, varnm="bycond", title="By condition?", 
+		first="YES", gui=gui, stopifnull=TRUE)
+
   ## Check bysubp
   ###################################################################################
   bysubp <- pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
 		first="YES", gui=gui, stopifnull=TRUE)
+
+
+  ## Check unique ids and set keys
+  if (bycond) {
+    pltsp <- FALSE
+    noplt <- TRUE
+
+    csumuniqueid <- c(cuniqueid, condid)
+    setkeyv(condx, csumuniqueid)
+           
+  } else {
+    csumuniqueid <- cuniqueid
+  }
+
 
   if (bysubp) {
     subpuniqueid <- "PLT_CN"
@@ -249,7 +281,6 @@ datSumCond <- function(cond = NULL,
     csumvar[csumvar == "CONDPROP_UNADJ"] <- "CONDPROP"
   }
 
-
   ## Check csumvarnm
   if (is.null(csumvarnm)) csumvarnm <- paste(csumvar, "PLT", sep="_")
   condnmlst <- sapply(csumvarnm, checknm, condnmlst)
@@ -319,7 +350,7 @@ datSumCond <- function(cond = NULL,
       condx <- adjfacdata$condx
     }
   }
-
+ 
   ## Filter cond
   cdat <- datFilter(x=condx, xfilter=cfilter, title.filter="tfilter",
 			 stopifnull=TRUE, gui=gui)
@@ -331,12 +362,12 @@ datSumCond <- function(cond = NULL,
       stop("cadjcnd not in cond... must get adjustment factor")
     csumvarnm <- paste0(csumvarnm, "_ADJ")
     condf.sum <- condf[, lapply(.SD, function(x) sum(x * CONDPROP_ADJ, na.rm=TRUE)),
- 		by=cuniqueid, .SDcols=csumvar]
+ 		by=csumuniqueid, .SDcols=csumvar]
   } else {
     condf.sum <- condf[, lapply(.SD, function(x) sum(x * CONDPROP_UNADJ, na.rm=TRUE)),
- 		by=cuniqueid, .SDcols=csumvar]
+ 		by=csumuniqueid, .SDcols=csumvar]
   }
-  names(condf.sum) <- c(cuniqueid, csumvarnm)
+  names(condf.sum) <- c(csumuniqueid, csumvarnm)
 
   ## Merge to plt
   if (!noplt) {

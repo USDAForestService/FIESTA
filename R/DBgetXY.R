@@ -484,6 +484,7 @@ DBgetXY <- function (states = NULL,
     PLOT <- evalInfo$PLOT
     plotnm <- "PLOT"
   }
+
   if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
     ppsanm <- "POP_PLOT_STRATUM_ASSGN"
   } else if (!is.null(evalInfo$POP_PLOT_STRATUM_ASSGN)) {
@@ -826,7 +827,6 @@ DBgetXY <- function (states = NULL,
           stop(ppsa_layer, " is missing evalids: ", toString(missevalid))
           ppsanm <- NULL
         }
-
       } else if (datsource == "datamart") {
         POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbrlst, 
 			returnDT=TRUE, stopifnull=FALSE)
@@ -1135,7 +1135,7 @@ DBgetXY <- function (states = NULL,
   if (is.null(xyjoinid)) {
     xyjoinid <- xy.uniqueid
   }
-
+ 
   ## GENERATE RETURN LIST
   ###########################################################
   if (returndata) {
@@ -1155,8 +1155,8 @@ DBgetXY <- function (states = NULL,
       returnlst$dbconn <- dbconn
     }
     returnlst$evalInfo <- evalInfo
-
-    if (!is.null(ppsanm)) {
+ 
+    if (!is.null(ppsanm) && exists(ppsanm)) {
       returnlst$pop_plot_stratum_assgn <- get(ppsanm)
     }
 
