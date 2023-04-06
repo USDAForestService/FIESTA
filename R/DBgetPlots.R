@@ -462,7 +462,7 @@ DBgetPlots <- function (states = NULL,
                         invtype = "ANNUAL", 
                         intensity1 = FALSE, 
                         issubp = FALSE, 
-                        isseed = TRUE,                      
+                        isseed = FALSE,                      
                         biojenk = FALSE,
                         greenwt = FALSE,
                         plotgeom = FALSE, 
@@ -560,7 +560,7 @@ DBgetPlots <- function (states = NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1] 
-  formallst <- unique(c(names(formals(DBgetPlots)), "istree", "isseed", "isveg", "ischng", "isdwm"))
+  formallst <- unique(c(names(formals(DBgetPlots)), "istree", "isveg", "ischng", "isdwm"))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -575,7 +575,7 @@ DBgetPlots <- function (states = NULL,
   for (i in 1:length(eval_defaults_list)) {
     assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
   } 
-
+ 
   ## Set user-supplied eval_opts values
   if (length(eval_opts) > 0) {
     for (i in 1:length(eval_opts)) {
@@ -585,6 +585,7 @@ DBgetPlots <- function (states = NULL,
         stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
       }
     }
+
   } else {
     if (gui) {
       evallst <- c("FIA", "custom")
@@ -606,7 +607,6 @@ DBgetPlots <- function (states = NULL,
   if ("istree" %in% names(args)) {
     message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
     istree <- args$istree
-
     if (!istree) {
       Type <- c("ALL", Type[!Type %in% c("CURR", "VOL")])
     } 
@@ -732,13 +732,13 @@ DBgetPlots <- function (states = NULL,
   ###########################################################
   getType <- ifelse (!is.null(evalid), TRUE, FALSE)
   if (gui) {
-    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "CHNG", "GRM")
+    Typelst <- c("CURR", "VOL", "P2VEG", "DWM", "GRM")
     Type <- select.list(Typelst, title="eval type", 
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
   } 
 
-  if (any(Type %in% c("CURR", "VOL"))) {
+  if (any(Type == "VOL")) {
     istree <- TRUE
   } 
   if (any(Type == "P2VEG")) {
@@ -757,11 +757,10 @@ DBgetPlots <- function (states = NULL,
   if (any(Type == "GRM")) {
     ischng=issubp=isgrm <- TRUE
   }
- 
   if (isveg && invtype == "PERIODIC") {
     message("understory vegetation data only available for annual data\n")
     isveg <- FALSE
-  } 
+  }
 
   biojenk <- pcheck.logical(biojenk, varnm="biojenk", 
 		title="Jenkins biomass?", first="NO", gui=gui)
@@ -867,7 +866,7 @@ DBgetPlots <- function (states = NULL,
     evalTypelist <- unlist(evalInfo$evalTypelist)
     Typelist <- sub("EXP", "", evalTypelist)
     if (any(c("VOL","CURR") %in% Typelist)) {
-      istree=isseed <- TRUE
+      istree <- TRUE
     }
     if ("P2VEG" %in% Typelist) {
       isveg=issubp <- TRUE
@@ -1067,6 +1066,7 @@ DBgetPlots <- function (states = NULL,
                             outfn.date = outfn.date, 
                             overwrite_dsn = overwrite_dsn, 
                             append_layer = append_layer, 
+                            createSQLite = FALSE,
                             gui = gui)
     outfolder <- outlst$outfolder
     out_dsn <- outlst$out_dsn
@@ -3542,7 +3542,7 @@ DBgetPlots <- function (states = NULL,
       tabs$cond <- rbind(tabs$cond, data.frame(condx))
       tabIDs$cond <- "PLT_CN"
     }
-
+ 
     ###############################################################################
     ###############################################################################
     ## SAVE data
@@ -3563,16 +3563,20 @@ DBgetPlots <- function (states = NULL,
         xycoords <- getcoords(coordType)
 
         if (xymeasCur) {
-          xyplt <- get(paste0("xyCurx_", coordType))
+          #spxynm <- paste0("xyCur_", coordType)
+          spxynm <- paste0("xy_", coordType)
+          xynm <- paste0("xyCurx_", coordType)
+          xyplt <- get(xynm)
         } else {
-          xyplt <- get(paste0("xyx_", coordType))
+          xynm <- paste0("xy_", coordType)
+          xynm <- paste0("xyx_", coordType)
+          xyplt <- get(xynm)
         }
-        spxynm <- "spxy"
-
+ 
         if (!is.null(xyplt)) {
           if (!is.null(pltx) && length(unique(xyplt$PLT_CN)) != nrow(pltx))
             warning("number of plots in ", spxynm, " does not match plot table")            
-
+ 
           ## Generate spatial output
           out_fmt_sp <- ifelse(out_fmt == "csv", "shp", out_fmt)
           assign(spxynm, spMakeSpatialPoints(xyplt = xyplt, 
@@ -3582,40 +3586,30 @@ DBgetPlots <- function (states = NULL,
                               xy.crs = 4269, 
                               addxy = TRUE, 
                               exportsp = savedata, 
-                              savedata_opts = list(
-                                out_dsn = out_dsn, 
-                                out_fmt = out_fmt_sp, 
-                                outfolder = outfolder, 
-                                out_layer = spxynm, 
-                                outfn.date = outfn.date, 
-                                overwrite_layer = overwrite_layer, 
-                                append_layer = append_layer, 
-                                outfn.pre = outfn.pre, 
-                                overwrite_dsn = overwrite_dsn)))
+                              savedata_opts = list(out_dsn = out_dsn, 
+                                                  out_fmt = out_fmt_sp, 
+                                                  outfolder = outfolder, 
+                                                  out_layer = spxynm, 
+                                                  outfn.date = outfn.date, 
+                                                  overwrite_layer = overwrite_layer, 
+                                                  append_layer = append_layer, 
+                                                  outfn.pre = outfn.pre, 
+                                                  overwrite_dsn = overwrite_dsn)))
         }
-      # } else {
-      #   ## output parameters
-      #   ###########################################################
-      #   if (savedata | saveqry | parameters | !treeReturn | !returndata) {
-      #     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-      #                     outfolder=outfolder, outfn.pre=outfn.pre, 
-      #                     outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, 
-      #                     append_layer=append_layer, gui=gui)
-      #     out_dsn <- outlst$out_dsn
-      #     out_fmt <- outlst$out_fmt
-      #   } 
       }
-
+ 
       if (savedata && getxy && !issp) {
         xycoords <- getcoords(coordType)
 
         if (xymeasCur) {
-          xynm <- paste0("xyCur_", coordType)
+          #xynm <- paste0("xyCur_", coordType)
+          xynm <- paste0("xy_", coordType)
           xyplt <- get(paste0("xyCurx_", coordType))
         } else {
           xynm <- paste0("xy_", coordType)
           xyplt <- get(paste0("xyx_", coordType))
         }
+
         if (!is.null(xyplt)) {
           index.unique.xyplt <- NULL
           if (!append_layer) index.unique.xyplt <- "PLT_CN"
@@ -3709,7 +3703,6 @@ DBgetPlots <- function (states = NULL,
     }
   } ## end loop for states
 
-
   if (savedata && saveSURVEY) {
     datExportData(SURVEY, 
         savedata_opts=list(outfolder = outfolder, 
@@ -3748,7 +3741,8 @@ DBgetPlots <- function (states = NULL,
     if (getxy) {
       xycoords <- getcoords(coordType)
       if (xymeasCur) {
-        xynm <- paste0("xyCur_", coordType)
+        xynm <- paste0("xy_", coordType)
+        #xynm <- paste0("xyCur_", coordType)
         #assign(xynm, get(paste0("xyCur_", coordType))) 
         returnlst[[xynm]] <- get(paste0("xyCur_", coordType))
       } else {
@@ -3756,7 +3750,7 @@ DBgetPlots <- function (states = NULL,
         #assign(xynm, get(paste0("xy_", coordType))) 
         returnlst[[xynm]] <- get(paste0("xy_", coordType))
       } 
-      spxynm <- "spxy"
+      spxynm <- xynm
  
       if (issp) {
         assign(spxynm, 
