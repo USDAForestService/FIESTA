@@ -42,6 +42,7 @@
 #' @param dbconn Open database connection.
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
 #' @param evalInfo List. List object output from DBgetEvalid or DBgetXY 
+#' @param ... For extendibility.
 #' FIESTA functions.   
 #' 
 #' @return FIAstrata - a list of the following objects: \item{pltassgn}{ Data
@@ -125,8 +126,9 @@ DBgetStrata <- function(dat = NULL,
                         savedata_opts = NULL,
                         dbconn = NULL,
                         dbconnopen = FALSE,
-                        evalInfo = NULL
-                        ){
+                        evalInfo = NULL,
+                        ...
+                        ) {
   ######################################################################################
   ## DESCRIPTION: This function gets the strata info and area by estimation unit from 
   ##		FIA Database, extracts and merges plot-level assignments to data file, and 
@@ -160,10 +162,17 @@ DBgetStrata <- function(dat = NULL,
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
+  matchargs <- as.list(match.call()[-1])
+
+  dotargs <- c(list(...))
+  args <- as.list(environment())
+  args <- args[!names(args) %in% names(dotargs)]
+  args <- args[names(args) %in% names(matchargs)]
+  args <- append(args, dotargs)
   
   ## Check arguments
   input.params <- names(as.list(match.call()))[-1]
-  if (!all(input.params %in% c(names(formals(DBgetStrata)), "istree", "isseed", "isP2VEG"))) {
+  if (!all(input.params %in% c(names(formals(DBgetStrata)), "istree", "isseed", "isveg"))) {
     miss <- input.params[!input.params %in% formals(DBgetStrata)]
     stop("invalid parameter: ", toString(miss))
   } 
@@ -190,6 +199,19 @@ DBgetStrata <- function(dat = NULL,
     message("no evaluation timeframe specified...")
     message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
     stop()
+  }
+
+
+  if ("istree" %in% names(args)) {
+    message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
+    istree <- args$istree
+    if (!istree) {
+      Type <- c("ALL", Type[!Type %in% c("CURR", "VOL")])
+    } 
+  }
+  if ("isveg" %in% names(args)) {
+    message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
+    isveg <- args$isveg
   }
 
   
@@ -343,7 +365,6 @@ DBgetStrata <- function(dat = NULL,
     saveSURVEY <- TRUE
   }
 
-
   ## Get states, Evalid and/or invyrs info
   ##########################################################
   if (!is.null(evalInfo)) {
@@ -387,11 +408,6 @@ DBgetStrata <- function(dat = NULL,
   ###########################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data to outfolder?", first="YES", gui=gui)
-
-  ## Check parameters
-  ###########################################################
-  parameters <- pcheck.logical(parameters, varnm="parameters", 
-		title="Save parameters", first="YES", gui=gui)
 
   ## Check outfolder/outfn
   if (savedata) {

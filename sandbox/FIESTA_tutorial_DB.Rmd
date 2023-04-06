@@ -340,7 +340,7 @@ dat1 <- DBgetPlots(states = "Idaho",
                   )
 names(dat1)
 plt1 <- dat1$tabs$plt
-spxy1 <- dat1$spxy
+spxy1 <- dat1$xy_PUBLIC
 table(plt1$INVYR)
 
 # Display spatial output
@@ -357,7 +357,7 @@ dat1b <- DBgetPlots(states = "Idaho",
                    allFilter = "FORTYPCD == 367")
 
 names(dat1b)
-spxy1b <- dat1b$spxy
+spxy1b <- dat1b$xy_PUBLIC
 dim(spxy1b)
 
 # Display spatial output
@@ -523,7 +523,7 @@ DBI::dbDisconnect(conn)
 sf::st_layers(splitefn)
 
 ## Import spatial xy coordinates (using sf package)
-spxy6 <- sf::st_read(splitefn, layer="spxy")
+spxy6 <- sf::st_read(splitefn, layer="xy_public")
 dim(spxy6)
 
 ## Display plots with public coordinates
@@ -567,7 +567,7 @@ table(ppsa7$EVALID)
 
 dat8 <- DBgetPlots(eval = "FIA",
                    eval_opts = eval_options(Cur = TRUE, 
-                                             evalid = c(491800, 491801, 491803)),
+                                            evalid = c(491800, 491801, 491803)),
                    )
 
 names(dat8)
@@ -641,8 +641,7 @@ table(ppsa10$EVALID)
 dat11 <- DBgetPlots(states = "Vermont", 
                     eval = "custom",
                     eval_opts = eval_options(invyrs = 2012:2014, 
-                                             evalType = "ALL"),
-                    issp = TRUE
+                                             evalType = "ALL")
                     )
 
 names(dat11)
@@ -700,7 +699,7 @@ UTevalCur <- DBgetPlots(states = "Idaho",
 names(UTevalCur)
 tabs.UTevalCur <- UTevalCur$tabs
 plt.UTevalCur <- tabs.UTevalCur$plt
-spxy.UTevalCur <- UTevalCur$spxy
+spxy.UTevalCur <- UTevalCur$xy_public
 
 ## The difference in number of plots by inventory year and measurement year
 table(plt.UTevalCur$INVYR, plt.UTevalCur$MEASYEAR)
@@ -716,7 +715,7 @@ UTmeasCur <- DBgetPlots(states = "Idaho",
 names(UTmeasCur)
 tabs.UTmeasCur <- UTmeasCur$tabs
 plt.UTmeasCur <- tabs.UTmeasCur$plt
-spxy.UTmeasCur <- UTmeasCur$spxy
+spxy.UTmeasCur <- UTmeasCur$xy_public
 
 ## The difference in number of plots by inventory year and measurement year
 table(plt.UTmeasCur$INVYR, plt.UTmeasCur$MEASYEAR)
@@ -758,7 +757,7 @@ dat14 <- DBgetPlots(states = "Vermont",
                     )
 tabs14 <- dat14$tabs
 plt14 <- tabs14$plt
-spxy14 <- dat14$spxy
+spxy14 <- dat14$xy_public
 
 ## With only P2 plots (intensity1 = TRUE)
 dat14b <- DBgetPlots(states = "Vermont", 
@@ -774,7 +773,7 @@ plt14b <- tabs14b$plt
 
 table(plt14$INVYR)
 table(plt14b$INVYR)
-spxy14b <- dat14b$spxy
+spxy14b <- dat14b$xy_public
 
 
 # Display spatial output of public coordinates
@@ -806,7 +805,7 @@ dat15$pltcnt
 table(dat15$tabs$cond$ADFORCD)
 
 ## Display points with by PLOT_STATUS_CD (1-light blue; 2-brown; 3-blue)
-spxy15 <- dat15$spxy
+spxy15 <- dat15$xy_public
 
 spxy15$color <- with(spxy15, 
           ifelse(PLOT_STATUS_CD == 2, "brown", 
@@ -826,7 +825,7 @@ dat15b <- DBgetPlots(states = "Montana",
                      )
 
 ## Display points with by PLOT_STATUS_CD (1-light blue; 2-brown; 3-blue)
-spxy15b <- dat15b$spxy
+spxy15b <- dat15b$xy_public
 plot(sf::st_geometry(spxy15b), pch = 16, cex = .5, col = "wheat", add = TRUE)
 
 ```

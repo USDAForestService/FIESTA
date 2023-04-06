@@ -611,11 +611,6 @@ DBgetPlots <- function (states = NULL,
       Type <- c("ALL", Type[!Type %in% c("CURR", "VOL")])
     } 
   }
-  if ("isseed" %in% names(args)) {
-    message("the parameter isseed is deprecated... use eval_options(Type='VOL'))\n")
-    isseed <- args$isseed
-  }
-
   if ("isveg" %in% names(args)) {
     message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
     isveg <- args$isveg
@@ -2327,7 +2322,7 @@ DBgetPlots <- function (states = NULL,
           assign(paste0("xyCurx_", coordType), 
 			xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ])
           if (returndata) { 
-            assign(paste0("xyCur_", coordType), 
+            assign(paste0("xy_", coordType), 
 				  rbind(get(paste0("xyCur_", coordType)), get(paste0("xyCurx_", coordType))))
           } 
         } else {
@@ -3744,11 +3739,11 @@ DBgetPlots <- function (states = NULL,
         xynm <- paste0("xy_", coordType)
         #xynm <- paste0("xyCur_", coordType)
         #assign(xynm, get(paste0("xyCur_", coordType))) 
-        returnlst[[xynm]] <- get(paste0("xyCur_", coordType))
+        returnlst[[xynm]] <- get(xynm)
       } else {
         xynm <- paste0("xy_", coordType)
         #assign(xynm, get(paste0("xy_", coordType))) 
-        returnlst[[xynm]] <- get(paste0("xy_", coordType))
+        returnlst[[xynm]] <- get(xynm)
       } 
       spxynm <- xynm
  
@@ -3776,6 +3771,10 @@ DBgetPlots <- function (states = NULL,
     }
     returnlst$pltcnt <- pltcnt
     returnlst$invyrs <- invyrs
+
+    if (!is.null(evalInfo)) {
+      returnlst$evalInfo <- evalInfo
+    }
   }
 
   if (returndata && !is.null(evalidlist)) {

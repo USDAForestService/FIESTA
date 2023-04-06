@@ -16,7 +16,7 @@ DBgetPlots(
   invtype = "ANNUAL",
   intensity1 = FALSE,
   issubp = FALSE,
-  isseed = TRUE,
+  isseed = FALSE,
   biojenk = FALSE,
   greenwt = FALSE,
   plotgeom = FALSE,
