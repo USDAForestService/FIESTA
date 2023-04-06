@@ -319,9 +319,10 @@
 #' @return if returndata=TRUE, a list of the following objects: 
 #' \item{states}{ Vector. Input state(s) (full state names: Arizona). } 
 #' \item{tabs}{ List. A list of data frames from FIA database, including 
-#' plt and cond; and tree (if istree=TRUE); seed (if isseed=TRUE), p2veg_subplot_spp,
-#' p2veg_subp_structure, and invsubp (if isveg=TRUE), lulc (if islulc=TRUE). See below 
-#' 'Output Tables - FIA Table Names' for reference to FIA database tables. 
+#' plt and cond; and tree (if Type='VOL'); seed (if isseed=TRUE), 
+#' p2veg_subplot_spp, p2veg_subp_structure, and invasive_subplot_spp 
+#' (if Type='P2VEG'). See below 'Output Tables - FIA Table Names' 
+#' for reference to FIA database tables.
 #' See FIESTA:ref_* for variable descriptions (e.g., FIESTA::ref_tree). 
 #' If istree and the number of states > 3, tree data are saved to outfolder 
 #' and not returned to accommodate R memory issues. } 
