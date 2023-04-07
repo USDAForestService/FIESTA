@@ -500,7 +500,7 @@ DBgetPlots <- function (states = NULL,
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-  saveSURVEY=istree=isveg=ischng=isdwm <- FALSE
+  saveSURVEY=istree=isveg=ischng=isdwm=isgrm=islulc=isinv <- FALSE
 
   other_tables <- c("BOUNDARY", "COND_DWM_CALC", "COUNTY", "DWM_COARSE_WOODY_DEBRIS", 
 	"DWM_DUFF_LITTER_FUEL", "DWM_FINE_WOODY_DEBRIS", "DWM_MICROPLOT_FUEL", 
@@ -677,7 +677,7 @@ DBgetPlots <- function (states = NULL,
   xycoords = c("LON_PUBLIC", "LAT_PUBLIC")
   coordType <- "PUBLIC"
   parameters <- FALSE
-  islulc=isgrm <- FALSE
+  islulc=isgrm=subcycle99 <- FALSE
   datamartType = "CSV" 
 
   ########################################################################
@@ -726,9 +726,9 @@ DBgetPlots <- function (states = NULL,
 
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
-  getType <- ifelse (!is.null(evalid), TRUE, FALSE)
+  getType <- ifelse (is.null(evalid), TRUE, FALSE)
   if (gui) {
-    Typelst <- c("CURR", "VOL", "P2VEG", "DWM", "GRM")
+    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", "GROW", "MORT", "REMV", "GRM")
     Type <- select.list(Typelst, title="eval type", 
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
@@ -739,8 +739,13 @@ DBgetPlots <- function (states = NULL,
   } 
   if (any(Type == "P2VEG")) {
     # understory vegetation tables 
-    # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP)
+    # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE)
     isveg=issubp <- TRUE
+  } 
+  if (any(Type == "INV")) {
+    # understory vegetation tables 
+    # (INVASIVE_SUBPLOT_SPP)
+    isinv=issubp <- TRUE
   } 
   if (any(Type == "DWM")) {
     # summarized condition-level down woody debris table (COND_DWM_CALC)
@@ -749,6 +754,9 @@ DBgetPlots <- function (states = NULL,
   if (any(Type == "CHNG")) {
     # current and previous conditions, subplot-level - sccm (SUBP_COND_CHNG_MTRX) 
     ischng=issubp <- TRUE
+  }
+  if (any(Type %in% c("GROW", "MORT", "REMV"))) {
+    Type <- "GRM"
   }
   if (any(Type == "GRM")) {
     ischng=issubp=isgrm <- TRUE
@@ -838,6 +846,7 @@ DBgetPlots <- function (states = NULL,
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   evalidlist <- evalInfo$evalidlist
+  evalTypelist <- unlist(evalInfo$evalTypelist)
   invtype <- evalInfo$invtype
   invyrtab <- evalInfo$invyrtab
   if (length(evalidlist) > 0) {
@@ -857,14 +866,16 @@ DBgetPlots <- function (states = NULL,
     PLOTe <- evalInfo$PLOT
     plotnm <- "PLOTe"
   }
- 
+
   if (getType) {
-    evalTypelist <- unlist(evalInfo$evalTypelist)
     Typelist <- sub("EXP", "", evalTypelist)
     if (any(c("VOL","CURR") %in% Typelist)) {
       istree <- TRUE
     }
     if ("P2VEG" %in% Typelist) {
+      isveg=issubp <- TRUE
+    } 
+    if ("INV" %in% Typelist) {
       isveg=issubp <- TRUE
     } 
     if ("DWM" %in% Typelist) {
@@ -873,8 +884,8 @@ DBgetPlots <- function (states = NULL,
     if ("CHNG" %in% Typelist) {
       ischng=issubp <- TRUE
     }
-    if ("GRM" %in% Typelist) {
-      ischng=issubp=isgrm <- TRUE
+    if (any(c("GRM","GROW") %in% Typelist)) {
+      ischng=issubp=isgrm=istree <- TRUE
     }
   } 
  
@@ -1033,10 +1044,6 @@ DBgetPlots <- function (states = NULL,
   ## Check saveqry
   saveqry <- pcheck.logical(saveqry, varnm="saveqry", 
 		title="Save queries to outfolder?", first="YES", gui=gui)
-
-  ## Check parameters
-  parameters <- pcheck.logical(parameters, varnm="parameters", 
-		title="Save parameters", first="NO", gui=gui)
 
   ## Check savePOP
   savePOP <- pcheck.logical(savePOP, varnm="savePOP", 
@@ -1367,21 +1374,29 @@ DBgetPlots <- function (states = NULL,
       evalid <- evalidlist[[state]]
       evalFilter <- paste0("ppsa.EVALID IN(", toString(evalid), ")")
 
-      if (any(evalType == "P2VEG")) {
+      if (any(endsWith(evalTypelist, "P2VEG"))) {
         evalid.veg <- evalid[endsWith(as.character(evalid), "10")]
         if (length(evalid.veg) == 0) stop("must include evaluation ending in 10")
         evalFilter.veg <- paste("ppsa.EVALID =", evalid.veg)
       } else {
         evalFilter.veg <- evalFilter
       }
-      if (any(evalType == "DWM")) {
+      if (any(endsWith(evalTypelist, "INV"))) {
+        evalid.inv <- evalid[endsWith(as.character(evalid), "09")]
+        if (length(evalid.inv) == 0) stop("must include evaluation ending in 09")
+        evalFilter.inv <- paste("ppsa.EVALID =", evalid.inv)
+      } else {
+        evalFilter.inv <- evalFilter
+      }
+      if (any(endsWith(evalTypelist, "DWM"))) {
         evalid.dwm <- evalid[endsWith(as.character(evalid), "07")]
         if (length(evalid.dwm) == 0) stop("must include evaluation ending in 07")
         evalFilter.dwm <- paste("ppsa.EVALID =", evalid.dwm)
       } else {
         evalFilter.dwm <- evalFilter
       }
-      if (any(evalType %in% c("CHNG", "GRM"))) {
+      if (any(endsWith(evalTypelist, "GROW"), endsWith(evalTypelist, "MORT"), 
+			endsWith(evalTypelist, "REMV"), endsWith(evalTypelist, "GRM"))) {
         evalid.grm <- evalid[endsWith(as.character(evalid), "03")]
         if (length(evalid.grm) == 0) stop("must include evaluation ending in 03")
         evalFilter.grm <- paste("ppsa.EVALID =", evalid.grm)
@@ -1404,8 +1419,15 @@ DBgetPlots <- function (states = NULL,
           evalFilter <- paste(evalFilter, "and p.SUBCYCLE <> 99")
         }
       }
+
+      if (!subcycle99) {
+        evalFilter <- paste(evalFilter, "and p.SUBCYCLE <> 99")
+      }
       if (isveg) {
         evalFilter.veg <- evalFilter
+      }
+      if (isinv) {
+        evalFilter.inv <- evalFilter
       }
       if (isdwm) {
         evalFilter.dwm <- evalFilter 
@@ -2078,12 +2100,6 @@ DBgetPlots <- function (states = NULL,
         rm(condux)
         gc()   
       } 
-
-      if (datsource == "datamart") {
-        if (exists("PLOT")) rm(PLOT)
-        if (exists("COND")) rm(COND)
-        gc()
-      }
     }
  
     ##############################################################
@@ -2502,7 +2518,7 @@ DBgetPlots <- function (states = NULL,
     }
 
     ##############################################################
-    ## Understory vegetation data (P2VEG_SUBPLOT_SPP/P2VEG_SUBP_STRUCTURE
+    ## Understory vegetation data (P2VEG_SUBPLOT_SPP/P2VEG_SUBP_STRUCTURE)
     ##############################################################
     if (isveg && !is.null(pltx)) {
       message("\n",
@@ -2525,13 +2541,6 @@ DBgetPlots <- function (states = NULL,
         } else {
           ## Get P2VEG_SUBP_STRUCTURE fields
           vstrflds <- DBI::dbListFields(dbconn, vsubpstrnm)
-        }
-        invsubpnm <- chkdbtab(dbtablst, invsubp_layer)
-        if (is.null(invsubpnm)) {
-          message("there is no INVASIVE_SUBPLOT_SPP table in database")
-        } else {
-          ## Get INVASIVE_SUBPLOT_SPP fields
-          invflds <- DBI::dbListFields(dbconn, invsubpnm)
         }
 
       } else if (datsource == "datamart") {
@@ -2556,18 +2565,6 @@ DBgetPlots <- function (states = NULL,
           names(P2VEG_SUBP_STRUCTURE) <- toupper(names(P2VEG_SUBP_STRUCTURE))
           vstrflds <- names(P2VEG_SUBP_STRUCTURE)
         }
-
-        INVASIVE_SUBPLOT_SPP <- 
-		      DBgetCSV("INVASIVE_SUBPLOT_SPP", stabbr, returnDT=TRUE, 
-		      stopifnull=FALSE)
-        if (is.null(P2VEG_SUBPLOT_SPP)) {
-          message("there is no INVASIVE_SUBPLOT_SPP table in datamart")
-        } else {
-          invsubpnm <- "INVASIVE_SUBPLOT_SPP"
-          names(INVASIVE_SUBPLOT_SPP) <- toupper(names(INVASIVE_SUBPLOT_SPP))
-          invflds <- names(INVASIVE_SUBPLOT_SPP)
-        }
-
       } else if (datsource %in% c("csv", "obj")) {
         P2VEG_SUBPLOT_SPP <- pcheck.table(vsubpspp_layer, 
 					stopifnull=TRUE, stopifinvalid=TRUE)
@@ -2587,16 +2584,6 @@ DBgetPlots <- function (states = NULL,
           vsubpstrnm <- "P2VEG_SUBP_STRUCTURE"
           names(P2VEG_SUBP_STRUCTURE) <- toupper(names(P2VEG_SUBP_STRUCTURE))
           vstrflds <- names(P2VEG_SUBP_STRUCTURE)
-        }
-
-        INVASIVE_SUBPLOT_SPP <- pcheck.table(invsubp_layer, 
-					stopifnull=TRUE, stopifinvalid=TRUE)
-        if (is.null(INVASIVE_SUBPLOT_SPP)) {
-          message("the INVASIVE_SUBPLOT_SPP is invalid")
-        } else {
-          invsubpnm <- "INVASIVE_SUBPLOT_SPP"
-          names(INVASIVE_SUBPLOT_SPP) <- toupper(names(INVASIVE_SUBPLOT_SPP))
-          invflds <- names(INVASIVE_SUBPLOT_SPP)
         }
       }
       
@@ -2712,21 +2699,73 @@ DBgetPlots <- function (states = NULL,
             if (!append_layer) index.unique.vsubpstrx <- c("PLT_CN", "CONDID")
             datExportData(p2veg_subp_structurex, 
                 index.unique = index.unique.vsubpstrx,
-                savedata_opts = list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="p2veg_subp_structure",
-                                outfn.pre=outfn.pre, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                outfn.date=outfn.date, 
-                                add_layer=TRUE))
+                savedata_opts = list(outfolder = outfolder, 
+                                out_fmt = out_fmt, 
+                                out_dsn = out_dsn, 
+                                out_layer = "p2veg_subp_structure",
+                                outfn.pre = outfn.pre, 
+                                overwrite_layer = overwrite_layer,
+                                append_layer = append_layer,
+                                outfn.date = outfn.date, 
+                                add_layer = TRUE))
             rm(p2veg_subp_structurex)
             gc() 
           }
         }
       }
 
+      if (datsource == "datamart") {
+        if (exists("P2VEG_SUBPLOT_SPP")) rm(P2VEG_SUBPLOT_SPP)
+        if (exists("P2VEG_SUBP_STRUCTURE")) rm(P2VEG_SUBP_STRUCTURE)
+        gc()
+      }
+    }
+
+
+    ##############################################################
+    ## Invasive species (INVASIVE_SUBPLOT_SPP)
+    ##############################################################
+    if (isinv && !is.null(pltx)) {
+      message("\n",
+      "## STATUS: Getting invasive data from INVASIVE_SUBPLOT_SPP (", 
+		stabbr, ") ...", "\n")
+
+      ## Invasive species
+      if (datsource == "sqlite") {
+        invsubpnm <- chkdbtab(dbtablst, invsubp_layer)
+        if (is.null(invsubpnm)) {
+          message("there is no INVASIVE_SUBPLOT_SPP table in database")
+        } else {
+          ## Get INVASIVE_SUBPLOT_SPP fields
+          invflds <- DBI::dbListFields(dbconn, invsubpnm)
+        }
+
+      } else if (datsource == "datamart") {
+
+        INVASIVE_SUBPLOT_SPP <- 
+		      DBgetCSV("INVASIVE_SUBPLOT_SPP", stabbr, returnDT=TRUE, 
+		      stopifnull=FALSE)
+        if (is.null(P2VEG_SUBPLOT_SPP)) {
+          message("there is no INVASIVE_SUBPLOT_SPP table in datamart")
+        } else {
+          invsubpnm <- "INVASIVE_SUBPLOT_SPP"
+          names(INVASIVE_SUBPLOT_SPP) <- toupper(names(INVASIVE_SUBPLOT_SPP))
+          invflds <- names(INVASIVE_SUBPLOT_SPP)
+        }
+
+      } else if (datsource %in% c("csv", "obj")) {
+
+        INVASIVE_SUBPLOT_SPP <- pcheck.table(invsubp_layer, 
+					stopifnull=TRUE, stopifinvalid=TRUE)
+        if (is.null(INVASIVE_SUBPLOT_SPP)) {
+          message("the INVASIVE_SUBPLOT_SPP is invalid")
+        } else {
+          invsubpnm <- "INVASIVE_SUBPLOT_SPP"
+          names(INVASIVE_SUBPLOT_SPP) <- toupper(names(INVASIVE_SUBPLOT_SPP))
+          invflds <- names(INVASIVE_SUBPLOT_SPP)
+        }
+      }
+      
       if (!is.null(invsubpnm)) {
         ## Check variables in database
         if (defaultVars) {
@@ -2744,7 +2783,7 @@ DBgetPlots <- function (states = NULL,
 
         ## Create query for INVASIVE_SUBPLOT_SPP
         invsubpqry <- paste("select distinct", invsubpvars, "from", invfromqry, 
-		                      "where", paste0(evalFilter.veg, stateFilters))
+		                      "where", paste0(evalFilter.inv, stateFilters))
 
         ## Run query for INVASIVE_SUBPLOT_SPP
         if (datsource == "sqlite") {
@@ -2777,15 +2816,15 @@ DBgetPlots <- function (states = NULL,
             if (!append_layer) index.unique.invsubpx <- c("PLT_CN", "CONDID")
             datExportData(invasive_subplot_sppx, 
                 index.unique = index.unique.invsubpx,
-                savedata_opts = list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="invasive_subplot_spp",
-                                outfn.pre=outfn.pre, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                outfn.date=outfn.date, 
-                                add_layer=TRUE)) 
+                savedata_opts = list(outfolder = outfolder, 
+                                out_fmt = out_fmt, 
+                                out_dsn = out_dsn, 
+                                out_layer = "invasive_subplot_spp",
+                                outfn.pre = outfn.pre, 
+                                overwrite_layer = overwrite_layer,
+                                append_layer = append_layer,
+                                outfn.date = outfn.date, 
+                                add_layer = TRUE)) 
             rm(invasive_subplot_sppx)
             gc() 
           }
@@ -2793,12 +2832,11 @@ DBgetPlots <- function (states = NULL,
       }
 
       if (datsource == "datamart") {
-        if (exists("P2VEG_SUBPLOT_SPP")) rm(P2VEG_SUBPLOT_SPP)
-        if (exists("P2VEG_SUBP_STRUCTURE")) rm(P2VEG_SUBP_STRUCTURE)
         if (exists("INVASIVE_SUBPLOT_SPP")) rm(INVASIVE_SUBPLOT_SPP)
         gc()
       }
     }
+
  
     ##############################################################
     ## Subplot data (SUBPLOT/SUBP_COND)
@@ -3759,8 +3797,8 @@ DBgetPlots <- function (states = NULL,
     if (!is.null(spconddat)) {
       returnlst$spconddat <- data.frame(spconddatx)
     }
- 
-    if (savePOP && exists(ppsanm) && is.data.frame(ppsanm)) {
+
+    if (savePOP && exists(ppsanm) && is.data.frame(get(ppsanm))) {
       returnlst$pop_plot_stratum_assgn <- data.frame(get(ppsanm))
     }
     if (saveSURVEY && !is.null(SURVEY)) {
