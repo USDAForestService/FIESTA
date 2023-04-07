@@ -867,7 +867,7 @@ DBgetPlots <- function (states = NULL,
     plotnm <- "PLOTe"
   }
 
-  if (getType) {
+  if (!is.null(evalTypelist)) {
     Typelist <- sub("EXP", "", evalTypelist)
     if (any(c("VOL","CURR") %in% Typelist)) {
       istree <- TRUE
@@ -876,7 +876,7 @@ DBgetPlots <- function (states = NULL,
       isveg=issubp <- TRUE
     } 
     if ("INV" %in% Typelist) {
-      isveg=issubp <- TRUE
+      isinv=issubp <- TRUE
     } 
     if ("DWM" %in% Typelist) {
       isdwm <- TRUE
@@ -884,10 +884,12 @@ DBgetPlots <- function (states = NULL,
     if ("CHNG" %in% Typelist) {
       ischng=issubp <- TRUE
     }
-    if (any(c("GRM","GROW") %in% Typelist)) {
+    if (any(c("GRM","GROW","MORT","REMV") %in% Typelist)) {
       ischng=issubp=isgrm=istree <- TRUE
     }
-  } 
+  } else {
+    Typelist <- unlist(Type)
+  }
  
   ## Get state abbreviations and codes 
   ###########################################################
@@ -1374,29 +1376,28 @@ DBgetPlots <- function (states = NULL,
       evalid <- evalidlist[[state]]
       evalFilter <- paste0("ppsa.EVALID IN(", toString(evalid), ")")
 
-      if (any(endsWith(evalTypelist, "P2VEG"))) {
+      if ("P2VEG" %in% Typelist) {
         evalid.veg <- evalid[endsWith(as.character(evalid), "10")]
         if (length(evalid.veg) == 0) stop("must include evaluation ending in 10")
         evalFilter.veg <- paste("ppsa.EVALID =", evalid.veg)
       } else {
         evalFilter.veg <- evalFilter
       }
-      if (any(endsWith(evalTypelist, "INV"))) {
+      if ("INV" %in% Typelist) {
         evalid.inv <- evalid[endsWith(as.character(evalid), "09")]
         if (length(evalid.inv) == 0) stop("must include evaluation ending in 09")
         evalFilter.inv <- paste("ppsa.EVALID =", evalid.inv)
       } else {
         evalFilter.inv <- evalFilter
       }
-      if (any(endsWith(evalTypelist, "DWM"))) {
+      if ("DWM" %in% Typelist) {
         evalid.dwm <- evalid[endsWith(as.character(evalid), "07")]
         if (length(evalid.dwm) == 0) stop("must include evaluation ending in 07")
         evalFilter.dwm <- paste("ppsa.EVALID =", evalid.dwm)
       } else {
         evalFilter.dwm <- evalFilter
       }
-      if (any(endsWith(evalTypelist, "GROW"), endsWith(evalTypelist, "MORT"), 
-			endsWith(evalTypelist, "REMV"), endsWith(evalTypelist, "GRM"))) {
+      if (any(c("GROW", "MORT", "REMV", "GRM") %in% Typelist)) {
         evalid.grm <- evalid[endsWith(as.character(evalid), "03")]
         if (length(evalid.grm) == 0) stop("must include evaluation ending in 03")
         evalFilter.grm <- paste("ppsa.EVALID =", evalid.grm)

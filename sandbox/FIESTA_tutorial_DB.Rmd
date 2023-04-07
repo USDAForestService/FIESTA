@@ -335,7 +335,7 @@ The `DBgetPlots` function extracts data from FIA's online DataMart or SQLite dat
 dat1 <- DBgetPlots(states = "Idaho", 
                   eval = "FIA", 
                   eval_opts = eval_options(Cur = TRUE, 
-                                           evalType = "ALL"),
+                                           Type = "ALL"),
                   issp = TRUE
                   )
 names(dat1)
@@ -377,7 +377,7 @@ plot(sf::st_geometry(spxy1b), pch = 16, cex = .5, add = TRUE, col="green")
 dat2 <- DBgetPlots(states = "Delaware", 
                    eval = "FIA",
                    eval_opts = eval_options(Cur = TRUE, 
-                                            evalType = "ALL"),
+                                            Type = "ALL"),
                    issubp = TRUE,
                    plotgeom = TRUE)
 names(dat2)
@@ -405,7 +405,7 @@ head(plt2)
 dat3 <- DBgetPlots(states = "Delaware", 
                    eval = "FIA",
                    eval_opts = eval_options(Cur = TRUE, 
-                                            evalType = "ALL"),
+                                            Type = "ALL"),
                    savePOP = TRUE,
                    othertables = c("POP_STRATUM", "POP_ESTN_UNIT"))
 
@@ -428,9 +428,10 @@ names(tabs3)
 
 ```{r}
 
-DBgetPlots(states = "Wyoming", 
+DBgetPlots(states = "Vermont", 
            eval = "FIA",
-           eval_opts = eval_options(Cur = TRUE, evalType = "ALL"),
+           eval_opts = eval_options(Cur = TRUE, 
+                                    Type = "ALL"),
            returndata = FALSE,
            savedata = TRUE,
            savedata_opts = savedata_options(outfolder = outfolder, 
@@ -454,9 +455,10 @@ head(plt)
 
 ```{r}
 
-DBgetPlots(states = "Wyoming", 
+DBgetPlots(states = "Vermont", 
            eval = "FIA",
-           eval_opts = eval_options(Cur = TRUE, evalType = "ALL"),
+           eval_opts = eval_options(Cur = TRUE, 
+                                    Type = "ALL"),
            returndata = FALSE,
            savedata = TRUE,
            savedata_opts = savedata_options(outfolder = outfolder, 
@@ -544,7 +546,7 @@ plot(sf::st_geometry(spxy6), pch = 16, cex = .5)
 dat7 <- DBgetPlots(states = "Vermont", 
                    eval = "FIA",
                    eval_opts = eval_options(Cur = TRUE, 
-                                            evalType = c("VOL", "CHNG", "P2VEG")),
+                                            Type = c("VOL", "CHNG", "P2VEG"))
                    )
 
 names(dat7)
@@ -567,7 +569,7 @@ table(ppsa7$EVALID)
 
 dat8 <- DBgetPlots(eval = "FIA",
                    eval_opts = eval_options(Cur = TRUE, 
-                                            evalid = c(491800, 491801, 491803)),
+                                            evalid = c(101800, 101801, 101803))
                    )
 
 names(dat8)
