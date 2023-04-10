@@ -16,6 +16,7 @@ DBgetPlots(
   invtype = "ANNUAL",
   intensity1 = FALSE,
   issubp = FALSE,
+  istree = FALSE,
   isseed = FALSE,
   biojenk = FALSE,
   greenwt = FALSE,
@@ -85,6 +86,8 @@ for a list of options.}
 
 \item{issubp}{Logical. If TRUE, subplot tables are extracted from FIA
 database (SUBPLOT, SUBP_COND).}
+
+\item{istree}{Logical. If TRUE, include tree data.}
 
 \item{isseed}{Logical. If TRUE, include seedling data.}
 

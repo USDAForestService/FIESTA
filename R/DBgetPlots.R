@@ -248,6 +248,7 @@
 #' INTENSITY = 1 (FIA base grid).
 #' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
 #' database (SUBPLOT, SUBP_COND).
+#' @param istree Logical. If TRUE, include tree data.
 #' @param isseed Logical. If TRUE, include seedling data.
 #' @param biojenk Logical. If TRUE, Jenkins biomass is calculated.
 #' @param greenwt Logical. If TRUE, green weight biomass is calculated.
@@ -463,6 +464,7 @@ DBgetPlots <- function (states = NULL,
                         invtype = "ANNUAL", 
                         intensity1 = FALSE, 
                         issubp = FALSE, 
+                        istree = FALSE,
                         isseed = FALSE,                      
                         biojenk = FALSE,
                         greenwt = FALSE,
@@ -500,7 +502,7 @@ DBgetPlots <- function (states = NULL,
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-  saveSURVEY=istree=isveg=ischng=isdwm=isgrm=islulc=isinv <- FALSE
+  saveSURVEY=isveg=ischng=isdwm=isgrm=islulc=isinv <- FALSE
 
   other_tables <- c("BOUNDARY", "COND_DWM_CALC", "COUNTY", "DWM_COARSE_WOODY_DEBRIS", 
 	"DWM_DUFF_LITTER_FUEL", "DWM_FINE_WOODY_DEBRIS", "DWM_MICROPLOT_FUEL", 
@@ -561,7 +563,7 @@ DBgetPlots <- function (states = NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1] 
-  formallst <- unique(c(names(formals(DBgetPlots)), "istree", "isveg", "ischng", "isdwm"))
+  formallst <- unique(c(names(formals(DBgetPlots)), "isveg", "ischng", "isdwm"))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -605,13 +607,6 @@ DBgetPlots <- function (states = NULL,
     }
   }
 
-  if ("istree" %in% names(args)) {
-    message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
-    istree <- args$istree
-    if (!istree) {
-      Type <- c("ALL", Type[!Type %in% c("CURR", "VOL")])
-    } 
-  }
   if ("isveg" %in% names(args)) {
     message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
     isveg <- args$isveg
@@ -734,7 +729,7 @@ DBgetPlots <- function (states = NULL,
     if (length(Type)==0) Type <- "VOL"
   } 
 
-  if (any(Type == "VOL")) {
+  if (any(Type %in% c("CURR", "VOL"))) {
     istree <- TRUE
   } 
   if (any(Type == "P2VEG")) {
@@ -2369,6 +2364,7 @@ DBgetPlots <- function (states = NULL,
         dbqueries$xy <- xydat$xyqry
       }
     }
+ 
     ##############################################################
     ## Seedling data (SEEDLING)
     ##############################################################
@@ -2378,21 +2374,19 @@ DBgetPlots <- function (states = NULL,
 
       if (datsource == "sqlite") {
         seednm <- chkdbtab(dbtablst, seed_layer)
-        if (is.null(seednm)) {
+        if (!is.null(seednm)) {
           stest <- dbtablst[grepl("seed", dbtablst)]
           if (length(stest) == 1) {
             seednm <- stest
 
             ## Get seedling fields
             seedflds <- DBI::dbListFields(dbconn, seednm)
-
           } else {
             message("there is no seedling table in database")
             isseed <- FALSE 
             seednm <- NULL
           }
         }
-
       } else if (datsource == "datamart") {
         SEEDLING <- DBgetCSV("SEEDLING", stabbr, returnDT=TRUE, 
 		      stopifnull=FALSE)

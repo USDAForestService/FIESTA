@@ -71,6 +71,7 @@
 #' INTENSITY = 1 (FIA base grid).
 #' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
 #' database (SUBPLOT, SUBP_COND).
+#' @param istree Logical. If TRUE, include tree data.
 #' @param isseed Logical. If TRUE, include seedling data.
 #' @param biojenk Logical. If TRUE, Jenkins biomass is calculated.
 #' @param greenwt Logical. If TRUE, green weight biomass is calculated.
@@ -173,6 +174,7 @@ spGetPlots <- function(bnd = NULL,
                        invtype = "ANNUAL", 
                        intensity1 = FALSE, 
                        issubp = FALSE, 
+                       istree = FALSE,
                        isseed = TRUE,
                        biojenk = FALSE,
                        greenwt = FALSE,
@@ -231,7 +233,7 @@ spGetPlots <- function(bnd = NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- unique(c(names(formals(spGetPlots)), "istree", "isseed", "isveg", "ischng", "isdwm"))
+  formallst <- unique(c(names(formals(spGetPlots)), "isveg", "ischng", "isdwm"))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -282,18 +284,6 @@ spGetPlots <- function(bnd = NULL,
     stop()
   }
 
-  if ("istree" %in% names(args)) {
-    message("the parameter istree is deprecated... use eval_options(Type='VOL')\n")
-    istree <- args$istree
-
-    if (!istree) {
-      Type <- c("ALL", Type[!Type %in% c("CURR", "VOL")])
-    } 
-  }
-  if ("isseed" %in% names(args)) {
-    message("the parameter isseed is deprecated... use eval_options(Type='VOL'))\n")
-    isseed <- args$isseed
-  }
   if ("isveg" %in% names(args)) {
     message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
     isveg <- args$isveg
@@ -416,29 +406,37 @@ spGetPlots <- function(bnd = NULL,
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
   if (gui) {
-    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "CHNG", "DWM", "GRM")
+    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", "GROW", "MORT", "REMV", "GRM")
     Type <- select.list(Typelst, title="eval type", 
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
   } 
 
-  if (Type %in% c("CURR", "VOL")) {
+  if (any(Type %in% c("CURR", "VOL"))) {
     istree <- TRUE
   } 
-  if (Type == "P2VEG") {
+  if (any(Type == "P2VEG")) {
     # understory vegetation tables 
-    # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP)
+    # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE)
     isveg=issubp <- TRUE
   } 
-  if (Type == "DWM") {
+  if (any(Type == "INV")) {
+    # understory vegetation tables 
+    # (INVASIVE_SUBPLOT_SPP)
+    isinv=issubp <- TRUE
+  } 
+  if (any(Type == "DWM")) {
     # summarized condition-level down woody debris table (COND_DWM_CALC)
     isdwm <- TRUE
   }
-  if (Type == "CHNG") {
+  if (any(Type == "CHNG")) {
     # current and previous conditions, subplot-level - sccm (SUBP_COND_CHNG_MTRX) 
     ischng=issubp <- TRUE
   }
-  if (Type == "GRM") {
+  if (any(Type %in% c("GROW", "MORT", "REMV"))) {
+    Type <- "GRM"
+  }
+  if (any(Type == "GRM")) {
     ischng=issubp=isgrm <- TRUE
   }
   if (isveg && invtype == "PERIODIC") {

@@ -105,7 +105,7 @@ outfolder <- tempdir()
 <details>
   <summary>View Getting Data</summary>
 
-Now that we've loaded `FIESTA` and setup our outfolder, we can retrieve the data needed to run the examples. First, we point to some external data and predictor layers stored in `FIESTA` and derive new predictor layers using the `raster` package. 
+Now that we've loaded `FIESTA` and setup our outfolder, we can retrieve the data needed to run the examples. First, we point to some external data and predictor layers stored in `FIESTA` and derive new predictor layers using the `terra` package. 
 
 ```{r}
 # File names for external spatial data
@@ -121,18 +121,20 @@ demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img",
                      package = "FIESTA")
 
 # Derive new predictor layers from dem
-library(raster)
-dem <- raster(demfn)
-slp <- terrain(dem,
-               opt = "slope",
-               unit = "degrees",
-               filename = paste0(outfolder, "/WYbh_slp.img"), 
-               overwrite = TRUE)
-asp <- terrain(dem,
-               opt = "aspect",
-               unit = "degrees", 
-               filename = paste0(outfolder, "/WYbh_asp.img"),
-               overwrite = TRUE)
+library(terra)
+dem <- rast(demfn)
+slpfn <- paste0(outfolder, "/WYbh_slp.img")
+slp <- terra::terrain(dem,
+                      v = "slope",
+                      unit = "degrees",
+                      filename = slpfn, 
+                      overwrite = TRUE)
+aspfn <- paste0(outfolder, "/WYbh_asp.img")
+asp <- terra::terrain(dem,
+                      v = "aspect",
+                      unit = "degrees", 
+                      filename = aspfn,
+                      overwrite = TRUE)
 ```
 
 Next, we can get our FIA plot data and set up our auxiliary data. We can get our FIA plot data with the `spMakeSpatialPoints` function from `FIESTA`. For more information on how to use this function, please see the `sp` vignette included with `FIESTA` (link). 
@@ -147,15 +149,16 @@ WYspplt <- spMakeSpatialPoints(
   datum = "NAD83"
 )
 
-rastlst.cont <- c(demfn, slp, asp)
+rastlst.cont <- c(demfn, slpfn, aspfn)
 rastlst.cont.name <- c("dem", "slp", "asp")
 rastlst.cat <- fornffn
-rastlst.cat.name="fornf"
+rastlst.cat.name <- "fornf"
 ```
 
 Next, we must generate dataset for model-assisted estimation. We can do this with the `spGetAuxiliary` function from `FIESTA`. Again, see the `sp` vignette for further information on this function. 
  
 ```{r, results='hide'}
+
 modeldat <- spGetAuxiliary(
   xyplt = WYspplt,
   uniqueid = "CN",
@@ -167,7 +170,7 @@ modeldat <- spGetAuxiliary(
   rastlst.cat.name = rastlst.cat.name,
   rastlst.cont.stat = "mean",
   asptransform = TRUE,
-  rast.asp = asp,
+  rast.asp = aspfn,
   keepNA = FALSE,
   showext = FALSE,
   savedata = FALSE)

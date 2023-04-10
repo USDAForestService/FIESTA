@@ -163,15 +163,16 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     return(returnlst)
   }
 
-  if (!is.null(row.FIAname) && row.FIAname) {
-    ## Get FIA reference table for xvar
-    xvar.ref <- getRefobject(toupper(rowvar))
-    if (is.null(xvar.ref)) {
-      message(paste("no reference name for", rowvar))
-      row.FIAname <- FALSE
-    }
-  }
   if (rowvar != "NONE") {
+
+    if (!is.null(row.FIAname) && row.FIAname) {
+      ## Get FIA reference table for xvar
+      xvar.ref <- getRefobject(toupper(rowvar))
+      if (is.null(xvar.ref)) {
+        message(paste("no reference name for", rowvar))
+        row.FIAname <- FALSE
+      }
+    }
 
     ## GET row titles defined in FIESTA
     ###################################################
@@ -475,6 +476,16 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   if (is.null(colvar)) colvar <- "NONE"
 
   if (colvar != "NONE") {
+
+    if (!is.null(col.FIAname) && col.FIAname) {
+      ## Get FIA reference table for xvar
+      xvar.ref <- getRefobject(toupper(colvar))
+      if (is.null(xvar.ref)) {
+        message(paste("no reference name for", colvar))
+        col.FIAname <- FALSE
+      }
+    }
+
     ## Check to make sure there is a rowvar when there is a colvar
     if (rowvar == "TOTAL") stop("no rowvar, use colvar as rowvar")
     if (is.null(col.orderby)) col.orderby <- "NONE"
