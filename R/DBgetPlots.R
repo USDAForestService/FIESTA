@@ -1415,10 +1415,6 @@ DBgetPlots <- function (states = NULL,
           evalFilter <- paste(evalFilter, "and p.SUBCYCLE <> 99")
         }
       }
-
-      if (!subcycle99) {
-        evalFilter <- paste(evalFilter, "and p.SUBCYCLE <> 99")
-      }
       if (isveg) {
         evalFilter.veg <- evalFilter
       }
@@ -1530,7 +1526,6 @@ DBgetPlots <- function (states = NULL,
       if (is.null(plotgeomnm)) {
         plotgeom <- FALSE
       }
-
       if (defaultVars) {
         ## Check variables in database
 
@@ -1578,7 +1573,6 @@ DBgetPlots <- function (states = NULL,
 
       ## Run pltcond query
       #message(pltcond.qry)
- 
       if (datsource == "sqlite") {
         tryCatch( pltcondx <- DBI::dbGetQuery(dbconn, pltcond.qry),
 			error=function(e) message("pltcond query is invalid"))

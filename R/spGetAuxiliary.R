@@ -646,6 +646,7 @@ spGetAuxiliary <- function(xyplt = NULL,
         sppltx$asp_sin <- eastness(sppltx[[aspnm]])
         prednames.cont <- c(prednames.cont[prednames.cont != aspnm], "asp_cos", "asp_sin")
       }
+
     } else {
       if (is.null(rastlst.cont.name)) {
         prednames.cont <- basename.NoExt(rastlst.contfn)
