@@ -686,10 +686,10 @@ dat13 <- DBgetPlots(states = "Vermont",
                     )
 tabs13 <- dat13$tabs
 plt13 <- tabs13$plt
-spxy13 <- dat13$xy_public
+spxy13 <- dat13$xy_PUBLIC
 
 ## With only P2 plots (intensity1 = TRUE)
-dat14b <- DBgetPlots(states = "Vermont", 
+dat13b <- DBgetPlots(states = "Vermont", 
                      eval = "FIA",
                      eval_opts = list(Cur = TRUE, 
                                      Type = "ALL"),
@@ -697,17 +697,17 @@ dat14b <- DBgetPlots(states = "Vermont",
                      issp = TRUE
                      )
 
-tabs14b <- dat14b$tabs
-plt14b <- tabs14b$plt
+tabs13b <- dat13b$tabs
+plt13b <- tabs13b$plt
 
-table(plt14$INVYR)
-table(plt14b$INVYR)
-spxy14b <- dat14b$xy_public
+table(plt13$INVYR)
+table(plt13b$INVYR)
+spxy13b <- dat13b$xy_PUBLIC
 
 
 # Display spatial output of public coordinates
-plot(sf::st_geometry(spxy14), pch = 16, cex = .5)
-plot(sf::st_geometry(spxy14b), pch = 16, cex = .5, add = TRUE, col = "grey")
+plot(sf::st_geometry(spxy13), pch = 16, cex = .5)
+plot(sf::st_geometry(spxy13b), pch = 16, cex = .5, add = TRUE, col = "grey")
 
 ```
 
