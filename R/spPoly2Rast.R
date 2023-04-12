@@ -61,9 +61,6 @@
 #' new_rast <- spPoly2Rast(polyv = WYbhdistfn,
 #'                         polyv.att = "DISTRICTNA",
 #'                         outfolder = tempdir())
-#'                     
-#' # Plot result with raster package                     
-#' terra::plot(terra::rast(new_rast$rastfn))
 #' }
 #' @export spPoly2Rast
 spPoly2Rast <- function(polyv, 

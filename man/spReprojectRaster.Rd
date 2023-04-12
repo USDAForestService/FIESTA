@@ -135,9 +135,6 @@ demfn <- system.file("extdata",
                      "sp_data/WYbighorn_dem_250m.img",
                      package = "FIESTA")
 
-# Plot original projection
-terra::plot(terra::rast(demfn))
-
 # Check original projection
 sf::st_crs(terra::rast(demfn))$proj4string
 
@@ -146,9 +143,6 @@ reprojected <- spReprojectRaster(rastfn = demfn,
                                  crs.new = "EPSG:32613",
                                  outfolder = tempdir())
                                  
-# Plot new projection
-terra::plot(terra::raster(reprojected))
-
 # Check new projection
 sf::st_crs(terra::rast(demfn))$proj4string
 }

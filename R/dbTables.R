@@ -108,9 +108,6 @@ dbTables <- function(plot_layer = "PLOT",
 }
 
 
-
-#' @rdname internal_desc
-#' @export
 addftypgrp <- function(x) {
   ## DESCRIPTION: appends fortypgrpcd and fortypgrpnm to table
   ftypnm <- findnm("FORTYPCD", names(x), returnNULL=TRUE)

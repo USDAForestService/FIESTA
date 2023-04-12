@@ -80,7 +80,6 @@
 #' demfn <- system.file("extdata",
 #'                      "sp_data/WYbighorn_dem_250m.img",
 #'                      package = "FIESTA")
-#' terra::plot(terra::rast(demfn))
 #' 
 #' # Clip raster to district = '03'
 #' dem03 <- spClipRast(rast = demfn,
