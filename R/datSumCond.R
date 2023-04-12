@@ -357,14 +357,14 @@ datSumCond <- function(cond = NULL,
 
     } else {
 
-      if ("COND_STATUS_CD" %in% names(condx)) {
-        condx <- condx[condx$COND_STATUS_CD != 5,]
+      if ("COND_STATUS_CD" %in% names(condf)) {
+        condf <- condf[condf$COND_STATUS_CD != 5,]
       } else {
         message("assuming no nonsampled condition in dataset")
       }
-      adjfacdata <- getadjfactorPLOT(condx=condx, cuniqueid=cuniqueid, 
+      adjfacdata <- getadjfactorPLOT(condx=condf, cuniqueid=cuniqueid, 
                 areawt="CONDPROP_UNADJ")
-      condx <- adjfacdata$condx
+      condf <- adjfacdata$condx
     }
   }
  
