@@ -1,14 +1,14 @@
 citHeader("To cite package 'FIESTA' in publications use:")
 
-citEntry(	entry="Manual",
+bibentry(	bibtype="Manual",
   		title = "FIESTA: A forest inventory estimation and analysis R package",
-  		author = personList(as.person("Tracey S. Frescino"), as.person("Gretchen G. Moisen"), as.person("Paul L. Patterson"),
+  		author = c(as.person("Tracey S. Frescino"), as.person("Gretchen G. Moisen"), as.person("Paul L. Patterson"),
 				as.person("Chris Toney"), as.person("Grayson W. White")),
  	 	year = "2023",
   		organization = "USDA Forest Service, Rocky Mountain Research Station",
   		address      = "4919 S 1500 W, Ste. 200, Riverdale, UT, USA",
   		note         = "tracey.frescino@usda.gov",
-  		textVersion =  paste(	"Frescino, Tracey S.; Patterson, Paul L.; Moisen, Gretchen G.; Toney, Chris;
+  		textVersion =  paste("Frescino, Tracey S.; Moisen, Gretchen G.; Patterson, Paul L.; Toney, Chris;
 					White, Grayson W. (2023). ",
 					"FIESTA: A forest inventory estimation and analysis R package. ",
 					"Ecography 2023: e06428 (ver. 1.0).", sep=""))
