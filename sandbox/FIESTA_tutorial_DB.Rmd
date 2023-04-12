@@ -110,7 +110,8 @@ The `DBgetCSV` function extracts data from FIA's publicly-available, online Data
   
 ```{r}
 
-WYUTplot <- DBgetCSV(DBtable="PLOT", states=c("Wyoming", "Utah"))
+WYUTplot <- DBgetCSV(DBtable = "PLOT", 
+                     states = c("Wyoming", "Utah"))
 table(WYUTplot$STATECD)
 
 ```
@@ -126,7 +127,8 @@ WYplots <- DBgetCSV("PLOT", "Wyoming")
 dim(WYplots)
 
 ## Get plot table for Wyoming and Utah
-WYUTplots <- DBgetCSV(DBtable="PLOT", states=c("Wyoming", "Utah"))
+WYUTplots <- DBgetCSV(DBtable = "PLOT", 
+                      states = c("Wyoming", "Utah"))
 table(WYUTplots$STATECD)
 
 ## Get survey table for Wyoming
@@ -201,27 +203,10 @@ WYeval$invtype
 
 ```
 
-</details>
-
-#### Example 2: Get most current evalid and inventory years for RMRS states
-<details>
-  <summary>View Example</summary>
-```{r}
-
-RMRSeval <- DBgetEvalid(RS = "RMRS",
-                        evalCur = TRUE)
-
-names(RMRSeval)
-RMRSeval$evalidlist
-RMRSeval$invyrs
-RMRSeval$invyrtab
-RMRSeval$invtype
-
-```
 
 </details>
 
-#### Example 3: Get most current evaluations for New York and Texas for VOL and GRM evalTypes
+#### Example 2: Get most current evaluations for New York and Texas for VOL and GRM evalTypes
 <details>
   <summary>View Example</summary>
   
@@ -332,7 +317,7 @@ The `DBgetPlots` function extracts data from FIA's online DataMart or SQLite dat
 #### <a name="DBgetPlots"/>DBgetPlots()
 ```{r}
 
-dat1 <- DBgetPlots(states = "Idaho", 
+dat1 <- DBgetPlots(states = "Rhode Island", 
                   eval = "FIA", 
                   eval_opts = eval_options(Cur = TRUE, 
                                            Type = "ALL"),
@@ -347,14 +332,14 @@ table(plt1$INVYR)
 plot(sf::st_geometry(spxy1), pch = 16, cex = .5)
 
 
-# Add a filter to include only plots with Whitebark pine forest type (FORTYPCD == 367)
+# Add a filter to include only plots with Northern red oak forest type (FORTYPCD == 505)
 # Note: *allFilter* filters for plots and/or conditions for all states specified.
-dat1b <- DBgetPlots(states = "Idaho", 
+dat1b <- DBgetPlots(states = "Rhode Island", 
                    eval = "FIA",
                    eval_opts = eval_options(Cur = TRUE, 
-                                            evalType = "ALL"),
+                                            Type = "ALL"),
                    issp = TRUE, 
-                   allFilter = "FORTYPCD == 367")
+                   allFilter = "FORTYPCD == 505")
 
 names(dat1b)
 spxy1b <- dat1b$xy_PUBLIC
@@ -428,7 +413,7 @@ names(tabs3)
 
 ```{r}
 
-DBgetPlots(states = "Vermont", 
+DBgetPlots(states = "Rhode Island", 
            eval = "FIA",
            eval_opts = eval_options(Cur = TRUE, 
                                     Type = "ALL"),
@@ -455,7 +440,7 @@ head(plt)
 
 ```{r}
 
-DBgetPlots(states = "Vermont", 
+DBgetPlots(states = "Rhode Island", 
            eval = "FIA",
            eval_opts = eval_options(Cur = TRUE, 
                                     Type = "ALL"),
@@ -543,7 +528,7 @@ plot(sf::st_geometry(spxy6), pch = 16, cex = .5)
 
 ```{r}
 
-dat7 <- DBgetPlots(states = "Vermont", 
+dat7 <- DBgetPlots(states = "Rhode Island", 
                    eval = "FIA",
                    eval_opts = eval_options(Cur = TRUE, 
                                             Type = c("VOL", "CHNG", "P2VEG"))
@@ -591,7 +576,7 @@ table(ppsa8$EVALID)
 
 ```{r}
 
-dat9 <- DBgetPlots(states = c("Texas", "Delaware", "Oregon"), 
+dat9 <- DBgetPlots(states = c("Connecticut", "South Carolina"), 
                    eval = "FIA",
                    eval_opts = eval_options(Cur = TRUE, 
                                             evalType = "ALL",
@@ -683,66 +668,8 @@ table(plt12$STATECD, plt12$INVYR)
 
 </details>
 
-#### Example 13: Get data for most current FIA Evaluation and most current custom Evaluation
-<details>
-  <summary>View Example</summary>
 
-The objective of this section is to understand the differences when extracting plots for the most current evaluation (evalCur=TRUE) and the most current measurement (measCur=TRUE).
-
-```{r}
-
-# Most current evaluation for Utah
-UTevalCur <- DBgetPlots(states = "Idaho", 
-                        eval = "FIA",
-                        eval_opts = eval_options(Cur = TRUE,
-                                                 evalType = "ALL"),
-                        issp = TRUE
-                        )
-names(UTevalCur)
-tabs.UTevalCur <- UTevalCur$tabs
-plt.UTevalCur <- tabs.UTevalCur$plt
-spxy.UTevalCur <- UTevalCur$xy_public
-
-## The difference in number of plots by inventory year and measurement year
-table(plt.UTevalCur$INVYR, plt.UTevalCur$MEASYEAR)
-
-
-# Most current measurement for Utah
-UTmeasCur <- DBgetPlots(states = "Idaho", 
-                        eval = "custom",
-                        eval_opts = eval_options(Cur = TRUE,
-                                                 evalType = "ALL"),
-                        issp = TRUE
-                        )
-names(UTmeasCur)
-tabs.UTmeasCur <- UTmeasCur$tabs
-plt.UTmeasCur <- tabs.UTmeasCur$plt
-spxy.UTmeasCur <- UTmeasCur$xy_public
-
-## The difference in number of plots by inventory year and measurement year
-table(plt.UTmeasCur$INVYR, plt.UTmeasCur$MEASYEAR)
-
-
-## See that nonsampled plots (PLOT_STATUS_CD=3) decrease in number.
-## Nonsampled plots that remain are plots that were nonsampled in every measurement cycle.
-table(plt.UTmeasCur$PLOT_STATUS_CD)
-table(plt.UTevalCur$PLOT_STATUS_CD)
-
-
-## Let's look at an example for plot location 889 in county 78
-## In the most current evaluation, inventory year 2012, the plot was denied access, and not sampled (PLOT_STATUS_CD=3 and PLOT_NONSAMPLE_REASN_CD=2)
-## The same plot was measured previously, in 2002, and was found with forest (PLOT_STATUS_CD=1)
-## We can use this information, with the caveat that the plot hasn't changed much
-
-plt.UTevalCur[plt.UTevalCur$PLOT_ID == "ID490400780889",]
-plt.UTmeasCur[plt.UTmeasCur$PLOT_ID == "ID490400780889",]
-
-```
-
-</details>
-
-
-#### Example 14: Intensity
+#### Example 13: Intensity
 <details>
   <summary>View Example</summary>
 
@@ -751,15 +678,15 @@ The objective of this section is to understand the differences when using INTENS
 ```{r}
 
 ## With intensified plots
-dat14 <- DBgetPlots(states = "Vermont", 
+dat13 <- DBgetPlots(states = "Vermont", 
                     eval = "FIA",
                     eval_opts = list(Cur = TRUE, 
                                      Type = "ALL"),
                     issp = TRUE
                     )
-tabs14 <- dat14$tabs
-plt14 <- tabs14$plt
-spxy14 <- dat14$xy_public
+tabs13 <- dat13$tabs
+plt13 <- tabs13$plt
+spxy13 <- dat13$xy_public
 
 ## With only P2 plots (intensity1 = TRUE)
 dat14b <- DBgetPlots(states = "Vermont", 
@@ -781,54 +708,6 @@ spxy14b <- dat14b$xy_public
 # Display spatial output of public coordinates
 plot(sf::st_geometry(spxy14), pch = 16, cex = .5)
 plot(sf::st_geometry(spxy14b), pch = 16, cex = .5, add = TRUE, col = "grey")
-
-```
-
-
-</details>
-
-#### Example 15: Filter multiple states for Region 1 forests
-<details>
-  <summary>View Example</summary>
-
-```{r}
-
-# Most current measurement for Montana, R1, filtered for OWNGRPCD=10
-dat15 <- DBgetPlots(states = "Montana", 
-                    eval = "custom",
-                    eval_opts = list(Cur = TRUE, 
-                                     Type = "ALL"),
-                    allFilter = "OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)",
-                    issp = TRUE
-                    )
-
-### Look at plot counts
-dat15$pltcnt
-table(dat15$tabs$cond$ADFORCD)
-
-## Display points with by PLOT_STATUS_CD (1-light blue; 2-brown; 3-blue)
-spxy15 <- dat15$xy_public
-
-spxy15$color <- with(spxy15, 
-          ifelse(PLOT_STATUS_CD == 2, "brown", 
-                ifelse(PLOT_STATUS_CD == 3, "blue", "light blue")))
-plot(sf::st_geometry(spxy15['PLOT_STATUS_CD']), pch = 16, cex = .5,
-                     col = spxy15$color)
-
-
-## Get plots that have pinyon pine trees in Montana
-dat15b <- DBgetPlots(states = "Montana", 
-                     eval = "custom",
-                     eval_opts = list(Cur = TRUE, 
-                                      Type = "ALL"),
-                     allFilter = "OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)",
-                     issp = TRUE,
-                     alltFilter = "SPCD == 101"
-                     )
-
-## Display points with by PLOT_STATUS_CD (1-light blue; 2-brown; 3-blue)
-spxy15b <- dat15b$xy_public
-plot(sf::st_geometry(spxy15b), pch = 16, cex = .5, col = "wheat", add = TRUE)
 
 ```
 

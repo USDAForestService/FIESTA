@@ -3326,7 +3326,7 @@ DBgetPlots <- function (states = NULL,
 
           grmx <- setDT(grmx)
           grmx[, PLT_CN := as.character(PLT_CN)]
-          setkey(grmx, PLT_CN, CONDID)
+          setkey(grmx, PLT_CN)
 
           ## Subset overall filters from condx
           #grmx <- grmx[paste(grmx$PLT_CN, grmx$CONDID) %in% pcondID,]
@@ -3360,7 +3360,7 @@ DBgetPlots <- function (states = NULL,
         gc()
       }
     }
-
+ 
     ##############################################################
     ## Other tables
     ##############################################################
