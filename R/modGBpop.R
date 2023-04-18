@@ -628,7 +628,6 @@ modGBpop <- function(popType = "VOL",
   if (popType == "DWM") {
     list.items <- c(list.items, "cond_dwm_calc")
   }
-
   popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
 
   ## Set user-supplied popTabIDs values
@@ -954,7 +953,15 @@ modGBpop <- function(popType = "VOL",
   ###################################################################################
   ## Return population data objects
   ###################################################################################
-  estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
+
+  if (!is.null(areawt2)) {
+    if (!is.numeric(condx[[areawt2]])) {
+      stop("areawt2 is invalid")
+    }
+    condx$areawt <- condx[[areawt]] * condx[[areawt2]]
+    areawtnm <- "areawt"
+  } 
+
   returnlst$popType <- popType
   if (!is.null(bndx)) {
     returnlst$bndx <- bndx
@@ -972,7 +979,7 @@ modGBpop <- function(popType = "VOL",
             strata=strata, stratalut=data.table(stratalut), 
             strvar=strvar, strwtvar=strwtvar, expcondtab=expcondtab, 
             plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-            states=states, invyrs=invyrs, estvar.area=estvar.area, 
+            states=states, invyrs=invyrs, estvar.area=areawtnm, 
             adj=adj, P2POINTCNT=P2POINTCNT))
 
   if (popType == "VOL") {
