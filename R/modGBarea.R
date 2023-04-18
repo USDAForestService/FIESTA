@@ -36,6 +36,8 @@
 #' For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
 #' 
 #' @param GBpopdat List. Population data objects returned from modGBpop().
+#' @param estvar2. String. Name of variable to multiply by the area weight
+#' variable (e.g., CONDPROP_ADJ).
 #' @param landarea String. The sample area filter for estimates ("ALL",
 #' "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
 #' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.
@@ -252,7 +254,8 @@
 #' )
 #' str(forest_area_by_forest_type, max.level = 1)
 #' @export modGBarea
-modGBarea <- function(GBpopdat, 
+modGBarea <- function(GBpopdat,
+                      estvar2 = NULL, 
                       landarea = "FOREST", 
                       pcfilter = NULL, 
                       rowvar = NULL, 

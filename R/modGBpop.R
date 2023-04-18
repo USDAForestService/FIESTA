@@ -80,8 +80,11 @@
 #' @param pjoinid String. Join variable in plot to match pltassgnid. Does not
 #' need to be uniqueid. If using most current XY coordinates for plot
 #' assignments, use identifier for plot (e.g., PLOT_ID).
-#' @param areawt String. Name of variable for summarizing area weights (e.g.,
-#' CONDPROP_UNADJ).
+#' @param areawt String. Name of variable in cond for summarizing area 
+#' weights (e.g., CONDPROP_UNADJ).
+#' @param areawt2 String. An equation to multiply to areawt for estimation. 
+#' All variables in equation must be in cond.
+#' weights (e.g., CONDPROP_UNADJ).
 #' @param adj String. How to calculate adjustment factors for nonsampled
 #' (nonresponse) conditions based on summed proportions for by plot ('samp',
 #' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
@@ -244,6 +247,7 @@ modGBpop <- function(popType = "VOL",
                      dsn = NULL, 
                      pjoinid = "CN", 
                      areawt = "CONDPROP_UNADJ", 
+                     areawt2 = NULL,
                      adj = "samp", 
                      unitvar = NULL, 
                      unitarea = NULL, 
@@ -485,7 +489,6 @@ modGBpop <- function(popType = "VOL",
 		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
   }
 
-
   ## Check popType
   ########################################################
   #evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "GRM", "DWM")
@@ -500,7 +503,7 @@ modGBpop <- function(popType = "VOL",
     evalid <- as.character(evalid)
     substr(evalid, nchar(evalid)-1, nchar(evalid)) <- "01"
   } 
-
+ 
  
   ###################################################################################
   ## Load data
@@ -616,6 +619,9 @@ modGBpop <- function(popType = "VOL",
   }
 
   list.items <- {}
+  if (popType == "VOL") {
+    list.items <- c(list.items, "tree")
+  }
   if (popType == "P2VEG") {
     list.items <- c(list.items, "vsubpstr", "subplot", "subp_cond")
   }
@@ -685,7 +691,7 @@ modGBpop <- function(popType = "VOL",
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
  
-  if (popType %in% c("ALL", "CURR", "AREA", "VOL")) {
+  if (popType %in% c("ALL", "CURR", "VOL")) {
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
     ###################################################################################
@@ -693,7 +699,7 @@ modGBpop <- function(popType = "VOL",
                tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
                pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
                adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
-               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
+               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, areawt=areawt, areawt2=areawt2)
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$condx
     pltcondx <- popcheck$pltcondx
@@ -705,6 +711,7 @@ modGBpop <- function(popType = "VOL",
     ACI.filter <- popcheck$ACI.filter
     condsampcnt <- popcheck$condsampcnt
     areawt <- popcheck$areawt
+    areawt2 <- popcheck$areawt2
     tpropvars <- popcheck$tpropvars
   }
  
@@ -966,7 +973,7 @@ modGBpop <- function(popType = "VOL",
             strvar=strvar, strwtvar=strwtvar, expcondtab=expcondtab, 
             plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
             states=states, invyrs=invyrs, estvar.area=estvar.area, 
-            adj=adj, areawt=areawtnm, P2POINTCNT=P2POINTCNT))
+            adj=adj, P2POINTCNT=P2POINTCNT))
 
   if (popType == "VOL") {
     if (!is.null(treef)) {

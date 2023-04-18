@@ -431,9 +431,10 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       ##################################################################################
       designcd <- unique(na.omit(pltx[["DESIGNCD"]]))
       if (length(designcd) > 1) {
-        if (any(!designcd %in% c(1, 501:505, 230:242, 328))) {
+        if (any(!designcd %in% c(1, 501:505, 230:242, 311:323, 328))) {
           if (adj == "samp") {
-            message("samp adjustment for trees is only for annual inventory")
+            message("designcds include: ", toString(sort(designcd)))
+            message("samp adjustment for trees is only for annual inventory designs... see FIA database manual")
           } else {
             warning("more than 1 plot design, calculate separate estimates by design")
           }

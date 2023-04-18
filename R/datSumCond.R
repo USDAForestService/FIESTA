@@ -344,7 +344,7 @@ datSumCond <- function(cond = NULL,
 
     if (bysubp) {
       ## Remove nonsampled conditions by subplot and summarize to condition-level
-      subpcx <- subpsamp(cond = condx, 
+      subpcx <- subpsamp(cond = condf, 
                          subp_cond = subpcondx, 
                          subplot = subplotx, 
                          subpuniqueid = subpuniqueid, 
@@ -370,9 +370,8 @@ datSumCond <- function(cond = NULL,
  
 
   if (getadjplot) {
-    if ("cadjcnd" %in% names(condf))
-      stop("cadjcnd not in cond... must get adjustment factor")
     csumvarnm <- paste0(csumvarnm, "_ADJ")
+    csumvar <- paste0(csumvar, "_ADJ")
     condf.sum <- condf[, lapply(.SD, function(x) sum(x * CONDPROP_ADJ, na.rm=TRUE)),
  		by=csumuniqueid, .SDcols=csumvar]
   } else {
