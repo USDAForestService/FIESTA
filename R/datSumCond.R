@@ -209,17 +209,19 @@ datSumCond <- function(cond = NULL,
   if (is.null(NAto0)) NAto0 <- FALSE
 
 
+  ## Check unique ids and set keys
+  if (bycond) {
+    csumuniqueid <- c(cuniqueid, condid)
+    setkeyv(condx, csumuniqueid)
+           
+  } else {
+    csumuniqueid <- cuniqueid
+  }
+
+
   if (bysubp) {
     subpuniqueid <- "PLT_CN"
     subpids <- c(subpuniqueid, subpid)
-
-    ## Check unique ids and set keys
-    if (bycond) {
-      csumuniqueid <- c(subpuniqueid, subpid, condid)
-      setkeyv(condx, csumuniqueid)           
-    } else {
-      csumuniqueid <- c(subpuniqueid, subpid)
-    }
 
     ## Check subplot
     subplotx <- pcheck.table(subplot, tab_dsn=data_dsn, tabnm="subplot", gui=gui, 
@@ -241,18 +243,17 @@ datSumCond <- function(cond = NULL,
     }
     setkeyv(subpcondx, subpids)
 
+    ## Check unique ids and set keys
+    if (bycond) {
+      csumuniqueid <- c(subpuniqueid, subpid, condid)
+      setkeyv(subpcondx, csumuniqueid)           
+    } else {
+      csumuniqueid <- c(subpuniqueid, subpid)
+    }
+
     ## Set pltx to NULL   
     pltx <- NULL
   } else {
-
-    ## Check unique ids and set keys
-    if (bycond) {
-      csumuniqueid <- c(cuniqueid, condid)
-      setkeyv(condx, csumuniqueid)
-           
-    } else {
-      csumuniqueid <- cuniqueid
-    }
 
     pltx <- pcheck.table(plt, tab_dsn=data_dsn, gui=gui, tabnm="plt", 
 			caption="Plot table?")
