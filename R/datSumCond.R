@@ -101,7 +101,8 @@ datSumCond <- function(cond = NULL,
   if(gui){ puniqueid=cuniqueid=csumvarnm=savedata <- NULL }
 
   ## Set global variables
-  CONDPROP_ADJ=CONDPROP_UNADJ <- NULL
+  CONDPROP_ADJ=CONDPROP_UNADJ=NF_COND_STATUS_CD <- NULL
+  ACI <- FALSE
 
 
   ##################################################################
@@ -208,19 +209,17 @@ datSumCond <- function(cond = NULL,
   if (is.null(NAto0)) NAto0 <- FALSE
 
 
-  ## Check unique ids and set keys
-  if (bycond) {
-    csumuniqueid <- c(cuniqueid, condid)
-    setkeyv(condx, csumuniqueid)
-           
-  } else {
-    csumuniqueid <- cuniqueid
-  }
-
-
   if (bysubp) {
     subpuniqueid <- "PLT_CN"
     subpids <- c(subpuniqueid, subpid)
+
+    ## Check unique ids and set keys
+    if (bycond) {
+      csumuniqueid <- c(subpuniqueid, subpid, condid)
+      setkeyv(condx, csumuniqueid)           
+    } else {
+      csumuniqueid <- c(subpuniqueid, subpid)
+    }
 
     ## Check subplot
     subplotx <- pcheck.table(subplot, tab_dsn=data_dsn, tabnm="subplot", gui=gui, 
@@ -245,6 +244,15 @@ datSumCond <- function(cond = NULL,
     ## Set pltx to NULL   
     pltx <- NULL
   } else {
+
+    ## Check unique ids and set keys
+    if (bycond) {
+      csumuniqueid <- c(cuniqueid, condid)
+      setkeyv(condx, csumuniqueid)
+           
+    } else {
+      csumuniqueid <- cuniqueid
+    }
 
     pltx <- pcheck.table(plt, tab_dsn=data_dsn, gui=gui, tabnm="plt", 
 			caption="Plot table?")
@@ -285,10 +293,6 @@ datSumCond <- function(cond = NULL,
   csumvar <- pcheck.varchar(var2check=csumvar, varnm="csumvar", 
 		checklst=condnmlst, caption="csumvar(s)", multiple=TRUE,
 		stopifnull=TRUE, gui=gui)
-  if (any(csumvar == "CONDPROP_UNADJ")) {
-    condx$CONDPROP <- 1
-    csumvar[csumvar == "CONDPROP_UNADJ"] <- "CONDPROP"
-  }
 
   ## Check csumvarnm
   if (is.null(csumvarnm)) csumvarnm <- paste(csumvar, "PLT", sep="_")
@@ -297,20 +301,17 @@ datSumCond <- function(cond = NULL,
   ## Check getadjplot
   getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
 		title="Get plot adjustment?", first="NO", gui=gui)
-  if (getadjplot && is.null(condx)) 
+  if (getadjplot && is.null(condx)) {
     stop("must include condx to adjust to plot")
+  }
 
   ## Check adjcond
   adjcond <- pcheck.logical(adjcond, varnm="adjcond", 
 		title="Adjust conditions?", first="NO", gui=gui)
-
-
-  ### Filter cond data 
-  ###########################################################  
-  cdat <- datFilter(x=condx, xfilter=cfilter, title.filter="cfilter",
-			 stopifnull=TRUE, gui=gui)
-  condf <- cdat$xf
-  cfilter <- cdat$xfilter
+  if (getadjplot && !adjcond) {
+    message("getadjplot=TRUE, and adjcond=FALSE... setting adjcond=TRUE")
+    adjcond <- TRUE
+  }
 
 
   ## Check savedata 
@@ -344,39 +345,72 @@ datSumCond <- function(cond = NULL,
 
     if (bysubp) {
       ## Remove nonsampled conditions by subplot and summarize to condition-level
-      subpcx <- subpsamp(cond = condf, 
+      subpcx <- subpsamp(cond = condx, 
                          subp_cond = subpcondx, 
                          subplot = subplotx, 
                          subpuniqueid = subpuniqueid, 
                          subpid = subpid)
 
-      adjfacdata <- getadjfactorPLOT(condx=subpcx, 
-		    cuniqueid=c(subpuniqueid, subpid), areawt="CONDPROP_UNADJ")
-      condf <- adjfacdata$condx
-      cuniqueid <- c(subpuniqueid, subpid)
+      adjfacdata <- getadjfactorPLOT(condx = subpcx, 
+		                          cuniqueid = c(subpuniqueid, subpid), 
+                                     areawt = csumvar)
+      subpcx <- adjfacdata$condx
+      mergecols <- unique(c(cuniqueid, condid, names(condx)[!names(condx) %in% names(subpcx)]))
+      condx <- merge(condx[, mergecols, with=FALSE], subpcx, 
+                     by.x=c(cuniqueid, condid), by.y=c(subpuniqueid, condid))
+      
 
     } else {
 
-      if ("COND_STATUS_CD" %in% names(condf)) {
-        condf <- condf[condf$COND_STATUS_CD != 5,]
+      ## Remove nonsampled conditions  
+      if ("COND_STATUS_CD" %in% names(condx)) {
+        cond.nonsamp.filter <- "COND_STATUS_CD != 5"
+        nonsampn <- sum(condx[["COND_STATUS_CD"]] == 5, na.rm=TRUE)
+        if (length(nonsampn) > 0) {
+          message("removing ", nonsampn, " nonsampled forest conditions")
+        } else {
+          message("assuming all sampled conditions in cond")
+        }
       } else {
-        message("assuming no nonsampled condition in dataset")
+        message("assuming all sampled conditions in cond")
       }
-      adjfacdata <- getadjfactorPLOT(condx=condf, cuniqueid=cuniqueid, 
-                areawt="CONDPROP_UNADJ")
-      condf <- adjfacdata$condx
+      if (ACI && "NF_COND_STATUS_CD" %in% names(condx)) {
+        cond.nonsamp.filter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
+        message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE), 
+		" nonsampled nonforest conditions")
+        if (!is.null(cond.nonsamp.filter)) {
+          cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.ACI)
+        }
+      }
+      condx <- datFilter(x = condx, 
+                         xfilter = cond.nonsamp.filter, 
+		              title.filter = "cond.nonsamp.filter")$xf
+
+
+      adjfacdata <- getadjfactorPLOT(condx = condx, 
+                                     cuniqueid = cuniqueid, 
+                                     areawt = csumvar)
+      condx <- adjfacdata$condx
     }
   }
  
+  ### Filter cond data 
+  ###########################################################  
+  cdat <- datFilter(x = condx, 
+                    xfilter = cfilter, 
+                    title.filter = "cfilter",
+                    stopifnull = TRUE, 
+                    gui = gui)
+  condf <- cdat$xf
+  cfilter <- cdat$xfilter
+
 
   if (getadjplot) {
+    csumvaradj <- ifelse(csumvar == "CONDPROP_UNADJ", "CONDPROP_ADJ", paste0(csumvar, "_ADJ"))
     csumvarnm <- paste0(csumvarnm, "_ADJ")
-    csumvar <- paste0(csumvar, "_ADJ")
-    condf.sum <- condf[, lapply(.SD, function(x) sum(x * CONDPROP_ADJ, na.rm=TRUE)),
- 		by=csumuniqueid, .SDcols=csumvar]
+    condf.sum <- condf[, lapply(.SD, sum, na.rm=TRUE), by=csumuniqueid, .SDcols=csumvaradj]
   } else {
-    condf.sum <- condf[, lapply(.SD, function(x) sum(x * CONDPROP_UNADJ, na.rm=TRUE)),
- 		by=csumuniqueid, .SDcols=csumvar]
+    condf.sum <- condf[, lapply(.SD, sum, na.rm=TRUE), by=csumuniqueid, .SDcols=csumvar]
   }
   names(condf.sum) <- c(csumuniqueid, csumvarnm)
 
