@@ -14,6 +14,7 @@ modGBpop(
   dsn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
+  areawt2 = NULL,
   adj = "samp",
   unitvar = NULL,
   unitarea = NULL,
@@ -64,8 +65,12 @@ reside.  The dsn varies by driver. See gdal OGR vector formats
 need to be uniqueid. If using most current XY coordinates for plot
 assignments, use identifier for plot (e.g., PLOT_ID).}
 
-\item{areawt}{String. Name of variable for summarizing area weights (e.g.,
-CONDPROP_UNADJ).}
+\item{areawt}{String. Name of variable in cond for summarizing area 
+weights (e.g., CONDPROP_UNADJ).}
+
+\item{areawt2}{String. An equation to multiply to areawt for estimation. 
+All variables in equation must be in cond.
+weights (e.g., CONDPROP_UNADJ).}
 
 \item{adj}{String. How to calculate adjustment factors for nonsampled
 (nonresponse) conditions based on summed proportions for by plot ('samp',
