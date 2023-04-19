@@ -820,9 +820,11 @@ datSumTree <- function(tree = NULL,
       treex <- tabs$tab1
       subpcx <- tabs$tab2
 
-      adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=subpcx, 
-		tuniqueid=c(tuniqueid, subpid), cuniqueid=c(subpuniqueid, subpid),
-		areawt="CONDPROP_UNADJ")
+      adjfacdata <- getadjfactorPLOT(treex = treef, seedx = seedf, 
+                                     condx = subpcx, 
+		                          tuniqueid = c(tuniqueid, subpid), 
+                                     cuniqueid = c(subpuniqueid, subpid),
+		                          areawt = "CONDPROP_UNADJ")
       condx <- adjfacdata$condx
       cuniqueid <- c(subpuniqueid, subpid)
       tuniqueid <- c(tuniqueid, subpid)

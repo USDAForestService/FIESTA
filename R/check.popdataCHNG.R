@@ -1,4 +1,4 @@
-check.popdataCHNG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
+check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgnid,
 	pfromqry, palias, pjoinid, whereqry, adj, ACI, pltx=NULL, puniqueid="CN", 
 	dsn=NULL, dbconn=NULL, condid="CONDID", areawt="CONDPROP_UNADJ", 
 	MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, diavar="DIA",
@@ -62,7 +62,7 @@ check.popdataCHNG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   conduid <- tabIDs[["condu"]]
   sccmid <- tabIDs[["sccm"]]
   lulcid <- "PLT_CN"
-  popType = "CHNG"
+  popType <- "CHNG"
 
   ###################################################################################
   ## Database queries
@@ -202,16 +202,17 @@ check.popdataCHNG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
       }
       treeqry <- paste("select distinct t.* from", tfromqry, whereqry)
       dbqueries$tree <- treeqry
-    }
-    if (all(!is.null(seed), is.character(seed), seed %in% tablst)) {
-      if (!is.null(pfromqry)) {
-        sfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., seed,
+
+      if (all(!is.null(seed), is.character(seed), seed %in% tablst)) {
+        if (!is.null(pfromqry)) {
+          sfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., seed,
 				" s ON (s.PLT_CN = ", palias, ".", pjoinid, ")")
-      } else {
-        sfromqry <- paste(seed, "s")
+        } else {
+          sfromqry <- paste(seed, "s")
+        }
+        seedqry <- paste("select distinct s.* from", sfromqry, whereqry)
+        dbqueries$seed <- seedqry
       }
-      seedqry <- paste("select distinct s.* from", sfromqry, whereqry)
-      dbqueries$seed <- seedqry
     }
   }
  
@@ -469,9 +470,11 @@ check.popdataCHNG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ###################################################################################
   ## Check area weight 
   ###################################################################################
-  condx <- sccm_condx
-  #areawt <- "SUBPTYP_PROP_CHNG"
-  condx[[areawt]] <- check.numeric(condx[[areawt]])
+#  condx <- sccm_condx
+#  #areawt <- "SUBPTYP_PROP_CHNG"
+#  condx[[areawt]] <- check.numeric(condx[[areawt]])
+
+  sccm_condx[[areawt]] <- check.numeric(sccm_condx[[areawt]])
 
 
   ###################################################################################
@@ -628,9 +631,9 @@ check.popdataCHNG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
  
   ## Set up list of variables to return
   ######################################################################################
-  returnlst <- list(condx=condx, pltcondx=pltcondx, sccmx=sccmx, cuniqueid=cuniqueid, 
-	condid=condid, condsampcnt=as.data.frame(condsampcnt),
-	ACI.filter=ACI.filter, areawt=areawt)
+  returnlst <- list(sccm_condx=sccm_condx, pltcondx=pltcondx, sccmx=sccmx, 
+      cuniqueid=cuniqueid, condid=condid, condsampcnt=as.data.frame(condsampcnt),
+      ACI.filter=ACI.filter, areawt=areawt)
 
   if (popType == "GRM" && !is.null(treex)) {
     ## Check that the values of tuniqueid in treex are all in cuniqueid in pltcondx

@@ -380,7 +380,6 @@ modGBchng <- function(GBpopdat,
   strwtvar <- GBpopdat$strwtvar
   strunitvars <- c(unitvar, strvar)
   strata <- GBpopdat$strata
-  areawt <- GBpopdat$areawt
 
 
   ## Check chngtype
@@ -528,13 +527,13 @@ modGBchng <- function(GBpopdat,
   } else {
     select.qry <- groupby.qry
   }
-
+ 
   if (chngtype == "ANNUAL") {
-    condf_chng.qry <- paste0("SELECT ", select.qry, ", SUM(", areawt, " / 4 / c.REMPER) AS ysum")
+    condf_chng.qry <- paste0("SELECT ", select.qry, ", SUM(", estvar.name, " / 4 / c.REMPER) AS ysum")
   } else {
-    condf_chng.qry <- paste0("SELECT ", select.qry, ", SUM(", areawt, " / 4) AS ysum")
+    condf_chng.qry <- paste0("SELECT ", select.qry, ", SUM(", estvar.name, " / 4) AS ysum")
   }
-
+ 
   condf_chng.qry <- paste0(condf_chng.qry, 
                       "\n FROM condf c
                       JOIN condf pcond ON (pcond.PLT_CN = c.PREV_PLT_CN) 
