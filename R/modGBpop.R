@@ -618,7 +618,7 @@ modGBpop <- function(popType = "VOL",
     stop("need to include popTabs")
   }
 
-  list.items <- {}
+  list.items <- c("cond")
   if (popType == "VOL") {
     list.items <- c(list.items, "tree")
   }
@@ -628,6 +628,10 @@ modGBpop <- function(popType = "VOL",
   if (popType == "DWM") {
     list.items <- c(list.items, "cond_dwm_calc")
   }
+  if (popType == "CHNG") {
+    list.items <- c(list.items, "sccm")
+  }
+
   popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
 
   ## Set user-supplied popTabIDs values
@@ -718,13 +722,13 @@ modGBpop <- function(popType = "VOL",
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
     ###################################################################################
-    popcheck <- check.popdataCHNG(gui=gui, 
+    popcheck <- check.popdataCHNG(gui=gui, popType=popType,
                tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
                pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
                adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
                condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, cvars2keep="REMPER")
     if (is.null(popcheck)) return(NULL)
-    condx <- popcheck$condx
+    condx <- popcheck$sccm_condx
     sccmx <- popcheck$sccmx
     pltcondx <- popcheck$pltcondx
     treef <- popcheck$treef
@@ -845,9 +849,7 @@ modGBpop <- function(popType = "VOL",
     areawtnm <- areawt
 
   } else {
-    if (popType %in% c("ALL", "VOL", "CURR", "CHNG")) {
-      if (popType == "CHNG") areawt <- "SUBPTYP_PROP_CHNG"
-
+    if (popType %in% c("ALL", "VOL", "CURR")) {
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 
                         treex = treef, 
@@ -867,11 +869,32 @@ modGBpop <- function(popType = "VOL",
       areaadj <- adjfacdata$areaadj
       varadjlst <- adjfacdata$varadjlst
       areawtnm <- adjfacdata$areawtnm
-      stratalut <- adjfacdata$unitlut
+      #stratalut <- adjfacdata$unitlut
       expcondtab <- adjfacdata$expcondtab
     }
 
     if (popType == "CHNG") {
+
+      adjfacdata <- getadjfactorVOL(adj=adj, 
+                        condx = condx, 
+                        #treex = treef, 
+                        #seedx = seedf, 
+                        cuniqueid = cuniqueid, 
+                        condid = condid,
+                        unitlut = stratalut, 
+                        unitvars = unitvar,
+                        strvars = strvar,
+                        unitarea = unitarea,
+                        areavar = areavar, 
+                        areawt = areawt
+                        )
+      condx <- adjfacdata$condx
+      areaadj <- adjfacdata$areaadj
+      varadjlst <- adjfacdata$varadjlst
+      areawtnm <- adjfacdata$areawtnm
+      stratalut <- adjfacdata$unitlut
+      expcondtab <- adjfacdata$expcondtab
+
       strunitvars <- key(stratalut)
       if (is.null(key(sccmx))) setkeyv(sccmx, c(cuniqueid, condid))
       sccmx <- sccmx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
