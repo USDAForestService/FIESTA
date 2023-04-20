@@ -631,7 +631,6 @@ modGBpop <- function(popType = "VOL",
   if (popType == "CHNG") {
     list.items <- c(list.items, "sccm")
   }
-
   popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
 
   ## Set user-supplied popTabIDs values

@@ -512,7 +512,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 
   ## Remove plots that have no remeasurement data
   ######################################################################################
-  if (popType %in% c("GRM", "CHNG", "LULC")) {
+  if (popType %in% c("GRM", "CHNG", "LULC") && "REMPER" %in% names(pltx)) {
     ## Remove plots that have no remeasurement data
     pltx <- pltx[!is.na(pltx$REMPER), ]
   }

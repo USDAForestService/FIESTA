@@ -76,21 +76,30 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
     }
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
-    SCHEMA.<- NULL
-    dbqueries <- list()
 
-    ## Create query for remeasured plots
-    ##########################################################################
+    ## Check plt in database
     if (!all(!is.null(plt), is.character(plt), plt %in% tablst)) {    
       stop("need PLOT table in database")
     }
+    ## Check cond in database
+    if (!all(!is.null(cond), is.character(cond), cond %in% tablst)) { 
+      stop("need COND table in database")
+    } 
+    ## Check sccm in database
+    if (!all(!is.null(sccm), is.character(sccm), sccm %in% tablst)) {
+      stop("need SUBP_COND_CHNG_MTRX table in database")
+    }
+
+    SCHEMA. <- NULL
+    dbqueries <- list()
+
 
     ## Get default variables for plot
     pltvars <- DBvars.default()$pltvarlst
 
     ## Get from statement for plot change query
     pchgfromqry <- paste0(pfromqry, 
-		" JOIN ", SCHEMA., plt, " pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
+	" JOIN ", SCHEMA., plt, " pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
 
     ## Get where statement for plot change query
     pchgwhere <- paste0(palias, ".REMPER > 0") 
@@ -109,11 +118,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
 					"from", pchgfromqry, pchgwhereqry)
     dbqueries$pltu <- pltuqry
 
-    ## Create query for remeasured conditions
-    ##########################################################################
-    if (!all(!is.null(cond), is.character(cond), cond %in% tablst)) { 
-      stop("need COND table in database")
-    } 
 
     ## Get default variables for cond
     condvars <-  DBvars.default()$condvarlst
@@ -138,9 +142,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
     ##########################################################################
     ## Get SUBP_COND_CHNG_MTRX queries for proportion of change (areawt)
     ##########################################################################
-    if (!all(!is.null(sccm), is.character(sccm), sccm %in% tablst)) {
-      stop("need SUBP_COND_CHNG_MTRX table in database")
-    }
 
     ## This is used for calculation of adjustment factors and estimates
     chgwhere <- "c.CONDPROP_UNADJ IS NOT NULL 

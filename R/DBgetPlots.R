@@ -729,7 +729,7 @@ DBgetPlots <- function (states = NULL,
     if (length(Type)==0) Type <- "VOL"
   } 
 
-  if (any(Type %in% c("CURR", "VOL"))) {
+  if (any(Type %in% c("VOL"))) {
     istree <- TRUE
   } 
   if (any(Type == "P2VEG")) {
