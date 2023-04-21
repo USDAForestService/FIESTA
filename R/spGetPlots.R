@@ -1109,6 +1109,7 @@ spGetPlots <- function(bnd = NULL,
       } else {
         evalInfost <- NULL
       }
+ 
       dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 

@@ -777,7 +777,6 @@ DBgetPlots <- function (states = NULL,
   coordType <- pcheck.varchar(var2check=coordType, varnm="coordType", 
 		gui=gui, checklst=coordTypelst, caption="Coordinate Type?")
 
-
   ########################################################################
   ### DBgetEvalid()
   ########################################################################
@@ -813,7 +812,7 @@ DBgetPlots <- function (states = NULL,
   ## Get states, Evalid and/or invyrs info
   ##########################################################
   if (!is.null(evalInfo)) {
-    list.items <- c("states", "evalidlist", "invtype", "invyrtab")
+    list.items <- c("states", "invtype", "invyrtab")
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {

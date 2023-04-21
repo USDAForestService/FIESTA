@@ -515,9 +515,6 @@ spGetSAdoms <- function(smallbnd,
 
   ## Check largebndx
   if (!is.null(largebndx)) {
-    if (is.null(maxbnd)) {
-      maxislarge <- TRUE
-    }
     largebnd.unique <- pcheck.varchar(var2check=largebnd.unique, 
 		varnm="largebnd.unique", gui=gui, checklst=names(largebndx), 
 		caption="max areas attribute", 
@@ -532,6 +529,14 @@ spGetSAdoms <- function(smallbnd,
 
     ## Check projections (reproject largebndx to projection of smallbndx
     largebndx <- crsCompare(largebndx, smallbndx, nolonglat=TRUE)$x
+
+    if (is.null(maxbndx)) {
+      maxislarge <- TRUE
+    } else {
+      if (identical(largebndx, maxbndx) && identical(largebnd.unique, maxbnd.unique)) {
+        maxislarge <- TRUE
+      }
+    }
 
     ## Get intersection of smallbndx
     #smallbndx <- suppressWarnings(selectByIntersects(smallbndx, largebndx, 49))
@@ -714,12 +719,10 @@ spGetSAdoms <- function(smallbnd,
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					largebndx[, largebnd.unique], largest=TRUE))
     }
-
     if (!maxislarge && !is.null(maxbndx)) {
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					maxbndx[, maxbnd.unique], largest=TRUE))
-    }
-  
+    } 
     if (addstate) {
       ## Check projections (reproject largebndx to projection of helperbndx
       prjdat <- crsCompare(SAdomslst[[i]], stunitco, nolonglat=TRUE)
