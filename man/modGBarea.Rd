@@ -6,7 +6,6 @@
 \usage{
 modGBarea(
   GBpopdat,
-  estvar2 = NULL,
   landarea = "FOREST",
   pcfilter = NULL,
   rowvar = NULL,
@@ -56,9 +55,6 @@ of options. Only used when savedata = TRUE.}
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
-
-\item{estvar2.}{String. Name of variable to multiply by the area weight
-variable (e.g., CONDPROP_ADJ).}
 }
 \value{
 A list with estimates with percent sampling error for rowvar (and

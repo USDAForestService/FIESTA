@@ -2367,7 +2367,7 @@ DBgetPlots <- function (states = NULL,
 
       if (datsource == "sqlite") {
         seednm <- chkdbtab(dbtablst, seed_layer)
-        if (!is.null(seednm)) {
+        if (is.null(seednm)) {
           stest <- dbtablst[grepl("seed", dbtablst)]
           if (length(stest) == 1) {
             seednm <- stest
@@ -2379,6 +2379,8 @@ DBgetPlots <- function (states = NULL,
             isseed <- FALSE 
             seednm <- NULL
           }
+        } else {
+          seedflds <- DBI::dbListFields(dbconn, seednm)
         }
       } else if (datsource == "datamart") {
         SEEDLING <- DBgetCSV("SEEDLING", stabbr, returnDT=TRUE, 

@@ -788,7 +788,7 @@ modGBpop <- function(popType = "VOL",
 #  if (popType == "LULC") {
 #    lulcx <- popcheck$lulcx
 #  }
- 
+
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
@@ -832,7 +832,7 @@ modGBpop <- function(popType = "VOL",
   ##     by strata and estunit (*PROP_UNADJ_SUM / n.strata)
   ##  2. Adjusted condition proportion (CONDPROP_ADJ) appended to condx
   ###################################################################################
-
+ 
   ## Merge plot strata info to condx
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
   condx <- condx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
@@ -980,7 +980,7 @@ modGBpop <- function(popType = "VOL",
     if (!is.numeric(condx[[areawt2]])) {
       stop("areawt2 is invalid")
     }
-    condx$areawt <- condx[[areawt]] * condx[[areawt2]]
+    condx$areawt <- condx[[areawtnm]] * condx[[areawt2]]
     areawtnm <- "areawt"
   } 
 

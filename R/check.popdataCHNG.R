@@ -41,7 +41,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
   COND_STATUS_CD=CONDID=CONDPROP_UNADJ=SUBPPROP_UNADJ=MICRPROP_UNADJ=MACRPROP_UNADJ=
 	ACI.filter=V1=condsampcnt=NF_COND_STATUS_CD=TPA_UNADJ=
 	condqry=treeqry=cfromqry=tfromqry=SUBPCOND_PROP=MACRCOND_PROP=tpropvars=
-	plot_pplotx=sccmx=dbqueries=chgwhereqry=nfplotsampcnt <- NULL
+	plot_pplotx=sccmx=dbqueries=chgwhereqry=nfplotsampcnt=dbname=drv <- NULL
 
 
   ###################################################################################
@@ -51,7 +51,8 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
   pdoms2keep <- c("INVYR", "STATECD", "UNITCD", "COUNTYCD", "PLOT_STATUS_CD", 
 			"MEASYEAR", "RDISTCD", "WATERCD", "ECOSUBCD", "CONGCD")
  
-  sccm=lulc=grm=treex=seedx <- NULL
+  sccm=lulc=grm=treex=seedx=pltnm <- NULL
+
   ## Get tables from tabs
   for (tabnm in names(tabs)) {
     assign(tabnm, tabs[[tabnm]])
@@ -63,6 +64,15 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
   sccmid <- tabIDs[["sccm"]]
   lulcid <- "PLT_CN"
   popType <- "CHNG"
+
+  SCHEMA. <- NULL
+  dbqueries <- list()
+
+  ## Check palias
+  if (is.null(palias)) {
+    palias <- "p"
+  }
+
 
   ###################################################################################
   ## Database queries
@@ -76,144 +86,181 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
     }
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
+    dbname <- dsn
+    drv <- "SQLite"
 
     ## Check plt in database
     if (!all(!is.null(plt), is.character(plt), plt %in% tablst)) {    
       stop("need PLOT table in database")
+    } else {
+      pltnm <- "plt"
     }
     ## Check cond in database
     if (!all(!is.null(cond), is.character(cond), cond %in% tablst)) { 
       stop("need COND table in database")
+      condnm <- "cond"
     } 
     ## Check sccm in database
     if (!all(!is.null(sccm), is.character(sccm), sccm %in% tablst)) {
       stop("need SUBP_COND_CHNG_MTRX table in database")
+      sccmnm <- "sccm"
     }
 
-    SCHEMA. <- NULL
-    dbqueries <- list()
-
-
-    ## Get default variables for plot
-    pltvars <- DBvars.default()$pltvarlst
+    if (!is.null(pfromqry)) {
+      pfromqry <- paste0(SCHEMA., pltnm, " ", palias)
+    }
 
     ## Get from statement for plot change query
-    pchgfromqry <- paste0(pfromqry, 
-	" JOIN ", SCHEMA., plt, " pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
-
-    ## Get where statement for plot change query
-    pchgwhere <- paste0(palias, ".REMPER > 0") 
-    if (is.null(whereqry)) {
-      pchgwhereqry <- paste("WHERE", pchgwhere)
+    if (is.null(pfromqry)) {
+      pchgfromqry <- paste0(SCHEMA., pltnm, 
+		" pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
     } else {
-      pchgwhereqry <- paste(whereqry, "and", pchgwhere)
+      pchgfromqry <- paste0(pfromqry, 
+		" JOIN ", SCHEMA., pltnm, " pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
     }
 
-    ## Build query for plot change
-    pltuqry <- paste("select distinct", 
+  } else {
+    condnm <- "cond"
+    sccmnm <- "sccm"
+
+    ## Get remeasured plot/condition data
+    cond <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
+           tabnm="cond", caption="Remeasured condition data?", 
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+
+    ## Get remeasured plot data
+    if (!is.null(plt)) {
+      plt <- suppressMessages(pcheck.table(plt, tab_dsn=dsn, 
+           tabnm="plt", caption="Remeasured plot data?", 
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+      pltnm <- "plt"
+    } 
+
+    ## Get subplot matrix data for generating estimates
+    sccm <- pcheck.table(sccm, tab_dsn=dsn, 
+           tabnm="sccm", caption="sccm table?", 
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE)
+
+    pfromqry <- paste0(SCHEMA., pltnm, " ", palias)
+    pchgfromqry <- paste0(pfromqry, 
+		" JOIN ", SCHEMA., pltnm, " pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
+  }  
+
+  ## Get default variables for plot
+  pltvars <- DBvars.default()$pltvarlst
+
+  ## Get where statement for plot change query
+  pchgwhere <- paste0(palias, ".REMPER > 0") 
+  if (is.null(whereqry)) {
+    pchgwhereqry <- paste("WHERE", pchgwhere)
+  } else {
+    pchgwhereqry <- paste(whereqry, "and", pchgwhere)
+  }
+
+  ## Build query for plot change
+  pltuqry <- paste("select distinct", 
 				toString(paste0(palias, ".", pltvars)), 
 					"from", pchgfromqry, pchgwhereqry,
 			  "UNION select distinct", 
 				toString(paste0("pplot.", pltvars)), 
 					"from", pchgfromqry, pchgwhereqry)
-    dbqueries$pltu <- pltuqry
+  dbqueries$pltu <- pltuqry
 
+  ## Get default variables for cond
+  condvars <-  DBvars.default()$condvarlst
 
-    ## Get default variables for cond
-    condvars <-  DBvars.default()$condvarlst
-
-    ## Get from statement for cond change query
-    cchgfromqry <- paste0(pfromqry, 
-		" JOIN ", SCHEMA., cond, 
+  ## Get from statement for cond change query
+  cchgfromqry <- paste0(pfromqry, 
+		" JOIN ", SCHEMA., condnm, 
 			" c ON (c.", cuniqueid, " = ", palias, ".", pjoinid, ")",
-      	" JOIN ", SCHEMA., cond, 
+      	" JOIN ", SCHEMA., condnm, 
 			" pcond ON (pcond.", cuniqueid, " = ", palias, ".PREV_PLT_CN)")
 
-    ## Build query for cond change
-    conduqry <- paste("select distinct", 
+  ## Build query for cond change
+  conduqry <- paste("select distinct", 
 				toString(paste0("c.", condvars)), 
 					"from", cchgfromqry, pchgwhereqry,
 			  "UNION select distinct", 
 				toString(paste0("pcond.", condvars)), 
 					"from", cchgfromqry, pchgwhereqry)
-    dbqueries$condu <- conduqry
+  dbqueries$condu <- conduqry
 
 
-    ##########################################################################
-    ## Get SUBP_COND_CHNG_MTRX queries for proportion of change (areawt)
-    ##########################################################################
+  ##########################################################################
+  ## Get SUBP_COND_CHNG_MTRX queries for proportion of change (areawt)
+  ##########################################################################
 
-    ## This is used for calculation of adjustment factors and estimates
-    chgwhere <- "c.CONDPROP_UNADJ IS NOT NULL 
-			 		and COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0    
-                    		and COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0"
-    if (is.null(pchgwhereqry)) {
-      chgwhereqry <- paste("WHERE", chgwhere)
-    } else {
-      chgwhereqry <- paste(pchgwhereqry, "and", chgwhere)
-    }
+  ## This is used for calculation of adjustment factors and estimates
+  chgwhere <- "c.CONDPROP_UNADJ IS NOT NULL 
+			 	and COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0    
+                    	and COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0"
+  if (is.null(pchgwhereqry)) {
+    chgwhereqry <- paste("WHERE", chgwhere)
+  } else {
+    chgwhereqry <- paste(pchgwhereqry, "and", chgwhere)
+  }
 
-    ## This query is used for estimates
-    sccmqry <- paste0("SELECT sccm.* FROM ", pfromqry,  
-                	" JOIN ", SCHEMA., sccm, 
+  ## This query is used for estimates
+  sccmqry <- paste0("SELECT sccm.* FROM ", pfromqry,  
+                	" JOIN ", SCHEMA., sccmnm, 
 				" sccm ON (sccm.", sccmid, " = p.", puniqueid, ") ", whereqry) 
 
-    ## This query is used for calculation of adjustment factors
-    sccm_condqry <- paste0(
-			"SELECT c.PLT_CN, 
-				pcond.PLT_CN PREV_PLT_CN, 
-				pcond.CONDID PREVCOND, c.CONDID,
-               		pcond.COND_STATUS_CD PREV_COND_STATUS_CD, c.COND_STATUS_CD,
-               		SUM(sccm.SUBPTYP_PROP_CHNG * 
-                     		(CASE WHEN ((sccm.SUBPTYP = 3 and c.PROP_BASIS = 'MACR') or
-									(sccm.SUBPTYP = 1 AND c.PROP_BASIS = 'SUBP')) 
-									THEN 1 ELSE 0 end)/4) AS CONDPROP_UNADJ,
-               		SUM(sccm.SUBPTYP_PROP_CHNG * 
-                     		(CASE WHEN sccm.SUBPTYP = 1 THEN 1 ELSE 0 end)/4) AS SUBPPROP_UNADJ,
-               		SUM(sccm.SUBPTYP_PROP_CHNG * 
-                     		(CASE WHEN sccm.SUBPTYP = 2 THEN 1 ELSE 0 end)/4) AS MICRPROP_UNADJ,
-               		SUM(sccm.SUBPTYP_PROP_CHNG * 
-                     		(CASE WHEN sccm.SUBPTYP = 3 THEN 1 ELSE 0 end)/4) AS MACRPROP_UNADJ
-                  FROM ", cchgfromqry,  
-               			" JOIN ", SCHEMA., sccm, " sccm ON (sccm.", sccmid, " = c.", cuniqueid, 
-                           	" and sccm.prev_plt_cn = pcond.", cuniqueid,
-                         	" and sccm.", condid, " = c.", condid, 
-                          	" and sccm.prevcond = pcond.", condid, ") ", 
-                  chgwhereqry, 
-                  " GROUP BY sccm.plt_cn, p.prev_plt_cn, sccm.condid")
-    dbqueries$sccm_cond <- sccm_condqry
+  ## This query is used for calculation of adjustment factors
+  sccm_condqry <- paste0(
+	"SELECT c.PLT_CN, 
+		pcond.PLT_CN PREV_PLT_CN, 
+		pcond.CONDID PREVCOND, c.CONDID,
+           pcond.COND_STATUS_CD PREV_COND_STATUS_CD, c.COND_STATUS_CD,
+           SUM(sccm.SUBPTYP_PROP_CHNG * 
+                  (CASE WHEN ((sccm.SUBPTYP = 3 and c.PROP_BASIS = 'MACR') or
+			  (sccm.SUBPTYP = 1 AND c.PROP_BASIS = 'SUBP')) 
+				  THEN 1 ELSE 0 end)/4) AS CONDPROP_UNADJ,
+           SUM(sccm.SUBPTYP_PROP_CHNG * 
+                  (CASE WHEN sccm.SUBPTYP = 1 THEN 1 ELSE 0 end)/4) AS SUBPPROP_UNADJ,
+           SUM(sccm.SUBPTYP_PROP_CHNG * 
+                  (CASE WHEN sccm.SUBPTYP = 2 THEN 1 ELSE 0 end)/4) AS MICRPROP_UNADJ,
+           SUM(sccm.SUBPTYP_PROP_CHNG * 
+                  (CASE WHEN sccm.SUBPTYP = 3 THEN 1 ELSE 0 end)/4) AS MACRPROP_UNADJ
+           FROM ", cchgfromqry,  
+               	  " JOIN ", SCHEMA., sccmnm, " sccm ON (sccm.", sccmid, " = c.", cuniqueid, 
+                   " and sccm.prev_plt_cn = pcond.", cuniqueid,
+                   " and sccm.", condid, " = c.", condid, 
+                   " and sccm.prevcond = pcond.", condid, ") ", 
+           chgwhereqry, 
+           " GROUP BY sccm.plt_cn, p.prev_plt_cn, sccm.condid")
+  dbqueries$sccm_cond <- sccm_condqry
 
-    ##########################################################################
-    ## Get remeasured tree and seed data queries for GRM
-    ##########################################################################
-    if (popType ==  "GRM") {
-      if (all(!is.null(tree), is.character(tree), tree %in% tablst)) {
-        tfromqry <- paste0(cfromqry, " JOIN ", SCHEMA., tree,
-				" t ON(t.", tuniqueid, " = c.", cuniqueid, " and t.", 
-						condid, " = c.", condid, " and t.prevcond = pcond.", condid, ")
-				LEFT JOIN ", SCHEMA., tree, " ptree ON(ptree.cn = t.prev_tre_cn)")
-        grmfromqry <- paste0(tfromqry, " LEFT JOIN ", SCHEMA., 
+
+  ##########################################################################
+  ## Get remeasured tree and seed data queries for GRM
+  ##########################################################################
+  if (popType ==  "GRM") {
+    if (all(!is.null(tree), is.character(tree), tree %in% tablst)) {
+      tfromqry <- paste0(cfromqry, " JOIN ", SCHEMA., tree,
+			" t ON(t.", tuniqueid, " = c.", cuniqueid, " and t.", 
+				condid, " = c.", condid, " and t.prevcond = pcond.", condid, ")
+			LEFT JOIN ", SCHEMA., tree, " ptree ON(ptree.cn = t.prev_tre_cn)")
+      grmfromqry <- paste0(tfromqry, " LEFT JOIN ", SCHEMA., 
 						"tree_grm_component grm on(grm.tre_cn = t.cn)")
-        grmqry <- paste("select distinct grm.* from", grmfromqry, whereqry)
-      } else if (!is.null(pfromqry)) {
-        tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., tree,
-				" t ON (t.PLT_CN = ", palias, ".", pjoinid, ")")
-      } else {
-        tfromqry <- paste(tree, "t")
-      }
-      treeqry <- paste("select distinct t.* from", tfromqry, whereqry)
-      dbqueries$tree <- treeqry
+      grmqry <- paste("select distinct grm.* from", grmfromqry, whereqry)
+    } else if (!is.null(pfromqry)) {
+      tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., tree,
+			" t ON (t.PLT_CN = ", palias, ".", pjoinid, ")")
+    } else {
+      tfromqry <- paste(tree, "t")
+    }
+    treeqry <- paste("select distinct t.* from", tfromqry, whereqry)
+    dbqueries$tree <- treeqry
 
-      if (all(!is.null(seed), is.character(seed), seed %in% tablst)) {
-        if (!is.null(pfromqry)) {
-          sfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., seed,
-				" s ON (s.PLT_CN = ", palias, ".", pjoinid, ")")
-        } else {
-          sfromqry <- paste(seed, "s")
-        }
-        seedqry <- paste("select distinct s.* from", sfromqry, whereqry)
-        dbqueries$seed <- seedqry
+    if (all(!is.null(seed), is.character(seed), seed %in% tablst)) {
+      if (!is.null(pfromqry)) {
+        sfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., seed,
+			" s ON (s.PLT_CN = ", palias, ".", pjoinid, ")")
+      } else {
+        sfromqry <- paste(seed, "s")
       }
+      seedqry <- paste("select distinct s.* from", sfromqry, whereqry)
+      dbqueries$seed <- seedqry
     }
   }
  
@@ -221,30 +268,18 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
   ## Import tables
   ###################################################################################
 
-  ## Get remeasured plot/condition data
-  condx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
-           tabnm="cond", caption="Remeasured condition data?", 
-           nullcheck=nullcheck, gui=gui, tabqry=conduqry, returnsf=FALSE))
+  condx <- data.table(sqldf::sqldf(conduqry, dbname=dsn, drv=drv))
+  if (!is.null(pltnm)) {
+    pltx <- data.table(sqldf::sqldf(pltuqry, dbname=dsn, drv=drv))
+  }   
+  sccmx <- data.table(sqldf::sqldf(sccmqry, dbname=dsn, drv=drv))
+  sccm_condx <- data.table(sqldf::sqldf(sccm_condqry, dbname=dsn, drv=drv))
 
-  ## Get remeasured plot data
-  if (!is.null(plt)) {
-    pltx <- suppressMessages(pcheck.table(plt, tab_dsn=dsn, 
-           tabnm="plt", caption="Remeasured plot data?", 
-           nullcheck=nullcheck, gui=gui, tabqry=pltuqry, returnsf=FALSE))
-  } 
-
-  ## Get subplot matrix data for generating estimates
-  sccmx <- suppressMessages(pcheck.table(sccm, tab_dsn=dsn, 
-           tabnm="sccm", caption="sccm table?", 
-           nullcheck=nullcheck, gui=gui, tabqry=sccmqry, returnsf=FALSE))
-  setkeyv(sccmx, c(cuniqueid, condid))
-
-  ## Get subplot matrix condition-level data for generating adjustment factors,
-  ## and with area weight variable (SUBPTYP_PROP_CHNG).
-  sccm_condx <- suppressMessages(pcheck.table(sccm, tab_dsn=dsn, 
-           tabnm="sccm", caption="sccm table?", 
-           nullcheck=nullcheck, gui=gui, tabqry=sccm_condqry, returnsf=FALSE))
-  setkeyv(sccm_condx, c(cuniqueid, condid))
+  if (is.null(dsn)) {
+    rm(cond)
+    rm(sccm)
+    gc()
+  }
   
   if (popType == "GRM") {
     treex <- suppressMessages(pcheck.table(tree, tab_dsn=dsn, 
@@ -332,7 +367,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
     stop(msg)
   }
   setkeyv(condx, c(cuniqueid, condid))
-
 
   ## Merge pltx with condx
   ###########################################################
