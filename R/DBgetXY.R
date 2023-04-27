@@ -484,7 +484,7 @@ DBgetXY <- function (states = NULL,
     PLOT <- evalInfo$PLOT
     plotnm <- "PLOT"
   }
-
+ 
   if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
     ppsanm <- "POP_PLOT_STRATUM_ASSGN"
   } else if (!is.null(evalInfo$POP_PLOT_STRATUM_ASSGN)) {
@@ -525,6 +525,9 @@ DBgetXY <- function (states = NULL,
   }
   pvars2keep <- unique(c("STATECD", "UNITCD", "COUNTYCD", "PLOT", 
 					pvars2keep))
+  if (!iseval) {
+    pvars2keep <- unique(pvars2keep, "SRV_CN")
+  }    
 
   if (!is.null(measyrs) || measCur) {
     XYvarlst <- unique(c(XYvarlst, "MEASYEAR", "PLOT_STATUS_CD", "INVYR")) 
@@ -580,6 +583,17 @@ DBgetXY <- function (states = NULL,
       stop(xy, " does not exist in database\n ", toString(xytablst))
     }
   } else {
+    if (iseval && is.null(POP_PLOT_STRATUM_ASSGN)) {
+      ppsaqry <- paste("select * from POP_PLOT_STRATUM_ASSGN where evalid IN(",
+               toString(unlist(evalidlist)), ")")
+			
+      POP_PLOT_STRATUM_ASSGN <- tryCatch( DBI::dbGetQuery(dbconn, ppsaqry),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
+      ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+    }
+
     XYdf <- pcheck.table(xy, stopifnull=TRUE, stopifinvalid=TRUE)
     xynm <- "XYdf"
     names(XYdf) <- toupper(names(XYdf))
@@ -913,14 +927,18 @@ DBgetXY <- function (states = NULL,
         pnm <- plotnm
         pid <- xyjoinid
       }
-      popSURVEY <- ifelse(is.null(SURVEY), FALSE, TRUE)
+      popSURVEY <- FALSE
+      if (!is.null(SURVEY) && "SRV_CN" %in% names(get(pnm))) {
+        popSURVEY <- TRUE
+      }
+        
       pfromqry <- getpfromqry(Endyr = measEndyr, 
                             SCHEMA. = SCHEMA., 
                             intensity1 = intensity1, 
                             popSURVEY = popSURVEY, 
                             plotnm = pnm,
                             pjoinid = pid,
-                            surveynm = "SURVEY",
+                            surveynm = surveynm,
                             plotobj = get(pnm))
       if (xyisplot || is.null(plotnm)) {
         xyfromqry <- pfromqry
@@ -1028,7 +1046,7 @@ DBgetXY <- function (states = NULL,
     xyx <- tryCatch( sqldf::sqldf(xycoords.qry, 
 						stringsAsFactors = FALSE), 
 			error = function(e) {
-                  message(e)
+                  message(e, "\n")
                   return(NULL) })
 
     if (!iseval && is.null(invyrtab) && !is.null(invyrtab.qry)) {
