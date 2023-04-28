@@ -40,7 +40,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Set global variables
   COND_STATUS_CD=CONDID=CONDPROP_UNADJ=SUBPPROP_UNADJ=MICRPROP_UNADJ=MACRPROP_UNADJ=
 	STATECD=cndnmlst=PROP_BASIS=ACI.filter=condsampcnt=
-	NF_COND_STATUS_CD=TPA_UNADJ=condqry=treeqry=cfromqry=tfromqry=
+	NF_COND_STATUS_CD=TPA_UNADJ=condqry=treeqry=seedqry=cfromqry=tfromqry=
 	tpropvars=treex <- NULL
 
   ###################################################################################
@@ -56,7 +56,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     assign(tabnm, tabs[[tabnm]])
   }
   cuniqueid <- tabIDs[["cond"]]
-
 
   ###################################################################################
   ## Database queries
@@ -428,7 +427,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
       cvars2keep <- unique(c(cvars2keep, unlist(tpropvars)))
     }
   }
-
 
   ###################################################################################
   ## Check seedling data

@@ -214,7 +214,7 @@ spGetPlots <- function(bnd = NULL,
   xydat=stateFilter=countyfips=xypltx=evalidst=PLOT_ID=INVYR=
 	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc=dbconn=
 	bndx=evalInfo <- NULL
-  istree=isveg=ischng=isdwm <- FALSE
+  isveg=ischng=isdwm <- FALSE
   cuniqueid=tuniqueid=duniqueid <- "PLT_CN"
   stbnd.att <- "COUNTYFIPS"
   returnlst <- list()
@@ -412,8 +412,10 @@ spGetPlots <- function(bnd = NULL,
     if (length(Type)==0) Type <- "VOL"
   } 
 
-  if (any(Type %in% c("CURR", "VOL"))) {
-    istree <- TRUE
+  if (any(Type %in% c("VOL"))) {
+    if (!istree) {
+      message("eval Type includes 'VOL', but istree = FALSE... not trees are included")
+    }
   } 
   if (any(Type == "P2VEG")) {
     # understory vegetation tables 
@@ -944,10 +946,6 @@ spGetPlots <- function(bnd = NULL,
                          pjoinid = pjoinid, 
                          istree = istree,
                          isseed = isseed,
-                         isveg = isveg,
-                         issubp = issubp,
-                         ischng = ischng,
-                         isdwm = isdwm,
                          plotgeom = plotgeom, 
                          othertables = othertables, 
                          getxy = FALSE,
@@ -1031,10 +1029,6 @@ spGetPlots <- function(bnd = NULL,
                          pjoinid = pjoinid, 
                          istree = istree,
                          isseed = isseed,
-                         isveg = isveg,
-                         issubp = issubp,
-                         ischng = ischng,
-                         isdwm = isdwm,
                          plotgeom = plotgeom, 
                          othertables = othertables, 
                          getxy = FALSE,
@@ -1122,10 +1116,6 @@ spGetPlots <- function(bnd = NULL,
                          pjoinid = pjoinid, 
                          istree = istree,
                          isseed = isseed,
-                         isveg = isveg,
-                         issubp = issubp,
-                         ischng = ischng,
-                         isdwm = isdwm,
                          plotgeom = plotgeom, 
                          othertables = othertables, 
                          getxy = FALSE,

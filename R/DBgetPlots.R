@@ -730,7 +730,9 @@ DBgetPlots <- function (states = NULL,
   } 
 
   if (any(Type %in% c("VOL"))) {
-    istree <- TRUE
+    if (!istree) {
+      message("eval Type includes 'VOL', but istree = FALSE... not trees are included")
+    }
   } 
   if (any(Type == "P2VEG")) {
     # understory vegetation tables 
@@ -864,7 +866,9 @@ DBgetPlots <- function (states = NULL,
   if (!is.null(evalTypelist)) {
     Typelist <- sub("EXP", "", evalTypelist)
     if (any(c("VOL","CURR") %in% Typelist)) {
-      istree <- TRUE
+      if (!istree) {
+        message("istree is set to FALSE... not including tree data")
+      }
     }
     if ("P2VEG" %in% Typelist) {
       isveg=issubp <- TRUE

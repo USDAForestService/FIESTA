@@ -371,15 +371,12 @@ DBgetXY <- function (states = NULL,
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
   if (gui) {
-    Typelst <- c("CURR", "VOL", "P2VEG", "DWM", "GRM")
+    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", "GROW", "MORT", "REMV", "GRM")
     Type <- select.list(Typelst, title="eval type", 
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
   } 
 
-  if (any(Type == "VOL")) {
-    istree=isseed <- TRUE
-  } 
   if (any(Type == "P2VEG")) {
     # understory vegetation tables 
     # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP)
@@ -436,7 +433,7 @@ DBgetXY <- function (states = NULL,
   ## Get states, Evalid and/or invyrs info
   ##########################################################
   if (!is.null(evalInfo)) {
-    list.items <- c("states", "evalidlist", "invtype", "invyrtab")
+    list.items <- c("states", "invtype", "invyrtab")
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {
