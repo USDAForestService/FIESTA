@@ -275,7 +275,14 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 
       ## Check for NA values in necessary variables in plt table
       pltx.na <- sum(is.na(pltx[[puniqueid]]))
-      if (pltx.na > 0) stop("NA values in ", puniqueid)
+      if (pltx.na > 0) {
+        if (length(pltx.na) == 1) {
+          message("1 NA value in ", puniqueid)
+        } else {
+          message(pltx.na, " NA values in ", puniqueid)
+        }
+        pltx <- pltx[!is.na(pltx[[puniqueid]]), ]
+      }
 
       ## Set key
       setkeyv(pltx, puniqueid)
