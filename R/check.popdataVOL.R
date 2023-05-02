@@ -100,7 +100,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
       } else {
         tfromqry <- paste(tree, "t")
       }
-      treeqry <- paste("select distinct", toString(paste0("t.", c(treevars, tsumvars))), 
+      treeqry <- paste("select distinct", toString(paste0("t.", unique(c(treevars, tsumvars)))), 
 				"from", tfromqry, whereqry)
       #treeqry <- paste("select distinct t.* from", tfromqry, whereqry)
       dbqueries$tree <- treeqry
