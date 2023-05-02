@@ -93,14 +93,14 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     #########################################
     if (all(!is.null(tree), is.character(tree), tree %in% tablst)) {
       treevars <-  DBvars.default(istree=TRUE)$treevarlst
-
+      tsumvars <-  DBvars.default(istree=TRUE)$tsumvarlst
       if (!is.null(pfromqry)) {
         tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., tree,
 				" t ON (t.PLT_CN = ", palias, ".", pjoinid, ")")
       } else {
         tfromqry <- paste(tree, "t")
       }
-      treeqry <- paste("select distinct", toString(paste0("t.", treevars)), 
+      treeqry <- paste("select distinct", toString(paste0("t.", c(treevars, tsumvars))), 
 				"from", tfromqry, whereqry)
       #treeqry <- paste("select distinct t.* from", tfromqry, whereqry)
       dbqueries$tree <- treeqry
