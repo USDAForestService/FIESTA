@@ -116,6 +116,7 @@ lead to erroneous data shifts when reprojecting. See spTransform help
 documentation for more details.
 }
 \examples{
+\donttest{
 # Set up data from `FIESTA`
 WYbhdistfn <- system.file("extdata",
                           "sp_data/WYbighorn_districtbnd.shp",
@@ -132,6 +133,7 @@ spZonalRast(polyv = WYbhdist,
             polyv.att = "DISTRICTNA", 
             rastfn = demfn, 
             zonalstat = c("mean", "sum")) 
+}
 }
 \author{
 Tracey S. Frescino

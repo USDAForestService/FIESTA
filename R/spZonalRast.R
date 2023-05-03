@@ -75,6 +75,7 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples 
+#' \donttest{
 #' # Set up data from `FIESTA`
 #' WYbhdistfn <- system.file("extdata",
 #'                           "sp_data/WYbighorn_districtbnd.shp",
@@ -91,6 +92,7 @@
 #'             polyv.att = "DISTRICTNA", 
 #'             rastfn = demfn, 
 #'             zonalstat = c("mean", "sum")) 
+#' }
 #' @export spZonalRast
 spZonalRast <- function(polyv, 
                         polyv_dsn = NULL, 
