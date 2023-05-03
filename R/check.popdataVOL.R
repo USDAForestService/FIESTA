@@ -75,7 +75,9 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     ## Create query for cond
     #########################################
     if (all(!is.null(cond), is.character(cond), cond %in% tablst)) {
-      condvars <-  DBvars.default()$condvarlst
+      dbcvars <- DBI::dbListFields(dbconn, cond)
+      cvars <-  DBvars.default()$condvarlst
+      cvars <- cvars[cvars %in% dbcvars]
 
       if (is.null(pfromqry)) {
         cfromqry <- paste0(SCHEMA., cond, " c")
@@ -83,7 +85,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
         cfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., cond,
 				" c ON (c.", cuniqueid, " = ", palias, ".", pjoinid, ")")
       }
-      condqry <- paste("select distinct", toString(paste0("c.", condvars)), 
+      condqry <- paste("select distinct", toString(paste0("c.", cvars)), 
 				"from", cfromqry, whereqry)
       #condqry <- paste("select distinct c.* from", cfromqry, whereqry)
       dbqueries$cond <- condqry   
@@ -92,15 +94,19 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     ## Create query for tree
     #########################################
     if (all(!is.null(tree), is.character(tree), tree %in% tablst)) {
+      dbtvars <- DBI::dbListFields(dbconn, tree)
       treevars <-  DBvars.default(istree=TRUE)$treevarlst
       tsumvars <-  DBvars.default(istree=TRUE)$tsumvarlst
+      tvars <- unique(c(treevars, tsumvars))
+      tvars <- tvars[tvars %in% dbtvars]
+
       if (!is.null(pfromqry)) {
         tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., tree,
 				" t ON (t.PLT_CN = ", palias, ".", pjoinid, ")")
       } else {
         tfromqry <- paste(tree, "t")
       }
-      treeqry <- paste("select distinct", toString(paste0("t.", unique(c(treevars, tsumvars)))), 
+      treeqry <- paste("select distinct", toString(paste0("t.", tvars)), 
 				"from", tfromqry, whereqry)
       #treeqry <- paste("select distinct t.* from", tfromqry, whereqry)
       dbqueries$tree <- treeqry
