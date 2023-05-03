@@ -20,7 +20,7 @@ datasource."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -87,33 +87,34 @@ datasource.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">DBgetXY</span><span class="op">(</span></span>
-<span>  states <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  RS <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  xy_datsource <span class="op">=</span> <span class="st">"datamart"</span>,</span>
-<span>  xy_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  xy <span class="op">=</span> <span class="st">"PLOT"</span>,</span>
-<span>  xy_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/xy_options.html" class="external-link">xy_options</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  datsource <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  dbTabs <span class="op">=</span> <span class="fu"><a href="dbTables.html">dbTables</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  pjoinid <span class="op">=</span> <span class="st">"CN"</span>,</span>
-<span>  eval <span class="op">=</span> <span class="st">"FIA"</span>,</span>
-<span>  eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  invtype <span class="op">=</span> <span class="st">"ANNUAL"</span>,</span>
-<span>  coordType <span class="op">=</span> <span class="st">"PUBLIC"</span>,</span>
-<span>  intensity1 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  pvars2keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  issp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  returndata <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  POP_PLOT_STRATUM_ASSGN <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  SURVEY <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  dbconnopen <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  evalInfo <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">DBgetXY</span><span class="op">(</span>
+  states <span class="op">=</span> <span class="cn">NULL</span>,
+  RS <span class="op">=</span> <span class="cn">NULL</span>,
+  xy_datsource <span class="op">=</span> <span class="st">"datamart"</span>,
+  xy_dsn <span class="op">=</span> <span class="cn">NULL</span>,
+  xy <span class="op">=</span> <span class="st">"PLOT"</span>,
+  xy_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/xy_options.html" class="external-link">xy_options</a></span><span class="op">(</span><span class="op">)</span>,
+  datsource <span class="op">=</span> <span class="cn">NULL</span>,
+  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,
+  dbTabs <span class="op">=</span> <span class="fu"><a href="dbTables.html">dbTables</a></span><span class="op">(</span><span class="op">)</span>,
+  pjoinid <span class="op">=</span> <span class="st">"CN"</span>,
+  eval <span class="op">=</span> <span class="st">"FIA"</span>,
+  eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span><span class="op">)</span>,
+  invtype <span class="op">=</span> <span class="st">"ANNUAL"</span>,
+  coordType <span class="op">=</span> <span class="st">"PUBLIC"</span>,
+  intensity1 <span class="op">=</span> <span class="cn">FALSE</span>,
+  pvars2keep <span class="op">=</span> <span class="cn">NULL</span>,
+  issp <span class="op">=</span> <span class="cn">FALSE</span>,
+  returndata <span class="op">=</span> <span class="cn">TRUE</span>,
+  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
+  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,
+  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  PLOT <span class="op">=</span> <span class="cn">NULL</span>,
+  POP_PLOT_STRATUM_ASSGN <span class="op">=</span> <span class="cn">NULL</span>,
+  SURVEY <span class="op">=</span> <span class="cn">NULL</span>,
+  dbconnopen <span class="op">=</span> <span class="cn">FALSE</span>,
+  evalInfo <span class="op">=</span> <span class="cn">NULL</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -123,35 +124,23 @@ datasource.</p>
 or code (e.g., 4, 35) of state(s) for evalid. If all states in one or more
 FIA Research Station is desired, set states=NULL and use RS argument to
 define RS.</p></dd>
-
-
 <dt>RS</dt>
 <dd><p>String vector. Name of research station(s) to get public XY
 coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
 is populated. See FIESTA::ref_statecd for reference to RS and states.</p></dd>
-
-
 <dt>xy_datsource</dt>
 <dd><p>Source of XY data ('datamart', 'sqlite', 'obj', 'csv').</p></dd>
-
-
 <dt>xy_dsn</dt>
 <dd><p>If datsource='sqlite', the file name (data source name) of
 the sqlite database (*.db) where XY data reside.</p></dd>
-
-
 <dt>xy</dt>
 <dd><p>sf R object or String. If xy_dsn = 'datamart', name of xy table 
 in FIA DataMart. If xy_dsn = 'sqlite', name of xy layer in database. If 
 datsource = 'csv', full pathname of xy CSV file(s). If datsource = 'obj', 
 name of xy R object. If datsource = 'shp', full pathname of shapefile.</p></dd>
-
-
 <dt>xy_opts</dt>
 <dd><p>List of xy data options for xy (e.g., xy_opts = list(xvar='LON', 
 yvar='LAT'). See xy_options() for more options and defaults.</p></dd>
-
-
 <dt>datsource</dt>
 <dd><p>String. Source of FIA data for defining FIA evalutions or 
 appending variables ('datamart', 'sqlite', 'obj', 'csv'). If datsource = NULL, 
@@ -160,104 +149,68 @@ extracted from FIA DataMart (http://apps.fs.usda.gov/fia/datamart/datamart.html)
 If datsource='sqlite', specify database name(s) in data_dsn and table name(s) 
 in dbTabs() argument. If datsource = ('obj','csv'), specify *.csv file name in 
 dbTabs argument.</p></dd>
-
-
 <dt>data_dsn</dt>
 <dd><p>String. Name of database with plot_layer and/or ppsa_layer.</p></dd>
-
-
 <dt>dbTabs</dt>
 <dd><p>String or R Object. If data_dsn = 'datamart', name of table(s) 
 in FIA DataMart. If data_dsn = 'sqlite', name of layer(s) in database. If 
 datsource = 'csv', name of CSV file(s). If datsource = 'obj', name of R object.</p></dd>
-
-
 <dt>pjoinid</dt>
 <dd><p>String. Variable in plot table to join to XY data, if 
 plot_layer is not NULL. Not necessary to be unique. If using most current 
 XY coordinates, use identifier for a plot (e.g., PLOT_ID).</p></dd>
-
-
 <dt>eval</dt>
 <dd><p>String. Type of evaluation time frame for data extraction 
 ('FIA', 'custom'). See eval_opts for more further options.</p></dd>
-
-
 <dt>eval_opts</dt>
 <dd><p>List of evaluation options for 'FIA' or 'custom'
 evaluations to determine the set of data returned. See help(eval_options)
 for a list of options.</p></dd>
-
-
 <dt>invtype</dt>
 <dd><p>String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.</p></dd>
-
-
 <dt>coordType</dt>
 <dd><p>String. c('PUBLIC', 'ACTUAL'). Defines type of coordinates and is
 used for the output name.</p></dd>
-
-
 <dt>intensity1</dt>
 <dd><p>Logical. If TRUE, includes only XY coordinates where 
 INTENSITY = 1 (FIA base grid).</p></dd>
-
-
 <dt>pvars2keep</dt>
 <dd><p>String vector. One or more variables in plot_layer to append 
 to output.</p></dd>
-
-
 <dt>issp</dt>
 <dd><p>Logical. If TRUE, returns spatial XY data as a list object with
 query.</p></dd>
-
-
 <dt>returndata</dt>
 <dd><p>Logical. If TRUE, returns XY data as a list object with
 query.</p></dd>
-
-
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves XY data. Specify outfolder and 
 format using savedata_opts.</p></dd>
-
-
 <dt>exportsp</dt>
 <dd><p>Logical. If TRUE, exports data as spatial.</p></dd>
-
-
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE or exportsp = TRUE.</p></dd>
-
-
+<dt>PLOT</dt>
+<dd><p>Data frame. The name of the PLOT data frame object if 
+it is already downloaded and stored in environment.</p></dd>
 <dt>POP_PLOT_STRATUM_ASSGN</dt>
 <dd><p>Data frame. The name of the 
 POP_PLOT_STRATUM_ASSGN data frame object if it is already downloaded 
 and stored in environment.</p></dd>
-
-
 <dt>SURVEY</dt>
 <dd><p>Data frame. The name of the SURVEY data frame object
 if it has been already downloaded and stored in environment.</p></dd>
-
-
 <dt>dbconnopen</dt>
 <dd><p>Logical. If TRUE, the dbconn connection is not closed.</p></dd>
-
-
 <dt>evalInfo</dt>
 <dd><p>List. List object output from DBgetEvalid or DBgetXY 
 FIESTA functions.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>if returndata=TRUE, a list of the following objects:</p>
+    <p>if returndata=TRUE, a list of the following objects:</p>
 <dl><dt>xy</dt>
 <dd><p>Data frame. XY data from database. The output name is based on
 coordType parameter (e.g., xy_PUBLIC). the data frame include xy.uniqueid,
@@ -265,17 +218,12 @@ xvar, yvar and appended plot variables in pvars2keep if plot_layer is not
 NULL. The default plot variables included are 'STATECD','UNITCD','COUNTYCD',
 'PLOT','PLOT_ID' (ID+STATECD+UNTCD+COUNTYCD+PLOT), 'COUNTYFIPS'. 
 If issp=TRUE, returns an sf object.</p></dd>
-
 <dt>xyqry</dt>
 <dd><p>String. Query to extract coordinates.</p></dd>
-
 <dt>xvar</dt>
 <dd><p>String. Name of X variable in xy*.</p></dd>
-
 <dt>yvar</dt>
 <dd><p>String. Name of Y variable in xy*.</p></dd>
-
-
 </dl><p>If savedata=TRUE, outputs the xy* based on savedata_opts. 
 If exportsp=TRUE, the output xy saved as spatial layer based on savedata_opts.</p>
     </div>
@@ -291,16 +239,16 @@ parameters, the default parameter values are used for those not specified.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span><span class="co"># Most current evaluation and shapefile with public coordinates</span></span></span>
-<span class="r-in"><span><span class="va">COxylst</span> <span class="op">&lt;-</span> <span class="fu">DBgetXY</span><span class="op">(</span>states <span class="op">=</span> <span class="st">"Colorado"</span>,</span></span>
-<span class="r-in"><span>                   eval <span class="op">=</span> <span class="st">"FIA"</span>,</span></span>
-<span class="r-in"><span>                   eval_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span>Endyr <span class="op">=</span> <span class="fl">2019</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">COxylst</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">COxylst</span><span class="op">$</span><span class="va">xy_PUBLIC</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">COxylst</span><span class="op">$</span><span class="va">xyqry</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in"><span class="co"># Most current evaluation and shapefile with public coordinates</span></span>
+<span class="r-in"><span class="va">COxylst</span> <span class="op">&lt;-</span> <span class="fu">DBgetXY</span><span class="op">(</span>states <span class="op">=</span> <span class="st">"Colorado"</span>,</span>
+<span class="r-in">                   eval <span class="op">=</span> <span class="st">"FIA"</span>,</span>
+<span class="r-in">                   eval_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span>Endyr <span class="op">=</span> <span class="fl">2019</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">COxylst</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">COxylst</span><span class="op">$</span><span class="va">xy_PUBLIC</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">COxylst</span><span class="op">$</span><span class="va">xyqry</span></span>
+<span class="r-in"><span class="op">}</span></span>
 </code></pre></div>
     </div>
   </div>
@@ -315,7 +263,7 @@ parameters, the default parameter values are used for those not specified.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -81,86 +81,60 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">datPivot</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  <span class="va">pvar</span>,</span>
-<span>  <span class="va">xvar</span>,</span>
-<span>  <span class="va">yvar</span>,</span>
-<span>  pfun <span class="op">=</span> <span class="va">sum</span>,</span>
-<span>  xfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  NAto0 <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  dropNAxvar <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  dropNAyvar <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  pvar.round <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">datPivot</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">pvar</span>,
+  <span class="va">xvar</span>,
+  <span class="va">yvar</span>,
+  pfun <span class="op">=</span> <span class="va">sum</span>,
+  xfilter <span class="op">=</span> <span class="cn">NULL</span>,
+  NAto0 <span class="op">=</span> <span class="cn">TRUE</span>,
+  dropNAxvar <span class="op">=</span> <span class="cn">TRUE</span>,
+  dropNAyvar <span class="op">=</span> <span class="cn">TRUE</span>,
+  pvar.round <span class="op">=</span> <span class="fl">2</span>,
+  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
+  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  gui <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>Dataframe. Table with pivot variables.</p></dd>
-
-
 <dt>pvar</dt>
 <dd><p>String. The name of the variable for pivot table values.</p></dd>
-
-
 <dt>xvar</dt>
 <dd><p>String. The name of the variable for rows.</p></dd>
-
-
 <dt>yvar</dt>
 <dd><p>String. The name of the variable for columns.</p></dd>
-
-
 <dt>pfun</dt>
 <dd><p>Function. The name of the function to use for pivot table values
 (ex. sum, mean, max).</p></dd>
-
-
 <dt>xfilter</dt>
 <dd><p>String. A filter to subset the datatable table x before
 pivoting (ex. "STATUSCD == 1").</p></dd>
-
-
 <dt>NAto0</dt>
 <dd><p>Logical. If TRUE, converts NA values to 0.</p></dd>
-
-
 <dt>dropNAxvar</dt>
 <dd><p>Logical. If TRUE, removes columns that are NA.</p></dd>
-
-
 <dt>dropNAyvar</dt>
 <dd><p>Logical. If TRUE, removes rows that have NA values.</p></dd>
-
-
 <dt>pvar.round</dt>
 <dd><p>Integer. Number to round pvar values to.</p></dd>
-
-
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, writes output data to outfolder.</p></dd>
-
-
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.  If out_layer = NULL, 
 default = 'datpivot'.</p></dd>
-
-
 <dt>gui</dt>
 <dd><p>Logical. If TRUE, pop-up windows will appear for user-interface.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>ptab</dt>
 <dd><p>Matrix. The pivot table.</p></dd>
-
 </dl></div>
     <div id="author">
     <h2>Author</h2>
@@ -169,11 +143,11 @@ default = 'datpivot'.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Pivot WYcond table</span></span></span>
-<span class="r-in"><span><span class="fu">datPivot</span><span class="op">(</span>x <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span>,</span></span>
-<span class="r-in"><span>         pvar <span class="op">=</span> <span class="st">"CONDPROP_UNADJ"</span>,</span></span>
-<span class="r-in"><span>         xvar <span class="op">=</span> <span class="st">"FORTYPCD"</span>,</span></span>
-<span class="r-in"><span>         yvar <span class="op">=</span> <span class="st">"STDSZCD"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Pivot WYcond table</span></span>
+<span class="r-in"><span class="fu">datPivot</span><span class="op">(</span>x <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span>,</span>
+<span class="r-in">         pvar <span class="op">=</span> <span class="st">"CONDPROP_UNADJ"</span>,</span>
+<span class="r-in">         xvar <span class="op">=</span> <span class="st">"FORTYPCD"</span>,</span>
+<span class="r-in">         yvar <span class="op">=</span> <span class="st">"STDSZCD"</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     FORTYPCD     1     2     3     5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:      182 23.23  3.00  4.50  0.00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  2:      184 15.50  0.00  1.00  0.00</span>
@@ -193,14 +167,14 @@ default = 'datpivot'.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16:      706  0.00  0.50  0.00  0.00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17:      901  2.00  8.12 19.25  0.00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 18:      999  0.00  0.00  0.00 40.75</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Pivot WYtree table</span></span></span>
-<span class="r-in"><span><span class="fu">datPivot</span><span class="op">(</span>x <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span></span>
-<span class="r-in"><span>         pvar <span class="op">=</span> <span class="st">"TPA_UNADJ"</span>,</span></span>
-<span class="r-in"><span>         xvar <span class="op">=</span> <span class="st">"SPCD"</span>,</span></span>
-<span class="r-in"><span>         yvar <span class="op">=</span> <span class="st">"STATUSCD"</span>,</span></span>
-<span class="r-in"><span>         pfun <span class="op">=</span> <span class="va">mean</span>,</span></span>
-<span class="r-in"><span>         NAto0 <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># Pivot WYtree table</span></span>
+<span class="r-in"><span class="fu">datPivot</span><span class="op">(</span>x <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span>
+<span class="r-in">         pvar <span class="op">=</span> <span class="st">"TPA_UNADJ"</span>,</span>
+<span class="r-in">         xvar <span class="op">=</span> <span class="st">"SPCD"</span>,</span>
+<span class="r-in">         yvar <span class="op">=</span> <span class="st">"STATUSCD"</span>,</span>
+<span class="r-in">         pfun <span class="op">=</span> <span class="va">mean</span>,</span>
+<span class="r-in">         NAto0 <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     SPCD     1    2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:  101 17.17 6.02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  2:  106  6.02 0.00</span>
@@ -235,7 +209,7 @@ default = 'datpivot'.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -81,204 +81,139 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">datLineplot</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  <span class="va">xvar</span>,</span>
-<span>  <span class="va">yvar</span>,</span>
-<span>  plotCI <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  sevar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  CIlst <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">68</span>, <span class="fl">95</span><span class="op">)</span>,</span>
-<span>  CIcolorlst <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dark grey"</span>, <span class="st">"black"</span><span class="op">)</span>,</span>
-<span>  addshade <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  device.type <span class="op">=</span> <span class="st">"dev.new"</span>,</span>
-<span>  jpeg.res <span class="op">=</span> <span class="fl">300</span>,</span>
-<span>  device.height <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  device.width <span class="op">=</span> <span class="fl">8</span>,</span>
-<span>  ylim <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  divideby <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ylabel <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  xlabel <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  xticks <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  mar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  addlegend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  main <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  cex.main <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  cex.label <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  cex.names <span class="op">=</span> <span class="fl">0.9</span>,</span>
-<span>  las.xnames <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  las.ynames <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  outfolder <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  outfn <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  outfn.pre <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  outfn.date <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  overwrite <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">datLineplot</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">xvar</span>,
+  <span class="va">yvar</span>,
+  plotCI <span class="op">=</span> <span class="cn">FALSE</span>,
+  sevar <span class="op">=</span> <span class="cn">NULL</span>,
+  CIlst <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">68</span>, <span class="fl">95</span><span class="op">)</span>,
+  CIcolorlst <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dark grey"</span>, <span class="st">"black"</span><span class="op">)</span>,
+  addshade <span class="op">=</span> <span class="cn">FALSE</span>,
+  device.type <span class="op">=</span> <span class="st">"dev.new"</span>,
+  jpeg.res <span class="op">=</span> <span class="fl">300</span>,
+  device.height <span class="op">=</span> <span class="fl">5</span>,
+  device.width <span class="op">=</span> <span class="fl">8</span>,
+  ylim <span class="op">=</span> <span class="cn">NULL</span>,
+  divideby <span class="op">=</span> <span class="cn">NULL</span>,
+  ylabel <span class="op">=</span> <span class="cn">NULL</span>,
+  xlabel <span class="op">=</span> <span class="cn">NULL</span>,
+  xticks <span class="op">=</span> <span class="cn">NULL</span>,
+  mar <span class="op">=</span> <span class="cn">NULL</span>,
+  addlegend <span class="op">=</span> <span class="cn">FALSE</span>,
+  main <span class="op">=</span> <span class="cn">NULL</span>,
+  cex.main <span class="op">=</span> <span class="fl">1</span>,
+  cex.label <span class="op">=</span> <span class="fl">1</span>,
+  cex.names <span class="op">=</span> <span class="fl">0.9</span>,
+  las.xnames <span class="op">=</span> <span class="fl">0</span>,
+  las.ynames <span class="op">=</span> <span class="fl">1</span>,
+  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
+  outfolder <span class="op">=</span> <span class="cn">NULL</span>,
+  outfn <span class="op">=</span> <span class="cn">NULL</span>,
+  outfn.pre <span class="op">=</span> <span class="cn">NULL</span>,
+  outfn.date <span class="op">=</span> <span class="cn">TRUE</span>,
+  overwrite <span class="op">=</span> <span class="cn">FALSE</span>,
+  <span class="va">...</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>Data frame or comma-delimited file (*.csv) - a frequency table.</p></dd>
-
-
 <dt>xvar</dt>
 <dd><p>String. Name of X variable.</p></dd>
-
-
 <dt>yvar</dt>
 <dd><p>String. Name of the y variable (e.g., FREQ).</p></dd>
-
-
 <dt>plotCI</dt>
 <dd><p>Logical. If TRUE, adds confidence intervals to plot as dotted
 lines.</p></dd>
-
-
 <dt>sevar</dt>
 <dd><p>String. Name of the variable with standard error values.</p></dd>
-
-
 <dt>CIlst</dt>
 <dd><p>String. Numeric vector. If plotCI=TRUE, identifies percent
 confidence interval to add to plot.</p></dd>
-
-
 <dt>CIcolorlst</dt>
 <dd><p>String. Character vector. If plotCI=TRUE, identifies
 colors to plot confidence interval lines. Must be same length as CIlst and
 from colors() list.</p></dd>
-
-
 <dt>addshade</dt>
 <dd><p>Logical. If TRUE, adds a light grey shading between the
 large confidence interval lines.</p></dd>
-
-
 <dt>device.type</dt>
 <dd><p>String. Type(s) of device for plotting ("dev.new", "jpg",
 "pdf").</p></dd>
-
-
 <dt>jpeg.res</dt>
 <dd><p>Integer. Resolution for jpeg image.</p></dd>
-
-
 <dt>device.height</dt>
 <dd><p>Integer. Height (in inches) of barplot, if writing to
 file.</p></dd>
-
-
 <dt>device.width</dt>
 <dd><p>Integer. Width (in inches) of barplot, if writing to
 file.</p></dd>
-
-
 <dt>ylim</dt>
 <dd><p>Number. A vector of min and max values, c(min,max) for the y
 axis (or x axis if horiz=TRUE). If NULL, defaults to maximum y value. If
 errbars=TRUE, the ylim defaults to the maximum y value plus the standard
 error.</p></dd>
-
-
 <dt>divideby</dt>
 <dd><p>String. Conversion number for output ('hundred', 'thousand',
 'million').</p></dd>
-
-
 <dt>ylabel</dt>
 <dd><p>String. Label for the y axis (same as ylab).</p></dd>
-
-
 <dt>xlabel</dt>
 <dd><p>String. Label for the x axis (same as xlab).</p></dd>
-
-
 <dt>xticks</dt>
 <dd><p>Numeric vector. Vector of tick marks for x axis.</p></dd>
-
-
 <dt>mar</dt>
 <dd><p>See par.. A numerical vector representing number of lines for
 margins (c(bottom, left, top, right).</p></dd>
-
-
 <dt>addlegend</dt>
 <dd><p>Logical. If TRUE, adds legend to bar plot (only applicable
 if grouping).</p></dd>
-
-
 <dt>main</dt>
 <dd><p>String. Title for plot.</p></dd>
-
-
 <dt>cex.main</dt>
 <dd><p>Number. Expansion factor for title.</p></dd>
-
-
 <dt>cex.label</dt>
 <dd><p>Number. A number representing cex in barplot (size
 expansion of x and/or ylabels.</p></dd>
-
-
 <dt>cex.names</dt>
 <dd><p>Number. Expansion factor for axis names (bar labels) (e.g.,
 0.5 represents half the size.</p></dd>
-
-
 <dt>las.xnames</dt>
 <dd><p>Number. The direction of x variable names (0,1,3).
 0:diagonal (Default), 1:horizontal; 3:vertical.</p></dd>
-
-
 <dt>las.ynames</dt>
 <dd><p>Number. The direction of y variable names (0,1,3).
 0:diagonal (Default), 1:horizontal; 3:vertical.</p></dd>
-
-
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, writes output data to outfolder (jpg and
 pdf).</p></dd>
-
-
 <dt>outfolder</dt>
 <dd><p>String. The name of the output folder. If savedata=TRUE,
 all output saved to the outfolder. If savedata=FALSE, only a text file of
 input parameters is saved.</p></dd>
-
-
 <dt>outfn</dt>
 <dd><p>String. The name of the output file if savedata=TRUE (*.csv).
 Do not include extension. If NULL, the file will be named
 BARPLOT_'yvar_date'.csv</p></dd>
-
-
 <dt>outfn.pre</dt>
 <dd><p>String. Add a prefix to output name (e.g., "01").</p></dd>
-
-
 <dt>outfn.date</dt>
 <dd><p>Logical. If TRUE, add date to end of outfile (e.g.,
 outfn_'date'.csv).</p></dd>
-
-
 <dt>overwrite</dt>
 <dd><p>Logical. If TRUE and exportshp=TRUE, overwrite files in
 outfolder.</p></dd>
-
-
 <dt>...</dt>
 <dd><p>additional arguments to pass to barplot(), including a list of
 arguments for legend() arguments (e.g., args.legend=list(x="topleft",
 "bty="n"), for moving legend to topleft and removing box around legend).</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>Outputs barplot to display window.</p>
+    <p>Outputs barplot to display window.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -299,8 +234,8 @@ right corner of legend box and y defines the upper right corner of box.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Lineplot of cubic foot volume by above-ground biomass, Wyoming tree data</span></span></span>
-<span class="r-in"><span><span class="co"># datLineplot(x = WYtree, xvar = "VOLCFNET", yvar = "DRYBIO_AG") # needs work</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Lineplot of cubic foot volume by above-ground biomass, Wyoming tree data</span></span>
+<span class="r-in"><span class="co"># datLineplot(x = WYtree, xvar = "VOLCFNET", yvar = "DRYBIO_AG") # needs work</span></span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>
@@ -316,7 +251,7 @@ right corner of legend box and y defines the upper right corner of box.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

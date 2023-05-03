@@ -4,7 +4,7 @@ feature or raster estimation unit layer. — spGetEstUnit • FIESTA</title><!--
 feature or raster estimation unit layer. — spGetEstUnit"><meta property="og:description" content="Wrapper to get point attribute values and area from a simple feature or
 raster layer of estimation units and calculates area. Points are reprojected
 on-the-fly to projection of unit_layer using PROJ.4 transformation parameters
-and rgdal spTransform function.  - Point attribute extraction from
+and sf spTransform function.  - Point attribute extraction from
 simple feature (spExtractPoly) or from raster (spExtractRast) - Calculate
 area by estimation unit(s) (areacalc.poly/areacalc.pixel)"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -24,7 +24,7 @@ area by estimation unit(s) (areacalc.poly/areacalc.pixel)"><!-- mathjax --><scri
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -88,34 +88,34 @@ feature or raster estimation unit layer.</h1>
     <p>Wrapper to get point attribute values and area from a simple feature or
 raster layer of estimation units and calculates area. Points are reprojected
 on-the-fly to projection of unit_layer using PROJ.4 transformation parameters
-and rgdal spTransform function.  - Point attribute extraction from
+and sf spTransform function.  - Point attribute extraction from
 simple feature (spExtractPoly) or from raster (spExtractRast) - Calculate
 area by estimation unit(s) (areacalc.poly/areacalc.pixel)</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spGetEstUnit</span><span class="op">(</span></span>
-<span>  <span class="va">xyplt</span>,</span>
-<span>  xyplt_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  uniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,</span>
-<span>  unittype <span class="op">=</span> <span class="st">"POLY"</span>,</span>
-<span>  <span class="va">unit_layer</span>,</span>
-<span>  unit_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  unitvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  unit.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  areavar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  areaunits <span class="op">=</span> <span class="st">"acres"</span>,</span>
-<span>  keepNA <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  returnxy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  showext <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  exportNA <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  spMakeSpatial_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  vars2keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spGetEstUnit</span><span class="op">(</span>
+  <span class="va">xyplt</span>,
+  xyplt_dsn <span class="op">=</span> <span class="cn">NULL</span>,
+  uniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,
+  unittype <span class="op">=</span> <span class="st">"POLY"</span>,
+  <span class="va">unit_layer</span>,
+  unit_dsn <span class="op">=</span> <span class="cn">NULL</span>,
+  unitvar <span class="op">=</span> <span class="cn">NULL</span>,
+  unit.filter <span class="op">=</span> <span class="cn">NULL</span>,
+  areavar <span class="op">=</span> <span class="cn">NULL</span>,
+  areaunits <span class="op">=</span> <span class="st">"acres"</span>,
+  keepNA <span class="op">=</span> <span class="cn">FALSE</span>,
+  returnxy <span class="op">=</span> <span class="cn">FALSE</span>,
+  showext <span class="op">=</span> <span class="cn">FALSE</span>,
+  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
+  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,
+  exportNA <span class="op">=</span> <span class="cn">FALSE</span>,
+  spMakeSpatial_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  vars2keep <span class="op">=</span> <span class="cn">NULL</span>,
+  gui <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -124,118 +124,74 @@ area by estimation unit(s) (areacalc.poly/areacalc.pixel)</p>
 <dd><p>Data frame, sf object, full pathname to *.csv or *shp, or layer
 name in a geodatabase. Includes XY coordinates and unique identifier.  If
 non-spatial, include options in spMakeSpatial_opts parameter.</p></dd>
-
-
 <dt>xyplt_dsn</dt>
 <dd><p>String. Name of database where xyplt is. The dsn varies by
 driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).</p></dd>
-
-
 <dt>uniqueid</dt>
 <dd><p>String.* Unique identifier of xyplt rows.</p></dd>
-
-
 <dt>unittype</dt>
 <dd><p>String. Spatial layer type of unit_layer ("POLY", "RASTER").</p></dd>
-
-
 <dt>unit_layer</dt>
 <dd><p>String or sf object. The name of the estimation unit
 layer. The layer name may be a full pathname to a file, the
 basename to a file, a spatial layer name from a database, or a
 SpatialPolygons object with a defined projection.</p></dd>
-
-
 <dt>unit_dsn</dt>
 <dd><p>String. The data source name (dsn; i.e., folder or database
 name) of unit_layer. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional.</p></dd>
-
-
 <dt>unitvar</dt>
 <dd><p>String. Name of estimation unit variable in unit_layer.</p></dd>
-
-
 <dt>unit.filter</dt>
 <dd><p>String. Filter to subset unit_layer spatial layer.</p></dd>
-
-
 <dt>areavar</dt>
 <dd><p>String. Name of area variable unit variable in unit_layer. If
 NULL, calculates area by unitvar.</p></dd>
-
-
 <dt>areaunits</dt>
 <dd><p>String. Output area units ("acres", "hectares",
 "sqmeters").</p></dd>
-
-
 <dt>keepNA</dt>
 <dd><p>Logical. If TRUE, returns data frame of NA values.</p></dd>
-
-
 <dt>returnxy</dt>
 <dd><p>Logical. If TRUE, returns xy data as sf object (spxyplt).</p></dd>
-
-
 <dt>showext</dt>
 <dd><p>Logical. If TRUE, layer extents are displayed in plot window.</p></dd>
-
-
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, the input data with extracted values are
 saved to outfolder.</p></dd>
-
-
 <dt>exportsp</dt>
 <dd><p>Logical. If TRUE, the extracted strata point data are
 exported to outfolder.</p></dd>
-
-
 <dt>exportNA</dt>
 <dd><p>Logical. If TRUE, NA values are exported to outfolder.</p></dd>
-
-
 <dt>spMakeSpatial_opts</dt>
 <dd><p>List. See help(spMakeSpatial_options()) for a list
 of options. Use to convert X/Y values to simple feature (sf) coordinates.</p></dd>
-
-
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
-
-
 <dt>vars2keep</dt>
 <dd><p>String vector. Attributes in SAdoms, other than domvar to
 include in dunitlut output and extract to pltassgn points.</p></dd>
-
-
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>pltunit</dt>
 <dd><p>Data frame. Input point data with extracted
 estimation unit and strata values appended.</p></dd>
- <dt>sppltunit</dt>
+<dt>sppltunit</dt>
 <dd><p>SpatialPointsDataframe. Spatial point data with extracted estimation unit
 values appended.</p></dd>
- <dt>unitarea</dt>
+<dt>unitarea</dt>
 <dd><p>Data frame. Area by estimation unit.</p></dd>
-
 <dt>unitvar</dt>
 <dd><p>Data frame. Variable name for estimation unit in unitarea.</p></dd>
-
 <dt>acrevar</dt>
 <dd><p>Data frame. Variable name for area in unitarea.</p></dd>
-
 <dt>pltassgnid</dt>
 <dd><p>String. Unique identifier of plot.</p></dd>
-
-
 </dl><p>If savedata=TRUE, pltstrat and unitarea are saved to outfolder (Default
 name: *_'date'.csv).  If exportshp=TRUE, the SpatialPointsDataFrame object
 is exported to outfolder (Default name: datext_'date'.shp). Variable names
@@ -252,12 +208,12 @@ about on-the-fly projection conversion).</p>
     </div>
     <div id="note">
     <h2>Note</h2>
-    <p>If exportsp=TRUE:<br> If out_fmt="shp", the writeOGR (rgdal) function is
+    <p>If exportsp=TRUE:<br> If out_fmt="shp", the st_write (sf) function is
 called. The ArcGIS driver truncates variable names to 10 characters or less.
 Variable names are changed before export using an internal function
 (trunc10shp). If Spatial object has more than 1 record, it will be returned
 but not exported.</p>
-<p>On-the-fly projection conversion<br> The spTransform (rgdal) method is used
+<p>On-the-fly projection conversion<br> The spTransform (sf) method is used
 for on-the-fly map projection conversion and datum transformation using
 PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
 present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
@@ -277,26 +233,26 @@ unit_layer input, than area is calculated from pixel counts.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Set up data from FIESTA</span></span></span>
-<span class="r-in"><span><span class="va">WYbhfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
-<span class="r-in"><span>                      <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>,</span></span>
-<span class="r-in"><span>                      package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>                      </span></span>
-<span class="r-in"><span><span class="co"># Create a `SpatialPoints` object from `WYplt`</span></span></span>
-<span class="r-in"><span><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span></span>
-<span class="r-in"><span>                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span></span>
-<span class="r-in"><span>                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span></span>
-<span class="r-in"><span>                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span></span>
-<span class="r-in"><span>                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></span></span>
-<span class="r-in"><span>                               </span></span>
-<span class="r-in"><span><span class="co"># Get estimation unit acres for Bighorn National Forest</span></span></span>
-<span class="r-in"><span><span class="fu">spGetEstUnit</span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span></span>
-<span class="r-in"><span>             uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span></span>
-<span class="r-in"><span>             unit_layer <span class="op">=</span> <span class="va">WYbhfn</span>, </span></span>
-<span class="r-in"><span>             spMakeSpatial_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span></span>
-<span class="r-in"><span>                                       yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span></span>
-<span class="r-in"><span>                                       prj <span class="op">=</span> <span class="st">"longlat"</span>, </span></span>
-<span class="r-in"><span>                                       datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Set up data from FIESTA</span></span>
+<span class="r-in"><span class="va">WYbhfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
+<span class="r-in">                      <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>,</span>
+<span class="r-in">                      package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
+<span class="r-in">                      </span>
+<span class="r-in"><span class="co"># Create a `SpatialPoints` object from `WYplt`</span></span>
+<span class="r-in"><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
+<span class="r-in">                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
+<span class="r-in">                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
+<span class="r-in">                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
+<span class="r-in">                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></span>
+<span class="r-in">                               </span>
+<span class="r-in"><span class="co"># Get estimation unit acres for Bighorn National Forest</span></span>
+<span class="r-in"><span class="fu">spGetEstUnit</span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
+<span class="r-in">             uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
+<span class="r-in">             unit_layer <span class="op">=</span> <span class="va">WYbhfn</span>, </span>
+<span class="r-in">             spMakeSpatial_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
+<span class="r-in">                                       yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
+<span class="r-in">                                       prj <span class="op">=</span> <span class="st">"longlat"</span>, </span>
+<span class="r-in">                                       datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> calculating area</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> crs.default must be in a projected CRS... using US albers</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs</span>
@@ -9499,7 +9455,7 @@ unit_layer input, than area is calculated from pixel counts.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

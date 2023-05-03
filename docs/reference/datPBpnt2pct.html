@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -81,7 +81,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">datPBpnt2pct</span><span class="op">(</span><span class="va">pnt</span>, <span class="va">uniqueid</span>, <span class="va">tvar</span>, othervars <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">datPBpnt2pct</span><span class="op">(</span><span class="va">pnt</span>, <span class="va">uniqueid</span>, <span class="va">tvar</span>, othervars <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -89,26 +89,18 @@
     <dl><dt>pnt</dt>
 <dd><p>DF/DT or comma-delimited file (*.csv). Point-level table with one
 record per point. If NULL, aggregated point counts must be in pntcnt.</p></dd>
-
-
 <dt>uniqueid</dt>
 <dd><p>String. Name of unique identifier of plot in pnt.</p></dd>
-
-
 <dt>tvar</dt>
 <dd><p>String. Name of variable to transpose.</p></dd>
-
-
 <dt>othervars</dt>
 <dd><p>String vector. Name(s) of plot-level variables to merge
 with transposed data.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>pltdom.pct</dt>
 <dd><p>Data frame with transposed data.</p></dd>
-
 </dl></div>
     <div id="author">
     <h2>Author</h2>
@@ -117,18 +109,18 @@ with transposed data.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Load necessary data from FIESTA</span></span></span>
-<span class="r-in"><span><span class="co">## Point data</span></span></span>
-<span class="r-in"><span><span class="va">icepntfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
-<span class="r-in"><span>                        <span class="st">"PB_data/icepnt_utco1135.csv"</span>,</span></span>
-<span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">icepnt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icepntfn</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Convert to percent</span></span></span>
-<span class="r-in"><span><span class="va">percent</span> <span class="op">&lt;-</span> <span class="fu">datPBpnt2pct</span><span class="op">(</span>pnt <span class="op">=</span> <span class="va">icepnt</span>,</span></span>
-<span class="r-in"><span>                        uniqueid <span class="op">=</span> <span class="st">"plot_id"</span>,</span></span>
-<span class="r-in"><span>                        tvar <span class="op">=</span> <span class="st">"cover_1"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">percent</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Load necessary data from FIESTA</span></span>
+<span class="r-in"><span class="co">## Point data</span></span>
+<span class="r-in"><span class="va">icepntfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
+<span class="r-in">                        <span class="st">"PB_data/icepnt_utco1135.csv"</span>,</span>
+<span class="r-in">                         package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">icepnt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icepntfn</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># Convert to percent</span></span>
+<span class="r-in"><span class="va">percent</span> <span class="op">&lt;-</span> <span class="fu">datPBpnt2pct</span><span class="op">(</span>pnt <span class="op">=</span> <span class="va">icepnt</span>,</span>
+<span class="r-in">                        uniqueid <span class="op">=</span> <span class="st">"plot_id"</span>,</span>
+<span class="r-in">                        tvar <span class="op">=</span> <span class="st">"cover_1"</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">percent</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          plot_id 110 130 140 210 220 310 999</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 11940039010690   0   0   0   0   0 100   0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 11940051010690   0  20  60  20   0   0   0</span>
@@ -150,7 +142,7 @@ with transposed data.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

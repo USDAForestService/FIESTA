@@ -100,6 +100,12 @@
     <loc>/reference/WYcond.html</loc>
   </url>
   <url>
+    <loc>/reference/WYp2veg_subp_structure.html</loc>
+  </url>
+  <url>
+    <loc>/reference/WYp2veg_subplot_spp.html</loc>
+  </url>
+  <url>
     <loc>/reference/WYplt.html</loc>
   </url>
   <url>
@@ -110,6 +116,12 @@
   </url>
   <url>
     <loc>/reference/WYstratalut.html</loc>
+  </url>
+  <url>
+    <loc>/reference/WYsubp_cond.html</loc>
+  </url>
+  <url>
+    <loc>/reference/WYsubplot.html</loc>
   </url>
   <url>
     <loc>/reference/WYtree.html</loc>
@@ -190,6 +202,9 @@
     <loc>/reference/modGBarea.html</loc>
   </url>
   <url>
+    <loc>/reference/modGBchng.html</loc>
+  </url>
+  <url>
     <loc>/reference/modGBdwm.html</loc>
   </url>
   <url>
@@ -233,6 +248,15 @@
   </url>
   <url>
     <loc>/reference/modSAtree.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modWFarea.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modWFpop.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modWFtree.html</loc>
   </url>
   <url>
     <loc>/reference/multest_options.html</loc>

@@ -26,7 +26,7 @@ population."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -99,109 +99,76 @@ population.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">modGBp2veg</span><span class="op">(</span></span>
-<span>  GBpopdat <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  p2vegtype <span class="op">=</span> <span class="st">"str"</span>,</span>
-<span>  peracre <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,</span>
-<span>  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  vfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  rowvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  colvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  sumunits <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  table_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  title_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  gui <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">modGBp2veg</span><span class="op">(</span>
+  GBpopdat <span class="op">=</span> <span class="cn">NULL</span>,
+  p2vegtype <span class="op">=</span> <span class="st">"str"</span>,
+  peracre <span class="op">=</span> <span class="cn">FALSE</span>,
+  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,
+  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,
+  vfilter <span class="op">=</span> <span class="cn">NULL</span>,
+  rowvar <span class="op">=</span> <span class="cn">NULL</span>,
+  colvar <span class="op">=</span> <span class="cn">NULL</span>,
+  sumunits <span class="op">=</span> <span class="cn">TRUE</span>,
+  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,
+  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
+  table_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  title_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  gui <span class="op">=</span> <span class="cn">FALSE</span>,
+  <span class="va">...</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>GBpopdat</dt>
 <dd><p>List. Population data objects returned from modGBpop().</p></dd>
-
-
 <dt>p2vegtype</dt>
 <dd><p>String. Type of p2veg estimate ('str', 'spp').</p></dd>
-
-
 <dt>peracre</dt>
 <dd><p>Logical. If TRUE, generates per-acre estimates.</p></dd>
-
-
 <dt>landarea</dt>
 <dd><p>String. The sample area filter for estimates ("ALL",
 "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.</p></dd>
-
-
 <dt>pcfilter</dt>
 <dd><p>String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.</p></dd>
-
-
 <dt>vfilter</dt>
 <dd><p>String. A filter for the P2 vegetation table used for
 estimate.  Must be R logical syntax.</p></dd>
-
-
 <dt>rowvar</dt>
 <dd><p>String. Name of row domain variable in cond (e.g., 'FORTYPCD') 
 or P2VEG_SUBP_STRUCTURE (e.g., 'GROWTH_HABIT_CD', 'LAYER') or 
 P2VEG_SUBPLOT_SPP (e.g., 'VEG_FLDSPCD', 'VEG_SPCD', 'GROWTH_HABIT_CD', 'LAYER'). 
 If only one domain, rowvar = domain variable. If more than one domain, include 
 colvar. If no domain, rowvar = NULL.</p></dd>
-
-
 <dt>colvar</dt>
 <dd><p>String. Name of column domain variable in cond.</p></dd>
-
-
 <dt>sumunits</dt>
 <dd><p>Logical. If TRUE, estimation units are summed and returned
 in one table.</p></dd>
-
-
 <dt>returntitle</dt>
 <dd><p>Logical. If TRUE, returns title(s) of the estimation
 table(s).</p></dd>
-
-
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves table(s) to outfolder.</p></dd>
-
-
 <dt>table_opts</dt>
 <dd><p>List. See help(table_options()) for a list of
 options.</p></dd>
-
-
 <dt>title_opts</dt>
 <dd><p>List. See help(title_options()) for a list of options.</p></dd>
-
-
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
-
-
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
-
-
 <dt>...</dt>
 <dd><p>Parameters for modGBpop() if GBpopdat is NULL.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>A list with estimates with percent sampling error for rowvar (and
+    <p>A list with estimates with percent sampling error for rowvar (and
 colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
 is returned.  Otherwise, a list object is returned with the following
 information.  If savedata=TRUE, all data frames are written to outfolder.</p>
@@ -210,43 +177,38 @@ information.  If savedata=TRUE, all data frames are written to outfolder.</p>
 rowvar, colvar (and estimation unit). If sumunits=TRUE or one estimation
 unit and colvar=NULL, or allin1=TRUE, estimates and percent sampling error
 are in one data frame.</p></dd>
- <dt>pse</dt>
+<dt>pse</dt>
 <dd><p>Data frame. Percent sampling errors
 (Confidence level 68<!-- %) for estimates by rowvar and colvar (and estimation -->
 unit).</p></dd>
- <dt>titlelst</dt>
+<dt>titlelst</dt>
 <dd><p>List. If returntitle=TRUE a list with table
 title(s). The list contains one title if est and pse are in the same table
 and two titles if est and pse are in separate tables. Row and column tables
 are also included in list.</p></dd>
- <dt>raw</dt>
+<dt>raw</dt>
 <dd><p>List. If rawdata=TRUE, a list
 including the processing data used for estimation including: number of plots
 and conditions; stratification information; and 1 to 8 tables with
 calculated values for table cells and totals (See processing data below).</p></dd>
-
-
 </dl><p>Raw data</p>
 <dl><dt>plotsampcnt</dt>
 <dd><p>Table. Number of plots by plot status (e.g., sampled
 forest on plot, sampled nonforest, nonsampled).</p></dd>
- <dt>condsampcnt</dt>
+<dt>condsampcnt</dt>
 <dd><p>DF.
 Number of conditions by condition status (forest land, nonforest land,
 noncensus water, census water, nonsampled).</p></dd>
- <dt>unitarea</dt>
+<dt>unitarea</dt>
 <dd><p>DF. Area by
 estimation unit.</p></dd>
- <dt>expcondtab</dt>
+<dt>expcondtab</dt>
 <dd><p>DF. Condition-level area expansion
 factors.</p></dd>
- <dt>domdat</dt>
+<dt>domdat</dt>
 <dd><p>DF. Final data table used for estimation.</p></dd>
-
-
 <dt>stratdat</dt>
 <dd><p>Data frame. Strata information by estimation unit.</p></dd>
-
 </dl><table class="table table"><tr><td></td><td><b>Variable</b></td><td><b>Description</b></td></tr><tr><td></td><td>unitvar</td><td>estimation unit</td></tr><tr><td></td><td>strvar</td><td>stratum value</td></tr><tr><td></td><td>strwtvar</td><td>number of pixels by strata and estimation unit</td></tr><tr><td></td><td>n.strata</td><td>number of plots in strata (after totally nonsampled plots removed)</td></tr><tr><td></td><td>n.total</td><td>number of plots for estimation unit</td></tr><tr><td></td><td>strwt</td><td>proportion of area (or plots) by strata and estimation unit (strata weight)</td></tr><tr><td></td><td>CONDPROP_UNADJ_SUM</td><td>summed condition proportion by strata and
 estimation unit</td></tr><tr><td></td><td>CONDPROP_ADJFAC</td><td>adjusted condition proportion
 by strata after nonresponse plots removed</td></tr><tr><td></td><td>AREA</td><td>total area for
@@ -270,15 +232,11 @@ estimated area</td></tr><tr><td></td><td>CI95right</td><td>right tail of 95 perc
 interval for estimated area</td></tr><tr><td></td><td>CI67left</td><td>left tail of 67 percent
 confidence interval for estimated area</td></tr><tr><td></td><td>CI67right</td><td>right tail of
 67 percent confidence interval for estimated area</td></tr></table><p></p></dd>
-
-
 </dl><p>savedata<br> if savedata=TRUE...<br> tables with estimate and percent standard
 error will be written as *csv files to outfolder.  if rawdata=TRUE, the
 rawdata will be output to the outfolder in a folder named rawdata (if
-raw_fmt="csv") or a database in the outfolder, if (raw_fmt != "csv").</p>
-
-
-<p>if outfn.pre is not null...<br> a prefix is added to output files if raw_fmt
+raw_fmt="csv") or a database in the outfolder, if (raw_fmt != "csv").
+if outfn.pre is not null...<br> a prefix is added to output files if raw_fmt
 = 'csv', prefix is added to file names in rawdata folder if raw_fmt !=
 'csv', prefix is added to dsn name</p>
     </div>
@@ -381,7 +339,7 @@ Station, p.53-77.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

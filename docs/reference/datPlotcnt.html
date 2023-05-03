@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -81,19 +81,19 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">datPlotcnt</span><span class="op">(</span></span>
-<span>  <span class="va">plt</span>,</span>
-<span>  yrtype <span class="op">=</span> <span class="st">"INVYR"</span>,</span>
-<span>  states <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  designcd <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  forsamp <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  total <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  subtotal <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  outfolder <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  outfn <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">datPlotcnt</span><span class="op">(</span>
+  <span class="va">plt</span>,
+  yrtype <span class="op">=</span> <span class="st">"INVYR"</span>,
+  states <span class="op">=</span> <span class="cn">NULL</span>,
+  designcd <span class="op">=</span> <span class="cn">FALSE</span>,
+  forsamp <span class="op">=</span> <span class="cn">TRUE</span>,
+  total <span class="op">=</span> <span class="cn">TRUE</span>,
+  subtotal <span class="op">=</span> <span class="cn">TRUE</span>,
+  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
+  outfolder <span class="op">=</span> <span class="cn">NULL</span>,
+  outfn <span class="op">=</span> <span class="cn">NULL</span>,
+  gui <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -101,60 +101,37 @@
     <dl><dt>plt</dt>
 <dd><p>Data frame. Table of plot-level variables to count plots. If
 using this table, it must include INVYR.</p></dd>
-
-
 <dt>yrtype</dt>
 <dd><p>String. Type of year to categorize data ("INVYR", "MEASYEAR").</p></dd>
-
-
 <dt>states</dt>
 <dd><p>String vector.  The states in plt table.</p></dd>
-
-
 <dt>designcd</dt>
 <dd><p>Logical. If TRUE, includes FIA design codes in the table.</p></dd>
-
-
 <dt>forsamp</dt>
 <dd><p>Logical. If TRUE, includes forest/nonforest/nonsampled codes
 in the table.</p></dd>
-
-
 <dt>total</dt>
 <dd><p>Logical. If TRUE, a row is added to bottom of table with a
 total for the whole table.</p></dd>
-
-
 <dt>subtotal</dt>
 <dd><p>Logical. If TRUE, a row is added to bottom of each section
 for subtotals.</p></dd>
-
-
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves data to outfolder as comma-delimited
 file (*.csv).  No objects are returned. If FALSE, the data are saved as R
 objects and returned to user.  See details for caveats.</p></dd>
-
-
 <dt>outfolder</dt>
 <dd><p>String. The output folder path. If NULL and savedata=TRUE
 or parameters=TRUE, outfolder is the working directory.</p></dd>
-
-
 <dt>outfn</dt>
 <dd><p>String. The name of the output file. If NULL, defaults to
 pltcnt_'date'.csv</p></dd>
-
-
 <dt>gui</dt>
 <dd><p>Logical. If TRUE, gui windows pop up for parameter selection.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>pltcnt - a dataframe of counts (YEAR, STABBR, STCD, PLOTS,
+    <p>pltcnt - a dataframe of counts (YEAR, STABBR, STCD, PLOTS,
 NONSAMPLED, FOREST, NONFOREST)</p>
     </div>
     <div id="author">
@@ -174,7 +151,7 @@ NONSAMPLED, FOREST, NONFOREST)</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

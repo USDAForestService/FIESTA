@@ -18,7 +18,7 @@ a polygon vector layer."><!-- mathjax --><script src="https://cdnjs.cloudflare.c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -83,23 +83,23 @@ a polygon vector layer.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spClipPoint</span><span class="op">(</span></span>
-<span>  <span class="va">xyplt</span>,</span>
-<span>  xyplt_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  uniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,</span>
-<span>  <span class="va">clippolyv</span>,</span>
-<span>  clippolyv_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  clippolyv.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  showext <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  keepNA <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  returnsp <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  othertabnms <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  stopifnotin <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  spMakeSpatial_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spClipPoint</span><span class="op">(</span>
+  <span class="va">xyplt</span>,
+  xyplt_dsn <span class="op">=</span> <span class="cn">NULL</span>,
+  uniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,
+  <span class="va">clippolyv</span>,
+  clippolyv_dsn <span class="op">=</span> <span class="cn">NULL</span>,
+  clippolyv.filter <span class="op">=</span> <span class="cn">NULL</span>,
+  showext <span class="op">=</span> <span class="cn">FALSE</span>,
+  keepNA <span class="op">=</span> <span class="cn">FALSE</span>,
+  returnsp <span class="op">=</span> <span class="cn">TRUE</span>,
+  othertabnms <span class="op">=</span> <span class="cn">NULL</span>,
+  stopifnotin <span class="op">=</span> <span class="cn">TRUE</span>,
+  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
+  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,
+  spMakeSpatial_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -108,97 +108,62 @@ a polygon vector layer.</p>
 <dd><p>sf R object or String. Point data to clip. Can be a spatial
 points object, full pathname to a shapefile, or name of a layer within a
 database.</p></dd>
-
-
 <dt>xyplt_dsn</dt>
 <dd><p>String. Data source name (dsn; e.g., sqlite or shapefile
 pathname) of layer to clip. The dsn varies by driver. See gdal OGR vector
 formats (https://www.gdal.org/ogr_formats.html).</p></dd>
-
-
 <dt>uniqueid</dt>
 <dd><p>String.* Unique identifier of xyplt rows.</p></dd>
-
-
 <dt>clippolyv</dt>
 <dd><p>sf R object or String. Name of clipping polygon spatial
 polygon object, full path to shapefile, or name of a layer within a
 database.</p></dd>
-
-
 <dt>clippolyv_dsn</dt>
 <dd><p>String. Data source name (dsn; e.g., sqlite or
 shapefile pathname) of clipping polygon. The dsn varies by driver. See gdal
 OGR vector formats (https://www.gdal.org/ogr_formats.html).</p></dd>
-
-
 <dt>clippolyv.filter</dt>
 <dd><p>String. Filter to subset clippolyv spatial layer.</p></dd>
-
-
 <dt>showext</dt>
 <dd><p>Logical. If TRUE, layer extents are displayed in plot window.</p></dd>
-
-
 <dt>keepNA</dt>
 <dd><p>Logical. If TRUE, keep NA values after data intersection.</p></dd>
-
-
 <dt>returnsp</dt>
 <dd><p>Logical. If TRUE, returns sf object of points. If FALSE,
 returns data frame of points (i.e., drops sf geometry).</p></dd>
-
-
 <dt>othertabnms</dt>
 <dd><p>String vector. Name(s) of R objects, comma-delimited
 files, or database layers to subset. Must include quotes (e.g.,
 othertabnms=c("tree", "cond")).</p></dd>
-
-
 <dt>stopifnotin</dt>
 <dd><p>Logical. If TRUE, stops if boundaries do not overlap.  If
 FALSE, returns NULL.</p></dd>
-
-
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, save data to outfolder.</p></dd>
-
-
 <dt>exportsp</dt>
 <dd><p>Logical. If TRUE, the clipped spatial point data are
 exported.</p></dd>
-
-
 <dt>spMakeSpatial_opts</dt>
 <dd><p>List. See help(spMakeSpatial_options()) for a list
 of options. Use to convert X/Y values to simple feature (sf) coordinates.</p></dd>
-
-
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options for saving data. If out_layer = NULL, default = 'pntclip'.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>A list of the following objects:</p>
+    <p>A list of the following objects:</p>
 <dl><dt>clip_xyplt</dt>
 <dd><p>sf object. The input xyplt, clipped to polygon boundary
 layer.  The projection will be same as clippolyv projection.</p></dd>
-
 <dt>xy.uniqueid</dt>
 <dd><p>String. Unique identifier of clip_xy.</p></dd>
-
 <dt>clip_polyv</dt>
 <dd><p>SpatialPolygonsDataFrame. The polygon boundary layer used
 for clipping.</p></dd>
- <dt>clip_tabs</dt>
+<dt>clip_tabs</dt>
 <dd><p>Data frame(s). Other tables in intabs
 clipped to boundary.</p></dd>
-
-
 </dl><p>If exportsp=TRUE, the sf object will be written to out_dsn (See note).</p>
     </div>
     <div id="details">
@@ -210,7 +175,7 @@ intersection.</p>
     </div>
     <div id="note">
     <h2>Note</h2>
-    <p>On-the-fly projection conversion<br> The spTransform (rgdal) method is
+    <p>On-the-fly projection conversion<br> The spTransform (sf) method is
 used for on-the-fly map projection conversion and datum transformation using
 PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
 present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
@@ -219,7 +184,7 @@ and WGS84 are identical unless other transformation parameters are
 specified.  Be aware, providing inaccurate or incomplete CRS information may
 lead to erroneous data shifts when reprojecting. See spTransform help
 documentation for more details.</p>
-<p>ESRI Shapefile Driver<br> If exportsp=TRUE:<br> The writeOGR (rgdal) function
+<p>ESRI Shapefile Driver<br> If exportsp=TRUE:<br> The st_write (sf) function
 is called. If out_fmt="shp", the ESRI Shapefile driver truncates variable
 names to 10 characters or less. Variable names are changed before export
 using an internal function (trunc10shp). If sf object has more than 1
@@ -232,36 +197,36 @@ record, it will be returned but not exported.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Get point data from WYplt data in FIESTA</span></span></span>
-<span class="r-in"><span><span class="va">WYplt</span> <span class="op">&lt;-</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYplt.html">WYplt</a></span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Get polygon vector layer from FIESTA external data</span></span></span>
-<span class="r-in"><span><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
-<span class="r-in"><span>                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>,</span></span>
-<span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Extract points from polygon vector layer</span></span></span>
-<span class="r-in"><span><span class="va">xyext</span> <span class="op">&lt;-</span> <span class="fu">spClipPoint</span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>,</span></span>
-<span class="r-in"><span>                     clippolyv <span class="op">=</span> <span class="va">WYbhdistfn</span>,</span></span>
-<span class="r-in"><span>                     clippolyv.filter <span class="op">=</span> <span class="st">"DISTRICTNU == '03'"</span>,</span></span>
-<span class="r-in"><span>                     uniqueid <span class="op">=</span> <span class="st">"CN"</span>,</span></span>
-<span class="r-in"><span>                     spMakeSpatial_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>,</span></span>
-<span class="r-in"><span>                                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>,</span></span>
-<span class="r-in"><span>                                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Get point data from WYplt data in FIESTA</span></span>
+<span class="r-in"><span class="va">WYplt</span> <span class="op">&lt;-</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYplt.html">WYplt</a></span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># Get polygon vector layer from FIESTA external data</span></span>
+<span class="r-in"><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
+<span class="r-in">                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>,</span>
+<span class="r-in">                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># Extract points from polygon vector layer</span></span>
+<span class="r-in"><span class="va">xyext</span> <span class="op">&lt;-</span> <span class="fu">spClipPoint</span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>,</span>
+<span class="r-in">                     clippolyv <span class="op">=</span> <span class="va">WYbhdistfn</span>,</span>
+<span class="r-in">                     clippolyv.filter <span class="op">=</span> <span class="st">"DISTRICTNU == '03'"</span>,</span>
+<span class="r-in">                     uniqueid <span class="op">=</span> <span class="st">"CN"</span>,</span>
+<span class="r-in">                     spMakeSpatial_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>,</span>
+<span class="r-in">                                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>,</span>
+<span class="r-in">                                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2 records: DISTRICTNU == '03'</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> crs.default must be in a projected CRS... using US albers</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  from: EPSG:4269 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">xyext</span><span class="op">)</span></span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">xyext</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clip_xyplt" "uniqueid"   "clip_polyv"</span>
-<span class="r-in"><span><span class="va">xyplt</span> <span class="op">&lt;-</span> <span class="va">xyext</span><span class="op">$</span><span class="va">clip_xyplt</span></span></span>
-<span class="r-in"><span><span class="va">polyv</span> <span class="op">&lt;-</span> <span class="va">xyext</span><span class="op">$</span><span class="va">clip_polyv</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Plot extracted values of national forest district</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">polyv</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">xyplt</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span class="va">xyplt</span> <span class="op">&lt;-</span> <span class="va">xyext</span><span class="op">$</span><span class="va">clip_xyplt</span></span>
+<span class="r-in"><span class="va">polyv</span> <span class="op">&lt;-</span> <span class="va">xyext</span><span class="op">$</span><span class="va">clip_polyv</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># Plot extracted values of national forest district</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">polyv</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">xyplt</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span class="r-plt img"><img src="spClipPoint-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
@@ -277,7 +242,7 @@ record, it will be returned but not exported.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

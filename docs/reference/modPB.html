@@ -20,7 +20,7 @@ inventory."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -87,185 +87,131 @@ inventory.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">modPB</span><span class="op">(</span></span>
-<span>  PBpopdat <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  tabtype <span class="op">=</span> <span class="st">"PCT"</span>,</span>
-<span>  sumunits <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  ratio <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  landarea <span class="op">=</span> <span class="st">"ALL"</span>,</span>
-<span>  landarea.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  nonsamp.pntfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  pntfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  pfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  rowvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  colvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  domlut <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  domvarlst <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ratioden <span class="op">=</span> <span class="st">"ROWVAR"</span>,</span>
-<span>  gainloss <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  gainloss.vals <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  addtitle <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  table_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  title_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  gui <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">modPB</span><span class="op">(</span>
+  PBpopdat <span class="op">=</span> <span class="cn">NULL</span>,
+  tabtype <span class="op">=</span> <span class="st">"PCT"</span>,
+  sumunits <span class="op">=</span> <span class="cn">FALSE</span>,
+  ratio <span class="op">=</span> <span class="cn">FALSE</span>,
+  landarea <span class="op">=</span> <span class="st">"ALL"</span>,
+  landarea.filter <span class="op">=</span> <span class="cn">NULL</span>,
+  nonsamp.pntfilter <span class="op">=</span> <span class="cn">NULL</span>,
+  pntfilter <span class="op">=</span> <span class="cn">NULL</span>,
+  pfilter <span class="op">=</span> <span class="cn">NULL</span>,
+  rowvar <span class="op">=</span> <span class="cn">NULL</span>,
+  colvar <span class="op">=</span> <span class="cn">NULL</span>,
+  domlut <span class="op">=</span> <span class="cn">NULL</span>,
+  domvarlst <span class="op">=</span> <span class="cn">NULL</span>,
+  ratioden <span class="op">=</span> <span class="st">"ROWVAR"</span>,
+  gainloss <span class="op">=</span> <span class="cn">FALSE</span>,
+  gainloss.vals <span class="op">=</span> <span class="cn">NULL</span>,
+  addtitle <span class="op">=</span> <span class="cn">FALSE</span>,
+  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,
+  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
+  table_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  title_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  gui <span class="op">=</span> <span class="cn">FALSE</span>,
+  <span class="va">...</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>PBpopdat</dt>
 <dd><p>List. Population data objects returned from modPBpop().</p></dd>
-
-
 <dt>tabtype</dt>
 <dd><p>String. Type of units for the table ("PCT", "AREA").</p></dd>
-
-
 <dt>sumunits</dt>
 <dd><p>Logical. If TRUE, estimation units are combined to one table
 for output. Note: only available if tabtype="AREA". Acres</p></dd>
-
-
 <dt>ratio</dt>
 <dd><p>Logical. If TRUE, ratio estimates are generated.</p></dd>
-
-
 <dt>landarea</dt>
 <dd><p>String. Sample area for estimates ("ALL", "CHANGE"). Used to
 describe landarea.filter.</p></dd>
-
-
 <dt>landarea.filter</dt>
 <dd><p>String. filter for land area. Must be R syntax.</p></dd>
-
-
 <dt>nonsamp.pntfilter</dt>
 <dd><p>String. An expression for filtering nonsampled
 points (e.g., cloud coverage). Must be R syntax.</p></dd>
-
-
 <dt>pntfilter</dt>
 <dd><p>String. A global filter for the pnt file. Must be R syntax.</p></dd>
-
-
 <dt>pfilter</dt>
 <dd><p>String. A global filter for the plt file. Must be R syntax.</p></dd>
-
-
 <dt>rowvar</dt>
 <dd><p>String. Name of domain variable in pnt used for output
 estimation table rows. If only 1 domain, must be rowvar. If no domain,
 rowvar=NULL.</p></dd>
-
-
 <dt>colvar</dt>
 <dd><p>String. Name of domain variable in pnt used for output
 estimation table columns. If only 1 domain, colvar=NULL.</p></dd>
-
-
 <dt>domlut</dt>
 <dd><p>DF/DT or comma-delimited (*.csv). Look-up table to define the
 variables in the pnt table with category codes (DOMCODE) and code names
 (DOMNAME), and to set a pretty name for the variable to use in output table
 (DOMTITLE). This table is also used to populate rowvar/colvar,
 row.orderby/col.orderby, and title.rowvar/title.colvar parameters. Optional.</p></dd>
-
-
 <dt>domvarlst</dt>
 <dd><p>String vector. A vector of variable names that can be row
 or column domains (codes and names). Optional.</p></dd>
-
-
 <dt>ratioden</dt>
 <dd><p>String. ("ROWVAR" or "COLVAR"). If ratio, defines whether
 the rowvar or colvar in estimation output table is the denominator.</p></dd>
-
-
 <dt>gainloss</dt>
 <dd><p>Logical. If TRUE, a table with the difference of gain and
 loss along with the variance and standard error, in percent, is generated.</p></dd>
-
-
 <dt>gainloss.vals</dt>
 <dd><p>String vector. A vector of names for values in gainloss
 table.</p></dd>
-
-
 <dt>addtitle</dt>
 <dd><p>Logical. If TRUE and savedata=TRUE, adds title to outfile.</p></dd>
-
-
 <dt>returntitle</dt>
 <dd><p>Logical. If TRUE, returns a character string of the title
 of the output data frame.</p></dd>
-
-
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves table(s) to outfolder.</p></dd>
-
-
 <dt>table_opts</dt>
 <dd><p>List. See help(table_options()) for a list of
 options.</p></dd>
-
-
 <dt>title_opts</dt>
 <dd><p>List. See help(title_options()) for a list of options.</p></dd>
-
-
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
-
-
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
-
-
 <dt>...</dt>
 <dd><p>Parameters for modPBpop() if PBpopdat is NULL.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>A list with estimates with percent sampling error for rowvar (and
+    <p>A list with estimates with percent sampling error for rowvar (and
 colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
 is returned.  Otherwise, a list object is returned with the following
 information.  If savedata=TRUE, all data frames are written to outfolder.</p>
 <dl><dt>est</dt>
 <dd><p>DF. Estimated percent cover or area by rowvar, colvar, (and
 estimation unit).</p></dd>
- <dt>pse</dt>
+<dt>pse</dt>
 <dd><p>DF. Percent sampling error of estimates by
 rowvar, colvar (and estimation unit).</p></dd>
- <dt>titlelst</dt>
+<dt>titlelst</dt>
 <dd><p>List with 1 or 2
 string vectors. If returntitle=TRUE a list with table title(s). The list
 contains one title if est and pse are in the same table and two titles if
 est and pse are in separate tables. Row and column tables are also included
 in list.</p></dd>
- <dt>raw</dt>
+<dt>raw</dt>
 <dd><p>List of data frames. If rawdata=TRUE, a list
 including the processing data used for estimation including: number of plots
 and conditions; stratification information; and 1 to 8 tables with
 calculated values for table cells and totals (See processing data below).</p></dd>
-
-
 </dl><p>Raw data</p>
 <dl><dt>pntsampcnt</dt>
 <dd><p>Table. Number of points by rowvar/colvar (sampled and
 nonsampled).</p></dd>
-
-
 <dt>stratdat</dt>
 <dd><p>Data frame. Strata information by estimation unit.</p></dd>
-
 </dl><table class="table table"><tr><td></td><td><b>Variable</b></td><td><b>Description</b></td></tr><tr><td></td><td>unitvar</td><td>estimation unit</td></tr><tr><td></td><td>strvar</td><td>strata</td></tr><tr><td></td><td>areavar</td><td>If
 tabtype='AREA', area by strata for estimation unit</td></tr><tr><td></td><td>n.strata</td><td>number of plots in strata (after totally nonsampled plots removed)</td></tr><tr><td></td><td>n.total</td><td>number of plots for estimation unit</td></tr><tr><td></td><td>TOTAREA</td><td>If
 tabtype='AREA', total area for estimation unit</td></tr><tr><td></td><td>strwt</td><td>proportion of area (or number of plots) by strata (strata weight)</td></tr></table><dl><dt>processing data</dt>
@@ -304,7 +250,6 @@ confidence interval for estimated area</td><td></td><td>CI99right</td></tr><tr><
 99 percent confidence interval for estimated area</td><td></td><td>CI95left</td></tr><tr><td>left tail of 95 percent confidence interval for estimated area</td><td></td><td>CI95right</td></tr><tr><td>right tail of 95 percent confidence interval for estimated
 area</td><td></td><td>CI67left</td></tr><tr><td>left tail of 67 percent confidence interval for
 estimated area</td><td></td><td>CI67right</td></tr></table><p></p></dd>
-
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -379,53 +324,53 @@ Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Load necessary data from FIESTA</span></span></span>
-<span class="r-in"><span><span class="co">## Point data</span></span></span>
-<span class="r-in"><span><span class="va">icepntfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
-<span class="r-in"><span>                        <span class="st">"PB_data/icepnt_utco1135.csv"</span>,</span></span>
-<span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">icepnt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icepntfn</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## Plot data</span></span></span>
-<span class="r-in"><span><span class="va">icepltfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
-<span class="r-in"><span>                        <span class="st">"PB_data/icepltassgn_utco1135.csv"</span>,</span></span>
-<span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">iceplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icepltfn</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## County data</span></span></span>
-<span class="r-in"><span><span class="va">unitareafn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, </span></span>
-<span class="r-in"><span>                          <span class="st">"PB_data/unitarea_utco1135.csv"</span>,</span></span>
-<span class="r-in"><span>                           package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">unitarea</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">unitareafn</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## ICE Cover</span></span></span>
-<span class="r-in"><span><span class="va">icecoverfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
-<span class="r-in"><span>                          <span class="st">"PB_data/cover_LUT.csv"</span>,</span></span>
-<span class="r-in"><span>                           package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">icecover</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icecoverfn</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"cover"</span>, <span class="st">"cover_1"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Set up population data (see ?modPBpop() for more information)</span></span></span>
-<span class="r-in"><span><span class="va">PBpopunit</span> <span class="op">&lt;-</span> <span class="fu"><a href="modPBpop.html">modPBpop</a></span><span class="op">(</span>pnt <span class="op">=</span> <span class="va">icepnt</span>, </span></span>
-<span class="r-in"><span>                      pltassgn <span class="op">=</span> <span class="va">iceplt</span>, </span></span>
-<span class="r-in"><span>                      pltassgnid <span class="op">=</span> <span class="st">"plot_id"</span>, </span></span>
-<span class="r-in"><span>                      pntid <span class="op">=</span> <span class="st">"dot_cnt"</span>,</span></span>
-<span class="r-in"><span>                      unitarea <span class="op">=</span> <span class="va">unitarea</span>, </span></span>
-<span class="r-in"><span>                      unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Load necessary data from FIESTA</span></span>
+<span class="r-in"><span class="co">## Point data</span></span>
+<span class="r-in"><span class="va">icepntfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
+<span class="r-in">                        <span class="st">"PB_data/icepnt_utco1135.csv"</span>,</span>
+<span class="r-in">                         package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">icepnt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icepntfn</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co">## Plot data</span></span>
+<span class="r-in"><span class="va">icepltfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
+<span class="r-in">                        <span class="st">"PB_data/icepltassgn_utco1135.csv"</span>,</span>
+<span class="r-in">                         package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">iceplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icepltfn</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co">## County data</span></span>
+<span class="r-in"><span class="va">unitareafn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, </span>
+<span class="r-in">                          <span class="st">"PB_data/unitarea_utco1135.csv"</span>,</span>
+<span class="r-in">                           package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">unitarea</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">unitareafn</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co">## ICE Cover</span></span>
+<span class="r-in"><span class="va">icecoverfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
+<span class="r-in">                          <span class="st">"PB_data/cover_LUT.csv"</span>,</span>
+<span class="r-in">                           package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">icecover</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icecoverfn</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"cover"</span>, <span class="st">"cover_1"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># Set up population data (see ?modPBpop() for more information)</span></span>
+<span class="r-in"><span class="va">PBpopunit</span> <span class="op">&lt;-</span> <span class="fu"><a href="modPBpop.html">modPBpop</a></span><span class="op">(</span>pnt <span class="op">=</span> <span class="va">icepnt</span>, </span>
+<span class="r-in">                      pltassgn <span class="op">=</span> <span class="va">iceplt</span>, </span>
+<span class="r-in">                      pltassgnid <span class="op">=</span> <span class="st">"plot_id"</span>, </span>
+<span class="r-in">                      pntid <span class="op">=</span> <span class="st">"dot_cnt"</span>,</span>
+<span class="r-in">                      unitarea <span class="op">=</span> <span class="va">unitarea</span>, </span>
+<span class="r-in">                      unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> no strata</span>
-<span class="r-in"><span><span class="co"># Photo-based estimation with point-level data by estimation unit (county)                       </span></span></span>
-<span class="r-in"><span><span class="co">## Without summing units</span></span></span>
-<span class="r-in"><span><span class="va">cover1.unit.area</span> <span class="op">&lt;-</span> <span class="fu">modPB</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  PBpopdat <span class="op">=</span> <span class="va">PBpopunit</span>,</span></span>
-<span class="r-in"><span>  tabtype <span class="op">=</span> <span class="st">"AREA"</span>,</span></span>
-<span class="r-in"><span>  rowvar <span class="op">=</span> <span class="st">"cover_1"</span>,</span></span>
-<span class="r-in"><span>  nonsamp.pntfilter <span class="op">=</span> <span class="st">"cover_1 != 999"</span>,</span></span>
-<span class="r-in"><span>  table_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rowlut <span class="op">=</span> <span class="va">icecover</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  title_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>title.rowvar <span class="op">=</span> <span class="st">"Land Cover (2011)"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span> </span></span>
+<span class="r-in"><span class="co"># Photo-based estimation with point-level data by estimation unit (county)                       </span></span>
+<span class="r-in"><span class="co">## Without summing units</span></span>
+<span class="r-in"><span class="va">cover1.unit.area</span> <span class="op">&lt;-</span> <span class="fu">modPB</span><span class="op">(</span></span>
+<span class="r-in">  PBpopdat <span class="op">=</span> <span class="va">PBpopunit</span>,</span>
+<span class="r-in">  tabtype <span class="op">=</span> <span class="st">"AREA"</span>,</span>
+<span class="r-in">  rowvar <span class="op">=</span> <span class="st">"cover_1"</span>,</span>
+<span class="r-in">  nonsamp.pntfilter <span class="op">=</span> <span class="st">"cover_1 != 999"</span>,</span>
+<span class="r-in">  table_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rowlut <span class="op">=</span> <span class="va">icecover</span><span class="op">)</span>,</span>
+<span class="r-in">  title_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>title.rowvar <span class="op">=</span> <span class="st">"Land Cover (2011)"</span><span class="op">)</span></span>
+<span class="r-in"><span class="op">)</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2 records: cover_1 != 999</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">cover1.unit.area</span><span class="op">$</span><span class="va">est</span></span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="va">cover1.unit.area</span><span class="op">$</span><span class="va">est</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Land Cover (2011)       11       35    Total</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1              Tree  32348.7 129952.9 165240.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2             Shrub  12070.4  91757.8 106358.3</span>
@@ -434,20 +379,20 @@ Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5        Impervious  13518.9  83551.8  99267.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6             Water 195540.8  25214.8 213333.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7             Total   405566   516977   922543</span>
-<span class="r-in"><span>                          </span></span>
-<span class="r-in"><span><span class="co">## With summing units</span></span></span>
-<span class="r-in"><span><span class="va">cover1.unit.area.sum</span> <span class="op">&lt;-</span> <span class="fu">modPB</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  PBpopdat <span class="op">=</span> <span class="va">PBpopunit</span>,</span></span>
-<span class="r-in"><span>  tabtype <span class="op">=</span> <span class="st">"AREA"</span>,</span></span>
-<span class="r-in"><span>  rowvar <span class="op">=</span> <span class="st">"cover_1"</span>,</span></span>
-<span class="r-in"><span>  nonsamp.pntfilter <span class="op">=</span> <span class="st">"cover_1 != 999"</span>,</span></span>
-<span class="r-in"><span>  sumunits <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  table_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rowlut <span class="op">=</span> <span class="va">icecover</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  title_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>title.rowvar <span class="op">=</span> <span class="st">"Land Cover (2011)"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in">                          </span>
+<span class="r-in"><span class="co">## With summing units</span></span>
+<span class="r-in"><span class="va">cover1.unit.area.sum</span> <span class="op">&lt;-</span> <span class="fu">modPB</span><span class="op">(</span></span>
+<span class="r-in">  PBpopdat <span class="op">=</span> <span class="va">PBpopunit</span>,</span>
+<span class="r-in">  tabtype <span class="op">=</span> <span class="st">"AREA"</span>,</span>
+<span class="r-in">  rowvar <span class="op">=</span> <span class="st">"cover_1"</span>,</span>
+<span class="r-in">  nonsamp.pntfilter <span class="op">=</span> <span class="st">"cover_1 != 999"</span>,</span>
+<span class="r-in">  sumunits <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span class="r-in">  table_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rowlut <span class="op">=</span> <span class="va">icecover</span><span class="op">)</span>,</span>
+<span class="r-in">  title_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>title.rowvar <span class="op">=</span> <span class="st">"Land Cover (2011)"</span><span class="op">)</span></span>
+<span class="r-in"><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2 records: cover_1 != 999</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">cover1.unit.area.sum</span><span class="op">$</span><span class="va">est</span>             </span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="va">cover1.unit.area.sum</span><span class="op">$</span><span class="va">est</span>             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Land Cover (2011) Estimate Percent Sampling Error</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1              Tree 162301.7                  13.95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2             Shrub 103828.2                  18.81</span>
@@ -470,7 +415,7 @@ Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

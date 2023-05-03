@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -329,34 +329,34 @@ WYbighorn_adminbnd.shp.</p>
 </h3>
 <p>First, you’ll need to load the <code>FIESTA</code> library:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></code></pre></div>
 <p>Next, you’ll have to load some external data from the
 <code>FIESTA</code> package and set up objects in your <code>R</code>
 global environment:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># File names for external spatial data</span></span>
-<span><span class="va">WYbhfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span>                      <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>,</span>
-<span>                      package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span>                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>,</span>
-<span>                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span><span class="va">WYbhdist.att</span> <span class="op">&lt;-</span> <span class="st">"DISTRICTNA"</span></span>
-<span></span>
-<span><span class="va">fornffn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span>                       <span class="st">"sp_data/WYbighorn_forest_nonforest_250m.tif"</span>,</span>
-<span>                       package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span><span class="va">demfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span>                     <span class="st">"sp_data/WYbighorn_dem_250m.img"</span>,</span>
-<span>                     package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span></span>
-<span></span>
-<span><span class="co"># Other spatial layers used for examples, extracted using the raster package, getData function.</span></span>
-<span><span class="co"># County-level boundaries for USA and subset for Wyoming (Note: must have internet connection)</span></span>
-<span><span class="va">USAco</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/getData.html" class="external-link">getData</a></span><span class="op">(</span><span class="st">"GADM"</span>, country <span class="op">=</span> <span class="st">"USA"</span>, level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>    </span>
-<span><span class="va">WYco</span> <span class="op">&lt;-</span> <span class="va">USAco</span><span class="op">[</span><span class="va">USAco</span><span class="op">$</span><span class="va">NAME_1</span> <span class="op">==</span> <span class="st">"Wyoming"</span>,<span class="op">]</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">USAco</span><span class="op">@</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="co"># File names for external spatial data</span>
+<span class="va">WYbhfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,
+                      <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>,
+                      package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span>
+<span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,
+                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>,
+                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span>
+<span class="va">WYbhdist.att</span> <span class="op">&lt;-</span> <span class="st">"DISTRICTNA"</span>
+
+<span class="va">fornffn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,
+                       <span class="st">"sp_data/WYbighorn_forest_nonforest_250m.tif"</span>,
+                       package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span>
+<span class="va">demfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,
+                     <span class="st">"sp_data/WYbighorn_dem_250m.img"</span>,
+                     package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span>
+
+
+<span class="co"># Other spatial layers used for examples, extracted using the raster package, getData function.</span>
+<span class="co"># County-level boundaries for USA and subset for Wyoming (Note: must have internet connection)</span>
+<span class="va">USAco</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/getData.html" class="external-link">getData</a></span><span class="op">(</span><span class="st">"GADM"</span>, country <span class="op">=</span> <span class="st">"USA"</span>, level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>    
+<span class="va">WYco</span> <span class="op">&lt;-</span> <span class="va">USAco</span><span class="op">[</span><span class="va">USAco</span><span class="op">$</span><span class="va">NAME_1</span> <span class="op">==</span> <span class="st">"Wyoming"</span>,<span class="op">]</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">USAco</span><span class="op">@</span><span class="va">data</span><span class="op">)</span></code></pre></div>
 <p>Finally, you’ll need to set up an “outfolder”. This is just a file
 path to a folder where you’d like <code>FIESTA</code> to send your data
 output. For this vignette, we have saved our outfolder file path as the
@@ -377,13 +377,13 @@ functions in the <code>sp</code> portion of <code>FIESTA</code>.</p>
 <details><summary>
 View Example
 </summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## Import external data shapefiles</span></span>
-<span><span class="va">WYbh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhfn</span><span class="op">)</span></span>
-<span><span class="va">WYbhdist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhdistfn</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## Display boundary</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbh</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="co">## Import external data shapefiles</span>
+<span class="va">WYbh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhfn</span><span class="op">)</span>
+<span class="va">WYbhdist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhdistfn</span><span class="op">)</span>
+
+<span class="co">## Display boundary</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbh</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -395,12 +395,12 @@ object.</p>
 <details><summary>
 View Example
 </summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## Export Spatial Polygons layer to a shapefile</span></span>
-<span><span class="fu"><a href="../reference/spExportSpatial.html">spExportSpatial</a></span><span class="op">(</span><span class="va">WYbh</span>, </span>
-<span>                savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>out_dsn <span class="op">=</span> <span class="st">"WYbh.shp"</span>, </span>
-<span>                                     outfolder <span class="op">=</span> <span class="va">outfolder</span>, </span>
-<span>                                     overwrite_dsn <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>                <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="co">## Export Spatial Polygons layer to a shapefile</span>
+<span class="fu"><a href="../reference/spExportSpatial.html">spExportSpatial</a></span><span class="op">(</span><span class="va">WYbh</span>, 
+                savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>out_dsn <span class="op">=</span> <span class="st">"WYbh.shp"</span>, 
+                                     outfolder <span class="op">=</span> <span class="va">outfolder</span>, 
+                                     overwrite_dsn <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+                <span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -414,47 +414,47 @@ coordinate reference system (crs) is: <code>prj = "longlat"</code> and
 <details><summary>
 View Example
 </summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYplt</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                               prj <span class="op">=</span> <span class="st">"longlat"</span>, </span>
-<span>                               datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYplt</span><span class="op">)</span>
+
+<span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                               prj <span class="op">=</span> <span class="st">"longlat"</span>, 
+                               datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></code></pre></div>
 <p>We can also use EPSG code with <code>spMakeSpatialPoints</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                               xy.crs <span class="op">=</span> <span class="fl">4269</span></span>
-<span>                               <span class="op">)</span></span>
-<span><span class="va">WYspplt</span> </span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                               xy.crs <span class="op">=</span> <span class="fl">4269</span>
+                               <span class="op">)</span>
+<span class="va">WYspplt</span> </code></pre></div>
 <p>To view our output we can run the following code.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## Display output</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## NOTE: To display multiple layers, all layers must be in the same coordinate system.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">WYbh</span>, <span class="va">WYbhdist</span>, <span class="va">WYspplt</span><span class="op">)</span>, <span class="fu">sf</span><span class="fu">::</span><span class="va"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="co">## Display output</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>
+
+<span class="co">## NOTE: To display multiple layers, all layers must be in the same coordinate system.</span>
+<span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">WYbh</span>, <span class="va">WYbhdist</span>, <span class="va">WYspplt</span><span class="op">)</span>, <span class="fu">sf</span><span class="fu">::</span><span class="va"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">)</span></code></pre></div>
 <p>And finally we export the spatial points to an outfolder.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>,</span>
-<span>                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>,</span>
-<span>                               xy.crs <span class="op">=</span> <span class="fl">4269</span>,</span>
-<span>                               exportsp <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                               savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>                                    out_dsn <span class="op">=</span> <span class="st">"spplt"</span>,</span>
-<span>                                    out_fmt <span class="op">=</span> <span class="st">"shp"</span>,</span>
-<span>                                    outfolder <span class="op">=</span> <span class="va">outfolder</span>,</span>
-<span>                                    out_layer <span class="op">=</span> <span class="st">"WYplots"</span>,</span>
-<span>                                    overwrite_layer <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>                               <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>,
+                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>,
+                               xy.crs <span class="op">=</span> <span class="fl">4269</span>,
+                               exportsp <span class="op">=</span> <span class="cn">TRUE</span>,
+                               savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+                                    out_dsn <span class="op">=</span> <span class="st">"spplt"</span>,
+                                    out_fmt <span class="op">=</span> <span class="st">"shp"</span>,
+                                    outfolder <span class="op">=</span> <span class="va">outfolder</span>,
+                                    out_layer <span class="op">=</span> <span class="st">"WYplots"</span>,
+                                    overwrite_layer <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+                               <span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -467,13 +467,13 @@ system (test using <code><a href="https://r-spatial.github.io/sf/reference/st_cr
 <details><summary>
 View Example
 </summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span>
-<span><span class="va">prj</span> <span class="op">&lt;-</span> <span class="st">"+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"</span></span>
-<span><span class="va">WYspplt.utm12</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spReprojectVector.html">spReprojectVector</a></span><span class="op">(</span>layer <span class="op">=</span> <span class="va">WYspplt</span>, </span>
-<span>                                   crs.new <span class="op">=</span> <span class="va">prj</span><span class="op">)</span></span>
-<span>        </span>
-<span><span class="co">## Check results</span></span>
-<span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">WYspplt.utm12</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span>
+<span class="va">prj</span> <span class="op">&lt;-</span> <span class="st">"+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"</span>
+<span class="va">WYspplt.utm12</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spReprojectVector.html">spReprojectVector</a></span><span class="op">(</span>layer <span class="op">=</span> <span class="va">WYspplt</span>, 
+                                   crs.new <span class="op">=</span> <span class="va">prj</span><span class="op">)</span>
+        
+<span class="co">## Check results</span>
+<span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">WYspplt.utm12</span><span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -486,86 +486,86 @@ boundary.</p>
 <details><summary>
 View Example
 </summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## Get points within Bighorn National Forest boundary (project on the fly)</span></span>
-<span></span>
-<span><span class="va">WYbhptslst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoint.html">spClipPoint</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                          uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                          clippolyv <span class="op">=</span> <span class="va">WYbh</span>, </span>
-<span>                          spMakeSpatial_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                                                  yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                                                  prj <span class="op">=</span> <span class="st">"longlat"</span>, </span>
-<span>                                                  datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span></span>
-<span>                          <span class="op">)</span></span>
-<span></span>
-<span><span class="va">WYbhptslst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoint.html">spClipPoint</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                          uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                          clippolyv <span class="op">=</span> <span class="va">WYbh</span>, </span>
-<span>                          savedata <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>                          exportsp <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>                          spMakeSpatial_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                                                  yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                                                  prj <span class="op">=</span> <span class="st">"longlat"</span>, </span>
-<span>                                                  datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span>, </span>
-<span>                          savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>outfolder<span class="op">=</span><span class="va">outfolder</span>, </span>
-<span>                                               out_layer <span class="op">=</span> <span class="st">"WYbh"</span><span class="op">)</span></span>
-<span>                          <span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></span>
-<span><span class="va">WYbhspplt</span> <span class="op">&lt;-</span> <span class="va">WYbhptslst</span><span class="op">$</span><span class="va">clip_xyplt</span></span>
-<span><span class="va">WYbhprj</span> <span class="op">&lt;-</span> <span class="va">WYbhptslst</span><span class="op">$</span><span class="va">clip_polyv</span></span></code></pre></div>
+<code class="sourceCode R"><span class="co">## Get points within Bighorn National Forest boundary (project on the fly)</span>
+
+<span class="va">WYbhptslst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoint.html">spClipPoint</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                          uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                          clippolyv <span class="op">=</span> <span class="va">WYbh</span>, 
+                          spMakeSpatial_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                                                  yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                                                  prj <span class="op">=</span> <span class="st">"longlat"</span>, 
+                                                  datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span>
+                          <span class="op">)</span>
+
+<span class="va">WYbhptslst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoint.html">spClipPoint</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                          uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                          clippolyv <span class="op">=</span> <span class="va">WYbh</span>, 
+                          savedata <span class="op">=</span> <span class="cn">TRUE</span>, 
+                          exportsp <span class="op">=</span> <span class="cn">TRUE</span>, 
+                          spMakeSpatial_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                                                  yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                                                  prj <span class="op">=</span> <span class="st">"longlat"</span>, 
+                                                  datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span>, 
+                          savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>outfolder<span class="op">=</span><span class="va">outfolder</span>, 
+                                               out_layer <span class="op">=</span> <span class="st">"WYbh"</span><span class="op">)</span>
+                          <span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span>
+<span class="va">WYbhspplt</span> <span class="op">&lt;-</span> <span class="va">WYbhptslst</span><span class="op">$</span><span class="va">clip_xyplt</span>
+<span class="va">WYbhprj</span> <span class="op">&lt;-</span> <span class="va">WYbhptslst</span><span class="op">$</span><span class="va">clip_polyv</span></code></pre></div>
 <p>Next we check and display the output:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhspplt</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhprj</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"red"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhspplt</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhspplt</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhprj</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"red"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhspplt</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Note: If the projection of spplt is not the same as the points layer,
 the points layer will be reprojected to the same projection as
 <code>clippolyv</code> (See notes in help file for more info).</p>
 <p>Now we generate a sf object first, then clip <code>sf</code> points
 with the <code>spClipPoint</code> function:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></span>
-<span><span class="va">WYbhptslst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoint.html">spClipPoint</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYspplt</span>, </span>
-<span>                          uniqueid <span class="op">=</span> <span class="st">"CN"</span>,</span>
-<span>                          clippolyv <span class="op">=</span> <span class="va">WYbh</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span>
+<span class="va">WYbhptslst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoint.html">spClipPoint</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYspplt</span>, 
+                          uniqueid <span class="op">=</span> <span class="st">"CN"</span>,
+                          clippolyv <span class="op">=</span> <span class="va">WYbh</span><span class="op">)</span></code></pre></div>
 <p>We can also subset other tales with clipped points.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhptslst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoint.html">spClipPoint</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYspplt</span>, </span>
-<span>                          uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                          clippolyv <span class="op">=</span> <span class="va">WYbh</span>, </span>
-<span>                          othertabnms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WYcond"</span>, <span class="st">"WYtree"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhptslst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoint.html">spClipPoint</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYspplt</span>, 
+                          uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                          clippolyv <span class="op">=</span> <span class="va">WYbh</span>, 
+                          othertabnms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WYcond"</span>, <span class="st">"WYtree"</span><span class="op">)</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></code></pre></div>
 <p>Next, we can export clipped points.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## Export clipped points</span></span>
-<span><span class="fu"><a href="../reference/spExportSpatial.html">spExportSpatial</a></span><span class="op">(</span><span class="va">WYbhspplt</span>, </span>
-<span>                savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>out_layer <span class="op">=</span> <span class="st">"WYbhpts"</span>, </span>
-<span>                                     outfolder <span class="op">=</span> <span class="va">outfolder</span>, </span>
-<span>                                     overwrite_layer <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>                <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="co">## Export clipped points</span>
+<span class="fu"><a href="../reference/spExportSpatial.html">spExportSpatial</a></span><span class="op">(</span><span class="va">WYbhspplt</span>, 
+                savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>out_layer <span class="op">=</span> <span class="st">"WYbhpts"</span>, 
+                                     outfolder <span class="op">=</span> <span class="va">outfolder</span>, 
+                                     overwrite_layer <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+                <span class="op">)</span></code></pre></div>
 <p>Finally, we can get points within Bighorn National Forest boundary
 (project on the fly) and save to an outfolder.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhptslst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoint.html">spClipPoint</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                          uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                          clippolyv <span class="op">=</span> <span class="va">WYbh</span>, </span>
-<span>                          othertabnms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WYcond"</span>, <span class="st">"WYtree"</span><span class="op">)</span>, </span>
-<span>                          exportsp <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>                          spMakeSpatial_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                                        yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                                        prj <span class="op">=</span> <span class="st">"longlat"</span>, </span>
-<span>                                        datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span>, </span>
-<span>                          savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>                                        outfolder <span class="op">=</span> <span class="va">outfolder</span>, </span>
-<span>                                        overwrite_layer <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                        outfn.pre <span class="op">=</span> <span class="st">"clip"</span><span class="op">)</span></span>
-<span>                          <span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhptslst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoint.html">spClipPoint</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                          uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                          clippolyv <span class="op">=</span> <span class="va">WYbh</span>, 
+                          othertabnms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WYcond"</span>, <span class="st">"WYtree"</span><span class="op">)</span>, 
+                          exportsp <span class="op">=</span> <span class="cn">TRUE</span>, 
+                          spMakeSpatial_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                                        yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                                        prj <span class="op">=</span> <span class="st">"longlat"</span>, 
+                                        datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span>, 
+                          savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+                                        outfolder <span class="op">=</span> <span class="va">outfolder</span>, 
+                                        overwrite_layer <span class="op">=</span> <span class="cn">TRUE</span>,
+                                        outfn.pre <span class="op">=</span> <span class="st">"clip"</span><span class="op">)</span>
+                          <span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -580,15 +580,15 @@ View Example
 <code>WYbighorn</code>. Note: you must download USAco from the
 <code>raster</code> package. See the “Set Up” section above.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoly.html">spClipPoly</a></span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">USAco</span>,</span>
-<span>                             clippolyv <span class="op">=</span> <span class="va">WYbh</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoly.html">spClipPoly</a></span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">USAco</span>,
+                             clippolyv <span class="op">=</span> <span class="va">WYbh</span><span class="op">)</span></code></pre></div>
 <p>We can now check and display <code>WYbighorn_co</code> with
 labels.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">[</span><span class="st">'NAME_2'</span><span class="op">]</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu">sf.colors</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">coords</span> <span class="op">&lt;-</span> <span class="fu">st_coordinates</span><span class="op">(</span><span class="fu">st_centroid</span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/text.html" class="external-link">text</a></span><span class="op">(</span><span class="va">coords</span><span class="op">[</span>,<span class="st">"X"</span><span class="op">]</span>, <span class="va">coords</span><span class="op">[</span>,<span class="st">"Y"</span><span class="op">]</span>, <span class="va">WYbhco</span><span class="op">[[</span><span class="st">"NAME_2"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">[</span><span class="st">'NAME_2'</span><span class="op">]</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu">sf.colors</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">coords</span> <span class="op">&lt;-</span> <span class="fu">st_coordinates</span><span class="op">(</span><span class="fu">st_centroid</span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/text.html" class="external-link">text</a></span><span class="op">(</span><span class="va">coords</span><span class="op">[</span>,<span class="st">"X"</span><span class="op">]</span>, <span class="va">coords</span><span class="op">[</span>,<span class="st">"Y"</span><span class="op">]</span>, <span class="va">WYbhco</span><span class="op">[[</span><span class="st">"NAME_2"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -602,28 +602,28 @@ View Example
 </summary><p>First, we subset the strata layer with the Medicine Wheel district
 boundary</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhdist</span></span>
-<span><span class="va">WYbhMW</span> <span class="op">&lt;-</span> <span class="va">WYbhdist</span><span class="op">[</span><span class="va">WYbhdist</span><span class="op">$</span><span class="va">DISTRICTNA</span> <span class="op">==</span> <span class="st">"Medicine Wheel Ranger District"</span>,<span class="op">]</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">WYbhMW</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"red"</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhdist</span>
+<span class="va">WYbhMW</span> <span class="op">&lt;-</span> <span class="va">WYbhdist</span><span class="op">[</span><span class="va">WYbhdist</span><span class="op">$</span><span class="va">DISTRICTNA</span> <span class="op">==</span> <span class="st">"Medicine Wheel Ranger District"</span>,<span class="op">]</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">WYbhMW</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"red"</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Next, we can clip the raster. Note: If the projection of
 <code>polyv</code> is not the same as <code>rast</code>,
 <code>polyv</code> will by reprojected to the same projection as
 <code>rast</code> before clipping (See note in the help file for more
 details).</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhMW.fornf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipRast.html">spClipRast</a></span><span class="op">(</span><span class="va">fornffn</span>, </span>
-<span>                           clippolyv <span class="op">=</span> <span class="va">WYbhMW</span>, </span>
-<span>                           outfolder <span class="op">=</span> <span class="va">outfolder</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhMW.fornf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipRast.html">spClipRast</a></span><span class="op">(</span><span class="va">fornffn</span>, 
+                           clippolyv <span class="op">=</span> <span class="va">WYbhMW</span>, 
+                           outfolder <span class="op">=</span> <span class="va">outfolder</span><span class="op">)</span></code></pre></div>
 <p>Finally, we display the results:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhMWprj</span> <span class="op">&lt;-</span> <span class="fu">crsCompare</span><span class="op">(</span><span class="va">WYbhMW</span>, </span>
-<span>                        <span class="fu">rasterInfo</span><span class="op">(</span><span class="va">WYbhMW.fornf</span><span class="op">)</span><span class="op">$</span><span class="va">crs</span><span class="op">)</span><span class="op">$</span><span class="va">x</span></span>
-<span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">WYbhMW.fornf</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">WYbhMWprj</span><span class="op">)</span>, </span>
-<span>     border <span class="op">=</span> <span class="st">"red"</span>, </span>
-<span>     add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhMWprj</span> <span class="op">&lt;-</span> <span class="fu">crsCompare</span><span class="op">(</span><span class="va">WYbhMW</span>, 
+                        <span class="fu">rasterInfo</span><span class="op">(</span><span class="va">WYbhMW.fornf</span><span class="op">)</span><span class="op">$</span><span class="va">crs</span><span class="op">)</span><span class="op">$</span><span class="va">x</span>
+<span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">WYbhMW.fornf</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">WYbhMWprj</span><span class="op">)</span>, 
+     border <span class="op">=</span> <span class="st">"red"</span>, 
+     add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -642,31 +642,31 @@ projection of <code>spplt</code> is not the same as the
 reprojected to the same projection as <code>clippolyv</code> before the
 evaluation points (See the note in help file for more details).</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">extpolylst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spExtractPoly.html">spExtractPoly</a></span><span class="op">(</span><span class="va">WYspplt</span>, </span>
-<span>                            xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                            polyvlst <span class="op">=</span> <span class="va">WYbhdist</span><span class="op">)</span></span>
-<span><span class="va">WYspplt_bh</span> <span class="op">&lt;-</span> <span class="va">extpolylst</span><span class="op">$</span><span class="va">spxyext</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">[</span><span class="st">"DISTRICTNA"</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">extpolylst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spExtractPoly.html">spExtractPoly</a></span><span class="op">(</span><span class="va">WYspplt</span>, 
+                            xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                            polyvlst <span class="op">=</span> <span class="va">WYbhdist</span><span class="op">)</span>
+<span class="va">WYspplt_bh</span> <span class="op">&lt;-</span> <span class="va">extpolylst</span><span class="op">$</span><span class="va">spxyext</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">[</span><span class="st">"DISTRICTNA"</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></code></pre></div>
 <p>Next we can extract a subset of polygon attributes from
 <code>WYbighorn</code> to <code>WYpts</code>, not keeping
 <code>NULL</code> values.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">extpolylst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spExtractPoly.html">spExtractPoly</a></span><span class="op">(</span><span class="va">WYspplt</span>, </span>
-<span>                            xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                            polyvlst <span class="op">=</span> <span class="va">WYbh</span>, </span>
-<span>                            polyvarlst <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FORESTNUMB"</span>, <span class="st">"FORESTNAME"</span><span class="op">)</span>, </span>
-<span>                            keepNA <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">WYspplt_bh2</span> <span class="op">&lt;-</span> <span class="va">extpolylst</span><span class="op">$</span><span class="va">spxyext</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt_bh2</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_bh2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">extpolylst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spExtractPoly.html">spExtractPoly</a></span><span class="op">(</span><span class="va">WYspplt</span>, 
+                            xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                            polyvlst <span class="op">=</span> <span class="va">WYbh</span>, 
+                            polyvarlst <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FORESTNUMB"</span>, <span class="st">"FORESTNAME"</span><span class="op">)</span>, 
+                            keepNA <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="va">WYspplt_bh2</span> <span class="op">&lt;-</span> <span class="va">extpolylst</span><span class="op">$</span><span class="va">spxyext</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt_bh2</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_bh2</span><span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -681,16 +681,16 @@ View Example
 </summary><p>We can extract raster values from <code>WYdem</code> to
 <code>WYpts</code>, not keeping <code>NULL</code> values.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">extrastlst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spExtractRast.html">spExtractRast</a></span><span class="op">(</span><span class="va">WYspplt</span>, </span>
-<span>                            rastlst <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fornffn</span>, <span class="va">demfn</span><span class="op">)</span>, </span>
-<span>                            xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                            keepNA <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">WYspplt_dem</span> <span class="op">&lt;-</span> <span class="va">extrastlst</span><span class="op">$</span><span class="va">sppltext</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt_dem</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_dem</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">extrastlst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spExtractRast.html">spExtractRast</a></span><span class="op">(</span><span class="va">WYspplt</span>, 
+                            rastlst <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fornffn</span>, <span class="va">demfn</span><span class="op">)</span>, 
+                            xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                            keepNA <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="va">WYspplt_dem</span> <span class="op">&lt;-</span> <span class="va">extrastlst</span><span class="op">$</span><span class="va">sppltext</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt_dem</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_dem</span><span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -724,67 +724,67 @@ public coordinates (<code>xvar = "LON_PUBLIC"</code>,
 projection information is: <code>prj = "longlat"</code>,
 <code>datum = "NAD83"</code>.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></code></pre></div>
 <p>Next, we derive new layers from <code>dem</code>.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster" class="external-link">raster</a></span><span class="op">)</span></span>
-<span><span class="va">dem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">demfn</span><span class="op">)</span></span>
-<span><span class="va">slp</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>, </span>
-<span>                       opt <span class="op">=</span> <span class="st">"slope"</span>,</span>
-<span>                       unit <span class="op">=</span> <span class="st">"degrees"</span>, </span>
-<span>                       filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outfolder</span>, <span class="st">"/WYbh_slp.img"</span><span class="op">)</span>, </span>
-<span>                       overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">asp</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>,</span>
-<span>                       opt <span class="op">=</span> <span class="st">"aspect"</span>, </span>
-<span>                       unit <span class="op">=</span> <span class="st">"degrees"</span>, </span>
-<span>                       filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outfolder</span>, <span class="st">"/WYbh_asp.img"</span><span class="op">)</span>,</span>
-<span>                       overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster" class="external-link">raster</a></span><span class="op">)</span>
+<span class="va">dem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">demfn</span><span class="op">)</span>
+<span class="va">slp</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>, 
+                       opt <span class="op">=</span> <span class="st">"slope"</span>,
+                       unit <span class="op">=</span> <span class="st">"degrees"</span>, 
+                       filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outfolder</span>, <span class="st">"/WYbh_slp.img"</span><span class="op">)</span>, 
+                       overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="va">asp</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>,
+                       opt <span class="op">=</span> <span class="st">"aspect"</span>, 
+                       unit <span class="op">=</span> <span class="st">"degrees"</span>, 
+                       filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outfolder</span>, <span class="st">"/WYbh_asp.img"</span><span class="op">)</span>,
+                       overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Finally, we extract estimation unit and zonal raster statistics
 (i.e., mean).</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rastlst.cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">demfn</span>, <span class="va">slp</span>, <span class="va">asp</span><span class="op">)</span></span>
-<span><span class="va">rastlst.cont.name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"slp"</span>, <span class="st">"asp"</span><span class="op">)</span></span>
-<span><span class="va">rastlst.cat</span> <span class="op">&lt;-</span> <span class="va">fornffn</span></span>
-<span><span class="va">rastlst.cat.name</span> <span class="op">&lt;-</span> <span class="st">"fornf"</span></span>
-<span></span>
-<span><span class="va">modeldat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetAuxiliary.html">spGetAuxiliary</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYspplt</span>, </span>
-<span>                           uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                           unit_layer <span class="op">=</span> <span class="va">WYbhfn</span>, </span>
-<span>                           unitvar <span class="op">=</span> <span class="cn">NULL</span>, </span>
-<span>                           rastlst.cont <span class="op">=</span> <span class="va">rastlst.cont</span>, </span>
-<span>                           rastlst.cont.name <span class="op">=</span> <span class="va">rastlst.cont.name</span>, </span>
-<span>                           rastlst.cat <span class="op">=</span> <span class="va">rastlst.cat</span>, </span>
-<span>                           rastlst.cat.name <span class="op">=</span> <span class="va">rastlst.cat.name</span>, </span>
-<span>                           rastlst.cont.stat <span class="op">=</span> <span class="st">"mean"</span>, </span>
-<span>                           asptransform <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>                           rast.asp <span class="op">=</span> <span class="va">asp</span>, </span>
-<span>                           keepNA <span class="op">=</span> <span class="cn">FALSE</span>, </span>
-<span>                           showext <span class="op">=</span> <span class="cn">FALSE</span>, </span>
-<span>                           savedata <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">modeldat</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">pltassgn</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">pltassgn</span></span>
-<span><span class="va">unitzonal</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">unitzonal</span></span>
-<span><span class="va">unitvar</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">dunitvar</span></span>
-<span><span class="va">inputdf</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">inputdf</span></span>
-<span><span class="va">unitarea</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">unitarea</span></span>
-<span><span class="va">areavar</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">areavar</span></span>
-<span><span class="va">inputdf</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">inputdf</span></span>
-<span><span class="va">prednames</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">prednames</span></span>
-<span><span class="va">zonalnames</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">zonalnames</span></span>
-<span></span>
-<span><span class="va">unitvar</span></span>
-<span><span class="va">areavar</span></span>
-<span><span class="va">unitzonal</span></span>
-<span><span class="va">unitarea</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltassgn</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">prednames</span></span>
-<span><span class="va">zonalnames</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">rastlst.cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">demfn</span>, <span class="va">slp</span>, <span class="va">asp</span><span class="op">)</span>
+<span class="va">rastlst.cont.name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"slp"</span>, <span class="st">"asp"</span><span class="op">)</span>
+<span class="va">rastlst.cat</span> <span class="op">&lt;-</span> <span class="va">fornffn</span>
+<span class="va">rastlst.cat.name</span> <span class="op">&lt;-</span> <span class="st">"fornf"</span>
+
+<span class="va">modeldat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetAuxiliary.html">spGetAuxiliary</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYspplt</span>, 
+                           uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                           unit_layer <span class="op">=</span> <span class="va">WYbhfn</span>, 
+                           unitvar <span class="op">=</span> <span class="cn">NULL</span>, 
+                           rastlst.cont <span class="op">=</span> <span class="va">rastlst.cont</span>, 
+                           rastlst.cont.name <span class="op">=</span> <span class="va">rastlst.cont.name</span>, 
+                           rastlst.cat <span class="op">=</span> <span class="va">rastlst.cat</span>, 
+                           rastlst.cat.name <span class="op">=</span> <span class="va">rastlst.cat.name</span>, 
+                           rastlst.cont.stat <span class="op">=</span> <span class="st">"mean"</span>, 
+                           asptransform <span class="op">=</span> <span class="cn">TRUE</span>, 
+                           rast.asp <span class="op">=</span> <span class="va">asp</span>, 
+                           keepNA <span class="op">=</span> <span class="cn">FALSE</span>, 
+                           showext <span class="op">=</span> <span class="cn">FALSE</span>, 
+                           savedata <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">modeldat</span><span class="op">)</span>
+
+<span class="va">pltassgn</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">pltassgn</span>
+<span class="va">unitzonal</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">unitzonal</span>
+<span class="va">unitvar</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">dunitvar</span>
+<span class="va">inputdf</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">inputdf</span>
+<span class="va">unitarea</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">unitarea</span>
+<span class="va">areavar</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">areavar</span>
+<span class="va">inputdf</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">inputdf</span>
+<span class="va">prednames</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">prednames</span>
+<span class="va">zonalnames</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">zonalnames</span>
+
+<span class="va">unitvar</span>
+<span class="va">areavar</span>
+<span class="va">unitzonal</span>
+<span class="va">unitarea</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltassgn</span><span class="op">)</span>
+
+<span class="va">prednames</span>
+<span class="va">zonalnames</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -798,27 +798,27 @@ View Example
 </summary><p>We can extract public coordinates within WY Bighorn NF boundary,
 returning spatial (spxy) and nonspatial plot identifiers (pltids).</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhxy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetXY.html">spGetXY</a></span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhfn</span>,</span>
-<span>                  xy_datsource <span class="op">=</span> <span class="st">"datamart"</span>,</span>
-<span>                  evalCur <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                  returnxy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhxy</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">pltids</span> <span class="op">&lt;-</span> <span class="va">WYbhxy</span><span class="op">$</span><span class="va">pltids</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltids</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">spxy</span> <span class="op">&lt;-</span> <span class="va">WYbhxy</span><span class="op">$</span><span class="va">spxy</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">spxy</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhxy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetXY.html">spGetXY</a></span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhfn</span>,
+                  xy_datsource <span class="op">=</span> <span class="st">"datamart"</span>,
+                  evalCur <span class="op">=</span> <span class="cn">TRUE</span>,
+                  returnxy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhxy</span><span class="op">)</span>
+
+<span class="va">pltids</span> <span class="op">&lt;-</span> <span class="va">WYbhxy</span><span class="op">$</span><span class="va">pltids</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltids</span><span class="op">)</span>
+
+<span class="va">spxy</span> <span class="op">&lt;-</span> <span class="va">WYbhxy</span><span class="op">$</span><span class="va">spxy</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">spxy</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Or, returning only nonspatial plot identifiers (pltids).</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhxyids</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetXY.html">spGetXY</a></span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhfn</span>,</span>
-<span>                     xy_datsource <span class="op">=</span> <span class="st">"datamart"</span>,</span>
-<span>                     evalCur <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                     returnxy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhxyids</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">pltids</span> <span class="op">&lt;-</span> <span class="va">WYbhxyids</span><span class="op">$</span><span class="va">pltids</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltids</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhxyids</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetXY.html">spGetXY</a></span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhfn</span>,
+                     xy_datsource <span class="op">=</span> <span class="st">"datamart"</span>,
+                     evalCur <span class="op">=</span> <span class="cn">TRUE</span>,
+                     returnxy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhxyids</span><span class="op">)</span>
+
+<span class="va">pltids</span> <span class="op">&lt;-</span> <span class="va">WYbhxyids</span><span class="op">$</span><span class="va">pltids</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltids</span><span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -831,12 +831,12 @@ given boundary.</p>
 View Example
 </summary><p>We can extract public coordinates within WY Bighorn NF boundary.</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetPlots.html">spGetPlots</a></span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhfn</span>, </span>
-<span>                      states <span class="op">=</span> <span class="st">"Wyoming"</span>,</span>
-<span>                      datsource <span class="op">=</span> <span class="st">"datamart"</span>, </span>
-<span>                      evalCur <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                      istree <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhdat</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetPlots.html">spGetPlots</a></span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhfn</span>, 
+                      states <span class="op">=</span> <span class="st">"Wyoming"</span>,
+                      datsource <span class="op">=</span> <span class="st">"datamart"</span>, 
+                      evalCur <span class="op">=</span> <span class="cn">TRUE</span>,
+                      istree <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhdat</span><span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -850,34 +850,34 @@ View Example
 </summary><p>First, we create a <code>SpatialPoints</code> object from
 <code>WYplt</code></p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></span>
-<span><span class="va">xyplt</span> <span class="op">&lt;-</span> <span class="va">WYspplt</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span>
+<span class="va">xyplt</span> <span class="op">&lt;-</span> <span class="va">WYspplt</span></code></pre></div>
 <div class="section level4">
 <h4 id="by-bighorn-national-forest">By Bighorn National Forest<a class="anchor" aria-label="anchor" href="#by-bighorn-national-forest"></a>
 </h4>
 <p>We now get estimation unit acres for Bighorn National Forest.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">unitdat.bh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetEstUnit.html">spGetEstUnit</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                           uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                           unit_layer <span class="op">=</span> <span class="va">WYbhfn</span>, </span>
-<span>                           spMakeSpatial_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                                                   yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                                                   prj <span class="op">=</span> <span class="st">"longlat"</span>, </span>
-<span>                                                   datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span></span>
-<span>                           <span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">unitdat.bh</span><span class="op">)</span></span>
-<span><span class="va">unitarea.bh</span> <span class="op">&lt;-</span> <span class="va">unitdat.bh</span><span class="op">$</span><span class="va">unitarea</span></span>
-<span><span class="va">unitvar.bh</span> <span class="op">&lt;-</span> <span class="va">unitdat.bh</span><span class="op">$</span><span class="va">unitvar</span></span>
-<span><span class="va">areavar.bh</span> <span class="op">&lt;-</span> <span class="va">unitdat.bh</span><span class="op">$</span><span class="va">areavar</span></span>
-<span></span>
-<span><span class="va">unitarea.bh</span></span>
-<span><span class="va">unitvar.bh</span></span>
-<span><span class="va">areavar.bh</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">unitdat.bh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetEstUnit.html">spGetEstUnit</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                           uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                           unit_layer <span class="op">=</span> <span class="va">WYbhfn</span>, 
+                           spMakeSpatial_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                                                   yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                                                   prj <span class="op">=</span> <span class="st">"longlat"</span>, 
+                                                   datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span>
+                           <span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">unitdat.bh</span><span class="op">)</span>
+<span class="va">unitarea.bh</span> <span class="op">&lt;-</span> <span class="va">unitdat.bh</span><span class="op">$</span><span class="va">unitarea</span>
+<span class="va">unitvar.bh</span> <span class="op">&lt;-</span> <span class="va">unitdat.bh</span><span class="op">$</span><span class="va">unitvar</span>
+<span class="va">areavar.bh</span> <span class="op">&lt;-</span> <span class="va">unitdat.bh</span><span class="op">$</span><span class="va">areavar</span>
+
+<span class="va">unitarea.bh</span>
+<span class="va">unitvar.bh</span>
+<span class="va">areavar.bh</span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="by-bighorn-national-forest-district">By Bighorn National Forest District<a class="anchor" aria-label="anchor" href="#by-bighorn-national-forest-district"></a>
@@ -885,24 +885,24 @@ View Example
 <p>We now get estimation unit acres and strata information for Bighorn
 National Forest.</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">unitdat.bhdist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetEstUnit.html">spGetEstUnit</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                               uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                               unit_layer <span class="op">=</span> <span class="va">WYbhdistfn</span>, </span>
-<span>                               unitvar <span class="op">=</span> <span class="st">"DISTRICTNA"</span>, </span>
-<span>                               spMakeSpatial_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                                                       yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                                                       prj <span class="op">=</span> <span class="st">"longlat"</span>, </span>
-<span>                                                       datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span></span>
-<span>                               <span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">unitdat.bhdist</span><span class="op">)</span></span>
-<span><span class="va">unitarea.bhdist</span> <span class="op">&lt;-</span> <span class="va">unitdat.bhdist</span><span class="op">$</span><span class="va">unitarea</span></span>
-<span><span class="va">unitvar.bhdist</span> <span class="op">&lt;-</span> <span class="va">unitdat.bhdist</span><span class="op">$</span><span class="va">unitvar</span></span>
-<span><span class="va">areavar.bhdist</span> <span class="op">&lt;-</span> <span class="va">unitdat.bhdist</span><span class="op">$</span><span class="va">areavar</span></span>
-<span></span>
-<span><span class="va">unitarea.bhdist</span></span>
-<span><span class="va">unitvar.bhdist</span></span>
-<span><span class="va">areavar.bhdist</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">unitdat.bhdist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetEstUnit.html">spGetEstUnit</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                               uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                               unit_layer <span class="op">=</span> <span class="va">WYbhdistfn</span>, 
+                               unitvar <span class="op">=</span> <span class="st">"DISTRICTNA"</span>, 
+                               spMakeSpatial_opts<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                                                       yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                                                       prj <span class="op">=</span> <span class="st">"longlat"</span>, 
+                                                       datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span>
+                               <span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">unitdat.bhdist</span><span class="op">)</span>
+<span class="va">unitarea.bhdist</span> <span class="op">&lt;-</span> <span class="va">unitdat.bhdist</span><span class="op">$</span><span class="va">unitarea</span>
+<span class="va">unitvar.bhdist</span> <span class="op">&lt;-</span> <span class="va">unitdat.bhdist</span><span class="op">$</span><span class="va">unitvar</span>
+<span class="va">areavar.bhdist</span> <span class="op">&lt;-</span> <span class="va">unitdat.bhdist</span><span class="op">$</span><span class="va">areavar</span>
+
+<span class="va">unitarea.bhdist</span>
+<span class="va">unitvar.bhdist</span>
+<span class="va">areavar.bhdist</span></code></pre></div>
 
 </div>
 </details>
@@ -922,21 +922,21 @@ public coordinates (<code>xvar = "LON_PUBLIC"</code>,
 projection information is: <code>prj = "longlat"</code>,
 <code>datum = "NAD83"</code>.</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
-<span>                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
-<span>                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, 
+                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                               xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                               yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, 
+                               xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></code></pre></div>
 <p>Next, we extract polygon attributes from <code>WYbighorn</code> to
 <code>WYpts</code>, keeping <code>NULL</code> values.</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">stratlst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetStrata.html">spGetStrata</a></span><span class="op">(</span><span class="va">WYspplt</span>, </span>
-<span>                        uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
-<span>                        unit_layer <span class="op">=</span> <span class="va">WYbhfn</span>, </span>
-<span>                        strattype <span class="op">=</span> <span class="st">"RASTER"</span>, </span>
-<span>                        strat_layer <span class="op">=</span> <span class="va">fornffn</span><span class="op">)</span> </span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">stratlst</span><span class="op">)</span> </span>
-<span><span class="va">stratlst</span><span class="op">$</span><span class="va">stratalut</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">stratlst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetStrata.html">spGetStrata</a></span><span class="op">(</span><span class="va">WYspplt</span>, 
+                        uniqueid <span class="op">=</span> <span class="st">"CN"</span>, 
+                        unit_layer <span class="op">=</span> <span class="va">WYbhfn</span>, 
+                        strattype <span class="op">=</span> <span class="st">"RASTER"</span>, 
+                        strat_layer <span class="op">=</span> <span class="va">fornffn</span><span class="op">)</span> 
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">stratlst</span><span class="op">)</span> 
+<span class="va">stratlst</span><span class="op">$</span><span class="va">stratalut</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -952,14 +952,14 @@ View Example
 then extract polygon attributes from <code>WYbighorn</code> to
 <code>WYpts</code>, keeping <code>NULL</code> values.</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhfn</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">polyUnion</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spUnionPoly.html">spUnionPoly</a></span><span class="op">(</span>polyv1 <span class="op">=</span> <span class="va">USAco</span><span class="op">[</span><span class="va">USAco</span><span class="op">$</span><span class="va">NAME_1</span> <span class="op">==</span> <span class="st">"Wyoming"</span>,<span class="op">]</span>, </span>
-<span>                         polyv2 <span class="op">=</span> <span class="va">WYbh</span>, </span>
-<span>                         areacalc<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">polyUnion</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">polyUnion</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhfn</span><span class="op">)</span>
+
+<span class="va">polyUnion</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spUnionPoly.html">spUnionPoly</a></span><span class="op">(</span>polyv1 <span class="op">=</span> <span class="va">USAco</span><span class="op">[</span><span class="va">USAco</span><span class="op">$</span><span class="va">NAME_1</span> <span class="op">==</span> <span class="st">"Wyoming"</span>,<span class="op">]</span>, 
+                         polyv2 <span class="op">=</span> <span class="va">WYbh</span>, 
+                         areacalc<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">polyUnion</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">polyUnion</span><span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -974,21 +974,21 @@ View Example
 then extract polygon attributes from <code>WYbighorn</code> to
 <code>WYpts</code>, keeping <code>NULL</code> values.</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhdist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhdistfn</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">zonallst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spZonalRast.html">spZonalRast</a></span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">WYbhdist</span>, </span>
-<span>                        polyv.att <span class="op">=</span> <span class="st">"DISTRICTNA"</span>, </span>
-<span>                        rastfn <span class="op">=</span> <span class="va">demfn</span>, </span>
-<span>                        zonalstat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"sum"</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">zonallst</span><span class="op">)</span> </span>
-<span></span>
-<span><span class="va">zonalext</span> <span class="op">&lt;-</span> <span class="va">zonallst</span><span class="op">$</span><span class="va">zonalext</span></span>
-<span><span class="va">outname</span> <span class="op">&lt;-</span> <span class="va">zonallst</span><span class="op">$</span><span class="va">outname</span></span>
-<span><span class="va">rasterfile</span> <span class="op">&lt;-</span> <span class="va">zonallst</span><span class="op">$</span><span class="va">rasterfile</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">zonalext</span><span class="op">)</span></span>
-<span><span class="va">outname</span></span>
-<span><span class="va">rasterfile</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">WYbhdist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhdistfn</span><span class="op">)</span>
+
+<span class="va">zonallst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spZonalRast.html">spZonalRast</a></span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">WYbhdist</span>, 
+                        polyv.att <span class="op">=</span> <span class="st">"DISTRICTNA"</span>, 
+                        rastfn <span class="op">=</span> <span class="va">demfn</span>, 
+                        zonalstat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"sum"</span><span class="op">)</span><span class="op">)</span> 
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">zonallst</span><span class="op">)</span> 
+
+<span class="va">zonalext</span> <span class="op">&lt;-</span> <span class="va">zonallst</span><span class="op">$</span><span class="va">zonalext</span>
+<span class="va">outname</span> <span class="op">&lt;-</span> <span class="va">zonallst</span><span class="op">$</span><span class="va">outname</span>
+<span class="va">rasterfile</span> <span class="op">&lt;-</span> <span class="va">zonallst</span><span class="op">$</span><span class="va">rasterfile</span>
+
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">zonalext</span><span class="op">)</span>
+<span class="va">outname</span>
+<span class="va">rasterfile</span></code></pre></div>
 </details>
 </div>
 </div>
@@ -1011,7 +1011,7 @@ then extract polygon attributes from <code>WYbighorn</code> to
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>

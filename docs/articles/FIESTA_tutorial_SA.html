@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -252,14 +252,14 @@ WYbighorn_adminbnd.shp.</p>
 </h3>
 <p>First, you’ll need to load the <code>FIESTA</code> library:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></code></pre></div>
 <p>Next, you’ll need to set up an “outfolder”. This is just a file path
 to a folder where you’d like <code>FIESTA</code> to send your data
 output. For our purposes in this vignette, we have saved our outfolder
 file path as the <code>outfolder</code> object in a temporary directory.
 We also set a few default options preferred for this vignette.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">outfolder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">outfolder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="get-data-for-examples">Get data for examples<a class="anchor" aria-label="anchor" href="#get-data-for-examples"></a>
@@ -269,140 +269,135 @@ View Getting Data
 </summary><p>Now that we’ve loaded <code>FIESTA</code> and setup our outfolder, we
 can retrieve the data needed to run the examples. First, we point to
 some external data and predictor layers stored in <code>FIESTA</code>
-and derive new predictor layers using the <code>raster</code>
+and derive new predictor layers using the <code>terra</code>
 package.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># File names for external spatial data</span></span>
-<span></span>
-<span><span class="va">WYbhfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span><span class="va">WYbhdist.att</span> <span class="op">&lt;-</span> <span class="st">"DISTRICTNA"</span></span>
-<span></span>
-<span><span class="va">fornffn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sp_data/WYbighorn_forest_nonforest_250m.tif"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span><span class="va">demfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sp_data/WYbighorn_dem_250m.img"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># # Derive new layers from dem</span></span>
-<span><span class="co"># aspfn &lt;- file.path(outfolder, "WYbh_asp.img")</span></span>
-<span><span class="co"># gdalUtils::gdaldem("aspect", input_dem=demfn, output=aspfn, of="GTiff")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># slpfn &lt;- file.path(outfolder, "WYbh_slp.img")</span></span>
-<span><span class="co"># gdalUtils::gdaldem("slope", input_dem=demfn, output=slpfn, of="GTiff")</span></span>
-<span></span>
-<span></span>
-<span><span class="co"># Derive new predictor layers from dem</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster" class="external-link">raster</a></span><span class="op">)</span></span>
-<span><span class="va">dem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">demfn</span><span class="op">)</span></span>
-<span><span class="va">slp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>,</span>
-<span>               opt <span class="op">=</span> <span class="st">"slope"</span>,</span>
-<span>               unit <span class="op">=</span> <span class="st">"degrees"</span>,</span>
-<span>               filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outfolder</span>, <span class="st">"/WYbh_slp.img"</span><span class="op">)</span>, </span>
-<span>               overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">asp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>,</span>
-<span>               opt <span class="op">=</span> <span class="st">"aspect"</span>,</span>
-<span>               unit <span class="op">=</span> <span class="st">"degrees"</span>, </span>
-<span>               filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outfolder</span>, <span class="st">"/WYbh_asp.img"</span><span class="op">)</span>,</span>
-<span>               overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="co"># File names for external spatial data</span>
+
+<span class="va">WYbhfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span>
+<span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span>
+<span class="va">WYbhdist.att</span> <span class="op">&lt;-</span> <span class="st">"DISTRICTNA"</span>
+
+<span class="va">fornffn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sp_data/WYbighorn_forest_nonforest_250m.tif"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span>
+<span class="va">demfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sp_data/WYbighorn_dem_250m.img"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span>
+
+<span class="co"># Derive new predictor layers from dem</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/terra/" class="external-link">terra</a></span><span class="op">)</span>
+<span class="va">dem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">demfn</span><span class="op">)</span>
+<span class="va">slpfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outfolder</span>, <span class="st">"/WYbh_slp.img"</span><span class="op">)</span>
+<span class="va">slp</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>,
+                      v <span class="op">=</span> <span class="st">"slope"</span>,
+                      unit <span class="op">=</span> <span class="st">"degrees"</span>,
+                      filename <span class="op">=</span> <span class="va">slpfn</span>, 
+                      overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="va">aspfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outfolder</span>, <span class="st">"/WYbh_asp.img"</span><span class="op">)</span>
+<span class="va">asp</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>,
+                      v <span class="op">=</span> <span class="st">"aspect"</span>,
+                      unit <span class="op">=</span> <span class="st">"degrees"</span>, 
+                      filename <span class="op">=</span> <span class="va">aspfn</span>,
+                      overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Next, we set up our small area domains with
 <code><a href="../reference/spGetSAdoms.html">FIESTA::spGetSAdoms</a></code>. For more information on how to use
 this function, please see the <code>sp</code> vignette included with
 <code>FIESTA</code> (link).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">smallbnd</span> <span class="op">&lt;-</span> <span class="va">WYbhdistfn</span></span>
-<span><span class="va">smallbnd.domain</span> <span class="op">&lt;-</span> <span class="st">"DISTRICTNA"</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">smallbnd</span> <span class="op">&lt;-</span> <span class="va">WYbhdistfn</span>
+<span class="va">smallbnd.domain</span> <span class="op">&lt;-</span> <span class="st">"DISTRICTNA"</span></code></pre></div>
 <p>Next, we can get our FIA plot data and set up our auxiliary data. We
 can get our FIA plot data with the <code>spGetPlots</code> function from
 <code>FIESTA</code>, which accesses data through <a href="https://apps.fs.usda.gov/fia/datamart/datamart.html" class="external-link">FIA’s
 DataMart</a>. Here, data are downloaded for all states intersecting
 boundary, then subset to boundary.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">SApltdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetPlots.html">spGetPlots</a></span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhdistfn</span>,</span>
-<span>                       xy_datsource <span class="op">=</span> <span class="st">"obj"</span>,</span>
-<span>                       xy <span class="op">=</span> <span class="va">WYplt</span>,</span>
-<span>                       xy_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, </span>
-<span>                                    yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span>,</span>
-<span>                       datsource <span class="op">=</span> <span class="st">"obj"</span>,</span>
-<span>                       istree <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                       isseed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                       dbTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plot_layer <span class="op">=</span> <span class="va">WYplt</span>, cond_layer <span class="op">=</span> <span class="va">WYcond</span>,</span>
-<span>                                   tree_layer <span class="op">=</span> <span class="va">WYtree</span>, seed_layer <span class="op">=</span> <span class="va">WYseed</span><span class="op">)</span>,</span>
-<span>                       eval <span class="op">=</span> <span class="st">"custom"</span>,</span>
-<span>                       eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>invyrs <span class="op">=</span> <span class="fl">2011</span><span class="op">:</span><span class="fl">2013</span><span class="op">)</span>,</span>
-<span>                       showsteps <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                       returnxy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                       savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/savedata_options.html" class="external-link">savedata_options</a></span><span class="op">(</span>outfolder <span class="op">=</span> <span class="va">outfolder</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">SApltdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetPlots.html">spGetPlots</a></span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhdistfn</span>,
+                       xy_datsource <span class="op">=</span> <span class="st">"obj"</span>,
+                       xy <span class="op">=</span> <span class="va">WYplt</span>,
+                       xy_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>, 
+                                    yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span>,
+                       datsource <span class="op">=</span> <span class="st">"obj"</span>,
+                       istree <span class="op">=</span> <span class="cn">TRUE</span>,
+                       isseed <span class="op">=</span> <span class="cn">TRUE</span>,
+                       dbTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plot_layer <span class="op">=</span> <span class="va">WYplt</span>, cond_layer <span class="op">=</span> <span class="va">WYcond</span>,
+                                   tree_layer <span class="op">=</span> <span class="va">WYtree</span>, seed_layer <span class="op">=</span> <span class="va">WYseed</span><span class="op">)</span>,
+                       eval <span class="op">=</span> <span class="st">"custom"</span>,
+                       eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>invyrs <span class="op">=</span> <span class="fl">2011</span><span class="op">:</span><span class="fl">2013</span><span class="op">)</span>,
+                       showsteps <span class="op">=</span> <span class="cn">TRUE</span>,
+                       returnxy <span class="op">=</span> <span class="cn">TRUE</span>,
+                       savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/savedata_options.html" class="external-link">savedata_options</a></span><span class="op">(</span>outfolder <span class="op">=</span> <span class="va">outfolder</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <details><summary>
 plot
 </summary><p><img src="FIESTA_tutorial_SA_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
 </details><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">SApltdat</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">SApltdat</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## List of 10</span></span>
-<span><span class="co">##  $ tabs       :List of 4</span></span>
-<span><span class="co">##  $ tabIDs     :List of 4</span></span>
-<span><span class="co">##  $ spxy       :Classes 'sf' and 'data.frame':    56 obs. of  11 variables:</span></span>
-<span><span class="co">##   ..- attr(*, "sf_column")= chr "geometry"</span></span>
-<span><span class="co">##   ..- attr(*, "agr")= Factor w/ 3 levels "constant","aggregate",..: NA NA NA NA NA NA NA NA NA NA</span></span>
-<span><span class="co">##   .. ..- attr(*, "names")= chr [1:10] "PLT_CN" "INVYR" "STATECD" "UNITCD" ...</span></span>
-<span><span class="co">##  $ pltids     :'data.frame': 56 obs. of  8 variables:</span></span>
-<span><span class="co">##  $ bnd        :Classes 'sf' and 'data.frame':    3 obs. of  5 variables:</span></span>
-<span><span class="co">##   ..- attr(*, "sf_column")= chr "geometry"</span></span>
-<span><span class="co">##   ..- attr(*, "agr")= Factor w/ 3 levels "constant","aggregate",..: NA NA NA NA</span></span>
-<span><span class="co">##   .. ..- attr(*, "names")= chr [1:4] "REGION" "FORESTNUMB" "DISTRICTNU" "DISTRICTNA"</span></span>
-<span><span class="co">##  $ puniqueid  : chr "CN"</span></span>
-<span><span class="co">##  $ xy.uniqueid: chr "PLT_CN"</span></span>
-<span><span class="co">##  $ pjoinid    : chr "CN"</span></span>
-<span><span class="co">##  $ states     : chr "Wyoming"</span></span>
-<span><span class="co">##  $ invyrs     : int [1:3] 2011 2012 2013</span></span></code></pre>
+</summary><pre><code><span class="co">## List of 11</span>
+<span class="co">##  $ tabs       :List of 4</span>
+<span class="co">##  $ tabIDs     :List of 4</span>
+<span class="co">##  $ spxy       :Classes 'sf' and 'data.frame':    56 obs. of  11 variables:</span>
+<span class="co">##   ..- attr(*, "sf_column")= chr "geometry"</span>
+<span class="co">##   ..- attr(*, "agr")= Factor w/ 3 levels "constant","aggregate",..: NA NA NA NA NA NA NA NA NA NA</span>
+<span class="co">##   .. ..- attr(*, "names")= chr [1:10] "PLT_CN" "INVYR" "STATECD" "UNITCD" ...</span>
+<span class="co">##  $ pltids     :'data.frame': 56 obs. of  8 variables:</span>
+<span class="co">##  $ bnd        :Classes 'sf' and 'data.frame':    3 obs. of  5 variables:</span>
+<span class="co">##   ..- attr(*, "sf_column")= chr "geometry"</span>
+<span class="co">##   ..- attr(*, "agr")= Factor w/ 3 levels "constant","aggregate",..: NA NA NA NA</span>
+<span class="co">##   .. ..- attr(*, "names")= chr [1:4] "REGION" "FORESTNUMB" "DISTRICTNU" "DISTRICTNA"</span>
+<span class="co">##  $ puniqueid  : chr "CN"</span>
+<span class="co">##  $ xy.uniqueid: chr "PLT_CN"</span>
+<span class="co">##  $ pjoinid    : chr "CN"</span>
+<span class="co">##  $ states     : chr "Wyoming"</span>
+<span class="co">##  $ invyrs     : int [1:3] 2011 2012 2013</span>
+<span class="co">##  $ args       :List of 13</span></code></pre>
 </details><p>Finally, we must generate the dataset with predictors for small area
 estimation. We can do this with the <code>spGetAuxiliary</code> function
 from <code>FIESTA</code>. Again, see the <code>sp</code> vignette for
 further information on this function.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rastlst.cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">dem</span>, <span class="va">slp</span>, <span class="va">asp</span><span class="op">)</span></span>
-<span><span class="va">rastlst.cont.name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"slp"</span>, <span class="st">"asp"</span><span class="op">)</span></span>
-<span><span class="va">rastlst.cat</span> <span class="op">&lt;-</span> <span class="va">fornffn</span></span>
-<span><span class="va">rastlst.cat.name</span> <span class="op">&lt;-</span> <span class="st">"fornf"</span></span>
-<span></span>
-<span><span class="va">unit_layer</span> <span class="op">&lt;-</span> <span class="va">WYbhdistfn</span></span>
-<span><span class="va">unitvar</span> <span class="op">&lt;-</span> <span class="st">"DISTRICTNA"</span></span>
-<span></span>
-<span><span class="va">auxdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetAuxiliary.html">spGetAuxiliary</a></span><span class="op">(</span></span>
-<span>  xyplt <span class="op">=</span> <span class="va">SApltdat</span><span class="op">$</span><span class="va">spxy</span>,</span>
-<span>  uniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,</span>
-<span>  unit_layer <span class="op">=</span> <span class="va">unit_layer</span>,</span>
-<span>  unitvar <span class="op">=</span> <span class="st">"DISTRICTNA"</span>,</span>
-<span>  rastlst.cont <span class="op">=</span> <span class="va">rastlst.cont</span>,</span>
-<span>  rastlst.cont.name <span class="op">=</span> <span class="va">rastlst.cont.name</span>,</span>
-<span>  rastlst.cont.stat <span class="op">=</span> <span class="st">"mean"</span>,</span>
-<span>  rastlst.cont.NODATA <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  rastlst.cat <span class="op">=</span> <span class="va">rastlst.cat</span>,</span>
-<span>  rastlst.cat.name <span class="op">=</span> <span class="va">rastlst.cat.name</span>,</span>
-<span>  asptransform <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  rast.asp <span class="op">=</span> <span class="va">asp</span>,</span>
-<span>  keepNA <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  showext <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">auxdat</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">rastlst.cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">demfn</span>, <span class="va">slpfn</span>, <span class="va">aspfn</span><span class="op">)</span>
+<span class="va">rastlst.cont.name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"slp"</span>, <span class="st">"asp"</span><span class="op">)</span>
+<span class="va">rastlst.cat</span> <span class="op">&lt;-</span> <span class="va">fornffn</span>
+<span class="va">rastlst.cat.name</span> <span class="op">&lt;-</span> <span class="st">"fornf"</span>
+
+<span class="va">unit_layer</span> <span class="op">&lt;-</span> <span class="va">WYbhdistfn</span>
+<span class="va">unitvar</span> <span class="op">&lt;-</span> <span class="st">"DISTRICTNA"</span>
+
+<span class="va">auxdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetAuxiliary.html">spGetAuxiliary</a></span><span class="op">(</span>
+  xyplt <span class="op">=</span> <span class="va">SApltdat</span><span class="op">$</span><span class="va">spxy</span>,
+  uniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,
+  unit_layer <span class="op">=</span> <span class="va">unit_layer</span>,
+  unitvar <span class="op">=</span> <span class="st">"DISTRICTNA"</span>,
+  rastlst.cont <span class="op">=</span> <span class="va">rastlst.cont</span>,
+  rastlst.cont.name <span class="op">=</span> <span class="va">rastlst.cont.name</span>,
+  rastlst.cont.stat <span class="op">=</span> <span class="st">"mean"</span>,
+  rastlst.cont.NODATA <span class="op">=</span> <span class="fl">0</span>,
+  rastlst.cat <span class="op">=</span> <span class="va">rastlst.cat</span>,
+  rastlst.cat.name <span class="op">=</span> <span class="va">rastlst.cat.name</span>,
+  asptransform <span class="op">=</span> <span class="cn">TRUE</span>,
+  rast.asp <span class="op">=</span> <span class="va">aspfn</span>,
+  keepNA <span class="op">=</span> <span class="cn">FALSE</span>,
+  showext <span class="op">=</span> <span class="cn">FALSE</span>,
+  savedata <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">auxdat</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">auxdat</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">auxdat</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## List of 12</span></span>
-<span><span class="co">##  $ unitvar       : chr "DISTRICTNA"</span></span>
-<span><span class="co">##  $ pltassgn      :'data.frame':  56 obs. of  17 variables:</span></span>
-<span><span class="co">##  $ pltassgnid    : chr "PLT_CN"</span></span>
-<span><span class="co">##  $ unitarea      :'data.frame':  3 obs. of  2 variables:</span></span>
-<span><span class="co">##  $ areavar       : chr "ACRES_GIS"</span></span>
-<span><span class="co">##  $ unitzonal     :'data.frame':  3 obs. of  8 variables:</span></span>
-<span><span class="co">##  $ inputdf       :Classes 'data.table' and 'data.frame': 5 obs. of  7 variables:</span></span>
-<span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
-<span><span class="co">##  $ prednames     : chr [1:5] "dem" "slp" "asp_cos" "asp_sin" ...</span></span>
-<span><span class="co">##  $ zonalnames    : chr [1:7] "dem" "slp" "asp_cos" "asp_sin" ...</span></span>
-<span><span class="co">##  $ predfac       : chr "fornf"</span></span>
-<span><span class="co">##  $ npixelvar     : chr "npixels"</span></span>
-<span><span class="co">##  $ predfac.levels:List of 1</span></span></code></pre>
+</summary><pre><code><span class="co">## List of 12</span>
+<span class="co">##  $ unitvar       : chr "DISTRICTNA"</span>
+<span class="co">##  $ pltassgn      :'data.frame':  56 obs. of  17 variables:</span>
+<span class="co">##  $ pltassgnid    : chr "PLT_CN"</span>
+<span class="co">##  $ unitarea      :'data.frame':  3 obs. of  2 variables:</span>
+<span class="co">##  $ areavar       : chr "ACRES_GIS"</span>
+<span class="co">##  $ unitzonal     :'data.frame':  3 obs. of  8 variables:</span>
+<span class="co">##  $ inputdf       :Classes 'data.table' and 'data.frame': 5 obs. of  7 variables:</span>
+<span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="co">##  $ prednames     : chr [1:5] "dem" "slp" "asp_cos" "asp_sin" ...</span>
+<span class="co">##  $ zonalnames    : chr [1:7] "dem" "slp" "asp_cos" "asp_sin" ...</span>
+<span class="co">##  $ predfac       : chr "fornf"</span>
+<span class="co">##  $ npixelvar     : chr "npixels"</span>
+<span class="co">##  $ predfac.levels:List of 1</span></code></pre>
 </details></details>
 </div>
 </div>
@@ -429,53 +424,54 @@ information for our small areas with the <code>smallbnd</code> and
 for us so far, so we can just run a simple call to
 <code>modSApop</code>:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">SApopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSApop.html">modSApop</a></span><span class="op">(</span>pltdat <span class="op">=</span> <span class="va">SApltdat</span>, </span>
-<span>                     auxdat <span class="op">=</span> <span class="va">auxdat</span>,</span>
-<span>                     smallbnd <span class="op">=</span> <span class="va">WYbhdistfn</span>,</span>
-<span>                         smallbnd.domain <span class="op">=</span> <span class="va">smallbnd.domain</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">SApopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSApop.html">modSApop</a></span><span class="op">(</span>pltdat <span class="op">=</span> <span class="va">SApltdat</span>, 
+                     auxdat <span class="op">=</span> <span class="va">auxdat</span>,
+                     smallbnd <span class="op">=</span> <span class="va">WYbhdistfn</span>,
+                         smallbnd.domain <span class="op">=</span> <span class="va">smallbnd.domain</span><span class="op">)</span></code></pre></div>
 <p>Note that the <code>modSApop</code> function returns a list with lots
 of information and data for us to use. For a quick look at what this
 list includes we can use the <code>str</code> function:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">SApopdat</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">SApopdat</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## List of 24</span></span>
-<span><span class="co">##  $ smallbnd       :Classes 'sf' and 'data.frame':    3 obs. of  5 variables:</span></span>
-<span><span class="co">##   ..- attr(*, "sf_column")= chr "geometry"</span></span>
-<span><span class="co">##   ..- attr(*, "agr")= Factor w/ 3 levels "constant","aggregate",..: NA NA NA NA</span></span>
-<span><span class="co">##   .. ..- attr(*, "names")= chr [1:4] "REGION" "FORESTNUMB" "DISTRICTNU" "DISTRICTNA"</span></span>
-<span><span class="co">##  $ smallbnd.domain: chr "DISTRICTNA"</span></span>
-<span><span class="co">##  $ condx          :Classes 'data.table' and 'data.frame':    66 obs. of  17 variables:</span></span>
-<span><span class="co">##   ..- attr(*, "sorted")= chr [1:2] "PLT_CN" "CONDID"</span></span>
-<span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
-<span><span class="co">##  $ pltcondx       :Classes 'data.table' and 'data.frame':    66 obs. of  29 variables:</span></span>
-<span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
-<span><span class="co">##   ..- attr(*, "sorted")= chr [1:2] "PLT_CN" "CONDID"</span></span>
-<span><span class="co">##  $ cuniqueid      : chr "PLT_CN"</span></span>
-<span><span class="co">##  $ condid         : chr "CONDID"</span></span>
-<span><span class="co">##  $ ACI.filter     : chr "COND_STATUS_CD == 1"</span></span>
-<span><span class="co">##  $ dunitarea      :Classes 'data.table' and 'data.frame':    3 obs. of  2 variables:</span></span>
-<span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
-<span><span class="co">##   ..- attr(*, "sorted")= chr "DOMAIN"</span></span>
-<span><span class="co">##  $ areavar        : chr "ACRES_GIS"</span></span>
-<span><span class="co">##  $ areaunits      : chr "acres"</span></span>
-<span><span class="co">##  $ dunitvar       : chr "DOMAIN"</span></span>
-<span><span class="co">##  $ dunitlut       :Classes 'data.table' and 'data.frame':    3 obs. of  8 variables:</span></span>
-<span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
-<span><span class="co">##   ..- attr(*, "sorted")= chr "DOMAIN"</span></span>
-<span><span class="co">##  $ plotsampcnt    :'data.frame': 2 obs. of  3 variables:</span></span>
-<span><span class="co">##  $ condsampcnt    :'data.frame': 4 obs. of  3 variables:</span></span>
-<span><span class="co">##  $ states         : chr "Wyoming"</span></span>
-<span><span class="co">##  $ invyrs         :List of 1</span></span>
-<span><span class="co">##  $ estvar.area    : chr "CONDPROP_ADJ"</span></span>
-<span><span class="co">##  $ adj            : chr "plot"</span></span>
-<span><span class="co">##  $ treex          :'data.frame': 1691 obs. of  21 variables:</span></span>
-<span><span class="co">##  $ tuniqueid      : chr "PLT_CN"</span></span>
-<span><span class="co">##  $ adjtree        : logi FALSE</span></span>
-<span><span class="co">##  $ seedx          :'data.frame': 102 obs. of  11 variables:</span></span>
-<span><span class="co">##  $ prednames      : chr [1:5] "dem" "slp" "asp_cos" "asp_sin" ...</span></span>
-<span><span class="co">##  $ predfac        : chr "fornf"</span></span></code></pre>
+</summary><pre><code><span class="co">## List of 25</span>
+<span class="co">##  $ module         : chr "SA"</span>
+<span class="co">##  $ smallbnd       :Classes 'sf' and 'data.frame':    3 obs. of  5 variables:</span>
+<span class="co">##   ..- attr(*, "sf_column")= chr "geometry"</span>
+<span class="co">##   ..- attr(*, "agr")= Factor w/ 3 levels "constant","aggregate",..: NA NA NA NA</span>
+<span class="co">##   .. ..- attr(*, "names")= chr [1:4] "REGION" "FORESTNUMB" "DISTRICTNU" "DISTRICTNA"</span>
+<span class="co">##  $ smallbnd.domain: chr "DISTRICTNA"</span>
+<span class="co">##  $ condx          :Classes 'data.table' and 'data.frame':    66 obs. of  17 variables:</span>
+<span class="co">##   ..- attr(*, "sorted")= chr [1:2] "PLT_CN" "CONDID"</span>
+<span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="co">##  $ pltcondx       :Classes 'data.table' and 'data.frame':    66 obs. of  29 variables:</span>
+<span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="co">##   ..- attr(*, "sorted")= chr [1:2] "PLT_CN" "CONDID"</span>
+<span class="co">##  $ cuniqueid      : chr "PLT_CN"</span>
+<span class="co">##  $ condid         : chr "CONDID"</span>
+<span class="co">##  $ ACI.filter     : chr "COND_STATUS_CD == 1"</span>
+<span class="co">##  $ dunitarea      :Classes 'data.table' and 'data.frame':    3 obs. of  2 variables:</span>
+<span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="co">##   ..- attr(*, "sorted")= chr "DOMAIN"</span>
+<span class="co">##  $ areavar        : chr "ACRES_GIS"</span>
+<span class="co">##  $ areaunits      : chr "acres"</span>
+<span class="co">##  $ dunitvar       : chr "DOMAIN"</span>
+<span class="co">##  $ dunitlut       :Classes 'data.table' and 'data.frame':    3 obs. of  8 variables:</span>
+<span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="co">##   ..- attr(*, "sorted")= chr "DOMAIN"</span>
+<span class="co">##  $ plotsampcnt    :'data.frame': 2 obs. of  3 variables:</span>
+<span class="co">##  $ condsampcnt    :'data.frame': 4 obs. of  3 variables:</span>
+<span class="co">##  $ states         : chr "Wyoming"</span>
+<span class="co">##  $ invyrs         :List of 1</span>
+<span class="co">##  $ estvar.area    : chr "CONDPROP_ADJ"</span>
+<span class="co">##  $ adj            : chr "plot"</span>
+<span class="co">##  $ treex          :'data.frame': 1691 obs. of  21 variables:</span>
+<span class="co">##  $ tuniqueid      : chr "PLT_CN"</span>
+<span class="co">##  $ adjtree        : logi FALSE</span>
+<span class="co">##  $ seedx          :'data.frame': 102 obs. of  11 variables:</span>
+<span class="co">##  $ prednames      : chr [1:5] "dem" "slp" "asp_cos" "asp_sin" ...</span>
+<span class="co">##  $ predfac        : chr "fornf"</span></code></pre>
 </details><p>Now that we’ve created our population dataset, we can move on to
 estimation.</p>
 </details>
@@ -492,58 +488,58 @@ estimation.</p>
 View Example
 </summary><p>First, we can set up our predictors as a vector:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">all_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"slp"</span>, <span class="st">"dem"</span>, <span class="st">"asp_cos"</span>, <span class="st">"asp_sin"</span>, <span class="st">"fornf"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">all_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"slp"</span>, <span class="st">"dem"</span>, <span class="st">"asp_cos"</span>, <span class="st">"asp_sin"</span>, <span class="st">"fornf"</span><span class="op">)</span></code></pre></div>
 <p>Next, we fit the unit-level EBLUP with the <code>JoSAE</code> R
 package.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span></span>
-<span>  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,        <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>  prednames <span class="op">=</span> <span class="va">all_preds</span>,         <span class="co"># est - charater vector of predictors to be used in the model</span></span>
-<span>  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,           <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>  SAmethod <span class="op">=</span> <span class="st">"unit"</span>              <span class="co"># est - method of small area estimation. Either "unit" or "area"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span>
+  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,        <span class="co"># pop - population calculations for WY, post-stratification</span>
+  prednames <span class="op">=</span> <span class="va">all_preds</span>,         <span class="co"># est - charater vector of predictors to be used in the model</span>
+  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,           <span class="co"># est - character string of the R package to do the estimation</span>
+  SAmethod <span class="op">=</span> <span class="st">"unit"</span>              <span class="co"># est - method of small area estimation. Either "unit" or "area"</span>
+  <span class="op">)</span></code></pre></div>
 <p>The <code>modSAarea</code> function outputs a list, and we can see
 our estimates and estimation method.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">area1</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">area1</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## List of 2</span></span>
-<span><span class="co">##  $ est:Classes 'data.table' and 'data.frame':    3 obs. of  3 variables:</span></span>
-<span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
-<span><span class="co">##   ..- attr(*, "sorted")= chr "DOMAIN"</span></span>
-<span><span class="co">##  $ raw:List of 12</span></span></code></pre>
+</summary><pre><code><span class="co">## List of 2</span>
+<span class="co">##  $ est:Classes 'data.table' and 'data.frame':    3 obs. of  3 variables:</span>
+<span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="co">##   ..- attr(*, "sorted")= chr "DOMAIN"</span>
+<span class="co">##  $ raw:List of 12</span></code></pre>
 </details><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area1</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area1</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District 225586.2                  16.90</span></span>
-<span><span class="co">## 2:   Powder River Ranger District 152976.2                  26.17</span></span>
-<span><span class="co">## 3:         Tongue Ranger District 286660.8                  12.99</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District 224320.1                  16.68</span>
+<span class="co">## 2:   Powder River Ranger District 149729.4                  26.23</span>
+<span class="co">## 3:         Tongue Ranger District 284851.4                  13.15</span></code></pre>
 </details><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area1</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">SAmethod</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area1</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">SAmethod</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "unit"</span></span></code></pre>
+</summary><pre><code><span class="co">## [1] "unit"</span></code></pre>
 </details><p>We can also look further into the <code>raw</code> list below:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">area1</span><span class="op">$</span><span class="va">raw</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">area1</span><span class="op">$</span><span class="va">raw</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## List of 12</span></span>
-<span><span class="co">##  $ dunit_totest   :'data.frame': 3 obs. of  18 variables:</span></span>
-<span><span class="co">##  $ domdat         :'data.frame': 66 obs. of  21 variables:</span></span>
-<span><span class="co">##  $ module         : chr "SA"</span></span>
-<span><span class="co">##  $ esttype        : chr "AREA"</span></span>
-<span><span class="co">##  $ SApackage      : chr "JoSAE"</span></span>
-<span><span class="co">##  $ SAmethod       : chr "unit"</span></span>
-<span><span class="co">##  $ estnm          : chr "est"</span></span>
-<span><span class="co">##  $ predselect.unit:'data.frame': 1 obs. of  8 variables:</span></span>
-<span><span class="co">##  $ SAobjlst       :List of 1</span></span>
-<span><span class="co">##  $ estvar         : chr "AREA_ADJ"</span></span>
-<span><span class="co">##  $ areaunits      : chr "acres"</span></span>
-<span><span class="co">##  $ estunits       : chr "acres"</span></span></code></pre>
+</summary><pre><code><span class="co">## List of 12</span>
+<span class="co">##  $ dunit_totest   :'data.frame': 3 obs. of  18 variables:</span>
+<span class="co">##  $ domdat         :'data.frame': 66 obs. of  21 variables:</span>
+<span class="co">##  $ module         : chr "SA"</span>
+<span class="co">##  $ esttype        : chr "AREA"</span>
+<span class="co">##  $ SApackage      : chr "JoSAE"</span>
+<span class="co">##  $ SAmethod       : chr "unit"</span>
+<span class="co">##  $ estnm          : chr "est"</span>
+<span class="co">##  $ predselect.unit:'data.frame': 1 obs. of  8 variables:</span>
+<span class="co">##  $ SAobjlst       :List of 1</span>
+<span class="co">##  $ estvar         : chr "AREA_ADJ"</span>
+<span class="co">##  $ areaunits      : chr "acres"</span>
+<span class="co">##  $ estunits       : chr "acres"</span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -557,32 +553,32 @@ area level model because at the area level, we only have three rows in
 our dataset. Since we also have a random effect term, the model we fit
 can have a maximum of one predictor without being exactly singular.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span></span>
-<span>  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,         <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>  prednames <span class="op">=</span> <span class="st">"slp"</span>,          <span class="co"># est - charater vector of predictors to be used in the model</span></span>
-<span>  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,            <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>  SAmethod <span class="op">=</span> <span class="st">"area"</span>               <span class="co"># est - method of small area estimation. Either "unit" or "area"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span>
+  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,         <span class="co"># pop - population calculations for WY, post-stratification</span>
+  prednames <span class="op">=</span> <span class="st">"slp"</span>,          <span class="co"># est - charater vector of predictors to be used in the model</span>
+  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,            <span class="co"># est - character string of the R package to do the estimation</span>
+  SAmethod <span class="op">=</span> <span class="st">"area"</span>               <span class="co"># est - method of small area estimation. Either "unit" or "area"</span>
+  <span class="op">)</span></code></pre></div>
 <p>We again can see our estimates. Notably, we have slightly larger
 percent sampling errors to the unit-level model fit in Example 2. This
 is likely due to only being able to incorporate one predictor’s worth of
 information to the model.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area2</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area2</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District 246497.2                  19.80</span></span>
-<span><span class="co">## 2:   Powder River Ranger District 141310.6                  29.94</span></span>
-<span><span class="co">## 3:         Tongue Ranger District 295968.8                  14.01</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District 246496.3                  19.80</span>
+<span class="co">## 2:   Powder River Ranger District 141310.9                  29.94</span>
+<span class="co">## 3:         Tongue Ranger District 295969.3                  14.01</span></code></pre>
 </details><p>Since <code>FIESTA</code> will attempt fit all models when running
 <code>modSAarea</code>, we can look at all the different modeling
 approaches and their estimates with the <code>multest</code> object.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area2</span><span class="op">$</span><span class="va">multest</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area2</span><span class="op">$</span><span class="va">multest</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## NULL</span></span></code></pre>
+</summary><pre><code><span class="co">## NULL</span></code></pre>
 </details><p>Notably, the <code>hbsae</code> models returned NAs with this model,
 likely due to computational issues with the integral they compute. Not
 to worry, though, we will fit models with <code>hbsae</code> in the next
@@ -602,41 +598,41 @@ get parameter estimates through numerical integration. Luckily, we do
 not have to take an integral ourselves to fit these models, we can just
 change the <code>SApackage</code> argument.</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span></span>
-<span>  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,           <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>  prednames <span class="op">=</span> <span class="va">all_preds</span>,            <span class="co"># est - character vector of predictors to be used in the model</span></span>
-<span>  SApackage <span class="op">=</span> <span class="st">"hbsae"</span>,              <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>  SAmethod <span class="op">=</span> <span class="st">"unit"</span>                 <span class="co"># est - method of small area estimation. Either "unit" or "area"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span>
+  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,           <span class="co"># pop - population calculations for WY, post-stratification</span>
+  prednames <span class="op">=</span> <span class="va">all_preds</span>,            <span class="co"># est - character vector of predictors to be used in the model</span>
+  SApackage <span class="op">=</span> <span class="st">"hbsae"</span>,              <span class="co"># est - character string of the R package to do the estimation</span>
+  SAmethod <span class="op">=</span> <span class="st">"unit"</span>                 <span class="co"># est - method of small area estimation. Either "unit" or "area"</span>
+  <span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## REML estimate of variance ratio: 0.08628 </span></span>
-<span><span class="co">## numerical integration of f(x):   26.21 with absolute error &lt; 8.7e-06</span></span>
-<span><span class="co">## numerical integration of x*f(x): 17.01 with absolute error &lt; 9e-06</span></span>
-<span><span class="co">## posterior mean for variance ratio: 0.6489</span></span></code></pre>
+</summary><pre><code><span class="co">## REML estimate of variance ratio: 0.09281 </span>
+<span class="co">## numerical integration of f(x):   24.85 with absolute error &lt; 7.9e-06</span>
+<span class="co">## numerical integration of x*f(x): 16.63 with absolute error &lt; 8.2e-06</span>
+<span class="co">## posterior mean for variance ratio: 0.6693</span></code></pre>
 </details><details><summary>
 plot
 </summary><p><img src="FIESTA_tutorial_SA_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
 </details><p>We can again check our estimates, small area method, and small area
 package.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area3</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area3</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District 227669.4                  16.08</span></span>
-<span><span class="co">## 2:   Powder River Ranger District 150163.3                  23.32</span></span>
-<span><span class="co">## 3:         Tongue Ranger District 287934.7                  12.75</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District 226061.8                  16.01</span>
+<span class="co">## 2:   Powder River Ranger District 147433.8                  23.40</span>
+<span class="co">## 3:         Tongue Ranger District 285934.0                  12.89</span></code></pre>
 </details><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area3</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">SAmethod</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area3</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">SAmethod</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "unit"</span></span></code></pre>
+</summary><pre><code><span class="co">## [1] "unit"</span></code></pre>
 </details><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area3</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">SApackage</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area3</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">SApackage</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "hbsae"</span></span></code></pre>
+</summary><pre><code><span class="co">## [1] "hbsae"</span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -651,35 +647,35 @@ uses a weakly informative half-Cauchy prior on this parameter as
 suggested by White et al (2021), but in this example we will fit the
 same model as before, but with a flat prior.</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span></span>
-<span>  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,           <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>  prednames <span class="op">=</span> <span class="va">all_preds</span>,            <span class="co"># est - charater vector of predictors to be used in the model</span></span>
-<span>  SApackage <span class="op">=</span> <span class="st">"hbsae"</span>,              <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>  SAmethod <span class="op">=</span> <span class="st">"unit"</span>,                <span class="co"># est - method of small area estimation. Either "unit" or "area"</span></span>
-<span>  prior <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">1</span>             <span class="co"># est - prior on ratio of between and within area variation</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span>
+  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,           <span class="co"># pop - population calculations for WY, post-stratification</span>
+  prednames <span class="op">=</span> <span class="va">all_preds</span>,            <span class="co"># est - charater vector of predictors to be used in the model</span>
+  SApackage <span class="op">=</span> <span class="st">"hbsae"</span>,              <span class="co"># est - character string of the R package to do the estimation</span>
+  SAmethod <span class="op">=</span> <span class="st">"unit"</span>,                <span class="co"># est - method of small area estimation. Either "unit" or "area"</span>
+  prior <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">1</span>             <span class="co"># est - prior on ratio of between and within area variation</span>
+  <span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## REML estimate of variance ratio: 0.08628 </span></span>
-<span><span class="co">## numerical integration of f(x):</span></span></code></pre>
+</summary><pre><code><span class="co">## REML estimate of variance ratio: 0.09281 </span>
+<span class="co">## numerical integration of f(x):</span></code></pre>
 </details><p>Let’s check our results compared to Example 3 (same model with
 half-Cauchy prior)</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area3</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area3</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District 227669.4                  16.08</span></span>
-<span><span class="co">## 2:   Powder River Ranger District 150163.3                  23.32</span></span>
-<span><span class="co">## 3:         Tongue Ranger District 287934.7                  12.75</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District 226061.8                  16.01</span>
+<span class="co">## 2:   Powder River Ranger District 147433.8                  23.40</span>
+<span class="co">## 3:         Tongue Ranger District 285934.0                  12.89</span></code></pre>
 </details><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area4</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area4</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District       NA                     NA</span></span>
-<span><span class="co">## 2:   Powder River Ranger District       NA                     NA</span></span>
-<span><span class="co">## 3:         Tongue Ranger District       NA                     NA</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District       NA                     NA</span>
+<span class="co">## 2:   Powder River Ranger District       NA                     NA</span>
+<span class="co">## 3:         Tongue Ranger District       NA                     NA</span></code></pre>
 </details><p>Due to rounding we do in <code>FIESTA</code>, we see the same result.
 However, the estimates are slightly different. We can see this with the
 model objects supplied in the output list from <code>FIESTA</code>:</p>
@@ -695,31 +691,31 @@ View Example
 net. To use model selection, we set the <code>modelselect</code>
 argument to <code>TRUE</code>.</p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span></span>
-<span>  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>  prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
-<span>  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>  SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"</span></span>
-<span>  modelselect <span class="op">=</span> <span class="cn">TRUE</span>           <span class="co"># est - elastic net variable selection</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span>
+  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span>
+  prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span>
+  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span>
+  SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"</span>
+  modelselect <span class="op">=</span> <span class="cn">TRUE</span>           <span class="co"># est - elastic net variable selection</span>
+  <span class="op">)</span></code></pre></div>
 <p>We can now look at estimates with our subset of selected predictors
 and the predictors that were selected.</p>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area5</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area5</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District 225586.2                  16.90</span></span>
-<span><span class="co">## 2:   Powder River Ranger District 152976.2                  26.17</span></span>
-<span><span class="co">## 3:         Tongue Ranger District 286660.8                  12.99</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District 224320.1                  16.68</span>
+<span class="co">## 2:   Powder River Ranger District 149729.4                  26.23</span>
+<span class="co">## 3:         Tongue Ranger District 284851.4                  13.15</span></code></pre>
 </details><div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">area5</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">predselect.unit</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">area5</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">predselect.unit</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##   LARGEBND LARGEBND TOTAL         slp           dem    asp_cos     asp_sin</span></span>
-<span><span class="co">## 1 SApopdat        1     1 0.008403849 -0.0001203369 0.02266181 -0.02543337</span></span>
-<span><span class="co">##       fornf2</span></span>
-<span><span class="co">## 1 -0.3826619</span></span></code></pre>
+</summary><pre><code><span class="co">##   LARGEBND LARGEBND TOTAL         slp           dem    asp_cos     asp_sin</span>
+<span class="co">## 1 SApopdat        1     1 0.004745915 -0.0001050103 0.03462268 -0.06178897</span>
+<span class="co">##       fornf2</span>
+<span class="co">## 1 -0.3936355</span></code></pre>
 </details></details>
 </div>
 </div>
@@ -733,8 +729,8 @@ volume, and filter with <code>estvar.filter</code> set to
 <code>"STATUSCD == 1"</code> so we only consider live trees in our
 estimation.</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">estvar</span> <span class="op">&lt;-</span> <span class="st">"VOLCFNET"</span></span>
-<span><span class="va">live_trees</span> <span class="op">&lt;-</span> <span class="st">"STATUSCD == 1"</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">estvar</span> <span class="op">&lt;-</span> <span class="st">"VOLCFNET"</span>
+<span class="va">live_trees</span> <span class="op">&lt;-</span> <span class="st">"STATUSCD == 1"</span></code></pre></div>
 <div class="section level4">
 <h4 id="example-7-total-net-cubic-foot-volume-of-live-trees-at-least-5-inches-diameter">Example 7: Total net cubic-foot volume of live trees (at least 5
 inches diameter)<a class="anchor" aria-label="anchor" href="#example-7-total-net-cubic-foot-volume-of-live-trees-at-least-5-inches-diameter"></a>
@@ -747,33 +743,33 @@ the <code>estvar</code> and <code>live_trees</code> objects defined
 above to set our response variable and filter, and then compute the
 estimates.</p>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
-<span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - character vector of predictors to be used in the model</span></span>
-<span>    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area" </span></span>
-<span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
-<span>    estvar <span class="op">=</span> <span class="va">estvar</span>,             <span class="co"># est - net cubic-foot volume</span></span>
-<span>    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>   <span class="co"># est - live trees only</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span>
+    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span>
+    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - character vector of predictors to be used in the model</span>
+    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span>
+    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area" </span>
+    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span>
+    estvar <span class="op">=</span> <span class="va">estvar</span>,             <span class="co"># est - net cubic-foot volume</span>
+    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>   <span class="co"># est - live trees only</span>
+    <span class="op">)</span></code></pre></div>
 <p>With both <code>modSAtree</code> and <code>modSAarea</code>,
 <code>FIESTA</code> will return your requested estimates specified with
 the <code>SApackage</code> and <code>SAmethod</code> arguments in the
 <code>est</code> item, but will return all possible estimates in the
 <code>multest</code> item. We can see these estimates below:</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree1</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree1</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN  Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District 410467112                  25.51</span></span>
-<span><span class="co">## 2:   Powder River Ranger District 370723088                  38.18</span></span>
-<span><span class="co">## 3:         Tongue Ranger District 519145288                  24.65</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN  Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District 416183748                  24.30</span>
+<span class="co">## 2:   Powder River Ranger District 378634745                  36.45</span>
+<span class="co">## 3:         Tongue Ranger District 511295196                  24.79</span></code></pre>
 </details><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree1</span><span class="op">$</span><span class="va">multest</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree1</span><span class="op">$</span><span class="va">multest</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## NULL</span></span></code></pre>
+</summary><pre><code><span class="co">## NULL</span></code></pre>
 </details><p>Notably, the area level models are NA in for this model, as there
 were more predictors than degrees of freedom in the model at the area
 level.</p>
@@ -790,31 +786,31 @@ View Example
 code, we set <code>modelselect = TRUE</code> to use the elastic net
 variable selection before fitting the model.</p>
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
-<span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
-<span>    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span></span>
-<span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
-<span>    estvar <span class="op">=</span> <span class="va">estvar</span>,             <span class="co"># est - net cubic-foot volume</span></span>
-<span>    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>,   <span class="co"># est - live trees only</span></span>
-<span>    modelselect <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span>
+    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span>
+    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span>
+    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span>
+    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span>
+    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span>
+    estvar <span class="op">=</span> <span class="va">estvar</span>,             <span class="co"># est - net cubic-foot volume</span>
+    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>,   <span class="co"># est - live trees only</span>
+    modelselect <span class="op">=</span> <span class="cn">TRUE</span>
+    <span class="op">)</span></code></pre></div>
 <p>We now can look at the selected predictors and estimates.</p>
 <div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree2</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">predselect.unit</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree2</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">predselect.unit</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##   LARGEBND LARGEBND TOTAL      slp       dem  asp_cos   asp_sin    fornf2</span></span>
-<span><span class="co">## 1 SApopdat        1     1 -64.4381 0.6691312 58.59386 -555.1746 -1373.544</span></span></code></pre>
+</summary><pre><code><span class="co">##   LARGEBND LARGEBND TOTAL       slp       dem asp_cos   asp_sin    fornf2</span>
+<span class="co">## 1 SApopdat        1     1 -75.98846 0.7412908       0 -685.1538 -1506.606</span></code></pre>
 </details><div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree2</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree2</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN  Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District 410467112                  25.51</span></span>
-<span><span class="co">## 2:   Powder River Ranger District 370723088                  38.18</span></span>
-<span><span class="co">## 3:         Tongue Ranger District 519145288                  24.65</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN  Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District 416320590                  24.12</span>
+<span class="co">## 2:   Powder River Ranger District 377234199                  36.11</span>
+<span class="co">## 3:         Tongue Ranger District 512279660                  24.44</span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -827,57 +823,57 @@ View Example
 example we chose basal area. We also returned titles by using
 <code>returntitle = TRUE</code>.</p>
 <div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
-<span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
-<span>    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span></span>
-<span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
-<span>    estvar <span class="op">=</span> <span class="st">"BA"</span>,               <span class="co"># est - net cubic-foot volume</span></span>
-<span>    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>,  <span class="co"># est - live trees only</span></span>
-<span>    returntitle <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span>
+    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span>
+    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span>
+    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span>
+    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span>
+    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span>
+    estvar <span class="op">=</span> <span class="st">"BA"</span>,               <span class="co"># est - net cubic-foot volume</span>
+    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>,  <span class="co"># est - live trees only</span>
+    returntitle <span class="op">=</span> <span class="cn">TRUE</span>
+    <span class="op">)</span></code></pre></div>
 <p>Now we can take a look at our estimates:</p>
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree3</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree3</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District 21964071                  22.24</span></span>
-<span><span class="co">## 2:   Powder River Ranger District 18982240                  32.81</span></span>
-<span><span class="co">## 3:         Tongue Ranger District 29944472                  19.43</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District 22043124                  21.61</span>
+<span class="co">## 2:   Powder River Ranger District 18865170                  32.06</span>
+<span class="co">## 3:         Tongue Ranger District 29693976                  19.54</span></code></pre>
 </details><p>and see our title list since we set <code>returntitle</code> to
 <code>TRUE</code>.</p>
 <div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree3</span><span class="op">$</span><span class="va">titlelst</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree3</span><span class="op">$</span><span class="va">titlelst</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## $title.estpse</span></span>
-<span><span class="co">## [1] "Basal area of live trees (at least 1 in dia), in square feet, and percent sampling error on forest land live DOMAIN"</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $title.yvar</span></span>
-<span><span class="co">## [1] "Basal area, in square feet"</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $title.estvar</span></span>
-<span><span class="co">## [1] "Basal area of live trees (at least 1 in dia)"</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $title.unitvar</span></span>
-<span><span class="co">## [1] "DOMAIN"</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $title.ref</span></span>
-<span><span class="co">## [1] "Wyoming, 2011-2013"</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $outfn.estpse</span></span>
-<span><span class="co">## [1] "tree_BA_live_forestland"</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $outfn.rawdat</span></span>
-<span><span class="co">## [1] "tree_BA_live_forestland_rawdata"</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $title.tot</span></span>
-<span><span class="co">## [1] "Basal area of live trees (at least 1 in dia), in square feet, on forest land live; Wyoming, 2011-2013"</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $title.unitsn</span></span>
-<span><span class="co">## [1] "square feet"</span></span></code></pre>
+</summary><pre><code><span class="co">## $title.estpse</span>
+<span class="co">## [1] "Basal area of live trees (at least 1 in dia), in square feet, and percent sampling error on forest land live DOMAIN"</span>
+<span class="co">## </span>
+<span class="co">## $title.yvar</span>
+<span class="co">## [1] "Basal area, in square feet"</span>
+<span class="co">## </span>
+<span class="co">## $title.estvar</span>
+<span class="co">## [1] "Basal area of live trees (at least 1 in dia)"</span>
+<span class="co">## </span>
+<span class="co">## $title.unitvar</span>
+<span class="co">## [1] "DOMAIN"</span>
+<span class="co">## </span>
+<span class="co">## $title.ref</span>
+<span class="co">## [1] "Wyoming, 2011-2013"</span>
+<span class="co">## </span>
+<span class="co">## $outfn.estpse</span>
+<span class="co">## [1] "tree_BA_live_forestland"</span>
+<span class="co">## </span>
+<span class="co">## $outfn.rawdat</span>
+<span class="co">## [1] "tree_BA_live_forestland_rawdata"</span>
+<span class="co">## </span>
+<span class="co">## $title.tot</span>
+<span class="co">## [1] "Basal area of live trees (at least 1 in dia), in square feet, on forest land live; Wyoming, 2011-2013"</span>
+<span class="co">## </span>
+<span class="co">## $title.unitsn</span>
+<span class="co">## [1] "square feet"</span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -890,25 +886,25 @@ View Example
 In this case, we choose to use dem to predict basal area with an
 area-level EBLUP from the <code>sae</code> package.</p>
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
-<span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="st">"dem"</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
-<span>    SApackage <span class="op">=</span> <span class="st">"sae"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>    SAmethod <span class="op">=</span> <span class="st">"area"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span></span>
-<span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
-<span>    estvar <span class="op">=</span> <span class="st">"BA"</span>,               <span class="co"># est - net cubic-foot volume</span></span>
-<span>    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>,  <span class="co"># est - live trees only</span></span>
-<span>    returntitle <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span>
+    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span>
+    prednames <span class="op">=</span> <span class="st">"dem"</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span>
+    SApackage <span class="op">=</span> <span class="st">"sae"</span>,         <span class="co"># est - character string of the R package to do the estimation</span>
+    SAmethod <span class="op">=</span> <span class="st">"area"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span>
+    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span>
+    estvar <span class="op">=</span> <span class="st">"BA"</span>,               <span class="co"># est - net cubic-foot volume</span>
+    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>,  <span class="co"># est - live trees only</span>
+    returntitle <span class="op">=</span> <span class="cn">TRUE</span>
+    <span class="op">)</span></code></pre></div>
 <p>Now we can take a look at our estimates.</p>
 <div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree4</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree4</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District 22024177                  32.79</span></span>
-<span><span class="co">## 2:   Powder River Ranger District 17538106                  41.99</span></span>
-<span><span class="co">## 3:         Tongue Ranger District 35374513                  27.57</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District 22014434                  32.81</span>
+<span class="co">## 2:   Powder River Ranger District 17546600                  41.96</span>
+<span class="co">## 3:         Tongue Ranger District 35374035                  27.57</span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -929,19 +925,19 @@ by looking at the help file for the <code>savedata_options</code>
 function (use <code><a href="https://rdrr.io/pkg/FIESTAutils/man/savedata_options.html" class="external-link">help(savedata_options)</a></code> with
 <code>FIESTA</code> loaded in your R environment).</p>
 <div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
-<span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
-<span>    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span></span>
-<span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
-<span>    estvar <span class="op">=</span> <span class="st">"BA"</span>,               <span class="co"># est - net cubic-foot volume</span></span>
-<span>    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>,  <span class="co"># est - live trees only</span></span>
-<span>    savedata <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/savedata_options.html" class="external-link">savedata_options</a></span><span class="op">(</span></span>
-<span>      outfolder <span class="op">=</span> <span class="va">outfolder</span></span>
-<span>    <span class="op">)</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span>
+    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span>
+    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span>
+    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span>
+    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span>
+    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span>
+    estvar <span class="op">=</span> <span class="st">"BA"</span>,               <span class="co"># est - net cubic-foot volume</span>
+    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>,  <span class="co"># est - live trees only</span>
+    savedata <span class="op">=</span> <span class="cn">TRUE</span>,
+    savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/savedata_options.html" class="external-link">savedata_options</a></span><span class="op">(</span>
+      outfolder <span class="op">=</span> <span class="va">outfolder</span>
+    <span class="op">)</span>
+    <span class="op">)</span></code></pre></div>
 </details>
 </div>
 <div class="section level4">
@@ -955,44 +951,44 @@ and in this case we use a HB unit level model from <code>hbsae</code>.
 We also save to an outfolder again, this time giving a file name prefix
 with the <code>outfn.pre</code> arguement.</p>
 <div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree6</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
-<span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
-<span>    SApackage <span class="op">=</span> <span class="st">"hbsae"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
-<span>    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span></span>
-<span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
-<span>    estvar <span class="op">=</span> <span class="st">"BA"</span>,               <span class="co"># est - net cubic-foot volume</span></span>
-<span>    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>,  <span class="co"># est - live trees only</span></span>
-<span>    savedata <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/savedata_options.html" class="external-link">savedata_options</a></span><span class="op">(</span></span>
-<span>      outfolder <span class="op">=</span> <span class="va">outfolder</span>,</span>
-<span>      outfn.pre <span class="op">=</span> <span class="st">"HB_unit"</span></span>
-<span>    <span class="op">)</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree6</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span>
+    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span>
+    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span>
+    SApackage <span class="op">=</span> <span class="st">"hbsae"</span>,         <span class="co"># est - character string of the R package to do the estimation</span>
+    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span>
+    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span>
+    estvar <span class="op">=</span> <span class="st">"BA"</span>,               <span class="co"># est - net cubic-foot volume</span>
+    estvar.filter <span class="op">=</span> <span class="va">live_trees</span>,  <span class="co"># est - live trees only</span>
+    savedata <span class="op">=</span> <span class="cn">TRUE</span>,
+    savedata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/savedata_options.html" class="external-link">savedata_options</a></span><span class="op">(</span>
+      outfolder <span class="op">=</span> <span class="va">outfolder</span>,
+      outfn.pre <span class="op">=</span> <span class="st">"HB_unit"</span>
+    <span class="op">)</span>
+    <span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## REML estimate of variance ratio: 0.0346 </span></span>
-<span><span class="co">## numerical integration of f(x):   22.61 with absolute error &lt; 9e-06</span></span>
-<span><span class="co">## numerical integration of x*f(x): 10.96 with absolute error &lt; 5e-06</span></span>
-<span><span class="co">## posterior mean for variance ratio: 0.4847</span></span></code></pre>
+</summary><pre><code><span class="co">## REML estimate of variance ratio: 0.03877 </span>
+<span class="co">## numerical integration of f(x):   21.9 with absolute error &lt; 8.2e-06</span>
+<span class="co">## numerical integration of x*f(x): 10.85 with absolute error &lt; 4.8e-06</span>
+<span class="co">## posterior mean for variance ratio: 0.4955</span></code></pre>
 </details><details><summary>
 plot
 </summary><p><img src="FIESTA_tutorial_SA_files/figure-html/unnamed-chunk-37-1.png" width="700"></p>
 </details><p>We can see the files in the outfolder here:</p>
 <div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">outfolder</span>, pattern <span class="op">=</span> <span class="st">"HB"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">outfolder</span>, pattern <span class="op">=</span> <span class="st">"HB"</span><span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## character(0)</span></span></code></pre>
+</summary><pre><code><span class="co">## character(0)</span></code></pre>
 </details><p>And the estimates here:</p>
 <div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree6</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">tree6</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1: Medicine Wheel Ranger District 22552929                  22.11</span></span>
-<span><span class="co">## 2:   Powder River Ranger District 17653030                  27.29</span></span>
-<span><span class="co">## 3:         Tongue Ranger District 30804151                  17.04</span></span></code></pre>
+</summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
+<span class="co">## 1: Medicine Wheel Ranger District 22549224                  21.66</span>
+<span class="co">## 2:   Powder River Ranger District 17699101                  26.52</span>
+<span class="co">## 3:         Tongue Ranger District 30499650                  17.10</span></code></pre>
 </details></details>
 </div>
 </div>
@@ -1026,7 +1022,7 @@ Jersey.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>

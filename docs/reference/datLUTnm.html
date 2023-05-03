@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
       </span>
     </div>
 
@@ -81,23 +81,23 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">datLUTnm</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  xvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  LUT <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  LUTvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  LUTnewvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  LUTnewvarnm <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  FIAname <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  NAclass <span class="op">=</span> <span class="st">"Other"</span>,</span>
-<span>  group <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  add0 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  stopifmiss <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  xtxt <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">datLUTnm</span><span class="op">(</span>
+  <span class="va">x</span>,
+  xvar <span class="op">=</span> <span class="cn">NULL</span>,
+  LUT <span class="op">=</span> <span class="cn">NULL</span>,
+  LUTvar <span class="op">=</span> <span class="cn">NULL</span>,
+  LUTnewvar <span class="op">=</span> <span class="cn">NULL</span>,
+  LUTnewvarnm <span class="op">=</span> <span class="cn">NULL</span>,
+  FIAname <span class="op">=</span> <span class="cn">FALSE</span>,
+  NAclass <span class="op">=</span> <span class="st">"Other"</span>,
+  group <span class="op">=</span> <span class="cn">FALSE</span>,
+  add0 <span class="op">=</span> <span class="cn">FALSE</span>,
+  stopifmiss <span class="op">=</span> <span class="cn">FALSE</span>,
+  xtxt <span class="op">=</span> <span class="cn">NULL</span>,
+  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
+  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
+  gui <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -105,87 +105,55 @@
     <dl><dt>x</dt>
 <dd><p>Data frame or comma-delimited file (*.csv). The data table with
 variable to classify.</p></dd>
-
-
 <dt>xvar</dt>
 <dd><p>String. Name of variable in the data table to join to.</p></dd>
-
-
 <dt>LUT</dt>
 <dd><p>Data frame or comma-delimited file (*.csv). Name of the file with
 collapsed classes (If FIAname=FALSE).</p></dd>
-
-
 <dt>LUTvar</dt>
 <dd><p>String. Name of variable in LUT with values matching that
 xvar.  If LUTvar=NULL, LUTvar=xvar.</p></dd>
-
-
 <dt>LUTnewvar</dt>
 <dd><p>String. Name(s) of other variable(s) in the look-up table
 to include in join. If NULL, all other variables in table will be included.</p></dd>
-
-
 <dt>LUTnewvarnm</dt>
 <dd><p>String. Different name(s) for LUTnewvar. If NULL, names
 will default to LUTnewvar. The length of LUTnewvarnm must equal the length
 for LUTnewvar.</p></dd>
-
-
 <dt>FIAname</dt>
 <dd><p>Logical. If TRUE, get FIA reference name based on (ref_codes)
 within FIESTA.</p></dd>
-
-
 <dt>NAclass</dt>
 <dd><p>String. NA values in xvar will be changed to NAclass.</p></dd>
-
-
 <dt>group</dt>
 <dd><p>Logical. If TRUE, the group variables in reference table
 (ref_codes) are merged to data table (GROUPCD, GROUPNM).</p></dd>
-
-
 <dt>add0</dt>
 <dd><p>Logical. IF TRUE, keep all codes in look up table. If FALSE,
 only include codes that are in x.</p></dd>
-
-
 <dt>stopifmiss</dt>
 <dd><p>Logical. IF TRUE, stops function if missing codes in LUTx.</p></dd>
-
-
 <dt>xtxt</dt>
 <dd><p>String.* Name of x table for more useful information in
 warnings.</p></dd>
-
-
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves data to outfolder.</p></dd>
-
-
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'datlut'.</p></dd>
-
-
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>xLUT</dt>
 <dd><p>The input data table with look-up table variable(s).</p></dd>
-
 <dt>xLUTnm</dt>
 <dd><p>Name of the new variable(s).</p></dd>
- <dt>LUT</dt>
+<dt>LUT</dt>
 <dd><p>Look up table with
 categories.</p></dd>
-
-
 </dl><p>If savedata = TRUE, a comma-delimited file is output to the outfolder as
 outfn.  If outfn = NULL, the name of the file will be datlut_'date'.csv.</p>
     </div>
@@ -201,18 +169,18 @@ sort(unique(ref_codes$VARIABLE))</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Append forest type names using the reference table above.</span></span></span>
-<span class="r-in"><span><span class="va">ref_fortypcd</span> <span class="op">&lt;-</span> <span class="va">ref_codes</span><span class="op">[</span><span class="va">ref_codes</span><span class="op">$</span><span class="va">VARIABLE</span> <span class="op">==</span> <span class="st">"FORTYPCD"</span>,<span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">WYcondlut</span> <span class="op">&lt;-</span> <span class="fu">datLUTnm</span><span class="op">(</span><span class="va">WYcond</span>,</span></span>
-<span class="r-in"><span>                      xvar <span class="op">=</span> <span class="st">"FORTYPCD"</span>,</span></span>
-<span class="r-in"><span>                      LUT <span class="op">=</span> <span class="va">ref_fortypcd</span>,</span></span>
-<span class="r-in"><span>                      LUTvar <span class="op">=</span> <span class="st">"VALUE"</span>,</span></span>
-<span class="r-in"><span>                      LUTnewvar <span class="op">=</span> <span class="st">"MEANING"</span>,</span></span>
-<span class="r-in"><span>                      LUTnewvarnm <span class="op">=</span> <span class="st">"FORTYPNM"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYcondlut</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Append forest type names using the reference table above.</span></span>
+<span class="r-in"><span class="va">ref_fortypcd</span> <span class="op">&lt;-</span> <span class="va">ref_codes</span><span class="op">[</span><span class="va">ref_codes</span><span class="op">$</span><span class="va">VARIABLE</span> <span class="op">==</span> <span class="st">"FORTYPCD"</span>,<span class="op">]</span></span>
+<span class="r-in"><span class="va">WYcondlut</span> <span class="op">&lt;-</span> <span class="fu">datLUTnm</span><span class="op">(</span><span class="va">WYcond</span>,</span>
+<span class="r-in">                      xvar <span class="op">=</span> <span class="st">"FORTYPCD"</span>,</span>
+<span class="r-in">                      LUT <span class="op">=</span> <span class="va">ref_fortypcd</span>,</span>
+<span class="r-in">                      LUTvar <span class="op">=</span> <span class="st">"VALUE"</span>,</span>
+<span class="r-in">                      LUTnewvar <span class="op">=</span> <span class="st">"MEANING"</span>,</span>
+<span class="r-in">                      LUTnewvarnm <span class="op">=</span> <span class="st">"FORTYPNM"</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYcondlut</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "xLUT"   "xLUTnm" "LUT"   </span>
-<span class="r-in"><span><span class="va">WYcond2</span> <span class="op">&lt;-</span> <span class="va">WYcondlut</span><span class="op">$</span><span class="va">xLUT</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcond2</span><span class="op">[</span><span class="va">WYcond2</span><span class="op">$</span><span class="va">FORTYPCD</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span class="va">WYcond2</span> <span class="op">&lt;-</span> <span class="va">WYcondlut</span><span class="op">$</span><span class="va">xLUT</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcond2</span><span class="op">[</span><span class="va">WYcond2</span><span class="op">$</span><span class="va">FORTYPCD</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: 40404762010690      1                      NA           1.00           1.00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2: 40404788010690      1                      NA           1.00           1.00</span>
@@ -248,16 +216,16 @@ sort(unique(ref_codes$VARIABLE))</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:        2 Rocky Mountain juniper</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5:        2 Rocky Mountain juniper</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6:        2 Rocky Mountain juniper</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Append forest type names the FIAname parameter. If the xvar is in the stored</span></span></span>
-<span class="r-in"><span><span class="co"># reference table, the name and values will automatically be appended.</span></span></span>
-<span class="r-in"><span><span class="va">WYcondlut2</span> <span class="op">&lt;-</span> <span class="fu">datLUTnm</span><span class="op">(</span><span class="va">WYcond</span>,</span></span>
-<span class="r-in"><span>                       xvar <span class="op">=</span> <span class="st">"FORTYPCD"</span>,</span></span>
-<span class="r-in"><span>                       FIAname <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYcondlut2</span><span class="op">)</span></span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># Append forest type names the FIAname parameter. If the xvar is in the stored</span></span>
+<span class="r-in"><span class="co"># reference table, the name and values will automatically be appended.</span></span>
+<span class="r-in"><span class="va">WYcondlut2</span> <span class="op">&lt;-</span> <span class="fu">datLUTnm</span><span class="op">(</span><span class="va">WYcond</span>,</span>
+<span class="r-in">                       xvar <span class="op">=</span> <span class="st">"FORTYPCD"</span>,</span>
+<span class="r-in">                       FIAname <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYcondlut2</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "xLUT"   "xLUTnm" "LUT"   </span>
-<span class="r-in"><span><span class="va">WYcond3</span> <span class="op">&lt;-</span> <span class="va">WYcondlut2</span><span class="op">$</span><span class="va">xLUT</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcond3</span><span class="op">[</span><span class="va">WYcond3</span><span class="op">$</span><span class="va">FORTYPCD</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span class="va">WYcond3</span> <span class="op">&lt;-</span> <span class="va">WYcondlut2</span><span class="op">$</span><span class="va">xLUT</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcond3</span><span class="op">[</span><span class="va">WYcond3</span><span class="op">$</span><span class="va">FORTYPCD</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: 40404762010690      1                      NA           1.00           1.00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2: 40404788010690      1                      NA           1.00           1.00</span>
@@ -307,7 +275,7 @@ sort(unique(ref_codes$VARIABLE))</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>
