@@ -42,7 +42,7 @@ spGetStates <- function(bnd_layer,
                         stbnd.att = "COUNTYFIPS", 
                         RS = NULL, 
                         states = NULL, 
-                        overlap = 1, 
+                        overlap = 2, 
                         showsteps = FALSE, 
                         savebnd = FALSE, 
                         savedata_opts = NULL) {
