@@ -364,7 +364,7 @@ DBgetEvalid <- function(states = NULL,
       pltflds <- names(PLOT)
     }
   }
- 
+
   ## Get SURVEY table
   if (!is.null(surveynm)) {
     survey.qry <- paste0("select * from ", surveynm, 
@@ -623,7 +623,6 @@ DBgetEvalid <- function(states = NULL,
         cat("Inventory years by state...", "\n" )
         message(paste0(utils::capture.output(invyrtab), collapse = "\n"))
 
-
       } else {
         ## Create table of all inventory years in database
         invdbtab <- NULL
@@ -677,6 +676,9 @@ DBgetEvalid <- function(states = NULL,
         stcdlst <- stcdlst[!stcdlst %in% misscodes]
         states <- states[!states %in% missnames]
       }
+    } else {
+      stinvyr.vals <- as.list(states)
+      names(stinvyr.vals) <- pcheck.states(names(stinvyr.vals), "MEANING")
     }
  
     if (!is.null(evalid)) {
@@ -873,6 +875,7 @@ DBgetEvalid <- function(states = NULL,
         } else {
           invyrtab <- NULL
         }
+
       } else {    ## datsource="datamart" or datsource="csv" & poptables
         invyrs <- list()
         evalidlist <- sapply(states, function(x) NULL)
@@ -913,82 +916,85 @@ DBgetEvalid <- function(states = NULL,
           } else {
             POP_EVAL_GRPstcd <- POP_EVAL_GRP[STATECD == stcd,]
           }
-   
-          ## Get evalid and inventory years from POP_EVAL table
-          setkey(POP_EVAL, "EVAL_GRP_CN")
-          setkey(POP_EVAL_GRPstcd, "CN")
+    
+          if (!is.null(POP_EVAL)) {
 
-          ## Subset POP_EVAL/POP_EVAL_GRP by state and inventory type
-#          popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% POP_EVAL_GRPstcd$CN,]
-          popevalgrptab <- POP_EVAL_GRPstcd[POP_EVAL_GRPstcd$EVAL_GRP_Endyr %in% invtype.invyrs,]
-          popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% popevalgrptab$CN,]
-#          popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% POP_EVAL_GRPstcd$CN &
-#		  POP_EVAL$EVAL_TYP %in% evalTypelist[[state]],]
-#          popevaltab <- POP_EVAL[POP_EVAL_GRPstcd[, c("CN", "EVAL_GRP_Endyr")]]
-          #popevaltab <- popevaltab[popevaltab$END_INVYR %in% invtype.invyrs,]
-          POP_EVAL_endyrs <- na.omit(unique(popevalgrptab[["EVAL_GRP_Endyr"]]))
+            ## Get evalid and inventory years from POP_EVAL table
+            setkey(POP_EVAL, "EVAL_GRP_CN")
+            setkey(POP_EVAL_GRPstcd, "CN")
 
-          if (!is.null(evalEndyr)) {
-            Endyr <- evalEndyr[[state]]
-            if (!all(Endyr %in% POP_EVAL_endyrs)) {
-              missEndyr <- Endyr[!Endyr %in% POP_EVAL_endyrs]
-              stop(paste0(toString(missEndyr), " data are not in ", 
+            ## Subset POP_EVAL/POP_EVAL_GRP by state and inventory type
+  #          popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% POP_EVAL_GRPstcd$CN,]
+            popevalgrptab <- POP_EVAL_GRPstcd[POP_EVAL_GRPstcd$EVAL_GRP_Endyr %in% invtype.invyrs,]
+            popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% popevalgrptab$CN,]
+  #          popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% POP_EVAL_GRPstcd$CN &
+  #		  POP_EVAL$EVAL_TYP %in% evalTypelist[[state]],]
+  #          popevaltab <- POP_EVAL[POP_EVAL_GRPstcd[, c("CN", "EVAL_GRP_Endyr")]]
+            #popevaltab <- popevaltab[popevaltab$END_INVYR %in% invtype.invyrs,]
+            POP_EVAL_endyrs <- na.omit(unique(popevalgrptab[["EVAL_GRP_Endyr"]]))
+
+            if (!is.null(evalEndyr)) {
+              Endyr <- evalEndyr[[state]]
+              if (!all(Endyr %in% POP_EVAL_endyrs)) {
+                missEndyr <- Endyr[!Endyr %in% POP_EVAL_endyrs]
+                stop(paste0(toString(missEndyr), " data are not in ", 
                         stabbr, "_", "POP_EVAL: ", toString(POP_EVAL_endyrs)))
-            }  
-          } else {   ## is.null(evalEndyr)
-            if (evalCur) {
-              Endyr <- max(POP_EVAL_endyrs)
-            } else if (evalAll) {
-              Endyr <- POP_EVAL_endyrs
-            } else {
-              if (length(POP_EVAL_endyrs) > 1 && gui) {
-                Endyr <- select.list(as.character(POP_EVAL_endyrs), 
-                                   title="Eval End Year?", multiple=FALSE)
-                if (Endyr == "") stop("")
-              } else {
+              }  
+            } else {   ## is.null(evalEndyr)
+              if (evalCur) {
                 Endyr <- max(POP_EVAL_endyrs)
-                message("No end year specified.. using most current year in database")
+              } else if (evalAll) {
+                Endyr <- POP_EVAL_endyrs
+              } else {
+                if (length(POP_EVAL_endyrs) > 1 && gui) {
+                  Endyr <- select.list(as.character(POP_EVAL_endyrs), 
+                                   title="Eval End Year?", multiple=FALSE)
+                  if (Endyr == "") stop("")
+                } else {
+                  Endyr <- max(POP_EVAL_endyrs)
+                  message("No end year specified.. using most current year in database")
+                }
               }
             }
-          }
-          ## Populate evalEndyrlist
-          evalEndyrlist[[state]] <- Endyr
+            ## Populate evalEndyrlist
+            evalEndyrlist[[state]] <- Endyr
 
-          ## Subset popevaltab by Endyr
-          #popevaltab <- popevaltab[END_INVYR %in% Endyr,]
-          popevalgrptab <- POP_EVAL_GRPstcd[POP_EVAL_GRPstcd$EVAL_GRP_Endyr %in% Endyr,]
-          popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% popevalgrptab$CN,]
+            ## Subset popevaltab by Endyr
+            #popevaltab <- popevaltab[END_INVYR %in% Endyr,]
+            popevalgrptab <- POP_EVAL_GRPstcd[POP_EVAL_GRPstcd$EVAL_GRP_Endyr %in% Endyr,]
+            popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% popevalgrptab$CN,]
 
 
-          ## Check evalType with evalType in database for state
-          evalType.chklst <- unique(popevaltab$EVAL_TYP)
+            ## Check evalType with evalType in database for state
+            evalType.chklst <- unique(popevaltab$EVAL_TYP)
 
-          if (invtype == "ANNUAL") {
-            if (!all(evalTypelist[[state]] %in% evalType.chklst)) {
-              eType.invalid <- evalTypelist[[state]][!evalTypelist[[state]] %in% evalType.chklst]
-              message("removing invalid evalType for ", state, ": ", 
+            if (invtype == "ANNUAL") {
+              if (!all(evalTypelist[[state]] %in% evalType.chklst)) {
+                eType.invalid <- evalTypelist[[state]][!evalTypelist[[state]] %in% evalType.chklst]
+                message("removing invalid evalType for ", state, ": ", 
                     toString(eType.invalid), "... \nmust be following list: ", 
                     toString(evalType.chklst))
-              evalTypelist[[state]] <- evalTypelist[[state]][!evalTypelist[[state]] %in% eType.invalid]
-            }
-            evalidall <- unique(popevaltab$EVALID[!is.na(popevaltab$EVALID)])
-            evalidlist[[state]] <- 
-              sort(unique(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]))
-            invyrs[[state]] <- 
-              min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE)
+                evalTypelist[[state]] <- evalTypelist[[state]][!evalTypelist[[state]] %in% eType.invalid]
+              }
+              evalidall <- unique(popevaltab$EVALID[!is.na(popevaltab$EVALID)])
+              evalidlist[[state]] <- 
+                sort(unique(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]))
+              invyrs[[state]] <- 
+                min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE)
 
-          } else {
-            if (!all(evalTypelist[[state]] %in% evalType.chklst)) { 
-              evalid.min <- min(popevaltab$EVALID)
-              evalTypelist[[state]] <- 
-                popevaltab[popevaltab$EVALID == min(popevaltab$EVALID), "EVAL_TYP"][1]
-              message(paste("invalid evalType for", state, "...using", evalTypelist[[state]]))
-            }
-            evalidlist[[state]] <- 
-              sort(unique(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]))
-            invyrs[[state]]  <- ifelse (any(is.na(popevaltab$END_INVYR)), 
+            } else {
+              if (!all(evalTypelist[[state]] %in% evalType.chklst)) { 
+                evalid.min <- min(popevaltab$EVALID)
+                evalTypelist[[state]] <- 
+                  popevaltab[popevaltab$EVALID == min(popevaltab$EVALID), "EVAL_TYP"][1]
+                message(paste("invalid evalType for", state, "...using", evalTypelist[[state]]))
+              }
+              evalidlist[[state]] <- 
+                sort(unique(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]))
+              invyrs[[state]]  <- ifelse (any(is.na(popevaltab$END_INVYR)), 
                                       unique(as.numeric(popevaltab$REPORT_YEAR_NM)), 
                                       min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE))
+            }
           }  ## invtype
         }  ## for state loop
       }  ## datsource

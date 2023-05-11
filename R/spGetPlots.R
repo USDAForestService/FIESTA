@@ -467,6 +467,7 @@ spGetPlots <- function(bnd = NULL,
     evalEndyr <- NULL
   }
  
+
   ## Check spXYdat
   if (!is.null(spXYdat)) {
     spxy <- spXYdat$spxy
@@ -582,7 +583,7 @@ spGetPlots <- function(bnd = NULL,
  
       ## Check states
       if (!is.null(states)) {
-        if (!all(states %in% FIESTAutils::ref_statecd$MEANING)) stop("states is invalid")
+        states <- pcheck.states(states)
       }
   
       if (clipxy) {
@@ -688,7 +689,7 @@ spGetPlots <- function(bnd = NULL,
           pjoinid = xydat$pjoinid 
           xyjoinid = xydat$xyjoinid 
           evalInfo <- xydat$evalInfo  
-          #pop_plot_stratum_assgn <- xydat$pop_plot_stratum_assgn           
+          #pop_plot_stratum_assgn <- xydat$pop_plot_stratum_assgn   
         }
  
         ## Check xyjoinid

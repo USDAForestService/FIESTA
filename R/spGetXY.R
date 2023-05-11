@@ -379,7 +379,7 @@ spGetXY <- function(bnd,
   } else if (!is.null(bndx)) {
  
     ## Get intersecting states
-    statedat <- spGetStates(bndx, 
+    statedat <- spGetStates(bnd_layer = bndx, 
                             stbnd.att = "COUNTYFIPS", 
                             RS = RS, 
                             states = states, 
@@ -452,6 +452,18 @@ spGetXY <- function(bnd,
     pjoinid <- xydat$pjoinid 
     evalInfo <- xydat$evalInfo
     pop_plot_stratum_assgn <- xydat$pop_plot_stratum_assgn
+    if (!is.null(evalInfo)) {
+      states <- evalInfo$states
+
+      if (length(states) < length(statenames)) {
+        statenames <- states
+        stcds <- ref_statecd$VALUE[ref_statecd$MEANING %in% states]
+        if (!is.null(countyfips)) {
+          stcdsf <- formatC(as.numeric(stcds), width=2, digits=2, flag="0")
+          countyfips <- countyfips[any(substr(countyfips, 1, 2) %in% stcdsf)] 
+        }     
+      }
+    } 
   }
 
   if (clipxy) {

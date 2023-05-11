@@ -247,6 +247,16 @@ DBgetXY <- function (states = NULL,
   ## Get number of states 
   nbrstates <- length(states)
 
+  ## Check invtype
+  invtypelst <- c('ANNUAL', 'PERIODIC')
+  invtype <- pcheck.varchar(invtype, varnm="invtype", checklst=invtypelst,
+		caption="Inventory Type", gui=gui)
+
+  ## Check intensity1
+  ####################################################################
+  intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
+		title="Single intensity?", first="YES", gui=gui)
+
 
   ###########################################################################
   ## Check XY database 
@@ -310,22 +320,11 @@ DBgetXY <- function (states = NULL,
   eval <- pcheck.varchar(eval, varnm="eval", checklst=evallst, 
 		caption="Evaluation Type", gui=gui)
 
-  ## Check invtype
-  ####################################################################
-  invtypelst <- c('ANNUAL', 'PERIODIC')
-  invtype <- pcheck.varchar(invtype, varnm="invtype", checklst=invtypelst, 
-		caption="Inventory Type", gui=gui)
-
   ## Check coordType
   ####################################################################
   coordTypelst <- c("PUBLIC", "ACTUAL")
   coordType <- pcheck.varchar(var2check=coordType, varnm="coordType", 
 		gui=gui, checklst=coordTypelst, caption="Coordinate Type?")
-
-  ## Check intensity1
-  ####################################################################
-  intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
-		title="Single intensity?", first="YES", gui=gui)
 
 
   ## Check savedata
@@ -433,7 +432,7 @@ DBgetXY <- function (states = NULL,
   ## Get states, Evalid and/or invyrs info
   ##########################################################
   if (!is.null(evalInfo)) {
-    list.items <- c("states", "invtype", "invyrtab")
+    list.items <- c("states", "invtype")
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {

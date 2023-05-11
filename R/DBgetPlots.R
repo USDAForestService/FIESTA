@@ -728,10 +728,9 @@ DBgetPlots <- function (states = NULL,
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
   } 
-
   if (any(Type %in% c("VOL"))) {
     if (!istree) {
-      message("eval Type includes 'VOL', but istree = FALSE... not trees are included")
+      message("eval Type includes 'VOL', but istree = FALSE... no trees included")
     }
   } 
   if (any(Type == "P2VEG")) {
@@ -814,7 +813,7 @@ DBgetPlots <- function (states = NULL,
   ## Get states, Evalid and/or invyrs info
   ##########################################################
   if (!is.null(evalInfo)) {
-    list.items <- c("states", "invtype", "invyrtab")
+    list.items <- c("states", "invtype")
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {
@@ -863,31 +862,37 @@ DBgetPlots <- function (states = NULL,
     plotnm <- "PLOTe"
   }
 
-  if (!is.null(evalTypelist)) {
-    Typelist <- sub("EXP", "", evalTypelist)
-    if (any(c("VOL","CURR") %in% Typelist)) {
-      if (!istree) {
-        message("istree is set to FALSE... not including tree data")
-      }
+#  if (!is.null(evalTypelist)) {
+#    #Typelist <- unlist(evalTypelist)
+#    #Typelist <- sub("EXP", "", evalTypelist)
+#    Typelist <- lapply(evalTypelist, function(x) sub("EXP", "", x))
+
+#    if (any(c("VOL","CURR") %in% Typelist)) {
+#      if (!istree) {
+#        message("istree is set to FALSE... not including tree data")
+#      }
+#    }
+#    if ("P2VEG" %in% Typelist) {
+#      isveg=issubp <- TRUE
+#    } 
+#    if ("INV" %in% Typelist) {
+#      isinv=issubp <- TRUE
+#    } 
+#    if ("DWM" %in% Typelist) {
+#      isdwm <- TRUE
+#    }
+#    if ("CHNG" %in% Typelist) {
+#      ischng=issubp <- TRUE
+#    }
+#    if (any(c("GRM","GROW","MORT","REMV") %in% Typelist)) {
+#      ischng=issubp=isgrm=istree <- TRUE
+#    }
+#  } else {
+    if (!is.list(Type)) {
+      Typelist <- as.list(rep(Type, length(states)))
+      names(Typelist) <- states
     }
-    if ("P2VEG" %in% Typelist) {
-      isveg=issubp <- TRUE
-    } 
-    if ("INV" %in% Typelist) {
-      isinv=issubp <- TRUE
-    } 
-    if ("DWM" %in% Typelist) {
-      isdwm <- TRUE
-    }
-    if ("CHNG" %in% Typelist) {
-      ischng=issubp <- TRUE
-    }
-    if (any(c("GRM","GROW","MORT","REMV") %in% Typelist)) {
-      ischng=issubp=isgrm=istree <- TRUE
-    }
-  } else {
-    Typelist <- unlist(Type)
-  }
+#  }
  
   ## Get state abbreviations and codes 
   ###########################################################
@@ -1372,30 +1377,31 @@ DBgetPlots <- function (states = NULL,
     ## If FIA evaluation, get all plot from all evaluations.
     if (iseval) {
       evalid <- evalidlist[[state]]
+      Types <- Typelist[[state]]
       evalFilter <- paste0("ppsa.EVALID IN(", toString(evalid), ")")
 
-      if ("P2VEG" %in% Typelist) {
+      if ("P2VEG" %in% Types) {
         evalid.veg <- evalid[endsWith(as.character(evalid), "10")]
         if (length(evalid.veg) == 0) stop("must include evaluation ending in 10")
         evalFilter.veg <- paste("ppsa.EVALID =", evalid.veg)
       } else {
         evalFilter.veg <- evalFilter
       }
-      if ("INV" %in% Typelist) {
+      if ("INV" %in% Types) {
         evalid.inv <- evalid[endsWith(as.character(evalid), "09")]
         if (length(evalid.inv) == 0) stop("must include evaluation ending in 09")
         evalFilter.inv <- paste("ppsa.EVALID =", evalid.inv)
       } else {
         evalFilter.inv <- evalFilter
       }
-      if ("DWM" %in% Typelist) {
+      if ("DWM" %in% Types) {
         evalid.dwm <- evalid[endsWith(as.character(evalid), "07")]
         if (length(evalid.dwm) == 0) stop("must include evaluation ending in 07")
         evalFilter.dwm <- paste("ppsa.EVALID =", evalid.dwm)
       } else {
         evalFilter.dwm <- evalFilter
       }
-      if (any(c("GROW", "MORT", "REMV", "GRM") %in% Typelist)) {
+      if (any(c("GROW", "MORT", "REMV", "GRM") %in% Types)) {
         evalid.grm <- evalid[endsWith(as.character(evalid), "03")]
         if (length(evalid.grm) == 0) stop("must include evaluation ending in 03")
         evalFilter.grm <- paste("ppsa.EVALID =", evalid.grm)
