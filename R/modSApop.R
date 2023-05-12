@@ -80,6 +80,7 @@
 #' model. 
 #' @param predfac String vector. Name(s) of factor predictor variables to use
 #' in model. Names will change in output depending on number of categories.
+#' @param returndata Logical. If TRUE, returns data objects.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder. 
 #' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
 #' @param objnm String. Name of *.rds object.
@@ -192,6 +193,7 @@ modSApop <- function(popType="VOL",
                      dunitzonal = NULL, 
                      prednames = NULL, 
                      predfac = NULL, 
+                     returndata = TRUE,
                      savedata = FALSE, 
                      saveobj = FALSE, 
                      objnm = "SApopdat", 
@@ -801,5 +803,9 @@ modSApop <- function(popType="VOL",
                               add_layer=TRUE))
   }
 
-  return(returnlst)
+  if (returndata) {
+    return(returnlst)
+  } 
+  rm(returnlst)
+  gc()
 }

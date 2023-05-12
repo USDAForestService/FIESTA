@@ -21,6 +21,7 @@ modSApop(
   dunitzonal = NULL,
   prednames = NULL,
   predfac = NULL,
+  returndata = TRUE,
   savedata = FALSE,
   saveobj = FALSE,
   objnm = "SApopdat",
@@ -87,6 +88,8 @@ model.}
 
 \item{predfac}{String vector. Name(s) of factor predictor variables to use
 in model. Names will change in output depending on number of categories.}
+
+\item{returndata}{Logical. If TRUE, returns data objects.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 

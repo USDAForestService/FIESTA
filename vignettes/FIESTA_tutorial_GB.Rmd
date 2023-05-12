@@ -457,7 +457,6 @@ DBI::dbDisconnect(conn)
 
 
 ```{r, results = FALSE, message = F}
-
 GBpopdat.RI <- modGBpop(popTabs = list(plt="plot", cond="cond", tree="tree", seed="seed"),
                   dsn = SQLitefn,
                   pltassgn = "pop_plot_stratum_assgn",

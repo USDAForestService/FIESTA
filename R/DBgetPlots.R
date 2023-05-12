@@ -464,7 +464,7 @@ DBgetPlots <- function (states = NULL,
                         invtype = "ANNUAL", 
                         intensity1 = FALSE, 
                         issubp = FALSE, 
-                        istree = FALSE,
+                        istree = TRUE,
                         isseed = FALSE,                      
                         biojenk = FALSE,
                         greenwt = FALSE,
@@ -535,7 +535,7 @@ DBgetPlots <- function (states = NULL,
 	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=SEEDSUBP6=
 	PREV_PLT_CN=dbqueries=REF_SPECIES=PLOT=PLOTe=POP_PLOT_STRATUM_ASSGNe <- NULL
   plotnm=plotgeomnm=ppsanm=condnm=treenm=seednm=vsubpsppnm=vsubpstrnm=invsubpnm=
-	subplotnm=subpcondnm=sccmnm=grmnm=dwmnm=othertablenm=surveynm=evalidnm=
+	subplotnm=subpcondnm=sccmnm=grmnm=dwmnm=surveynm=evalidnm=
      pltcondx <- NULL
 
 
@@ -1199,7 +1199,19 @@ DBgetPlots <- function (states = NULL,
           plotgeomflds <- DBI::dbListFields(dbconn, plotgeomnm)
           pltcondflds <- c(pltcondflds, plotgeomflds)
         }
-      }        
+      } 
+
+      ## Other tables
+      if (!is.null(othertables)) {
+        for (othertable in othertables) {
+          othertable <- chkdbtab(dbtablst, othertable)
+          if (is.null(othertable)) {
+            othertables <- othertables[othertables != othertable]
+            othertables2 <- othertables
+          }
+        }
+      }
+       
     } else if (datsource == "datamart") {
 
       ## PLOT table
@@ -1259,7 +1271,10 @@ DBgetPlots <- function (states = NULL,
         for (othertable in othertables) {
           assign(othertable, 
  		        DBgetCSV(othertable, stabbr, returnDT=TRUE, stopifnull=FALSE))
-          if (!is.null(othertable)) othertablenm <- othertable
+          if (is.null(get(othertable))) {
+            othertables <- othertables[othertables != othertable]
+            othertables2 <- othertables
+          }
         }
       }
     } else if (datsource %in% c("csv", "obj")) {
@@ -1444,7 +1459,7 @@ DBgetPlots <- function (states = NULL,
         message("the INTENSITY variable is not in dataset")
       }
     }
- 
+
     ####################################################################################
     #############################  ADDS FILTER (OPTIONAL)  #############################
     ####################################################################################
@@ -2100,7 +2115,7 @@ DBgetPlots <- function (states = NULL,
         gc()   
       } 
     }
- 
+
     ##############################################################
     ## Tree data
     ##############################################################
@@ -2313,7 +2328,7 @@ DBgetPlots <- function (states = NULL,
           xy_datsource <- datsource
           xy_dsn <- data_dsn
         }
-        if (exists(plotnm)) {
+        if (exists(plotnm) && !is.function(get(plotnm))) {
           dbTabs$plot_layer <- get(plotnm)
         } else {
           dbTabs$plot_layer <- plotnm
@@ -2367,7 +2382,7 @@ DBgetPlots <- function (states = NULL,
         dbqueries$xy <- xydat$xyqry
       }
     }
- 
+
     ##############################################################
     ## Seedling data (SEEDLING)
     ##############################################################
@@ -3409,7 +3424,6 @@ DBgetPlots <- function (states = NULL,
 						and x.UNITCD = p.UNITCD
 						and x.COUNTYCD = p.COUNTYCD
 						and x.PLOT = p.PLOT)")
-
       for (j in 1:length(othertables2)) {
         isref <- FALSE
         othertable <- othertables[j]
@@ -3474,10 +3488,10 @@ DBgetPlots <- function (states = NULL,
         if (!isref) {
           if (is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
             ## Subset overall filters from condx
-            if ("CONDID" %in% names(tab)) {
-              tab <- tab[paste(tab$PLT_CN, tab$CONDID) %in% pcondID,]
+            if ("CONDID" %in% names(otab)) {
+              otab <- otab[paste(otab$PLT_CN, otab$CONDID) %in% pcondID,]
             } else {
-              tab <- tab[tab[[joinid]] %in% unique(pltx$CN),]
+              otab <- otab[otab[[joinid]] %in% unique(pltx$CN),]
             }
           }
           if (nrow(otab) == 0) {
@@ -3501,9 +3515,6 @@ DBgetPlots <- function (states = NULL,
             tabs[[tolower(othertable)]] <- rbind(tabs[[tolower(othertable)]], get(othertablexnm))
           }
           if (savedata) {
-            other_overwrite <- ifelse (j == 1, TRUE, FALSE)
-            other_append <- ifelse (j == 1, TRUE, FALSE)
-
             index.unique.other <- NULL
             datExportData(get(othertablexnm),
                 index.unique = index.unique.other,
@@ -3512,8 +3523,8 @@ DBgetPlots <- function (states = NULL,
                                     out_dsn = out_dsn, 
                                     out_layer = tolower(othertable),
                                     outfn.pre = outfn.pre, 
-                                    overwrite_layer = other_overwrite,
-                                    append_layer = other_append,
+                                    overwrite_layer = overwrite_layer,
+                                    append_layer = append_layer,
                                     outfn.date = outfn.date, 
                                     add_layer = TRUE))
           }
@@ -3753,15 +3764,15 @@ DBgetPlots <- function (states = NULL,
   ## Write out plot/condition counts to comma-delimited file.
   if (savedata) {
     datExportData(pltcnt, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="pltcnt",
-                            outfn.pre=outfn.pre, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            outfn.date=outfn.date, 
-                            add_layer=TRUE)) 
+        savedata_opts=list(outfolder = outfolder, 
+                            out_fmt = out_fmt, 
+                            out_dsn = out_dsn, 
+                            out_layer = "pltcnt",
+                            outfn.pre = outfn.pre, 
+                            overwrite_layer = overwrite_layer,
+                            append_layer = append_layer,
+                            outfn.date = outfn.date, 
+                            add_layer = TRUE)) 
   }
 
   ## GENERATE RETURN LIST

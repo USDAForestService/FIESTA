@@ -22,6 +22,7 @@ modGBpop(
   strata = TRUE,
   stratalut = NULL,
   strvar = "STRATUMCD",
+  returndata = TRUE,
   savedata = FALSE,
   saveobj = FALSE,
   objnm = "GBpopdat",
@@ -100,6 +101,8 @@ of variable to calculate weights from (e.g., pixel counts).}
 \item{strvar}{String. If strata=TRUE, name of the strata variable in
 stratalut and cond or pltassgn data frame with stratum assignment for each
 plot (Default = 'STRATUMCD').}
+
+\item{returndata}{Logical. If TRUE, returns data objects.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 

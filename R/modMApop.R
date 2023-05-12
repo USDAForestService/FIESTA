@@ -89,6 +89,7 @@
 #' @param predfac String vector. Name(s) of prednames that are factors (i.e.,
 #' categorical). Names will change in output depending on number of categories.
 #' @param standardize Logical. If TRUE, predictors are standardized. 
+#' @param returndata Logical. If TRUE, returns data objects.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
 #' @param objnm String. Name of *.rds object.
@@ -232,6 +233,7 @@ modMApop <- function(popType="VOL",
                      prednames = NULL, 
                      predfac = NULL, 
                      standardize = TRUE,
+                     returndata = TRUE,
                      savedata = FALSE, 
                      saveobj = FALSE, 
                      objnm = "MApopdat", 
@@ -857,6 +859,10 @@ modMApop <- function(popType="VOL",
                               add_layer=TRUE))
   }
 
-  return(returnlst)
+  if (returndata) {
+    return(returnlst)
+  } 
+  rm(returnlst)
+  gc()
 }
 

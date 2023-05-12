@@ -22,6 +22,7 @@ modMApop(
   prednames = NULL,
   predfac = NULL,
   standardize = TRUE,
+  returndata = TRUE,
   savedata = FALSE,
   saveobj = FALSE,
   objnm = "MApopdat",
@@ -91,6 +92,8 @@ model.}
 categorical). Names will change in output depending on number of categories.}
 
 \item{standardize}{Logical. If TRUE, predictors are standardized.}
+
+\item{returndata}{Logical. If TRUE, returns data objects.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 

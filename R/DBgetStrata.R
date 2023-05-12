@@ -255,7 +255,6 @@ DBgetStrata <- function(dat = NULL,
     }     
   }
   
-  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -336,12 +335,15 @@ DBgetStrata <- function(dat = NULL,
       }
     }
   }
-
+ 
   if (!is.null(POP_PLOT_STRATUM_ASSGN) && is.null(evalid)) {
     evalidnm <- findnm("evalid", names(POP_PLOT_STRATUM_ASSGN))
     evalid <- sort(unique(POP_PLOT_STRATUM_ASSGN[[evalidnm]]))
+    stevalid <- pcheck.states(as.numeric(substr(format(evalid, digits=2), 1, 2)))
+    evalid <- evalid[stevalid %in% states]
+    POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGN[POP_PLOT_STRATUM_ASSGN[[evalidnm]] %in% evalid, ]
   }
-
+ 
   ## Get DBgetEvalid parameters from eval_opts
   ################################################
   if (eval == "FIA") {

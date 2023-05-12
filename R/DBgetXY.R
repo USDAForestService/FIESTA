@@ -233,7 +233,7 @@ DBgetXY <- function (states = NULL,
       }
     }
   }
- 
+
   ########################################################################
   ### GET PARAMETER INPUTS 
   ########################################################################
@@ -457,6 +457,7 @@ DBgetXY <- function (states = NULL,
       iseval <- FALSE
     }
   }
+ 
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   rslst <- evalInfo$rslst
@@ -615,6 +616,7 @@ DBgetXY <- function (states = NULL,
   } else {
     pvars2keep <- NULL
   }
+
  
   ####################################################################
   ## Check plot table
@@ -644,7 +646,7 @@ DBgetXY <- function (states = NULL,
     }
 
   } else if (!xyisplot && !is.null(pvars2keep)) {    
-
+ 
     ## Check plot table
     ########################################################
     if (datsource == "datamart") {

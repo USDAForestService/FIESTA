@@ -107,6 +107,7 @@
 #' @param strvar String. If strata=TRUE, name of the strata variable in
 #' stratalut and cond or pltassgn data frame with stratum assignment for each
 #' plot (Default = 'STRATUMCD').
+#' @param returndata Logical. If TRUE, returns data objects.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
 #' @param objnm String. Name of *.rds object.
@@ -254,7 +255,8 @@ modGBpop <- function(popType = "VOL",
                      areavar = "ACRES", 
                      strata = TRUE, 
                      stratalut = NULL, 
-                     strvar = "STRATUMCD", 
+                     strvar = "STRATUMCD",
+                     returndata = TRUE, 
                      savedata = FALSE,
                      saveobj = FALSE, 
                      objnm = "GBpopdat",
@@ -1202,5 +1204,9 @@ modGBpop <- function(popType = "VOL",
 		                          add_layer=TRUE))
   }
 
-  return(returnlst)
+  if (returndata) {
+    return(returnlst)
+  } 
+  rm(returnlst)
+  gc()
 }

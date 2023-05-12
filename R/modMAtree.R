@@ -577,20 +577,16 @@ modMAtree <- function(MApopdat,
     if (!row.add0) {
       if (any(is.na(tdomdat[[rowvar]]))) {
         tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]), ]
-      } else if (any(is.na(tdomdat[[rowvar]]))) {
-        tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]),]
-      } else if (any(as.character(tdomdat[[rowvar]]) == "0")) {
-        tdomdat <- tdomdat[tdomdat[[rowvar]] != 0,]
+#      } else if (any(as.character(tdomdat[[rowvar]]) == "0")) {
+#        tdomdat <- tdomdat[tdomdat[[rowvar]] != 0,]
       }
     }
     if (colvar != "NONE") {
       if (!col.add0) {
         if (any(is.na(tdomdat[[colvar]]))) {
           tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]), ]
-        } else if (any(is.na(tdomdat[[colvar]]))) {
-          tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]),]
-        } else if (any(as.character(tdomdat[[colvar]]) == "0")) {
-          tdomdat <- tdomdat[tdomdat[[colvar]] != 0,]
+#        } else if (any(as.character(tdomdat[[colvar]]) == "0")) {
+#          tdomdat <- tdomdat[tdomdat[[colvar]] != 0,]
         }
       }
     }

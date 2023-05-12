@@ -164,13 +164,24 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
     tablst <- DBI::dbListTables(dbconn)
     ppsanm=pltassgnqry <- NULL
-
+ 
     ## Filter for population data
     if (!is.null(evalid) && !is.data.frame(pltassgn)) {
       ppsanm <- chkdbtab(tablst, pltassgn, stopifnull=TRUE)
+      ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
       if (!pltassgnid %in% DBI::dbListFields(dbconn, ppsanm)) {
         stop("pltassgnid is invalid")
       }
+      evalidnm <- chkdbtab(ppsaflds, "EVALID", stopifnull=FALSE)
+      evalidvals <- DBI::dbGetQuery(dbconn, paste("select distinct", evalidnm, "from", ppsanm))[[1]]
+      evalidmiss <- evalid[!evalid %in% evalidvals]
+      if (any(!evalid %in% evalidvals)) {
+        stop("evalids are missing: ", toString(evalid[!evalid %in% evalidvals]))
+      } 
+      if (!pltassgnid %in% DBI::dbListFields(dbconn, ppsanm)) {
+        stop("pltassgnid is invalid")
+      }
+
       if (is.null(plt)) {
         palias <- "ppsa"
         pfromqry <- paste(ppsanm, "ppsa")
@@ -183,6 +194,13 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       whereqry <- paste0("where evalid in(", toString(evalid), ")")
       popwhereqry <- paste0("where evalid in(", toString(popevalid), ")")
       pltassgnqry <- paste("select distinct ppsa.* from", pfromqry, popwhereqry)
+    } else if (!is.null(evalid) && is.data.frame(pltassgn)) {
+      evalidnm <- chkdbtab(names(pltassgn), "EVALID", stopifnull=FALSE)
+      if (!is.null(evalidnm)) {
+        whereqry <- paste0("where ", evalidnm, " in(", toString(evalid), ")")
+        popwhereqry <- paste0("where ", evalidnm, " in(", toString(popevalid), ")")
+        pltassgnqry <- paste("select distinct * from pltassgn", popwhereqry)
+      }
     } else if (measCur) {
       palias <- "p"
       pfromqry <- getpfromqry(varCur="MEASYEAR", Endyr=measEndyr, dsn=dsn,
@@ -208,7 +226,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
         }
       }
     }
-
+ 
     if (!is.null(pfromqry)) {
       pvars <- paste0(palias, ".*")
       ppvars <- paste0("pplot", ".*")
@@ -258,7 +276,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   pltassgnx <- suppressMessages(pcheck.table(pltassgn, tab_dsn=dsn, 
            tabnm="pltassgn", caption="plot assignments?", 
            nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE))
- 
+
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
   ###################################################################################
