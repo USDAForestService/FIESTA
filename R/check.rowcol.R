@@ -361,7 +361,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
 
           if (!is.null(rowlut)) row.add0 <- TRUE
           if (rowvar == "SPCD") {
-            rowLUT <- datLUTspp(x=treef, xvar=rowar, add0=row.add0, xtxt="treef")
+            rowLUT <- datLUTspp(x=treef, xvar=rowvar, add0=row.add0, xtxt="treef")
           } else {            
             rowLUT <- datLUTnm(x=treef, xvar=rowvar, LUT=rowlut, FIAname=row.FIAname,
 		  		group=rowLUTgrp, add0=row.add0, xtxt="tree")
@@ -373,7 +373,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           if (estseed %in% c("add", "only") && !is.null(seedf)) {
             if (rowvar %in% names(seedf)) {
               if (rowvar == "SPCD") {
-                rowLUT <- datLUTspp(x=seedf, xvar=rowar, add0=row.add0, xtxt="treef")
+                rowLUT <- datLUTspp(x=seedf, xvar=rowvar, add0=row.add0, xtxt="treef")
               } else {            
                 rowLUT <- datLUTnm(x=seedf, xvar=rowvar, LUT=rowlut,
 				FIAname=row.FIAname, group=rowLUTgrp, add0=row.add0, xtxt="seed")

@@ -54,7 +54,7 @@
 #' subp_cond table.
 #' @param subpid String. Unique identifier of each subplot.
 #' @param tsumvarlst String (vector). Tree-level variable(s) to aggregate
-#' (e.g., "TPA_UNADJ", "BA"). Use tsumvar="PLT_CN" (tfun=sum) for summed tree
+#' (e.g., "TPA_UNADJ", "BA"). Use "TPA_UNADJ" (tfun=sum) for summed tree
 #' count.
 #' @param tsumvarnmlst String (vector). Name of the tree-level variable(s) to
 #' aggregate (e.g., "TPALIVE", "BALIVE"). This list must have the same number
@@ -180,7 +180,7 @@ datSumTree <- function(tree = NULL,
   checkNAtvars <- {}
   seedonly=parameters <- FALSE
   ref_estvar <- FIESTAutils::ref_estvar
-  tfromqry=sfromqry <- NULL
+  twhereqry=swhereqry=tfromqry=sfromqry <- NULL
 
   ## For documentation
   # subplot Dataframe or comma-delimited file (*.csv). If getadjplot=TRUE, 
@@ -371,11 +371,9 @@ datSumTree <- function(tree = NULL,
         treex[[condid]] <- 1
       }
       if (addseed) {
-        if (!condid %in% seednames && nocond) {
-          message(condid, " not in seed")
+        if (!condid %in% seednames) {
+          message(condid, " not in seed table")
           seedx[[condid]] <- 1
-        } else {
-          stop(condid, " is not in seed table") 
         }
       }
       tsumuniqueid <- c(tsumuniqueid, condid)
@@ -416,8 +414,16 @@ datSumTree <- function(tree = NULL,
   }
 
   selectvars <- tsumuniqueid
-  whereqry <- paste("WHERE", RtoSQL(tfilter, x=treenames))
+  if (!is.null(tfilter)) {
+    twhereqry <- paste("WHERE", RtoSQL(tfilter, x=treenames))
 
+    if (addseed || seedonly) {
+      sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
+      if (!is.null(sfilter)) {
+        swhereqry <- paste("WHERE", RtoSQL(tfilter))
+      }
+    }
+  }
       
   ### Check tsumvarlst
   ###########################################################  
@@ -430,8 +436,7 @@ datSumTree <- function(tree = NULL,
 
   tselectvars <- unique(c(selectvars, tsumvarlst))
 
-
-  ## Check seedonly
+  ## check seed table
   if (seedonly || addseed) {
     if (!any(tsumvarlst %in% c("TPA_UNADJ", "PLT_CN"))) {
       stop("tsumvarlst must be TPA_UNADJ for seedonly")
@@ -442,7 +447,9 @@ datSumTree <- function(tree = NULL,
     sselectvars <- unique(c(selectvars, "TPA_UNADJ"))
   }
 
-  ## Check TPA and if the TPA variable is in treex
+
+  ## CHECK TPA and tsumvars
+  ###########################################################  
   TPA <- pcheck.logical(TPA, varnm="TPA", title="Calculate TPA?", first="NO", 
 		stopifnull=TRUE, gui=gui)
  
@@ -451,18 +458,22 @@ datSumTree <- function(tree = NULL,
       if (!"TPAMORT_UNADJ" %in% treenames) {
         stop("you must have TPAMORT_UNADJ in tree table to calculate trees per acre")
       }
+      tpavar <- "TPAMORT_UNADJ"
     } else if (any(tsumvarlst %in% growvars)) {
       if (!"TPAGROW_UNADJ" %in% treenames) {
         stop("you must have TPAGROW_UNADJ in tree table to calculate trees per acre")
       }
+      tpavar <- "TPAGROW_UNADJ"
     } else if (any(tsumvarlst %in% remvars)){
       if (!"TPAREMV_UNADJ" %in% treenames) {
         stop("you must have TPAREMV_UNADJ in tree table to calculate trees per acre")
       }
+      tpavar <- "TPAREMV_UNADJ"
     } else {  
       if (!"TPA_UNADJ" %in% treenames) {
         stop("you must have TPA_UNADJ in tree table to calculate trees per acre")
       }
+      tpavar <- "TPA_UNADJ"
     }
     tselectvars <- unique(c(tselectvars, tpavar))
 
@@ -471,22 +482,63 @@ datSumTree <- function(tree = NULL,
     }
   }
 
+
+  ## CHECK getadjplot and adjtree
+  ###########################################################  
+  getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
+		title="Get plot adjustment?", first="NO", gui=gui)
+
+  ## Check adjtree
+  adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Adjust trees", 
+		first="NO", gui=gui)
+  if (is.null(adjtree)) adjtree <- FALSE
+
+  if (getadjplot && !adjtree) {
+    message("getadjplot=TRUE, and adjtree=FALSE... setting adjtree=TRUE")
+    adjtree <- TRUE
+  }
+
+  if (adjtree && !getadjplot) {
+    if (!adjvar %in% treenames) {
+      message(adjvar, " variable not in tree table... setting getadjplot=TRUE")
+      getadjplot <- TRUE
+    } else {
+      tselectvars <- unique(c(tselectvars, adjvar))
+    }
+    if (addseed || seedonly) {
+      if (!adjvar %in% seednames) {
+        message(adjvar, " variable not in seed table... setting getadjplot=TRUE")
+        if (seedonly) getadjplot <- TRUE
+      } else {
+        sselectvars <- unique(c(sselectvars, adjvar))
+      }
+    }
+  }
+
+
   #####################################################################
   ## Get tree data
   #####################################################################
   tree.qry <- paste("SELECT", toString(tselectvars), 
-                   tfromqry, whereqry)
+                   tfromqry)
+  if (!is.null(twhereqry)) {
+    tree.qry <- paste(tree.qry, twhereqry)
+  }
   message(tree.qry)
   treex <- setDT(sqldf::sqldf(tree.qry, dbname=dbname))
   setkeyv(treex, tsumuniqueid)
 
   if (addseed) {
     seed.qry <- paste("SELECT", toString(sselectvars), 
-                   sfromqry, whereqry)
+                   sfromqry)
+    if (!is.null(swhereqry)) {
+      seed.qry <- paste(seed.qry, swhereqry)
+    }
     message(seed.qry)
     seedx <- setDT(sqldf::sqldf(seed.qry, dbname=dbname))
     setkeyv(seedx, tsumuniqueid)
   }
+
 
   ## Check cond and plot tables
   ########################################################################
@@ -519,25 +571,6 @@ datSumTree <- function(tree = NULL,
 
   ## Check if have correct data for adjusting plots
   ##########################################################################
-
-  ## Check getadjplot
-  getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
-		title="Get plot adjustment?", first="NO", gui=gui)
-
-  ## Check adjtree
-  adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Adjust trees", 
-		first="NO", gui=gui)
-  if (is.null(adjtree)) adjtree <- FALSE
-
-  if (getadjplot && !adjtree) {
-    message("getadjplot=TRUE, and adjtree=FALSE... setting adjtree=TRUE")
-    adjtree <- TRUE
-  }
-  if (adjtree && !getadjplot && !adjvar %in% treenames) {
-    message(adjvar, " variable not in tree table... setting getadjplot=TRUE")
-    getadjplot <- TRUE
-  }
-
   if (getadjplot) {
     if (bysubp) {
       if (sum(is.null(subpcondx), is.null(condx)) < 3) {
@@ -763,7 +796,6 @@ datSumTree <- function(tree = NULL,
   ### Get tfun used for aggregation
   ###########################################################################
   tfunlst <- c("sum", "mean", "max", "min", "length", "median")
-  if (tsumvar == tuniqueid) tfun <- length
 
   if (is.null(tfun)) {
     if (gui) {
@@ -778,7 +810,7 @@ datSumTree <- function(tree = NULL,
   if (!is.function(tfun)) {
     stop("tfun is not a function")
   } else {
-    if(tuniqueid %in% tsumvar & !identical(tfun, sum))
+    if(tuniqueid %in% tsumvarlst & !identical(tfun, sum))
       stop("use sum with PLT_CN for getting number of trees.")
 
     if (length(grep("mean", deparse(tfun))) > 0) {

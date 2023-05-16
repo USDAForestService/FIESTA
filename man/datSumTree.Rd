@@ -93,7 +93,7 @@ subp_cond table.}
 \item{subpid}{String. Unique identifier of each subplot.}
 
 \item{tsumvarlst}{String (vector). Tree-level variable(s) to aggregate
-(e.g., "TPA_UNADJ", "BA"). Use tsumvar="PLT_CN" (tfun=sum) for summed tree
+(e.g., "TPA_UNADJ", "BA"). Use "TPA_UNADJ" (tfun=sum) for summed tree
 count.}
 
 \item{tsumvarnmlst}{String (vector). Name of the tree-level variable(s) to

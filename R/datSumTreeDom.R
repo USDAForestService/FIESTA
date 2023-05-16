@@ -66,7 +66,7 @@
 #' @param presence Logical. If TRUE, an additional table is output with tree
 #' domain values as presence/absence (1/0).
 #' @param tsumvar String. Name of the variable to aggregate (e.g., "BA"). For
-#' summing number of trees, use tsumvar="PLT_CN" with tfun=sum.
+#' summing number of trees, use tsumvar="TPA_UNADJ" with tfun=sum.
 #' @param addseed Logical. If TRUE, add seedling counts to tree counts. Note:
 #' tdomvar must be 'SPCD' or 'SPGRPCD'.
 #' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
@@ -90,7 +90,7 @@
 #' @param tdomvarlst String (vector). List of specific tree domains of tdomvar
 #' to aggregate (ex. c(108, 202)). If NULL, all domains of tdomvar are used.
 #' @param tdomvar2 String. A second tree domain variable to use to aggregate by
-#' (ex. "DIACL").  The variables, tdomvar and tdomvar2 will be concatenated
+#' (e.g. "DIACL").  The variables, tdomvar and tdomvar2 will be concatenated
 #' before summed.
 #' @param tdomvar2lst String (vector). List of specific tree domains of
 #' tdomvar2 to aggregate.  If NULL, all domains of tdomvar2 are used.
@@ -277,7 +277,7 @@ datSumTreeDom <- function(tree = NULL,
   seedclnm <- "<1"
   seedonly=parameters <- FALSE
   ref_estvar <- FIESTAutils::ref_estvar
-  tfromqry=sfromqry <- NULL
+  twhereqry=swhereqry=tfromqry=sfromqry <- NULL
 
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
@@ -470,11 +470,9 @@ datSumTreeDom <- function(tree = NULL,
         treex[[condid]] <- 1
       }
       if (addseed) {
-        if (!condid %in% seednames && nocond) {
-          message(condid, " not in seed")
+        if (!condid %in% seednames) {
+          message(condid, " not in seed table")
           seedx[[condid]] <- 1
-        } else {
-          stop(condid, " is not in seed table") 
         }
       }
       tsumuniqueid <- c(tsumuniqueid, condid)
@@ -515,8 +513,16 @@ datSumTreeDom <- function(tree = NULL,
   }
 
   selectvars <- tsumuniqueid
-  whereqry <- paste("WHERE", RtoSQL(tfilter, x=treenames))
+  if (!is.null(tfilter)) {
+    twhereqry <- paste("WHERE", RtoSQL(tfilter, x=treenames))
 
+    if (addseed || seedonly) {
+      sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
+      if (!is.null(sfilter)) {
+        swhereqry <- paste("WHERE", RtoSQL(tfilter))
+      }
+    }
+  }
 
   ### Check tsumvar 
   ###########################################################  
@@ -570,7 +576,7 @@ datSumTreeDom <- function(tree = NULL,
         addseed <- FALSE
       }
     }
-    if (!tdomvar2 %in% seednames) {
+    if (!is.null(tdomvar2) && !tdomvar2 %in% seednames) {
       message(tdomvar2, "not in seed... no seeds included")
       if (seedonly) {
         stop()
@@ -617,19 +623,57 @@ datSumTreeDom <- function(tree = NULL,
   }
 
 
+  ## CHECK getadjplot and adjtree
+  ###########################################################  
+  getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
+		title="Get plot adjustment?", first="NO", gui=gui)
+
+  ## Check adjtree
+  adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Adjust trees", 
+		first="NO", gui=gui)
+  if (is.null(adjtree)) adjtree <- FALSE
+
+  if (getadjplot && !adjtree) {
+    message("getadjplot=TRUE, and adjtree=FALSE... setting adjtree=TRUE")
+    adjtree <- TRUE
+  }
+
+  if (adjtree && !getadjplot) {
+    if (!adjvar %in% treenames) {
+      message(adjvar, " variable not in tree table... setting getadjplot=TRUE")
+      getadjplot <- TRUE
+    } else {
+      tselectvars <- unique(c(tselectvars, adjvar))
+    }
+    if (addseed || seedonly) {
+      if (!adjvar %in% seednames) {
+        message(adjvar, " variable not in seed table... setting getadjplot=TRUE")
+        if (seedonly) getadjplot <- TRUE
+      } else {
+        sselectvars <- unique(c(sselectvars, adjvar))
+      }
+    }
+  }
+
 
   #####################################################################
   ## Get tree data
   #####################################################################
   tree.qry <- paste("SELECT", toString(tselectvars), 
-                   tfromqry, whereqry)
+                   tfromqry)
+  if (!is.null(twhereqry)) {
+    tree.qry <- paste(tree.qry, twhereqry)
+  }
   message(tree.qry)
   treex <- setDT(sqldf::sqldf(tree.qry, dbname=dbname))
   setkeyv(treex, tsumuniqueid)
 
   if (addseed) {
     seed.qry <- paste("SELECT", toString(sselectvars), 
-                   sfromqry, whereqry)
+                   sfromqry)
+    if (!is.null(swhereqry)) {
+      seed.qry <- paste(seed.qry, swhereqry)
+    }
     message(seed.qry)
     seedx <- setDT(sqldf::sqldf(seed.qry, dbname=dbname))
     setkeyv(seedx, tsumuniqueid)
@@ -664,28 +708,8 @@ datSumTreeDom <- function(tree = NULL,
     }
   }
 
-
   ## Check if have correct data for adjusting plots
   ##########################################################################
-
-  ## Check getadjplot
-  getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
-		title="Get plot adjustment?", first="NO", gui=gui)
-
-  ## Check adjtree
-  adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Adjust trees", 
-		first="NO", gui=gui)
-  if (is.null(adjtree)) adjtree <- FALSE
-
-  if (getadjplot && !adjtree) {
-    message("getadjplot=TRUE, and adjtree=FALSE... setting adjtree=TRUE")
-    adjtree <- TRUE
-  }
-  if (adjtree && !getadjplot && !adjvar %in% treenames) {
-    message(adjvar, " variable not in tree table... setting getadjplot=TRUE")
-    getadjplot <- TRUE
-  }
-
   if (getadjplot) {
     if (bysubp) {
       if (sum(is.null(subpcondx), is.null(condx)) < 3) {
@@ -1083,6 +1107,7 @@ datSumTreeDom <- function(tree = NULL,
   if (FIAname) {
     if (tdomvar == "SPCD") {
       tdomdata <- datLUTspp(treex, xvar=tdomvar, name=spcd_name)
+      ref_SPCD <- tdomdata$LUT
     } else {    
       tdomdata <- datLUTnm(treex, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
     }
@@ -1168,16 +1193,10 @@ datSumTreeDom <- function(tree = NULL,
     if (!is.null(tdomvar2)) {
       treex <- treex[treex[[tdomvar2]] %in% tdomvar2lst,]
 
-      ## GETS FIAname for tdomvar
-      if (gui && tdomvar2 %in% FIAtnamelst && is.null(FIAname)) {
-        FIAnameresp <- select.list(c("NO", "YES"), title=paste0("FIA name: ", tdomvar2, "?"),
- 		multiple=FALSE)
-        if (FIAnameresp == "") stop("")
-        FIAname <- ifelse(FIAnameresp == "YES", TRUE, FALSE)
-      }
       if (FIAname) {
         if (tdomvar2 == "SPCD") {
           tdomdata <- datLUTspp(treex, xvar=tdomvar2, name=spcd_name)
+          ref_SPCD <- tdomdata$LUT
         } else {
           tdomdata <- datLUTnm(treex, xvar=tdomvar2, LUTvar="VALUE", FIAname=TRUE)
         }
@@ -1848,6 +1867,10 @@ datSumTreeDom <- function(tree = NULL,
   if (!is.null(tdomtotnm)) {
     tdomdata$tdomtotnm <- tdomtotnm
   }
-    
+
+  if (any(c(tdomvar, tdomvar2) == "SPCD")) {
+    tdomdata$ref_spcd <- ref_SPCD
+  }
+ 
   return(tdomdata)
 } 

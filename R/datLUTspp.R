@@ -13,6 +13,8 @@
 #' majority is used or E if equal. The group name is merged from 
 #' ref_codes, SPGRPCD Variable.
 #' @param states String. Name of state(s) the x table is from.
+#' @param name String. Name for species output type ('COMMON', 'SCIENTIFIC', 
+#' 'SYMBOL').
 #' @param add0 Logical. IF TRUE, keep all codes in look up table. If FALSE,
 #' only include codes that are in x.
 #' @param stopifmiss Logical. IF TRUE, stops function if missing codes in LUTx.
@@ -139,7 +141,9 @@ datLUTspp <- function(x,
 
   ## Check if all species codes in datx are in ref table
   #############################################################
-  ref_spp <- ref_species[ref_species$SPCD %in% unique(datx[[xvar]]), ]
+  ref_spp <- FIESTA::ref_species[FIESTA::ref_species$SPCD %in% unique(datx[[xvar]]), 
+			c("SPCD", "COMMON_NAME", "GENUS", "SPECIES", "SPECIES_SYMBOL",
+                 "E_SPGRPCD", "C_SPGRPCD", "P_SPGRPCD", "MAJOR_SPGRPCD", "SCIENTIFIC_NAME")]
   if (length(ref_spp) == 0) {
     stop("SPCD values do not match FIESTA::ref_species values")
   }
@@ -223,7 +227,6 @@ datLUTspp <- function(x,
   ###############################################################
   LUTx <- ref_spp[, lutvars]  
 
-
   ## Merg ref_spp to datx
   ###############################################################
 
@@ -298,13 +301,14 @@ datLUTspp <- function(x,
   } else {
     xLUTlst$xLUTnm <- NULL
   }
-  xLUTlst$LUT <- LUTx
+  #xLUTlst$LUT <- LUTx
+  xLUTlst$LUT <- ref_spp
 
   if (group) {
     xLUTlst$grpcode <- grpcode
     xLUTlst$grpname <- grpname
   }  
-  
+ 
   #### WRITE TO FILE 
   #############################################################
   if (savedata) {

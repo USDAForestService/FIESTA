@@ -22,6 +22,7 @@ datSumTreeDom(
   bysubp = FALSE,
   subpid = "SUBP",
   tsumvar = NULL,
+  addseed = FALSE,
   TPA = TRUE,
   tfun = sum,
   ACI = FALSE,
@@ -37,7 +38,7 @@ datSumTreeDom(
   tdomtot = FALSE,
   tdomtotnm = NULL,
   FIAname = FALSE,
-  addseed = FALSE,
+  spcd_name = "COMMON",
   pivot = TRUE,
   presence = FALSE,
   proportion = FALSE,
@@ -105,7 +106,10 @@ uniqueid).}
 \item{subpid}{String. Unique identifier of each subplot.}
 
 \item{tsumvar}{String. Name of the variable to aggregate (e.g., "BA"). For
-summing number of trees, use tsumvar="PLT_CN" with tfun=sum.}
+summing number of trees, use tsumvar="TPA_UNADJ" with tfun=sum.}
+
+\item{addseed}{Logical. If TRUE, add seedling counts to tree counts. Note:
+tdomvar must be 'SPCD' or 'SPGRPCD'.}
 
 \item{TPA}{Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 respective trees-per-acre variable (see details) to get per-acre
@@ -136,7 +140,7 @@ TPA is converted to trees per hectare (TPH: 1 / (1/ tpavar * 0.4046860)).}
 to aggregate (ex. c(108, 202)). If NULL, all domains of tdomvar are used.}
 
 \item{tdomvar2}{String. A second tree domain variable to use to aggregate by
-(ex. "DIACL").  The variables, tdomvar and tdomvar2 will be concatenated
+(e.g. "DIACL").  The variables, tdomvar and tdomvar2 will be concatenated
 before summed.}
 
 \item{tdomvar2lst}{String (vector). List of specific tree domains of
@@ -158,8 +162,8 @@ column in output data frame. If NULL, the default will be tdomvar + 'TOT'.}
 \item{FIAname}{Logical. If TRUE, changes names of columns for SPCD and
 SPGRPCD from code to FIA names.}
 
-\item{addseed}{Logical. If TRUE, add seedling counts to tree counts. Note:
-tdomvar must be 'SPCD' or 'SPGRPCD'.}
+\item{spcd_name}{String. Output name type if tdomvar or tdomvar2 = "SPCD"
+('COMMON', 'SCIENTIFIC', 'SYMBOL').}
 
 \item{pivot}{Logical. If TRUE, tdomvar data are transposed (pivoted) to
 separate columns.}
