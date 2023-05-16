@@ -1134,6 +1134,16 @@ DBgetPlots <- function (states = NULL,
   ## Loop through states
   ###################################################################################
   for (i in 1:length(states)) {
+
+    if (savedata) {
+      if (i > 1) { 
+        append_layer <- TRUE
+      }
+      if (append_layer && overwrite_layer) {
+        overwrite_layer <- FALSE
+      }
+    }
+
     if (!is.null(PLOTe)) {
       PLOT <- PLOTe
     } else {
@@ -2965,15 +2975,15 @@ DBgetPlots <- function (states = NULL,
             if (!append_layer) index.unique.subpx <- "PLT_CN"
             datExportData(subpx, 
                 index.unique = index.unique.subpx,
-                savedata_opts = list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="subplot",
-                                outfn.pre=outfn.pre, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                outfn.date=outfn.date, 
-                                add_layer=TRUE)) 
+                savedata_opts = list(outfolder = outfolder, 
+                                out_fmt = out_fmt, 
+                                out_dsn = out_dsn, 
+                                out_layer = "subplot",
+                                outfn.pre = outfn.pre, 
+                                overwrite_layer = overwrite_layer,
+                                append_layer = append_layer,
+                                outfn.date = outfn.date, 
+                                add_layer = TRUE)) 
             index.unique.subpcx <- NULL
             rm(subpx)
             gc()
@@ -3029,15 +3039,15 @@ DBgetPlots <- function (states = NULL,
             if (!append_layer) index.unique.subpcx <- c("PLT_CN", "CONDID")
             datExportData(subpcx, 
                 index.unique = index.unique.subpcx,
-                savedata_opts = list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="subp_cond",
-                                outfn.pre=outfn.pre, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                outfn.date=outfn.date, 
-                                add_layer=TRUE)) 
+                savedata_opts = list(outfolder = outfolder, 
+                                out_fmt = out_fmt, 
+                                out_dsn = out_dsn, 
+                                out_layer = "subp_cond",
+                                outfn.pre = outfn.pre, 
+                                overwrite_layer = overwrite_layer,
+                                append_layer = append_layer,
+                                outfn.date = outfn.date, 
+                                add_layer = TRUE)) 
             rm(subpcx)
             gc() 
           } 
@@ -3596,12 +3606,6 @@ DBgetPlots <- function (states = NULL,
     if ((savedata || !treeReturn) && !is.null(pltx)) {
       message("saving data...")
       col.names <- ifelse (i == 1, TRUE, FALSE)
-      if (i > 1) { 
-        append_layer <- TRUE
-      }
-      if (append_layer && overwrite_layer) {
-        overwrite_layer <- FALSE
-      }
 
       if (savedata && getxy && issp) {
         message("saving spatial xy data...")

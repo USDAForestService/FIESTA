@@ -20,9 +20,9 @@
 #' @param NAclass String. NA values in xvar will be changed to NAclass.
 #' @param group Logical. If TRUE, the group variables in reference table
 #' (ref_codes) are merged to data table (GROUPCD, GROUPNM).
-#' @param stopifmiss Logical. IF TRUE, stops function if missing codes in LUTx.
 #' @param add0 Logical. IF TRUE, keep all codes in look up table. If FALSE,
 #' only include codes that are in x.
+#' @param stopifmiss Logical. IF TRUE, stops function if missing codes in LUTx.
 #' @param xtxt String.* Name of x table for more useful information in
 #' warnings.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
@@ -86,12 +86,14 @@ datLUTnm <- function(x,
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
-  if (gui) x=xvar=FIAname=LUT=LUTvar=LUTnewvar=varclass=minvar=maxvar=VALUE <- NULL 
+  if (gui) x=xvar=FIAname=LUT=LUTvar=LUTnewvar <- NULL 
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") 
     Filters <- rbind(Filters, csv=c("Comma-delimited files (*.csv)", "*.csv"))
 
+  ## Set global variables
+  VALUE <- NULL 
   
   ##################################################################
   ## CHECK PARAMETER NAMES

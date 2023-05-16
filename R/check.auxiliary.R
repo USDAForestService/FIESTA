@@ -66,6 +66,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     if (length(grep("Total", lastrow, ignore.case=TRUE)) > 0) {
       auxlut <- auxlut[-nrow(auxlut)]
     }
+ 
     ## If auxlut is NULL, generate based on unitvars in pltx
     #############################################################
     if (is.null(auxlut)) {
@@ -100,7 +101,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     setkeyv(auxlut, unitvars)
     strunitvars <- c(unitvars, strvars)
 
-
     ## Check if class of unitvar in auxlut matches class of unitvar in pltx
     tabs <- check.matchclass(pltx, auxlut, c(unitvars, strvars),
 		tab1txt="pltassgn", tab2txt="auxlut")
@@ -114,7 +114,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     ## Check that the strunitvars in pltx are all in auxlut
     pltx <- check.matchval(tab1=pltx, tab2=auxlut, var1=c(unitvars, strvars),
 		tab1txt="plt", tab2txt=auxtext, stopifmiss=FALSE)
-
 
     ## Check that the strunitvars in auxlut are all in pltx
     auxlut <- check.matchval(tab1=auxlut, tab2=pltx, var1=c(unitvars, strvars),
@@ -192,7 +191,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     if (length(predcon) > 0) {
       missvars <- c(missvars, predcon[which(!predcon %in% auxnmlst)])
     }
-
+ 
     if (length(missvars) > 0) {
       for (mvar in missvars) {
         if (any(grepl(mvar, auxnmlst))) {
@@ -234,7 +233,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       auxlut$npixels <- NULL
     }
   }
-
+ 
   ## Merge P2POINTCNT to auxlut
   ##################################################
   if (!is.null(P2POINTCNT) && !"P2POINTCNT" %in% names(auxlut)) {
@@ -328,7 +327,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     pltx <- pltx[pltx[[strvar]] %in% unique(auxlut[[strvar]]),]
     message("removing plots with invalid strata assignments")
   }
-
+ 
   ###################################################################################
   ## Collapse strata and/or estimation unit classes if errtab warnings
   ###################################################################################

@@ -529,8 +529,6 @@ modWFtree <- function(WFpopdat,
           tdomdatsubp <- tdomdatsubp[!is.na(tdomdatsubp[[rowvar]]), ]
         } else if (any(is.na(tdomdatsubp[[rowvar]]))) {
           tdomdatsubp <- tdomdatsubp[!is.na(tdomdatsubp[[rowvar]]),]
-        } else if (any(as.character(tdomdatsubp[[rowvar]]) == "0")) {
-          tdomdatsubp <- tdomdatsubp[tdomdatsubp[[rowvar]] != 0,]
         }
       }
       if (colvar != "NONE") {
@@ -539,8 +537,6 @@ modWFtree <- function(WFpopdat,
             tdomdatsubp <- tdomdat[!is.na(tdomdatsubp[[colvar]]), ]
           } else if (any(is.na(tdomdatsubp[[colvar]]))) {
             tdomdatsubp <- tdomdatsubp[!is.na(tdomdatsubp[[colvar]]),]
-          } else if (any(as.character(tdomdatsubp[[colvar]]) == "0")) {
-            tdomdatsubp <- tdomdatsubp[tdomdatsubp[[colvar]] != 0,]
           }
         }
       }
@@ -574,8 +570,6 @@ modWFtree <- function(WFpopdat,
           tdomdatmicr <- tdomdatmicr[!is.na(tdomdatmicr[[rowvar]]), ]
         } else if (any(is.na(tdomdatmicr[[rowvar]]))) {
           tdomdatmicr <- tdomdatmicr[!is.na(tdomdatmicr[[rowvar]]),]
-        } else if (any(as.character(tdomdatmicr[[rowvar]]) == "0")) {
-          tdomdatmicr <- tdomdatmicr[tdomdatmicr[[rowvar]] != 0,]
         }
       }
       if (colvar != "NONE") {
@@ -584,8 +578,6 @@ modWFtree <- function(WFpopdat,
             tdomdatmicr <- tdomdat[!is.na(tdomdatmicr[[colvar]]), ]
           } else if (any(is.na(tdomdatmicr[[colvar]]))) {
             tdomdatmicr <- tdomdatmicr[!is.na(tdomdatmicr[[colvar]]),]
-          } else if (any(as.character(tdomdatmicr[[colvar]]) == "0")) {
-            tdomdatmicr <- tdomdatmicr[tdomdatmicr[[colvar]] != 0,]
           }
         }
       }

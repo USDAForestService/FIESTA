@@ -705,15 +705,11 @@ modSAtree <- function(SApopdatlst = NULL,
         if (!rowcolinfo$row.add0) {
           if (any(is.na(tdomdat[[rowcolinfo$rowvar]]))) {
             tdomdat <- tdomdat[!is.na(tdomdat[[rowcolinfo$rowvar]]), ]
-#          } else if (any(as.character(tdomdat[[rowcolinfo$rowvar]]) == "0")) {
-#            tdomdat <- tdomdat[tdomdat[[rowcolinfo$rowvar]] != 0,]
           }
         }
         if (!rowcolinfo$col.add0) {
           if (any(is.na(tdomdat[[rowcolinfo$colvar]]))) {
             tdomdat <- tdomdat[!is.na(tdomdat[[rowcolinfo$colvar]]), ]
-#          } else if (any(as.character(tdomdat[[rowcolinfo$colvar]]) == "0")) {
-#            tdomdat <- tdomdat[tdomdat[[rowcolinfo$colvar]] != 0,]
           }
         }
       }

@@ -184,28 +184,27 @@ NULL
 NULL
 
 
-
-
-#' Reference tables - Code definitions.
-#' 
-#' Table with species information.
-#' 
-#' 
+#' Reference table - Code definitions.
+#'
+#' Table with species information downloaded from datamart FIADB_REFERENCES, 
+#' subset from REF_SPECIES TABLE.
+#'
+#'
 #' @name ref_species
 #' @docType data
-#' @format A dataframe with 8 columns: SPCD, COMMON_NAME, GENUS, SPECIES,
-#' EXISTS_IN_NRCS, EXISTS_IN_NERS, EXISTS_IN_PNWRS, EXISTS_IN_RMRS,
-#' EXISTS_IN_SRS.
+#' @format A dataframe with 14 columns: SPCD, COMMON_NAME, GENUS, SPECIES, 
+#' 		SPECIES_SYMBOL, E_SPGRCD, W_SPGRPCD, C_SPGRPCD, P_SPGRPCD, 
+#'         MAJOR_SPGRPCD, JENKINS_TOTAL_B1, JENKINS_TOTAL_B2, 
+#'         DRYWT_TO_GREENWT_CONERSION, SCIENTIFIC_NAME (GENUS + SPECIES).
 #' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
 #' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
 #' Forest Inventory and Analysis Database: Database Description and Users
 #' Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
 #' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
 #' manual_5-1-2_p2_07_2012.pdf)
-#' @source FIA look-up tables.
+#' @source Imported from comma-delimited file.
 #' @keywords datasets
 NULL
-
 
 
 #' Reference table - Variable titles.
