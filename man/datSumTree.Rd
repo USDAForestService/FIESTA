@@ -174,7 +174,7 @@ file of input parameters is saved to outfolder
 }
 \description{
 Aggregates numeric tree-level data (e.g., VOLCFNET) to plot or condition,
-including options for filtering tree data or extrapolating to plot acre by
+including options for filtering tree data or extrapolating to plot aseedonlycre by
 multiplying by TPA.
 }
 \details{
