@@ -850,7 +850,12 @@ modGBpop <- function(popType = "VOL",
     areawtnm <- areawt
 
   } else {
+    if (adj == "samp") {
+      message("calculating adjustment factors...")
+    }      
+
     if (popType %in% c("ALL", "VOL", "CURR")) {
+      message("calculating adjustment factors...")
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 
                         treex = treef, 
@@ -870,7 +875,7 @@ modGBpop <- function(popType = "VOL",
       areaadj <- adjfacdata$areaadj
       varadjlst <- adjfacdata$varadjlst
       areawtnm <- adjfacdata$areawtnm
-      #stratalut <- adjfacdata$unitlut
+      stratalut <- adjfacdata$unitlut
       expcondtab <- adjfacdata$expcondtab
     }
 
