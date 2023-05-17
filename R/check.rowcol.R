@@ -168,7 +168,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     if (!is.null(row.FIAname) && row.FIAname) {
       ## Get FIA reference table for xvar
       xvar.ref <- getRefobject(toupper(rowvar))
-      if (is.null(xvar.ref)) {
+      if (is.null(xvar.ref) && toupper(rowvar) != "SPCD") {
         message(paste("no reference name for", rowvar))
         row.FIAname <- FALSE
       }
@@ -489,7 +489,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       ## Get FIA reference table for xvar
 
       xvar.ref <- getRefobject(toupper(colvar))
-      if (is.null(xvar.ref)) {
+      if (is.null(xvar.ref) && toupper(colvar) != "SPCD") {
         message(paste("no reference name for", colvar))
         col.FIAname <- FALSE
       }

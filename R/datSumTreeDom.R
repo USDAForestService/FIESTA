@@ -273,7 +273,7 @@ datSumTreeDom <- function(tree = NULL,
 
   ## Set global variables  
   COND_STATUS_CD=COUNT=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=
-	seedx=estunits=TREECOUNT_CALC=cond.nonsamp.filter <- NULL
+	seedx=estunits=TREECOUNT_CALC=cond.nonsamp.filter=ref_spcd <- NULL
   checkNApvars <- {}
   checkNAcvars <- {}
   checkNAtvars <- {}
@@ -873,7 +873,7 @@ datSumTreeDom <- function(tree = NULL,
 		first="NO", gui=gui)
   if (!ACI) {
     if (is.null(condx) || (!"COND_STATUS_CD" %in% condnames)) {
-      message("COND_STATUS_CD not in table, assuming forested plots with no ACI plots")
+      #message("COND_STATUS_CD not in table, assuming forested plots with no ACI plots")
     } else {
       cond.ids <- na.omit(condx[COND_STATUS_CD == 1, 
 		do.call(paste, .SD), .SDcols = cjoinid])
@@ -1106,7 +1106,7 @@ datSumTreeDom <- function(tree = NULL,
   if (FIAname) {
     if (tdomvar == "SPCD") {
       tdomdata <- datLUTspp(treex, xvar=tdomvar, name=spcd_name)
-      ref_SPCD <- tdomdata$LUT
+      ref_spcd <- tdomdata$ref_spcd
     } else {    
       tdomdata <- datLUTnm(treex, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
     }
@@ -1195,7 +1195,7 @@ datSumTreeDom <- function(tree = NULL,
       if (FIAname) {
         if (tdomvar2 == "SPCD") {
           tdomdata <- datLUTspp(treex, xvar=tdomvar2, name=spcd_name)
-          ref_SPCD <- tdomdata$LUT
+          ref_spcd <- tdomdata$ref_spcd
         } else {
           tdomdata <- datLUTnm(treex, xvar=tdomvar2, LUTvar="VALUE", FIAname=TRUE)
         }
@@ -1868,7 +1868,7 @@ datSumTreeDom <- function(tree = NULL,
   }
 
   if (any(c(tdomvar, tdomvar2) == "SPCD")) {
-    tdomdata$ref_spcd <- ref_SPCD
+    tdomdata$ref_spcd <- ref_spcd
   }
  
   return(tdomdata)

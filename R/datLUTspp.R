@@ -225,7 +225,25 @@ datLUTspp <- function(x,
  
   ## Subset ref_spp table
   ###############################################################
-  LUTx <- ref_spp[, lutvars]  
+  LUTx <- unique(ref_spp[, lutvars]) 
+  if (any(duplicated(LUTx[[LUTnewvar]]))) {
+    dups <- LUTx[[LUTnewvar]][duplicated(LUTx[[LUTnewvar]])]
+    message("duplicated values exist in data: ", toString(dups))
+
+    for (dup in dups) {
+      duprows <- which(LUTx[[LUTnewvar]] == dup)
+      nbrdups <- length(duprows)
+      for (i in 2:nbrdups) {
+        row <- duprows[i]
+        newnm <- paste0(dup, "_", i - 1)
+        LUTx[duprows[i], ][[LUTnewvar]] <- paste0(dup, "_", i - 1)
+        if (is.factor(LUTx[[LUTnewvar]])) {
+          levels(LUTx[[LUTnewvar]]) <- c(levels(LUTx[[LUTnewvar]]), newnm)
+        }
+      }
+    }
+  }
+
 
   ## Merg ref_spp to datx
   ###############################################################
@@ -302,7 +320,8 @@ datLUTspp <- function(x,
     xLUTlst$xLUTnm <- NULL
   }
   #xLUTlst$LUT <- LUTx
-  xLUTlst$LUT <- ref_spp
+  xLUTlst$LUT <- LUTx
+  xLUTlst$ref_spp <- ref_spp
 
   if (group) {
     xLUTlst$grpcode <- grpcode

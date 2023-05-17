@@ -261,7 +261,7 @@ datLUTnm <- function(x,
     grpvars <- {}
     if (group) grpvars <- c("GROUPCD", "GROUPNM")  
     ref <- setDT(FIESTAutils::ref_codes[FIESTAutils::ref_codes[["VARIABLE"]] == xvar.ref, c(lutvars, grpvars)])
-
+ 
     ## Check LUTx - xvar in LUTx
     #################################################
     if (!is.null(LUTx)) {

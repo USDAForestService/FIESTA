@@ -492,7 +492,7 @@ modGBtree <- function(GBpopdat,
   if ("INVYR" %in% names(pltcondf)) {
     invyr <- sort(unique(pltcondf$INVYR))
   }
-  
+ 
   ###################################################################################
   ### Check row and column data
   ###################################################################################
