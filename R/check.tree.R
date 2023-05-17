@@ -55,35 +55,30 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     adjTPA <- 1
   }
 
+  if (estseed == "only") {
+    seedonly <- TRUE
+    addseed <- FALSE
+  } else if (estseed == "add") {
+    addseed <- TRUE
+    seedonly <- FALSE
+  } else {
+    seedonly=addseed <- FALSE
+  }
+
+
   ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (NUMERATOR)
   #####################################################################################
   if (bytdom) {
     pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
-    if (estseed == "none") {
-      suppressWarnings(
-      tdomdata <- datSumTreeDom(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid,
-		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid,
-		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name,
-		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
-		adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE, pivot=pivot, metric=metric))
 
-    } else if (estseed == "only") {
-      suppressWarnings(
-      tdomdata <- datSumTreeDom(seed=seedf, cond=condf, plt=plt, tuniqueid=tuniqueid,
-		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid,
-		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name,
-		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
- 		adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE, pivot=pivot, metric=metric))
-
-    } else if (estseed == "add") {
-      suppressWarnings(
-      tdomdata <- datSumTreeDom(tree=treef, seed=seedf, cond=condf, plt=plt,
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid,
-		bycond=bycond, condid=condid, tsumvar=estvarn, TPA=estvarn.TPA,
-		tdomtot=esttotn, tdomtotnm=estvarn.name, addseed=TRUE,
-		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
- 		adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE, pivot=pivot, metric=metric))
-    }
+    suppressWarnings(
+    tdomdata <- datSumTreeDom(tree=treef, seed=seedf, cond=condf, plt=plt, 
+           tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
+           bycond=bycond, condid=condid, tsumvar=estvarn, TPA=estvarn.TPA, 
+           tdomtot=esttotn, tdomtotnm=estvarn.name, tfilter=estvarn.filter, 
+		tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
+		adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE, pivot=pivot, metric=metric,
+           addseed=addseed, seedonly=seedonly))
     if (is.null(tdomdata)) return(NULL)
     tdomdat <- tdomdata$tdomdat
     if (!pivot) {
@@ -92,32 +87,16 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     tdomvarn <- tdomdata$tdomtotnm
     tdomvarlstn <- tdomdata$tdomlst
     estunitsn <- tdomdata$estunits
+
   } else {
-
-    if (estseed == "none") {
-      suppressWarnings(
-      treedata <- datSumTree(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid,
-		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid,
+ 
+    suppressWarnings(
+    treedata <- datSumTree(tree=treef, seed=seedf, cond=condf, plt=plt, 
+           tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
+           bycond=bycond, condid=condid,
  		tsumvarlst=estvarn, tsumvarnmlst=estvarn.name, TPA=estvarn.TPA,
 		tfilter=estvarn.filter, adjtree=adjtree, adjvar=adjvar, checkNA=FALSE,
- 		metric=metric))
-
-    } else if (estseed == "only") {
-      suppressWarnings(
-      treedata <- datSumTree(seed=seedf, cond=condf, plt=plt, tuniqueid=tuniqueid,
-		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid,
- 		tsumvarlst=estvarn, tsumvarnmlst=estvarn.name, TPA=estvarn.TPA,
-		tfilter=estvarn.filter, adjtree=adjtree, adjvar=adjvar, checkNA=FALSE,
- 		metric=metric))
-
-    } else if (estseed == "add") {
-      treedata <- datSumTree(tree=treef, seed=seedf, cond=condf, plt=plt,
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid,
-		bycond=bycond, condid=condid, tsumvarlst=estvarn,
-		tsumvarnmlst=estvarn.name, TPA=estvarn.TPA, addseed=TRUE,
-		tfilter=estvarn.filter, adjtree=adjtree, adjvar=adjvar, checkNA=FALSE,
- 		metric=metric)
-    }
+ 		metric=metric, addseed=addseed, seedonly=seedonly))
     if (is.null(treedata)) return(NULL)
     tdomdat <- treedata$treedat
     tdomvarn <- treedata$sumvars
@@ -152,31 +131,15 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     #################################################################################
     if (bytdom) {
       pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
-      if (estseed == "none") {
-        suppressWarnings(
-        tdomdata <- datSumTreeDom(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid,
-		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid,
+
+      suppressWarnings(
+      tdomdata <- datSumTreeDom(tree=treef, seed=seedf, cond=condf, plt=plt, 
+           tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
+           bycond=bycond, condid=condid,
 		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name,
 		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
-		adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE, pivot=pivot, metric=metric))
-
-      } else if (estseed == "only") {
-        suppressWarnings(
-        tdomdata <- datSumTreeDom(seed=seedf, cond=condf, plt=plt, tuniqueid=tuniqueid,
-		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid,
-		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name,
-		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
- 		adjTPA=adjTPA, adjvar=adjvar, checkNA=FALSE, pivot=pivot, metric=metric))
-
-      } else if (estseed == "add") {
-        suppressWarnings(
-        tdomdata <- datSumTreeDom(tree=treef, seed=seedf, cond=condf, plt=plt,
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid,
-		bycond=bycond, condid=condid, tsumvar=estvarn, TPA=estvarn.TPA,
-		tdomtot=esttotn, tdomtotnm=estvarn.name, addseed=TRUE,
-		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
- 		adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE, pivot=pivot, metric=metric))
-      }
+		adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE, pivot=pivot, metric=metric,
+           addseed=addseed, seedonly=seedonly))
       if (is.null(tdomdata)) {
         message("invalid denominator... returning null")
         return(NULL)
@@ -202,27 +165,13 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
 
     } else {
 
-      if (estseed == "none") {
-        suppressWarnings(
-        treedata <- datSumTree(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid,
-		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid,
+      suppressWarnings(
+      treedata <- datSumTree(tree=treef, seed=seedf, cond=condf, plt=plt, 
+           tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
+           bycond=bycond, condid=condid,
  		tsumvarlst=estvard, tsumvarnmlst=estvard.name, TPA=estvard.TPA,
-		tfilter=estvard.filter, adjtree=adjtree, checkNA=FALSE, metric=metric))
-
-      } else if (estseed == "only") {
-        suppressWarnings(
-        treedata <- datSumTree(seed=seedf, cond=condf, plt=plt, tuniqueid=tuniqueid,
-		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid,
- 		tsumvarlst=estvard, tsumvarnmlst=estvard.name, TPA=estvard.TPA,
-		tfilter=estvard.filter, adjtree=adjtree, checkNA=FALSE, metric=metric))
-
-      } else if (estseed == "add") {
-        treedata <- datSumTree(tree=treef, seed=seedf, cond=condf, plt=plt,
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid,
-		bycond=bycond, condid=condid, tsumvarlst=estvard,
-		tsumvarnmlst=estvard.name, TPA=estvard.TPA, addseed=TRUE,
-		tfilter=estvard.filter, adjtree=adjtree, checkNA=FALSE, metric=metric)
-      }
+		tfilter=estvard.filter, adjtree=adjtree, checkNA=FALSE, metric=metric,
+           addseed=addseed, seedonly=seedonly))
       if (is.null(treedata)) return(NULL)
       tdomdatd <- treedata$treedat
       tdomvard <- treedata$sumvars

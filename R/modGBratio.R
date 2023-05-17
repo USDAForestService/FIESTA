@@ -548,7 +548,8 @@ modGBratio <- function(GBpopdat,
   tdomvar <- rowcolinfo$tdomvar
   tdomvar2 <- rowcolinfo$tdomvar2
   grpvar <- rowcolinfo$grpvar
-  #rm(rowcolinfo)  
+  #rm(rowcolinfo) 
+
 
   if (rowvar == "TOTAL") rowcol.total <- TRUE
 

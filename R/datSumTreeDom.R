@@ -69,6 +69,8 @@
 #' summing number of trees, use tsumvar="TPA_UNADJ" with tfun=sum.
 #' @param addseed Logical. If TRUE, add seedling counts to tree counts. Note:
 #' tdomvar must be 'SPCD' or 'SPGRPCD'.
+#' @param seedonly Logical. If TRUE, seedling counts only. Note: tdomvar
+#' must be 'SPCD' or 'SPGRPCD'.
 #' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 #' respective trees-per-acre variable (see details) to get per-acre
 #' measurements.
@@ -223,6 +225,7 @@ datSumTreeDom <- function(tree = NULL,
                           subpid = "SUBP", 
                           tsumvar = NULL, 
                           addseed = FALSE, 
+                          seedonly = FALSE,
                           TPA = TRUE, 
                           tfun = sum, 
                           ACI = FALSE, 
@@ -275,7 +278,7 @@ datSumTreeDom <- function(tree = NULL,
   checkNAcvars <- {}
   checkNAtvars <- {}
   seedclnm <- "<1"
-  seedonly=parameters <- FALSE
+  parameters <- FALSE
   ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry <- NULL
 
@@ -466,7 +469,6 @@ datSumTreeDom <- function(tree = NULL,
     if (bycond) {
       if (!condid %in% treenames) {
         message(condid, " not in tree... assuming only 1 condition")
-        nocond <- TRUE
         treex[[condid]] <- 1
       }
       if (addseed) {
@@ -495,10 +497,7 @@ datSumTreeDom <- function(tree = NULL,
     if (bycond) {
       if (!condid %in% seednames) {
         message(condid, " not in seed... assuming only 1 condition")
-        nocond <- TRUE
         seedx[[condid]] <- 1
-      } else {
-        stop(condid, " is not in seed table") 
       }
       tsumuniqueid <- c(tsumuniqueid, condid)
     }
@@ -736,7 +735,7 @@ datSumTreeDom <- function(tree = NULL,
     }
     if (bycond) {
       if (!condid %in% condnames) {
-        if (nocond) {
+        if (!nocond) {
           condx[[condid]] <- 1
         } else {
           stop("bycond=TRUE but ", condid, " is not in cond")

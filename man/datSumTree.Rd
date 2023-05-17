@@ -23,11 +23,12 @@ datSumTree(
   subpid = "SUBP",
   tsumvarlst = NULL,
   tsumvarnmlst = NULL,
+  addseed = FALSE,
+  seedonly = FALSE,
   TPA = TRUE,
   tfun = sum,
   ACI = FALSE,
   tfilter = NULL,
-  addseed = FALSE,
   lbs2tons = TRUE,
   metric = FALSE,
   getadjplot = FALSE,
@@ -101,6 +102,12 @@ aggregate (e.g., "TPALIVE", "BALIVE"). This list must have the same number
 of variables as tsumvarlst and be in respective order. If NULL, the default
 names will be tsumvar'_tfun' (e.g., "TPA_UNADJ_SUM", "BA_SUM").}
 
+\item{addseed}{Logical. If TRUE, add seedling counts to tree counts. Note:
+tdomvar must be 'SPCD' or 'SPGRPCD'.}
+
+\item{seedonly}{Logical. If TRUE, seedling counts only. Note: tdomvar
+must be 'SPCD' or 'SPGRPCD'.}
+
 \item{TPA}{Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 respective trees-per-acre variable (see details) to get per-acre
 measurements.}
@@ -115,9 +122,6 @@ include condition table.}
 \item{tfilter}{String. Filter to subset the tree data before aggregating
 (e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is
 prompted.  Use tfilter="NONE" if no filters.}
-
-\item{addseed}{Logical. If TRUE, add seedling data to tree counts (if TPA
-variable in tsumvarlst).}
 
 \item{lbs2tons}{Logical. If TRUE, converts biomass or carbon variables from
 pounds to tons. If metric=TRUE, converts to metric tons, else short tons.}

@@ -262,8 +262,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           rowLUT <- datLUTnm(x=condf, xvar=rowvar, 
                              LUT=rowlut, FIAname=row.FIAname, 
                              group=rowLUTgrp, add0=row.add0)
-          condf <- rowLUT$xLUT
-          rowlut <- rowLUT$LUT
+          condf <- setDT(rowLUT$xLUT)
+          rowlut <- setDT(rowLUT$LUT)
 
           rowLUTnm <- rowLUT$xLUTnm
           if (rowgrp) {
@@ -366,8 +366,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
             rowLUT <- datLUTnm(x=treef, xvar=rowvar, LUT=rowlut, FIAname=row.FIAname,
 		  		group=rowLUTgrp, add0=row.add0, xtxt="tree")
           }
-          treef <- rowLUT$xLUT
-          rowlut <- rowLUT$LUT
+          treef <- setDT(rowLUT$xLUT)
+          rowlut <- setDT(rowLUT$LUT)
           rowLUTnm <- rowLUT$xLUTnm
 
           if (estseed %in% c("add", "only") && !is.null(seedf)) {
@@ -558,8 +558,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           if (!is.null(collut)) col.add0 <- TRUE
           colLUT <- datLUTnm(x=condf, xvar=colvar, LUT=collut, FIAname=col.FIAname,
 			add0=col.add0)
-          condf <- colLUT$xLUT
-          collut <- colLUT$LUT
+          condf <- setDT(colLUT$xLUT)
+          collut <- setDT(colLUT$LUT)
           colLUTnm <- colLUT$xLUTnm
 
           if (is.null(col.orderby) || col.orderby == "NONE") {
@@ -633,8 +633,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
             colLUT <- datLUTnm(x=treef, xvar=colvar, LUT=collut, FIAname=col.FIAname,
 				add0=col.add0, xtxt="treef")
           }
-          treef <- colLUT$xLUT
-          collut <- colLUT$LUT
+          treef <- setDT(colLUT$xLUT)
+          collut <- setDT(colLUT$LUT)
           colLUTnm <- colLUT$xLUTnm
 
           if (estseed == "add" && !is.null(seedf)) {

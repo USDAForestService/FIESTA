@@ -1,7 +1,7 @@
 #' Data - Aggregates numeric tree data to the plot or condition-level.
 #' 
 #' Aggregates numeric tree-level data (e.g., VOLCFNET) to plot or condition,
-#' including options for filtering tree data or extrapolating to plot acre by
+#' including options for filtering tree data or extrapolating to plot aseedonlycre by
 #' multiplying by TPA.
 #' 
 #' If variable = NULL, then it will prompt user for input.
@@ -60,6 +60,10 @@
 #' aggregate (e.g., "TPALIVE", "BALIVE"). This list must have the same number
 #' of variables as tsumvarlst and be in respective order. If NULL, the default
 #' names will be tsumvar'_tfun' (e.g., "TPA_UNADJ_SUM", "BA_SUM").
+#' @param addseed Logical. If TRUE, add seedling counts to tree counts. Note:
+#' tdomvar must be 'SPCD' or 'SPGRPCD'.
+#' @param seedonly Logical. If TRUE, seedling counts only. Note: tdomvar
+#' must be 'SPCD' or 'SPGRPCD'.
 #' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 #' respective trees-per-acre variable (see details) to get per-acre
 #' measurements.
@@ -71,8 +75,6 @@
 #' @param tfilter String. Filter to subset the tree data before aggregating
 #' (e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is
 #' prompted.  Use tfilter="NONE" if no filters.
-#' @param addseed Logical. If TRUE, add seedling data to tree counts (if TPA
-#' variable in tsumvarlst).
 #' @param lbs2tons Logical. If TRUE, converts biomass or carbon variables from
 #' pounds to tons. If metric=TRUE, converts to metric tons, else short tons.
 #' @param metric Logical. If TRUE, converts response to metric units based on
@@ -139,11 +141,12 @@ datSumTree <- function(tree = NULL,
                        subpid = "SUBP", 
                        tsumvarlst = NULL, 
                        tsumvarnmlst = NULL, 
+                       addseed = FALSE, 
+                       seedonly = FALSE,
                        TPA = TRUE, 
                        tfun = sum, 
                        ACI = FALSE, 
                        tfilter = NULL, 
-                       addseed = FALSE, 
                        lbs2tons = TRUE, 
                        metric = FALSE, 
                        getadjplot = FALSE, 
@@ -178,9 +181,10 @@ datSumTree <- function(tree = NULL,
   checkNApvars <- {}
   checkNAcvars <- {}
   checkNAtvars <- {}
-  seedonly=parameters <- FALSE
+  parameters <- FALSE
   ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry <- NULL
+
 
   ## For documentation
   # subplot Dataframe or comma-delimited file (*.csv). If getadjplot=TRUE, 
@@ -324,6 +328,7 @@ datSumTree <- function(tree = NULL,
   if (is.null(treex) && is.null(seedx)) {
     stop("must include tree and/or seed table")
   }
+ 
   if (addseed && is.null(seedx)) {
     stop("if addseed=TRUE, must include seed table")
   }
@@ -367,7 +372,6 @@ datSumTree <- function(tree = NULL,
     if (bycond) {
       if (!condid %in% treenames) {
         message(condid, " not in tree... assuming only 1 condition")
-        nocond <- TRUE
         treex[[condid]] <- 1
       }
       if (addseed) {
@@ -396,10 +400,7 @@ datSumTree <- function(tree = NULL,
     if (bycond) {
       if (!condid %in% seednames) {
         message(condid, " not in seed... assuming only 1 condition")
-        nocond <- TRUE
         seedx[[condid]] <- 1
-      } else {
-        stop(condid, " is not in seed table") 
       }
       tsumuniqueid <- c(tsumuniqueid, condid)
     }

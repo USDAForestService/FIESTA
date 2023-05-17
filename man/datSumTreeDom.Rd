@@ -23,6 +23,7 @@ datSumTreeDom(
   subpid = "SUBP",
   tsumvar = NULL,
   addseed = FALSE,
+  seedonly = FALSE,
   TPA = TRUE,
   tfun = sum,
   ACI = FALSE,
@@ -110,6 +111,9 @@ summing number of trees, use tsumvar="TPA_UNADJ" with tfun=sum.}
 
 \item{addseed}{Logical. If TRUE, add seedling counts to tree counts. Note:
 tdomvar must be 'SPCD' or 'SPGRPCD'.}
+
+\item{seedonly}{Logical. If TRUE, seedling counts only. Note: tdomvar
+must be 'SPCD' or 'SPGRPCD'.}
 
 \item{TPA}{Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 respective trees-per-acre variable (see details) to get per-acre

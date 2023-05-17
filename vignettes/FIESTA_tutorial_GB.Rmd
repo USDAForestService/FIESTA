@@ -2015,7 +2015,6 @@ Next, we look at tree ratios:
 ##    by forest type, Wyoming, 2011-2013
 ratio1.4 <- modGBratio(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
-    estseed = "add",             # est - add seedling data
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
     estvarn = "VOLCFNET",                # est - net cubic-foot volume, numerator
