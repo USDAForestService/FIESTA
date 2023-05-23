@@ -372,7 +372,7 @@ spGetAuxiliary <- function(xyplt = NULL,
 
   ## Check continuous rasters
   ###################################################################
-  rastlst.contfn <- tryCatch(suppressWarnings(getrastlst.rgdal(rastlst.cont, 
+  rastlst.contfn <- tryCatch(suppressWarnings(getrastlst(rastlst.cont, 
 	rastfolder, quiet=TRUE, gui=gui)),
      	 	error=function(e) {
 			      message(e, "\n")
@@ -422,7 +422,7 @@ spGetAuxiliary <- function(xyplt = NULL,
     ## Transform aspect 
     if (asptransform) {
       ## Check aspect raster
-      rast.aspfn <- getrastlst.rgdal(rast.asp, rastfolder, gui=gui)  
+      rast.aspfn <- getrastlst(rast.asp, rastfolder, gui=gui)  
 
       if (is.null(rast.aspfn)) {
         stop("must identify aspect raster in rastlst.contfn using rast.asp")
@@ -438,7 +438,7 @@ spGetAuxiliary <- function(xyplt = NULL,
  
   ## Check categorical rasters
   ###################################################################
-  rastlst.catfn <- tryCatch(suppressWarnings(getrastlst.rgdal(rastlst.cat, 
+  rastlst.catfn <- tryCatch(suppressWarnings(getrastlst(rastlst.cat, 
 	rastfolder, quiet=TRUE, gui=gui)),
      	 	error=function(e) {
 			      message(e, "\n")
@@ -473,7 +473,7 @@ spGetAuxiliary <- function(xyplt = NULL,
     }
 
     ## Check raster for lookup table
-    rast.lutfn <- suppressWarnings(getrastlst.rgdal(rast.lut, rastfolder, gui=gui))
+    rast.lutfn <- suppressWarnings(getrastlst(rast.lut, rastfolder, gui=gui))
     
     if (!is.null(rast.lutfn)) {
       if (length(rast.lutfn) > 1) 

@@ -7,7 +7,5 @@
 #' @importFrom stats as.formula na.omit rnorm sd xtabs aggregate 
 #' @importFrom stats median var complete.cases ave model.matrix
 #' @importFrom methods as new slot canCoerce is
-#' @importFrom rgdal readOGR GDALinfo GDAL.open GDAL.close getRasterBand 
-#' @importFrom rgdal saveDataset getRasterData getDriverName putRasterData getProjectionRef
 #' @importFrom parallel detectCores
 NULL

@@ -154,7 +154,7 @@ spReprojectRaster <- function(rastfn,
   ##################################################################
 
   ## Verify rasters 
-  srcfile <- getrastlst.rgdal(rastfn, gui=gui)
+  srcfile <- getrastlst(rastfn, gui=gui)
   srcinfo <- rasterInfo(srcfile)
 
   ## Get names of raster 
@@ -170,7 +170,7 @@ spReprojectRaster <- function(rastfn,
     stop("invalid bands... must be integer(s) less than ", rast.nbands)
 
   ## Check rast.ref
-  rast.ref <- getrastlst.rgdal(rast.ref, gui=gui)
+  rast.ref <- getrastlst(rast.ref, gui=gui)
   if (!is.null(rast.ref)) {
     info.ref <- rasterInfo(rast.ref)
     bbox.new <- info.ref$bbox

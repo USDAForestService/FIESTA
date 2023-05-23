@@ -389,7 +389,7 @@ spGetStrata <- function(xyplt,
     ## if strattype == "RASTER"
     ##################################################################
     ## Check strat_layer
-    stratlayerfn <- suppressMessages(getrastlst.rgdal(strat_layer, rastfolder=strat_dsn,
+    stratlayerfn <- suppressMessages(getrastlst(strat_layer, rastfolder=strat_dsn,
  		stopifLonLat=TRUE))
 
     ## Get raster info

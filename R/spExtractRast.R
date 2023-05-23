@@ -277,7 +277,7 @@ spExtractRast <- function(xyplt,
  
   ## Verify rasters
   ########################################################
-  rastfnlst <- suppressWarnings(getrastlst.rgdal(rastlst, rastfolder, gui=gui))
+  rastfnlst <- suppressWarnings(getrastlst(rastlst, rastfolder, gui=gui))
   #if (any(rastfnlst == "")) stop("must write raster to file")
   nrasts <- length(rastfnlst)
 

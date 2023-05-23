@@ -147,14 +147,12 @@ spPoly2Rast <- function(polyv,
   if (!is.null(rastfn.template)) {
 
     ## verify raster
-    rastfn <- getrastlst.rgdal(rastfn.template)
+    rastfn <- getrastlst(rastfn.template)
 
-    ## get format from raster
-    rast_info2 <- suppressWarnings(rgdal::GDALinfo(rastfn))
-    rast.fmt <- attr(rast_info2, "driver")
-
+    ## get raster info
     rast_info <- rasterInfo(rastfn)
     rast.prj <- rast_info$crs
+    rast.fmt <- rast_info$format
     nbands <- rast_info$nbands
 
     ## Check if projections match

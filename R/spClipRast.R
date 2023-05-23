@@ -159,17 +159,14 @@ spClipRast <- function(rast,
   clippolyvx <- datFilter(clippolyvx, xfilter=clippolyv.filter)$xf
   
   ## Verify raster
-  rastfn <- getrastlst.rgdal(rast, rastfolder, gui=gui)
+  rastfn <- getrastlst(rast, rastfolder, gui=gui)
   
   ## Get names of raster
   rastnm <- basename.NoExt(rastfn)
   
-  ## Import raster
-  rast_info2 <- suppressWarnings(rgdal::GDALinfo(rastfn))
-  
+  ## Get raster info
   rast_info <- rasterInfo(rastfn)
-  rast.fmt <- attr(rast_info2, "driver")
-  rast.df <- attr(rast_info2, "df")
+  rast.fmt <- rast_info$format
   rast.prj <- rast_info$crs
   nbands <- rast_info$nbands
   nodata <- rast_info$nodata_value
@@ -199,30 +196,12 @@ spClipRast <- function(rast,
     }
   }
   
-#  ## Check NODATA
+  ## Check NODATA
   if (is.null(NODATA)) {
     if (!is.null(NODATA) && (!is.numeric(NODATA) || length(NODATA) > 1)) {
       stop("NODATA must be numeric")
     }
   }
-#    if (!is.null(nodata) && length(unique(nodata)) == 1) {
-#      NODATA <- unique(rast.df$NoDataValue)
-#    } else {
-#      NODATA <- 0
-#    } 
-#  } else {
-#    if (!is.na(NODATA) && NODATA != 0) {
-#      if (!is.numeric(NODATA)) {
-#        message("invalid NODATA value... using 0")
-#        NODATA <- 0
-#      }
-#      if (rast.dtyp %in% c("INT1U", "INT2U", "INT4U") && NODATA < 0) {
-#        message("Cannot have a negative NODATA value for raster of datatype: ", 
-#                rast.dtyp, ", using 0")
-#        NODATA <- 0
-#      }
-#    }
-#  }
   
   ## Check buffdist
   if (!is.null(buffdist)) 
@@ -235,11 +214,7 @@ spClipRast <- function(rast,
   ## Check showext
   showext <- pcheck.logical(showext, varnm="showext", title="Show Extents?", 
                             first="NO", gui=gui)
-  
-  ## Check setNODATA
-  #  setNODATA <- pcheck.logical(setNODATA, varnm="setNODATA", title="Set NODATA?", 
-  #		first="NO", gui=gui)
-  
+    
   ## Check fmt
   fmt <- pcheck.varchar(var2check=fmt, varnm="fmt", gui=gui, 
                         checklst=drivers$fmt, caption="Export format")

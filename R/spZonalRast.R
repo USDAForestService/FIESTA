@@ -159,7 +159,7 @@ spZonalRast <- function(polyv,
   ########################################################  
 
   ## Verify rasters 
-  rastfn <- suppressWarnings(getrastlst.rgdal(rastfn, rastfolder, 
+  rastfn <- suppressWarnings(getrastlst(rastfn, rastfolder, 
 		stopifLonLat=TRUE, gui=gui))
 
   ## Get names of raster 
