@@ -72,3 +72,38 @@ ref_statecd <- FIESTAutils::ref_statecd
 #' @inherit FIESTAutils::stunitco source title
 #' @export
 stunitco <- FIESTAutils::stunitco
+
+#' @inherit FIESTAutils::ref_plt source title
+#' @export
+ref_plt <- FIESTAutils::ref_plt
+
+#' @inherit FIESTAutils::ref_cond source title
+#' @export
+ref_cond <- FIESTAutils::ref_cond
+
+#' @inherit FIESTAutils::ref_tree source title
+#' @export
+ref_tree <- FIESTAutils::ref_tree
+
+#' @inherit FIESTAutils::ref_shp source title
+#' @export
+ref_shp <- FIESTAutils::ref_shp
+
+#' @inherit FIESTAutils::ref_species source title
+#' @export
+ref_species <- FIESTAutils::ref_species
+
+#' @inherit FIESTAutils::ref_conversion source title
+#' @export
+ref_conversion <- FIESTAutils::ref_conversion
+
+#' @inherit FIESTAutils::ref_popType source title
+#' @export
+ref_popType <- FIESTAutils::ref_popType
+
+#' @inherit FIESTAutils::ref_titles source title
+#' @export
+ref_titles <- FIESTAutils::ref_titles
+
+
+
