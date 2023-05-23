@@ -189,12 +189,7 @@ spClipPoint <- function(xyplt,
                                   xy.uniqueid=uniqueid, 
                                   xvar=xvar, 
                                   yvar=yvar,
-                                  xy.crs=xy.crs,
-                                  prj=prj,
-                                  datum=datum,
-                                  zone=zone,
-                                  zoneS=zoneS,
-                                  aea.param=aea.param)
+                                  xy.crs=xy.crs)
   } else {
     ## GET uniqueid
     sppntnames <- names(sppntx)

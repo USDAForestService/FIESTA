@@ -71,8 +71,7 @@
 #'                                xy.uniqueid = "CN", 
 #'                                xvar = "LON_PUBLIC", 
 #'                                yvar = "LAT_PUBLIC", 
-#'                                prj = "longlat", 
-#'                                datum = "NAD83")
+#'                                crs = 4326)
 #' # Check CRS
 #' sf::st_crs(WYspplt)
 #' 

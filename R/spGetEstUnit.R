@@ -106,8 +106,7 @@
 #'              unit_layer = WYbhfn, 
 #'              spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
 #'                                        yvar = "LAT_PUBLIC", 
-#'                                        prj = "longlat", 
-#'                                        datum = "NAD83"))
+#'                                        xy.crs = 4269))
 #' @export spGetEstUnit
 spGetEstUnit <- function(xyplt, 
                          xyplt_dsn = NULL, 
@@ -219,12 +218,7 @@ spGetEstUnit <- function(xyplt,
                                   xy.uniqueid=uniqueid, 
                                   xvar=xvar, 
                                   yvar=yvar,
-                                  xy.crs=xy.crs,
-                                  prj=prj,
-                                  datum=datum,
-                                  zone=zone,
-                                  zoneS=zoneS,
-                                  aea.param=aea.param)
+                                  xy.crs=xy.crs)
   } else {
     ## GET uniqueid
     sppltnames <- names(sppltx)

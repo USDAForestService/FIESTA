@@ -201,13 +201,7 @@ spExtractPoly <- function(xyplt,
                                   xy.uniqueid=xy.uniqueid, 
                                   xvar=xvar, 
                                   yvar=yvar,
-                                  xy.crs=xy.crs,
-                                  prj=prj,
-                                  datum=datum,
-                                  zone=zone,
-                                  zoneS=zoneS,
-                                  aea.param=aea.param)
-    
+                                  xy.crs=xy.crs)   
   } else {
     ## GET xy.uniqueid
     sppltnames <- names(sppltx)
