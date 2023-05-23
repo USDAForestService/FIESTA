@@ -1535,9 +1535,11 @@ datSumTreeDom <- function(tree = NULL,
   names(tdomvarlut) <- c(byvars, newname, nvar)
 
   if (tdomvar == "SPCD") {
-    ref_spcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "SPCD", c("VALUE", "MEANING")]
-    tdomvarlut <- merge(ref_spcd, tdomvarlut, by.x="VALUE", by.y="SPCD")
-    names(tdomvarlut)[names(tdomvarlut) %in% c("VALUE", "MEANING")] <- c("SPCD", "SPNM")
+    refcol <- ifelse(spcd_name == "COMMON", "COMMON_NAME", 
+                 ifelse(spcd_name == "SYMBOL", "SPECIES_SYMBOL", 
+                      ifelse(spcd_name == "SCIENTIFIC", "SCIENTIFIC_NAME")))
+    tdomvarlut <- merge(FIESTAutils::ref_species[, c("SPCD", refcol)], 
+					tdomvarlut, by="SPCD")
   } else if (tdomvar == "SPGRPCD") {
     ref_spgrpcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "SPGRPCD", c("VALUE", "MEANING")]
     tdomvarlut <- merge(ref_spgrpcd, tdomvarlut, by.x="VALUE", by.y="SPGRPCD")
@@ -1548,11 +1550,11 @@ datSumTreeDom <- function(tree = NULL,
   if (tdombarplot) {
     ## Frequency
     ylabel <- ifelse(bycond, "Number of Conditions", "Number of Plots")
-    datBarplot(x=setDF(tdomvarlut), xvar=tdomvarnm, yvar=newname, savedata=savedata, 
+    datBarplot(x=tdomvarlut, xvar=tdomvarnm, yvar=newname, savedata=savedata, 
 		outfolder=outfolder, ylabel=newname)
 
     ## Summed variable
-    datBarplot(x=setDF(tdomvarlut), xvar=tdomvarnm, yvar=newname, savedata=savedata, 
+    datBarplot(x=tdomvarlut, xvar=tdomvarnm, yvar=newname, savedata=savedata, 
 		outfolder=outfolder, ylabel=newname) 
   }
 
