@@ -22,8 +22,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   ## 4. Check for lookup tables, col.orderby, and uniquecol.
   ## 5. Check row and column filters.
   ## 6. Create uniquerow/uniquecol if NULL and set keys
-  ## 7. Get title.rowvar/title.colvar from ref_titles
-  ## 8. Concatenate variables:
+  ## 7. Concatenate variables:
   ##	   If rowvar and colvar in cond table, concatenate columns and add to cond table.
   ## 8. Define domain.
   ## 9. Define PBvars2keep

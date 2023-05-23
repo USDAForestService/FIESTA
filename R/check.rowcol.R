@@ -39,7 +39,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   if (!is.null(cuniqueid) && !cuniqueid %in% names(condf)) stop("invalid cuniqueid")
   if (!is.null(treef) && !is.null(tuniqueid) && !tuniqueid %in% names(treef))
     stop("invalid tuniqueid")
-  ref_titles <- ref_titles
+  ref_titles <- FIESTAutils::ref_titles
   concat <- FALSE
   bytdom <- FALSE
   seedclnm <- "<1"

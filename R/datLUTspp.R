@@ -141,11 +141,11 @@ datLUTspp <- function(x,
 
   ## Check if all species codes in datx are in ref table
   #############################################################
-  ref_spp <- FIESTA::ref_species[FIESTA::ref_species$SPCD %in% unique(datx[[xvar]]), 
+  ref_spp <- FIESTAutils::ref_species[FIESTAutils::ref_species$SPCD %in% unique(datx[[xvar]]), 
 			c("SPCD", "COMMON_NAME", "GENUS", "SPECIES", "SPECIES_SYMBOL",
                  "E_SPGRPCD", "C_SPGRPCD", "P_SPGRPCD", "MAJOR_SPGRPCD", "SCIENTIFIC_NAME")]
   if (length(ref_spp) == 0) {
-    stop("SPCD values do not match FIESTA::ref_species values")
+    stop("SPCD values do not match ref_species values")
   }
   if (length(ref_spp$SPCD) < length(unique(datx[[xvar]]))) {
     spmiss <- unique(datx[[xvar]])[!unique(datx[[xvar]]) %in% ref_spp$SPCD] 

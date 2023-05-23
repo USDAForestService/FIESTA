@@ -375,7 +375,7 @@ modSApop <- function(popType="VOL",
   popevalid <- as.character(evalid)
   if (!is.null(evalid)) {
     substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
-		FIESTA::ref_popType[FIESTA::ref_popType$popType %in% popType, "EVAL_TYP_CD"]
+		FIESTAutils::ref_popType[FIESTAutils::ref_popType$popType %in% popType, "EVAL_TYP_CD"]
   } 
 
   ###################################################################################

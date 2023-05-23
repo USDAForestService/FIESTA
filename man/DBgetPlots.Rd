@@ -196,7 +196,7 @@ plt and cond; and tree (if Type='VOL'); seed (if isseed=TRUE),
 p2veg_subplot_spp, p2veg_subp_structure, and invasive_subplot_spp 
 (if Type='P2VEG'). See below 'Output Tables - FIA Table Names' 
 for reference to FIA database tables.
-See FIESTA:ref_* for variable descriptions (e.g., FIESTA::ref_tree). 
+See FIESTA:ref_* for variable descriptions (e.g., FIESTAutils::ref_tree). 
 If istree and the number of states > 3, tree data are saved to outfolder 
 and not returned to accommodate R memory issues. } 
 \item{xy*_PUBLIC}{ Data frame. XY data from FIA's public database. If 
@@ -503,7 +503,7 @@ UTdat$pltcnt
 # Look at number of plots by inventory year
 table(UTdat$plot$INVYR)
 
-# Note: see FIESTA::ref_plot and FIESTA::ref_cond for variable descriptions
+# Note: see FIESTAutils::ref_plot and FIESTAutils::ref_cond for variable descriptions
 # Or consult FIA Database documentation
 # \link{https://www.fia.fs.fed.us/library/database-documentation/index.php}
 

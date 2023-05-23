@@ -434,11 +434,12 @@ datSumTreeDom <- function(tree = NULL,
     seedonly <- TRUE
     treex <- seedx
     treenm <- seednm
+    treenames <- seednames
   }
   if (!addseed && !seedonly && !is.null(seedx)) {
     seedx <- NULL
   }
- 
+
   ## Check unique identifiers and set unique keys for R objects
   ###########################################################################
 
@@ -522,7 +523,7 @@ datSumTreeDom <- function(tree = NULL,
       }
     }
   }
-
+ 
   ### Check tsumvar 
   ###########################################################  
   notdomdat <- ifelse(is.null(tsumvar) && presence, TRUE, FALSE)

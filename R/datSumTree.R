@@ -337,6 +337,7 @@ datSumTree <- function(tree = NULL,
     seedonly <- TRUE
     treex <- seedx
     treenm <- seednm
+    treenames <- seednames
   }
   if (!addseed && !seedonly && !is.null(seedx)) {
     seedx <- NULL
@@ -1173,7 +1174,7 @@ datSumTree <- function(tree = NULL,
   sumdatcols <- names(sumdat)
  
   if (bycond) {  
-    meta = FIESTA::ref_cond[FIESTA::ref_cond$VARIABLE %in% sumdatcols, ]
+    meta = FIESTAutils::ref_cond[FIESTAutils::ref_cond$VARIABLE %in% sumdatcols, ]
     missnames <- names(sumdat)[!names(sumdat) %in% meta$VARIABLE]
     meta2 = FIESTA::ref_plt[FIESTA::ref_plt$VARIABLE %in% missnames, ]
     if (nrow(meta2) > 0) {
@@ -1187,7 +1188,7 @@ datSumTree <- function(tree = NULL,
   meta <- meta[meta$VARIABLE %in% metanames, ]
   meta <- meta[match(metanames, meta$VARIABLE),]
 
-  tree_ref <- FIESTA::ref_tree[match(tsumvarlst, FIESTA::ref_tree$VARIABLE),]
+  tree_ref <- FIESTAutils::ref_tree[match(tsumvarlst, FIESTAutils::ref_tree$VARIABLE),]
   tree_ref$VARIABLE[tree_ref$VARIABLE == "TPA_UNADJ"] <- "COUNT"
 
   if (nrow(tree_ref) > 0) {
