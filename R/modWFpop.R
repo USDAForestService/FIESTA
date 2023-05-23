@@ -449,7 +449,7 @@ modWFpop <- function(popType = "VOL",
   }
 
   if (saveobj) {
-    outobj_fmtlst <- c('rds', 'rda', 'llo')
+    outobj_fmtlst <- c('rds', 'rda')
     outobj_fmt <- pcheck.varchar(var2check=outobj_fmt, varnm="outobj_fmt", gui=gui,
 		checklst=outobj_fmtlst, caption="outobj_fmt", multiple=FALSE, stopifnull=TRUE)
 
@@ -998,22 +998,14 @@ modWFpop <- function(popType = "VOL",
   ## Save list object
   ##################################################################
   if (saveobj) {
-    if (getext(objfn) == "llo") {
-      if (append_layer) {
-        message("appending list object to: ", objfn)
-        largeList::saveList(returnlst, file=objfn, append=append_layer, compress=TRUE)
-      } else {
-        message("saving list object to: ", objfn)
-        largeList::saveList(returnlst, file=objfn, compress=TRUE)
-      }
-    } else if (getext(objfn) == "rds") {
+    if (getext(objfn) == "rds") {
       message("saving list object to: ", objfn)
       saveRDS(returnlst, objfn)
     } else if (getext(objfn) == "rda") {
       message("saving list object to: ", objfn)
       save(returnlst, objfn)
     } else {
-      message("invalid object name... must end in: ", toString(c("rds", "rda", "llo")))
+      message("invalid object name... must end in: ", toString(c("rds", "rda")))
     } 
   } 
 
