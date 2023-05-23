@@ -155,8 +155,7 @@ spGetEstUnit(xyplt = WYplt,
              unit_layer = WYbhfn, 
              spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
                                        yvar = "LAT_PUBLIC", 
-                                       prj = "longlat", 
-                                       datum = "NAD83"))
+                                       xy.crs = 4269))
 }
 \author{
 Tracey S. Frescino, Chris Toney
