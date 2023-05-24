@@ -409,8 +409,8 @@ First, we subset the strata layer with the Medicine Wheel district boundary
 WYbhdist
 WYbhMW <- WYbhdist[WYbhdist$DISTRICTNA == "Medicine Wheel Ranger District",]
 
-plot(st_geometry(WYbhdist))
-plot(st_geometry(WYbhMW), border="red", add=TRUE)
+plot(sf::st_geometry(WYbhdist))
+plot(sf::st_geometry(WYbhMW), border="red", add=TRUE)
 ```
 
 Next, we can clip the raster. Note: If the projection of `polyv` is not the same as `rast`, `polyv` will by reprojected to the same projection as `rast` before clipping (See note in the help file for more details).
@@ -610,7 +610,7 @@ pltids <- WYbhxy$pltids
 head(pltids)
 
 spxy <- WYbhxy$spxy
-plot(st_geometry(spxy))
+plot(sf::st_geometry(spxy))
 
 ```
 
