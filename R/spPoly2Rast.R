@@ -166,7 +166,7 @@ spPoly2Rast <- function(polyv,
 
     ## Create blank raster from clipped virtual raster
     rast.fmt <- drivers[drivers$DefaultExt == outext, "fmt"]
-    rast <- rasterFromRaster(rastclip, fmt=rast.fmt, dstfile=outfilenm)
+    rast <- gdalraster::rasterFromRaster(rastclip, fmt=rast.fmt, dstfile=outfilenm)
 
     ## Rasterize polygons
     polyrast <- rasterizePolygons(src=polyvx, burn_value=polyv.att, rasterfile=rast)
