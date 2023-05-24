@@ -145,8 +145,7 @@ WYspplt <- spMakeSpatialPoints(
   xy.uniqueid = "CN",
   xvar = "LON_PUBLIC",
   yvar = "LAT_PUBLIC",
-  prj = "longlat",
-  datum = "NAD83"
+  xy.crs = 4269
 )
 
 rastlst.cont <- c(demfn, slpfn, aspfn)

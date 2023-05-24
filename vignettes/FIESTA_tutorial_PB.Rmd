@@ -296,8 +296,7 @@ icepltsp <- spMakeSpatialPoints(xyplt = iceplt,
                                 xy.uniqueid = "plot_id",
                                 xvar = "LON_PUBLIC",
                                 yvar = "LAT_PUBLIC", 
-                                prj = "longlat",
-                                datum = "NAD83")
+                                xy.crs = 4269)
 plot(icepltsp["ESTN_UNIT"])
 ```
 
