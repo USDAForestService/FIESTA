@@ -88,7 +88,7 @@ WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
                                xy.uniqueid = "CN", 
                                xvar = "LON_PUBLIC", 
                                yvar = "LAT_PUBLIC", 
-                               crs = 4326)
+                               xy.crs = 4326)
 # Check CRS
 sf::st_crs(WYspplt)
 
