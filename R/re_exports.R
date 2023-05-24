@@ -37,10 +37,6 @@ FIESTAutils::eval_options
 #' @export
 FIESTAutils::xy_options
 
-#' @inherit FIESTAutils::DEFAULT_NODATA source title
-#' @export
-DEFAULT_NODATA <- FIESTAutils::DEFAULT_NODATA
-
 #' @inherit FIESTAutils::GDT_NAMES source title
 #' @export
 GDT_NAMES <- FIESTAutils::GDT_NAMES

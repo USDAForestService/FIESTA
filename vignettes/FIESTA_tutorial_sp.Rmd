@@ -9,7 +9,7 @@ vignette: >
 
 ```{r setup, include = F}
 library(knitr)
-knitr::opts_chunk$set(message = F, warning = F, eval = F)
+knitr::opts_chunk$set(message = F, warning = F, eval=F)
 ```
 
 ```{r, include=FALSE}
@@ -140,12 +140,11 @@ demfn <- system.file("extdata",
                      package = "FIESTA")
 
 
-# Other spatial layers used for examples, extracted using the raster package, getData function.
+# Other spatial layers used for examples, extracted using the geodata package, gadm function.
 # County-level boundaries for USA and subset for Wyoming (Note: must have internet connection)
-USAco <- raster::getData("GADM", country = "USA", level = 2)    
+USAco <- geodata::gadm(country = "USA", level = 2, path=tempdir())    
 WYco <- USAco[USAco$NAME_1 == "Wyoming",]
 
-head(USAco@data)
 ```
 
 Finally, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For this vignette, we have saved our outfolder file path as the `outfolder` object.
@@ -202,21 +201,8 @@ The `spMakeSpatialPoints` function generates an `sf` points object with a define
 
 <details>
   <summary>View Example</summary>
-  
-```{r}
-head(WYplt)
 
-WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
-                               xy.uniqueid = "CN", 
-                               xvar = "LON_PUBLIC", 
-                               yvar = "LAT_PUBLIC", 
-                               prj = "longlat", 
-                               datum = "NAD83")
-head(WYspplt)
-
-```
-
-We can also use EPSG code with `spMakeSpatialPoints`.
+We can use EPSG code with `spMakeSpatialPoints`.
 
 ```{r}        
 WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
@@ -225,7 +211,6 @@ WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
                                yvar = "LAT_PUBLIC", 
                                xy.crs = 4269
                                )
-WYspplt 
 
 ```        
 
@@ -294,9 +279,8 @@ WYbhptslst <- spClipPoint(xyplt = WYplt,
                           uniqueid = "CN", 
                           clippolyv = WYbh, 
                           spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                                  yvar = "LAT_PUBLIC", 
-                                                  prj = "longlat", 
-                                                  datum = "NAD83")
+                                                  yvar = "LAT_PUBLIC",
+                                                  xy.crs = 4269)
                           )
 
 WYbhptslst <- spClipPoint(xyplt = WYplt, 
@@ -305,9 +289,8 @@ WYbhptslst <- spClipPoint(xyplt = WYplt,
                           savedata = TRUE, 
                           exportsp = TRUE, 
                           spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                                  yvar = "LAT_PUBLIC", 
-                                                  prj = "longlat", 
-                                                  datum = "NAD83"), 
+                                                  yvar = "LAT_PUBLIC",
+                                                  xy.crs = 4269), 
                           savedata_opts = list(outfolder=outfolder, 
                                                out_layer = "WYbh")
                           )
@@ -375,8 +358,7 @@ WYbhptslst <- spClipPoint(xyplt = WYplt,
                           exportsp = TRUE, 
                           spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
                                         yvar = "LAT_PUBLIC", 
-                                        prj = "longlat", 
-                                        datum = "NAD83"), 
+                                        xy.crs = 4269), 
                           savedata_opts = list(
                                         outfolder = outfolder, 
                                         overwrite_layer = TRUE,
@@ -394,7 +376,7 @@ The `spClipPoly` function clips (intersects) a polygon vector layer with another
 <details>
   <summary>View Example</summary>
   
-We first subsect the USAco `SpatialPolygons` layer with `WYbighorn`. Note: you must download USAco from the `raster` package. See the "Set Up" section above.
+We first subsect the USAco `SpatialPolygons` layer with `WYbighorn`. Note: you must download USAco from the `geodata` package. See the "Set Up" section above.
   
 ```{r}
 WYbhco <- spClipPoly(polyv = USAco,
@@ -407,7 +389,7 @@ We can now check and display `WYbighorn_co` with labels.
 ```{r}
 head(WYbhco)
 plot(sf::st_geometry(WYbhco['NAME_2']), col = sf.colors(nrow(WYbhco)))
-coords <- st_coordinates(st_centroid(st_geometry(WYbhco)))
+coords <- sf::st_coordinates(st_centroid(sf::st_geometry(WYbhco)))
 text(coords[,"X"], coords[,"Y"], WYbhco[["NAME_2"]])
 ```
 
@@ -544,18 +526,20 @@ WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
 Next, we derive new layers from `dem`. 
 
 ```{r}
-library(raster)
-dem <- raster(demfn)
-slp <- raster::terrain(dem, 
-                       opt = "slope",
-                       unit = "degrees", 
-                       filename = paste0(outfolder, "/WYbh_slp.img"), 
-                       overwrite = TRUE)
-asp <- raster::terrain(dem,
-                       opt = "aspect", 
-                       unit = "degrees", 
-                       filename = paste0(outfolder, "/WYbh_asp.img"),
-                       overwrite = TRUE)
+library(terra)
+dem <- rast(demfn)
+slpfn <- paste0(outfolder, "/WYbh_slp.img")
+slp <- terra::terrain(dem,
+                      v = "slope",
+                      unit = "degrees",
+                      filename = slpfn, 
+                      overwrite = TRUE)
+aspfn <- paste0(outfolder, "/WYbh_asp.img")
+asp <- terra::terrain(dem,
+                      v = "aspect",
+                      unit = "degrees", 
+                      filename = aspfn,
+                      overwrite = TRUE)
 ```
 
 Finally, we extract estimation unit and zonal raster statistics (i.e., mean).
@@ -617,7 +601,8 @@ We can extract public coordinates within WY Bighorn NF boundary, returning spati
 ```{r}
 WYbhxy <- spGetXY(bnd = WYbhfn,
                   xy_datsource = "datamart",
-                  evalCur = TRUE,
+                  eval = "FIA",
+                  eval_opts = eval_options(Cur = TRUE),
                   returnxy = TRUE)
 names(WYbhxy)
 
@@ -636,7 +621,8 @@ Or, returning only nonspatial plot identifiers (pltids).
 
 WYbhxyids <- spGetXY(bnd = WYbhfn,
                      xy_datsource = "datamart",
-                     evalCur = TRUE,
+                     eval = "FIA",
+                     eval_opts = eval_options(Cur = TRUE),
                      returnxy = FALSE)
 names(WYbhxyids)
 
@@ -662,7 +648,8 @@ We can extract public coordinates within WY Bighorn NF boundary.
 WYbhdat <- spGetPlots(bnd = WYbhfn, 
                       states = "Wyoming",
                       datsource = "datamart", 
-                      evalCur = TRUE,
+                      eval = "FIA",
+                      eval_opts = eval_options(Cur = TRUE),
                       istree = FALSE)
 names(WYbhdat)
 ```
@@ -697,8 +684,7 @@ unitdat.bh <- spGetEstUnit(xyplt = WYplt,
                            unit_layer = WYbhfn, 
                            spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
                                                    yvar = "LAT_PUBLIC", 
-                                                   prj = "longlat", 
-                                                   datum = "NAD83")
+                                                   xy.crs = 4269)
                            )
 
 names(unitdat.bh)
@@ -723,8 +709,7 @@ unitdat.bhdist <- spGetEstUnit(xyplt = WYplt,
                                unitvar = "DISTRICTNA", 
                                spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
                                                        yvar = "LAT_PUBLIC", 
-                                                       prj = "longlat", 
-                                                       datum = "NAD83")
+                                                       xy.crs = 4269)
                                )
 
 names(unitdat.bhdist)
@@ -787,7 +772,7 @@ WYbh <- spImportSpatial(WYbhfn)
 
 polyUnion <- spUnionPoly(polyv1 = USAco[USAco$NAME_1 == "Wyoming",], 
                          polyv2 = WYbh, 
-                         areacalc=TRUE)
+                         areacalc = TRUE)
 
 plot(st_geometry(polyUnion))
 head(polyUnion)
