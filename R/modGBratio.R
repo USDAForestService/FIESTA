@@ -249,6 +249,7 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @examples
+#' \donttest{
 #' GBpopdat <- modGBpop(
 #' popTabs = list(cond = FIESTA::WYcond,  
 #'                tree = FIESTA::WYtree,        
@@ -285,6 +286,7 @@
 #' returntitle = TRUE           # out - return title information
 #' )
 #' str(ratio1.2, max.level = 1)
+#' }
 #' @export modGBratio
 modGBratio <- function(GBpopdat, 
                        estseed = "none", 

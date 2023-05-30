@@ -291,6 +291,7 @@ Common tree filters: \cr
 AGENTCD == 30" \tab Dead trees from fire \cr }
 }
 \examples{
+\donttest{
 GBpopdat <- modGBpop(
 popTabs = list(cond = FIESTA::WYcond,  
                tree = FIESTA::WYtree,        
@@ -327,6 +328,7 @@ rowvar = "FORTYPCD",         # est - row domain
 returntitle = TRUE           # out - return title information
 )
 str(ratio1.2, max.level = 1)
+}
 }
 \references{
 Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.;
