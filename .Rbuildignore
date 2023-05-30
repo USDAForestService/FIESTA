@@ -16,3 +16,4 @@ _pkgdown.yml
 ^sandbox$
 ^docs$
 ^doc$
+^CRAN-SUBMISSION$
