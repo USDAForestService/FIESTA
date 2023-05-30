@@ -20,7 +20,7 @@ use SQL syntax)."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -87,24 +87,31 @@ use SQL syntax).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">DBqryCSV</span><span class="op">(</span><span class="va">sql</span>, states <span class="op">=</span> <span class="cn">NULL</span>, sqltables <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">DBqryCSV</span><span class="op">(</span><span class="va">sql</span>, states <span class="op">=</span> <span class="cn">NULL</span>, sqltables <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>sql</dt>
 <dd><p>String. A sql query. Must be appropriate sql syntax.</p></dd>
+
+
 <dt>states</dt>
 <dd><p>String vector. Name of state(s) in query. If not by state, set
 to NULL.</p></dd>
+
+
 <dt>sqltables</dt>
 <dd><p>String vector. Name of table(s) in sql statement to
 download.  The sqltables must match tables in the sql statement (i.e.,
 case-sensitive).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Returns a data frame from resulting query.</p>
+    
+
+<p>Returns a data frame from resulting query.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -120,15 +127,15 @@ connection.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Number of plots by inventory year for the state of Wyoming</span></span>
-<span class="r-in"><span class="va">sql</span> <span class="op">&lt;-</span> <span class="st">"select INVYR, count(*) AS NBRPLOTS</span>
-<span class="r-in">        from plot</span>
-<span class="r-in">        where statecd=56 group by INVYR"</span></span>
-<span class="r-in"><span class="fu">DBqryCSV</span><span class="op">(</span>sql <span class="op">=</span> <span class="va">sql</span>,</span>
-<span class="r-in">         states <span class="op">=</span> <span class="st">"Wyoming"</span>,</span>
-<span class="r-in">         sqltables <span class="op">=</span> <span class="st">"plot"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Number of plots by inventory year for the state of Wyoming</span></span></span>
+<span class="r-in"><span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="st">"select INVYR, count(*) AS NBRPLOTS</span></span></span>
+<span class="r-in"><span><span class="st">        from plot</span></span></span>
+<span class="r-in"><span><span class="st">        where statecd=56 group by INVYR"</span></span></span>
+<span class="r-in"><span><span class="fu">DBqryCSV</span><span class="op">(</span>sql <span class="op">=</span> <span class="va">sql</span>,</span></span>
+<span class="r-in"><span>         states <span class="op">=</span> <span class="st">"Wyoming"</span>,</span></span>
+<span class="r-in"><span>         sqltables <span class="op">=</span> <span class="st">"plot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -143,7 +150,7 @@ connection.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

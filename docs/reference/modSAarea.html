@@ -18,7 +18,7 @@ unit)."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/math
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -83,34 +83,34 @@ unit).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">modSAarea</span><span class="op">(</span>
-  SApopdatlst <span class="op">=</span> <span class="cn">NULL</span>,
-  prednames <span class="op">=</span> <span class="cn">NULL</span>,
-  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,
-  SAmethod <span class="op">=</span> <span class="st">"area"</span>,
-  estseed <span class="op">=</span> <span class="st">"none"</span>,
-  largebnd.unique <span class="op">=</span> <span class="cn">NULL</span>,
-  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,
-  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,
-  rowvar <span class="op">=</span> <span class="cn">NULL</span>,
-  modelselect <span class="op">=</span> <span class="cn">FALSE</span>,
-  prior <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">1</span><span class="op">/</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span>,
-  na.fill <span class="op">=</span> <span class="st">"NONE"</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  savesteps <span class="op">=</span> <span class="cn">FALSE</span>,
-  multest <span class="op">=</span> <span class="cn">FALSE</span>,
-  addSAdomsdf <span class="op">=</span> <span class="cn">TRUE</span>,
-  SAdomvars <span class="op">=</span> <span class="cn">NULL</span>,
-  savemultest <span class="op">=</span> <span class="cn">FALSE</span>,
-  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,
-  table_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  title_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  multest_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  save4testing <span class="op">=</span> <span class="cn">FALSE</span>,
-  gui <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">modSAarea</span><span class="op">(</span></span>
+<span>  SApopdatlst <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prednames <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,</span>
+<span>  SAmethod <span class="op">=</span> <span class="st">"area"</span>,</span>
+<span>  estseed <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  largebnd.unique <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,</span>
+<span>  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rowvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  modelselect <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  prior <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">1</span><span class="op">/</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  na.fill <span class="op">=</span> <span class="st">"NONE"</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savesteps <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  multest <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  addSAdomsdf <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  SAdomvars <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savemultest <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  table_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  title_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  multest_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  save4testing <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  gui <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -118,98 +118,156 @@ unit).</p>
     <dl><dt>SApopdatlst</dt>
 <dd><p>List. List of population data objects returned from
 modSApop().</p></dd>
+
+
 <dt>prednames</dt>
 <dd><p>String vector. Name(s) of predictor variables to use in
 model.</p></dd>
+
+
 <dt>SApackage</dt>
 <dd><p>String. Small area package to use ('JoSAE', 'sae', 'hbsae')</p></dd>
+
+
 <dt>SAmethod</dt>
 <dd><p>String. Small area method to use ('unit', 'area')</p></dd>
+
+
 <dt>estseed</dt>
 <dd><p>String. Use seedling data only or add to tree data. Seedling
 estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').</p></dd>
+
+
 <dt>largebnd.unique</dt>
 <dd><p>String. Name of the large boundary unique identifer
 to define plots within a model extent. If NULL, all plots are used for model
 extent.</p></dd>
+
+
 <dt>landarea</dt>
 <dd><p>String. The sample area filter for estimates ('ALL',
 'FOREST', 'TIMBERLAND').  If landarea=FOREST, filtered to COND_STATUS_CD =
 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.</p></dd>
+
+
 <dt>pcfilter</dt>
 <dd><p>String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.</p></dd>
+
+
 <dt>rowvar</dt>
 <dd><p>String. Name of the row domain variable in cond or tree. If
 only one domain, rowvar = domain variable. If more than one domain, include
 colvar. If no domain, rowvar = NULL.</p></dd>
+
+
 <dt>modelselect</dt>
 <dd><p>Logical. If TRUE, selects useful predictors using
 mase:ElasticNet.</p></dd>
+
+
 <dt>prior</dt>
 <dd><p>Function. A prior function to use for hbsae models.</p></dd>
+
+
 <dt>na.fill</dt>
 <dd><p>String. An estimate to fill in for NA values (i.e., when 
 model is unstable or no predictors are selected). Choose from the following 
 list that does not include SApackage used ('NONE', 'DIR', 'JoSAE', 'sae', 
 'hbsae'). DIR is suggested value for no NA values.</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves table(s) to outfolder.</p></dd>
+
+
 <dt>savesteps</dt>
 <dd><p>Logical. Saves graphs of predictors and response with
 labels whether selected or not for both area- and unit-level models.</p></dd>
+
+
 <dt>multest</dt>
 <dd><p>Logical. If TRUE, returns a data frame of SA estimates using
 both unit-level and area-level estimates.</p></dd>
+
+
 <dt>addSAdomsdf</dt>
 <dd><p>Logical. If TRUE, appends SAdomdf to unit.multest table
 for output.</p></dd>
+
+
 <dt>SAdomvars</dt>
 <dd><p>String vector. List of attributes from SAdoms to include in
 multest output.</p></dd>
+
+
 <dt>savemultest</dt>
 <dd><p>Logical. If TRUE, save table with area- and unit-level
 estimates.</p></dd>
+
+
 <dt>returntitle</dt>
 <dd><p>Logical. If TRUE, returns title(s) of the estimation
 table(s).</p></dd>
+
+
 <dt>table_opts</dt>
 <dd><p>List. See help(table_options()) for a list of
 options.</p></dd>
+
+
 <dt>title_opts</dt>
 <dd><p>List. See help(title_options()) for a list of options.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
+
+
 <dt>multest_opts</dt>
 <dd><p>List. See help(multest_options()) for a list of options.
 Only used when multest = TRUE.</p></dd>
+
+
 <dt>save4testing</dt>
 <dd><p>Logical. If TRUE, saves intermediate steps as R objects
 to outfolder for testing (pdomdat, dunitlut).</p></dd>
+
+
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Parameters for modSApop if SApopdat is NULL.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>est</dt>
 <dd><p>Data frame. Tree estimates and percent sampling error by
 domain. Estimates are based on the SApackage and SAmethod parameters defined.</p></dd>
+ 
 <dt>titlelst</dt>
 <dd><p>List. List of titles used for table output.</p></dd>
+
 <dt>raw</dt>
 <dd><p>List of raw data. If rawdata=TRUE, a list including raw data
 components used for calculating estimate.</p></dd>
+ 
 <dt>dunit.multest</dt>
 <dd><p>Data frame. Table comparing different estimation 
 strategies for SAE.</p></dd>
+
+
 </dl><p>Raw data</p>
 <dl><dt>domdat</dt>
 <dd><p>Data frame. Domain-level data used for estimation.</p></dd>
+
 <dt>dunit.totest</dt>
 <dd><p>String. Table of estimates, including more details.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -266,27 +324,27 @@ https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co"># Set up population dataset (see ?modSApop() for more information)</span></span>
-<span class="r-in"><span class="va">SApopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="modSApop.html">modSApop</a></span><span class="op">(</span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span>
-<span class="r-in">                                    cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span><span class="op">)</span>,</span>
-<span class="r-in">                     pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYpltassgn.html">WYpltassgn</a></span>,</span>
-<span class="r-in">                     pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,</span>
-<span class="r-in">                     dunitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitarea.html">WYunitarea</a></span>,</span>
-<span class="r-in">                     dunitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>,</span>
-<span class="r-in">                     dunitzonal <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitzonal.html">WYunitzonal</a></span>,</span>
-<span class="r-in">                     prednames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"tcc"</span>, <span class="st">"tpi"</span>, <span class="st">"tnt"</span><span class="op">)</span>,</span>
-<span class="r-in">                     predfac <span class="op">=</span> <span class="st">"tnt"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Set up population dataset (see ?modSApop() for more information)</span></span></span>
+<span class="r-in"><span><span class="va">SApopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="modSApop.html">modSApop</a></span><span class="op">(</span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span></span>
+<span class="r-in"><span>                                    cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                     pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYpltassgn.html">WYpltassgn</a></span>,</span></span>
+<span class="r-in"><span>                     pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,</span></span>
+<span class="r-in"><span>                     dunitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitarea.html">WYunitarea</a></span>,</span></span>
+<span class="r-in"><span>                     dunitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>,</span></span>
+<span class="r-in"><span>                     dunitzonal <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitzonal.html">WYunitzonal</a></span>,</span></span>
+<span class="r-in"><span>                     prednames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"tcc"</span>, <span class="st">"tpi"</span>, <span class="st">"tnt"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                     predfac <span class="op">=</span> <span class="st">"tnt"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> INTENSITY not in dataset.. assuming single intensity plots</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> DESIGNCD not in dataset.. assuming DESIGNCD = 1 (annual inventory)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> For FIA estimation, adjustment factors are calculated to account for plots with partial nonresponse.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ...there are 14 nonsampled forest conditions in the dataset.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 14 records: COND_STATUS_CD != 5</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Fit a unit level EBLUP with `JoSAE`</span></span>
-<span class="r-in"><span class="fu">modSAarea</span><span class="op">(</span>SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,</span>
-<span class="r-in">          SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,</span>
-<span class="r-in">          SAmethod <span class="op">=</span> <span class="st">"unit"</span><span class="op">)</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Fit a unit level EBLUP with `JoSAE`</span></span></span>
+<span class="r-in"><span><span class="fu">modSAarea</span><span class="op">(</span>SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,</span></span>
+<span class="r-in"><span>          SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,</span></span>
+<span class="r-in"><span>          SAmethod <span class="op">=</span> <span class="st">"unit"</span><span class="op">)</span> </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> generating estimates for... SApopdat</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> need to add SAdomsdf when addSAdomsdf = TRUE</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2620 records: COND_STATUS_CD == 1</span>
@@ -10234,11 +10292,11 @@ https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "acres"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in">          </span>
-<span class="r-in"><span class="co"># Fit an area level Fay-Herriot hierarchical Bayesian model with `hbsae`</span></span>
-<span class="r-in"><span class="fu">modSAarea</span><span class="op">(</span>SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,</span>
-<span class="r-in">          SApackage <span class="op">=</span> <span class="st">"hbsae"</span>,</span>
-<span class="r-in">          SAmethod <span class="op">=</span> <span class="st">"area"</span><span class="op">)</span> </span>
+<span class="r-in"><span>          </span></span>
+<span class="r-in"><span><span class="co"># Fit an area level Fay-Herriot hierarchical Bayesian model with `hbsae`</span></span></span>
+<span class="r-in"><span><span class="fu">modSAarea</span><span class="op">(</span>SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,</span></span>
+<span class="r-in"><span>          SApackage <span class="op">=</span> <span class="st">"hbsae"</span>,</span></span>
+<span class="r-in"><span>          SAmethod <span class="op">=</span> <span class="st">"area"</span><span class="op">)</span> </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> generating estimates for... SApopdat</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> need to add SAdomsdf when addSAdomsdf = TRUE</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2620 records: COND_STATUS_CD == 1</span>
@@ -19995,13 +20053,13 @@ https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "acres"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Fit an area level Fay-Herriot EBLUP with `sae`, while using Elastic Net</span></span>
-<span class="r-in"><span class="co"># variable selection</span></span>
-<span class="r-in"><span class="fu">modSAarea</span><span class="op">(</span>SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,</span>
-<span class="r-in">          SApackage <span class="op">=</span> <span class="st">"sae"</span>,</span>
-<span class="r-in">          SAmethod <span class="op">=</span> <span class="st">"area"</span>,</span>
-<span class="r-in">          modelselect <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Fit an area level Fay-Herriot EBLUP with `sae`, while using Elastic Net</span></span></span>
+<span class="r-in"><span><span class="co"># variable selection</span></span></span>
+<span class="r-in"><span><span class="fu">modSAarea</span><span class="op">(</span>SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,</span></span>
+<span class="r-in"><span>          SApackage <span class="op">=</span> <span class="st">"sae"</span>,</span></span>
+<span class="r-in"><span>          SAmethod <span class="op">=</span> <span class="st">"area"</span>,</span></span>
+<span class="r-in"><span>          modelselect <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> generating estimates for... SApopdat</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> need to add SAdomsdf when addSAdomsdf = TRUE</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2620 records: COND_STATUS_CD == 1</span>
@@ -29841,7 +29899,7 @@ https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "acres"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -29856,7 +29914,7 @@ https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

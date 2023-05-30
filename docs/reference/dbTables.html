@@ -18,7 +18,7 @@ tables to be supplied to *DB functions."><!-- mathjax --><script src="https://cd
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -83,31 +83,31 @@ tables to be supplied to *DB functions.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">dbTables</span><span class="op">(</span>
-  plot_layer <span class="op">=</span> <span class="st">"PLOT"</span>,
-  cond_layer <span class="op">=</span> <span class="st">"COND"</span>,
-  tree_layer <span class="op">=</span> <span class="st">"TREE"</span>,
-  seed_layer <span class="op">=</span> <span class="st">"SEEDLING"</span>,
-  plotgeom_layer <span class="op">=</span> <span class="st">"PLOTGEOM"</span>,
-  vsubpspp_layer <span class="op">=</span> <span class="st">"P2VEG_SUBPLOT_SPP"</span>,
-  vsubpstr_layer <span class="op">=</span> <span class="st">"P2VEG_SUBP_STRUCTURE"</span>,
-  invsubp_layer <span class="op">=</span> <span class="st">"INVASIVE_SUBPLOT_SPP"</span>,
-  subplot_layer <span class="op">=</span> <span class="st">"SUBPLOT"</span>,
-  subpcond_layer <span class="op">=</span> <span class="st">"SUBP_COND"</span>,
-  dwm_layer <span class="op">=</span> <span class="st">"COND_DWM_CALC"</span>,
-  sccm_layer <span class="op">=</span> <span class="st">"SUBP_COND_CHNG_MTRX"</span>,
-  grm_layer <span class="op">=</span> <span class="st">"TREE_GRM_COMPONENT"</span>,
-  survey_layer <span class="op">=</span> <span class="st">"SURVEY"</span>,
-  popeval_layer <span class="op">=</span> <span class="st">"POP_EVAL"</span>,
-  popevalgrp_layer <span class="op">=</span> <span class="st">"POP_EVAL_GRP"</span>,
-  popevaltyp_layer <span class="op">=</span> <span class="st">"POP_EVAL_TYP"</span>,
-  popstratum_layer <span class="op">=</span> <span class="st">"POP_STRATUM"</span>,
-  popestnunit_layer <span class="op">=</span> <span class="st">"POP_ESTN_UNIT"</span>,
-  ppsa_layer <span class="op">=</span> <span class="st">"POP_PLOT_STRATUM_ASSGN"</span>,
-  refspp_layer <span class="op">=</span> <span class="st">"REF_SPECIES"</span>,
-  other_layers <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dbTables</span><span class="op">(</span></span>
+<span>  plot_layer <span class="op">=</span> <span class="st">"PLOT"</span>,</span>
+<span>  cond_layer <span class="op">=</span> <span class="st">"COND"</span>,</span>
+<span>  tree_layer <span class="op">=</span> <span class="st">"TREE"</span>,</span>
+<span>  seed_layer <span class="op">=</span> <span class="st">"SEEDLING"</span>,</span>
+<span>  plotgeom_layer <span class="op">=</span> <span class="st">"PLOTGEOM"</span>,</span>
+<span>  vsubpspp_layer <span class="op">=</span> <span class="st">"P2VEG_SUBPLOT_SPP"</span>,</span>
+<span>  vsubpstr_layer <span class="op">=</span> <span class="st">"P2VEG_SUBP_STRUCTURE"</span>,</span>
+<span>  invsubp_layer <span class="op">=</span> <span class="st">"INVASIVE_SUBPLOT_SPP"</span>,</span>
+<span>  subplot_layer <span class="op">=</span> <span class="st">"SUBPLOT"</span>,</span>
+<span>  subpcond_layer <span class="op">=</span> <span class="st">"SUBP_COND"</span>,</span>
+<span>  dwm_layer <span class="op">=</span> <span class="st">"COND_DWM_CALC"</span>,</span>
+<span>  sccm_layer <span class="op">=</span> <span class="st">"SUBP_COND_CHNG_MTRX"</span>,</span>
+<span>  grm_layer <span class="op">=</span> <span class="st">"TREE_GRM_COMPONENT"</span>,</span>
+<span>  survey_layer <span class="op">=</span> <span class="st">"SURVEY"</span>,</span>
+<span>  popeval_layer <span class="op">=</span> <span class="st">"POP_EVAL"</span>,</span>
+<span>  popevalgrp_layer <span class="op">=</span> <span class="st">"POP_EVAL_GRP"</span>,</span>
+<span>  popevaltyp_layer <span class="op">=</span> <span class="st">"POP_EVAL_TYP"</span>,</span>
+<span>  popstratum_layer <span class="op">=</span> <span class="st">"POP_STRATUM"</span>,</span>
+<span>  popestnunit_layer <span class="op">=</span> <span class="st">"POP_ESTN_UNIT"</span>,</span>
+<span>  ppsa_layer <span class="op">=</span> <span class="st">"POP_PLOT_STRATUM_ASSGN"</span>,</span>
+<span>  refspp_layer <span class="op">=</span> <span class="st">"REF_SPECIES"</span>,</span>
+<span>  other_layers <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -115,82 +115,129 @@ tables to be supplied to *DB functions.</p>
     <dl><dt>plot_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Plot-level data (PLOT).</p></dd>
+
+
 <dt>cond_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Condition-level data (COND).</p></dd>
+
+
 <dt>tree_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Tree-level data (TREE).</p></dd>
+
+
 <dt>seed_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Seedling data (SEEDLING).</p></dd>
+
+
 <dt>plotgeom_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Plot-level GIS extracted data (PLOTGEOM).</p></dd>
+
+
 <dt>vsubpspp_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Understory vegetation species data 
 (P2VEG_SUBPLOT_SPP).</p></dd>
+
+
 <dt>vsubpstr_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Understory vegetation structure data 
 (P2VEG_SUBP_STRUCTURE).</p></dd>
+
+
 <dt>invsubp_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Understory vegetation invasives data 
 (INVASIVE_SUBPLOT_SPP).</p></dd>
+
+
 <dt>subplot_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Subplot-level data (SUBPLOT).</p></dd>
+
+
 <dt>subpcond_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Subplot condition-level data (SUBP_COND).</p></dd>
+
+
 <dt>dwm_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Down wood material data (COND_DWM_CALC)</p></dd>
+
+
 <dt>sccm_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Subplot-level change matrix data
 (SUBP_COND_CHNG_MTRX).</p></dd>
+
+
 <dt>grm_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Tree growth, removal, mortality data 
 (TREE_GRM_COMPONENT).</p></dd>
+
+
 <dt>survey_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Population survey (SURVEY) data.</p></dd>
+
+
 <dt>popeval_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Population evaluation (POP_EVAL) data.</p></dd>
+
+
 <dt>popevalgrp_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Population evaluation group data (POP_EVAL_GRP).</p></dd>
+
+
 <dt>popevaltyp_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Population evaluation type data (POP_EVAL_TYP).</p></dd>
+
+
 <dt>popstratum_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Population stratum data (POP_STRATUM).</p></dd>
+
+
 <dt>popestnunit_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Population estimation unit data (POP_ESTN_UNIT).</p></dd>
+
+
 <dt>ppsa_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Population plot stratum assignment data (
 (POP_PLOT_STRATUM_ASSGN).</p></dd>
+
+
 <dt>refspp_layer</dt>
 <dd><p>R object, comma-delimited file(*.csv), or name of
 layer in database. Reference table for species (REF_SPECIES).</p></dd>
+
+
 <dt>other_layers</dt>
 <dd><p>String. Other layer(s) in database to clip and/or
 extract from database (Note: must include PLT_CN variable as unique
 identifier).</p></dd>
+
+
 <dt>...</dt>
 <dd><p>For extendibility.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of user-supplied parameters and parameter values for strata.</p>
+    
+
+<p>A list of user-supplied parameters and parameter values for strata.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -203,7 +250,7 @@ identifier).</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">dbTables</span><span class="op">(</span>plot_layer <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYplt.html">WYplt</a></span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">dbTables</span><span class="op">(</span>plot_layer <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYplt.html">WYplt</a></span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $plot_layer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    40404728010690  2013      56     3      2        1 86688  -105.9625</span>
@@ -12475,7 +12522,7 @@ identifier).</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

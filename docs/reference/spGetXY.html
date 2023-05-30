@@ -20,7 +20,7 @@ boundary (spClipPoint)"><!-- mathjax --><script src="https://cdnjs.cloudflare.co
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -87,32 +87,32 @@ boundary (spClipPoint)</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spGetXY</span><span class="op">(</span>
-  <span class="va">bnd</span>,
-  bnd_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  bnd.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  states <span class="op">=</span> <span class="cn">NULL</span>,
-  RS <span class="op">=</span> <span class="cn">NULL</span>,
-  xy_datsource <span class="op">=</span> <span class="st">"datamart"</span>,
-  xy_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  xy <span class="op">=</span> <span class="st">"PLOT"</span>,
-  xy_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/xy_options.html" class="external-link">xy_options</a></span><span class="op">(</span><span class="op">)</span>,
-  datsource <span class="op">=</span> <span class="cn">NULL</span>,
-  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  dbTabs <span class="op">=</span> <span class="fu"><a href="dbTables.html">dbTables</a></span><span class="op">(</span><span class="op">)</span>,
-  eval <span class="op">=</span> <span class="st">"FIA"</span>,
-  eval_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  pjoinid <span class="op">=</span> <span class="st">"CN"</span>,
-  invtype <span class="op">=</span> <span class="st">"ANNUAL"</span>,
-  intensity1 <span class="op">=</span> <span class="cn">FALSE</span>,
-  pvars2keep <span class="op">=</span> <span class="cn">NULL</span>,
-  clipxy <span class="op">=</span> <span class="cn">TRUE</span>,
-  showsteps <span class="op">=</span> <span class="cn">FALSE</span>,
-  returnxy <span class="op">=</span> <span class="cn">TRUE</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spGetXY</span><span class="op">(</span></span>
+<span>  <span class="va">bnd</span>,</span>
+<span>  bnd_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bnd.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  states <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  RS <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xy_datsource <span class="op">=</span> <span class="st">"datamart"</span>,</span>
+<span>  xy_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xy <span class="op">=</span> <span class="st">"PLOT"</span>,</span>
+<span>  xy_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/xy_options.html" class="external-link">xy_options</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  datsource <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dbTabs <span class="op">=</span> <span class="fu"><a href="dbTables.html">dbTables</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  eval <span class="op">=</span> <span class="st">"FIA"</span>,</span>
+<span>  eval_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pjoinid <span class="op">=</span> <span class="st">"CN"</span>,</span>
+<span>  invtype <span class="op">=</span> <span class="st">"ANNUAL"</span>,</span>
+<span>  intensity1 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  pvars2keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  clipxy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  showsteps <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  returnxy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  exportsp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -120,32 +120,50 @@ boundary (spClipPoint)</p>
     <dl><dt>bnd</dt>
 <dd><p>sf R object, Area of Interest (AOI) boundary. Can be a spatial sf
 object, full pathname to a shapefile, or name of a layer within a database.</p></dd>
+
+
 <dt>bnd_dsn</dt>
 <dd><p>String. Data source name (dsn; e.g., SQLite database or shapefile
 pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional if bnd is an R object.</p></dd>
+
+
 <dt>bnd.filter</dt>
 <dd><p>String. Filter to subset bnd spatial layer.</p></dd>
+
+
 <dt>states</dt>
 <dd><p>String. The name of state(s) for tables (e.g., "Vermont",
 "Utah").</p></dd>
+
+
 <dt>RS</dt>
 <dd><p>String. Name of FIA research station to restrict states to
 ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 included.</p></dd>
+
+
 <dt>xy_datsource</dt>
 <dd><p>Source of XY data ('datamart', 'sqlite', 'obj', 'csv').</p></dd>
+
+
 <dt>xy_dsn</dt>
 <dd><p>If datsource='sqlite', the file name (data source name) of
 the sqlite database (*.db) where XY data reside.</p></dd>
+
+
 <dt>xy</dt>
 <dd><p>sf R object or String. If xy_dsn = 'datamart', name of xy table 
 in FIA DataMart. If xy_dsn = 'sqlite', name of xy layer in database. If 
 datsource = 'csv', full pathname of xy CSV file(s). If datsource = 'obj', 
 name of xy R object. If datsource = 'shp', full pathname of shapefile.</p></dd>
+
+
 <dt>xy_opts</dt>
 <dd><p>List of xy data options for xy (e.g., xy_opts = list(xvar='LON', 
 yvar='LAT'). See xy_options() for more options and defaults.</p></dd>
+
+
 <dt>datsource</dt>
 <dd><p>String. Source of FIA data for defining FIA evalutions or 
 appending variables ('datamart', 'sqlite', 'obj', 'csv'). If datsource = NULL, 
@@ -154,69 +172,115 @@ extracted from FIA DataMart (http://apps.fs.usda.gov/fia/datamart/datamart.html)
 If datsource='sqlite', specify database name(s) in data_dsn and table name(s) 
 in dbTabs() argument. If datsource = ('obj','csv'), specify *.csv file name in 
 dbTabs argument.</p></dd>
+
+
 <dt>data_dsn</dt>
 <dd><p>String. Name of database with plot_layer and/or ppsa_layer.</p></dd>
+
+
 <dt>dbTabs</dt>
 <dd><p>String or R Object. If data_dsn = 'datamart', name of table(s) 
 in FIA DataMart. If data_dsn = 'sqlite', name of layer(s) in database. If 
 datsource = 'csv', name of CSV file(s). If datsource = 'obj', name of R object.</p></dd>
+
+
 <dt>eval</dt>
 <dd><p>String. Type of evaluation time frame for data extraction 
 ('FIA', 'custom'). See eval_opts for more further options.</p></dd>
+
+
 <dt>eval_opts</dt>
 <dd><p>List of evaluation options for 'FIA' or 'custom'
 evaluations to determine the set of data returned. See help(eval_options)
 for a list of options.</p></dd>
+
+
 <dt>pjoinid</dt>
 <dd><p>String. Variable in plt to join to XY data. Not necessary to
 be unique. If using most current XY coordinates, use identifier for a plot
 (e.g., PLOT_ID).</p></dd>
+
+
 <dt>invtype</dt>
 <dd><p>String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.</p></dd>
+
+
 <dt>intensity1</dt>
 <dd><p>Logical. If TRUE, includes only XY coordinates where 
 INTENSITY = 1 (FIA base grid).</p></dd>
+
+
 <dt>pvars2keep</dt>
 <dd><p>String vector. One or more variables in pltTab to append to output.</p></dd>
+
+
 <dt>clipxy</dt>
 <dd><p>Logical. If TRUE, clips xy data to bnd.</p></dd>
+
+
 <dt>showsteps</dt>
 <dd><p>Logical. If TRUE, display data in device window.</p></dd>
+
+
 <dt>returnxy</dt>
 <dd><p>Logical. If TRUE, returns XY coordinates.</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves data to outfolder. Note:
 includes XY data if returnxy = TRUE.</p></dd>
+
+
 <dt>exportsp</dt>
 <dd><p>Logical. If savedata = TRUE and returnxy = TRUE, 
 if TRUE, exports XY data as spatial data.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>spxy</dt>
 <dd><p>sf. If returnxy=TRUE, spatial xy point data.</p></dd>
+
 <dt>pltids</dt>
 <dd><p>data frame. A table of pltids that are within bnd.</p></dd>
+
 <dt>spxy</dt>
 <dd><p>sf data frame. If returnxy, a simple feature with pltids within bnd.</p></dd>
+
 <dt>bndx</dt>
 <dd><p>sf object. Input bnd.</p></dd>
+ 
 <dt>xy.uniqueid</dt>
 <dd><p>String. Unique identifier of plots in xy.</p></dd>
+ 
 <dt>states</dt>
 <dd><p>String. Vector of states that intersect bnd.</p></dd>
+ 
 <dt>countyfips</dt>
 <dd><p>String. Vector of countyfips values that intersect bnd.</p></dd>
+ 
 <dt>stbnd.att</dt>
 <dd><p>String. Name of state attribute used to select plots.</p></dd>
+
+
 </dl><p>If savedata=TRUE and returnxy=TRUE, the plt data frame, including XY 
-coordinates is saved to outfolder (xyplt).<br>If savedata=TRUE and returnxy=FALSE, the plt data frame, without XY 
-coordinates is saved to outfolder (pltids).<br>If savedata=TRUE and returnxy=TRUE and exportsp=TRUE, the spxy sf object is 
+coordinates is saved to outfolder (xyplt).<br></p>
+ 
+
+<p>If savedata=TRUE and returnxy=FALSE, the plt data frame, without XY 
+coordinates is saved to outfolder (pltids).<br></p>
+
+
+<p>If savedata=TRUE and returnxy=TRUE and exportsp=TRUE, the spxy sf object is 
 exported as shapefile to outfolder.<br></p>
+
+
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -255,18 +319,18 @@ connections will affect download speeds.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Set up data from FIESTA</span></span>
-<span class="r-in"><span class="va">WYbhfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                      <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>,</span>
-<span class="r-in">                      package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># Use spGetXY</span></span>
-<span class="r-in"><span class="va">WYbhxy</span> <span class="op">&lt;-</span> <span class="fu">spGetXY</span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhfn</span>,</span>
-<span class="r-in">                  xy_datsource <span class="op">=</span> <span class="st">"datamart"</span>,</span>
-<span class="r-in">                  eval <span class="op">=</span> <span class="st">"custom"</span>,</span>
-<span class="r-in">                  eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span class="r-in">                  returnxy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Set up data from FIESTA</span></span></span>
+<span class="r-in"><span><span class="va">WYbhfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                      <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>,</span></span>
+<span class="r-in"><span>                      package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Use spGetXY</span></span></span>
+<span class="r-in"><span><span class="va">WYbhxy</span> <span class="op">&lt;-</span> <span class="fu">spGetXY</span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhfn</span>,</span></span>
+<span class="r-in"><span>                  xy_datsource <span class="op">=</span> <span class="st">"datamart"</span>,</span></span>
+<span class="r-in"><span>                  eval <span class="op">=</span> <span class="st">"custom"</span>,</span></span>
+<span class="r-in"><span>                  eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  returnxy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -281,7 +345,7 @@ connections will affect download speeds.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

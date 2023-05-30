@@ -18,7 +18,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -83,53 +83,53 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">DBgetPlots</span><span class="op">(</span>
-  states <span class="op">=</span> <span class="cn">NULL</span>,
-  RS <span class="op">=</span> <span class="cn">NULL</span>,
-  datsource <span class="op">=</span> <span class="st">"datamart"</span>,
-  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  dbTabs <span class="op">=</span> <span class="fu"><a href="dbTables.html">dbTables</a></span><span class="op">(</span><span class="op">)</span>,
-  eval <span class="op">=</span> <span class="st">"FIA"</span>,
-  eval_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  puniqueid <span class="op">=</span> <span class="st">"CN"</span>,
-  invtype <span class="op">=</span> <span class="st">"ANNUAL"</span>,
-  intensity1 <span class="op">=</span> <span class="cn">FALSE</span>,
-  issubp <span class="op">=</span> <span class="cn">FALSE</span>,
-  istree <span class="op">=</span> <span class="cn">FALSE</span>,
-  isseed <span class="op">=</span> <span class="cn">FALSE</span>,
-  biojenk <span class="op">=</span> <span class="cn">FALSE</span>,
-  greenwt <span class="op">=</span> <span class="cn">FALSE</span>,
-  plotgeom <span class="op">=</span> <span class="cn">FALSE</span>,
-  othertables <span class="op">=</span> <span class="cn">NULL</span>,
-  getxy <span class="op">=</span> <span class="cn">TRUE</span>,
-  xy_datsource <span class="op">=</span> <span class="cn">NULL</span>,
-  xy_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  xy <span class="op">=</span> <span class="st">"PLOT"</span>,
-  xy_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/xy_options.html" class="external-link">xy_options</a></span><span class="op">(</span><span class="op">)</span>,
-  xymeasCur <span class="op">=</span> <span class="cn">FALSE</span>,
-  coordType <span class="op">=</span> <span class="st">"PUBLIC"</span>,
-  pjoinid <span class="op">=</span> <span class="cn">NULL</span>,
-  issp <span class="op">=</span> <span class="cn">FALSE</span>,
-  spcond <span class="op">=</span> <span class="cn">FALSE</span>,
-  spcondid1 <span class="op">=</span> <span class="cn">FALSE</span>,
-  defaultVars <span class="op">=</span> <span class="cn">TRUE</span>,
-  regionVars <span class="op">=</span> <span class="cn">FALSE</span>,
-  regionVarsRS <span class="op">=</span> <span class="st">"RMRS"</span>,
-  ACI <span class="op">=</span> <span class="cn">FALSE</span>,
-  subcycle99 <span class="op">=</span> <span class="cn">FALSE</span>,
-  stateFilter <span class="op">=</span> <span class="cn">NULL</span>,
-  allFilter <span class="op">=</span> <span class="cn">NULL</span>,
-  alltFilter <span class="op">=</span> <span class="cn">NULL</span>,
-  returndata <span class="op">=</span> <span class="cn">TRUE</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  saveqry <span class="op">=</span> <span class="cn">FALSE</span>,
-  savePOP <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  dbconn <span class="op">=</span> <span class="cn">NULL</span>,
-  dbconnopen <span class="op">=</span> <span class="cn">FALSE</span>,
-  evalInfo <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">DBgetPlots</span><span class="op">(</span></span>
+<span>  states <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  RS <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  datsource <span class="op">=</span> <span class="st">"datamart"</span>,</span>
+<span>  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dbTabs <span class="op">=</span> <span class="fu"><a href="dbTables.html">dbTables</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  eval <span class="op">=</span> <span class="st">"FIA"</span>,</span>
+<span>  eval_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  puniqueid <span class="op">=</span> <span class="st">"CN"</span>,</span>
+<span>  invtype <span class="op">=</span> <span class="st">"ANNUAL"</span>,</span>
+<span>  intensity1 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  issubp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  istree <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  isseed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  biojenk <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  greenwt <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  plotgeom <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  othertables <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  getxy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  xy_datsource <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xy_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xy <span class="op">=</span> <span class="st">"PLOT"</span>,</span>
+<span>  xy_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/xy_options.html" class="external-link">xy_options</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  xymeasCur <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  coordType <span class="op">=</span> <span class="st">"PUBLIC"</span>,</span>
+<span>  pjoinid <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  issp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  spcond <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  spcondid1 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  defaultVars <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  regionVars <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  regionVarsRS <span class="op">=</span> <span class="st">"RMRS"</span>,</span>
+<span>  ACI <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  subcycle99 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  stateFilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  allFilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alltFilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  returndata <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  saveqry <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savePOP <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dbconn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dbconnopen <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  evalInfo <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -139,181 +139,284 @@
 or code (e.g., 4, 35) of state(s) for evalid. If all states in one or more
 FIA Research Station is desired, set states=NULL and use RS argument to
 define RS.</p></dd>
+
+
 <dt>RS</dt>
 <dd><p>String vector. Name of research station(s) to get public XY
 coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
 is populated. See FIESTA::ref_statecd for reference to RS and states.</p></dd>
+
+
 <dt>datsource</dt>
 <dd><p>String. Source of data ('datamart', 'sqlite').</p></dd>
+
+
 <dt>data_dsn</dt>
 <dd><p>String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).</p></dd>
+
+
 <dt>dbTabs</dt>
 <dd><p>List of database tables the user would like returned.
 See help(dbTables) for a list of options.</p></dd>
+
+
 <dt>eval</dt>
 <dd><p>String. Type of evaluation time frame for data extraction 
 ('FIA', 'custom'). See eval_opts for more further options.</p></dd>
+
+
 <dt>eval_opts</dt>
 <dd><p>List of evaluation options for 'FIA' or 'custom'
 evaluations to determine the set of data returned. See help(eval_options)
 for a list of options.</p></dd>
+
+
 <dt>puniqueid</dt>
 <dd><p>String. Name of unique identifier in plot_layer in dbTabs.</p></dd>
+
+
 <dt>invtype</dt>
 <dd><p>String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.</p></dd>
+
+
 <dt>intensity1</dt>
 <dd><p>Logical. If TRUE, includes only plots where INTENSITY = 1.</p></dd>
+
+
 <dt>issubp</dt>
 <dd><p>Logical. If TRUE, subplot tables are extracted from FIA
 database (SUBPLOT, SUBP_COND).</p></dd>
+
+
 <dt>istree</dt>
 <dd><p>Logical. If TRUE, include tree data.</p></dd>
+
+
 <dt>isseed</dt>
 <dd><p>Logical. If TRUE, include seedling data.</p></dd>
+
+
 <dt>biojenk</dt>
 <dd><p>Logical. If TRUE, Jenkins biomass is calculated.</p></dd>
+
+
 <dt>greenwt</dt>
 <dd><p>Logical. If TRUE, green weight biomass is calculated.</p></dd>
+
+
 <dt>plotgeom</dt>
 <dd><p>Logical. If TRUE, variables from the PLOTGEOM table are
 appended to the plot table.</p></dd>
+
+
 <dt>othertables</dt>
 <dd><p>String Vector. Name of other table(s) in FIADB to include
 in output. The table must have PLT_CN as unique identifier of a plot.</p></dd>
+
+
 <dt>getxy</dt>
 <dd><p>Logical. If TRUE, gets separate XY table.</p></dd>
+
+
 <dt>xy_datsource</dt>
 <dd><p>Source of XY data ('obj', 'csv', 'datamart', 'sqlite').</p></dd>
+
+
 <dt>xy_dsn</dt>
 <dd><p>If datsource='sqlite', the file name (data source name) of
 the sqlite database (*.sqlite) where XY data are.</p></dd>
+
+
 <dt>xy</dt>
 <dd><p>sf R object or String. Table with xy coordinates. Can be a spatial
 polygon object, data frame, full pathname to a shapefile, or name of a layer
 within a database.</p></dd>
+
+
 <dt>xy_opts</dt>
 <dd><p>List of xy data options to specify if xy is NOT NULL. 
 See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').</p></dd>
+
+
 <dt>xymeasCur</dt>
 <dd><p>Logical. If TRUE, include XY coordinates from the most 
 current sampled measurement of each plot.</p></dd>
+
+
 <dt>coordType</dt>
 <dd><p>String. Type of xy coordinates using ('PUBLIC', 'ACTUAL')</p></dd>
+
+
 <dt>pjoinid</dt>
 <dd><p>String. Variable in plt to join to XY data. Not necessary to
 be unique. If using most current XY coordinates, use identifier for a plot
 (e.g., PLOT_ID).</p></dd>
+
+
 <dt>issp</dt>
 <dd><p>Logical. If TRUE, an sf spatial object is generated from the
 public X/Y coordinates in the plot table.</p></dd>
+
+
 <dt>spcond</dt>
 <dd><p>Logical. If TRUE, a set of condition-level attributes (e.g.,
 FORTYPCD) represented at the plot-level are extracted from FIA DataMart COND
 table.  (See Notes for more info on how condition attributes were added).</p></dd>
+
+
 <dt>spcondid1</dt>
 <dd><p>Logical. If TRUE and issp=TRUE and spcond=TRUE, condition
 variables are determined by condition 1 attributes. If FALSE, an algorithm
 is used to select the condition to use (See details for alorithm used).</p></dd>
+
+
 <dt>defaultVars</dt>
 <dd><p>Logical. If TRUE, a set of default variables are selected
 in query.  See notes for variable descriptions.</p></dd>
+
+
 <dt>regionVars</dt>
 <dd><p>Logical. If TRUE, regional variables are included in query
 (e.g., SDI_RMRS, SDIPCT_RMRS, SDIMAX_RMRS, QMD_RMRS).</p></dd>
+
+
 <dt>regionVarsRS</dt>
 <dd><p>String. Region for regionVars
 ('RMRS','SRS','NCRS','NERS','PNWRS').</p></dd>
+
+
 <dt>ACI</dt>
 <dd><p>Logical. If TRUE, the data from All Condition Inventories (ACI)
 are included in dataset (NF_SAMPLING_STATUS_CD = 1). See below for more
 details.</p></dd>
+
+
 <dt>subcycle99</dt>
 <dd><p>Logical. If TRUE, excludes plots with SUBCYCLE = 99. These
 plots are plots that are measured more than once and are not included in the
 estimation process.</p></dd>
+
+
 <dt>stateFilter</dt>
 <dd><p>Character string or Named list. Logical statement to use
 as plot and filter in sql query. Must include plot alias ('p.') and be sql
 syntax (e.g., 'p.COUNTYCD = 1'). If more than 1 state, stateFilter must be a
 named list with names as state(s) (e.g., list(Utah='p.COUNTYCD = 1').</p></dd>
+
+
 <dt>allFilter</dt>
 <dd><p>String. An overall filter for plot or condition data in all
 states in query. The expression must be R syntax (e.g., 'PLOT_STATUS_CD ==
 1').</p></dd>
+
+
 <dt>alltFilter</dt>
 <dd><p>String. If istree=TRUE, an overall filter for tree data in
 all states (e.g., only Whitebark pine trees - 'SPCD == 101'). Note: returns
 only plots with trees included in filter.</p></dd>
+
+
 <dt>returndata</dt>
 <dd><p>Logical. If TRUE, returns data objects.</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves data to outfolder as comma-delimited
 file (*.csv).  No objects are returned. If FALSE, the data are saved as R
 objects and returned to user.  See details for caveats.</p></dd>
+
+
 <dt>saveqry</dt>
 <dd><p>Logical. If TRUE, saves queries to outfolder (by state).</p></dd>
+
+
 <dt>savePOP</dt>
 <dd><p>Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN
 table.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,</p></dd>
+
+
 <dt>dbconn</dt>
 <dd><p>Open database connection.</p></dd>
+
+
 <dt>dbconnopen</dt>
 <dd><p>Logical. If TRUE, the dbconn connection is not closed.</p></dd>
+
+
 <dt>evalInfo</dt>
 <dd><p>List. List object output from DBgetEvalid or DBgetXY</p></dd>
+
+
 <dt>...</dt>
 <dd><p>For extendibility.
 FIESTA functions.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>if returndata=TRUE, a list of the following objects:</p>
+    
+
+<p>if returndata=TRUE, a list of the following objects:</p>
 <dl><dt>states</dt>
 <dd><p>Vector. Input state(s) (full state names: Arizona).</p></dd>
+ 
 <dt>tabs</dt>
 <dd><p>List. A list of data frames from FIA database, including 
 plt and cond; and tree (if Type='VOL'); seed (if isseed=TRUE), 
 p2veg_subplot_spp, p2veg_subp_structure, and invasive_subplot_spp 
 (if Type='P2VEG'). See below 'Output Tables - FIA Table Names' 
 for reference to FIA database tables.
-See FIESTA:ref_* for variable descriptions (e.g., FIESTA::ref_tree). 
+See FIESTA:ref_* for variable descriptions (e.g., FIESTAutils::ref_tree). 
 If istree and the number of states &gt; 3, tree data are saved to outfolder 
 and not returned to accommodate R memory issues.</p></dd>
+ 
 <dt>xy*_PUBLIC</dt>
 <dd><p>Data frame. XY data from FIA's public database. If 
 measCur=TRUE, named xyCur_PUBLIC, else named xy_PUBLIC. The data frame 
 has 10 columns ('PLT_CN', 'LON_PUBLIC', 'LAT_PUBLIC', 'STATECD', 'UNITCD',
 'COUNTYCD', 'PLOT', 'INTENSITY', 'PLOT_ID' (ID+STATECD+UNTCD+COUNTYCD+PLOT), 
 'COUNTYFIPS'. If issp=TRUE, returns an sf object.</p></dd>
+
 <dt>spconddat</dt>
 <dd><p>If spcond=TRUE, the condition variables representing 
 each plot for spatial display. For plots with multiple conditions, 
 the selected condition is based on CONDID=1 (if spcondid1=TRUE) or a 
 set if criteria defined in Details - spcond (if spcondid1=FALSE).</p></dd>
+
 <dt>evalid</dt>
 <dd><p>Number. If evalCur=TRUE or evalEndyr is not NULL, the
 Evalidation ID from the FIA database used to define the output data.</p></dd>
+ 
 <dt>pltcnt</dt>
 <dd><p>Data frame. Number of plots (NBRPLOTS) by state, cycle, 
 inventory year, and plot status.</p></dd>
+
 <dt>pop_plot_stratum_assgn</dt>
 <dd><p>Data frame. If savePOP=TRUE, and FIA Evaluations
 are used to extract data from database, return the POP_PLOT_STRATUM_ASSGN
 table or, if more than one Type and savePOP=FALSE. If more than one
 Type, only the records for the evalTypes are returned, otherwise all
 Types for the state evaluation are returned.</p></dd>
-</dl><p>*Output Tables - FIA Table Names*<br></p><table class="table table"><tr><td></td><td><b>tab</b></td><td><b>FIA Table</b></td></tr><tr><td></td><td>plt</td><td>plot</td></tr><tr><td></td><td>cond</td><td>cond</td></tr><tr><td></td><td>tree</td><td>tree</td></tr><tr><td></td><td>p2veg_subplot_spp</td><td>P2VEG_SUBPLOT_SPP</td></tr><tr><td></td><td>p2veg_subp_structure</td><td>P2VEG_SUBP_STRUCTURE</td></tr><tr><td></td><td>invsubp</td><td>INVASIVE_SUBPLOT_SPP</td></tr><tr><td></td><td>subplot</td><td>SUBPLOT</td></tr><tr><td></td><td>subp_cond</td><td>SUBP_COND</td></tr><tr><td></td><td>cond_dwm_calc</td><td>COND_DWM_CALC</td></tr><tr><td></td><td>grm</td><td>TREE_GRM_COMPONENT</td></tr><tr><td></td><td>issccm</td><td>SUBP_COND_CHNG_MTRX</td></tr></table><p>#' Outputs to outfolder (if savedata=TRUE):</p><table class="table table"><tr><td></td><td>- If saveqry=TRUE, text file(s) of SQL queries used to extract data 
+
+
+</dl><p>*Output Tables - FIA Table Names*<br></p>
+<p></p>
+<table class="table table"><tr><td></td><td><b>tab</b></td><td><b>FIA Table</b></td></tr><tr><td></td><td>plt</td><td>plot</td></tr><tr><td></td><td>cond</td><td>cond</td></tr><tr><td></td><td>tree</td><td>tree</td></tr><tr><td></td><td>p2veg_subplot_spp</td><td>P2VEG_SUBPLOT_SPP</td></tr><tr><td></td><td>p2veg_subp_structure</td><td>P2VEG_SUBP_STRUCTURE</td></tr><tr><td></td><td>invsubp</td><td>INVASIVE_SUBPLOT_SPP</td></tr><tr><td></td><td>subplot</td><td>SUBPLOT</td></tr><tr><td></td><td>subp_cond</td><td>SUBP_COND</td></tr><tr><td></td><td>cond_dwm_calc</td><td>COND_DWM_CALC</td></tr><tr><td></td><td>grm</td><td>TREE_GRM_COMPONENT</td></tr><tr><td></td><td>issccm</td><td>SUBP_COND_CHNG_MTRX</td></tr></table><p>#' Outputs to outfolder (if savedata=TRUE):</p><table class="table table"><tr><td></td><td>- If saveqry=TRUE, text file(s) of SQL queries used to extract data 
 from database (_.txt). Note: one query is used for extracting both plt
 and cond (pltcondqry*.txt).</td></tr><tr><td></td><td>- CSV file of plot and condition counts (pltcnt*.txt).</td></tr><tr><td></td><td>- Layers in a database or CSV files of output tables.</td></tr><tr><td></td><td>- If issp=TRUE, a feature class or ESRI shapefile of plot-level 
 level attributes. If shapefile (.shp), variable names are truncated to 
 10 characters or less. See notes for more info.</td></tr><tr><td></td><td>- If issp=TRUE and out_fmt='sqlite', the SQLite data is SpatiaLite.</td></tr></table><p>To deal with limitations of R object size and/or computer memory issues, if
 istree=TRUE and more than three states are desired, the tree data are saved
 to a CSV file, with no tree data object returned. <br></p>
+
+
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -473,44 +576,44 @@ North. Res. Stn.  URL http://apps.fs.fed.us/fiadb-downloads/datamart.html
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Extract the most current evaluation of data for Utah</span></span>
-<span class="r-in"><span class="va">UTdat</span> <span class="op">&lt;-</span> <span class="fu">DBgetPlots</span><span class="op">(</span>states <span class="op">=</span> <span class="st">"Utah"</span>, </span>
-<span class="r-in">                    eval <span class="op">=</span> <span class="st">"FIA"</span>,</span>
-<span class="r-in">                    eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">UTdat</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">UTdat</span><span class="op">$</span><span class="va">plot</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">UTdat</span><span class="op">$</span><span class="va">pltcnt</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Look at number of plots by inventory year</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">UTdat</span><span class="op">$</span><span class="va">plot</span><span class="op">$</span><span class="va">INVYR</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Note: see FIESTA::ref_plot and FIESTA::ref_cond for variable descriptions</span></span>
-<span class="r-in"><span class="co"># Or consult FIA Database documentation</span></span>
-<span class="r-in"><span class="co"># \link{https://www.fia.fs.fed.us/library/database-documentation/index.php}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Extract specified inventory years 2012:2014 and spatial information</span></span>
-<span class="r-in"><span class="va">UTdat2</span> <span class="op">&lt;-</span> <span class="fu">DBgetPlots</span><span class="op">(</span>states <span class="op">=</span> <span class="st">"Utah"</span>,</span>
-<span class="r-in">                     eval <span class="op">=</span> <span class="st">"custom"</span>,</span>
-<span class="r-in">                     eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>invyrs <span class="op">=</span> <span class="fl">2012</span><span class="op">:</span><span class="fl">2014</span><span class="op">)</span>, </span>
-<span class="r-in">                     issp <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">UTdat2</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">UTdat2</span><span class="op">$</span><span class="va">pltcnt</span></span>
-<span class="r-in"><span class="va">UTdat2</span><span class="op">$</span><span class="va">xy_PUBLIC</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Extract and display plots with aspen forest type</span></span>
-<span class="r-in"><span class="va">UTdat3</span> <span class="op">&lt;-</span> <span class="fu">DBgetPlots</span><span class="op">(</span>states <span class="op">=</span> <span class="st">"Utah"</span>,</span>
-<span class="r-in">                     eval <span class="op">=</span> <span class="st">"custom"</span>,</span>
-<span class="r-in">                     eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span>invyrs <span class="op">=</span> <span class="fl">2012</span><span class="op">:</span><span class="fl">2014</span><span class="op">)</span>,</span>
-<span class="r-in">                     issp <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span class="r-in">                     allFilter <span class="op">=</span> <span class="st">"FORTYPCD == 901"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">UTdat3</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">UTdat3</span><span class="op">$</span><span class="va">pltcnt</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="stunitco.html">stunitco</a></span><span class="op">[</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="stunitco.html">stunitco</a></span><span class="op">$</span><span class="va">STATENM</span> <span class="op">==</span> <span class="st">"Utah"</span>,<span class="op">]</span><span class="op">)</span>,</span>
-<span class="r-in">                     border <span class="op">=</span> <span class="st">"light grey"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">UTdat3</span><span class="op">$</span><span class="va">xy_PUBLIC</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">18</span>, cex<span class="op">=</span><span class="fl">.5</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Extract the most current evaluation of data for Utah</span></span></span>
+<span class="r-in"><span><span class="va">UTdat</span> <span class="op">&lt;-</span> <span class="fu">DBgetPlots</span><span class="op">(</span>states <span class="op">=</span> <span class="st">"Utah"</span>, </span></span>
+<span class="r-in"><span>                    eval <span class="op">=</span> <span class="st">"FIA"</span>,</span></span>
+<span class="r-in"><span>                    eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">UTdat</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">UTdat</span><span class="op">$</span><span class="va">plot</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">UTdat</span><span class="op">$</span><span class="va">pltcnt</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Look at number of plots by inventory year</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">UTdat</span><span class="op">$</span><span class="va">plot</span><span class="op">$</span><span class="va">INVYR</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Note: see FIESTAutils::ref_plot and FIESTAutils::ref_cond for variable descriptions</span></span></span>
+<span class="r-in"><span><span class="co"># Or consult FIA Database documentation</span></span></span>
+<span class="r-in"><span><span class="co"># \link{https://www.fia.fs.fed.us/library/database-documentation/index.php}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Extract specified inventory years 2012:2014 and spatial information</span></span></span>
+<span class="r-in"><span><span class="va">UTdat2</span> <span class="op">&lt;-</span> <span class="fu">DBgetPlots</span><span class="op">(</span>states <span class="op">=</span> <span class="st">"Utah"</span>,</span></span>
+<span class="r-in"><span>                     eval <span class="op">=</span> <span class="st">"custom"</span>,</span></span>
+<span class="r-in"><span>                     eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>invyrs <span class="op">=</span> <span class="fl">2012</span><span class="op">:</span><span class="fl">2014</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>                     issp <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">UTdat2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">UTdat2</span><span class="op">$</span><span class="va">pltcnt</span></span></span>
+<span class="r-in"><span><span class="va">UTdat2</span><span class="op">$</span><span class="va">xy_PUBLIC</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Extract and display plots with aspen forest type</span></span></span>
+<span class="r-in"><span><span class="va">UTdat3</span> <span class="op">&lt;-</span> <span class="fu">DBgetPlots</span><span class="op">(</span>states <span class="op">=</span> <span class="st">"Utah"</span>,</span></span>
+<span class="r-in"><span>                     eval <span class="op">=</span> <span class="st">"custom"</span>,</span></span>
+<span class="r-in"><span>                     eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span>invyrs <span class="op">=</span> <span class="fl">2012</span><span class="op">:</span><span class="fl">2014</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                     issp <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>                     allFilter <span class="op">=</span> <span class="st">"FORTYPCD == 901"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">UTdat3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">UTdat3</span><span class="op">$</span><span class="va">pltcnt</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="stunitco.html">stunitco</a></span><span class="op">[</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="stunitco.html">stunitco</a></span><span class="op">$</span><span class="va">STATENM</span> <span class="op">==</span> <span class="st">"Utah"</span>,<span class="op">]</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                     border <span class="op">=</span> <span class="st">"light grey"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">UTdat3</span><span class="op">$</span><span class="va">xy_PUBLIC</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">18</span>, cex<span class="op">=</span><span class="fl">.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -525,7 +628,7 @@ North. Res. Stn.  URL http://apps.fs.fed.us/fiadb-downloads/datamart.html
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

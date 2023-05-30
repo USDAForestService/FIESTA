@@ -18,7 +18,7 @@ McConville et al. (2018)'s mase R package."><!-- mathjax --><script src="https:/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -83,95 +83,136 @@ McConville et al. (2018)'s mase R package.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">modMAtree</span><span class="op">(</span>
-  <span class="va">MApopdat</span>,
-  <span class="va">MAmethod</span>,
-  <span class="va">estvar</span>,
-  estvar.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  estseed <span class="op">=</span> <span class="st">"none"</span>,
-  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,
-  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,
-  rowvar <span class="op">=</span> <span class="cn">NULL</span>,
-  colvar <span class="op">=</span> <span class="cn">NULL</span>,
-  prednames <span class="op">=</span> <span class="cn">NULL</span>,
-  modelselect <span class="op">=</span> <span class="cn">FALSE</span>,
-  FIA <span class="op">=</span> <span class="cn">TRUE</span>,
-  bootstrap <span class="op">=</span> <span class="cn">FALSE</span>,
-  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  table_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  title_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  gui <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">modMAtree</span><span class="op">(</span></span>
+<span>  <span class="va">MApopdat</span>,</span>
+<span>  <span class="va">MAmethod</span>,</span>
+<span>  <span class="va">estvar</span>,</span>
+<span>  estvar.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  estseed <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,</span>
+<span>  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rowvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  colvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prednames <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  modelselect <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  FIA <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  bootstrap <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  table_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  title_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gui <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>MApopdat</dt>
 <dd><p>List. Population data objects returned from modMApop().</p></dd>
+
+
 <dt>MAmethod</dt>
 <dd><p>String. mase (i.e., model-assisted) method to use 
 ('greg', 'gregEN', 'ratio').</p></dd>
+
+
 <dt>estvar</dt>
 <dd><p>String. Name of the tree-level estimate variable (e.g.,
 'VOLCFNET').</p></dd>
+
+
 <dt>estvar.filter</dt>
 <dd><p>String. A tree-level filter for estvar. Must be R
 syntax (e.g., 'STATUSCD == 1').</p></dd>
+
+
 <dt>estseed</dt>
 <dd><p>String. Use seedling data only or add to tree data. Seedling
 estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').</p></dd>
+
+
 <dt>landarea</dt>
 <dd><p>String. The condition-level filter for defining land area
 ('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1;
 if landarea='TIMBERLAND', SITECLCD in(1:6) &amp; RESERVCD = 0.</p></dd>
+
+
 <dt>pcfilter</dt>
 <dd><p>String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.</p></dd>
+
+
 <dt>rowvar</dt>
 <dd><p>String. Optional. Name of domain variable to group estvar by
 for rows in table output. Rowvar must be included in an input data frame
 (i.e., plt, cond, tree). If no rowvar is included, an estimate is returned
 for the total estimation unit. Include colvar for grouping by 2 variables.</p></dd>
+
+
 <dt>colvar</dt>
 <dd><p>String. Optional. If rowvar != NULL, name of domain variable
 to group estvar by for columns in table output. Colvar must be included in
 an input data frame (i.e., plt, cond, tree).</p></dd>
+
+
 <dt>prednames</dt>
 <dd><p>String vector. Name(s) of predictor variables to include in
 model.</p></dd>
+
+
 <dt>modelselect</dt>
 <dd><p>Logical. If TRUE, variable selection occurs.</p></dd>
+
+
 <dt>FIA</dt>
 <dd><p>Logical. If TRUE, the finite population term is removed from
 estimator to match FIA estimates.</p></dd>
+
+
 <dt>bootstrap</dt>
 <dd><p>Logical. If TRUE, returns bootstrap variance estimates,
 otherwise uses Horvitz-Thompson estimator under simple random sampling
 without replacement.</p></dd>
+
+
 <dt>returntitle</dt>
 <dd><p>Logical. If TRUE, returns title(s) of the estimation
 table(s).</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves table(s) to outfolder.</p></dd>
+
+
 <dt>table_opts</dt>
 <dd><p>List. See help(table_options()) for a list of
 options.</p></dd>
+
+
 <dt>title_opts</dt>
 <dd><p>List. See help(title_options()) for a list of options.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
+
+
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Parameters for modMApop() if MApopdat is NULL.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>If FIA=TRUE or unitvar=NULL and colvar=NULL, one data frame is
+    
+
+<p>If FIA=TRUE or unitvar=NULL and colvar=NULL, one data frame is
 returned with tree estimates and percent sample errors. Otherwise, a list is
 returned with tree estimates in one data frame (est) and percent sample
 errors in another data frame (est.pse). If rawdata=TRUE, another list is
@@ -182,32 +223,37 @@ savedata=TRUE, all data frames are written to outfolder.</p>
 <dd><p>Data frame. Tree estimates by rowvar, colvar (and estimation
 unit). If FIA=TRUE or one estimation unit and colvar=NULL, estimates and
 percent sampling error are in one data frame.</p></dd>
-<dt>pse</dt>
+ <dt>pse</dt>
 <dd><p>Data frame.
 Percent sampling errors for estimates by rowvar and colvar (and estimation
 unit).</p></dd>
-<dt>titlelst</dt>
+ <dt>titlelst</dt>
 <dd><p>List with 1 or 2 string vectors. If
 returntitle=TRUE a list with table title(s). The list contains one title if
 est and pse are in the same table and two titles if est and pse are in
 separate tables.</p></dd>
-<dt>raw</dt>
+ <dt>raw</dt>
 <dd><p>List of data frames. If rawdata=TRUE, a list
 including: number of plots by plot status, if in dataset (plotsampcnt);
 number of conditions by condition status (condsampcnt); data used for
 post-stratification (stratdat); and 1-8 tables with calculated variables
 used for processing estimates and percent sampling error for table cell
 values and totals (See processing data below).</p></dd>
+
+
 </dl><p>Raw data</p>
 <dl><dt>plotsampcnt</dt>
 <dd><p>Table. Number of plots by plot status (ex. sampled
 forest on plot, sampled nonforest, nonsampled).</p></dd>
-<dt>condsampcnt</dt>
+ <dt>condsampcnt</dt>
 <dd><p>DF.
 Number of conditions by condition status (forest land, nonforest land,
 noncensus water, census water, nonsampled).</p></dd>
+
+
 <dt>stratdat</dt>
 <dd><p>Data frame. Strata information by estimation unit.</p></dd>
+
 </dl><table class="table table"><tr><td></td><td><b>Variable</b></td><td><b>Description</b></td></tr><tr><td></td><td>ESTUNIT</td><td>estimation unit</td></tr><tr><td></td><td>STRATA</td><td>strata</td></tr><tr><td></td><td>ACRES</td><td>area by
 strata for estimation unit</td></tr><tr><td></td><td>n.strata</td><td>number of plots in strata
 (and estimation unit)</td></tr><tr><td></td><td>n.total</td><td>number of plots for estimation
@@ -228,6 +274,8 @@ estimated area</td></tr><tr><td></td><td>CI95left</td><td>left tail of 95 percen
 interval for estimated area</td></tr><tr><td></td><td>CI95right</td><td>right tail of 95 percent
 confidence interval for estimated area</td></tr><tr><td></td><td>CI67left</td><td>left tail of
 67 percent confidence interval for estimated area</td></tr><tr><td></td><td>CI67right</td><td>right tail of 67 percent confidence interval for estimated area</td></tr></table><p></p></dd>
+
+
 </dl><p>Table(s) are also written to outfolder.</p>
     </div>
     <div id="details">
@@ -333,32 +381,31 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co"># Set up population dataset (see ?modMApop() for more information)</span></span>
-<span class="r-in"><span class="va">MApopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="modMApop.html">modMApop</a></span><span class="op">(</span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span>
-<span class="r-in">                                    cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span><span class="op">)</span>,</span>
-<span class="r-in">                     pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYpltassgn.html">WYpltassgn</a></span>,</span>
-<span class="r-in">                     pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,</span>
-<span class="r-in">                     unitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitarea.html">WYunitarea</a></span>,</span>
-<span class="r-in">                     unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>,</span>
-<span class="r-in">                     unitzonal <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitzonal.html">WYunitzonal</a></span>,</span>
-<span class="r-in">                     prednames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"tcc"</span>, <span class="st">"tpi"</span>, <span class="st">"tnt"</span><span class="op">)</span>,</span>
-<span class="r-in">                     predfac <span class="op">=</span> <span class="st">"tnt"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Set up population dataset (see ?modMApop() for more information)</span></span></span>
+<span class="r-in"><span><span class="va">MApopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="modMApop.html">modMApop</a></span><span class="op">(</span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span></span>
+<span class="r-in"><span>                                    cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                     pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYpltassgn.html">WYpltassgn</a></span>,</span></span>
+<span class="r-in"><span>                     pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,</span></span>
+<span class="r-in"><span>                     unitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitarea.html">WYunitarea</a></span>,</span></span>
+<span class="r-in"><span>                     unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>,</span></span>
+<span class="r-in"><span>                     unitzonal <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitzonal.html">WYunitzonal</a></span>,</span></span>
+<span class="r-in"><span>                     prednames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"tcc"</span>, <span class="st">"tpi"</span>, <span class="st">"tnt"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                     predfac <span class="op">=</span> <span class="st">"tnt"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> INTENSITY not in dataset.. assuming single intensity plots</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> DESIGNCD not in dataset.. assuming DESIGNCD = 1 (annual inventory)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> For FIA estimation, adjustment factors are calculated to account for plots with partial nonresponse.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ...there are 14 nonsampled forest conditions in the dataset.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 14 records: COND_STATUS_CD != 5</span>
-<span class="r-in">                     </span>
-<span class="r-in"><span class="co"># Use GREG Estimator to Estimate cubic foot volume of live trees in our</span></span>
-<span class="r-in"><span class="co"># population</span></span>
-<span class="r-in"><span class="fu">modMAtree</span><span class="op">(</span>MApopdat <span class="op">=</span> <span class="va">MApopdat</span>,</span>
-<span class="r-in">          MAmethod <span class="op">=</span> <span class="st">"greg"</span>,</span>
-<span class="r-in">          estvar <span class="op">=</span> <span class="st">"VOLCFNET"</span>,</span>
-<span class="r-in">          estvar.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span><span class="op">)</span></span>
+<span class="r-in"><span>                     </span></span>
+<span class="r-in"><span><span class="co"># Use GREG Estimator to Estimate cubic foot volume of live trees in our</span></span></span>
+<span class="r-in"><span><span class="co"># population</span></span></span>
+<span class="r-in"><span><span class="fu">modMAtree</span><span class="op">(</span>MApopdat <span class="op">=</span> <span class="va">MApopdat</span>,</span></span>
+<span class="r-in"><span>          MAmethod <span class="op">=</span> <span class="st">"greg"</span>,</span></span>
+<span class="r-in"><span>          estvar <span class="op">=</span> <span class="st">"VOLCFNET"</span>,</span></span>
+<span class="r-in"><span>          estvar.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2620 records: COND_STATUS_CD == 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> multiplying VOLCFNET by TPA</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 5537 records: STATUSCD == 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> generating estimates using mase::greg function...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> using the following predictors...dem, tcc, tpi, tnt2</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> getting output...</span>
@@ -10167,120 +10214,119 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> $invyr</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2011 2012 2013</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in">          </span>
-<span class="r-in"><span class="co"># Use GREG Elastic Net Estimator to Estimate basal area of live trees in our</span></span>
-<span class="r-in"><span class="co"># population</span></span>
-<span class="r-in"><span class="fu">modMAtree</span><span class="op">(</span>MApopdat <span class="op">=</span> <span class="va">MApopdat</span>,</span>
-<span class="r-in">          MAmethod <span class="op">=</span> <span class="st">"gregEN"</span>,</span>
-<span class="r-in">          estvar <span class="op">=</span> <span class="st">"BA"</span>,</span>
-<span class="r-in">          estvar.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span><span class="op">)</span></span>
+<span class="r-in"><span>          </span></span>
+<span class="r-in"><span><span class="co"># Use GREG Elastic Net Estimator to Estimate basal area of live trees in our</span></span></span>
+<span class="r-in"><span><span class="co"># population</span></span></span>
+<span class="r-in"><span><span class="fu">modMAtree</span><span class="op">(</span>MApopdat <span class="op">=</span> <span class="va">MApopdat</span>,</span></span>
+<span class="r-in"><span>          MAmethod <span class="op">=</span> <span class="st">"gregEN"</span>,</span></span>
+<span class="r-in"><span>          estvar <span class="op">=</span> <span class="st">"BA"</span>,</span></span>
+<span class="r-in"><span>          estvar.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2620 records: COND_STATUS_CD == 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> multiplying BA by TPA</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 5537 records: STATUSCD == 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> generating estimates using mase::gregElasticNet function...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> using the following predictors...dem, tcc, tpi, tnt2</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> getting output...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $est</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     ESTN_UNIT  Estimate Percent Sampling Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:         1  34579963                   8.82</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:         3  27618824                  20.56</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:         5   7727020                  27.62</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:         7  70082601                   9.25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:         9  22383415                  21.59</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:        11  46592973                  13.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:        13  71604128                  11.22</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:        15    306229                  84.53</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:        17   5256210                  60.04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:        19  39061487                  19.65</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:        21   1604707                  80.77</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:        23  70880793                  12.78</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        25   9398510                  47.94</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        27   5255582                   6.01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:        29 116481124                   9.37</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:        31   6821745                  25.55</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:        33  35732251                  15.39</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:        35  60678474                  13.57</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19:        37  20546720                  43.07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20:        39 161690967                   7.41</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21:        41  12571935                  35.18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22:        43   9051345                  54.09</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23:        45  10063131                  33.67</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     ESTN_UNIT  Estimate Percent Sampling Error</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ESTN_UNIT    Estimate Percent Sampling Error</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:         1  34621115.8                   8.80</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:         3  27637431.8                  20.54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:         5   8297900.4                  30.73</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:         7  71025574.5                   9.56</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:         9  22307892.2                  21.62</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:        11  46562509.2                  13.04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:        13  72231439.2                  11.20</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:        15    308997.8                  84.58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:        17   4687031.4                  67.72</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:        19  39054132.2                  19.66</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:        21   1604706.6                  80.77</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:        23  70904024.8                  12.76</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        25   9404808.6                  47.90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        27   5255581.5                   6.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:        29 116496163.5                   9.37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16:        31   6822369.2                  25.54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17:        33  35732250.8                  15.39</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18:        35  60674681.4                  13.58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19:        37  18490596.0                  45.81</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20:        39 161724727.9                   7.40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21:        41  12615496.3                  34.94</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22:        43   9051345.4                  54.09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23:        45  10058968.6                  33.52</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ESTN_UNIT    Estimate Percent Sampling Error</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $raw</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $raw$unit_totest</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ESTN_UNIT       nhat    nhat.var NBRPLT NBRPLT.gt0   ACRES AREAUSED</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1          1 12.5398174  1.22345689    133         24 2757613  2757613</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2          3 13.6609921  7.88803007     98         11 2021729  2021729</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3          5  2.5144974  0.48224890    152         14 3072988  3072988</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4          7 13.7498851  1.61764350    245         35 5096959  5096959</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5          9  8.2000955  3.13479842    133         15 2729653  2729653</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6         11 25.3619098 10.91173992     85         26 1837124  1837124</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7         13 12.0747159  1.83500857    290         49 5930088  5930088</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8         15  0.2143592  0.03282894     70          2 1428579  1428579</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9         17  4.0937202  6.04057432     58          6 1283969  1283969</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10        19 14.6199032  8.25653498    128         22 2671802  2671802</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          1 12.5547406  1.22193076    133         24 2757613  2757613</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2          3 13.6701961  7.88155373     98         11 2021729  2021729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3          5  2.7002710  0.68837846    152         14 3072988  3072988</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4          7 13.9348922  1.77634384    245         35 5096959  5096959</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5          9  8.1724279  3.12301438    133         15 2729653  2729653</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6         11 25.3453274 10.91710651     85         26 1837124  1837124</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7         13 12.1805004  1.86163524    290         49 5930088  5930088</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8         15  0.2162973  0.03346752     70          2 1428579  1428579</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9         17  3.6504241  6.11076910     58          6 1283969  1283969</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10        19 14.6171506  8.25554888    128         22 2671802  2671802</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11        21  0.9329288  0.56786281     86          2 1720074  1720074</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12        23 27.0852268 11.97361518    132         37 2616954  2616954</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13        25  2.7317715  1.71482101    175          7 3440445  3440445</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12        23 27.0941044 11.95568540    132         37 2616954  2616954</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13        25  2.7336024  1.71485334    175          7 3440445  3440445</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 14        27  3.1248831  0.03528171     79          2 1681849  1681849</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15        29 26.1178630  5.99480179    216         89 4459826  4459826</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16        31  5.0495197  1.66407137     64          6 1350969  1350969</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15        29 26.1212351  5.99218646    216         89 4459826  4459826</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16        31  5.0499820  1.66395404     64          6 1350969  1350969</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17        33 22.0935220 11.56198576     82         19 1617318  1617318</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18        35 19.2093010  6.79942414    158         42 3158807  3158807</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19        37  3.0601347  1.73746084    339          7 6714319  6714319</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20        39 59.8425233 19.63963330    125         87 2701941  2701941</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21        41  9.4098913 10.95931012     63          6 1336034  1336034</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18        35 19.2081002  6.80197746    158         42 3158807  3158807</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19        37  2.7539049  1.59136144    339          7 6714319  6714319</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20        39 59.8550183 19.64312164    125         87 2701941  2701941</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21        41  9.4424965 10.88493873     63          6 1336034  1336034</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 22        43  6.3060110 11.63420661     63          4 1435352  1435352</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23        45  6.5513558  4.86486244     73          8 1536038  1536038</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          est      est.var     est.se     est.cv       pse  CI99left   CI99right</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   34579963 9.303692e+12  3050195.3 0.08820701  8.820701  26723181  42436745.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   27618824 3.224144e+13  5678154.7 0.20559002 20.559002  12992867  42244781.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3    7727020 4.554000e+12  2134010.2 0.27617504 27.617504   2230174  13223866.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   70082601 4.202475e+13  6482649.6 0.09250013  9.250013  53384402  86780799.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   22383415 2.335740e+13  4832949.4 0.21591653 21.591653   9934562  34832268.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   46592973 3.682739e+13  6068557.5 0.13024620 13.024620  30961405  62224541.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   71604128 6.452981e+13  8033044.8 0.11218690 11.218690  50912376  92295879.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8     306229 6.699855e+10   258840.8 0.84525222 84.525222         0    972958.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9    5256210 9.958348e+12  3155685.1 0.60037273 60.037273         0  13384715.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10  39061487 5.893949e+13  7677205.8 0.19654157 19.654157  19286315  58836658.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11   1604707 1.680110e+12  1296190.5 0.80774298 80.774298         0   4943472.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12  70880793 8.200068e+13  9055422.9 0.12775567 12.775567  47555569  94206016.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13   9398510 2.029776e+13  4505303.1 0.47936357 47.936357         0  21003401.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14   5255581 9.979840e+10   315908.9 0.06010921  6.010921   4441854   6069308.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15 116481124 1.192369e+14 10919564.8 0.09374536  9.374536  88354189 144608059.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16   6821745 3.037125e+12  1742735.0 0.25546764 25.546764   2332757  11310732.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17  35732251 3.024289e+13  5499353.5 0.15390448 15.390448  21566855  49897646.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18  60678474 6.784507e+13  8236812.1 0.13574521 13.574521  39461852  81895096.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19  20546720 7.832835e+13  8850330.4 0.43074175 43.074175         0  43343660.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20 161690967 1.433789e+14 11974090.8 0.07405541  7.405541 130847753 192534181.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21  12571935 1.956222e+13  4422920.4 0.35180905 35.180905   1179247  23964622.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22   9051345 2.396920e+13  4895835.4 0.54089587 54.089587         0  21662181.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23  10063131 1.147822e+13  3387951.9 0.33666975 33.666975   1336346  18789917.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       CI95left   CI95right     CI68left   CI68right</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   28601690.4  40558236.4  31546672.59  37613254.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   16489845.3  38747802.7  21972138.30  33265509.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3    3544437.3  11909603.6   5604837.20   9849203.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   57376841.0  82788360.6  63635878.80  76529322.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   12911008.3  31855822.0  17577250.50  27189579.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   34698819.0  58487127.4  40558048.34  52627898.1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   55859649.2  87348606.0  63615602.93  79592652.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8          0.0    813547.7     48822.79    563635.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9          0.0  11441238.9   2118013.93   8394405.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10  24014439.7  54108533.4  31426828.72  46696144.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11         0.0   4145193.4    315699.75   2893713.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12  53132489.8  88629095.3  61875555.88  79886029.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13    568277.8  18228741.5   4918175.44  13878843.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14   4636411.5   5874751.5   4941423.44   5569739.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15  95079170.5 137883078.0 105622076.97 127340171.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16   3406046.7  10237442.5   5088668.04   8554821.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17  24953716.1  46510785.6  30263375.42  41201126.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18  44534619.3  76822329.4  52487311.65  68869637.1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19   3200391.7  37893049.3  11745439.68  29348001.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20 138222180.4 185159754.0 149783238.20 173598696.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21   3903170.1  21240699.3   8173526.67  16970342.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22         0.0  18647006.4   4182643.36  13920047.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23   3422867.7  16703395.2   6693955.93  13432307.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23        45  6.5486457  4.81823676     73          8 1536038  1536038</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            est      est.var     est.se     est.cv       pse  CI99left</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   34621115.8 9.292086e+12  3048292.4 0.08804720  8.804720  26769235</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   27637431.8 3.221497e+13  5675823.2 0.20536725 20.536725  13017480</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    8297900.4 6.500534e+12  2549614.4 0.30726018 30.726018   1730529</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   71025574.5 4.614762e+13  6793204.0 0.09564448  9.564448  53527441</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   22307892.2 2.326960e+13  4823857.1 0.21623993 21.623993   9882460</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   46562509.2 3.684550e+13  6070049.7 0.13036346 13.036346  30927097</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   72231439.2 6.546616e+13  8091116.1 0.11201654 11.201654  51390105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8     308997.8 6.830178e+10   261346.1 0.84578634 84.578634         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    4687031.4 1.007407e+13  3173967.5 0.67718076 67.718076         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  39054132.2 5.893245e+13  7676747.3 0.19656684 19.656684  19280141</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   1604706.6 1.680110e+12  1296190.5 0.80774298 80.774298         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12  70904024.8 8.187789e+13  9048640.4 0.12761815 12.761815  47596272</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13   9404808.6 2.029814e+13  4505345.6 0.47904703 47.904703         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   5255581.5 9.979840e+10   315908.9 0.06010921  6.010921   4441854</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 116496163.5 1.191849e+14 10917182.6 0.09371281  9.371281  88375365</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16   6822369.2 3.036911e+12  1742673.6 0.25543525 25.543525   2333540</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17  35732250.8 3.024289e+13  5499353.5 0.15390448 15.390448  21566855</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18  60674681.4 6.787055e+13  8238358.5 0.13577918 13.577918  39454076</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19  18490596.0 7.174188e+13  8470058.0 0.45807383 45.807383         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20 161724727.9 1.434043e+14 11975154.2 0.07404653  7.404653 130878775</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21  12615496.3 1.942947e+13  4407887.5 0.34940263 34.940263   1261530</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22   9051345.4 2.396920e+13  4895835.4 0.54089587 54.089587         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23  10058968.6 1.136821e+13  3371677.5 0.33519117 33.519117   1374103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      CI99right    CI95left   CI95right     CI68left   CI68right</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   42472996.6  28646572.6  40595659.0  31589717.43  37652514.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   42257383.6  16513022.7  38761840.9  21993064.64  33281799.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   14865271.8   3300748.0  13295052.7   5762416.23  10833384.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   88523708.4  57711139.3  84340009.7  64270019.18  77781129.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   34733324.7  12853306.0  31762478.4  17510769.50  27105014.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   62197921.0  34665430.5  58459587.9  40526100.46  52598917.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   93072773.2  56373143.0  88089735.4  64185165.02  80277713.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8     982180.7         0.0    821226.7     49100.09    568895.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   12862629.9         0.0  10907893.4   1530654.43   7843408.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  58828122.9  24007983.9  54100280.5  31419930.25  46688334.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   4943472.2         0.0   4145193.4    315699.75   2893713.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12  94211777.9  53169015.6  88639034.1  61905533.07  79902516.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13  21009809.8    574493.5  18235123.7   4924432.14  13885185.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   6069308.8   4636411.5   5874751.5   4941423.44   5569739.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 144616962.3  95098878.8 137893448.2 105639485.17 127352841.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16  11311198.9   3406791.7  10237946.6   5089353.72   8555384.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17  49897646.7  24953716.1  46510785.6  30263375.42  41201126.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18  81895286.6  44527795.5  76821567.3  52481980.88  68867382.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19  40308019.7   1889587.2  35091604.7  10067479.97  26913712.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20 192570681.0 138253856.9 185195598.8 149815941.40 173633514.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21  23969462.2   3976195.5  21254797.1   8232037.82  16998954.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22  21662181.6         0.0  18647006.4   4182643.36  13920047.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23  18743834.3   3450602.1  16667335.1   6705977.34  13411959.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $raw$domdat</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              PLT_CN CONDID CONDPROP_UNADJ SUBPPROP_UNADJ MICRPROP_UNADJ</span>
@@ -19939,31 +19985,31 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $raw$predselectlst</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $raw$predselectlst$totest</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     ESTN_UNIT TOTAL           dem       tcc         tpi      tnt2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:         1     1 -0.0092756217 1.9865804  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:         3     1  0.0138558086 1.3390416  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:         5     1 -0.0057039962 0.7058379 -0.69197549   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:         7     1  0.0224319127 1.2999303  0.13321813 -18.33725</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:         9     1  0.0178559099 1.8703445  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:        11     1  0.0366826928 0.3685158  0.73020337 -37.27019</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:        13     1  0.0044911847 1.4964501 -0.50533789  -4.52820</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:        15     1  0.0004448949 0.0000000  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:        17     1  0.0042442451 0.0000000  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:        19     1  0.0070099970 1.2641716  0.64940832   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:        21     1  0.0000000000 0.0000000  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:        23     1  0.0446728599 1.3396380  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        25     1 -0.0006392483 1.4241530 -1.32569686   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        27     1 -0.0009672695 0.0000000  0.03405079 -65.20340</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:        29     1  0.0015273819 1.5602096  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:        31     1 -0.0254285326 1.9468626 -0.25819379   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:        33     1  0.0199330396 1.1499422 -0.98283693   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:        35     1  0.0054817682 1.5184772  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19:        37     1  0.0000000000 0.0000000  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20:        39     1  0.0232744572 1.7090800  0.84484481   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21:        41     1 -0.0594397677 2.2354071  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22:        43     1  0.0000000000 0.0000000  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23:        45     1  0.0287618921 0.5864515  0.00000000   0.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     ESTN_UNIT TOTAL           dem       tcc         tpi      tnt2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ESTN_UNIT TOTAL           dem        tcc         tpi      tnt2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:         1     1 -0.0096567324 1.99728286  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:         3     1  0.0134622481 1.36034436  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:         5     1 -0.0115850687 0.08511595  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:         7     1  0.0286843618 1.55937870  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:         9     1  0.0168719003 1.90929334  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:        11     1  0.0366176442 0.38351782  0.73427516 -36.56243</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:        13     1  0.0047943140 1.58119376 -0.49104215   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:        15     1  0.0000000000 0.00000000  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:        17     1  0.0000000000 0.00000000  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:        19     1  0.0069285071 1.26769537  0.68300071   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:        21     1  0.0000000000 0.00000000  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:        23     1  0.0440562039 1.37968867  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        25     1 -0.0006216429 1.42267941 -1.32081258   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        27     1 -0.0009672695 0.00000000  0.03405079 -65.20340</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:        29     1  0.0014304539 1.56992826  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16:        31     1 -0.0254274809 1.94951890 -0.26074870   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17:        33     1  0.0199330396 1.14994224 -0.98283693   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18:        35     1  0.0056040840 1.50932216  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19:        37     1  0.0019528812 2.34072639 -1.10003632   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20:        39     1  0.0231921259 1.70102613  0.79508725   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21:        41     1 -0.0627711795 2.33642080  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22:        43     1  0.0000000000 0.00000000  0.00000000   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23:        45     1  0.0214801237 0.70222003 -0.37270958   0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ESTN_UNIT TOTAL           dem        tcc         tpi      tnt2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $raw$rowvar</span>
@@ -19985,7 +20031,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> $invyr</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2011 2012 2013</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -20000,7 +20046,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

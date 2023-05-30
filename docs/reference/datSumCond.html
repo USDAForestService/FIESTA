@@ -20,7 +20,7 @@ weighted sum."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/li
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -87,30 +87,30 @@ weighted sum.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">datSumCond</span><span class="op">(</span>
-  cond <span class="op">=</span> <span class="cn">NULL</span>,
-  datsource <span class="op">=</span> <span class="st">"obj"</span>,
-  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  plt <span class="op">=</span> <span class="cn">NULL</span>,
-  subp_cond <span class="op">=</span> <span class="cn">NULL</span>,
-  subplot <span class="op">=</span> <span class="cn">NULL</span>,
-  cuniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,
-  puniqueid <span class="op">=</span> <span class="st">"CN"</span>,
-  condid <span class="op">=</span> <span class="st">"CONDID"</span>,
-  bycond <span class="op">=</span> <span class="cn">FALSE</span>,
-  bysubp <span class="op">=</span> <span class="cn">FALSE</span>,
-  subpid <span class="op">=</span> <span class="st">"SUBP"</span>,
-  csumvar <span class="op">=</span> <span class="cn">NULL</span>,
-  csumvarnm <span class="op">=</span> <span class="cn">NULL</span>,
-  cfilter <span class="op">=</span> <span class="cn">NULL</span>,
-  getadjplot <span class="op">=</span> <span class="cn">FALSE</span>,
-  adjcond <span class="op">=</span> <span class="cn">FALSE</span>,
-  NAto0 <span class="op">=</span> <span class="cn">FALSE</span>,
-  returnDT <span class="op">=</span> <span class="cn">TRUE</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  gui <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">datSumCond</span><span class="op">(</span></span>
+<span>  cond <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  datsource <span class="op">=</span> <span class="st">"obj"</span>,</span>
+<span>  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plt <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subp_cond <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subplot <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cuniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,</span>
+<span>  puniqueid <span class="op">=</span> <span class="st">"CN"</span>,</span>
+<span>  condid <span class="op">=</span> <span class="st">"CONDID"</span>,</span>
+<span>  bycond <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  bysubp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  subpid <span class="op">=</span> <span class="st">"SUBP"</span>,</span>
+<span>  csumvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  csumvarnm <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  getadjplot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  adjcond <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  NAto0 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  returnDT <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -118,73 +118,120 @@ weighted sum.</p>
     <dl><dt>cond</dt>
 <dd><p>Data frame or comma-delimited file (*.csv). Condition-level
 table with aggregate variable and CONDPROP_UNADJ.</p></dd>
+
+
 <dt>datsource</dt>
 <dd><p>String. Source of data ('obj', 'csv', 'sqlite', 'gdb').</p></dd>
+
+
 <dt>data_dsn</dt>
 <dd><p>String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).</p></dd>
+
+
 <dt>plt</dt>
 <dd><p>Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
 database file. Plot-level table to join the aggregated tree data to (if
 bycond=FALSE). Nonsampled plots (PLOT_STATUS_CD = 3) are removed. Optional.</p></dd>
+
+
 <dt>subp_cond</dt>
 <dd><p>Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
 Subplot condition-level table to use to sum condition proportions, 
 if bysubp=TRUE.</p></dd>
+
+
 <dt>subplot</dt>
 <dd><p>Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
 Subplot-level table to used to calculate adjustment factors, to remove 
 nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.</p></dd>
+
+
 <dt>cuniqueid</dt>
 <dd><p>String. Unique identifier of cond (default = "PLT_CN").</p></dd>
+
+
 <dt>puniqueid</dt>
 <dd><p>String. Unique identifier of plt (default = "CN").</p></dd>
+
+
 <dt>condid</dt>
 <dd><p>String. Unique identifier for conditions.</p></dd>
+
+
 <dt>bycond</dt>
 <dd><p>Logical. If TRUE, the data are aggregated to the condition
 level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
 level (by: puniqueid).</p></dd>
+
+
 <dt>bysubp</dt>
 <dd><p>Logical. If TRUE, data are aggregated to the subplot level.</p></dd>
+
+
 <dt>subpid</dt>
 <dd><p>String. Unique identifier of each subplot.</p></dd>
+
+
 <dt>csumvar</dt>
 <dd><p>String. One or more variable names to sum to plot level.</p></dd>
+
+
 <dt>csumvarnm</dt>
 <dd><p>String. Name of the resulting aggregated plot-level
 variable(s).  Default = csumvar + '_PLT'.</p></dd>
+
+
 <dt>cfilter</dt>
 <dd><p>String. A filter to subset the cond data before aggregating
 (e.g., "COND_STATUS_CD == 1"). Must be R syntax.</p></dd>
+
+
 <dt>getadjplot</dt>
 <dd><p>Logical. If TRUE, adjustments are calculated for
 nonsampled conditions on plot.</p></dd>
+
+
 <dt>adjcond</dt>
 <dd><p>Logical. If TRUE, csumvar condition variables are adjusted
 for nonsampled conditions by plot.</p></dd>
+
+
 <dt>NAto0</dt>
 <dd><p>Logical. If TRUE, convert NA values to 0.</p></dd>
+
+
 <dt>returnDT</dt>
 <dd><p>Logical. If TRUE, returns data.table object(s). If FALSE,
 returns data.frame object(s).</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves data to outfolder.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'condsum'.</p></dd>
+
+
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of the following items:</p>
+    
+
+<p>A list of the following items:</p>
 <dl><dt>condsum</dt>
 <dd><p>Data frame.
 Plot-level table with aggregated condition attribute.</p></dd>
-<dt>cfilter</dt>
+ <dt>cfilter</dt>
 <dd><p>Condition filter.</p></dd>
+
+
 </dl><p>If savedata=TRUE, condsum is saved to the outfolder.</p>
     </div>
     <div id="details">
@@ -202,15 +249,15 @@ Plot-level table with aggregated condition attribute.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ</span></span>
-<span class="r-in"><span class="va">condsum</span> <span class="op">&lt;-</span> <span class="fu">datSumCond</span><span class="op">(</span>cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span>,</span>
-<span class="r-in">                      csumvar <span class="op">=</span> <span class="st">"LIVE_CANOPY_CVR_PCT"</span><span class="op">)</span><span class="op">$</span><span class="va">condsum</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Check results</span></span>
-<span class="r-in"><span class="va">condsum</span><span class="op">[</span><span class="va">condsum</span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op">==</span> <span class="fl">40404737010690</span>,<span class="op">]</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ</span></span></span>
+<span class="r-in"><span><span class="va">condsum</span> <span class="op">&lt;-</span> <span class="fu">datSumCond</span><span class="op">(</span>cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span>,</span></span>
+<span class="r-in"><span>                      csumvar <span class="op">=</span> <span class="st">"LIVE_CANOPY_CVR_PCT"</span><span class="op">)</span><span class="op">$</span><span class="va">condsum</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Check results</span></span></span>
+<span class="r-in"><span><span class="va">condsum</span><span class="op">[</span><span class="va">condsum</span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op">==</span> <span class="fl">40404737010690</span>,<span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            PLT_CN LIVE_CANOPY_CVR_PCT_PLT</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: 40404737010690                      16</span>
-<span class="r-in"><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span><span class="op">[</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op">==</span> <span class="fl">40404737010690</span>,<span class="op">]</span></span>
+<span class="r-in"><span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span><span class="op">[</span><span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op">==</span> <span class="fl">40404737010690</span>,<span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9  40404737010690      1                      NA           0.75           0.75</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10 40404737010690      2                      NA           0.25           0.25</span>
@@ -240,7 +287,7 @@ Plot-level table with aggregated condition attribute.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

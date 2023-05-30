@@ -18,7 +18,7 @@ McConville et al. (2018)'s mase R package."><!-- mathjax --><script src="https:/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -83,80 +83,115 @@ McConville et al. (2018)'s mase R package.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">modMAarea</span><span class="op">(</span>
-  <span class="va">MApopdat</span>,
-  <span class="va">MAmethod</span>,
-  FIA <span class="op">=</span> <span class="cn">TRUE</span>,
-  prednames <span class="op">=</span> <span class="cn">NULL</span>,
-  modelselect <span class="op">=</span> <span class="cn">FALSE</span>,
-  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,
-  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,
-  rowvar <span class="op">=</span> <span class="cn">NULL</span>,
-  colvar <span class="op">=</span> <span class="cn">NULL</span>,
-  bootstrap <span class="op">=</span> <span class="cn">FALSE</span>,
-  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  table_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  title_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  gui <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">modMAarea</span><span class="op">(</span></span>
+<span>  <span class="va">MApopdat</span>,</span>
+<span>  <span class="va">MAmethod</span>,</span>
+<span>  FIA <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  prednames <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  modelselect <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  landarea <span class="op">=</span> <span class="st">"FOREST"</span>,</span>
+<span>  pcfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rowvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  colvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bootstrap <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  returntitle <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  table_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  title_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gui <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>MApopdat</dt>
 <dd><p>List. Population data objects returned from modMApop().</p></dd>
+
+
 <dt>MAmethod</dt>
 <dd><p>String. mase (i.e., model-assisted) method to use 
 ('greg', 'gregEN', 'ratio').</p></dd>
+
+
 <dt>FIA</dt>
 <dd><p>Logical. If TRUE, the finite population term is removed from
 estimator to match FIA estimates.</p></dd>
+
+
 <dt>prednames</dt>
 <dd><p>String vector. Name(s) of predictor variables to include in
 model.</p></dd>
+
+
 <dt>modelselect</dt>
 <dd><p>Boolean. TRUE if you want model selection to occur.</p></dd>
+
+
 <dt>landarea</dt>
 <dd><p>String. The sample area filter for estimates ('ALL',
 'FOREST', 'TIMBERLAND').  If landarea=FOREST, filtered to COND_STATUS_CD =
 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.</p></dd>
+
+
 <dt>pcfilter</dt>
 <dd><p>String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.</p></dd>
+
+
 <dt>rowvar</dt>
 <dd><p>String. Name of the row domain variable in cond or tree. If
 only one domain, rowvar = domain variable. If more than one domain, include
 colvar. If no domain, rowvar = NULL.</p></dd>
+
+
 <dt>colvar</dt>
 <dd><p>String. Name of the column domain variable in cond or tree.</p></dd>
+
+
 <dt>bootstrap</dt>
 <dd><p>Logical. If TRUE, returns bootstrap variance estimates,
 otherwise uses Horvitz-Thompson estimator under simple random sampling
 without replacement.</p></dd>
+
+
 <dt>returntitle</dt>
 <dd><p>Logical. If TRUE, returns title(s) of the estimation
 table(s).</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves table(s) to outfolder.</p></dd>
+
+
 <dt>table_opts</dt>
 <dd><p>List. See help(table_options()) for a list of
 options.</p></dd>
+
+
 <dt>title_opts</dt>
 <dd><p>List. See help(title_options()) for a list of options.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
+
+
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Parameters for modMApop() if MApopdat is NULL.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>If FIA=TRUE or unitvar=NULL and colvar=NULL, one data frame is
+    
+
+<p>If FIA=TRUE or unitvar=NULL and colvar=NULL, one data frame is
 returned with tree estimates and percent sample errors. Otherwise, a list is
 returned with tree estimates in one data frame (est) and percent sample
 errors in another data frame (est.pse). If rawdata=TRUE, another list is
@@ -167,32 +202,37 @@ savedata=TRUE, all data frames are written to outfolder.</p>
 <dd><p>Data frame. Tree estimates by rowvar, colvar (and estimation
 unit). If FIA=TRUE or one estimation unit and colvar=NULL, estimates and
 percent sampling error are in one data frame.</p></dd>
-<dt>pse</dt>
+ <dt>pse</dt>
 <dd><p>Data frame.
 Percent sampling errors for estimates by rowvar and colvar (and estimation
 unit).</p></dd>
-<dt>titlelst</dt>
+ <dt>titlelst</dt>
 <dd><p>List with 1 or 2 string vectors. If
 returntitle=TRUE a list with table title(s). The list contains one title if
 est and pse are in the same table and two titles if est and pse are in
 separate tables.</p></dd>
-<dt>raw</dt>
+ <dt>raw</dt>
 <dd><p>List of data frames. If rawdata=TRUE, a list
 including: number of plots by plot status, if in dataset (plotsampcnt);
 number of conditions by condition status (condsampcnt); data used for
 post-stratification (stratdat); and 1-8 tables with calculated variables
 used for processing estimates and percent sampling error for table cell
 values and totals (See processing data below).</p></dd>
+
+
 </dl><p>Raw data</p>
 <dl><dt>plotsampcnt</dt>
 <dd><p>Table. Number of plots by plot status (ex. sampled
 forest on plot, sampled nonforest, nonsampled).</p></dd>
-<dt>condsampcnt</dt>
+ <dt>condsampcnt</dt>
 <dd><p>DF.
 Number of conditions by condition status (forest land, nonforest land,
 noncensus water, census water, nonsampled).</p></dd>
+
+
 <dt>stratdat</dt>
 <dd><p>Data frame. Strata information by estimation unit.</p></dd>
+
 </dl><table class="table table"><tr><td></td><td><b>Variable</b></td><td><b>Description</b></td></tr><tr><td></td><td>ESTUNIT</td><td>estimation unit</td></tr><tr><td></td><td>STRATA</td><td>strata</td></tr><tr><td></td><td>ACRES</td><td>area by
 strata for estimation unit</td></tr><tr><td></td><td>n.strata</td><td>number of plots in strata
 (and estimation unit)</td></tr><tr><td></td><td>n.total</td><td>number of plots for estimation
@@ -213,6 +253,8 @@ estimated area</td></tr><tr><td></td><td>CI95left</td><td>left tail of 95 percen
 interval for estimated area</td></tr><tr><td></td><td>CI95right</td><td>right tail of 95 percent
 confidence interval for estimated area</td></tr><tr><td></td><td>CI67left</td><td>left tail of
 67 percent confidence interval for estimated area</td></tr><tr><td></td><td>CI67right</td><td>right tail of 67 percent confidence interval for estimated area</td></tr></table><p></p></dd>
+
+
 </dl><p>Table(s) are also written to outfolder.</p>
     </div>
     <div id="details">
@@ -303,27 +345,27 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co"># Set up population dataset (see ?modMApop() for more information)</span></span>
-<span class="r-in"><span class="va">MApopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="modMApop.html">modMApop</a></span><span class="op">(</span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span>
-<span class="r-in">                                    cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span><span class="op">)</span>,</span>
-<span class="r-in">                     pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYpltassgn.html">WYpltassgn</a></span>,</span>
-<span class="r-in">                     pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,</span>
-<span class="r-in">                     unitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitarea.html">WYunitarea</a></span>,</span>
-<span class="r-in">                     unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>,</span>
-<span class="r-in">                     unitzonal <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitzonal.html">WYunitzonal</a></span>,</span>
-<span class="r-in">                     prednames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"tcc"</span>, <span class="st">"tpi"</span>, <span class="st">"tnt"</span><span class="op">)</span>,</span>
-<span class="r-in">                     predfac <span class="op">=</span> <span class="st">"tnt"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Set up population dataset (see ?modMApop() for more information)</span></span></span>
+<span class="r-in"><span><span class="va">MApopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="modMApop.html">modMApop</a></span><span class="op">(</span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span></span>
+<span class="r-in"><span>                                    cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYcond.html">WYcond</a></span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                     pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYpltassgn.html">WYpltassgn</a></span>,</span></span>
+<span class="r-in"><span>                     pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,</span></span>
+<span class="r-in"><span>                     unitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitarea.html">WYunitarea</a></span>,</span></span>
+<span class="r-in"><span>                     unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>,</span></span>
+<span class="r-in"><span>                     unitzonal <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYunitzonal.html">WYunitzonal</a></span>,</span></span>
+<span class="r-in"><span>                     prednames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"tcc"</span>, <span class="st">"tpi"</span>, <span class="st">"tnt"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                     predfac <span class="op">=</span> <span class="st">"tnt"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> INTENSITY not in dataset.. assuming single intensity plots</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> DESIGNCD not in dataset.. assuming DESIGNCD = 1 (annual inventory)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> For FIA estimation, adjustment factors are calculated to account for plots with partial nonresponse.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ...there are 14 nonsampled forest conditions in the dataset.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 14 records: COND_STATUS_CD != 5</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Use GREG estimator to estimate area of forest land in our population</span></span>
-<span class="r-in"><span class="fu">modMAarea</span><span class="op">(</span>MApopdat <span class="op">=</span> <span class="va">MApopdat</span>, </span>
-<span class="r-in">          MAmethod <span class="op">=</span> <span class="st">"greg"</span>, </span>
-<span class="r-in">          landarea <span class="op">=</span> <span class="st">"FOREST"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Use GREG estimator to estimate area of forest land in our population</span></span></span>
+<span class="r-in"><span><span class="fu">modMAarea</span><span class="op">(</span>MApopdat <span class="op">=</span> <span class="va">MApopdat</span>, </span></span>
+<span class="r-in"><span>          MAmethod <span class="op">=</span> <span class="st">"greg"</span>, </span></span>
+<span class="r-in"><span>          landarea <span class="op">=</span> <span class="st">"FOREST"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2620 records: COND_STATUS_CD == 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> generating estimates using mase::greg function...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> using the following predictors...dem, tcc, tpi, tnt2</span>
@@ -371,7 +413,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11        21 0.02511316 1.887731e-04     86          2 1720074  1720074</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12        23 0.28992041 6.495083e-04    132         38 2616954  2616954</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13        25 0.03666191 1.318670e-04    175          7 3440445  3440445</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14        27 0.04696366 3.838416e-33     79          2 1681849  1681849</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14        27 0.04696366 9.355105e-33     79          2 1681849  1681849</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15        29 0.43439558 6.463685e-04    216         99 4459826  4459826</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16        31 0.14344407 8.274251e-04     64          8 1350969  1350969</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17        33 0.22982728 6.783994e-04     82         20 1617318  1617318</span>
@@ -395,7 +437,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11   43196.50 5.585145e+08 2.363291e+04 5.471025e-01 5.471025e+01       0.00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12  758708.38 4.448124e+09 6.669426e+04 8.790500e-02 8.790500e+00  586915.36</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13  126133.28 1.560865e+09 3.950778e+04 3.132225e-01 3.132225e+01   24367.98</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14   78985.78 1.085741e-20 1.041989e-10 1.319211e-15 1.319211e-13   78985.78</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   78985.78 2.646200e-20 1.626714e-10 2.059503e-15 2.059503e-13   78985.78</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15 1937328.72 1.285630e+10 1.133856e+05 5.852679e-02 5.852679e+00 1645266.70</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16  193788.50 1.510148e+09 3.886062e+04 2.005311e-01 2.005311e+01   93690.17</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17  371703.79 1.774501e+09 4.212483e+04 1.133290e-01 1.133290e+01  263197.42</span>
@@ -10090,7 +10132,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11:        21     1 -4.636583e-05  4.056781e-02  1.412267e-02  0.027508725</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12:        23     1  2.619539e-04  1.414130e-02  5.982672e-04 -0.121993357</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13:        25     1  3.038939e-05  6.220090e-03 -2.294800e-03 -0.297812325</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        27     1  2.564816e-18 -1.205633e-16 -2.287667e-17 -1.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        27     1  5.115655e-18 -1.682682e-16 -3.317659e-17 -1.000000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15:        29     1  1.117958e-04  9.523017e-03 -3.643689e-03 -0.241199551</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16:        31     1 -1.874004e-04  1.595056e-02 -5.314004e-03 -0.734143182</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17:        33     1  2.736194e-04  9.309618e-03 -3.353780e-03 -0.013814599</span>
@@ -10119,14 +10161,14 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> $invyr</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2011 2012 2013</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in">          </span>
-<span class="r-in"><span class="co"># Use GREG estimator to estimate area of forest land by forest type and</span></span>
-<span class="r-in"><span class="co"># stand-size class</span></span>
-<span class="r-in"><span class="fu">modMAarea</span><span class="op">(</span>MApopdat <span class="op">=</span> <span class="va">MApopdat</span>,</span>
-<span class="r-in">          MAmethod <span class="op">=</span> <span class="st">"greg"</span>,</span>
-<span class="r-in">          landarea <span class="op">=</span> <span class="st">"FOREST"</span>,</span>
-<span class="r-in">          rowvar <span class="op">=</span> <span class="st">"FORTYPCD"</span>,</span>
-<span class="r-in">          colvar <span class="op">=</span> <span class="st">"STDSZCD"</span><span class="op">)</span></span>
+<span class="r-in"><span>          </span></span>
+<span class="r-in"><span><span class="co"># Use GREG estimator to estimate area of forest land by forest type and</span></span></span>
+<span class="r-in"><span><span class="co"># stand-size class</span></span></span>
+<span class="r-in"><span><span class="fu">modMAarea</span><span class="op">(</span>MApopdat <span class="op">=</span> <span class="va">MApopdat</span>,</span></span>
+<span class="r-in"><span>          MAmethod <span class="op">=</span> <span class="st">"greg"</span>,</span></span>
+<span class="r-in"><span>          landarea <span class="op">=</span> <span class="st">"FOREST"</span>,</span></span>
+<span class="r-in"><span>          rowvar <span class="op">=</span> <span class="st">"FORTYPCD"</span>,</span></span>
+<span class="r-in"><span>          colvar <span class="op">=</span> <span class="st">"STDSZCD"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2620 records: COND_STATUS_CD == 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> generating estimates using mase::greg function...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> using the following predictors...dem, tcc, tpi, tnt2</span>
@@ -10175,7 +10217,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11        21 0.02511316 1.887731e-04     86          2 1720074  1720074</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12        23 0.28992041 6.495083e-04    132         38 2616954  2616954</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13        25 0.03666191 1.318670e-04    175          7 3440445  3440445</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14        27 0.04696366 3.838416e-33     79          2 1681849  1681849</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14        27 0.04696366 9.355105e-33     79          2 1681849  1681849</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15        29 0.43439558 6.463685e-04    216         99 4459826  4459826</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16        31 0.14344407 8.274251e-04     64          8 1350969  1350969</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17        33 0.22982728 6.783994e-04     82         20 1617318  1617318</span>
@@ -10199,7 +10241,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11   43196.50 5.585145e+08 2.363291e+04 5.471025e-01 5.471025e+01       0.00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12  758708.38 4.448124e+09 6.669426e+04 8.790500e-02 8.790500e+00  586915.36</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13  126133.28 1.560865e+09 3.950778e+04 3.132225e-01 3.132225e+01   24367.98</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14   78985.78 1.085741e-20 1.041989e-10 1.319211e-15 1.319211e-13   78985.78</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   78985.78 2.646200e-20 1.626714e-10 2.059503e-15 2.059503e-13   78985.78</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15 1937328.72 1.285630e+10 1.133856e+05 5.852679e-02 5.852679e+00 1645266.70</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16  193788.50 1.510148e+09 3.886062e+04 2.005311e-01 2.005311e+01   93690.17</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17  371703.79 1.774501e+09 4.212483e+04 1.133290e-01 1.133290e+01  263197.42</span>
@@ -10698,7 +10740,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> 50        25                2 0.000000000 0.000000e+00      0          0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 51        25                3 0.010263671 4.232558e-05    175          2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 52        25                5 0.007934928 2.305406e-05    175          1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 53        27                1 0.046963660 3.838416e-33     79          2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53        27                1 0.046963660 9.355105e-33     79          2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 54        27                2 0.000000000 0.000000e+00      0          0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 55        27                3 0.000000000 0.000000e+00      0          0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 56        27                5 0.000000000 0.000000e+00      0          0</span>
@@ -10791,7 +10833,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> 50 3440445  3440445       0.000 0.000000e+00 0.000000e+00          NaN</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 51 3440445  3440445   35311.596 5.009936e+08 2.238289e+04 6.338679e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 52 3440445  3440445   27299.683 2.728831e+08 1.651917e+04 6.051050e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 53 1681849  1681849   78985.785 1.085741e-20 1.041989e-10 1.319211e-15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53 1681849  1681849   78985.785 2.646200e-20 1.626714e-10 2.059503e-15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 54 1681849  1681849       0.000 0.000000e+00 0.000000e+00          NaN</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 55 1681849  1681849       0.000 0.000000e+00 0.000000e+00          NaN</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 56 1681849  1681849       0.000 0.000000e+00 0.000000e+00          NaN</span>
@@ -10884,7 +10926,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> 50          NaN      0.0000       0.00      0.000       0.00       0.000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 51 6.338679e+01      0.0000   92966.09      0.000   79181.25   13052.758</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 52 6.051050e+01      0.0000   69850.26      0.000   59676.67   10872.060</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 53 1.319211e-13  78985.7846   78985.78  78985.785   78985.78   78985.785</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53 2.059503e-13  78985.7846   78985.78  78985.785   78985.78   78985.785</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 54          NaN      0.0000       0.00      0.000       0.00       0.000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 55          NaN      0.0000       0.00      0.000       0.00       0.000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 56          NaN      0.0000       0.00      0.000       0.00       0.000</span>
@@ -24763,7 +24805,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11:        21     1 -4.636583e-05  4.056781e-02  1.412267e-02  0.027508725</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12:        23     1  2.619539e-04  1.414130e-02  5.982672e-04 -0.121993357</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13:        25     1  3.038939e-05  6.220090e-03 -2.294800e-03 -0.297812325</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        27     1  2.564816e-18 -1.205633e-16 -2.287667e-17 -1.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        27     1  5.115655e-18 -1.682682e-16 -3.317659e-17 -1.000000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15:        29     1  1.117958e-04  9.523017e-03 -3.643689e-03 -0.241199551</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16:        31     1 -1.874004e-04  1.595056e-02 -5.314004e-03 -0.734143182</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17:        33     1  2.736194e-04  9.309618e-03 -3.353780e-03 -0.013814599</span>
@@ -24790,7 +24832,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11:        21     1 -4.636583e-05  4.056781e-02  1.412267e-02  0.027508725</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12:        23     1  2.619539e-04  1.414130e-02  5.982672e-04 -0.121993357</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13:        25     1  3.038939e-05  6.220090e-03 -2.294800e-03 -0.297812325</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        27     1  2.564816e-18 -1.205633e-16 -2.287667e-17 -1.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        27     1  5.115655e-18 -1.682682e-16 -3.317659e-17 -1.000000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15:        29     1  1.117958e-04  9.523017e-03 -3.643689e-03 -0.241199551</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16:        31     1 -1.874004e-04  1.595056e-02 -5.314004e-03 -0.734143182</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17:        33     1  2.736194e-04  9.309618e-03 -3.353780e-03 -0.013814599</span>
@@ -24819,7 +24861,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 <span class="r-out co"><span class="r-pr">#&gt;</span> $invyr</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2011 2012 2013</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -24834,7 +24876,7 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

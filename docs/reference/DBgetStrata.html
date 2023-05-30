@@ -21,7 +21,7 @@ information."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/lib
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -89,22 +89,22 @@ information.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">DBgetStrata</span><span class="op">(</span>
-  dat <span class="op">=</span> <span class="cn">NULL</span>,
-  uniqueid <span class="op">=</span> <span class="st">"CN"</span>,
-  datsource <span class="op">=</span> <span class="st">"datamart"</span>,
-  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  states <span class="op">=</span> <span class="cn">NULL</span>,
-  eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  getassgn <span class="op">=</span> <span class="cn">TRUE</span>,
-  pop_plot_stratum_assgn <span class="op">=</span> <span class="cn">NULL</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  dbconn <span class="op">=</span> <span class="cn">NULL</span>,
-  dbconnopen <span class="op">=</span> <span class="cn">FALSE</span>,
-  evalInfo <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">DBgetStrata</span><span class="op">(</span></span>
+<span>  dat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  uniqueid <span class="op">=</span> <span class="st">"CN"</span>,</span>
+<span>  datsource <span class="op">=</span> <span class="st">"datamart"</span>,</span>
+<span>  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  states <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  getassgn <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  pop_plot_stratum_assgn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dbconn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dbconnopen <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  evalInfo <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -113,67 +113,101 @@ information.</p>
 <dd><p>Data frame, comma-delimited file (*.csv), or shapefile (*.shp).
 The strata value is merged to this table and returned as a data frame. See
 details for necessary variables.</p></dd>
+
+
 <dt>uniqueid</dt>
 <dd><p>String. The unique plot identifier of dat (e.g., 'CN').</p></dd>
+
+
 <dt>datsource</dt>
 <dd><p>String. Source of data ('datamart', 'sqlite').</p></dd>
+
+
 <dt>data_dsn</dt>
 <dd><p>String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).</p></dd>
+
+
 <dt>states</dt>
 <dd><p>String or numeric vector. Name(s) (e.g., 'Arizona','New
 Mexico') or code(s) (e.g., 4, 35) of states for strata if dat=NULL.</p></dd>
+
+
 <dt>eval_opts</dt>
 <dd><p>List of evaluation options for 'FIA' or 'custom'
 evaluations to determine the set of data returned. See help(eval_options)
 for a list of options.</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, writes output to outfolder.</p></dd>
+
+
 <dt>getassgn</dt>
 <dd><p>Logical. If TRUE, extracts plot assignments from
 pop_plot_stratum_assgn table in database.</p></dd>
+
+
 <dt>pop_plot_stratum_assgn</dt>
 <dd><p>Data frame. The pop_plot_stratum_assgn for
 state(s).</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
+
+
 <dt>dbconn</dt>
 <dd><p>Open database connection.</p></dd>
+
+
 <dt>dbconnopen</dt>
 <dd><p>Logical. If TRUE, the dbconn connection is not closed.</p></dd>
+
+
 <dt>evalInfo</dt>
 <dd><p>List. List object output from DBgetEvalid or DBgetXY</p></dd>
+
+
 <dt>...</dt>
 <dd><p>For extendibility.
 FIESTA functions.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>FIAstrata - a list of the following objects:</p>
+    
+
+<p>FIAstrata - a list of the following objects:</p>
 <dl><dt>pltassgn</dt>
 <dd><p>Data
 frame. Plot-level strata/estimation unit assignment.  If dat is not NULL,
 strata/estimation unit variables are appended to dat.</p></dd>
-<dt>pltassgnid</dt>
+ <dt>pltassgnid</dt>
 <dd><p>String. Name of unique identifier of plot in pltassgn.</p></dd>
-<dt>unitarea</dt>
+ <dt>unitarea</dt>
 <dd><p>Data frame. Total acres by estimation unit.</p></dd>
-<dt>unitvar</dt>
+ <dt>unitvar</dt>
 <dd><p>String. Name
 of the estimation unit variable (ESTN_UNIT).</p></dd>
-<dt>areavar</dt>
+ <dt>areavar</dt>
 <dd><p>String. Name
 of the acre variable (ACRES).</p></dd>
-<dt>stratalut</dt>
+ <dt>stratalut</dt>
 <dd><p>Data frame. Strata look-up
 table with summarized pixel counts (P1POINTCNT) by strata/estimation unit.</p></dd>
+
 <dt>strvar</dt>
 <dd><p>String. Name of the strata variable (STRATA).</p></dd>
+
 <dt>strwtvar</dt>
 <dd><p>String. Name of the strata weight variable (P1POINTCNT).</p></dd>
+
 <dt>evalid</dt>
 <dd><p>List. evalid by state.</p></dd>
+
+
 </dl><p>Outputs to outfolder (if savedata=TRUE):</p><table class="table table"><tr><td></td><td>- CSV file of
 pltassgn (*'date'.csv).</td></tr><tr><td></td><td>- CSV file of unitarea (*'date'.csv).</td></tr><tr><td></td><td>- CSV file of stratalut (*'date'.csv).</td></tr><tr><td></td><td>- If collapsed, a CSV
 file of original classes and new collapsed classes.</td></tr></table></div>
@@ -228,27 +262,27 @@ evaluation occurring in the database.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Get strata for the most current evaluation of a state (ex. Wyoming)</span></span>
-<span class="r-in"><span class="va">WYstrat1</span> <span class="op">&lt;-</span> <span class="fu">DBgetStrata</span><span class="op">(</span>states <span class="op">=</span> <span class="st">"Wyoming"</span>,</span>
-<span class="r-in">                        eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYstrat1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYstrat1</span><span class="op">$</span><span class="va">pltassgn</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">WYstrat1</span><span class="op">$</span><span class="va">unitarea</span></span>
-<span class="r-in"><span class="va">WYstrat1</span><span class="op">$</span><span class="va">unitvar</span></span>
-<span class="r-in"><span class="va">WYstrat1</span><span class="op">$</span><span class="va">areavar</span></span>
-<span class="r-in"><span class="va">WYstrat1</span><span class="op">$</span><span class="va">strvar</span></span>
-<span class="r-in"><span class="va">WYstrat1</span><span class="op">$</span><span class="va">evalid</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Get strata information for a specific set of plots</span></span>
-<span class="r-in"><span class="va">WYstrat4</span> <span class="op">&lt;-</span> <span class="fu">DBgetStrata</span><span class="op">(</span>dat <span class="op">=</span> <span class="va">WYplt</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYstrat4</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYstrat4</span><span class="op">$</span><span class="va">pltassgn</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">WYstrat4</span><span class="op">$</span><span class="va">unitarea</span></span>
-<span class="r-in"><span class="va">WYstrat4</span><span class="op">$</span><span class="va">evalid</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Get strata for the most current evaluation of a state (ex. Wyoming)</span></span></span>
+<span class="r-in"><span><span class="va">WYstrat1</span> <span class="op">&lt;-</span> <span class="fu">DBgetStrata</span><span class="op">(</span>states <span class="op">=</span> <span class="st">"Wyoming"</span>,</span></span>
+<span class="r-in"><span>                        eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYstrat1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYstrat1</span><span class="op">$</span><span class="va">pltassgn</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">WYstrat1</span><span class="op">$</span><span class="va">unitarea</span></span></span>
+<span class="r-in"><span><span class="va">WYstrat1</span><span class="op">$</span><span class="va">unitvar</span></span></span>
+<span class="r-in"><span><span class="va">WYstrat1</span><span class="op">$</span><span class="va">areavar</span></span></span>
+<span class="r-in"><span><span class="va">WYstrat1</span><span class="op">$</span><span class="va">strvar</span></span></span>
+<span class="r-in"><span><span class="va">WYstrat1</span><span class="op">$</span><span class="va">evalid</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Get strata information for a specific set of plots</span></span></span>
+<span class="r-in"><span><span class="va">WYstrat4</span> <span class="op">&lt;-</span> <span class="fu">DBgetStrata</span><span class="op">(</span>dat <span class="op">=</span> <span class="va">WYplt</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYstrat4</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYstrat4</span><span class="op">$</span><span class="va">pltassgn</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">WYstrat4</span><span class="op">$</span><span class="va">unitarea</span></span></span>
+<span class="r-in"><span><span class="va">WYstrat4</span><span class="op">$</span><span class="va">evalid</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -263,7 +297,7 @@ evaluation occurring in the database.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

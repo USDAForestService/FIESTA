@@ -23,7 +23,7 @@ weights and then expanded to using the total land area in the population."><!-- 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -93,35 +93,35 @@ weights and then expanded to using the total land area in the population.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">modPBpop</span><span class="op">(</span>
-  pntdat <span class="op">=</span> <span class="cn">NULL</span>,
-  pltpct <span class="op">=</span> <span class="cn">NULL</span>,
-  plotid <span class="op">=</span> <span class="st">"plot_id"</span>,
-  pntid <span class="op">=</span> <span class="cn">NULL</span>,
-  pltpctvars <span class="op">=</span> <span class="cn">NULL</span>,
-  plt <span class="op">=</span> <span class="cn">NULL</span>,
-  pltassgn <span class="op">=</span> <span class="cn">NULL</span>,
-  puniqueid <span class="op">=</span> <span class="st">"CN"</span>,
-  pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,
-  nonsamp.pfilter <span class="op">=</span> <span class="cn">NULL</span>,
-  sumunits <span class="op">=</span> <span class="cn">FALSE</span>,
-  unitvar <span class="op">=</span> <span class="cn">NULL</span>,
-  unitarea <span class="op">=</span> <span class="cn">NULL</span>,
-  areavar <span class="op">=</span> <span class="st">"ACRES"</span>,
-  strata <span class="op">=</span> <span class="cn">FALSE</span>,
-  strtype <span class="op">=</span> <span class="st">"POST"</span>,
-  stratalut <span class="op">=</span> <span class="cn">NULL</span>,
-  strvar <span class="op">=</span> <span class="st">"STRATUMCD"</span>,
-  pvars2keep <span class="op">=</span> <span class="cn">NULL</span>,
-  saveobj <span class="op">=</span> <span class="cn">FALSE</span>,
-  objnm <span class="op">=</span> <span class="st">"PBpopdat"</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  unit_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  strata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  PBstratdat <span class="op">=</span> <span class="cn">NULL</span>,
-  gui <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">modPBpop</span><span class="op">(</span></span>
+<span>  pntdat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pltpct <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plotid <span class="op">=</span> <span class="st">"plot_id"</span>,</span>
+<span>  pntid <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pltpctvars <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plt <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pltassgn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  puniqueid <span class="op">=</span> <span class="st">"CN"</span>,</span>
+<span>  pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,</span>
+<span>  nonsamp.pfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sumunits <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  unitvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  unitarea <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  areavar <span class="op">=</span> <span class="st">"ACRES"</span>,</span>
+<span>  strata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  strtype <span class="op">=</span> <span class="st">"POST"</span>,</span>
+<span>  stratalut <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  strvar <span class="op">=</span> <span class="st">"STRATUMCD"</span>,</span>
+<span>  pvars2keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  saveobj <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  objnm <span class="op">=</span> <span class="st">"PBpopdat"</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  unit_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  strata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  PBstratdat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -129,140 +129,200 @@ weights and then expanded to using the total land area in the population.</p>
     <dl><dt>pntdat</dt>
 <dd><p>DF/DT or comma-delimited file (*.csv). Point-level table with
 one record per point. If NULL, aggregated point counts must be in pntcnt.</p></dd>
+
+
 <dt>pltpct</dt>
 <dd><p>DF/DT or comma-delimited file (*.csv). Plot-domain-level table
 with percent observed by domain per plot.</p></dd>
+
+
 <dt>plotid</dt>
 <dd><p>String. Unique identifier of plot in pnt. All values must
 match puniqueid values, if pltassgn is not NULL.</p></dd>
+
+
 <dt>pntid</dt>
 <dd><p>String. Unique identifier of points in pnt.</p></dd>
+
+
 <dt>pltpctvars</dt>
 <dd><p>String vector. Variables in pltpct for estimation. If
 NULL, all variables are used except plotid in pltpct.</p></dd>
+
+
 <dt>plt</dt>
 <dd><p>DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
 Can also be a shapefile(*.shp) with one record per plot, a spatial layer in
 dsn, or a sf R object. Plot-level variables. If nonsampled plots are
 included, PLOT_STATUS_CD variable must be in table. Optional.</p></dd>
+
+
 <dt>pltassgn</dt>
 <dd><p>DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or
 shapefile(*.shp). The plot-level data with one record per plot, including
 estimation unit and/or strata information. Optional.</p></dd>
+
+
 <dt>puniqueid</dt>
 <dd><p>String. Unique identifier of plot.</p></dd>
+
+
 <dt>pltassgnid</dt>
 <dd><p>String. Name of unique identifier of plot in pltassgn with
 All values must match plotid values if pnt is not NULL.</p></dd>
+
+
 <dt>nonsamp.pfilter</dt>
 <dd><p>String. An expression for filtering nonsampled plots.
 Must be R syntax.</p></dd>
+
+
 <dt>sumunits</dt>
 <dd><p>Logical. If TRUE, estimation units are combined to one table
 for output. Note: only available if tabtype="AREA". Acres</p></dd>
+
+
 <dt>unitvar</dt>
 <dd><p>String. Name of the estimation unit variable in cond or
 pltassgn with estimation unit assignment for each plot (e.g., 'ESTN_UNIT').
 If one estimation unit, set unitvar=NULL.</p></dd>
+
+
 <dt>unitarea</dt>
 <dd><p>Numeric or DF. Total area by estimation unit. If only 1
 estimation unit, include number of total acreage for the area of interest or
 a data frame with areavar. If more than one estimation unit, provide a data
 frame of total area by estimation unit, including unitvar and areavar.</p></dd>
+
+
 <dt>areavar</dt>
 <dd><p>String. Name of acre variable in unitarea. Default="ACRES".</p></dd>
+
+
 <dt>strata</dt>
 <dd><p>Logical. If TRUE, add data information for stratification.</p></dd>
+
+
 <dt>strtype</dt>
 <dd><p>String. If strata=TRUE, the type of strata ('POST', 'PRE').
 Note: the variance equations are slighlty different.</p></dd>
+
+
 <dt>stratalut</dt>
 <dd><p>DF/DT. If strata=TRUE, look-up table with strata
 proportions ('strwt') by strata (and estimation unit). To calculate 'strwt',
 set getwt=TRUE and getwtvar= name of variable with information to calculate
 weights from (e.g., pixel counts)</p></dd>
+
+
 <dt>strvar</dt>
 <dd><p>String. If strata=TRUE, name of the strata variable in
 stratalut and cond or pltassgn data frame with stratum assignment for each
 plot (Default = 'STRATUMCD').</p></dd>
+
+
 <dt>pvars2keep</dt>
 <dd><p>String vector. Additional plot variables to keep in
 dataset.</p></dd>
+
+
 <dt>saveobj</dt>
 <dd><p>Logical. If TRUE, saves SApopdat object to outfolder.</p></dd>
+
+
 <dt>objnm</dt>
 <dd><p>String. Name of *.rda object.</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, saves table(s) to outfolder.</p></dd>
+
+
 <dt>unit_opts</dt>
 <dd><p>List. See help(unit_options()) for a list of options.</p></dd>
+
+
 <dt>strata_opts</dt>
 <dd><p>List. See help(strata_options()) for a list of options.
 Only used when strata = TRUE.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
+
+
 <dt>PBstratdat</dt>
 <dd><p>R List object. Output data list components from
 FIESTA::DBgetStrata().</p></dd>
+
+
 <dt>gui</dt>
 <dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list with population data for Green-Book estimates.</p>
+    
+
+<p>A list with population data for Green-Book estimates.</p>
 <dl><dt>condx</dt>
 <dd><p>Data frame. Condition-level data including plot-level
 assignment of estimation unit and stratum (if strata=TRUE) and adjusted
 condition proportion.</p></dd>
-<dt>pltcondx</dt>
+ <dt>pltcondx</dt>
 <dd><p>Data frame. Condition-level data,
 merged with plot data.</p></dd>
-<dt>cuniqueid</dt>
+ <dt>cuniqueid</dt>
 <dd><p>String. Unique identifier of plot
 in condx and pltcondx.</p></dd>
-<dt>condid</dt>
+ <dt>condid</dt>
 <dd><p>String. Unique identifier of
 condition in condx and pltcondx.</p></dd>
-<dt>treex</dt>
+ <dt>treex</dt>
 <dd><p>Data frame. If
 esttype='TREE', tree-level data, including sample adjustment factor.</p></dd>
+
 <dt>tuniqueid</dt>
 <dd><p>String. If esttype='TREE', unique identifier of plot in
 treex.</p></dd>
-<dt>ACI.filter</dt>
+ <dt>ACI.filter</dt>
 <dd><p>String. If ACI=FALSE, ACI.filter="COND_STATUS_CD
 == 1" .</p></dd>
-<dt>unitarea</dt>
+ <dt>unitarea</dt>
 <dd><p>String. Returned table of area by estimation
 unit.</p></dd>
-<dt>unitvar</dt>
+ <dt>unitvar</dt>
 <dd><p>String. Variable name for estimation unit.</p></dd>
+
 <dt>strlut</dt>
 <dd><p>String. Strata-level table with pixel counts by strata
 (P1POINTCNT), strata weights (strwt), number of plots by strata (n.strata),
 total number of plots in estimation unit (n.total), sum of condition
 proportions (*_UNADJ_SUM), area adjustments (*_ADJFAC), total area, and area
 expansion by strata (EXPNS).</p></dd>
-<dt>strvar</dt>
+ <dt>strvar</dt>
 <dd><p>String. Variable name for
 strata. If strata=FALSE, strvar="ONESTRAT".</p></dd>
-<dt>expcondtab</dt>
+ <dt>expcondtab</dt>
 <dd><p>String. If
 ACI=FALSE, ACI.filter="COND_STATUS_CD == 1" .</p></dd>
-<dt>plotsampcnt</dt>
+ <dt>plotsampcnt</dt>
 <dd><p>Data
 frame. Number of plots by PLOT_STATUS_CD.</p></dd>
-<dt>condsampcnt</dt>
+ <dt>condsampcnt</dt>
 <dd><p>Data frame.
 Number of conditions by COND_STATUS_CD.</p></dd>
-<dt>states</dt>
+ <dt>states</dt>
 <dd><p>String. State names
 in dataset.</p></dd>
-<dt>invyrs</dt>
+ <dt>invyrs</dt>
 <dd><p>String. Range of inventory years in dataset.</p></dd>
+
+
 <dt>stratdat</dt>
 <dd><p>Data frame. Strata information by estimation unit.</p></dd>
+
 </dl><table class="table table"><tr><td></td><td><b>Variable</b></td><td><b>Description</b></td></tr><tr><td></td><td>unitvar</td><td>estimation unit</td></tr><tr><td></td><td>strvar</td><td>stratum value</td></tr><tr><td></td><td>strwtvar</td><td>number of pixels by strata and estimation unit</td></tr><tr><td></td><td>n.strata</td><td>number of plots in strata (after totally nonsampled plots removed)</td></tr><tr><td></td><td>n.total</td><td>number of plots for estimation unit</td></tr><tr><td></td><td>strwt</td><td>proportion of area (or plots) by strata and estimation unit (i.e., strata
 weight)</td></tr><tr><td></td><td>CONDPROP_UNADJ_SUM</td><td>summed condition proportion by
 strata and estimation unit</td></tr><tr><td></td><td>CONDPROP_ADJFAC</td><td>adjusted condition
@@ -337,28 +397,28 @@ Station, p.53-77.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Load necessary data from FIESTA</span></span>
-<span class="r-in"><span class="co">## Point data</span></span>
-<span class="r-in"><span class="va">icepntfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                        <span class="st">"PB_data/icepnt_utco1135.csv"</span>,</span>
-<span class="r-in">                         package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">icepnt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icepntfn</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Plot data</span></span>
-<span class="r-in"><span class="va">icepltfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span class="r-in">                        <span class="st">"PB_data/icepltassgn_utco1135.csv"</span>,</span>
-<span class="r-in">                         package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">iceplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icepltfn</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake</span></span>
-<span class="r-in"><span class="co"># Counties, UT</span></span>
-<span class="r-in"><span class="va">PBpopdat</span> <span class="op">&lt;-</span> <span class="fu">modPBpop</span><span class="op">(</span>pnt <span class="op">=</span> <span class="va">icepnt</span>, </span>
-<span class="r-in">                     pltassgn <span class="op">=</span> <span class="va">iceplt</span>,</span>
-<span class="r-in">                     pltassgnid <span class="op">=</span> <span class="st">"plot_id"</span>,</span>
-<span class="r-in">                     pntid <span class="op">=</span> <span class="st">"dot_cnt"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Load necessary data from FIESTA</span></span></span>
+<span class="r-in"><span><span class="co">## Point data</span></span></span>
+<span class="r-in"><span><span class="va">icepntfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                        <span class="st">"PB_data/icepnt_utco1135.csv"</span>,</span></span>
+<span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">icepnt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icepntfn</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Plot data</span></span></span>
+<span class="r-in"><span><span class="va">icepltfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span></span>
+<span class="r-in"><span>                        <span class="st">"PB_data/icepltassgn_utco1135.csv"</span>,</span></span>
+<span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">iceplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">icepltfn</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake</span></span></span>
+<span class="r-in"><span><span class="co"># Counties, UT</span></span></span>
+<span class="r-in"><span><span class="va">PBpopdat</span> <span class="op">&lt;-</span> <span class="fu">modPBpop</span><span class="op">(</span>pnt <span class="op">=</span> <span class="va">icepnt</span>, </span></span>
+<span class="r-in"><span>                     pltassgn <span class="op">=</span> <span class="va">iceplt</span>,</span></span>
+<span class="r-in"><span>                     pltassgnid <span class="op">=</span> <span class="st">"plot_id"</span>,</span></span>
+<span class="r-in"><span>                     pntid <span class="op">=</span> <span class="st">"dot_cnt"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> no strata</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">PBpopdat</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">PBpopdat</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ PBx        :Classes ‘data.table’ and 'data.frame':	1305 obs. of  12 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
@@ -381,21 +441,21 @@ Station, p.53-77.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ strwtvar   : chr "strwt"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ plotsampcnt: NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ getprop    : logi TRUE</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We can also create population data for estimates by estimation unit</span></span>
-<span class="r-in"><span class="co">## Read in data for multiple estimation units</span></span>
-<span class="r-in"><span class="va">unitareafn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, </span>
-<span class="r-in">                          <span class="st">"PB_data/unitarea_utco1135.csv"</span>,</span>
-<span class="r-in">                           package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">unitarea</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">unitareafn</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Run modPBpop</span></span>
-<span class="r-in"><span class="va">PBpopunit</span> <span class="op">&lt;-</span> <span class="fu">modPBpop</span><span class="op">(</span>pnt <span class="op">=</span> <span class="va">icepnt</span>, </span>
-<span class="r-in">                      pltassgn <span class="op">=</span> <span class="va">iceplt</span>, </span>
-<span class="r-in">                      pltassgnid <span class="op">=</span> <span class="st">"plot_id"</span>, </span>
-<span class="r-in">                      pntid <span class="op">=</span> <span class="st">"dot_cnt"</span>,</span>
-<span class="r-in">                      unitarea <span class="op">=</span> <span class="va">unitarea</span>, </span>
-<span class="r-in">                      unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We can also create population data for estimates by estimation unit</span></span></span>
+<span class="r-in"><span><span class="co">## Read in data for multiple estimation units</span></span></span>
+<span class="r-in"><span><span class="va">unitareafn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, </span></span>
+<span class="r-in"><span>                          <span class="st">"PB_data/unitarea_utco1135.csv"</span>,</span></span>
+<span class="r-in"><span>                           package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">unitarea</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">unitareafn</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Run modPBpop</span></span></span>
+<span class="r-in"><span><span class="va">PBpopunit</span> <span class="op">&lt;-</span> <span class="fu">modPBpop</span><span class="op">(</span>pnt <span class="op">=</span> <span class="va">icepnt</span>, </span></span>
+<span class="r-in"><span>                      pltassgn <span class="op">=</span> <span class="va">iceplt</span>, </span></span>
+<span class="r-in"><span>                      pltassgnid <span class="op">=</span> <span class="st">"plot_id"</span>, </span></span>
+<span class="r-in"><span>                      pntid <span class="op">=</span> <span class="st">"dot_cnt"</span>,</span></span>
+<span class="r-in"><span>                      unitarea <span class="op">=</span> <span class="va">unitarea</span>, </span></span>
+<span class="r-in"><span>                      unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> no strata</span>
 </code></pre></div>
     </div>
@@ -411,7 +471,7 @@ Station, p.53-77.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

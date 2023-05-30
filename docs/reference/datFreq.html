@@ -19,7 +19,7 @@ and/or subtotals."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aja
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -85,16 +85,16 @@ and/or subtotals.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">datFreq</span><span class="op">(</span>
-  <span class="va">x</span>,
-  xvar <span class="op">=</span> <span class="cn">NULL</span>,
-  total <span class="op">=</span> <span class="cn">FALSE</span>,
-  subtotal <span class="op">=</span> <span class="cn">FALSE</span>,
-  subtotalcol <span class="op">=</span> <span class="cn">NULL</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  gui <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">datFreq</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  xvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  total <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  subtotal <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  subtotalcol <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -102,25 +102,40 @@ and/or subtotals.</p>
     <dl><dt>x</dt>
 <dd><p>Data frame or comma-delimited file (*.csv). The table with the
 variable(s).</p></dd>
+
+
 <dt>xvar</dt>
 <dd><p>String (vector).* The name of the variable(s) to summarize.</p></dd>
+
+
 <dt>total</dt>
 <dd><p>Logical. If TRUE, a row is added to bottom of table with a
 total for the whole table.</p></dd>
+
+
 <dt>subtotal</dt>
 <dd><p>Logical. If TRUE, a row is added to bottom of each section
 for subtotals.</p></dd>
+
+
 <dt>subtotalcol</dt>
 <dd><p>Logical. If subtotal=TRUE, the column(s) to generate
 subtotals.</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, writes output data to outfolder.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'datfreq'.</p></dd>
+
+
 <dt>gui</dt>
 <dd><p>Logical. If TRUE, pop-up windows will appear for user-interface.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -142,23 +157,23 @@ default parameter values are used.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Set up data for example</span></span>
-<span class="r-in"><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>CONDCLASS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>, </span>
-<span class="r-in">                         FORTYPCD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">182</span>, <span class="fl">184</span>, <span class="fl">201</span>, <span class="fl">221</span>, <span class="fl">221</span>, <span class="fl">184</span>, <span class="fl">221</span>, <span class="fl">182</span>,</span>
-<span class="r-in">                                      <span class="fl">182</span>, <span class="fl">201</span>, <span class="fl">182</span>, <span class="fl">221</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Frequency table with "FORTYPCD"       </span></span>
-<span class="r-in"><span class="fu">datFreq</span><span class="op">(</span>x <span class="op">=</span> <span class="va">tab</span>,</span>
-<span class="r-in">        xvar <span class="op">=</span> <span class="st">"FORTYPCD"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Set up data for example</span></span></span>
+<span class="r-in"><span><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>CONDCLASS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>                         FORTYPCD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">182</span>, <span class="fl">184</span>, <span class="fl">201</span>, <span class="fl">221</span>, <span class="fl">221</span>, <span class="fl">184</span>, <span class="fl">221</span>, <span class="fl">182</span>,</span></span>
+<span class="r-in"><span>                                      <span class="fl">182</span>, <span class="fl">201</span>, <span class="fl">182</span>, <span class="fl">221</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Frequency table with "FORTYPCD"       </span></span></span>
+<span class="r-in"><span><span class="fu">datFreq</span><span class="op">(</span>x <span class="op">=</span> <span class="va">tab</span>,</span></span>
+<span class="r-in"><span>        xvar <span class="op">=</span> <span class="st">"FORTYPCD"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   FORTYPCD FREQ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1      182    4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2      184    2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3      201    2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4      221    4</span>
-<span class="r-in">                                      </span>
-<span class="r-in"><span class="co"># Frequency table with "CONDCLASS" and "FORTYPCD"                                        </span></span>
-<span class="r-in"><span class="fu">datFreq</span><span class="op">(</span>x <span class="op">=</span> <span class="va">tab</span>,</span>
-<span class="r-in">        xvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CONDCLASS"</span>, <span class="st">"FORTYPCD"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span>                                      </span></span>
+<span class="r-in"><span><span class="co"># Frequency table with "CONDCLASS" and "FORTYPCD"                                        </span></span></span>
+<span class="r-in"><span><span class="fu">datFreq</span><span class="op">(</span>x <span class="op">=</span> <span class="va">tab</span>,</span></span>
+<span class="r-in"><span>        xvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CONDCLASS"</span>, <span class="st">"FORTYPCD"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   CONDCLASS FORTYPCD FREQ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1         1      182    3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2         1      184    1</span>
@@ -168,13 +183,13 @@ default parameter values are used.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6         2      201    1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7         3      184    1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8         3      221    2</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Frequency table with "CONDCLASS" and "FORTYPCD", adding total and subtotal</span></span>
-<span class="r-in"><span class="co"># rows                                        </span></span>
-<span class="r-in"><span class="fu">datFreq</span><span class="op">(</span>x <span class="op">=</span> <span class="va">tab</span>,</span>
-<span class="r-in">        xvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CONDCLASS"</span>, <span class="st">"FORTYPCD"</span><span class="op">)</span>, </span>
-<span class="r-in">        total <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span class="r-in">        subtotal <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Frequency table with "CONDCLASS" and "FORTYPCD", adding total and subtotal</span></span></span>
+<span class="r-in"><span><span class="co"># rows                                        </span></span></span>
+<span class="r-in"><span><span class="fu">datFreq</span><span class="op">(</span>x <span class="op">=</span> <span class="va">tab</span>,</span></span>
+<span class="r-in"><span>        xvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CONDCLASS"</span>, <span class="st">"FORTYPCD"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>        total <span class="op">=</span> <span class="cn">TRUE</span>, </span></span>
+<span class="r-in"><span>        subtotal <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    CONDCLASS FORTYPCD FREQ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1          1      182    3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5          2      182    1</span>
@@ -189,11 +204,11 @@ default parameter values are used.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8          3      221    2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12           Subtotal    4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13              Total   12</span>
-<span class="r-in">        </span>
-<span class="r-in"><span class="co"># Frequency table for WYtree, multiple variables, subtotal options</span></span>
-<span class="r-in"><span class="fu">datFreq</span><span class="op">(</span>x <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span>
-<span class="r-in">        xvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SPGRPCD"</span>, <span class="st">"SPCD"</span>, <span class="st">"STATUSCD"</span><span class="op">)</span>, </span>
-<span class="r-in">         subtotal <span class="op">=</span> <span class="cn">TRUE</span>, subtotalcol <span class="op">=</span> <span class="st">"SPCD"</span><span class="op">)</span></span>
+<span class="r-in"><span>        </span></span>
+<span class="r-in"><span><span class="co"># Frequency table for WYtree, multiple variables, subtotal options</span></span></span>
+<span class="r-in"><span><span class="fu">datFreq</span><span class="op">(</span>x <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span></span>
+<span class="r-in"><span>        xvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SPGRPCD"</span>, <span class="st">"SPCD"</span>, <span class="st">"STATUSCD"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>         subtotal <span class="op">=</span> <span class="cn">TRUE</span>, subtotalcol <span class="op">=</span> <span class="st">"SPCD"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     SPGRPCD SPCD STATUSCD FREQ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1        10  202        1  849</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2        10  202        2  381</span>
@@ -263,7 +278,7 @@ default parameter values are used.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

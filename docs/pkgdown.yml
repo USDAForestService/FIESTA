@@ -1,5 +1,5 @@
 pandoc: 2.19.2
-pkgdown: 2.0.3
+pkgdown: 2.0.6
 pkgdown_sha: ~
 articles:
   FIESTA_manual_mod_est: FIESTA_manual_mod_est.html
@@ -11,5 +11,5 @@ articles:
   FIESTA_tutorial_SA: FIESTA_tutorial_SA.html
   FIESTA_tutorial_dat: FIESTA_tutorial_dat.html
   FIESTA_tutorial_sp: FIESTA_tutorial_sp.html
-last_built: 2023-05-03T16:36Z
+last_built: 2023-05-30T15:32Z
 

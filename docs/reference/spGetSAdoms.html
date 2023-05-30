@@ -23,7 +23,7 @@ area polygons, resulting in a set of model domains that can be used for SAE."><!
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -92,42 +92,42 @@ area polygons, resulting in a set of model domains that can be used for SAE.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spGetSAdoms</span><span class="op">(</span>
-  <span class="va">smallbnd</span>,
-  smallbnd_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  smallbnd.unique <span class="op">=</span> <span class="cn">NULL</span>,
-  smallbnd.domain <span class="op">=</span> <span class="cn">NULL</span>,
-  smallbnd.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  smallbnd.stfilter <span class="op">=</span> <span class="cn">NULL</span>,
-  helperbnd <span class="op">=</span> <span class="cn">NULL</span>,
-  helperbnd_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  helperbnd.unique <span class="op">=</span> <span class="cn">NULL</span>,
-  helperbnd.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  largebnd <span class="op">=</span> <span class="cn">NULL</span>,
-  largebnd_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  largebnd.unique <span class="op">=</span> <span class="cn">NULL</span>,
-  largebnd.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  maxbnd <span class="op">=</span> <span class="cn">NULL</span>,
-  maxbnd_dsn <span class="op">=</span> <span class="cn">NULL</span>,
-  maxbnd.unique <span class="op">=</span> <span class="cn">NULL</span>,
-  maxbnd.filter <span class="op">=</span> <span class="cn">NULL</span>,
-  helper_autoselect <span class="op">=</span> <span class="cn">TRUE</span>,
-  nbrdom.min <span class="op">=</span> <span class="cn">NULL</span>,
-  maxbnd.threshold <span class="op">=</span> <span class="fl">10</span>,
-  largebnd.threshold <span class="op">=</span> <span class="fl">5</span>,
-  multiSAdoms <span class="op">=</span> <span class="cn">FALSE</span>,
-  showsteps <span class="op">=</span> <span class="cn">TRUE</span>,
-  savedata <span class="op">=</span> <span class="cn">FALSE</span>,
-  savesteps <span class="op">=</span> <span class="cn">FALSE</span>,
-  saveobj <span class="op">=</span> <span class="cn">FALSE</span>,
-  objnm <span class="op">=</span> <span class="st">"SAdomdat"</span>,
-  maxbnd.addtext <span class="op">=</span> <span class="cn">TRUE</span>,
-  largebnd.addtext <span class="op">=</span> <span class="cn">FALSE</span>,
-  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
-  addstate <span class="op">=</span> <span class="cn">FALSE</span>,
-  dissolve <span class="op">=</span> <span class="cn">FALSE</span>,
-  byeach <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spGetSAdoms</span><span class="op">(</span></span>
+<span>  <span class="va">smallbnd</span>,</span>
+<span>  smallbnd_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  smallbnd.unique <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  smallbnd.domain <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  smallbnd.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  smallbnd.stfilter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  helperbnd <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  helperbnd_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  helperbnd.unique <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  helperbnd.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  largebnd <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  largebnd_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  largebnd.unique <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  largebnd.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  maxbnd <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  maxbnd_dsn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  maxbnd.unique <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  maxbnd.filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  helper_autoselect <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  nbrdom.min <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  maxbnd.threshold <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  largebnd.threshold <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  multiSAdoms <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  showsteps <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savesteps <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  saveobj <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  objnm <span class="op">=</span> <span class="st">"SAdomdat"</span>,</span>
+<span>  maxbnd.addtext <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  largebnd.addtext <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  addstate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  dissolve <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  byeach <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -136,126 +136,195 @@ area polygons, resulting in a set of model domains that can be used for SAE.</p>
 <dd><p>sf R object or String. Small area of interest boundary.  Can
 be a spatial polygon object, full pathname to a shapefile, or name of a
 layer within a database.</p></dd>
+
+
 <dt>smallbnd_dsn</dt>
 <dd><p>String. Data source name (dsn; e.g., sqlite or shapefile
 pathname) of smallbnd. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional if smallbnd is an R
 object.</p></dd>
+
+
 <dt>smallbnd.unique</dt>
 <dd><p>String. The attribute in smallbnd that defines unique
 domain identifier in smallbnd that defines the unique small area(s). If
 NULL, an attribute is appended to smallbnd attribute table and used as
 smallbnd.unique, defining one polygon (SMALLAREA="SMALLAREA").</p></dd>
+
+
 <dt>smallbnd.domain</dt>
 <dd><p>String. A different attribute to use as for grouped
 modeling domains (optional). If NULL, smallbnd.domain=smallbnd.unique.</p></dd>
+
+
 <dt>smallbnd.filter</dt>
 <dd><p>String. A filter for smallbnd. Must be R syntax.</p></dd>
+
+
 <dt>smallbnd.stfilter</dt>
 <dd><p>String. A spatial filter for smallbnd to include
 only smallbnd polygons that intersect (or overlap &gt;= 30<!-- %) the filter -->
 boundary. The filter is based on the stunitco internal R object, with
 attributes: STATECD, STATENM, UNITCD, UNITNM, COUNTYCD, COUNTYNM. The filter
 should include one of these attributes and must be R syntax.</p></dd>
+
+
 <dt>helperbnd</dt>
 <dd><p>sf R object or String. Name of polygon spatial layer
 delineating helper polygons for small area models. Can be a spatial polygon
 object, full pathname to a shapefile, or name of a layer within a database.</p></dd>
+
+
 <dt>helperbnd_dsn</dt>
 <dd><p>String. Data source name (dsn; e.g., sqlite or
 shapefile pathname) of helperbnd. The dsn varies by driver. See gdal OGR
 vector formats (https://www.gdal.org/ogr_formats.html). Optional if
 helperbnd is an R object.</p></dd>
+
+
 <dt>helperbnd.unique</dt>
 <dd><p>String. The attribute in helper polygon layer that
 defines unique helper polygons.</p></dd>
+
+
 <dt>helperbnd.filter</dt>
 <dd><p>String. A filter for helperbnd. Must be R syntax.</p></dd>
+
+
 <dt>largebnd</dt>
 <dd><p>sf R object or String. Name of large area polygon spatial
 layer, defining the model data extent for building small are models.  Can be
 a spatial polygon object, full pathname to a shapefile, or name of a layer
 within a database.</p></dd>
+
+
 <dt>largebnd_dsn</dt>
 <dd><p>String. Data source name (dsn; e.g., sqlite or shapefile
 pathname) of largebnd. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional if largebnd is an R
 object.</p></dd>
+
+
 <dt>largebnd.unique</dt>
 <dd><p>String. The attribute in largebnd polygon layer that
 defines unique large area polygon(s).</p></dd>
+
+
 <dt>largebnd.filter</dt>
 <dd><p>String. A filter for largebnd. Must be R syntax.</p></dd>
+
+
 <dt>maxbnd</dt>
 <dd><p>sf R object or String. Name of polygon spatial layer, defining
 the maximum model data restraint for adding more helper polygons for
 building small are models. Can be a spatial polygon object, full pathname to
 a shapefile, or name of a layer within a database.</p></dd>
+
+
 <dt>maxbnd_dsn</dt>
 <dd><p>String. Data source name (dsn; e.g., sqlite or shapefile
 pathname) of maxbnd. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional if maxbnd is an R object.</p></dd>
+
+
 <dt>maxbnd.unique</dt>
 <dd><p>String. The attribute in maxbnd polygon layer that
 defines unique max restraint area(s).</p></dd>
+
+
 <dt>maxbnd.filter</dt>
 <dd><p>String. A filter for maxbnd. Must be R syntax.</p></dd>
+
+
 <dt>helper_autoselect</dt>
 <dd><p>Logical. If TRUE, the helper boundaries are
 automatically selected based on intersection with maxbnd and/or largebnd and
 number of helperbnds defined by nbrdom.min.</p></dd>
+
+
 <dt>nbrdom.min</dt>
 <dd><p>Integer. Set number for minimum domains for modeling. If
 NULL, all domains within largebnd are selected.</p></dd>
+
+
 <dt>maxbnd.threshold</dt>
 <dd><p>Integer. Percent for including additional maxbnds
 for selecting helperbnds. If multiSAdoms=FALSE, the maxbnd with greatest
 percentage over the maxbnd.threshold is selected.</p></dd>
+
+
 <dt>largebnd.threshold</dt>
 <dd><p>Integer. Percent for including additional
 largebnds for selecting helperbnds.</p></dd>
+
+
 <dt>multiSAdoms</dt>
 <dd><p>Logical. If TRUE, and the percent intersect of smallbnd
 with maxbnd is greater than maxbnd.threshold, more than 1 SAdoms will be
 output in list.</p></dd>
+
+
 <dt>showsteps</dt>
 <dd><p>Logical. If TRUE, intermediate steps of selection process
 are displayed.</p></dd>
+
+
 <dt>savedata</dt>
 <dd><p>Logical. If TRUE, save SAdoms spatial layer to outfolder.</p></dd>
+
+
 <dt>savesteps</dt>
 <dd><p>Logical. If TRUE, save steps spatial intermediate layers
 and JPG images. All spatial layers are output as *.shp format in a separate
 folder (SAdoms_steps).</p></dd>
+
+
 <dt>saveobj</dt>
 <dd><p>Logical. If TRUE, save SAdomdat object to outfolder.</p></dd>
+
+
 <dt>objnm</dt>
 <dd><p>String. Name of *.rds object.</p></dd>
+
+
 <dt>maxbnd.addtext</dt>
 <dd><p>Logical. If TRUE, adds text to intermediate step plots
 for maxbnd displays.</p></dd>
+
+
 <dt>largebnd.addtext</dt>
 <dd><p>Logical. If TRUE, adds text to intermediate step
 plots for largebnd displays.</p></dd>
+
+
 <dt>savedata_opts</dt>
 <dd><p>List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.</p></dd>
+
+
 <dt>addstate</dt>
 <dd><p>Logical. If TRUE, appends state attribute to SAdoms.</p></dd>
+
+
 <dt>dissolve</dt>
 <dd><p>Logical. If TRUE, aggregates polygons to smallbnd.domain or
 smallbnd.unique.</p></dd>
+
+
 <dt>byeach</dt>
 <dd><p>Logical. If TRUE, creates an SAdom for each smallbnd polygon.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <dl><dt>SAdomslst</dt>
 <dd><p>List object. Set(s) of model domain units. If
 multiSAdoms=TRUE, the list may have more than one set of model domain units.</p></dd>
-<dt>smallbndlst</dt>
+ <dt>smallbndlst</dt>
 <dd><p>List object. smallbnd(s). If multiSAdoms=TRUE, the
 list may have more than one set of smallbnd.</p></dd>
+
+
 </dl><p>If exportsp=TRUE, the SAdoms spatial object(s) is exported to outfolder,
 with format specified by out_fmt.</p>
     </div>
@@ -317,7 +386,7 @@ when reprojecting. See spTransform help documentation for more details.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

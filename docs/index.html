@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
       </span>
     </div>
 
@@ -141,7 +141,7 @@
 </h4>
 <p>You can install the current stable version of <code>FIESTA</code> from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"FIESTA"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"FIESTA"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="developmental-installation">Developmental installation<a class="anchor" aria-label="anchor" href="#developmental-installation"></a>
@@ -159,13 +159,13 @@
 </h5>
 <p>First note that the developmental version of <code>FIESTA</code> may rely on a developmental version of <code>FIESTAutils</code>. For both of these installations, you’ll need to make sure to have the <code>remotes</code> package, and then you can install both packages from GitHub:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Install developmental FIESTAutils first</span>
-<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"USDAForestService/FIESTAutils"</span>,
-                        dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-
-<span class="co"># Then install developmental FIESTA</span>
-<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"USDAForestService/FIESTA"</span>,
-                        dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Install developmental FIESTAutils first</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"USDAForestService/FIESTAutils"</span>,</span>
+<span>                        dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Then install developmental FIESTA</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"USDAForestService/FIESTA"</span>,</span>
+<span>                        dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -199,128 +199,128 @@
 </h2>
 <p>These examples make use of vignettes that come with <code>FIESTA</code>, and these vignettes can be found by calling <code>vignette(package = "FIESTA")</code>. The data used in these examples come with the <code>FIESTA</code> package and are from Wyoming, inventory years 2011-2013 (Evaluation 561301). We first load <code>FIESTA</code> to run these examples:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="example-1-green-book-estimation">Example 1: Green-book estimation<a class="anchor" aria-label="anchor" href="#example-1-green-book-estimation"></a>
 </h3>
 <p>In order to produce estimates based on the Green-book, we first use the <code>GBpopdat</code> function to produce population data for our areas of interest. We can look at a summary of the population data below.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">GBpopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/modGBpop.html">modGBpop</a></span><span class="op">(</span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYcond.html">WYcond</a></span>,  
-                                    tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYtree.html">WYtree</a></span><span class="op">)</span>,      
-                     popTabIDs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cond <span class="op">=</span> <span class="st">"PLT_CN"</span><span class="op">)</span>,
-                     pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYpltassgn.html">WYpltassgn</a></span>,
-                     pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,
-                     pjoinid <span class="op">=</span> <span class="st">"PLT_CN"</span>,
-                     unitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYunitarea.html">WYunitarea</a></span>,
-                     unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>, 
-                     strata <span class="op">=</span> <span class="cn">TRUE</span>,
-                     stratalut <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYstratalut.html">WYstratalut</a></span>,
-                     strata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/strata_options.html" class="external-link">strata_options</a></span><span class="op">(</span>getwt <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">GBpopdat</span><span class="op">)</span>
-<span class="co">#&gt;             Length Class      Mode     </span>
-<span class="co">#&gt; popType      1     -none-     character</span>
-<span class="co">#&gt; condx       12     data.table list     </span>
-<span class="co">#&gt; pltcondx    43     data.table list     </span>
-<span class="co">#&gt; cuniqueid    1     -none-     character</span>
-<span class="co">#&gt; condid       1     -none-     character</span>
-<span class="co">#&gt; ACI.filter   1     -none-     character</span>
-<span class="co">#&gt; unitarea     2     data.table list     </span>
-<span class="co">#&gt; areavar      1     -none-     character</span>
-<span class="co">#&gt; areaunits    1     -none-     character</span>
-<span class="co">#&gt; unitvar      1     -none-     character</span>
-<span class="co">#&gt; unitvars     1     -none-     character</span>
-<span class="co">#&gt; strata       1     -none-     logical  </span>
-<span class="co">#&gt; stratalut   18     data.table list     </span>
-<span class="co">#&gt; strvar       1     -none-     character</span>
-<span class="co">#&gt; strwtvar     1     -none-     character</span>
-<span class="co">#&gt; expcondtab  12     data.table list     </span>
-<span class="co">#&gt; plotsampcnt  3     data.frame list     </span>
-<span class="co">#&gt; condsampcnt  3     data.frame list     </span>
-<span class="co">#&gt; states       1     -none-     character</span>
-<span class="co">#&gt; invyrs       1     -none-     list     </span>
-<span class="co">#&gt; estvar.area  1     -none-     character</span>
-<span class="co">#&gt; adj          1     -none-     character</span>
-<span class="co">#&gt; areawt       1     -none-     character</span>
-<span class="co">#&gt; treex       21     data.table list     </span>
-<span class="co">#&gt; tuniqueid    1     -none-     character</span>
-<span class="co">#&gt; adjtree      1     -none-     logical</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">GBpopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/modGBpop.html">modGBpop</a></span><span class="op">(</span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYcond.html">WYcond</a></span>,  </span>
+<span>                                    tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYtree.html">WYtree</a></span><span class="op">)</span>,      </span>
+<span>                     popTabIDs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cond <span class="op">=</span> <span class="st">"PLT_CN"</span><span class="op">)</span>,</span>
+<span>                     pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYpltassgn.html">WYpltassgn</a></span>,</span>
+<span>                     pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,</span>
+<span>                     pjoinid <span class="op">=</span> <span class="st">"PLT_CN"</span>,</span>
+<span>                     unitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYunitarea.html">WYunitarea</a></span>,</span>
+<span>                     unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>, </span>
+<span>                     strata <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                     stratalut <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYstratalut.html">WYstratalut</a></span>,</span>
+<span>                     strata_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/strata_options.html" class="external-link">strata_options</a></span><span class="op">(</span>getwt <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">GBpopdat</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             Length Class      Mode     </span></span>
+<span><span class="co">#&gt; popType      1     -none-     character</span></span>
+<span><span class="co">#&gt; condx       12     data.table list     </span></span>
+<span><span class="co">#&gt; pltcondx    43     data.table list     </span></span>
+<span><span class="co">#&gt; cuniqueid    1     -none-     character</span></span>
+<span><span class="co">#&gt; condid       1     -none-     character</span></span>
+<span><span class="co">#&gt; ACI.filter   1     -none-     character</span></span>
+<span><span class="co">#&gt; unitarea     2     data.table list     </span></span>
+<span><span class="co">#&gt; areavar      1     -none-     character</span></span>
+<span><span class="co">#&gt; areaunits    1     -none-     character</span></span>
+<span><span class="co">#&gt; unitvar      1     -none-     character</span></span>
+<span><span class="co">#&gt; unitvars     1     -none-     character</span></span>
+<span><span class="co">#&gt; strata       1     -none-     logical  </span></span>
+<span><span class="co">#&gt; stratalut   18     data.table list     </span></span>
+<span><span class="co">#&gt; strvar       1     -none-     character</span></span>
+<span><span class="co">#&gt; strwtvar     1     -none-     character</span></span>
+<span><span class="co">#&gt; expcondtab  12     data.table list     </span></span>
+<span><span class="co">#&gt; plotsampcnt  3     data.frame list     </span></span>
+<span><span class="co">#&gt; condsampcnt  3     data.frame list     </span></span>
+<span><span class="co">#&gt; states       1     -none-     character</span></span>
+<span><span class="co">#&gt; invyrs       1     -none-     list     </span></span>
+<span><span class="co">#&gt; estvar.area  1     -none-     character</span></span>
+<span><span class="co">#&gt; adj          1     -none-     character</span></span>
+<span><span class="co">#&gt; areawt       1     -none-     character</span></span>
+<span><span class="co">#&gt; treex       21     data.table list     </span></span>
+<span><span class="co">#&gt; tuniqueid    1     -none-     character</span></span>
+<span><span class="co">#&gt; adjtree      1     -none-     logical</span></span></code></pre></div>
 <p>Note that the <code>GBpopdat</code> list generated by <code>modGBpop</code> contains many items. Some examples include the number of plots by plot status (<code>plotsampcnt</code>), the number of conditions by condition status (<code>condsampcnt</code>), the strata-level population data, including number of plots and adjustment factors (<code>stratalut</code>), and the adjustment factors added to the condition-level, tree-level, and seedling data (<code>condx</code>, <code>treex</code>, and <code>seedx</code>, respectfully).</p>
 <p>Now, with the <code>GBpopdat</code> object, we can quickly produce estimates of basal area (<code>estvar = "BA"</code>) by county in Wyoming for the 2011-2013 years.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">GBest</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/modGBtree.html">modGBtree</a></span><span class="op">(</span>GBpopdat <span class="op">=</span> <span class="va">GBpopdat</span>,
-                   estvar <span class="op">=</span> <span class="st">"BA"</span>,
-                   estvar.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span>,
-                   sumunits <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">GBest</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/modGBtree.html">modGBtree</a></span><span class="op">(</span>GBpopdat <span class="op">=</span> <span class="va">GBpopdat</span>,</span>
+<span>                   estvar <span class="op">=</span> <span class="st">"BA"</span>,</span>
+<span>                   estvar.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span>,</span>
+<span>                   sumunits <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>We again output a list, now with estimates/standard errors, raw data, state code, and inventory year:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">GBest</span>, max.level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>
-<span class="co">#&gt; List of 4</span>
-<span class="co">#&gt;  $ est    :'data.frame': 23 obs. of  3 variables:</span>
-<span class="co">#&gt;   ..$ ESTN_UNIT             : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...</span>
-<span class="co">#&gt;   ..$ Estimate              : num [1:23] 35117889 24184274 8223787 73174024 16031144 ...</span>
-<span class="co">#&gt;   ..$ Percent Sampling Error: num [1:23] 11.71 26.91 32.24 8.56 31.4 ...</span>
-<span class="co">#&gt;  $ raw    :List of 11</span>
-<span class="co">#&gt;   ..$ unit_totest  :'data.frame':    23 obs. of  17 variables:</span>
-<span class="co">#&gt;   ..$ domdat       :'data.frame':    590 obs. of  14 variables:</span>
-<span class="co">#&gt;   ..$ estvar       : chr "BA"</span>
-<span class="co">#&gt;   ..$ estvar.filter: chr "STATUSCD == 1"</span>
-<span class="co">#&gt;   ..$ module       : chr "GB"</span>
-<span class="co">#&gt;   ..$ esttype      : chr "TREE"</span>
-<span class="co">#&gt;   ..$ GBmethod     : chr "PS"</span>
-<span class="co">#&gt;   ..$ rowvar       : chr "TOTAL"</span>
-<span class="co">#&gt;   ..$ colvar       : chr "NONE"</span>
-<span class="co">#&gt;   ..$ areaunits    : chr "acres"</span>
-<span class="co">#&gt;   ..$ estunits     : chr "square feet"</span>
-<span class="co">#&gt;  $ statecd: int 56</span>
-<span class="co">#&gt;  $ invyr  : int [1:3] 2011 2012 2013</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">GBest</span>, max.level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 4</span></span>
+<span><span class="co">#&gt;  $ est    :'data.frame': 23 obs. of  3 variables:</span></span>
+<span><span class="co">#&gt;   ..$ ESTN_UNIT             : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...</span></span>
+<span><span class="co">#&gt;   ..$ Estimate              : num [1:23] 35117889 24184274 8223787 73174024 16031144 ...</span></span>
+<span><span class="co">#&gt;   ..$ Percent Sampling Error: num [1:23] 11.71 26.91 32.24 8.56 31.4 ...</span></span>
+<span><span class="co">#&gt;  $ raw    :List of 11</span></span>
+<span><span class="co">#&gt;   ..$ unit_totest  :'data.frame':    23 obs. of  17 variables:</span></span>
+<span><span class="co">#&gt;   ..$ domdat       :'data.frame':    590 obs. of  14 variables:</span></span>
+<span><span class="co">#&gt;   ..$ estvar       : chr "BA"</span></span>
+<span><span class="co">#&gt;   ..$ estvar.filter: chr "STATUSCD == 1"</span></span>
+<span><span class="co">#&gt;   ..$ module       : chr "GB"</span></span>
+<span><span class="co">#&gt;   ..$ esttype      : chr "TREE"</span></span>
+<span><span class="co">#&gt;   ..$ GBmethod     : chr "PS"</span></span>
+<span><span class="co">#&gt;   ..$ rowvar       : chr "TOTAL"</span></span>
+<span><span class="co">#&gt;   ..$ colvar       : chr "NONE"</span></span>
+<span><span class="co">#&gt;   ..$ areaunits    : chr "acres"</span></span>
+<span><span class="co">#&gt;   ..$ estunits     : chr "square feet"</span></span>
+<span><span class="co">#&gt;  $ statecd: int 56</span></span>
+<span><span class="co">#&gt;  $ invyr  : int [1:3] 2011 2012 2013</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="example-2-model-assisted-estimation">Example 2: Model-assisted estimation<a class="anchor" aria-label="anchor" href="#example-2-model-assisted-estimation"></a>
 </h3>
 <p><code>FIESTA</code> makes it easy to do estimation through techniques such as model-assited estimation and small area estimation. In this example, we use a similar process to the Green-Book estimation above to produce estimates for the same region, but through a generalized regression (GREG) model-assisted estimator. First, we get our population data:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">MApopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/modMApop.html">modMApop</a></span><span class="op">(</span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYtree.html">WYtree</a></span>,
-                                    cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYcond.html">WYcond</a></span><span class="op">)</span>,
-                     pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYpltassgn.html">WYpltassgn</a></span>,
-                     pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,
-                     unitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYunitarea.html">WYunitarea</a></span>,
-                     unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>,
-                     unitzonal <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYunitzonal.html">WYunitzonal</a></span>,
-                     prednames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"tcc"</span>, <span class="st">"tpi"</span>, <span class="st">"tnt"</span><span class="op">)</span>,
-                     predfac <span class="op">=</span> <span class="st">"tnt"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">MApopdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/modMApop.html">modMApop</a></span><span class="op">(</span>popTabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYtree.html">WYtree</a></span>,</span>
+<span>                                    cond <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYcond.html">WYcond</a></span><span class="op">)</span>,</span>
+<span>                     pltassgn <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYpltassgn.html">WYpltassgn</a></span>,</span>
+<span>                     pltassgnid <span class="op">=</span> <span class="st">"CN"</span>,</span>
+<span>                     unitarea <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYunitarea.html">WYunitarea</a></span>,</span>
+<span>                     unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span>,</span>
+<span>                     unitzonal <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="reference/WYunitzonal.html">WYunitzonal</a></span>,</span>
+<span>                     prednames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem"</span>, <span class="st">"tcc"</span>, <span class="st">"tpi"</span>, <span class="st">"tnt"</span><span class="op">)</span>,</span>
+<span>                     predfac <span class="op">=</span> <span class="st">"tnt"</span><span class="op">)</span></span></code></pre></div>
 <p>Now, analogous to the <code><a href="reference/modGBtree.html">modGBtree()</a></code> function we can produce estimates with the <code><a href="reference/modMAtree.html">modMAtree()</a></code> function</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">MAest</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/modMAtree.html">modMAtree</a></span><span class="op">(</span>MApopdat <span class="op">=</span> <span class="va">MApopdat</span>,
-                   MAmethod <span class="op">=</span> <span class="st">"greg"</span>,
-                   estvar <span class="op">=</span> <span class="st">"BA"</span>,
-                   estvar.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">MAest</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/modMAtree.html">modMAtree</a></span><span class="op">(</span>MApopdat <span class="op">=</span> <span class="va">MApopdat</span>,</span>
+<span>                   MAmethod <span class="op">=</span> <span class="st">"greg"</span>,</span>
+<span>                   estvar <span class="op">=</span> <span class="st">"BA"</span>,</span>
+<span>                   estvar.filter <span class="op">=</span> <span class="st">"STATUSCD == 1"</span><span class="op">)</span></span></code></pre></div>
 <p>and we can see the output of <code><a href="reference/modMAtree.html">modMAtree()</a></code>:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">MAest</span>, max.level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>
-<span class="co">#&gt; List of 4</span>
-<span class="co">#&gt;  $ est    :Classes 'data.table' and 'data.frame':    23 obs. of  3 variables:</span>
-<span class="co">#&gt;   ..$ ESTN_UNIT             : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...</span>
-<span class="co">#&gt;   ..$ Estimate              : num [1:23] 34769303 28493559 8260491 69278394 23200460 ...</span>
-<span class="co">#&gt;   ..$ Percent Sampling Error: num [1:23] 8.7 19.8 25.69 9.23 20.17 ...</span>
-<span class="co">#&gt;   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="co">#&gt;   ..- attr(*, "sorted")= chr "ESTN_UNIT"</span>
-<span class="co">#&gt;  $ raw    :List of 13</span>
-<span class="co">#&gt;   ..$ unit_totest  :'data.frame':    23 obs. of  18 variables:</span>
-<span class="co">#&gt;   ..$ domdat       :'data.frame':    3210 obs. of  14 variables:</span>
-<span class="co">#&gt;   ..$ plotweights  :List of 1</span>
-<span class="co">#&gt;   ..$ estvar       : chr "BA"</span>
-<span class="co">#&gt;   ..$ estvar.filter: chr "STATUSCD == 1"</span>
-<span class="co">#&gt;   ..$ module       : chr "MA"</span>
-<span class="co">#&gt;   ..$ esttype      : chr "TREE"</span>
-<span class="co">#&gt;   ..$ MAmethod     : chr "greg"</span>
-<span class="co">#&gt;   ..$ predselectlst:List of 1</span>
-<span class="co">#&gt;   ..$ rowvar       : chr "TOTAL"</span>
-<span class="co">#&gt;   ..$ colvar       : chr "NONE"</span>
-<span class="co">#&gt;   ..$ areaunits    : chr "acres"</span>
-<span class="co">#&gt;   ..$ estunits     : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...</span>
-<span class="co">#&gt;  $ statecd: int 56</span>
-<span class="co">#&gt;  $ invyr  : int [1:3] 2011 2012 2013</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">MAest</span>, max.level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 4</span></span>
+<span><span class="co">#&gt;  $ est    :Classes 'data.table' and 'data.frame':    23 obs. of  3 variables:</span></span>
+<span><span class="co">#&gt;   ..$ ESTN_UNIT             : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...</span></span>
+<span><span class="co">#&gt;   ..$ Estimate              : num [1:23] 34769303 28493559 8260491 69278394 23200460 ...</span></span>
+<span><span class="co">#&gt;   ..$ Percent Sampling Error: num [1:23] 8.7 19.8 25.69 9.23 20.17 ...</span></span>
+<span><span class="co">#&gt;   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
+<span><span class="co">#&gt;   ..- attr(*, "sorted")= chr "ESTN_UNIT"</span></span>
+<span><span class="co">#&gt;  $ raw    :List of 13</span></span>
+<span><span class="co">#&gt;   ..$ unit_totest  :'data.frame':    23 obs. of  18 variables:</span></span>
+<span><span class="co">#&gt;   ..$ domdat       :'data.frame':    3210 obs. of  14 variables:</span></span>
+<span><span class="co">#&gt;   ..$ plotweights  :List of 1</span></span>
+<span><span class="co">#&gt;   ..$ estvar       : chr "BA"</span></span>
+<span><span class="co">#&gt;   ..$ estvar.filter: chr "STATUSCD == 1"</span></span>
+<span><span class="co">#&gt;   ..$ module       : chr "MA"</span></span>
+<span><span class="co">#&gt;   ..$ esttype      : chr "TREE"</span></span>
+<span><span class="co">#&gt;   ..$ MAmethod     : chr "greg"</span></span>
+<span><span class="co">#&gt;   ..$ predselectlst:List of 1</span></span>
+<span><span class="co">#&gt;   ..$ rowvar       : chr "TOTAL"</span></span>
+<span><span class="co">#&gt;   ..$ colvar       : chr "NONE"</span></span>
+<span><span class="co">#&gt;   ..$ areaunits    : chr "acres"</span></span>
+<span><span class="co">#&gt;   ..$ estunits     : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...</span></span>
+<span><span class="co">#&gt;  $ statecd: int 56</span></span>
+<span><span class="co">#&gt;  $ invyr  : int [1:3] 2011 2012 2013</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -374,7 +374,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>
