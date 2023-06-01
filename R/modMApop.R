@@ -22,7 +22,7 @@
 #' trees on microplot).\cr 
 #' \tab cond \tab cuniqueid \tab Unique identifier for each plot, to link to 
 #' pltassgn (e.g. PLT_CN).\cr 
-#' \tab \tab CONDID \tab Unique identfier of each condition on plot. Set 
+#' \tab \tab CONDID \tab Unique identifier of each condition on plot. Set 
 #' CONDID=1, if only 1 condition per plot.\cr 
 #' \tab \tab CONDPROP_UNADJ \tab Unadjusted proportion of condition on
 #' each plot.  Set CONDPROP_UNADJ=1, if only 1 condition per plot.\cr 
@@ -170,7 +170,7 @@
 #' previous in order.
 #' 
 #' stratcombine:\cr If TRUE and less than 2 plots in any one strata class
-#' within an esimation unit, all strata classes with 2 or less plots are
+#' within an estimation unit, all strata classes with 2 or less plots are
 #' combined. The current method for combining is to group the strata with less
 #' than 2 plots with the strata class following in consecutive order (numeric
 #' or alphabetical), restrained by estimation unit (if unitcombine=FALSE), and

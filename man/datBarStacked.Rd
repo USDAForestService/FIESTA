@@ -68,7 +68,7 @@ for colors.  Must contain column with same name as sub.attribute.}
 \item{color}{String. Automated color selection ("rainbow", "topo", "heat",
 "terrain", "cm").}
 
-\item{device.type}{String. The type(s) of device for ploting ("default",
+\item{device.type}{String. The type(s) of device for plotting ("default",
 "jpg", "pdf", or "ps").}
 
 \item{jpeg.res}{Integer. The resolution for jpeg image.}
@@ -179,11 +179,11 @@ x axis if horiz=T) # Therefore to modify this axis by par commands (other
 than the # ones specifically included above) may require changing the
 function. For example par(yaxp) # may not work.  # # # The arguments bar.lab
 and bar.lim are equivalent to xlab/ylab, xlim/ylim, controlling # whichever
-is the lengthwise axis in the bar charts (as detrmined by horiz).  # # #
+is the lengthwise axis in the bar charts (as determined by horiz).  # # #
 bar.ratio is only used when bar.lim is specified, it controls what
 percentage of the # plot area will be occupied by the specified range of the
 chart itself. For example, setting # bar.lim=c(0,80) and bar.ratio=0.75 will
-result in the 80% tick mark occuring 75% of the way # across the plot
+result in the 80% tick mark occurring 75% of the way # across the plot
 region, leaving 25% of the plot region for the legend. (Note, if any of #
 the bars are taller than 80% they will still overlap the legend.)  # # If
 bar.lim is not specified, the function will automatically scale the

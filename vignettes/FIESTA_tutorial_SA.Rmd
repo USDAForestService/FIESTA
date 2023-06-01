@@ -243,7 +243,7 @@ Next, we fit the unit-level EBLUP with the `JoSAE` R package.
 ```{r}
 area1 <- modSAarea(
   SApopdatlst = SApopdat,        # pop - population calculations for WY, post-stratification
-  prednames = all_preds,         # est - charater vector of predictors to be used in the model
+  prednames = all_preds,         # est - character vector of predictors to be used in the model
   SApackage = "JoSAE",           # est - character string of the R package to do the estimation
   SAmethod = "unit"              # est - method of small area estimation. Either "unit" or "area"
   )
@@ -275,7 +275,7 @@ In this example, we fit an area level EBLUP with `JoSAE`, while only using slp a
 ```{r}
 area2 <- modSAarea(
   SApopdatlst = SApopdat,         # pop - population calculations for WY, post-stratification
-  prednames = "slp",          # est - charater vector of predictors to be used in the model
+  prednames = "slp",          # est - character vector of predictors to be used in the model
   SApackage = "JoSAE",            # est - character string of the R package to do the estimation
   SAmethod = "area"               # est - method of small area estimation. Either "unit" or "area"
   )
@@ -333,7 +333,7 @@ Notably, we can also set priors on the ratio of between and within area variatio
 ```{r}
 area4 <- modSAarea(
   SApopdatlst = SApopdat,           # pop - population calculations for WY, post-stratification
-  prednames = all_preds,            # est - charater vector of predictors to be used in the model
+  prednames = all_preds,            # est - character vector of predictors to be used in the model
   SApackage = "hbsae",              # est - character string of the R package to do the estimation
   SAmethod = "unit",                # est - method of small area estimation. Either "unit" or "area"
   prior = function(x) 1             # est - prior on ratio of between and within area variation
@@ -365,7 +365,7 @@ Due to rounding we do in `FIESTA`, we see the same result. However, the estimate
 ```{r}
 area5 <- modSAarea(
   SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
-  prednames = all_preds,       # est - charater vector of predictors to be used in the model
+  prednames = all_preds,       # est - character vector of predictors to be used in the model
   SApackage = "JoSAE",         # est - character string of the R package to do the estimation
   SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"
   modelselect = TRUE           # est - elastic net variable selection
@@ -430,7 +430,7 @@ We can bring the `modelselect` parameter into play with `modSAtree` as well as `
 ```{r}
 tree2 <- modSAtree(
     SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
-    prednames = all_preds,       # est - charater vector of predictors to be used in the model
+    prednames = all_preds,       # est - character vector of predictors to be used in the model
     SApackage = "JoSAE",         # est - character string of the R package to do the estimation
     SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
     landarea = "FOREST",         # est - forest land filter
@@ -459,7 +459,7 @@ We can also use different response variables to estimate, and in this example we
 ```{r}
 tree3 <- modSAtree(
     SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
-    prednames = all_preds,       # est - charater vector of predictors to be used in the model
+    prednames = all_preds,       # est - character vector of predictors to be used in the model
     SApackage = "JoSAE",         # est - character string of the R package to do the estimation
     SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
     landarea = "FOREST",         # est - forest land filter
@@ -493,7 +493,7 @@ Now, we can of course fit a different model to estimate basal area. In this case
 ```{r}
 tree4 <- modSAtree(
     SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
-    prednames = "dem",       # est - charater vector of predictors to be used in the model
+    prednames = "dem",       # est - character vector of predictors to be used in the model
     SApackage = "sae",         # est - character string of the R package to do the estimation
     SAmethod = "area",           # est - method of small area estimation. Either "unit" or "area"  
     landarea = "FOREST",         # est - forest land filter
@@ -521,7 +521,7 @@ One may want to easily save `FIESTA` output to your computer, rather than just h
 ```{r}
 tree5 <- modSAtree(
     SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
-    prednames = all_preds,       # est - charater vector of predictors to be used in the model
+    prednames = all_preds,       # est - character vector of predictors to be used in the model
     SApackage = "JoSAE",         # est - character string of the R package to do the estimation
     SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
     landarea = "FOREST",         # est - forest land filter
@@ -546,7 +546,7 @@ We can also of course use a different model to predict basal area, and in this c
 ```{r}
 tree6 <- modSAtree(
     SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
-    prednames = all_preds,       # est - charater vector of predictors to be used in the model
+    prednames = all_preds,       # est - character vector of predictors to be used in the model
     SApackage = "hbsae",         # est - character string of the R package to do the estimation
     SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
     landarea = "FOREST",         # est - forest land filter

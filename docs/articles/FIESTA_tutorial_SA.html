@@ -494,7 +494,7 @@ package.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">area1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span></span>
 <span>  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,        <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>  prednames <span class="op">=</span> <span class="va">all_preds</span>,         <span class="co"># est - charater vector of predictors to be used in the model</span></span>
+<span>  prednames <span class="op">=</span> <span class="va">all_preds</span>,         <span class="co"># est - character vector of predictors to be used in the model</span></span>
 <span>  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,           <span class="co"># est - character string of the R package to do the estimation</span></span>
 <span>  SAmethod <span class="op">=</span> <span class="st">"unit"</span>              <span class="co"># est - method of small area estimation. Either "unit" or "area"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
@@ -555,7 +555,7 @@ can have a maximum of one predictor without being exactly singular.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">area2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span></span>
 <span>  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,         <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>  prednames <span class="op">=</span> <span class="st">"slp"</span>,          <span class="co"># est - charater vector of predictors to be used in the model</span></span>
+<span>  prednames <span class="op">=</span> <span class="st">"slp"</span>,          <span class="co"># est - character vector of predictors to be used in the model</span></span>
 <span>  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,            <span class="co"># est - character string of the R package to do the estimation</span></span>
 <span>  SAmethod <span class="op">=</span> <span class="st">"area"</span>               <span class="co"># est - method of small area estimation. Either "unit" or "area"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
@@ -649,7 +649,7 @@ same model as before, but with a flat prior.</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">area4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span></span>
 <span>  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,           <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>  prednames <span class="op">=</span> <span class="va">all_preds</span>,            <span class="co"># est - charater vector of predictors to be used in the model</span></span>
+<span>  prednames <span class="op">=</span> <span class="va">all_preds</span>,            <span class="co"># est - character vector of predictors to be used in the model</span></span>
 <span>  SApackage <span class="op">=</span> <span class="st">"hbsae"</span>,              <span class="co"># est - character string of the R package to do the estimation</span></span>
 <span>  SAmethod <span class="op">=</span> <span class="st">"unit"</span>,                <span class="co"># est - method of small area estimation. Either "unit" or "area"</span></span>
 <span>  prior <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">1</span>             <span class="co"># est - prior on ratio of between and within area variation</span></span>
@@ -693,7 +693,7 @@ argument to <code>TRUE</code>.</p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">area5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAarea.html">modSAarea</a></span><span class="op">(</span></span>
 <span>  SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>  prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
+<span>  prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - character vector of predictors to be used in the model</span></span>
 <span>  SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
 <span>  SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"</span></span>
 <span>  modelselect <span class="op">=</span> <span class="cn">TRUE</span>           <span class="co"># est - elastic net variable selection</span></span>
@@ -788,7 +788,7 @@ variable selection before fitting the model.</p>
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tree2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
 <span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
+<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - character vector of predictors to be used in the model</span></span>
 <span>    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
 <span>    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span></span>
 <span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
@@ -825,7 +825,7 @@ example we chose basal area. We also returned titles by using
 <div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tree3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
 <span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
+<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - character vector of predictors to be used in the model</span></span>
 <span>    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
 <span>    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span></span>
 <span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
@@ -888,7 +888,7 @@ area-level EBLUP from the <code>sae</code> package.</p>
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tree4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
 <span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="st">"dem"</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
+<span>    prednames <span class="op">=</span> <span class="st">"dem"</span>,       <span class="co"># est - character vector of predictors to be used in the model</span></span>
 <span>    SApackage <span class="op">=</span> <span class="st">"sae"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
 <span>    SAmethod <span class="op">=</span> <span class="st">"area"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span></span>
 <span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
@@ -927,7 +927,7 @@ function (use <code><a href="https://rdrr.io/pkg/FIESTAutils/man/savedata_option
 <div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tree5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
 <span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
+<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - character vector of predictors to be used in the model</span></span>
 <span>    SApackage <span class="op">=</span> <span class="st">"JoSAE"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
 <span>    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span></span>
 <span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
@@ -953,7 +953,7 @@ with the <code>outfn.pre</code> arguement.</p>
 <div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tree6</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/modSAtree.html">modSAtree</a></span><span class="op">(</span></span>
 <span>    SApopdatlst <span class="op">=</span> <span class="va">SApopdat</span>,      <span class="co"># pop - population calculations for WY, post-stratification</span></span>
-<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - charater vector of predictors to be used in the model</span></span>
+<span>    prednames <span class="op">=</span> <span class="va">all_preds</span>,       <span class="co"># est - character vector of predictors to be used in the model</span></span>
 <span>    SApackage <span class="op">=</span> <span class="st">"hbsae"</span>,         <span class="co"># est - character string of the R package to do the estimation</span></span>
 <span>    SAmethod <span class="op">=</span> <span class="st">"unit"</span>,           <span class="co"># est - method of small area estimation. Either "unit" or "area"  </span></span>
 <span>    landarea <span class="op">=</span> <span class="st">"FOREST"</span>,         <span class="co"># est - forest land filter</span></span>
