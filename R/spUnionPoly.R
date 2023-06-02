@@ -1,7 +1,7 @@
 #' Spatial - Generate a unioned sf object with polygons and attributes from
 #' two sf polygon objects.
 #' 
-#' Generate a unioned sf object with polygons and attribtutes from two sf
+#' Generate a unioned sf object with polygons and attributes from two sf
 #' polygon objects.
 #' 
 #' *If variable = NULL, then it will prompt user for input.

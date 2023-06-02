@@ -61,7 +61,7 @@ as poly1 (See note about on-the-fly projection conversion).
 If exportsp=TRUE, the sf object will be written to outfolder (See note).
 }
 \description{
-Generate a unioned sf object with polygons and attribtutes from two sf
+Generate a unioned sf object with polygons and attributes from two sf
 polygon objects.
 }
 \details{

@@ -15,7 +15,7 @@
 #' 74.965282 for trees on microplot).\cr 
 #' \tab cond \tab cuniqueid \tab Unique identifier for each plot, to link to 
 #' pltassgn (e.g. PLT_CN).\cr 
-#' \tab \tab CONDID \tab Unique identfier of each condition on plot. Set 
+#' \tab \tab CONDID \tab Unique identifier of each condition on plot. Set 
 #' CONDID=1, if only 1 condition per plot.\cr 
 #' \tab \tab CONDPROP_UNADJ \tab Unadjusted proportion of condition on
 #' each plot.  Set CONDPROP_UNADJ=1, if only 1 condition per plot.\cr 

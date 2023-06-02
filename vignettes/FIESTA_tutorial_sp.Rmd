@@ -76,7 +76,7 @@ FUNCTION  | DESCRIPTION
 [spExtractRast()](#spExtractRast) | Extracts point attribute values from raster layer(s).
 [spGetXY()](#spGetXY) | Wrapper: Extracts XY coordinates and subsets to boundary.
 [spGetPlots()](#spGetXY) | Wrapper: Extracts plot data and subsets to boundary.
-[spGetAuxiliary()](#spGetAuxiliary) | Wrapper: Extracts point attribute values, area for estimation unit(s), and zonal statitics for strata predictor layers.
+[spGetAuxiliary()](#spGetAuxiliary) | Wrapper: Extracts point attribute values, area for estimation unit(s), and zonal statistics for strata predictor layers.
 [spGetEstUnit()](#spGetEstUnit) | Wrapper: Extracts point attribute values and area for estimation unit(s).
 [spGetStrata()](#spGetStrata) | Wrapper: Extracts point attribute values, area for estimation unit(s), and pixel counts for strata spatial layer.
 [spUnionPoly()](#spUnionPoly) | Generates one Spatial polygons object from two Spatial polygons layers.

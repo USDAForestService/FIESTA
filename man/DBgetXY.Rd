@@ -56,7 +56,7 @@ name of xy R object. If datsource = 'shp', full pathname of shapefile.}
 \item{xy_opts}{List of xy data options for xy (e.g., xy_opts = list(xvar='LON', 
 yvar='LAT'). See xy_options() for more options and defaults.}
 
-\item{datsource}{String. Source of FIA data for defining FIA evalutions or 
+\item{datsource}{String. Source of FIA data for defining FIA evaluations or 
 appending variables ('datamart', 'sqlite', 'obj', 'csv'). If datsource = NULL, 
 datsource = xy_datsource. If datsource = 'datamart', data are downloaded
 extracted from FIA DataMart (http://apps.fs.usda.gov/fia/datamart/datamart.html). 
@@ -138,7 +138,7 @@ If savedata=TRUE, outputs the xy* based on savedata_opts.
 If exportsp=TRUE, the output xy saved as spatial layer based on savedata_opts.
 }
 \description{
-Extracts public plot coodinates for an FIA evaluation or a custom 
+Extracts public plot coordinates for an FIA evaluation or a custom 
 evaluation. Plots are extracted from FIA's public Datamart 
 (https://apps.fs.usda.gov/fia/datamart/datamart.html) or other defined
 datasource.

@@ -83,7 +83,7 @@ frame of total area by estimation unit, including unitvar and areavar.}
 \item{strata}{Logical. If TRUE, add data information for stratification.}
 
 \item{strtype}{String. If strata=TRUE, the type of strata ('POST', 'PRE').
-Note: the variance equations are slighlty different.}
+Note: the variance equations are slightly different.}
 
 \item{stratalut}{DF/DT. If strata=TRUE, look-up table with strata
 proportions ('strwt') by strata (and estimation unit). To calculate 'strwt',
@@ -178,7 +178,7 @@ cond.  Set CONDID=1, if only 1 condition per plot.\cr \tab \tab TPA_UNADJ
 TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on
 microplot).\cr \tab cond \tab cuniqueid \tab Unique identifier for each
 plot, to link to pltassgn (ex. PLT_CN).\cr \tab \tab CONDID \tab Unique
-identfier of each condition on plot.  Set CONDID=1, if only 1 condition per
+identifier of each condition on plot.  Set CONDID=1, if only 1 condition per
 plot.\cr \tab \tab CONDPROP_UNADJ \tab Unadjusted proportion of condition on
 each plot.  Set CONDPROP_UNADJ=1, if only 1 condition per plot.\cr \tab \tab
 COND_STATUS_CD \tab Status of each forested condition on plot (i.e.
@@ -232,7 +232,7 @@ estimation units following in order, it is combined with the estimation unit
 previous in order.
 
 stratcombine:\cr If TRUE and less than 2 plots in any one strata class
-within an esimation unit, all strata classes with 2 or less plots are
+within an estimation unit, all strata classes with 2 or less plots are
 combined. The current method for combining is to group the strata with less
 than 2 plots with the strata class following in consecutive order (numeric
 or alphabetical), restrained by estimation unit (if unitcombine=FALSE), and

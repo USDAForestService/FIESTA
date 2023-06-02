@@ -363,7 +363,7 @@ conditions removed (AREA_USED/n.strata)</td></tr><tr><td></td><td>EXPNS</td><td>
     <div id="details">
     <h2>Details</h2>
     <p>Population types <br></p><table class="table table"><tr><td></td><td><b>popType</b>
-<b>Description</b></td><td></td></tr><tr><td>ALL</td><td>Population data, inluding nonsampled plots.</td><td></td></tr><tr><td>CURR</td><td>Population data for area estimates, excluding nonsampled 
+<b>Description</b></td><td></td></tr><tr><td>ALL</td><td>Population data, including nonsampled plots.</td><td></td></tr><tr><td>CURR</td><td>Population data for area estimates, excluding nonsampled 
 plots.</td><td></td></tr><tr><td>VOL</td><td>Population data for area/tree estimates, excluding 
 nonsampled plots.</td><td></td></tr><tr><td>LULC</td><td>Population data for land use/land cover transitional estimates, 
 including only plots with previous measurements and excluding nonsampled 
@@ -373,7 +373,7 @@ table.</td></tr><tr><td></td><td></td><td>CONDID</td><td>Unique identifier of ea
 Set CONDID=1, if only 1 condition per plot.</td></tr><tr><td></td><td></td><td>TPA_UNADJ</td><td>Number of trees per acre each sample tree represents 
 (e.g., DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for 
 trees on microplot).</td></tr><tr><td></td><td>cond</td><td>cuniqueid</td><td>Unique identifier for each plot in cond 
-table.</td></tr><tr><td></td><td></td><td>CONDID</td><td>Unique identfier of each condition on plot. Set 
+table.</td></tr><tr><td></td><td></td><td>CONDID</td><td>Unique identifier of each condition on plot. Set 
 CONDID=1, if only 1 condition per plot.</td></tr><tr><td></td><td></td><td>CONDPROP_UNADJ</td><td>Unadjusted proportion of condition on each 
 plot. Set CONDPROP_UNADJ=1, if only 1 condition per plot.</td></tr><tr><td></td><td></td><td>COND_STATUS_CD</td><td>Status of each forested condition on
 plot (i.e. accessible forest, nonforest, water, etc.)</td></tr><tr><td></td><td></td><td>NF_COND_STATUS_CD</td><td>If ACI=TRUE. Status of each nonforest 
@@ -410,7 +410,7 @@ and continuing until the number of plots equals 10. If there are no
 estimation units following in order, it is combined with the estimation unit
 previous in order.</p>
 <p>stratcombine:<br> If TRUE and less than 2 plots in any one strata class
-within an esimation unit, all strata classes with 2 or less plots are
+within an estimation unit, all strata classes with 2 or less plots are
 combined. The current method for combining is to group the strata with less
 than 2 plots with the strata class following in consecutive order (numeric
 or alphabetical), restrained by estimation unit (if unitcombine=FALSE), and
