@@ -23,14 +23,6 @@ spGetPlots(
   puniqueid = "CN",
   invtype = "ANNUAL",
   intensity1 = FALSE,
-  issubp = FALSE,
-  istree = FALSE,
-  isseed = TRUE,
-  biojenk = FALSE,
-  greenwt = FALSE,
-  plotgeom = FALSE,
-  othertables = NULL,
-  ACI = FALSE,
   clipxy = TRUE,
   pjoinid = NULL,
   showsteps = FALSE,
@@ -107,27 +99,6 @@ for a list of options.}
 \item{intensity1}{Logical. If TRUE, includes only XY coordinates where 
 INTENSITY = 1 (FIA base grid).}
 
-\item{issubp}{Logical. If TRUE, subplot tables are extracted from FIA
-database (SUBPLOT, SUBP_COND).}
-
-\item{istree}{Logical. If TRUE, include tree data.}
-
-\item{isseed}{Logical. If TRUE, include seedling data.}
-
-\item{biojenk}{Logical. If TRUE, Jenkins biomass is calculated.}
-
-\item{greenwt}{Logical. If TRUE, green weight biomass is calculated.}
-
-\item{plotgeom}{Logical. If TRUE, variables from the PLOTGEOM table are
-appended to the plot table.}
-
-\item{othertables}{String Vector. Name of other table(s) in FIADB to include
-in output. The table must have PLT_CN as unique identifier of a plot.}
-
-\item{ACI}{Logical. If TRUE, the data from All Condition Inventories (ACI)
-are included in dataset (NF_SAMPLING_STATUS_CD = 1). See below for more
-details.}
-
 \item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
 
 \item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
@@ -155,7 +126,28 @@ of options. Only used when savedata = TRUE.}
 
 \item{gui}{Logical. If TRUE, uses gui interface.}
 
-\item{...}{parameters passed to DBgetPlot().}
+\item{...}{parameters passed to DBgetPlots().}
+
+\item{issubp}{Logical. If TRUE, subplot tables are extracted from FIA
+database (SUBPLOT, SUBP_COND).}
+
+\item{istree}{Logical. If TRUE, include tree data.}
+
+\item{isseed}{Logical. If TRUE, include seedling data.}
+
+\item{biojenk}{Logical. If TRUE, Jenkins biomass is calculated.}
+
+\item{greenwt}{Logical. If TRUE, green weight biomass is calculated.}
+
+\item{plotgeom}{Logical. If TRUE, variables from the PLOTGEOM table are
+appended to the plot table.}
+
+\item{othertables}{String Vector. Name of other table(s) in FIADB to include
+in output. The table must have PLT_CN as unique identifier of a plot.}
+
+\item{ACI}{Logical. If TRUE, the data from All Condition Inventories (ACI)
+are included in dataset (NF_SAMPLING_STATUS_CD = 1). See below for more
+details.}
 }
 \value{
 \item{xypltx}{ sf object. Input xy data clipped to boundary. }

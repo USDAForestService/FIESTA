@@ -98,7 +98,7 @@
 #' of options. Only used when savedata = TRUE. 
 #' @param spXYdat R list object. Output from spGetXY().
 #' @param gui Logical. If TRUE, uses gui interface. 
-#' @param ... parameters passed to DBgetPlot().
+#' @param ... parameters passed to DBgetPlots().
 #' 
 #' @return \item{xypltx}{ sf object. Input xy data clipped to boundary. }
 #' \item{bndx}{ sf object. Input bnd. } \item{tabs}{ list object. List of input
@@ -170,17 +170,9 @@ spGetPlots <- function(bnd = NULL,
                        dbTabs = dbTables(),
                        eval = "FIA",
                        eval_opts = NULL,
-                       puniqueid = "CN", 
+                       puniqueid = "CN",
                        invtype = "ANNUAL", 
-                       intensity1 = FALSE, 
-                       issubp = FALSE, 
-                       istree = FALSE,
-                       isseed = TRUE,
-                       biojenk = FALSE,
-                       greenwt = FALSE,
-                       plotgeom = FALSE, 
-                       othertables = NULL, 
-                       ACI = FALSE, 
+                       intensity1 = FALSE,  
                        clipxy = TRUE, 
                        pjoinid = NULL, 
                        showsteps = FALSE, 
@@ -211,7 +203,7 @@ spGetPlots <- function(bnd = NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilter=countyfips=xypltx=evalidst=PLOT_ID=INVYR=
+  xydat=stateFilterDB=countyfips=xypltx=evalidst=PLOT_ID=INVYR=
 	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc=dbconn=
 	bndx=evalInfo <- NULL
   isveg=ischng=isdwm <- FALSE
@@ -229,11 +221,12 @@ spGetPlots <- function(bnd = NULL,
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
-  args <- as.list(match.call()[-1])
+  args <- as.list(match.call()[-1], list(...))
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- unique(c(names(formals(spGetPlots)), "isveg", "ischng", "isdwm"))
+  formallst <- unique(c(names(formals(spGetPlots)), names(formals(DBgetPlots)), 
+			"isveg", "ischng", "isdwm"))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -242,6 +235,17 @@ spGetPlots <- function(bnd = NULL,
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts,
 			xy_opts=xy_opts)
+
+  if ("stateFilter" %in% names(args)) {
+    stop("cannot use stateFilter parameter at this time in spGetPlots")
+  }
+  if ("getxy" %in% input.params) {
+    stop("cannot use getxy parameter at this time in spGetPlots")    
+  }
+  if ("evalInfo" %in% input.params) {
+    stop("cannot use evalInfo parameter at this time in spGetPlots")    
+  }
+
 
   ## Set dbTables defaults
   dbTables_defaults_list <- formals(dbTables)[-length(formals(dbTables))] 
@@ -411,41 +415,6 @@ spGetPlots <- function(bnd = NULL,
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
   } 
-
-  if (any(Type %in% c("VOL"))) {
-    if (!istree) {
-      message("eval Type includes 'VOL', but istree = FALSE... not trees are included")
-    }
-  } 
-  if (any(Type == "P2VEG")) {
-    # understory vegetation tables 
-    # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE)
-    isveg=issubp <- TRUE
-  } 
-  if (any(Type == "INV")) {
-    # understory vegetation tables 
-    # (INVASIVE_SUBPLOT_SPP)
-    isinv=issubp <- TRUE
-  } 
-  if (any(Type == "DWM")) {
-    # summarized condition-level down woody debris table (COND_DWM_CALC)
-    isdwm <- TRUE
-  }
-  if (any(Type == "CHNG")) {
-    # current and previous conditions, subplot-level - sccm (SUBP_COND_CHNG_MTRX) 
-    ischng=issubp <- TRUE
-  }
-  if (any(Type %in% c("GROW", "MORT", "REMV"))) {
-    Type <- "GRM"
-  }
-  if (any(Type == "GRM")) {
-    ischng=issubp=isgrm <- TRUE
-  }
-  if (isveg && invtype == "PERIODIC") {
-    message("understory vegetation data only available for annual data\n")
-    isveg <- FALSE
-  } 
-
 
   ## Get DBgetEvalid parameters from eval_opts
   ################################################
@@ -884,7 +853,7 @@ spGetPlots <- function(bnd = NULL,
         countyfips1 <- formatC(as.numeric(countyfips1), width=5, digits=5, flag="0")
         stcnty1 <- countyfips1[startsWith(countyfips1, formatC(stcd, width=2, flag="0"))]
         countycds1 <- sort(as.numeric(unique(substr(stcnty1, 3, 5))))
-        stateFilter1 <- paste("p.countycd IN(", toString(countycds1), ")")
+        stateFilterDB1 <- paste("p.countycd IN(", toString(countycds1), ")")
       }
 
       ## Subset evalInfo
@@ -935,6 +904,12 @@ spGetPlots <- function(bnd = NULL,
         evalInfo2st <- NULL
       }
 
+      if ("stateFilter" %in% input.params) {
+        stateFilterDB1 <- paste(stateFilter, "&", stateFilterDB1) 
+        rm(stateFilter)
+      }
+
+
       dat1 <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 
@@ -942,21 +917,12 @@ spGetPlots <- function(bnd = NULL,
                          eval = eval,
                          eval_opts = eval_opts1,
                          puniqueid = puniqueid, 
-                         invtype = invtype, 
-                         intensity1 = intensity1, 
                          pjoinid = pjoinid, 
-                         istree = istree,
-                         isseed = isseed,
-                         plotgeom = plotgeom, 
-                         othertables = othertables, 
                          getxy = FALSE,
-                         ACI = ACI, 
-                         biojenk = biojenk,
-                         greenwt = greenwt,
-                         savePOP = savePOP,
-                         stateFilter = stateFilter1, 
+                         stateFilter = stateFilterDB1, 
                          returndata = TRUE,
-                         evalInfo = evalInfo1st
+                         evalInfo = evalInfo1st,
+                         ...
                          )
       tabs1 <- dat1$tabs
       tabIDs <- dat1$tabIDs
@@ -1016,8 +982,14 @@ spGetPlots <- function(bnd = NULL,
         countyfips2 <- formatC(as.numeric(countyfips2), width=5, digits=5, flag="0")
         stcnty2 <- countyfips2[startsWith(countyfips2, formatC(stcd, width=2, flag="0"))]
         countycds2 <- sort(as.numeric(unique(substr(stcnty2, 3, 5))))
-        stateFilter2 <- paste("p.countycd IN(", toString(countycds2), ")")
+        stateFilterDB2 <- paste("p.countycd IN(", toString(countycds2), ")")
       }
+
+      if ("stateFilter" %in% input.params) {
+        stateFilterDB2 <- paste(stateFilter, "&", stateFilterDB2) 
+        rm(stateFilter)
+      }
+
       dat2 <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 
@@ -1025,21 +997,12 @@ spGetPlots <- function(bnd = NULL,
                          eval = eval,
                          eval_opts = eval_opts2,
                          puniqueid = puniqueid,
-                         invtype = invtype, 
-                         intensity1 = intensity1, 
                          pjoinid = pjoinid, 
-                         istree = istree,
-                         isseed = isseed,
-                         plotgeom = plotgeom, 
-                         othertables = othertables, 
                          getxy = FALSE,
-                         ACI = ACI, 
-                         biojenk = biojenk,
-                         greenwt = greenwt,
-                         savePOP = savePOP,
-                         stateFilter = stateFilter2, 
+                         stateFilter = stateFilterDB2, 
                          returndata = TRUE,
-                         evalInfo = evalInfo2st
+                         evalInfo = evalInfo2st,
+                         ...
                          )
       tabs2 <- dat2$tabs
       pop_plot_stratum_assgn2 <- dat2$pop_plot_stratum_assgn
@@ -1079,7 +1042,7 @@ spGetPlots <- function(bnd = NULL,
         countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
         stcnty <- countyfips[startsWith(countyfips, formatC(stcd, width=2, flag="0"))]
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
-        stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
+        stateFilterDB <- paste("p.countycd IN(", toString(countycds), ")")
       }
  
       if (!is.null(evalInfo)) {
@@ -1105,6 +1068,10 @@ spGetPlots <- function(bnd = NULL,
         evalInfost <- NULL
       }
  
+      if ("stateFilter" %in% input.params) {
+        stateFilterDB <- paste(stateFilterDB, "&", stateFilter) 
+        rm(stateFilter)
+      }
       dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 
@@ -1112,21 +1079,12 @@ spGetPlots <- function(bnd = NULL,
                          eval = eval,
                          eval_opts = eval_opts,
                          puniqueid = puniqueid, 
-                         invtype = invtype, 
-                         intensity1 = intensity1, 
                          pjoinid = pjoinid, 
-                         istree = istree,
-                         isseed = isseed,
-                         plotgeom = plotgeom, 
-                         othertables = othertables, 
                          getxy = FALSE,
-                         ACI = ACI, 
-                         biojenk = biojenk,
-                         greenwt = greenwt,
-                         savePOP = savePOP,
-                         stateFilter = stateFilter, 
+                         stateFilter = stateFilterDB, 
                          returndata = TRUE,
-                         evalInfo = evalInfost
+                         evalInfo = evalInfost,
+                         ...
                          )
       tabs <- dat$tabs
       tabIDs <- dat$tabIDs
