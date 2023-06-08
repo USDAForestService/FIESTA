@@ -516,7 +516,6 @@ DBgetPlots <- function (states = NULL,
   pop_tables <- c("POP_ESTN_UNIT", "POP_EVAL", "POP_EVAL_ATTRIBUTE", "POP_EVAL_GRP", 
 	"POP_EVAL_TYP", "POP_STRATUM", "SURVEY") 
 
-
   if (gui) {
     invtype=issp=spcondid1=defaultVars=regionVars=ACI=
 	subcycle99=intensity1=allFilter=savedata=saveqry=parameters=out_fmt=
@@ -1233,6 +1232,7 @@ DBgetPlots <- function (states = NULL,
           message("there is no PLOT table in datamart")
         } else {
           plotnm <- "PLOT"
+          pltflds <- names(PLOT)
         }
       } 
       ## PLOTGEOM table  
@@ -1240,7 +1240,8 @@ DBgetPlots <- function (states = NULL,
         PLOTGEOM <- DBgetCSV("PLOTGEOM", stabbr, returnDT=TRUE, stopifnull=FALSE)
         if (!is.null(PLOTGEOM)) { 
           plotgeomnm <- "PLOTGEOM"
-          plotgeomflds <- names(PLOTGEOM)
+          pltgeomflds <- names(PLOTGEOM)
+          pltflds <- unique(pltflds, pltgeomflds)
         } else {
           message("there is no plotgeom table in datamart")
         }
@@ -1249,12 +1250,13 @@ DBgetPlots <- function (states = NULL,
       ## COND table 
       COND <- DBgetCSV("COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
       condnm <- "COND"
+      condflds <- names(COND)
 
       ## Get pltcondflds
       if (!is.null(plotnm)) {
-        pltcondflds <- unique(c(names(PLOT), names(COND)))
+        pltcondflds <- unique(c(pltflds, condflds))
       } else {
-        pltcondflds <- names(COND)
+        pltcondflds <- condflds
       }
 
       if (iseval || savePOP) {
@@ -1295,6 +1297,7 @@ DBgetPlots <- function (states = NULL,
         message("the PLOT table does not exist")
       } else {
         plotnm <- "PLOT"
+        pltflds <- names(PLOT)
       }
  
       ## PLOTGEOM table  
@@ -1302,7 +1305,8 @@ DBgetPlots <- function (states = NULL,
         PLOTGEOM <- pcheck.table(plotgeom_layer, stopifnull=FALSE, stopifinvalid=FALSE)
         if (!is.null(PLOTGEOM)) { 
           plotgeomnm <- "PLOTGEOM"
-          plotgeomflds <- names(PLOTGEOM)
+          pltgeomflds <- names(PLOTGEOM)
+          pltflds <- unique(pltflds, pltgeomflds)
         } else {
           message("there is no plotgeom table in datamart")
         }
@@ -1311,12 +1315,13 @@ DBgetPlots <- function (states = NULL,
       ## COND table
       COND <- pcheck.table(cond_layer, stopifnull=TRUE, stopifinvalid=TRUE)
       condnm <- "COND"
+      condflds <- names(COND)
 
       ## Get pltcondflds
       if (!is.null(plotnm)) {
-        pltcondflds <- unique(c(names(PLOT), names(COND)))
+        pltcondflds <- unique(c(pltflds, condflds))
       } else {
-        pltcondflds <- names(COND)
+        pltcondflds <- condflds
       }
 
       if (iseval || savePOP) {
@@ -1560,41 +1565,42 @@ DBgetPlots <- function (states = NULL,
       if (is.null(plotgeomnm)) {
         plotgeom <- FALSE
       }
-      if (defaultVars) {
-        ## Check variables in database
+      if (!defaultVars) {
+        pltvarlst <- pltflds
+        condvarlst <- condflds
+      }        
 
-        if (is.null(chkdbtab(pltcondflds, "LON")) && !is.null(chkdbtab(pltcondflds, "LON_PUBLIC"))) {
-          pltvarlst <- sub("LON", "LON_PUBLIC", pltvarlst)
-          pltvarlst <- sub("LAT", "LAT_PUBLIC", pltvarlst)
-        }
-        if (is.null(chkdbtab(pltcondflds, "ELEV")) && !is.null(chkdbtab(pltcondflds, "ELEV_PUBLIC"))) {
-          pltvarlst <- sub("ELEV", "ELEV_PUBLIC", pltvarlst)
-        }
-        pltvarlst <- pltvarlst[pltvarlst %in% pltcondflds]
-        condvarlst <- condvarlst[condvarlst %in% pltcondflds]
 
-        ## Add commas
-        pcvars <- NULL
-        if (length(pltvarlst) > 0) {
-          pcvars <- toString(paste0("p.", pltvarlst))
-          if (plotgeom && !is.null(plotgeomnm)) {
-            pgeomvarlst <- pgeomvarlst[pgeomvarlst %in% plotgeomflds]
-            pcvars <- toString(c(paste0("p.", pltvarlst), paste0("pg.", pgeomvarlst))) 
-          }           
-        } 
-        pcvars <- toString(c(pcvars, paste0("c.", condvarlst)))
+      ## Check variables in database
+      if (is.null(chkdbtab(pltcondflds, "LON")) && !is.null(chkdbtab(pltcondflds, "LON_PUBLIC"))) {
+        pltvarlst <- sub("LON", "LON_PUBLIC", pltvarlst)
+        pltvarlst <- sub("LAT", "LAT_PUBLIC", pltvarlst)
+      }
+      if (is.null(chkdbtab(pltcondflds, "ELEV")) && !is.null(chkdbtab(pltcondflds, "ELEV_PUBLIC"))) {
+        pltvarlst <- sub("ELEV", "ELEV_PUBLIC", pltvarlst)
+      }
+      pltvarlst <- pltvarlst[pltvarlst %in% pltcondflds]
+      condvarlst <- condvarlst[condvarlst %in% pltcondflds]
 
-        if (iseval) { 
-          evalidnm <- findnm("EVALID", ppsaflds, returnNULL=TRUE)
-          if (is.null(evalidnm)) {
-            evalidnm <- findnm("EVALID", pltcondflds)
-            pcvars <- paste0(pcvars, ", p.", evalidnm)
-          } else {           
-            pcvars <- paste0(pcvars, ", ppsa.", evalidnm)
-          }
+      ## Add commas
+      pcvars <- NULL
+      if (length(pltvarlst) > 0) {
+        pcvars <- toString(paste0("p.", pltvarlst))
+        if (plotgeom && !is.null(plotgeomnm)) {
+          pgeomvarlst <- pgeomvarlst[pgeomvarlst %in% plotgeomflds]
+          pcvars <- toString(c(paste0("p.", pltvarlst), paste0("pg.", pgeomvarlst))) 
+        }           
+      } 
+      pcvars <- toString(c(pcvars, paste0("c.", condvarlst)))
+
+      if (iseval) { 
+        evalidnm <- findnm("EVALID", ppsaflds, returnNULL=TRUE)
+        if (is.null(evalidnm)) {
+          evalidnm <- findnm("EVALID", pltcondflds)
+          pcvars <- paste0(pcvars, ", p.", evalidnm)
+        } else {           
+          pcvars <- paste0(pcvars, ", ppsa.", evalidnm)
         }
-      } else {
-        pcvars <- "p.*"
       }
  
       ## Create pltcond query
@@ -1626,7 +1632,7 @@ DBgetPlots <- function (states = NULL,
         message("saved pltcond query to:\n", pltcondqryfn)
       }
     }
-
+ 
     if (nrow(pltcondx) == 0) {
       message("no plots in database for ", state)
     } else {
@@ -1660,14 +1666,15 @@ DBgetPlots <- function (states = NULL,
         pltx <- unique(pltcondx[, pltvarlst2, with=FALSE])
         pltx[, CN := as.character(CN)]
         setkey(pltx, CN)
-        if ("PREV_PLTCN" %in% names(pltx))
-          pltx[, PREV_PLTCN := as.character(PREV_PLTCN)]             
-      }
+        if ("PREV_PLTCN" %in% names(pltx)) {
+          pltx[, PREV_PLTCN := as.character(PREV_PLTCN)]  
+        }           
+      }         
       if (!is.null(condvarlst) && "CONDID" %in% names(pltcondx)) {
         condx <- unique(pltcondx[, condvarlst2, with=FALSE])
         condx[, PLT_CN := as.character(PLT_CN)]        
         setkey(condx, PLT_CN, CONDID)
-      } 
+      }
  
       ## Change names of LON and LAT to LON_PUBLIC and LAT_PUBLIC
       ###########################################################
@@ -1688,7 +1695,7 @@ DBgetPlots <- function (states = NULL,
 
       ## Create plot-level, number of condtion variables
       ###########################################################
-      if (defaultVars) {
+      if ("COND_STATUS_CD" %in% names(condx) && !"NBRCND" %in% names(pltx)) {
 
         ## Number of conditions
         nbrcnd <- condx[, list(NBRCND = length(COND_STATUS_CD)), by="PLT_CN"]
@@ -1712,125 +1719,127 @@ DBgetPlots <- function (states = NULL,
 
         ## Merge to plot table
         pltx <- nbrcnd[pltx]
+        setkeyv(pltx, "PLT_CN")
+        rm(nbrcnd)
+        gc()
 
         nbrcndlst <- c("NBRCND", "NBRCNDSAMP", "NBRCNDFOR", "NBRCNDFTYP")
-        pltvarlst2 <- c(pltvarlst2, nbrcndlst)      
+        pltvarlst2 <- unique(c(pltvarlst2, nbrcndlst))      
+      }
 
-        ## CCLIVEPLT:
-        ## A plot level canopy cover variable based on LIVE_CANOPY_CVR_PCT
-        if (all(c("LIVE_CANOPY_CVR_PCT", "CONDPROP_UNADJ") %in% names(condx))) {
-          ccliveplt <- condx[, 
+      ## CCLIVEPLT:
+      ## A plot level canopy cover variable based on LIVE_CANOPY_CVR_PCT
+      if (all(c("LIVE_CANOPY_CVR_PCT", "CONDPROP_UNADJ") %in% names(pltx))) {
+        ccliveplt <- condx[, 
 			        round(sum(LIVE_CANOPY_CVR_PCT * CONDPROP_UNADJ, na.rm=TRUE),2), 
 			        by=PLT_CN]
-          setnames(ccliveplt, c("PLT_CN", "CCLIVEPLT"))
+        setnames(ccliveplt, c("PLT_CN", "CCLIVEPLT"))
 
-          pltx <- ccliveplt[pltx]
-          pltvarlst2 <- c(pltvarlst2, "CCLIVEPLT")
-        }
+        pltx <- ccliveplt[pltx]
+        pltvarlst2 <- c(pltvarlst2, "CCLIVEPLT")
+      }
  
-        ## Regional variables 
-        ######################################################################
-        if (isRMRS && regionVars) {
-          ## CCRMRSPLT: plot level canopy cover variable based on CRCOVPCT_RMRS
-          if (all(c("CRCOVPCT_RMRS", "CONDPROP_UNADJ") %in% names(condx))) {
-            ccRMRSplt <- condx[, list(round(sum(CRCOVPCT_RMRS * CONDPROP_UNADJ, 
+      ## Regional variables 
+      ######################################################################
+      if (isRMRS && regionVars) {
+        ## CCRMRSPLT: plot level canopy cover variable based on CRCOVPCT_RMRS
+        if (all(c("CRCOVPCT_RMRS", "CONDPROP_UNADJ") %in% names(pltx))) {
+          ccRMRSplt <- condx[, list(round(sum(CRCOVPCT_RMRS * CONDPROP_UNADJ, 
 			        na.rm=TRUE), 2)), by="PLT_CN"]
-            setnames(ccRMRSplt, c("PLT_CN", "CCRMRSPLT"))
-            pltx <- ccRMRSplt[pltx]
+          setnames(ccRMRSplt, c("PLT_CN", "CCRMRSPLT"))
+          pltx <- ccRMRSplt[pltx]
 
-            pltvarlst2 <- c(pltvarlst2, "CCRMRSPLT")
-          }
-          ## CCPLT: plot level canopy cover variable based on CRCOV
-          if (all(c("CRCOV", "CONDPROP_UNADJ") %in% names(condx))) {
-            ccplt <- condx[, list(round(sum(CRCOVPCT_RMRS * CONDPROP_UNADJ, 
+          pltvarlst2 <- c(pltvarlst2, "CCRMRSPLT")
+        }
+        ## CCPLT: plot level canopy cover variable based on CRCOV
+        if (all(c("CRCOV", "CONDPROP_UNADJ") %in% names(pltx))) {
+          ccplt <- condx[, list(round(sum(CRCOVPCT_RMRS * CONDPROP_UNADJ, 
 			na.rm=TRUE), 2)), by="PLT_CN"]
-            setnames(ccplt, c("PLT_CN", "CCPLT"))
-            pltx <- ccplt[pltx]
+          setnames(ccplt, c("PLT_CN", "CCPLT"))
+          pltx <- ccplt[pltx]
 
-            pltvarlst2 <- c(pltvarlst2, "CCRMRSPLT")
-          }
-        }  
+          pltvarlst2 <- c(pltvarlst2, "CCRMRSPLT")
+        }
+      }  
 
-        ## FORNONSAMP: 
-        ## Plot-level variable based on PLOT_STATUS_CD and PLOT_NONSAMPLE_REASN_CD
-        if ("PLOT_NONSAMPLE_REASN_CD" %in% names(pltx)) {
-          pltx[, FORNONSAMP := 
-		        ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 2, 
+      ## FORNONSAMP: 
+      ## Plot-level variable based on PLOT_STATUS_CD and PLOT_NONSAMPLE_REASN_CD
+      if ("PLOT_NONSAMPLE_REASN_CD" %in% names(pltx)) {
+        pltx[, FORNONSAMP := 
+		      ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 2, 
 			      "Nonsampled-Denied access",
-		        ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 3, 
+		      ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 3, 
 			      "Nonsampled-Hazardous",
-		        ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD %in% c(5,6),
+		      ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD %in% c(5,6),
 		 	      "Nonsampled-Lost data",
-		        ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 7, 
+		      ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 7, 
 			      "Nonsampled-Wrong location",
-		        ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 8, 
+		      ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 8, 
 			      "Nonsampled-Skipped visit",
-		        ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 9, 
+		      ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 9, 
 			      "Nonsampled-Dropped plot",
-		        ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD %in% c(10,11),
+		      ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD %in% c(10,11),
  			      "Nonsampled-Other",
-		        ifelse(PLOT_STATUS_CD == "1", "Sampled-Forest",
-		        ifelse(PLOT_STATUS_CD == "2", "Sampled-Nonforest",
+		      ifelse(PLOT_STATUS_CD == "1", "Sampled-Forest",
+		      ifelse(PLOT_STATUS_CD == "2", "Sampled-Nonforest",
 		            as.character(pltx$PLOT_STATUS_CD))))))))))]
 
           pltvarlst2 <- c(pltvarlst2, "FORNONSAMP")
-        }
+      }
 
-        ## Generate PLOT_ID, with STATECD, UNIT, COUNTYCD, PLOT to define
+      ## Generate PLOT_ID, with STATECD, UNIT, COUNTYCD, PLOT to define
+      if (all(c("STATECD", "UNITCD", "COUNTYCD", "PLOT") %in% names(pltx))) {
         pltx[, PLOT_ID := paste0("ID", 
 		        formatC(pltx$STATECD, width=2, digits=2, flag=0), 
           	formatC(pltx$UNITCD, width=2, digits=2, flag=0),
           	formatC(pltx$COUNTYCD, width=3, digits=3, flag=0),
           	formatC(pltx$PLOT, width=5, digits=5, flag=0))] 
         pltvarlst2 <- c(pltvarlst2, "PLOT_ID")
+      }
 
-        ## Additional condition variables
-        ######################################################################
-        ref_fortypgrp <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "FORTYPCD",]
+      ## Additional condition variables
+      ######################################################################
+      ref_fortypgrp <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "FORTYPCD",]
 
-        ## FORTYPGRP: condition level variable grouping FORTYPCD
-        cndnames <- names(condx)
-        if ("FORTYPCD" %in% cndnames) {
-          condx <- merge(condx, ref_fortypgrp[,c("VALUE", "GROUPCD")],
+      ## FORTYPGRP: condition level variable grouping FORTYPCD
+      cndnames <- names(condx)
+      if ("FORTYPCD" %in% cndnames && !"FORTYPGRPCD" %in% cndnames) {
+        condx <- merge(condx, ref_fortypgrp[,c("VALUE", "GROUPCD")],
         		by.x="FORTYPCD", by.y="VALUE", all.x=TRUE)
-          setnames(condx, "GROUPCD", "FORTYPGRPCD")
-          setcolorder(condx, c(cndnames, "FORTYPGRPCD"))
-        
-          condvarlst2 <- c(condvarlst2, "FORTYPGRPCD")
-        }
-        ## FLDTYPGRP: condition level variable grouping FLDTYPGRP
-        if ("FLDTYPCD" %in% cndnames) {
-          condx <- merge(condx, ref_fortypgrp[,c("VALUE", "GROUPCD")], 
+        setnames(condx, "GROUPCD", "FORTYPGRPCD")
+        setcolorder(condx, c(cndnames, "FORTYPGRPCD"))   
+        condvarlst2 <- unique(c(condvarlst2, "FORTYPGRPCD"))
+      }
+      ## FLDTYPGRP: condition level variable grouping FLDTYPGRP
+      if ("FLDTYPCD" %in% cndnames && !"FLDTYPGRPCD" %in% cndnames) {
+        condx <- merge(condx, ref_fortypgrp[,c("VALUE", "GROUPCD")], 
                by.x="FLDTYPCD", by.y="VALUE", all.x=TRUE)
-          setnames(condx, "GROUPCD", "FLDTYPGRPCD")
-          setcolorder(condx, c(cndnames, "FLDTYPGRPCD"))
+        setnames(condx, "GROUPCD", "FLDTYPGRPCD")
+        setcolorder(condx, c(cndnames, "FLDTYPGRPCD"))
+        condvarlst2 <- unique(c(condvarlst2, "FLDTYPGRPCD"))
+      }
+      setkey(condx, "PLT_CN", "CONDID")
 
-          condvarlst2 <- c(condvarlst2, "FLDTYPGRPCD")
-        }
-        setkey(condx, PLT_CN, CONDID)
+      ## TIMBERCD condition level variable defining TIMBERLAND conditions
+      if ("SITECLCD" %in% cndnames && !"TIMBERCD" %in% cndnames) {
+        condx[COND_STATUS_CD == 1, TIMBERCD := 2]
+        condx[SITECLCD %in% 1:6, TIMBERCD := 1]
+        condvarlst2 <- unique(c(condvarlst2, "TIMBERCD"))
+      }
 
-        ## TIMBERCD condition level variable defining TIMBERLAND conditions
-        if ("SITECLCD" %in% cndnames) {
-          condx[COND_STATUS_CD == 1, TIMBERCD := 2]
-          condx[SITECLCD %in% 1:6, TIMBERCD := 1]
-
-          condvarlst2 <- c(condvarlst2, "TIMBERCD")
-        }
-
-        ## LANDUSECD
-        ## A combination of PRESNFCD and COND_STATUS_CD
-        if (all(c("PRESNFCD", "COND_STATUS_CD") %in% cndnames)) {
-          condx$LANDUSECD <- with(condx, ifelse(is.na(PRESNFCD), COND_STATUS_CD, PRESNFCD))
-
-          condvarlst2 <- c(condvarlst2, "LANDUSECD")
-        }
-      }   ##  End (defaultVars)
-      
-      setnames(pltx, "PLT_CN", "CN")
+      ## LANDUSECD
+      ## A combination of PRESNFCD and COND_STATUS_CD
+      if (all(c("PRESNFCD", "COND_STATUS_CD") %in% cndnames) && !"LANDUSECD" %in% cndnames) {
+        condx$LANDUSECD <- with(condx, ifelse(is.na(PRESNFCD), COND_STATUS_CD, PRESNFCD))
+        condvarlst2 <- unique(c(condvarlst2, "LANDUSECD"))
+      }
+ 
+      if ("PLT_CN" %in% names(pltx) && !"CN" %in% names(pltx)) {
+        setnames(pltx, "PLT_CN", "CN")
+      }
+      pltx <- pltx[, pltvarlst2, with=FALSE]
       setkeyv(pltx, "CN")
 
-      pltx <- pltx[, pltvarlst2, with=FALSE]
- 
       ## Create combined unique identifier to subset other tables
       pcondID <- condx[, paste(PLT_CN, CONDID)]
     }
@@ -3743,7 +3752,6 @@ DBgetPlots <- function (states = NULL,
         gc()
       }
     }
-    rm(nbrcnd)
     rm(pltcondx)
     gc()
 
