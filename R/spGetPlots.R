@@ -69,19 +69,6 @@
 #' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
 #' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
 #' INTENSITY = 1 (FIA base grid).
-#' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
-#' database (SUBPLOT, SUBP_COND).
-#' @param istree Logical. If TRUE, include tree data.
-#' @param isseed Logical. If TRUE, include seedling data.
-#' @param biojenk Logical. If TRUE, Jenkins biomass is calculated.
-#' @param greenwt Logical. If TRUE, green weight biomass is calculated.
-#' @param plotgeom Logical. If TRUE, variables from the PLOTGEOM table are
-#' appended to the plot table.
-#' @param othertables String Vector. Name of other table(s) in FIADB to include
-#' in output. The table must have PLT_CN as unique identifier of a plot.
-#' @param ACI Logical. If TRUE, the data from All Condition Inventories (ACI)
-#' are included in dataset (NF_SAMPLING_STATUS_CD = 1). See below for more
-#' details.
 #' @param clipxy Logical. If TRUE, clips xy data to bnd.
 #' @param pjoinid String. Variable in plt to join to XY data. Not necessary to
 #' be unique. If using most current XY coordinates, use identifier for a plot
