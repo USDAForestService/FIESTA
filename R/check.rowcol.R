@@ -823,9 +823,49 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       }
     }
   }
-  if (!is.null(landarea) && landarea %in% c("FOREST", "TIMBERLAND")) {
-    uniquerow2 <- uniquerow[!uniquerow[[rowvar]] %in% c(0, "Nonforest"),]
+
+  ## Check for duplicate values
+  if (any(duplicated(uniquerow[[rowvar]]))) {
+    dupvals <- uniquerow[[rowvar]][duplicated(uniquerow[[rowvar]])]
+    for (dup in dupvals) {       
+      vals <- uniquerow[uniquerow[[rowvar]] == dup, row.orderby, with=FALSE][[1]]
+      val <- vals[length(vals)]
+      vals2chg <- vals[-length(vals)]
+
+      if (any(c(rowvar, row.orderby) %in% names(condf))) {
+        if (row.orderby %in% names(condf)) {
+          if (class(condf[[row.orderby]]) != class(val)) {
+            class(val) <- class(condf[[row.orderby]])
+          } 
+          condf[condf[[row.orderby]] %in% vals2chg, row.orderby] <- val
+        } else {
+          if (class(condf[[rowvar]]) != class(val)) {
+            class(val) <- class(condf[[rowvar]])
+          } 
+          condf[condf[[rowvar]] %in% vals2chg, rowvar] <- val
+        }
+      }
+      if (any(c(rowvar, row.orderby) %in% names(treef))) {
+        if (row.orderby %in% names(treef)) {
+          if (class(treef[[row.orderby]]) != class(val)) {
+            class(val) <- class(treef[[row.orderby]])
+          } 
+          treef[treef[[row.orderby]] %in% vals2chg, row.orderby] <- val
+        } else {
+          if (class(treef[[rowvar]]) != class(val)) {
+            class(val) <- class(treef[[rowvar]])
+          } 
+          treef[condf[[rowvar]] %in% vals2chg, rowvar] <- val
+        }
+      }
+      uniquerow <- uniquerow[!uniquerow[[row.orderby]] %in% vals2chg, ] 
+    }
   }
+
+
+  #if (!is.null(landarea) && landarea %in% c("FOREST", "TIMBERLAND")) {
+  #  uniquerow2 <- uniquerow[!uniquerow[[rowvar]] %in% c(0, "Nonforest"),]
+  #}
 
   ## uniquecol
   #########################################################
@@ -897,6 +937,43 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
         uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=colvals)
         setkeyv(uniquecol, colvar)
       }
+    }
+  }
+
+  if (any(duplicated(uniquecol[[colvar]]))) {
+    dupvals <- uniquecol[[colvar]][duplicated(uniquecol[[colvar]])]
+    for (dup in dupvals) {       
+      vals <- uniquecol[uniquecol[[colvar]] == dup, col.orderby, with=FALSE][[1]]
+      val <- vals[length(vals)]
+      vals2chg <- vals[-length(vals)]
+
+      if (any(c(colvar, col.orderby) %in% names(condf))) {
+        if (col.orderby %in% names(condf)) {
+          if (class(condf[[col.orderby]]) != class(val)) {
+            class(val) <- class(condf[[col.orderby]])
+          } 
+          condf[condf[[col.orderby]] %in% vals2chg, col.orderby] <- val
+        } else {
+          if (class(condf[[colvar]]) != class(val)) {
+            class(val) <- class(condf[[colvar]])
+          } 
+          condf[condf[[colvar]] %in% vals2chg, colvar] <- val
+        }
+      }
+      if (any(c(colvar, col.orderby) %in% names(treef))) {
+        if (col.orderby %in% names(treef)) {
+          if (class(treef[[col.orderby]]) != class(val)) {
+            class(val) <- class(treef[[col.orderby]])
+          } 
+          treef[treef[[col.orderby]] %in% vals2chg, col.orderby] <- val
+        } else {
+          if (class(treef[[colvar]]) != class(val)) {
+            class(val) <- class(treef[[colvar]])
+          } 
+          treef[treef[[colvar]] %in% vals2chg, colvar] <- val
+        }
+      }
+      uniquecol <- uniquecol[!uniquecol[[col.orderby]] %in% vals2chg, ] 
     }
   }
 
