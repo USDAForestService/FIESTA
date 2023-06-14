@@ -172,7 +172,7 @@ datSumTree <- function(tree = NULL,
   COND_STATUS_CD=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
       seedx=TREECOUNT_CALC=estunits=fname=NF_SUBP_STATUS_CD=
       CONDPROP_UNADJ=MACRPROP_UNADJ=SUBPPROP_UNADJ=sumbcvars=treex=
-      cond.nonsamp.filter  <- NULL
+      cond.nonsamp.filter=meta  <- NULL
 
 
   ## If gui.. set variables to NULL
@@ -290,11 +290,13 @@ datSumTree <- function(tree = NULL,
   if (datsource %in% c("obj", "csv")) {
     treex <- pcheck.table(tree, gui=gui, tabnm="tree", caption="Tree table?")
     if (!is.null(treex)) {
+      treex <- setDT(int64tochar(treex))
       treenames <- names(treex)
       treenm <- "treex"
     }
     seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
     if (!is.null(seedx)) {
+      seedx <- setDT(int64tochar(seedx))
       seednames <- names(seedx)
       seednm <- "seedx"
     }
@@ -1188,35 +1190,37 @@ datSumTree <- function(tree = NULL,
   meta <- meta[meta$VARIABLE %in% metanames, ]
   meta <- meta[match(metanames, meta$VARIABLE),]
 
-  tree_ref <- FIESTAutils::ref_tree[match(tsumvarlst, FIESTAutils::ref_tree$VARIABLE),]
-  tree_ref$VARIABLE[tree_ref$VARIABLE == "TPA_UNADJ"] <- "COUNT"
+  if (nrow(meta) > 0) {
+    tree_ref <- FIESTAutils::ref_tree[match(tsumvarlst, FIESTAutils::ref_tree$VARIABLE),]
+    tree_ref$VARIABLE[tree_ref$VARIABLE == "TPA_UNADJ"] <- "COUNT"
 
-  if (nrow(tree_ref) > 0) {
-    if (TPA) {
-      tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_TPA")
-    } 
-    if (!is.null(fname)) {
-      tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_", fname)
-      tree_ref$DESCRIPTION <- paste0(tree_ref$DESCRIPTION, " (", tfilter, ")")
-    }
-    if (adjtree) {
-      tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_ADJ")
-      tree_ref$DESCRIPTION <- paste(tree_ref$DESCRIPTION, "- adjusted for partial nonresponse at plot-level")
-    }
+    if (nrow(tree_ref) > 0) {
+      if (TPA) {
+        tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_TPA")
+      } 
+      if (!is.null(fname)) {
+        tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_", fname)
+        tree_ref$DESCRIPTION <- paste0(tree_ref$DESCRIPTION, " (", tfilter, ")")
+      }
+      if (adjtree) {
+        tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_ADJ")
+        tree_ref$DESCRIPTION <- paste(tree_ref$DESCRIPTION, "- adjusted for partial nonresponse at plot-level")
+      }
 
     ## Check for biomass and/or carbon variables to add units
-    if (any(tsumvarlst %in% c(biovars, carbvars))) {
-      bcvars <- tsumvarlst[tsumvarlst %in% c(biovars, carbvars)]
-      refbcvars <- unlist(lapply(bcvars, function(x) tree_ref$VARIABLE[grepl(x, tree_ref$VARIABLE)]))
+      if (any(tsumvarlst %in% c(biovars, carbvars))) {
+        bcvars <- tsumvarlst[tsumvarlst %in% c(biovars, carbvars)]
+        refbcvars <- unlist(lapply(bcvars, function(x) tree_ref$VARIABLE[grepl(x, tree_ref$VARIABLE)]))
 
-      unittxt <- ifelse(lbs2tons, "tons", "lbs")
-      tree_ref[tree_ref$VARIABLE %in% refbcvars, "DESCRIPTION"] <- 
+        unittxt <- ifelse(lbs2tons, "tons", "lbs")
+        tree_ref[tree_ref$VARIABLE %in% refbcvars, "DESCRIPTION"] <- 
 			paste0(tree_ref[tree_ref$VARIABLE %in% refbcvars, "DESCRIPTION"], " (in ", unittxt, ")")    
-      tree_ref[tree_ref$VARIABLE %in% refbcvars, "VARIABLE"] <- 
+        tree_ref[tree_ref$VARIABLE %in% refbcvars, "VARIABLE"] <- 
 			paste0(tree_ref[tree_ref$VARIABLE %in% refbcvars, "VARIABLE"], "_", toupper(unittxt))
-    } 
+      } 
    
-    meta <- rbind(meta, tree_ref)
+      meta <- rbind(meta, tree_ref)
+    }
   }
 
 
@@ -1268,6 +1272,8 @@ datSumTree <- function(tree = NULL,
   if (!is.null(tfilter)) {
     sumtreelst$tfilter <- tfilter
   }
-  sumtreelst$meta <- meta
+  if (!is.null(meta) && nrow(meta) > 0) {
+    sumtreelst$meta <- meta
+  }
   return(sumtreelst)
 } 

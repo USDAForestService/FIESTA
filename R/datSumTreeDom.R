@@ -388,11 +388,13 @@ datSumTreeDom <- function(tree = NULL,
   if (datsource %in% c("obj", "csv")) {
     treex <- pcheck.table(tree, gui=gui, tabnm="tree", caption="Tree table?")
     if (!is.null(treex)) {
+      treex <- setDT(int64tochar(treex))
       treenames <- names(treex)
       treenm <- "treex"
     }
     seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
     if (!is.null(seedx)) {
+      seedx <- setDT(int64tochar(seedx))
       seednames <- names(seedx)
       seednm <- "seedx"
     }

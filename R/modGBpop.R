@@ -479,8 +479,9 @@ modGBpop <- function(popType = "VOL",
 
   if (saveobj) {
     outobj_fmtlst <- c('rds', 'rda')
-    outobj_fmt <- pcheck.varchar(var2check=outobj_fmt, varnm="outobj_fmt", gui=gui,
-		checklst=outobj_fmtlst, caption="outobj_fmt", multiple=FALSE, stopifnull=TRUE)
+    outobj_fmt <- pcheck.varchar(var2check=outobj_fmt, varnm="outobj_fmt", 
+           gui=gui, checklst=outobj_fmtlst, caption="outobj_fmt", 
+           multiple=FALSE, stopifnull=TRUE)
 
     if (is.null(objnm)) {
       objnm <- "GBpopdat"
@@ -855,7 +856,6 @@ modGBpop <- function(popType = "VOL",
     }      
 
     if (popType %in% c("ALL", "VOL", "CURR")) {
-      message("calculating adjustment factors...")
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 
                         treex = treef, 
@@ -880,7 +880,6 @@ modGBpop <- function(popType = "VOL",
     }
 
     if (popType == "CHNG") {
-
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 
                         #treex = treef, 
@@ -1071,6 +1070,7 @@ modGBpop <- function(popType = "VOL",
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
 		                          add_layer=TRUE))
+ 
     datExportData(pltcondx, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
