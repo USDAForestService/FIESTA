@@ -520,15 +520,17 @@ datSumTree <- function(tree = NULL,
   }
 
 
-  #####################################################################
+  ########################################################################
+  ########################################################################
   ## Get tree data
-  #####################################################################
+  ########################################################################
+  ########################################################################
   tree.qry <- paste("SELECT", toString(tselectvars), 
                    tfromqry)
   if (!is.null(twhereqry)) {
     tree.qry <- paste(tree.qry, twhereqry)
   }
-  #message(tree.qry)
+  message(tree.qry)
   treex <- setDT(sqldf::sqldf(tree.qry, dbname=dbname))
   setkeyv(treex, tsumuniqueid)
 
@@ -538,7 +540,7 @@ datSumTree <- function(tree = NULL,
     if (!is.null(swhereqry)) {
       seed.qry <- paste(seed.qry, swhereqry)
     }
-    #message(seed.qry)
+    message(seed.qry)
     seedx <- setDT(sqldf::sqldf(seed.qry, dbname=dbname))
     setkeyv(seedx, tsumuniqueid)
   }

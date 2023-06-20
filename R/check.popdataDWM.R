@@ -1,8 +1,9 @@
 check.popdataDWM <- function(tabs, tabIDs, pltassgnx, pltassgnid,
-	pfromqry, palias, pjoinid, whereqry, adj, ACI, pltx=NULL, puniqueid="CN", 
-	dsn=NULL, condid="CONDID", areawt="CONDPROP_UNADJ",
-	nonsamp.cfilter=NULL, nullcheck=FALSE, cvars2keep=NULL, 
-	dwmvars2keep=NULL, gui=FALSE){
+     pfromqry, palias, pjoinid, whereqry, 
+     adj, ACI, pltx=NULL, puniqueid="CN", dsn=NULL, dbconn=NULL,
+     condid="CONDID", areawt="CONDPROP_UNADJ",
+     nonsamp.cfilter=NULL, nullcheck=FALSE, cvars2keep=NULL,
+     dwmvars2keep=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs for DWM estimation
@@ -61,9 +62,13 @@ check.popdataDWM <- function(tabs, tabIDs, pltassgnx, pltassgnid,
 
   ## Check dsn and create queries to get population subset from database
   ###################################################################################
-  if (!is.null(dsn) && getext(dsn) %in% c("sqlite", "db", "db3", "sqlite3", "gpkg")) {
+  if (!is.null(dbconn) || 
+	(!is.null(dsn) && getext(dsn) %in% c("sqlite", "db", "db3", "sqlite3", "gpkg"))) {
+
     datindb <- TRUE
-    dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
+    if (is.null(dbconn)) {
+      dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
+    }
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
     SCHEMA. <- NULL

@@ -1036,6 +1036,17 @@ DBgetPlots <- function (states = NULL,
 		title="Use cond1 for spatial?", first="YES", gui=gui)
   }
 
+  ## Check othertables
+  if (!is.null(othertables)) {
+    if ("PLOTGEOM" %in% othertables) {
+      plotgeom <- TRUE
+      othertables <- othertables[othertables != "PLOTGEOM"]
+    }
+    if ("POP_PLOT_STRATUM_ASSGN" %in% othertables) {
+      savePOP <- TRUE
+      othertables <- othertables[othertables != "POP_PLOT_STRATUM_ASSGN"]
+    }
+  } 
 
   ########################################################################
   ### Saving data
@@ -1164,8 +1175,9 @@ DBgetPlots <- function (states = NULL,
 		ppsax=spconddatx=cond_chngx <- NULL   
 
     if (!is.null(othertables)) {
-      for (j in 1:length(othertables)) 
+      for (j in 1:length(othertables)) {
         assign(paste0("otherx", j), NULL)
+      }
     } 
 
     ## Get PLOT/COND data 
@@ -1240,8 +1252,8 @@ DBgetPlots <- function (states = NULL,
         PLOTGEOM <- DBgetCSV("PLOTGEOM", stabbr, returnDT=TRUE, stopifnull=FALSE)
         if (!is.null(PLOTGEOM)) { 
           plotgeomnm <- "PLOTGEOM"
-          pltgeomflds <- names(PLOTGEOM)
-          pltflds <- unique(pltflds, pltgeomflds)
+          plotgeomflds <- names(PLOTGEOM)
+          pltflds <- unique(pltflds, plotgeomflds)
         } else {
           message("there is no plotgeom table in datamart")
         }
@@ -1305,8 +1317,8 @@ DBgetPlots <- function (states = NULL,
         PLOTGEOM <- pcheck.table(plotgeom_layer, stopifnull=FALSE, stopifinvalid=FALSE)
         if (!is.null(PLOTGEOM)) { 
           plotgeomnm <- "PLOTGEOM"
-          pltgeomflds <- names(PLOTGEOM)
-          pltflds <- unique(pltflds, pltgeomflds)
+          plotgeomflds <- names(PLOTGEOM)
+          pltflds <- unique(pltflds, plotgeomflds)
         } else {
           message("there is no plotgeom table in datamart")
         }
@@ -1356,7 +1368,7 @@ DBgetPlots <- function (states = NULL,
         ppsafromqry <- paste0(SCHEMA., ppsanm, " ppsa")
       }
     }
-
+ 
     ## PLOT from/join query
     ################################################
     if (iseval) {
@@ -1396,7 +1408,7 @@ DBgetPlots <- function (states = NULL,
       pcgeomfromqry <- paste0(pcfromqry, " JOIN ", SCHEMA., 
 				plotgeomnm, " pg ON (pg.CN = p.", puniqueid, ")")
     }
- 
+
     ###########################################################################
     ## State filter 
     ###########################################################################
@@ -1568,15 +1580,17 @@ DBgetPlots <- function (states = NULL,
       if (!defaultVars) {
         pltvarlst <- pltflds
         condvarlst <- condflds
+        pgeomvarlst <- plotgeomflds
       }        
 
-
       ## Check variables in database
-      if (is.null(chkdbtab(pltcondflds, "LON")) && !is.null(chkdbtab(pltcondflds, "LON_PUBLIC"))) {
+      if (is.null(chkdbtab(pltcondflds, "LON")) && 
+				!is.null(chkdbtab(pltcondflds, "LON_PUBLIC"))) {
         pltvarlst <- sub("LON", "LON_PUBLIC", pltvarlst)
         pltvarlst <- sub("LAT", "LAT_PUBLIC", pltvarlst)
       }
-      if (is.null(chkdbtab(pltcondflds, "ELEV")) && !is.null(chkdbtab(pltcondflds, "ELEV_PUBLIC"))) {
+      if (is.null(chkdbtab(pltcondflds, "ELEV")) && 
+				!is.null(chkdbtab(pltcondflds, "ELEV_PUBLIC"))) {
         pltvarlst <- sub("ELEV", "ELEV_PUBLIC", pltvarlst)
       }
       pltvarlst <- pltvarlst[pltvarlst %in% pltcondflds]
@@ -1602,7 +1616,7 @@ DBgetPlots <- function (states = NULL,
           pcvars <- paste0(pcvars, ", ppsa.", evalidnm)
         }
       }
- 
+
       ## Create pltcond query
       if (plotgeom) {
         pltcond.qry <- paste("select distinct", pcvars, "from", pcgeomfromqry, "where", xfilter)

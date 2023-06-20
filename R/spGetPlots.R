@@ -190,7 +190,7 @@ spGetPlots <- function(bnd = NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilterDB=countyfips=xypltx=evalidst=PLOT_ID=INVYR=
+  xydat=stateFilter=stateFilterDB=countyfips=xypltx=evalidst=PLOT_ID=INVYR=
 	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc=dbconn=
 	bndx=evalInfo <- NULL
   isveg=ischng=isdwm <- FALSE

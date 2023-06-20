@@ -1,9 +1,11 @@
-check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgnid,
-	pfromqry, palias, pjoinid, whereqry, adj, ACI, pltx=NULL, puniqueid="CN", 
-	dsn=NULL, dbconn=NULL, condid="CONDID", areawt="CONDPROP_UNADJ", 
-	MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, diavar="DIA",
-	areawt_micr="MICRPROP_UNADJ", areawt_subp="SUBPPROP_UNADJ", areawt_macr="MACRPROP_UNADJ",
-	nonsamp.cfilter=NULL, nullcheck=FALSE, cvars2keep=NULL, gui=FALSE){
+check.popdataCHNG <- function(tabs, tabIDs, popType=popType, 
+     pltassgnx, pltassgnid, pfromqry, palias, pjoinid, whereqry, 
+     adj, ACI, pltx=NULL, puniqueid="CN", dsn=NULL, dbconn=NULL, 
+     condid="CONDID", areawt="CONDPROP_UNADJ",
+     MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, diavar="DIA",
+     areawt_micr="MICRPROP_UNADJ", areawt_subp="SUBPPROP_UNADJ", 
+     areawt_macr="MACRPROP_UNADJ",
+     nonsamp.cfilter=NULL, nullcheck=FALSE, cvars2keep=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs for CHNG popType
@@ -63,7 +65,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
   conduid <- tabIDs[["condu"]]
   sccmid <- tabIDs[["sccm"]]
   lulcid <- "PLT_CN"
-  popType <- "CHNG"
 
   SCHEMA. <- NULL
   dbqueries <- list()
@@ -93,30 +94,19 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
     if (!all(!is.null(plt), is.character(plt), plt %in% tablst)) {    
       stop("need PLOT table in database")
     } else {
-      pltnm <- "plt"
+      pltnm <- plt
     }
     ## Check cond in database
     if (!all(!is.null(cond), is.character(cond), cond %in% tablst)) { 
       stop("need COND table in database")
-      condnm <- "cond"
+    } else {
+      condnm <- cond
     } 
     ## Check sccm in database
     if (!all(!is.null(sccm), is.character(sccm), sccm %in% tablst)) {
       stop("need SUBP_COND_CHNG_MTRX table in database")
-      sccmnm <- "sccm"
-    }
-
-    if (!is.null(pfromqry)) {
-      pfromqry <- paste0(SCHEMA., pltnm, " ", palias)
-    }
-
-    ## Get from statement for plot change query
-    if (is.null(pfromqry)) {
-      pchgfromqry <- paste0(SCHEMA., pltnm, 
-		" pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
     } else {
-      pchgfromqry <- paste0(pfromqry, 
-		" JOIN ", SCHEMA., pltnm, " pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
+      sccmnm <- sccm
     }
 
   } else {
@@ -140,11 +130,22 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
     sccm <- pcheck.table(sccm, tab_dsn=dsn, 
            tabnm="sccm", caption="sccm table?", 
            nullcheck=nullcheck, gui=gui, returnsf=FALSE)
-
-    pfromqry <- paste0(SCHEMA., pltnm, " ", palias)
-    pchgfromqry <- paste0(pfromqry, 
-		" JOIN ", SCHEMA., pltnm, " pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
   }  
+
+  if (is.null(pfromqry)) {
+    pfromqry <- paste0(SCHEMA., pltnm, " ", palias)
+  }
+
+  ## Get from statement for plot change query
+  if (is.null(pfromqry)) {
+    pchgfromqry <- paste0(SCHEMA., pltnm, 
+		" pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
+  } else {
+    pchgfromqry <- paste0(pfromqry, 
+	          " JOIN ", SCHEMA., pltnm, 
+                " pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
+  }
+
 
   ## Get default variables for plot
   pltvars <- DBvars.default()$pltvarlst
@@ -231,12 +232,29 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
   dbqueries$sccm_cond <- sccm_condqry
 
 
+  ## Import tables
+  #########################################################################
+  condx <- data.table(sqldf::sqldf(conduqry, dbname=dsn, drv=drv))
+  if (!is.null(pltnm)) {
+    pltx <- data.table(sqldf::sqldf(pltuqry, dbname=dsn, drv=drv))
+  }   
+  sccmx <- data.table(sqldf::sqldf(sccmqry, dbname=dsn, drv=drv))
+  sccm_condx <- data.table(sqldf::sqldf(sccm_condqry, dbname=dsn, drv=drv))
+
+  if (is.null(dsn)) {
+    rm(cond)
+    rm(sccm)
+    gc()
+  }
+
+
   ##########################################################################
   ## Get remeasured tree and seed data queries for GRM
+  ## And TREE_GRM_BEGIN and TREE_GRM_MIDPT queries
   ##########################################################################
   if (popType ==  "GRM") {
     if (all(!is.null(tree), is.character(tree), tree %in% tablst)) {
-      tfromqry <- paste0(cfromqry, " JOIN ", SCHEMA., tree,
+      tfromqry <- paste0(cchgfromqry, " JOIN ", SCHEMA., tree,
 			" t ON(t.", tuniqueid, " = c.", cuniqueid, " and t.", 
 				condid, " = c.", condid, " and t.prevcond = pcond.", condid, ")
 			LEFT JOIN ", SCHEMA., tree, " ptree ON(ptree.cn = t.prev_tre_cn)")
@@ -262,26 +280,31 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
       seedqry <- paste("select distinct s.* from", sfromqry, whereqry)
       dbqueries$seed <- seedqry
     }
-  }
- 
-  ###################################################################################
-  ## Import tables
-  ###################################################################################
 
-  condx <- data.table(sqldf::sqldf(conduqry, dbname=dsn, drv=drv))
-  if (!is.null(pltnm)) {
-    pltx <- data.table(sqldf::sqldf(pltuqry, dbname=dsn, drv=drv))
-  }   
-  sccmx <- data.table(sqldf::sqldf(sccmqry, dbname=dsn, drv=drv))
-  sccm_condx <- data.table(sqldf::sqldf(sccm_condqry, dbname=dsn, drv=drv))
+    if (all(!is.null(begin), is.character(begin), begin %in% tablst)) {
+      if (!is.null(pfromqry)) {
+        bfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., begin,
+			" b ON (b.PLT_CN = ", palias, ".", pjoinid, ")")
+      } else {
+        bfromqry <- paste(begin, "b")
+      }
+      beginqry <- paste("select distinct b.* from", bfromqry, whereqry)
+      dbqueries$begin <- beginqry
+    }
 
-  if (is.null(dsn)) {
-    rm(cond)
-    rm(sccm)
-    gc()
-  }
-  
-  if (popType == "GRM") {
+    if (all(!is.null(midpt), is.character(midpt), midpt %in% tablst)) {
+      if (!is.null(pfromqry)) {
+        mfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., midpt,
+			" m ON (m.PLT_CN = ", palias, ".", pjoinid, ")")
+      } else {
+        mfromqry <- paste(begin, "m")
+      }
+      midptqry <- paste("select distinct m.* from", mfromqry, whereqry)
+      dbqueries$midpt <- midptqry
+    }
+   
+    ## Import tables
+    #########################################################################
     treex <- suppressMessages(pcheck.table(tree, tab_dsn=dsn, 
            tabnm="tree", caption="Tree table?",
 		nullcheck=nullcheck, gui=gui, tabqry=treeqry, returnsf=FALSE))
@@ -293,7 +316,18 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
     grmx <- suppressMessages(pcheck.table(grm, tab_dsn=dsn, 
            tabnm="grm", caption="tree_grm_component table?", 
            nullcheck=nullcheck, gui=gui, tabqry=grmqry, returnsf=FALSE))
+
+    beginx <- suppressMessages(pcheck.table(begin, tab_dsn=dsn, 
+           tabnm="begin", caption="tree_grm_begin table?", 
+           nullcheck=nullcheck, gui=gui, tabqry=beginqry, returnsf=FALSE))
+
+    midptx <- suppressMessages(pcheck.table(midpt, tab_dsn=dsn, 
+           tabnm="midpt", caption="tree_grm_midpt table?", 
+           nullcheck=nullcheck, gui=gui, tabqry=midptqry, returnsf=FALSE))
+
   }
+
+
   if (popType == "LULC") {
 
     lulcqry <- 
@@ -625,7 +659,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
     }
 
     ## Check for condid in tree
-    if (!condid %in% names(treex)) {
+    if (!condid %in% names(seedx)) {
       if (nrow(seedx) == length(unique(seedx[[tuniqueid]]))) {
         seedx[, CONDID := 1]
       } else {
@@ -670,20 +704,44 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType, pltassgnx, pltassgn
       cuniqueid=cuniqueid, condid=condid, condsampcnt=as.data.frame(condsampcnt),
       ACI.filter=ACI.filter, areawt=areawt)
 
-  if (popType == "GRM" && !is.null(treex)) {
-    ## Check that the values of tuniqueid in treex are all in cuniqueid in pltcondx
-    treef <- check.matchval(treex, pltcondx, tuniqueid, cuniqueid, tab1txt="tree",
-		tab2txt="cond", subsetrows=TRUE)
-    returnlst$treef <- treef
-    returnlst$tuniqueid <- tuniqueid
+  if (popType == "GRM") {
+    if (!is.null(treex)) {
+      ## Check that the values of tuniqueid in treex are all in cuniqueid in pltcondx
+      returnlst$treef <- check.matchval(treex, pltcondx, tuniqueid, cuniqueid, 
+            tab1txt="tree", tab2txt="cond", subsetrows=TRUE)
+      returnlst$tuniqueid <- tuniqueid
+      rm(treex)
+      gc()
+    }
+    if (!is.null(seedx)) {
+      ## Check that the values of tuniqueid in seedx are all in cuniqueid in pltcondx
+      returnlst$seedf <- check.matchval(seedx, pltcondx, tuniqueid, cuniqueid, 
+            tab1txt="seed", tab2txt="cond", subsetrows=TRUE)
+      rm(seedx)
+      gc()
+    }
+    if (!is.null(grmx)) {
+      ## Check that the values of tuniqueid in grmx are all in cuniqueid in pltcondx
+      returnlst$grmf <- check.matchval(grmx, pltcondx, tuniqueid, cuniqueid, 
+            tab1txt="grm", tab2txt="cond", subsetrows=TRUE)
+      rm(grmx)
+      gc()
+    }
+    if (!is.null(beginx)) {
+      ## Check that the values of tuniqueid in beginx are all in cuniqueid in pltcondx
+      returnlst$beginf <- check.matchval(beginx, pltcondx, tuniqueid, cuniqueid, 
+            tab1txt="begin", tab2txt="cond", subsetrows=TRUE)
+      rm(beginx)
+      gc()
+    }
+    if (!is.null(midptx)) {
+      ## Check that the values of tuniqueid in midptx are all in cuniqueid in pltcondx
+      returnlst$midptf <- check.matchval(midptx, pltcondx, tuniqueid, cuniqueid, 
+            tab1txt="midpt", tab2txt="cond", subsetrows=TRUE)
+      rm(midptx)
+      gc()
+    }
   }
-  if (popType == "GRM" && !is.null(seedx)) {
-    ## Check that the values of tuniqueid in seedx are all in cuniqueid in pltcondx
-    seedf <- check.matchval(seedx, pltcondx, tuniqueid, cuniqueid, tab1txt="seed",
-		tab2txt="cond", subsetrows=TRUE)
-    returnlst$seedf <- seedf
-  }
-
   if (popType == "LULC") {
     returnlst$lulcx <- lulcx
   }

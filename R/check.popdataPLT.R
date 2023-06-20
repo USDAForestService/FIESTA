@@ -173,7 +173,8 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
         stop("pltassgnid is invalid")
       }
       evalidnm <- chkdbtab(ppsaflds, "EVALID", stopifnull=FALSE)
-      evalidvals <- DBI::dbGetQuery(dbconn, paste("select distinct", evalidnm, "from", ppsanm))[[1]]
+      evalidvals <- DBI::dbGetQuery(dbconn, 
+			paste("select distinct", evalidnm, "from", ppsanm))[[1]]
       evalidmiss <- evalid[!evalid %in% evalidvals]
       if (any(!evalid %in% evalidvals)) {
         stop("evalids are missing: ", toString(evalid[!evalid %in% evalidvals]))

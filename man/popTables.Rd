@@ -19,6 +19,8 @@ popTables(
   grm = NULL,
   pltu = NULL,
   condu = NULL,
+  begin = NULL,
+  midpt = NULL,
   ...
 )
 }
@@ -75,6 +77,12 @@ Plot-level data with unioned previous and current plots.}
 
 \item{condu}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 Condition-level data with unioned previous and current plots.}
+
+\item{begin}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Tree-level growth, removal, and mortality data (TREE_GRM_BEGIN).}
+
+\item{midpt}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Tree-level growth, removal, and mortality data (TREE_GRM_MIDPT).}
 
 \item{...}{For extendibility.}
 }

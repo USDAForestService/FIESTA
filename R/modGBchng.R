@@ -454,7 +454,8 @@ modGBchng <- function(GBpopdat,
                   title.rowvar=title.rowvar, title.colvar=title.colvar, 
                   rowlut=rowlut, collut=collut, 
                   rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-                  landarea=landarea, cvars2keep=c("PREV_PLT_CN", "REMPER", "PROP_BASIS"))
+                  landarea=landarea, 
+                  cvars2keep=c("PREV_PLT_CN", "REMPER", "PROP_BASIS"))
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -529,9 +530,11 @@ modGBchng <- function(GBpopdat,
   }
  
   if (chngtype == "ANNUAL") {
-    condf_chng.qry <- paste0("SELECT ", select.qry, ", SUM(", estvar.name, " / 4 / c.REMPER) AS ysum")
+    condf_chng.qry <- paste0("SELECT ", select.qry, ", 
+                              SUM(", estvar.name, " / 4 / c.REMPER) AS ysum")
   } else {
-    condf_chng.qry <- paste0("SELECT ", select.qry, ", SUM(", estvar.name, " / 4) AS ysum")
+    condf_chng.qry <- paste0("SELECT ", select.qry, ", 
+                              SUM(", estvar.name, " / 4) AS ysum")
   }
  
   condf_chng.qry <- paste0(condf_chng.qry, 

@@ -294,12 +294,15 @@ modGBpop <- function(popType = "VOL",
   adjtree <- FALSE
   nonsamp.pfilter=nonsamp.cfilter <- NULL
   #nonsamp.vfilter.fixed <- FALSE
-  returnlst <- list(module = "GB")
+  poponly <- FALSE
+  if (returndata) {
+    returnlst <- list(module = "GB")
+  }
   
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
-    	treef=seedf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=
+    	treef=seedf=grmf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=
 	sccmx=cond_pcondx=lulcx=popevalid <- NULL
   condid <- "CONDID"
   
@@ -496,7 +499,8 @@ modGBpop <- function(popType = "VOL",
   ########################################################
   #evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "GRM", "DWM")
   DWM_types <- c("CWD", "FWD_SM", "FWD_LG", "DUFF")
-  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "CHNG", "GRM")
+  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", 
+                  "CHNG", "GRM", "GROW", "MORT", "REMV")
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
 		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
   if (!is.null(evalid)) {
@@ -506,6 +510,9 @@ modGBpop <- function(popType = "VOL",
     evalid <- as.character(evalid)
     substr(evalid, nchar(evalid)-1, nchar(evalid)) <- "01"
   } 
+  if (popType %in% c("GROW", "MORT", "REMV")) {
+    popType <- "GRM"
+  }
  
  
   ###################################################################################
@@ -701,10 +708,12 @@ modGBpop <- function(popType = "VOL",
     ## Check parameters and data for popType AREA/VOL
     ###################################################################################
     popcheck <- check.popdataVOL(gui=gui, 
-               tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
-               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
-               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
-               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, areawt=areawt, areawt2=areawt2)
+          tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
+          pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
+          whereqry=whereqry, adj=adj, ACI=ACI, 
+          pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
+          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
+          areawt=areawt, areawt2=areawt2)
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$condx
     pltcondx <- popcheck$pltcondx
@@ -720,21 +729,24 @@ modGBpop <- function(popType = "VOL",
     tpropvars <- popcheck$tpropvars
   }
  
-  if (popType %in% c("CHNG")) {
+  if (popType %in% c("CHNG", "GRM")) {
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
     ###################################################################################
     popcheck <- check.popdataCHNG(gui=gui, popType=popType,
-               tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
-               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
-               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
-               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, cvars2keep="REMPER")
+          tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
+          pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
+          whereqry=whereqry, adj=adj, ACI=ACI, 
+          pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
+          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
+          cvars2keep="REMPER")
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$sccm_condx
     sccmx <- popcheck$sccmx
+    grmf <- popcheck$grmf
+    beginf <- popcheck$beginf
+    midptf <- popcheck$midptf
     pltcondx <- popcheck$pltcondx
-    treef <- popcheck$treef
-    seedf <- popcheck$seedf
     cuniqueid <- popcheck$cuniqueid
     condid <- popcheck$condid
     tuniqueid <- popcheck$tuniqueid
@@ -746,10 +758,11 @@ modGBpop <- function(popType = "VOL",
 
   if (popType == "P2VEG") {
     popcheck <- check.popdataP2VEG(gui=gui, 
-               tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
-               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
-               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn, 
-               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
+          tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx,
+          pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
+          whereqry=whereqry, adj=adj, ACI=ACI, 
+          pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn, 
+          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
     pltcondx <- popcheck$pltcondx
     pltassgnx <- popcheck$pltassgnx
     pltassgnid <- popcheck$pltassgnid
@@ -766,10 +779,11 @@ modGBpop <- function(popType = "VOL",
 
   if (popType == "DWM") {
     popcheck <- check.popdataDWM(gui=gui, 
-               tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
-               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
-               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, 
-               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
+          tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
+          pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
+          whereqry=whereqry, adj=adj, ACI=ACI, 
+          pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
+          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
     condx <- popcheck$condx
     pltcondx <- popcheck$pltcondx
     cuniqueid <- popcheck$cuniqueid
@@ -803,14 +817,14 @@ modGBpop <- function(popType = "VOL",
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
-                    unitvar=unitvar, unitvar2=unitvar2, 
-                    unitarea=unitarea, areavar=areavar, 
-                    minplotnum.unit=minplotnum.unit, unit.action=unit.action, 
-                    strata=strata, auxlut=stratalut, strvar=strvar, 
-                    stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
-                    removeifnostrata=TRUE, getwt=getwt, 
-                    getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT,
-                    auxtext="stratalut")
+              unitvar=unitvar, unitvar2=unitvar2, 
+              unitarea=unitarea, areavar=areavar, 
+              minplotnum.unit=minplotnum.unit, unit.action=unit.action, 
+              strata=strata, auxlut=stratalut, strvar=strvar, 
+              stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
+              removeifnostrata=TRUE, getwt=getwt, 
+              getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT,
+              auxtext="stratalut")
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
@@ -879,7 +893,7 @@ modGBpop <- function(popType = "VOL",
       expcondtab <- adjfacdata$expcondtab
     }
 
-    if (popType == "CHNG") {
+    if (popType %in% c("CHNG", "GRM")) {
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 
                         #treex = treef, 
@@ -990,17 +1004,19 @@ modGBpop <- function(popType = "VOL",
     areawtnm <- "areawt"
   } 
 
-  returnlst$popType <- popType
-  if (!is.null(bndx)) {
-    returnlst$bndx <- bndx
-  }
- 
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvars)
   }
   setorderv(stratalut, c(unitvars, strvar))
 
-  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
+
+  if (returndata) {
+    returnlst$popType <- popType
+    if (!is.null(bndx)) {
+      returnlst$bndx <- bndx
+    }
+ 
+    returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
             cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
             unitarea=unitarea, areavar=areavar, 
             areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, 
@@ -1010,36 +1026,219 @@ modGBpop <- function(popType = "VOL",
             states=states, invyrs=invyrs, estvar.area=areawtnm, 
             adj=adj, P2POINTCNT=P2POINTCNT))
 
-  if (popType == "VOL") {
+    if (popType == "VOL") {
+      if (!is.null(treef)) {
+        returnlst$treex <- treef
+        returnlst$tuniqueid <- tuniqueid
+        returnlst$adjtree <- adjtree
+      }
+      if (!is.null(seedf)) {
+        returnlst$seedx <- seedf
+      }
+    }
+
+    if (strata) {
+      if (!is.null(stratcombinelut)) {
+        returnlst$stratcombinelut <- stratcombinelut
+      }
+    }
+    if (!is.null(evalid)) {
+      returnlst$evalid <- evalid
+    }
+    if (popType == "P2VEG") {
+      returnlst$vcondsppx <- vcondsppf
+      returnlst$vcondstrx <- vcondstrf
+      returnlst$varadjP2VEG <- varadjP2VEG
+    }
+    if (popType %in% c("CHNG")) {
+      returnlst$sccmx <- sccmx
+    }
+    if (popType %in% c("GRM")) {
+      returnlst$grmx <- popcheck$grmf
+      returnlst$beginx <- popcheck$beginf
+      returnlst$midptx <- popcheck$midptf
+    }
+  }
+
+
+  ## Save data frames
+  ##################################################################
+  if (savedata) {
+    datExportData(condx, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+		                 out_dsn = out_dsn, 
+		                 out_layer = "condx",
+		                 outfn.pre = outfn.pre, 
+		                 outfn.date = outfn.date, 
+		                 overwrite_layer = overwrite_layer,
+		                 append_layer = append_layer,
+		                 add_layer = TRUE))
+ 
+    datExportData(pltcondx, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+		                 out_dsn = out_dsn, 
+		                 out_layer = "pltcondx",
+		                 outfn.pre = outfn.pre, 
+		                 outfn.date = outfn.date, 
+		                 overwrite_layer = overwrite_layer,
+		                 append_layer = append_layer,
+		                 add_layer = TRUE))
+    rm(condx)
+    rm(pltcondx)
+    gc()
+
+    if (popType %in% c("CHNG") && !is.null(sccmx)) {
+      datExportData(sccmx, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+		                 out_dsn = out_dsn, 
+		                 out_layer = "sccmx",
+		                 outfn.pre = outfn.pre, 
+		                 outfn.date = outfn.date, 
+		                 overwrite_layer = overwrite_layer,
+		                 append_layer = append_layer,
+		                 add_layer = TRUE))
+      rm(sccmx)
+      gc()
+    }
+
     if (!is.null(treef)) {
-      returnlst$treex <- treef
-      returnlst$tuniqueid <- tuniqueid
-      returnlst$adjtree <- adjtree
+      datExportData(treef, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+		                 out_dsn = out_dsn, 
+		                 out_layer = "treex",
+		                 outfn.pre = outfn.pre, 
+		                 outfn.date = outfn.date, 
+		                 overwrite_layer = overwrite_layer,
+		                 append_layer = append_layer,
+		                 add_layer = TRUE))
+      rm(treef)
+      gc()
     }
     if (!is.null(seedf)) {
-      returnlst$seedx <- seedf
+      datExportData(seedf, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+		                 out_dsn = out_dsn, 
+		                 out_layer ="seedx",
+		                 outfn.pre = outfn.pre, 
+		                 outfn.date = outfn.date, 
+		                 overwrite_layer = overwrite_layer,
+		                 append_layer = append_layer,
+		                 add_layer = TRUE))
+      rm(seedf)
+      gc()
     }
-  }
-
-  if (strata) {
-    if (!is.null(stratcombinelut)) {
-      returnlst$stratcombinelut <- stratcombinelut
+    if (!is.null(vcondsppf)) {
+      datExportData(vcondsppf, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+		                 out_dsn = out_dsn, 
+		                 out_layer = "vcondsppx",
+		                 outfn.pre = outfn.pre, 
+		                 outfn.date = outfn.date, 
+		                 overwrite_layer = overwrite_layer,
+		                 append_layer = append_layer,
+		                 add_layer = TRUE))
+      rm(vcondsppf)
+      gc()
     }
-  }
-  if (!is.null(evalid)) {
-    returnlst$evalid <- evalid
-  }
-  if (popType == "P2VEG") {
-    returnlst$vcondsppx <- vcondsppf
-    returnlst$vcondstrx <- vcondstrf
-    returnlst$varadjP2VEG <- varadjP2VEG
-  }
-  if (popType %in% c("GRM", "CHNG", "LULC")) {
-    returnlst$sccmx <- sccmx
-  }
+    if (!is.null(vcondstrf)) {
+      datExportData(vcondstrf, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+		                 out_dsn = out_dsn, 
+		                 out_layer = "vcondstrx",
+		                 outfn.pre = outfn.pre, 
+		                 outfn.date = outfn.date, 
+		                 overwrite_layer = overwrite_layer,
+		                 append_layer = append_layer,
+		                 add_layer = TRUE))
+      rm(vcondstrf)
+      gc()
+    }
+    if (popType == "GRM" && !is.null(grmf) && !poponly) {
+      if (!is.null(popcheck$grmf)) {
+        datExportData(popcheck$grmf, 
+            savedata_opts=list(outfolder = outfolder, 
+                               out_fmt = out_fmt, 
+		                   out_dsn = out_dsn, 
+		                   out_layer = "grmx",
+		                   outfn.pre = outfn.pre, 
+		                   outfn.date = outfn.date, 
+		                   overwrite_layer = overwrite_layer,
+		                   append_layer = append_layer,
+		                   add_layer = TRUE))
+        rm(grmf)
+        gc()
+      }
+      if (!is.null(popcheck$beginf)) {
+        datExportData(popcheck$beginf, 
+            savedata_opts=list(outfolder = outfolder, 
+                              out_fmt = out_fmt, 
+		                  out_dsn = out_dsn, 
+		                  out_layer = "beginx",
+		                  outfn.pre = outfn.pre, 
+		                  outfn.date = outfn.date, 
+		                  overwrite_layer = overwrite_layer,
+		                  append_layer = append_layer,
+		                  add_layer = TRUE))
+        rm(beginf)
+        gc()
+      }
+      if (!is.null(popcheck$midptf)) {
+        datExportData(popcheck$midptf, 
+            savedata_opts=list(outfolder = outfolder, 
+                               out_fmt = out_fmt, 
+		                   out_dsn = out_dsn, 
+		                   out_layer = "midptx",
+		                   outfn.pre = outfn.pre, 
+		                   outfn.date = outfn.date, 
+		                   overwrite_layer = overwrite_layer,
+		                   append_layer = append_layer,
+		                   add_layer = TRUE))
+        rm(midptf)
+        gc()
+      }
+    }
 
-  if (popType == "LULC") {
-    returnlst$lulcx <- lulcx
+    datExportData(pltassgnx, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+		                 out_dsn = out_dsn, 
+		                 out_layer = "pltassgn",
+		                 outfn.pre = outfn.pre, 
+		                 outfn.date = outfn.date, 
+		                 overwrite_layer = overwrite_layer,
+		                 append_layer = append_layer,
+		                 add_layer = TRUE))
+    datExportData(unitarea, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+		                 out_dsn = out_dsn, 
+		                 out_layer = "unitarea",
+		                 outfn.pre = outfn.pre, 
+		                 outfn.date = outfn.date, 
+		                 overwrite_layer = overwrite_layer,
+		                 append_layer = append_layer,
+		                 add_layer = TRUE))
+    datExportData(stratalut, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+		                 out_dsn = out_dsn, 
+		                 out_layer = "stratalut",
+		                 outfn.pre = outfn.pre, 
+		                 outfn.date = outfn.date, 
+		                 overwrite_layer = overwrite_layer,
+		                 append_layer = append_layer,
+		                 add_layer = TRUE))
+    rm(pltassgnx)
+    rm(unitarea)
+    rm(stratalut)
+    gc()
   }
 
 
@@ -1057,153 +1256,10 @@ modGBpop <- function(popType = "VOL",
     } 
   } 
 
-  ## Save data frames
-  ##################################################################
-  if (savedata) {
-    datExportData(condx, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="condx",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
- 
-    datExportData(pltcondx, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="pltcondx",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-
-    if (!is.null(sccmx)) {
-      datExportData(sccmx, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="sccmx",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-    }
-
-    if (!is.null(treef)) {
-      datExportData(treef, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="treex",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-    }
-    if (!is.null(seedf)) {
-      datExportData(seedf, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="seedx",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-    }
-    if (!is.null(vcondsppf)) {
-      datExportData(vcondsppf, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="vcondsppx",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-    }
-    if (!is.null(vcondstrf)) {
-      datExportData(vcondstrf, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="vcondstrx",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-    }
-    if (popType == "CHNG" && !is.null(sccmx)) {
-      datExportData(sccmx, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="sccmx",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-    }
-
-    if (!is.null(cond_dwm_calcf)) {
-      datExportData(cond_dwm_calcf, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="cond_dwm_calcx",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-    }
-
-    datExportData(pltassgnx, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="pltassgn",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-    datExportData(unitarea, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="unitarea",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-    datExportData(stratalut, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="stratalut",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
-  }
+  rm(popcheck)
+  gc()
 
   if (returndata) {
     return(returnlst)
   } 
-  rm(returnlst)
-  gc()
 }

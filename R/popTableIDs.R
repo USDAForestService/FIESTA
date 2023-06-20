@@ -19,6 +19,8 @@
 #' @param grm String. 
 #' @param pltu String. 
 #' @param condu String. 
+#' @param begin String. 
+#' @param midpt String. 
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for strata.
 #' @author Grayson W. White
@@ -41,6 +43,8 @@ popTableIDs <- function(cond = "PLT_CN",
                         grm = "PLT_CN",
                         pltu = "PLT_CN", 
                         condu = "PLT_CN",
+                        begin = "PLT_CN",
+                        midpt = "PLT_CN",
                         ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]

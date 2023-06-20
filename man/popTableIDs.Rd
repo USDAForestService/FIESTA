@@ -19,6 +19,8 @@ popTableIDs(
   grm = "PLT_CN",
   pltu = "PLT_CN",
   condu = "PLT_CN",
+  begin = "PLT_CN",
+  midpt = "PLT_CN",
   ...
 )
 }
@@ -50,6 +52,10 @@ popTableIDs(
 \item{pltu}{String.}
 
 \item{condu}{String.}
+
+\item{begin}{String.}
+
+\item{midpt}{String.}
 
 \item{...}{For extendibility.}
 }
