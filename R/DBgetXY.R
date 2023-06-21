@@ -307,7 +307,12 @@ DBgetXY <- function (states = NULL,
     }
   }
   if (datsource == "sqlite" && !is.null(data_dsn)) {
-    dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+    if (data_dsn == xy_dsn) {
+      dbconn <- suppressMessages(DBtestSQLite(data_dsn, 
+				dbconnopen=TRUE, showlist=FALSE))
+    } else {
+      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+    }
     dbtablst <- DBI::dbListTables(dbconn)
     if (length(dbtablst) == 0) {
       stop("no data in ", datsource)
@@ -436,7 +441,8 @@ DBgetXY <- function (states = NULL,
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {
-    evalInfo <- tryCatch( DBgetEvalid(states = states, 
+    evalInfo <- tryCatch( suppressMessages(
+				DBgetEvalid(states = states, 
                           RS = RS, 
                           datsource = datsource,
                           data_dsn = data_dsn,
@@ -449,7 +455,7 @@ DBgetXY <- function (states = NULL,
                           evalEndyr = evalEndyr, 
                           evalAll = evalAll,
                           evalType = evalType,
-                          gui = gui),
+                          gui = gui)),
 			error = function(e) {
                   message(e,"\n")
                   return(NULL) })
@@ -696,7 +702,7 @@ DBgetXY <- function (states = NULL,
         if (length(xymiss) > 0) {
           stop("missing essential variables: ", toString(xymiss))
         } else {
-          message("missing plot variables: ", toString(pmiss))
+          warning("missing plot variables: ", toString(pmiss))
         }
         if (length(pmiss) < length(pvars2keep)) {
           pvars <- pvars2keep[!pvars2keep %in% pmiss]
@@ -760,7 +766,7 @@ DBgetXY <- function (states = NULL,
 
         XYPLOT <- merge(XYdf, PLOT, by.x=xyjoinid, by.y=pjoinid)
         if (length(XYPLOT) == 0) {
-          message("invalid join... check xyjoinid and pjoinid") 
+          warning("invalid join... check xyjoinid and pjoinid") 
         }
         xyisplot <- TRUE
         xyvars <- unique(c(xyvars, pvars))
@@ -1026,7 +1032,7 @@ DBgetXY <- function (states = NULL,
   xycoords.qry <- paste0("select distinct ", toString(xyvarsA), 
 		" from ", xyfromqry,
 		" where ", evalFilter)
-  message(xycoords.qry)
+  #message(xycoords.qry)
 
   if (xy_datsource == "sqlite") {
     if (is.null(dbconn)) dbconn <- xyconn
@@ -1056,7 +1062,7 @@ DBgetXY <- function (states = NULL,
     xyx <- setDT(xyx)     
   }
   if (is.null(xyx) || nrow(xyx) == 0) {
-    message("invalid xy query\n")
+    warning("invalid xy query\n")
     message(xycoords.qry)
     stop()
   }

@@ -374,30 +374,30 @@ spGetPlots <- function(bnd = NULL,
     }
   }
 
+  ## Message for data sources
+  if (datsource == xy_datsource) {
+    message("source of xy data and plot data is ", datsource)
+  } else {
+    message("source of xy data is ", xy_datsource, " and plot data is ", datsource) 
+  }
+
   ## Check database connection - xy_dsn
   ########################################################
   if (xy_datsource == "sqlite" && !is.null(xy_dsn)) {
-    xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE)
-    xytablst <- DBI::dbListTables(xyconn)
-    if (length(xytablst) == 0) {
-      stop("no data in ", xy_datsource)
-    }
+    suppressMessages(DBtestSQLite(xy_dsn, showlist=FALSE))
   }
  
   ## Check database connection - data_dsn
   ########################################################
   if (datsource == "sqlite" && !is.null(data_dsn)) {
-    dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-    dbtablst <- DBI::dbListTables(dbconn)
-    if (length(dbtablst) == 0) {
-      stop("no data in ", datsource)
-    }
+    suppressMessages(DBtestSQLite(data_dsn, showlist=FALSE))
   }
-
+  
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
   if (gui) {
-    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", "GROW", "MORT", "REMV", "GRM")
+    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", 
+				"GROW", "MORT", "REMV", "GRM")
     Type <- select.list(Typelst, title="eval type", 
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
@@ -458,7 +458,8 @@ spGetPlots <- function(bnd = NULL,
 
       ## Check xyjoinid
       xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-		checklst=names(pltids), gui=gui, caption="JoinID in pltids?", stopifnull=TRUE)  
+		checklst=names(pltids), gui=gui, caption="JoinID in pltids?",
+ 		stopifnull=TRUE)  
  
       ## Check stbnd.att
       stbnd.att <- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
@@ -546,7 +547,8 @@ spGetPlots <- function(bnd = NULL,
         ###########################################################################
         ## Get XY
         ###########################################################################
- 
+        message("getting xy data...")
+
         if (!is.null(Endyr.filter)) {
           ## Get XY data inside filter
           #######################################
@@ -768,7 +770,7 @@ spGetPlots <- function(bnd = NULL,
   ## Initialize lists
   tabs2save <- {}
 
-  msg <- "getting data for... "
+  msg <- "getting plot data for... "
   if (!is.null(evalid)) {
     iseval=savePOP <- TRUE
     evalid <- unlist(evalid)
@@ -895,7 +897,6 @@ spGetPlots <- function(bnd = NULL,
         stateFilterDB1 <- paste(stateFilter, "&", stateFilterDB1) 
         rm(stateFilter)
       }
-
 
       dat1 <- DBgetPlots(states = stcd, 
                          datsource = datsource,

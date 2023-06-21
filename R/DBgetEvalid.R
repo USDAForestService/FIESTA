@@ -265,7 +265,7 @@ DBgetEvalid <- function(states = NULL,
       if (!all(states %in% RSstatelst)) {
         msg <- paste("RS and states are invalid...", 
 			toString(states[!states %in% RSstatelst]))
-        message(msg)
+        warning(msg)
         states <- toString(states[states %in% RSstatelst])
         if (is.null(states) || states == "") {
           stop("")
@@ -300,7 +300,7 @@ DBgetEvalid <- function(states = NULL,
 		paste("select distinct statecd from", plotnm))[[1]]
     if (!all(stcdlst %in% stcdlstdb)) {
       stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
-      message("statecds missing in database: ", toString(stcdmiss))
+      warning("statecds missing in database: ", toString(stcdmiss))
       stcdlsttmp <- stcdlst[stcdlst %in% stcdlstdb]
       if (length(stcdlsttmp) == 0) {
         stop("no data in database for: ", toString(stcdlst), "\n")
@@ -440,7 +440,7 @@ DBgetEvalid <- function(states = NULL,
     if (!is.null(stcdlstdb)) {
       if (!all(stcdlst %in% stcdlstdb)) {
         stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
-        message("statecds missing in database: ", toString(stcdmiss))
+        warning("statecds missing in database: ", toString(stcdmiss))
       } 
     }
   } else {
@@ -511,7 +511,7 @@ DBgetEvalid <- function(states = NULL,
             ppsanm <- "POP_PLOT_STRATUM_ASSGN"
             ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
           } else {
-            message("there is no pop_plot_stratum_assgn table in database")
+            warning("there is no pop_plot_stratum_assgn table in database")
           }
 
         } else if (datsource == "DATAMART") {
@@ -521,7 +521,7 @@ DBgetEvalid <- function(states = NULL,
             ppsanm <- "POP_PLOT_STRATUM_ASSGN"
             ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
           } else {
-            message("pop_plot_stratum_assgn is not in datamart")
+            warning("pop_plot_stratum_assgn is not in datamart")
           }
 
         } else {
@@ -546,7 +546,7 @@ DBgetEvalid <- function(states = NULL,
           }
           if (!all(evalid %in% evalidindb)) {
             missevalid <- sort(!evalid[evalid %in% evalidindb])
-            message(ppsa_layer, " is missing evalids: ", toString(missevalid))
+            warning(ppsa_layer, " is missing evalids: ", toString(missevalid))
             ppsanm <- NULL
           } else {
             if (!is.null(invyrnm)) {
@@ -672,7 +672,7 @@ DBgetEvalid <- function(states = NULL,
       if (!all(states %in% names(stinvyr.vals))) {
         missnames <- states[!states %in% names(stinvyr.vals)]
         misscodes <- pcheck.states(missnames, "VALUE")
-        message("there is no data in the database for: ", toString(missnames))
+        warning("there is no data in the database for: ", toString(missnames))
         stcdlst <- stcdlst[!stcdlst %in% misscodes]
         states <- states[!states %in% missnames]
       }
@@ -750,7 +750,7 @@ DBgetEvalid <- function(states = NULL,
           invendyr.max <- stinvyr.max[[st]]
 
           if (all(evalendyr < invendyr.min) || any(evalendyr > invendyr.max)) {
-            message(paste("check evalEndyr.. outside of range in database:", st))    
+            warning(paste("check evalEndyr.. outside of range in database:", st))    
             evalEndyr[[st]] <- invendyr.max
             #evalresp <- FALSE
           }
@@ -771,7 +771,7 @@ DBgetEvalid <- function(states = NULL,
       if (datsource == "sqlite" && nopoptables) {
         ppsanm <- chkdbtab(dbtablst, ppsa_layer)
         if (is.null(ppsanm)) {
-          message("need to include pop_plot_stratum_assgn table in database to extract an FIA evaluation\n")
+          warning("need to include pop_plot_stratum_assgn table in database to extract an FIA evaluation\n")
           message("database tables: ", toString(dbtablst))
           stop()
         }
@@ -952,7 +952,7 @@ DBgetEvalid <- function(states = NULL,
                   if (Endyr == "") stop("")
                 } else {
                   Endyr <- max(POP_EVAL_endyrs)
-                  message("No end year specified.. using most current year in database")
+                  warning("No end year specified.. using most current year in database")
                 }
               }
             }
@@ -971,7 +971,7 @@ DBgetEvalid <- function(states = NULL,
             if (invtype == "ANNUAL") {
               if (!all(evalTypelist[[state]] %in% evalType.chklst)) {
                 eType.invalid <- evalTypelist[[state]][!evalTypelist[[state]] %in% evalType.chklst]
-                message("removing invalid evalType for ", state, ": ", 
+                warning("removing invalid evalType for ", state, ": ", 
                     toString(eType.invalid), "... \nmust be following list: ", 
                     toString(evalType.chklst))
                 evalTypelist[[state]] <- evalTypelist[[state]][!evalTypelist[[state]] %in% eType.invalid]
@@ -987,7 +987,7 @@ DBgetEvalid <- function(states = NULL,
                 evalid.min <- min(popevaltab$EVALID)
                 evalTypelist[[state]] <- 
                   popevaltab[popevaltab$EVALID == min(popevaltab$EVALID), "EVAL_TYP"][1]
-                message(paste("invalid evalType for", state, "...using", evalTypelist[[state]]))
+                warning(paste("invalid evalType for", state, "...using", evalTypelist[[state]]))
               }
               evalidlist[[state]] <- 
                 sort(unique(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]))

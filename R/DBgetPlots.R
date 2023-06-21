@@ -600,7 +600,7 @@ DBgetPlots <- function (states = NULL,
       }
       eval_opts <- eval_options(Cur = TRUE)
     } else {
-      message("no evaluation timeframe specified...")
+      warning("no evaluation timeframe specified...")
       message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
       stop()
     }
@@ -698,11 +698,14 @@ DBgetPlots <- function (states = NULL,
     if (getext(data_dsn) %in% c("sqlite", "db", "db3")) {
       dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
       dbtablst <- DBI::dbListTables(dbconn)
+      if (length(dbtablst) == 0) {
+        stop("no data in ", datsource)
+      }
     } else {
       stop("only sqlite databases available currently")
     }     
   }
-
+ 
   datamartTypelst <- c("CSV", "SQLITE")
   datamartType <- pcheck.varchar(var2check=datamartType, varnm="datamartType", 
 		checklst=datamartTypelst, gui=gui, caption="Datamart Type?") 
@@ -785,7 +788,6 @@ DBgetPlots <- function (states = NULL,
   ## Note: Periodic data in database includes forested plots >= 5% cover 
   ## Note: Annual data in database includes forested plots >=10% cover
 
- 
   ## Get DBgetEvalid parameters from eval_opts
   ################################################
   if (eval == "FIA") {
@@ -816,7 +818,8 @@ DBgetPlots <- function (states = NULL,
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {
-    evalInfo <- tryCatch( DBgetEvalid(states = states, 
+    evalInfo <- tryCatch( suppressMessages(
+                    DBgetEvalid(states = states, 
                           RS = RS, 
                           datsource = datsource, 
                           data_dsn = data_dsn, 
@@ -829,7 +832,7 @@ DBgetPlots <- function (states = NULL,
                           evalAll = evalAll, 
                           evalType = Type, 
                           dbTabs = dbTabs,
-                          gui = gui),
+                          gui = gui)),
 			error = function(e) {
                   message(e,"\n")
                   return(NULL) })
@@ -1166,7 +1169,7 @@ DBgetPlots <- function (states = NULL,
     }
     evalid <- NULL
     state <- states[i]
-    message("getting data for ", state)
+    message("getting data for ", state, "...")
     stcd <- pcheck.states(state, "VALUE")
     stabbr <- pcheck.states(state, "ABBR")
     pltx=condx=treex=seedx=
@@ -1580,7 +1583,9 @@ DBgetPlots <- function (states = NULL,
       if (!defaultVars) {
         pltvarlst <- pltflds
         condvarlst <- condflds
-        pgeomvarlst <- plotgeomflds
+        if (plotgeom) {
+          pgeomvarlst <- plotgeomflds
+        }
       }        
 
       ## Check variables in database
