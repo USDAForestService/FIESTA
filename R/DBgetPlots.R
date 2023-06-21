@@ -1169,7 +1169,7 @@ DBgetPlots <- function (states = NULL,
     }
     evalid <- NULL
     state <- states[i]
-    message("getting data for ", state, "...")
+    message("\ngetting data for ", state, "...")
     stcd <- pcheck.states(state, "VALUE")
     stabbr <- pcheck.states(state, "ABBR")
     pltx=condx=treex=seedx=
@@ -3554,6 +3554,7 @@ DBgetPlots <- function (states = NULL,
             tabs[[tolower(othertable)]] <- rbind(tabs[[tolower(othertable)]], get(othertablexnm))
           }
           if (savedata) {
+            message("saving ", tolower(othertable), " table...")
             index.unique.other <- NULL
             datExportData(get(othertablexnm),
                 index.unique = index.unique.other,
@@ -3652,6 +3653,7 @@ DBgetPlots <- function (states = NULL,
         }
  
         if (!is.null(xyplt)) {
+          message("saving xy data...")
           if (!is.null(pltx) && length(unique(xyplt$PLT_CN)) != nrow(pltx))
             warning("number of plots in ", spxynm, " does not match plot table")            
  
@@ -3722,6 +3724,7 @@ DBgetPlots <- function (states = NULL,
                                    add_layer = TRUE)) 
       }
       if (savedata && !is.null(pltx)) {
+        message("saving plot table...")
         index.unique.pltx <- NULL
         if (i == 1) index.unique.pltx <- "CN"
         datExportData(pltx, 
@@ -3739,6 +3742,7 @@ DBgetPlots <- function (states = NULL,
         gc() 
       }
       if (savedata && !is.null(condx)) {
+        message("saving cond table...")
         index.unique.condx <- NULL
         if (!append_layer) index.unique.condx <- c("PLT_CN", "CONDID")
         datExportData(condx, 
@@ -3756,6 +3760,7 @@ DBgetPlots <- function (states = NULL,
         gc()
       }  
       if (savedata && savePOP && !is.null(ppsax)) {
+        message("saving pop_plot_stratum_assgn table...")
         #index.unique.ppsax <- NULL
         #if (i == 1) index.unique.ppsax <- "PLT_CN"
         datExportData(ppsax, 
@@ -3781,6 +3786,7 @@ DBgetPlots <- function (states = NULL,
   } ## end loop for states
 
   if (savedata && saveSURVEY) {
+    message("saving survey table...")
     datExportData(SURVEY, 
         savedata_opts=list(outfolder = outfolder, 
                            out_fmt = out_fmt, 
@@ -3795,6 +3801,7 @@ DBgetPlots <- function (states = NULL,
  
   ## Write out plot/condition counts to comma-delimited file.
   if (savedata) {
+    message("saving pltcnt table...")
     datExportData(pltcnt, 
         savedata_opts=list(outfolder = outfolder, 
                             out_fmt = out_fmt, 
