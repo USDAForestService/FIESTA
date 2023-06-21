@@ -1783,7 +1783,7 @@ DBgetPlots <- function (states = NULL,
 
       ## FORNONSAMP: 
       ## Plot-level variable based on PLOT_STATUS_CD and PLOT_NONSAMPLE_REASN_CD
-      if ("PLOT_NONSAMPLE_REASN_CD" %in% names(pltx)) {
+      if ("PLOT_NONSAMPLE_REASN_CD" %in% names(pltx) && !"FORNONSAMP" %in% names(pltx)) {
         pltx[, FORNONSAMP := 
 		      ifelse(!is.na(PLOT_NONSAMPLE_REASN_CD) & PLOT_NONSAMPLE_REASN_CD == 2, 
 			      "Nonsampled-Denied access",
@@ -1807,7 +1807,8 @@ DBgetPlots <- function (states = NULL,
       }
 
       ## Generate PLOT_ID, with STATECD, UNIT, COUNTYCD, PLOT to define
-      if (all(c("STATECD", "UNITCD", "COUNTYCD", "PLOT") %in% names(pltx))) {
+      if (all(c("STATECD", "UNITCD", "COUNTYCD", "PLOT") %in% names(pltx)) && 
+		!"PLOT_ID" %in% names(pltx)) {
         pltx[, PLOT_ID := paste0("ID", 
 		        formatC(pltx$STATECD, width=2, digits=2, flag=0), 
           	formatC(pltx$UNITCD, width=2, digits=2, flag=0),
