@@ -154,12 +154,13 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       }
     }
 
-    returnlst <- list(treef=treef, condf=condf[,unique(c(cuniqueid, condid, cvars2keep, "TOTAL")), with=FALSE],
-                seedf=seedf, uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, bytdom=bytdom,
-                rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, col.orderby=col.orderby,
-                row.add0=row.add0, col.add0=col.add0,
-                title.rowvar=title.rowvar, title.colvar=title.colvar,
-                tdomvar=tdomvar, concat=concat)
+    returnlst <- list(treef=treef, seedf=seedf, 
+          condf=condf[,unique(c(cuniqueid, condid, cvars2keep, "TOTAL")), with=FALSE],
+          uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, bytdom=bytdom,
+          rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, col.orderby=col.orderby,
+          row.add0=row.add0, col.add0=col.add0,
+          title.rowvar=title.rowvar, title.colvar=title.colvar,
+          tdomvar=tdomvar, concat=concat)
     return(returnlst)
   }
 
@@ -231,6 +232,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
         }
       }
     } else if (rowvar %in% names(condf)) {
+
       if (row.FIAname || !is.null(rowlut)) {
         if (!is.null(rowlut) && ncol(rowlut) > 1 &&  all(names(rowlut) %in% names(condf))) {
           if (is.null(row.orderby) || row.orderby == "NONE") {
@@ -269,7 +271,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           if (rowgrp) {
             rowgrpord <- rowLUT$grpcode
             rowgrpnm <- rowLUT$grpname
-            if (all(sapply(rowlut[[rowgrpnm]], function(x) x == "")) || all(is.na(rowlut[[rowgrpnm]])))
+            if (all(sapply(rowlut[[rowgrpnm]], function(x) x == "")) || 								all(is.na(rowlut[[rowgrpnm]])))
               stop("no groups for ", rowvar)
 
             title.rowgrp <- ifelse (rowgrpord %in% ref_titles[["DOMVARNM"]], 

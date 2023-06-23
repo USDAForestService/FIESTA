@@ -506,7 +506,7 @@ modGBpop <- function(popType = "VOL",
   if (!is.null(evalid)) {
     popevalid <- as.character(evalid)
     substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
-		FIESTAutils::ref_popType[FIESTAutils::ref_popType$popType %in% popType, "EVAL_TYP_CD"]
+		formatC(FIESTAutils::ref_popType[FIESTAutils::ref_popType$popType %in% popType, "EVAL_TYP_CD"], width=2, flag="0")
     evalid <- as.character(evalid)
     substr(evalid, nchar(evalid)-1, nchar(evalid)) <- "01"
   } 
@@ -743,6 +743,7 @@ modGBpop <- function(popType = "VOL",
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$sccm_condx
     sccmx <- popcheck$sccmx
+    treef <- popcheck$treef
     grmf <- popcheck$grmf
     beginf <- popcheck$beginf
     midptf <- popcheck$midptf
@@ -1064,6 +1065,7 @@ modGBpop <- function(popType = "VOL",
   ## Save data frames
   ##################################################################
   if (savedata) {
+    message("saving condx...")
     datExportData(condx, 
           savedata_opts=list(outfolder = outfolder, 
                              out_fmt = out_fmt, 
@@ -1075,6 +1077,7 @@ modGBpop <- function(popType = "VOL",
 		                 append_layer = append_layer,
 		                 add_layer = TRUE))
  
+    message("saving pltcondx...")
     datExportData(pltcondx, 
           savedata_opts=list(outfolder = outfolder, 
                              out_fmt = out_fmt, 
@@ -1090,6 +1093,7 @@ modGBpop <- function(popType = "VOL",
     gc()
 
     if (popType %in% c("CHNG") && !is.null(sccmx)) {
+      message("saving sccmx...")
       datExportData(sccmx, 
           savedata_opts=list(outfolder = outfolder, 
                              out_fmt = out_fmt, 
@@ -1105,6 +1109,7 @@ modGBpop <- function(popType = "VOL",
     }
 
     if (!is.null(treef)) {
+      message("saving treex...")
       datExportData(treef, 
           savedata_opts=list(outfolder = outfolder, 
                              out_fmt = out_fmt, 
@@ -1119,6 +1124,7 @@ modGBpop <- function(popType = "VOL",
       gc()
     }
     if (!is.null(seedf)) {
+      message("saving seedx...")
       datExportData(seedf, 
           savedata_opts=list(outfolder = outfolder, 
                              out_fmt = out_fmt, 
@@ -1133,6 +1139,7 @@ modGBpop <- function(popType = "VOL",
       gc()
     }
     if (!is.null(vcondsppf)) {
+      message("saving vcondsppx...")
       datExportData(vcondsppf, 
           savedata_opts=list(outfolder = outfolder, 
                              out_fmt = out_fmt, 
@@ -1147,6 +1154,7 @@ modGBpop <- function(popType = "VOL",
       gc()
     }
     if (!is.null(vcondstrf)) {
+      message("saving vcondstrx...")
       datExportData(vcondstrf, 
           savedata_opts=list(outfolder = outfolder, 
                              out_fmt = out_fmt, 
@@ -1161,6 +1169,7 @@ modGBpop <- function(popType = "VOL",
       gc()
     }
     if (popType == "GRM" && !is.null(grmf) && !poponly) {
+      message("saving grmx...")
       if (!is.null(popcheck$grmf)) {
         datExportData(popcheck$grmf, 
             savedata_opts=list(outfolder = outfolder, 
@@ -1176,6 +1185,7 @@ modGBpop <- function(popType = "VOL",
         gc()
       }
       if (!is.null(popcheck$beginf)) {
+        message("saving beginx...")
         datExportData(popcheck$beginf, 
             savedata_opts=list(outfolder = outfolder, 
                               out_fmt = out_fmt, 
@@ -1190,6 +1200,7 @@ modGBpop <- function(popType = "VOL",
         gc()
       }
       if (!is.null(popcheck$midptf)) {
+        message("saving midptx...")
         datExportData(popcheck$midptf, 
             savedata_opts=list(outfolder = outfolder, 
                                out_fmt = out_fmt, 
@@ -1205,6 +1216,7 @@ modGBpop <- function(popType = "VOL",
       }
     }
 
+    message("saving pltassgnx...")
     datExportData(pltassgnx, 
           savedata_opts=list(outfolder = outfolder, 
                              out_fmt = out_fmt, 
@@ -1215,6 +1227,7 @@ modGBpop <- function(popType = "VOL",
 		                 overwrite_layer = overwrite_layer,
 		                 append_layer = append_layer,
 		                 add_layer = TRUE))
+    message("saving unitarea...")
     datExportData(unitarea, 
           savedata_opts=list(outfolder = outfolder, 
                              out_fmt = out_fmt, 
@@ -1225,6 +1238,7 @@ modGBpop <- function(popType = "VOL",
 		                 overwrite_layer = overwrite_layer,
 		                 append_layer = append_layer,
 		                 add_layer = TRUE))
+    message("saving stratalut...")
     datExportData(stratalut, 
           savedata_opts=list(outfolder = outfolder, 
                              out_fmt = out_fmt, 
