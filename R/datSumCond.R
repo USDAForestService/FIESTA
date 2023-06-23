@@ -39,6 +39,7 @@
 #' @param adjcond Logical. If TRUE, csumvar condition variables are adjusted
 #' for nonsampled conditions by plot.
 #' @param NAto0 Logical. If TRUE, convert NA values to 0.
+#' @param cround Number. The number of digits to round to. If NULL, default=5.
 #' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
 #' returns data.frame object(s).
 #' @param savedata Logical. If TRUE, saves data to outfolder.
@@ -82,6 +83,7 @@ datSumCond <- function(cond = NULL,
                        getadjplot = FALSE,
                        adjcond = FALSE, 
                        NAto0 = FALSE, 
+                       cround = 5, 
                        returnDT = TRUE,
                        savedata = FALSE, 
                        savedata_opts = NULL,
@@ -314,6 +316,11 @@ datSumCond <- function(cond = NULL,
     adjcond <- TRUE
   }
 
+  ## CHECK tround
+  if (is.null(cround) | !is.numeric(cround)) {
+    warning("cround is invalid.. rounding to 5 digits")
+    tround <- 5
+  }
 
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
@@ -469,6 +476,9 @@ datSumCond <- function(cond = NULL,
                                   add_layer = TRUE)) 
     }
   }  
+
+  ## Round values
+  sumdat[,(csumvarnm) := lapply(.SD, round, cround), .SDcols=csumvarnm]
 
   if (!returnDT) {     
     sumdat <- data.frame(sumdat)

@@ -23,6 +23,7 @@ datSumCond(
   getadjplot = FALSE,
   adjcond = FALSE,
   NAto0 = FALSE,
+  cround = 5,
   returnDT = TRUE,
   savedata = FALSE,
   savedata_opts = NULL,
@@ -79,6 +80,8 @@ nonsampled conditions on plot.}
 for nonsampled conditions by plot.}
 
 \item{NAto0}{Logical. If TRUE, convert NA values to 0.}
+
+\item{cround}{Number. The number of digits to round to. If NULL, default=5.}
 
 \item{returnDT}{Logical. If TRUE, returns data.table object(s). If FALSE,
 returns data.frame object(s).}

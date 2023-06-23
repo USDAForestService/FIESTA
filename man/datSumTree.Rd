@@ -147,7 +147,7 @@ for estimate, adjTPA=4. The default is 1.}
 
 \item{NAto0}{Logical. If TRUE, convert NA values to 0.}
 
-\item{tround}{Number. The number of digits to round to. If NULL, default=6.}
+\item{tround}{Number. The number of digits to round to. If NULL, default=5.}
 
 \item{checkNA}{Logical. If TRUE, checks if NA values exist in necessary
 variables.}

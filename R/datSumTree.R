@@ -92,7 +92,7 @@
 #' (annual inventory), if using less than 4 subplots. If using only 1 sublot
 #' for estimate, adjTPA=4. The default is 1.
 #' @param NAto0 Logical. If TRUE, convert NA values to 0.
-#' @param tround Number. The number of digits to round to. If NULL, default=6.
+#' @param tround Number. The number of digits to round to. If NULL, default=5.
 #' @param checkNA Logical. If TRUE, checks if NA values exist in necessary
 #' variables.
 #' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
@@ -849,8 +849,8 @@ datSumTree <- function(tree = NULL,
 
   ## CHECK tround
   if (is.null(tround) | !is.numeric(tround)) {
-    warning("tround is invalid.. rounding to 6 digits")
-    tround <- 6
+    warning("tround is invalid.. rounding to 5 digits")
+    tround <- 5
   }
 
   ## Check savedata 
