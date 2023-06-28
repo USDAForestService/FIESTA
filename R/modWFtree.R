@@ -270,7 +270,7 @@ modWFtree <- function(WFpopdat,
   nonresp <- TRUE 
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter=
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=
 	n.resp=n.nonresp=SUBPPROP_UNADJ=MICRPROP_UNADJ <- NULL
   
   
@@ -465,8 +465,7 @@ modWFtree <- function(WFpopdat,
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf,
 	                condf=pltcondf, cuniqueid=cuniqueid, 
 	                tuniqueid=tuniqueid, estseed=estseed,
-	                rowvar=rowvar, rowvar.filter=rowvar.filter, 
-	                colvar=colvar, colvar.filter=colvar.filter, 
+	                rowvar=rowvar, colvar=colvar, 
 	                row.FIAname=row.FIAname, col.FIAname=col.FIAname,
  	                row.orderby=row.orderby, col.orderby=col.orderby, 
 	                row.add0=row.add0, col.add0=col.add0, 

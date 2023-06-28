@@ -13,9 +13,16 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
   ## Set global variables
   tdomvarlstn=estunitsd <- NULL
 
+  if (estseed == "only") {
+    tnames <- names(seedf)
+  } else {
+    tnames <- names(treef)
+  }
+  
+
   ## SET ESTIMATION VARIABLE LIST
   estvarlst.not <- c("TREE", "CONDID", "PREV_TRE_CN", "SUBP")
-  estvarlst <- names(treef)[!names(treef) %in% estvarlst.not] 	## Estimation variables
+  estvarlst <- tnames[!tnames %in% estvarlst.not] 	## Estimation variables
 
   ## GET TREE ESTIMATION VARIABLE AND CHECK IF IN TREE DATA SET (NUMERATOR)
   varnm <- ifelse(esttype == "TREE", "estvar", "estvarn")
@@ -30,23 +37,20 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     if (estvarn.TPA) message("multiplying ", estvarn, " by TPA")
   }
   ## GET NAME FOR ESTIMATION VARIABLE FOR ALL TREE DOMAINS
-#  if (is.null(estvarn.name)) {
-#    estvarn.name <- paste0(estvarn, "_SUM")
-#  } else if (!is.character(estvarn.name)) {
   if (!is.null(estvarn.name) && !is.character(estvarn.name)) {
      stop("invalid estvarn.name.. must be a string")
   }
-  ## CHECK FOR NA VALUES IN TPA_UNADJ
-#  if (sum(is.na(unique(treef$TPA_UNADJ))) > 0) {
-#    nbrna <- nrow(treef[is.na(treef$TPA_UNADJ),])
-#    stop(paste("check tree table.. there are", nbrna, "NA values in TPA_UNADJ variable"))
-#  }
 
   ## TO INCREASE TREES PER ACRE IF ONLY USING 1 SUBPLOT
-  if (adjtpa && "SUBP" %in% names(treef)) {
-    if (length(unique(treef$SUBP)) == 1) {
+  if (adjtpa && "SUBP" %in% tnames) {
+    if (estseed == "only") {
+      nbrsubp <- length(unique(seedf$SUBP))
+    } else {
+      nbrsubp <- length(unique(treef$SUBP))
+    }
+    if (nbrsubp == 1) {
       adjTPA <- 4
-    } else if (length(unique(treef$SUBP)) == 2) {
+    } else if (nbrsubp == 2) {
       adjTPA <- 2
     } else {
       stop("can only adjust subplots with 1 or 2 subplots")
@@ -95,7 +99,8 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
            bycond=bycond, condid=condid,
  		tsumvarlst=estvarn, tsumvarnmlst=estvarn.name, TPA=estvarn.TPA,
-		tfilter=estvarn.filter, adjtree=adjtree, adjvar=adjvar, checkNA=FALSE,
+		tfilter=estvarn.filter, adjtree=adjtree, 
+           adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE,
  		metric=metric, addseed=addseed, seedonly=seedonly))
     if (is.null(treedata)) return(NULL)
     tdomdat <- treedata$treedat
@@ -137,8 +142,9 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
            bycond=bycond, condid=condid,
 		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name,
-		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
-		adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE, pivot=pivot, metric=metric,
+		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, 
+           adjtree=adjtree, adjvar=adjvar, adjTPA=adjTPA, 
+           checkNA=FALSE, pivot=pivot, metric=metric,
            addseed=addseed, seedonly=seedonly))
       if (is.null(tdomdata)) {
         message("invalid denominator... returning null")
@@ -170,7 +176,8 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
            bycond=bycond, condid=condid,
  		tsumvarlst=estvard, tsumvarnmlst=estvard.name, TPA=estvard.TPA,
-		tfilter=estvard.filter, adjtree=adjtree, checkNA=FALSE, metric=metric,
+		tfilter=estvard.filter, adjtree=adjtree, adjTPA=adjTPA, 
+           checkNA=FALSE, metric=metric,
            addseed=addseed, seedonly=seedonly))
       if (is.null(treedata)) return(NULL)
       tdomdatd <- treedata$treedat

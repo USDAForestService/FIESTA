@@ -335,8 +335,8 @@ modGBratio <- function(GBpopdat,
   rawdata <- TRUE
 
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=tdom=estvar.name=rowvar.filter=colvar.filter=
-    variable=estvard.name <- NULL
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=tdom=estvar.name=
+		variable=estvard.name <- NULL
   
   
   ##################################################################
@@ -522,8 +522,7 @@ modGBratio <- function(GBpopdat,
                      treef=treef, seedf=seedf,
 	                condf=pltcondf, cuniqueid=cuniqueid, 
 	                tuniqueid=tuniqueid, estseed=estseed, 
-	                rowvar=rowvar, rowvar.filter=rowvar.filter, 
-	                colvar=colvar, colvar.filter=colvar.filter, 
+	                rowvar=rowvar, colvar=colvar, 
 	                row.FIAname=row.FIAname, col.FIAname=col.FIAname,
  	                row.orderby=row.orderby, col.orderby=col.orderby, 
 	                row.add0=row.add0, col.add0=col.add0, 

@@ -1108,7 +1108,7 @@ datSumTreeDom <- function(tree = NULL,
   flag <- ifelse(NAto0, "0", "")
   if (FIAname) {
     if (tdomvar == "SPCD") {
-      tdomdata <- datLUTspp(treex, xvar=tdomvar, name=spcd_name)
+      tdomdata <- datLUTspp(treex, name=spcd_name)
       ref_spcd <- tdomdata$ref_spcd
     } else {    
       tdomdata <- datLUTnm(treex, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
@@ -1197,7 +1197,7 @@ datSumTreeDom <- function(tree = NULL,
 
       if (FIAname) {
         if (tdomvar2 == "SPCD") {
-          tdomdata <- datLUTspp(treex, xvar=tdomvar2, name=spcd_name)
+          tdomdata <- datLUTspp(treex, name=spcd_name)
           ref_spcd <- tdomdata$ref_spcd
         } else {
           tdomdata <- datLUTnm(treex, xvar=tdomvar2, LUTvar="VALUE", FIAname=TRUE)

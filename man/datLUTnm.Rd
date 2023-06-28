@@ -5,13 +5,14 @@
 \title{Data - Gets variable description or class.}
 \usage{
 datLUTnm(
-  x,
+  x = NULL,
   xvar = NULL,
   LUT = NULL,
   LUTvar = NULL,
   LUTnewvar = NULL,
   LUTnewvarnm = NULL,
   FIAname = FALSE,
+  uniquex = NULL,
   NAclass = "Other",
   group = FALSE,
   add0 = FALSE,
@@ -43,6 +44,8 @@ for LUTnewvar.}
 
 \item{FIAname}{Logical. If TRUE, get FIA reference name based on (ref_codes)
 within FIESTA.}
+
+\item{uniquex}{String. Unique values of SPCD to match, if x is NULL.}
 
 \item{NAclass}{String. NA values in xvar will be changed to NAclass.}
 

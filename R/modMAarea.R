@@ -277,7 +277,7 @@ modMAarea <- function(MApopdat,
   rawdata <- TRUE
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
+  ONEUNIT=n.total=n.strata=strwt=TOTAL <- NULL
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -481,8 +481,7 @@ modMAarea <- function(MApopdat,
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, condf=pltcondf, 
-                    cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
-                    colvar=colvar, colvar.filter=colvar.filter, 
+                    cuniqueid=cuniqueid, rowvar=rowvar, colvar=colvar, 
                     row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
                     row.orderby=row.orderby, col.orderby=col.orderby, 
                     row.add0=row.add0, col.add0=col.add0, 

@@ -314,7 +314,7 @@ modGBtree <- function(GBpopdat,
   rawdata <- TRUE  
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
+  ONEUNIT=n.total=n.strata=strwt=TOTAL <- NULL
   
   
   ##################################################################
@@ -431,6 +431,8 @@ modGBtree <- function(GBpopdat,
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
   strata <- GBpopdat$strata
+  pop_fmt <- GBpopdat$pop_fmt
+  pop_dsn <- GBpopdat$pop_dsn
 
  
   ########################################
@@ -450,8 +452,8 @@ modGBtree <- function(GBpopdat,
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
-                cuniqueid=cuniqueid, condid=condid, 
+  estdat <- check.estdata(esttype=esttype, pop_fmt=pop_fmt, pop_dsn=pop_dsn,
+                pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid, 
                 treex=treex, seedx=seedx, estseed=estseed, sumunits=sumunits, 
                 landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
                 allin1=allin1, estround=estround, pseround=pseround, 
@@ -485,6 +487,7 @@ modGBtree <- function(GBpopdat,
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
   rawfolder <- estdat$rawfolder
+  conn <- estdat$conn
 
   if ("STATECD" %in% names(pltcondf)) {
     states <- pcheck.states(sort(unique(pltcondf$STATECD)))
@@ -496,18 +499,18 @@ modGBtree <- function(GBpopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf,
+  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, conn=conn, 
+                      treef=treef, seedf=seedf,
 	                condf=pltcondf, cuniqueid=cuniqueid, 
 	                tuniqueid=tuniqueid, estseed=estseed,
-	                rowvar=rowvar, rowvar.filter=rowvar.filter, 
-	                colvar=colvar, colvar.filter=colvar.filter, 
+	                rowvar=rowvar, colvar=colvar, 
 	                row.FIAname=row.FIAname, col.FIAname=col.FIAname,
  	                row.orderby=row.orderby, col.orderby=col.orderby, 
 	                row.add0=row.add0, col.add0=col.add0, 
 	                title.rowvar=title.rowvar, title.colvar=title.colvar, 
 	                rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
 	                rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-	                landarea=landarea)
+	                landarea=landarea, states=states)
   treef <- rowcolinfo$treef
   seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf
@@ -536,7 +539,7 @@ modGBtree <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-
+ 
   #####################################################################################
   ### Get estimation data from tree table
   #####################################################################################

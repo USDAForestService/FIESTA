@@ -344,7 +344,7 @@ datSumTree <- function(tree = NULL,
   if (!addseed && !seedonly && !is.null(seedx)) {
     seedx <- NULL
   }
- 
+
   ## Check unique identifiers and set unique keys for R objects
   ###########################################################################
 

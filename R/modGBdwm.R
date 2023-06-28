@@ -261,7 +261,7 @@ modGBdwm <- function(GBpopdat = NULL,
   returnlst <- list()
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter=
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=
     rawfolder=estvard.name <- NULL
   #estvar <- "CONDPROP_ADJ"
   
@@ -475,8 +475,7 @@ modGBdwm <- function(GBpopdat = NULL,
   ### Check row and column data
   ###################################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype="AREA", condf=pltcondf, 
-                  cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
-                  colvar=colvar, colvar.filter=colvar.filter, 
+                  cuniqueid=cuniqueid, rowvar=rowvar, colvar=colvar, 
                   row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
                   row.orderby=row.orderby, col.orderby=col.orderby, 
                   row.add0=row.add0, col.add0=col.add0, 

@@ -5,8 +5,9 @@
 \title{Data - Gets variable description or class for SPCD.}
 \usage{
 datLUTspp(
-  x,
+  x = NULL,
   xvar = "SPCD",
+  uniquex = NULL,
   NAclass = "Other",
   group = FALSE,
   states = NULL,
@@ -24,6 +25,8 @@ datLUTspp(
 variable to classify.}
 
 \item{xvar}{String. Name of variable in the data table to join to.}
+
+\item{uniquex}{String. Unique values of SPCD to match, if x is NULL.}
 
 \item{NAclass}{String. NA values in xvar will be changed to NAclass.}
 

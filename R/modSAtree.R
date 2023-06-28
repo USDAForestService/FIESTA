@@ -226,7 +226,7 @@ modSAtree <- function(SApopdatlst = NULL,
   }
 
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=
 	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
 	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
 
@@ -645,8 +645,7 @@ modSAtree <- function(SApopdatlst = NULL,
     if (!is.null(rowvar) && rowvar == "TOTAL") rowvar <- NULL
     rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf, 
                       condf=pltcondf, cuniqueid=cuniqueid, rowvar=rowvar, 
-                      rowvar.filter=rowvar.filter, 
-                      colvar=colvar, colvar.filter=colvar.filter, 
+                      colvar=colvar, 
                       row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
                       row.orderby=row.orderby, col.orderby=col.orderby, 
                       row.add0=row.add0, col.add0=col.add0, 

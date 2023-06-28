@@ -1055,6 +1055,7 @@ modGBpop <- function(popType = "VOL",
       returnlst$sccmx <- sccmx
     }
     if (popType %in% c("GRM")) {
+      returnlst$treex <- popcheck$treef
       returnlst$grmx <- popcheck$grmf
       returnlst$beginx <- popcheck$beginf
       returnlst$midptx <- popcheck$midptf
@@ -1065,6 +1066,10 @@ modGBpop <- function(popType = "VOL",
   ## Save data frames
   ##################################################################
   if (savedata) {
+    if (out_fmt == "sqlite") {
+      returnlst$pop_fmt <- "sqlite"
+      returnlst$pop_dsn <- file.path(outfolder, out_dsn)
+    }
     message("saving condx...")
     datExportData(condx, 
           savedata_opts=list(outfolder = outfolder, 
