@@ -17,6 +17,7 @@
 #' for LUTnewvar.
 #' @param FIAname Logical. If TRUE, get FIA reference name based on (ref_codes)
 #' within FIESTA.
+#' @param uniquex String. Unique values of SPCD to match, if x is NULL.
 #' @param NAclass String. NA values in xvar will be changed to NAclass.
 #' @param group Logical. If TRUE, the group variables in reference table
 #' (ref_codes) are merged to data table (GROUPCD, GROUPNM).
@@ -63,13 +64,14 @@
 #' WYcond3 <- WYcondlut2$xLUT
 #' head(WYcond3[WYcond3$FORTYPCD > 0, ])
 #' @export datLUTnm
-datLUTnm <- function(x, 
+datLUTnm <- function(x = NULL, 
                      xvar = NULL, 
                      LUT = NULL, 
                      LUTvar = NULL, 
                      LUTnewvar = NULL, 
                      LUTnewvarnm = NULL, 
-                     FIAname = FALSE, 
+                     FIAname = FALSE,
+                     uniquex = NULL,
                      NAclass = "Other", 
                      group = FALSE, 
                      add0 = FALSE, 
@@ -86,7 +88,7 @@ datLUTnm <- function(x,
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
-  if (gui) x=xvar=FIAname=LUT=LUTvar=LUTnewvar <- NULL 
+  if (gui) x=xvar=FIAname=LUT=LUTvar=LUTnewvar=datnmlst <- NULL 
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") 
@@ -94,6 +96,7 @@ datLUTnm <- function(x,
 
   ## Set global variables
   VALUE <- NULL 
+  returnlst <- list()
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -134,24 +137,32 @@ datLUTnm <- function(x,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
+  isdt <- FALSE
 
   ## Check datx
   ########################################################
   isdatatable <- FALSE
   datx <- pcheck.table(x, gui=gui, caption="Data table?")
-  if ("data.table" %in% class(datx)) {
-    isdatatable <- TRUE
-    datkey <- key(datx)
-#    datx <- setDF(datx)
+  if (is.null(datx)) {
+    if (is.character(x) && length(x) > 1) {
+      datnmlst <- x
+    } else {
+      stop("invalid x")
+    }
+  } else {
+    if ("data.table" %in% class(datx)) {
+      isdatatable <- TRUE
+      datkey <- key(datx)
+    }
+    datnmlst <- names(datx)
+    isdt <- TRUE
   }
 
   ## Check xvar
   ##########################################
-  datnmlst <- names(datx)
   xvar <- pcheck.varchar(xvar, "xvar", datnmlst, gui=gui,
 		caption="Join variable in dat", stopifnull=TRUE)
 
- 
   ## Check LUT
   ########################################################
   if (is.vector(LUT) && length(LUT) > 1) {
@@ -173,13 +184,32 @@ datLUTnm <- function(x,
   if (FIAname) {
     ## Get FIA reference table for xvar
     xvar.ref <- getRefobject(toupper(xvar))
-    if (is.null(xvar.ref)) 
-      stop(paste("no reference name for", xvar))
+    if (is.null(xvar.ref)) {
+      if (xvar == "SPCD") {
+        return(datLUTspp(x=x, uniquex=uniquex, add0=add0,
+                  stopifmiss=stopifmiss, 
+                  xtxt=xtxt, savedata=savedata,
+                  savedata_opts=savedata_opts))
+      } else {
+        stop(paste("no reference name for", xvar))
+      }
+    }
   }
 
   ## Check group
   group <- pcheck.logical(group, varnm="group", title="Variable group?", 
 		first="NO", gui=gui)
+
+  ## Check uniquex
+  #############################################################
+  if (is.null(uniquex)) {
+    if (is.null(datx)) {
+      message("both uniquex and datx are NULL... returning all values")
+    } else {
+      uniquex <- sort(unique(datx[[xvar]]))
+    }
+  }
+
 
   #######################################################################
   ## Check LUTvar
@@ -217,25 +247,6 @@ datLUTnm <- function(x,
     } else {
       LUTnewvarnm <- LUTnewvar
     }
-#    } else {
-#      
-#      ## To get a name other than MEANING
-#      nameslst <- getnm(xvar, group=group)
-#      if ("MEANING" %in% names(LUTx)) {
-#        LUTnewvarnm <- nameslst$LUTnewvarnm 
-#        LUTnewvarnm <- checknm(LUTnewvarnm, names(datx))              
-#        setnames(LUTx, "MEANING", LUTnewvarnm)
-#        LUTnewvar <- c(LUTnewvar, LUTnewvarnm)
-#      }
-#      ## set new names
-#      if (group) {
-#        grpcode <- nameslst$grpcode
-#        grpname <- nameslst$grpname
-#        grpnames <- sapply(c(grpcode, grpname), checknm, names(datx))     
-#        setnames(LUTx, c("GROUPCD", "GROUPNM"), grpnames) 
-#        LUTnewvar <- c(LUTnewvar, grpnames)
-#      }
-#    } 
     LUTnmlst <- names(LUTx)
     LUTnewvarlst <- LUTnmlst[which(LUTnmlst != LUTvar)]
  
@@ -254,13 +265,11 @@ datLUTnm <- function(x,
 
     ## Get FIA reference table for xvar
     #################################################
-   # xvar.ref <- getRefobject(toupper(LUTvar))
-    #if (is.null(xvar.ref)) message(paste("no reference name for", xvar))
-
     lutvars <- c("VALUE", "MEANING")
     grpvars <- {}
     if (group) grpvars <- c("GROUPCD", "GROUPNM")  
-    ref <- setDT(FIESTAutils::ref_codes[FIESTAutils::ref_codes[["VARIABLE"]] == xvar.ref, c(lutvars, grpvars)])
+    ref <- setDT(FIESTAutils::ref_codes[FIESTAutils::ref_codes[["VARIABLE"]] == xvar.ref,
+ 		c(lutvars, grpvars)])
  
     ## Check LUTx - xvar in LUTx
     #################################################
@@ -282,7 +291,9 @@ datLUTnm <- function(x,
       if (group) {
         grpcode <- nameslst$grpcode
         grpname <- nameslst$grpname
-        grpnames <- sapply(c(grpcode, grpname), checknm, names(datx))     
+        if (!is.null(datnmlst)) {
+          grpnames <- sapply(c(grpcode, grpname), checknm, datnmlst)
+        }     
         setnames(LUTx, grpvars, grpnames)
         LUTnewvar <- c(LUTnewvar, grpnames)
       }        
@@ -294,7 +305,9 @@ datLUTnm <- function(x,
         ## To get a name other than MEANING
         nameslst <- getnm(LUTvar, group=group)
         LUTnewvar <- nameslst$xvarnm
-        LUTnewvar <- checknm(LUTnewvar, names(datx))  
+        if (!is.null(datnmlst)) {
+          LUTnewvar <- checknm(LUTnewvar, datnmlst) 
+        } 
         setnames(LUTx, lutvars, c(xvar, LUTnewvar))
         LUTvar <- xvar
 
@@ -302,7 +315,9 @@ datLUTnm <- function(x,
         if (group) {
           grpcode <- nameslst$grpcode
           grpname <- nameslst$grpname
-          grpnames <- sapply(c(grpcode, grpname), checknm, names(datx))     
+          if (!is.null(datnmlst)) {
+            grpnames <- sapply(c(grpcode, grpname), checknm, datnmlst)
+          }     
           setnames(LUTx, grpvars, grpnames)
           LUTnewvar <- c(LUTnewvar, grpnames)
         } 
@@ -310,10 +325,12 @@ datLUTnm <- function(x,
         stop("LUTvar not in LUTx")
       }
 
-      ## Subset LUT values to only those in datx
-      if (sum(LUTx[[LUTvar]] %in% datx[[LUTvar]], na.rm=TRUE) == 0) {
-        message(paste("no rows exist for", LUTvar))
-        return(NULL)
+      if (!is.null(datx) || !is.null(uniquex)) {
+        ## Subset LUT values to only those in datx
+        if (sum(LUTx[[LUTvar]] %in% uniquex, na.rm=TRUE) == 0) {
+          message(paste("no rows exist for", LUTvar))
+          return(NULL)
+        }
       }
     }
 
@@ -377,70 +394,76 @@ datLUTnm <- function(x,
   ## DO THE WORK 
   ############################################################################
   ### SELECT RELEVANT COLUMNS FROM LUT & MERGE TO x.
-  if (!is.null(LUTnewvar) && length(LUTnewvar) != 0) {
-    if (is.null(xtxt)) xtxt <- xvar
-    ## Check that the all values of LUTvar in datx are all in xvar in LUTx
-    check.matchval(datx, LUTx, xvar, LUTvar, tab1txt=xtxt, tab2txt=paste(xtxt, "lut"),
+  if (!is.null(datx)) {
+    if (!is.null(LUTnewvar) && length(LUTnewvar) != 0) {
+      if (is.null(xtxt)) xtxt <- xvar
+      ## Check that the all values of LUTvar in datx are all in xvar in LUTx
+      check.matchval(datx, LUTx, xvar, LUTvar, tab1txt=xtxt, tab2txt=paste(xtxt, "lut"),
 		stopifmiss=stopifmiss)
 
-    ## Check if class of xvar in datx matches class of xvar in LUTx
-    tabs <- check.matchclass(datx, LUTx, xvar, LUTvar, 
+      ## Check if class of xvar in datx matches class of xvar in LUTx
+      tabs <- check.matchclass(datx, LUTx, xvar, LUTvar, 
 		tab1txt=xtxt, tab2txt=LUTvar)
-    datx <- tabs$tab1
-    LUTx <- tabs$tab2
+      datx <- tabs$tab1
+      LUTx <- tabs$tab2
 
-    LUTnewvar2 <- sapply(LUTnewvar, checknm, names(datx))
-    if (!identical(LUTnewvar2, LUTnewvar)) {
-      setnames(LUTx, LUTnewvar, LUTnewvar2)
-      LUTnewvar <- LUTnewvar2
-    }
-    datx.names <- names(datx)
-    xLUT <- merge(datx, LUTx[,c(LUTvar, LUTnewvar), with=FALSE], 
+      LUTnewvar2 <- sapply(LUTnewvar, checknm, names(datx))
+      if (!identical(LUTnewvar2, LUTnewvar)) {
+        setnames(LUTx, LUTnewvar, LUTnewvar2)
+        LUTnewvar <- LUTnewvar2
+      }
+      datx.names <- names(datx)
+      xLUT <- merge(datx, LUTx[,c(LUTvar, LUTnewvar), with=FALSE], 
 			by.x=xvar, by.y=LUTvar, all.x=TRUE)
 
-    xLUTvals <- unique(as.character(xLUT[[LUTnewvar[1]]][!is.na(xLUT[[xvar]])]))
-    if (any(is.na(xLUTvals))) {
-      xLUTmiss <- unique(xLUT[!is.na(get(xvar)) & is.na(get(LUTnewvar[1])), xvar, 
+      xLUTvals <- unique(as.character(xLUT[[LUTnewvar[1]]][!is.na(xLUT[[xvar]])]))
+      if (any(is.na(xLUTvals))) {
+        xLUTmiss <- unique(xLUT[!is.na(get(xvar)) & is.na(get(LUTnewvar[1])), xvar, 
 		with=FALSE])
-      warning("missing codes: ", paste(xLUTmiss, collapse=", "))
-    }
+        warning("missing codes: ", paste(xLUTmiss, collapse=", "))
+      }
 
-    setcolorder(xLUT, c(datx.names, LUTnewvar))
-    if (!is.null(LUTnewvarnm)) 
-      setnames(xLUT, LUTnewvar, LUTnewvarnm)    
-  } else {
-    xLUT <- datx
-  } 
- 
-  ## Only include xvar values that exist in x
-  if (!add0) {
-    LUTx <-LUTx[LUTx[[LUTvar]] %in% unique(xLUT[[xvar]]), ]
+      setcolorder(xLUT, c(datx.names, LUTnewvar))
+      if (!is.null(LUTnewvarnm)) 
+        setnames(xLUT, LUTnewvar, LUTnewvarnm)    
+    } else {
+      xLUT <- datx
+    }
+     
+    ## Only include xvar values that exist in x
+    if (!add0) {
+      LUTx <-LUTx[LUTx[[LUTvar]] %in% unique(xLUT[[xvar]]), ]
+    }
   }
   
   ## Get all values of LUTx newvars
   LUTnewvar.vals <- unique(unlist(lapply(LUTx[,LUTnewvar, with=FALSE], as.character)))
 
-  ## If NA values and NAclass != NULL, add NA to LUT
-  if (!is.null(NAclass) && sum(is.na(xLUT[[xvar]])) > 0 && all(!is.na(LUTx[[LUTvar]]))) {
-    NAclass <- checknm(NAclass, LUTnewvar.vals) 
-
-    LUTxrow <- rep(NA, ncol(LUTx))
-    for (v in LUTnewvar) {
-      if (!is.numeric(LUTx[[v]])) {
-         if (is.factor(LUTx[[v]]))
-           levels(LUTx[[v]]) <- c(levels(LUTx[[v]]), NAclass)
-         LUTxrow[which(names(LUTx) == v)] <- NAclass
-      }
-    }
-    LUTx <- rbind(LUTx, as.list(LUTxrow))
-
-    ## change NA values in xLUT
-    DT_NAto0(xLUT, LUTnewvar, changeto=NAclass)
-  }
 
   ## Add records if not other values exist in xLUT
-  if (!all(unique(xLUT[[xvar]]) %in% LUTx[[xvar]])) {
-    xvals <- unique(na.omit(xLUT[[xvar]]))
+  if (!is.null(datx)) {
+    ## If NA values and NAclass != NULL, add NA to LUT
+    if (!is.null(NAclass) && sum(is.na(xLUT[[xvar]])) > 0 && all(!is.na(LUTx[[LUTvar]]))) {
+      NAclass <- checknm(NAclass, LUTnewvar.vals) 
+
+      LUTxrow <- rep(NA, ncol(LUTx))
+      for (v in LUTnewvar) {
+        if (!is.numeric(LUTx[[v]])) {
+           if (is.factor(LUTx[[v]]))
+             levels(LUTx[[v]]) <- c(levels(LUTx[[v]]), NAclass)
+           LUTxrow[which(names(LUTx) == v)] <- NAclass
+        }
+      }
+      LUTx <- rbind(LUTx, as.list(LUTxrow))
+
+      ## change NA values in xLUT
+      DT_NAto0(xLUT, LUTnewvar, changeto=NAclass)
+    }
+  }
+
+  ## Add records if no other values exist in xLUT
+  if (!is.null(uniquex) && !all(uniquex %in% LUTx[[xvar]])) {
+    xvals <- unique(na.omit(uniquex))
     missvals <- xvals[which(!xvals %in% unique(LUTx[[LUTvar]]))]
 
     if (length(missvals) > 0) {
@@ -467,53 +490,65 @@ datLUTnm <- function(x,
           
   ## Return list
   ########################################################
-  if (isdatatable) {
+  if (isdt && isdatatable) {
     xLUT <- data.table(xLUT)
     setkeyv(xLUT, datkey)
+    returnlst$xLUT <- xLUT
   }
-  xLUTlst <- list(xLUT=xLUT)
 
   if (!is.null(LUTnewvarnm) || !is.null(LUTnewvar)) {
-    xLUTlst$xLUTnm <- ifelse (is.null(LUTnewvarnm), LUTnewvar, LUTnewvarnm)
+    returnlst$xLUTnm <- ifelse (is.null(LUTnewvarnm), LUTnewvar, LUTnewvarnm)
   } else {
-    xLUTlst$xLUTnm <- NULL
+    returnlst$xLUTnm <- NULL
   }
-  xLUTlst$LUT <- LUTx
+  returnlst$LUT <- LUTx
 
   if (group) {
-    xLUTlst$grpcode <- grpcode
-    xLUTlst$grpname <- grpname
+    returnlst$grpcode <- grpcode
+    returnlst$grpname <- grpname
   }  
   
   #### WRITE TO FILE 
   #############################################################
   if (savedata) {
-    if ("sf" %in% class(datx)) {
-      spExportSpatial(xLUT, 
+    if (isdt) {
+      if ("sf" %in% class(datx)) {
+        spExportSpatial(xLUT, 
               savedata_opts=list(outfolder=outfolder, 
-                                  out_fmt=outsp_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer=out_layer,
-                                  outfn.pre=outfn.pre, 
-                                  outfn.date=outfn.date, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer, 
-                                  add_layer=TRUE))
-    } else {
-      datExportData(xLUT, 
-            savedata_opts=list(outfolder=outfolder, 
-                                  out_fmt=out_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer=out_layer,
-                                  outfn.pre=outfn.pre, 
-                                  outfn.date=outfn.date, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer,
-                                  add_layer=TRUE))
+                                 out_fmt=outsp_fmt, 
+                                 out_dsn=out_dsn, 
+                                 out_layer=out_layer,
+                                 outfn.pre=outfn.pre, 
+                                 outfn.date=outfn.date, 
+                                 overwrite_layer=overwrite_layer,
+                                 append_layer=append_layer, 
+                                 add_layer=TRUE))
+      } else {
+        datExportData(xLUT, 
+              savedata_opts=list(outfolder=outfolder, 
+                                 out_fmt=out_fmt, 
+                                 out_dsn=out_dsn, 
+                                 out_layer=out_layer,
+                                 outfn.pre=outfn.pre, 
+                                 outfn.date=outfn.date, 
+                                 overwrite_layer=overwrite_layer,
+                                 append_layer=append_layer,
+                                 add_layer=TRUE))
                     
+      }
     }
+    datExportData(LUTx, 
+          savedata_opts=list(outfolder = outfolder, 
+                             out_fmt = out_fmt, 
+                             out_dsn = out_dsn, 
+                             out_layer = "LUTx",
+                             outfn.pre = outfn.pre, 
+                             outfn.date = outfn.date, 
+                             overwrite_layer = overwrite_layer,
+                             append_layer = append_layer,
+                             add_layer = TRUE))
   }
   
   
-  return(xLUTlst)
+  return(returnlst)
 }
