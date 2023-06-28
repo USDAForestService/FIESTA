@@ -441,7 +441,7 @@ DBgetXY <- function (states = NULL,
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {
-    evalInfo <- tryCatch( suppressMessages(
+    evalInfo <- tryCatch(
 				DBgetEvalid(states = states, 
                           RS = RS, 
                           datsource = datsource,
@@ -455,7 +455,7 @@ DBgetXY <- function (states = NULL,
                           evalEndyr = evalEndyr, 
                           evalAll = evalAll,
                           evalType = evalType,
-                          gui = gui)),
+                          gui = gui),
 			error = function(e) {
                   message(e,"\n")
                   return(NULL) })
@@ -463,7 +463,6 @@ DBgetXY <- function (states = NULL,
       iseval <- FALSE
     }
   }
- 
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   rslst <- evalInfo$rslst
@@ -741,6 +740,7 @@ DBgetXY <- function (states = NULL,
           plot.qry <- paste("select", toString(unique(c(pjoinid, pvars))), 
 				"from", plotnm)
         }
+
         PLOT <- DBI::dbGetQuery(dbconn, plot.qry)
         plotnm <- "PLOT"
         datsource <- "datamart"
@@ -768,8 +768,12 @@ DBgetXY <- function (states = NULL,
         if (length(XYPLOT) == 0) {
           warning("invalid join... check xyjoinid and pjoinid") 
         }
+
         xyisplot <- TRUE
         xyvars <- unique(c(xyvars, pvars))
+        if (pjoinid != xyjoinid) {
+          xyvars <- xyvars[xyvars != pjoinid]
+        }
         xynm <- "XYPLOT"
         pvars=plotnm <- NULL
         if (measCur) {
@@ -1121,7 +1125,7 @@ DBgetXY <- function (states = NULL,
       ## Generate shapefile
       assign(spxyoutnm, spMakeSpatialPoints(xyplt = xyx, 
                      xvar = xvar, yvar = yvar, xy.uniqueid = xy.uniqueid, 
-                     xy.crs = 4269, addxy = TRUE, 
+                     xy.crs = 4269, addxy = FALSE, 
                      exportsp = exportsp,
                      savedata_opts=list(out_dsn=out_dsn, 
                                out_fmt=outsp_fmt,

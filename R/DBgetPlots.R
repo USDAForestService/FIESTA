@@ -3653,7 +3653,6 @@ DBgetPlots <- function (states = NULL,
         }
  
         if (!is.null(xyplt)) {
-          message("saving xy data...")
           if (!is.null(pltx) && length(unique(xyplt$PLT_CN)) != nrow(pltx))
             warning("number of plots in ", spxynm, " does not match plot table")            
  
@@ -3691,6 +3690,7 @@ DBgetPlots <- function (states = NULL,
         }
 
         if (!is.null(xyplt)) {
+          message("saving xy data...")
           index.unique.xyplt <- NULL
           if (!append_layer) index.unique.xyplt <- "PLT_CN"
           datExportData(xyplt, 
@@ -3708,6 +3708,7 @@ DBgetPlots <- function (states = NULL,
       }  
  
       if (savedata && !is.null(spconddatx)) {
+        message("saving spatial condition data...")
         index.unique.spconddat <- NULL
         #if (!append_layer) index.unique.spconddatx <- "PLT_CN"
         index.unique.spconddatx <- "PLT_CN"
@@ -3725,6 +3726,7 @@ DBgetPlots <- function (states = NULL,
       }
       if (savedata && !is.null(pltx)) {
         message("saving plot table...")
+
         index.unique.pltx <- NULL
         if (i == 1) index.unique.pltx <- "CN"
         datExportData(pltx, 
@@ -3743,6 +3745,7 @@ DBgetPlots <- function (states = NULL,
       }
       if (savedata && !is.null(condx)) {
         message("saving cond table...")
+
         index.unique.condx <- NULL
         if (!append_layer) index.unique.condx <- c("PLT_CN", "CONDID")
         datExportData(condx, 
@@ -3761,6 +3764,7 @@ DBgetPlots <- function (states = NULL,
       }  
       if (savedata && savePOP && !is.null(ppsax)) {
         message("saving pop_plot_stratum_assgn table...")
+
         #index.unique.ppsax <- NULL
         #if (i == 1) index.unique.ppsax <- "PLT_CN"
         datExportData(ppsax, 
@@ -3787,6 +3791,7 @@ DBgetPlots <- function (states = NULL,
 
   if (savedata && saveSURVEY) {
     message("saving survey table...")
+
     datExportData(SURVEY, 
         savedata_opts=list(outfolder = outfolder, 
                            out_fmt = out_fmt, 
@@ -3802,6 +3807,7 @@ DBgetPlots <- function (states = NULL,
   ## Write out plot/condition counts to comma-delimited file.
   if (savedata) {
     message("saving pltcnt table...")
+
     datExportData(pltcnt, 
         savedata_opts=list(outfolder = outfolder, 
                             out_fmt = out_fmt, 

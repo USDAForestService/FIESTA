@@ -391,6 +391,9 @@ spGetPlots <- function(bnd = NULL,
   ########################################################
   if (datsource == "sqlite" && !is.null(data_dsn)) {
     suppressMessages(DBtestSQLite(data_dsn, showlist=FALSE))
+    #conn <- suppressMessages(DBtestSQLite(data_dsn, showlist=FALSE, dbconnopen=TRUE))
+    #dbtablst <- DBI::dbListTables(conn)
+    #DBI::dbDisconnect(conn)
   }
   
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
@@ -423,7 +426,6 @@ spGetPlots <- function(bnd = NULL,
     evalEndyr <- NULL
   }
  
-
   ## Check spXYdat
   if (!is.null(spXYdat)) {
     spxy <- spXYdat$spxy
