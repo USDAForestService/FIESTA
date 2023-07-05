@@ -128,13 +128,15 @@ slp <- terra::terrain(dem,
                       v = "slope",
                       unit = "degrees",
                       filename = slpfn, 
-                      overwrite = TRUE)
+                      overwrite = TRUE,
+                      NAflag = -99999.0)
 aspfn <- paste0(outfolder, "/WYbh_asp.img")
 asp <- terra::terrain(dem,
                       v = "aspect",
                       unit = "degrees", 
                       filename = aspfn,
-                      overwrite = TRUE)
+                      overwrite = TRUE,
+                      NAflag = -99999.0)
 ```
 
 Next, we can get our FIA plot data and set up our auxiliary data. We can get our FIA plot data with the `spMakeSpatialPoints` function from `FIESTA`. For more information on how to use this function, please see the `sp` vignette included with `FIESTA` (link). 
@@ -193,7 +195,6 @@ We can create our population data for model-assisted estimation. To do so, we us
  
 ```{r}
 MApopdat <- modMApop(popTabs = list(tree = WYtree, cond = WYcond),
-                     pltassgn = WYpltassgn,
                      auxdat = modeldat)
 ```
 
@@ -220,7 +221,7 @@ In this example, we look at estimating the area of forest land in Wyoming from 2
 area1 <- modMAarea(
   MApopdat = MApopdat, # pop - population calculations for WY, post-stratification
   MAmethod = "greg", # est - model-assisted method
-  landarea = "FOREST", # est - forest land filter
+  landarea = "FOREST" # est - forest land filter
   )
 
 ```

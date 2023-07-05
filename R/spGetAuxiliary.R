@@ -690,7 +690,7 @@ spGetAuxiliary <- function(xyplt = NULL,
       rast.cont.NODATA <- rastlst.cont.NODATA[i]
       zonalstat <- rastlst.cont.stat 
       #message(rastfn, "...")
- 
+
       if (asptransform && identical(rast.aspfn, rastfn)) {
         rastnm2 <- ifelse(is.null(rastnm), "asp_cos", paste0(rastnm, "_cos"))
         if (i == 1 && npixels) {

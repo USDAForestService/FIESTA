@@ -102,8 +102,8 @@ outfolder <- tempdir()
 Now that we've loaded `FIESTA` and setup our outfolder, we can retrieve the data needed to run the examples. First, we point to some external data and predictor layers stored in `FIESTA` and derive new predictor layers using the `terra` package. 
 
 ```{r}
-# File names for external spatial data
 
+# File names for external spatial data
 WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
 WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
 WYbhdist.att <- "DISTRICTNA"
@@ -119,13 +119,15 @@ slp <- terra::terrain(dem,
                       v = "slope",
                       unit = "degrees",
                       filename = slpfn, 
-                      overwrite = TRUE)
+                      overwrite = TRUE, 
+                      NAflag = -99999.0)
 aspfn <- paste0(outfolder, "/WYbh_asp.img")
 asp <- terra::terrain(dem,
                       v = "aspect",
                       unit = "degrees", 
                       filename = aspfn,
-                      overwrite = TRUE)
+                      overwrite = TRUE, 
+                      NAflag = -99999.0)
 ```
 
 Next, we set up our small area domains with `FIESTA::spGetSAdoms`. For more information on how to use this function, please see the `sp` vignette included with `FIESTA` (link). 
@@ -189,6 +191,7 @@ auxdat <- spGetAuxiliary(
   savedata = FALSE
 )
 names(auxdat)
+
 ```
 
 ```{r}
