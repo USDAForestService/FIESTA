@@ -2154,7 +2154,7 @@ DBgetPlots <- function (states = NULL,
         gc()   
       } 
     }
-
+    
     ##############################################################
     ## Tree data
     ##############################################################
@@ -2192,7 +2192,7 @@ DBgetPlots <- function (states = NULL,
  
       message("\n",
       	"## STATUS: Getting tree data from TREE (", stabbr, ") ...", "\n")
-      if (is.null(treenm) || (is.null(treevarlst) && is.null(tsumvarlst))) {
+      if (is.null(treenm)) {
         treex <- NULL
         istree <- FALSE
       } else {
@@ -2216,10 +2216,16 @@ DBgetPlots <- function (states = NULL,
 
           ## Add commas
           ttvars <- toString(paste0("t.", tcols))
+          
+          if (is.null(ttvars)) {
+            message("no columns in tree table")
+            exit()
+          }
+          
         } else {
           ttvars <- "t.*"
         }
-
+        
         ## Create tfromqry
         tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
 				treenm, " t ON (t.PLT_CN = p.", puniqueid, ")")
@@ -2240,7 +2246,7 @@ DBgetPlots <- function (states = NULL,
                     message("TREE query is invalid")
                     return(NULL) })
         }
- 
+
         if (!is.null(treex) && nrow(treex) != 0) {
           treex <- setDT(treex)
           treex[, PLT_CN := as.character(PLT_CN)]
@@ -2335,7 +2341,7 @@ DBgetPlots <- function (states = NULL,
         }
       }
     }
- 
+    
     ##############################################################
     ## Plot counts and spatial data
     ##############################################################
@@ -2477,7 +2483,7 @@ DBgetPlots <- function (states = NULL,
           ## Add commas
           ssvars <- toString(paste0("s.", scols))
         } else {
-            ssvars <- "s.*"
+          ssvars <- "s.*"
         }
 
         ## Create sfromqry
@@ -2500,7 +2506,7 @@ DBgetPlots <- function (states = NULL,
                     message(seedqry)
                     return(NULL) })
         }
-        if (!is.null(seedx) && nrow(seedx) != 0 && length(scols) > 0) {
+        if (!is.null(seedx) && nrow(seedx) != 0 && length(ssvars) > 0) {
           dbqueries$seed <- seedqry
 
           seedx <- setDT(seedx)
