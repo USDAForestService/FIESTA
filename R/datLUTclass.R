@@ -32,6 +32,8 @@
 #' classes are appended to dataset.
 #' @param dsn String. Data source name of database with x.
 #' @param conn Open database connection.
+#' @param overwrite Logical. If TRUE, and the class name already exists 
+#' in x, overwrites class name.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,

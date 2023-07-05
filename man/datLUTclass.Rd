@@ -17,14 +17,17 @@ datLUTclass(
   NAto0 = FALSE,
   vars2keep = NULL,
   keepcutbreaks = FALSE,
+  dsn = NULL,
+  conn = NULL,
+  overwrite = TRUE,
   savedata = FALSE,
   savedata_opts = NULL,
   gui = FALSE
 )
 }
 \arguments{
-\item{x}{Data frame or comma-delimited file (*.csv). The data table with
-variable to classify.}
+\item{x}{Data frame or comma-delimited file (*.csv) or table in dsn. 
+The data table with variable to classify.}
 
 \item{xvar}{String. Name of variable in the data table to join to.}
 
@@ -60,6 +63,13 @@ x.}
 \item{keepcutbreaks}{Logical. If TRUE, the cutbreaks used for creating
 classes are appended to dataset.}
 
+\item{dsn}{String. Data source name of database with x.}
+
+\item{conn}{Open database connection.}
+
+\item{overwrite}{Logical. If TRUE, and the class name already exists 
+in x, overwrites class name.}
+
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
@@ -78,8 +88,7 @@ outfn.  If outfn = NULL, the name of the file will be datlut_'date'.csv.
 }
 \description{
 Merge a look-up table to define categories of continuous data in x (e.g.,
-DIA).  Adds a variable (LUTclassnm) to x, defining as: xvar >= MIN (and xvar
-<= MAX).
+DIA).  Adds a variable to x, defining as: xvar >= MIN (and xvar < MAX).
 }
 \details{
 Use datLUTclass() to prompt for input.
