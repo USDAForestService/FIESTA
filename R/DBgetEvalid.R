@@ -38,7 +38,7 @@
 #' @param data_dsn If datsource='sqlite', the file name (data source name) of
 #' the sqlite database (*.sqlite).
 #' @param invtype String. The type of FIA data to extract ('PERIODIC',
-#' 'ANNUAL', 'BOTH').  See further details below.
+#' 'ANNUAL').  Only 1 allowed at a time. See further details below.
 #' @param evalCur Logical. If TRUE, the most current evalidation is extracted
 #' for state(s).
 #' @param evalEndyr Number. The end year of the evaluation period of interest.
@@ -207,16 +207,10 @@ DBgetEvalid <- function(states = NULL,
  
   ## Check invtype
   #####################################################
-  invtypelst <- c("ANNUAL", "PERIODIC", "BOTH")
+  invtypelst <- c("ANNUAL", "PERIODIC")
   invtype <- pcheck.varchar(var2check=invtype, varnm="invtype", 
 		gui=gui, checklst=invtypelst, caption="Inventory type?")
-  if (invtype == "ANNUAL") {
-    ann_inv <- "Y"
-  } else if (invtype == "PERIODIC") {
-    ann_inv <- "N"
-  } else {
-    ann_inv <- c("Y","N")
-  }
+  ann_inv <- ifelse (invtype == "ANNUAL", "Y", "N")
 
 
   ## Check database connection
@@ -486,7 +480,6 @@ DBgetEvalid <- function(states = NULL,
           endyr <- unique(min(pop_eval$END_INVYR))
           ann_inventory <- SURVEY[SURVEY$STATECD == st & SURVEY$INVYR == endyr, 
 		"ANN_INVENTORY"][[1]]
-          invtype <- ifelse(ann_inventory == "Y", "ANNUAL", "PERIODIC")
           stinvyr <- startyr:endyr
           if (length(unique(pop_eval$EVAL_TYP)) > 1 && 
 			all(unique(pop_eval$EVAL_TYP) %in% c("EXPCURR", "EXPVOL"))) { 
@@ -873,7 +866,7 @@ DBgetEvalid <- function(states = NULL,
         evalidlist <- sapply(states, function(x) NULL)
         evalEndyrlist <- sapply(states, function(x) NULL)
 
-        ## check evalType
+        ## check evalType 
         if (invtype == "PERIODIC" && evalType == "ALL") {
           evalType <- "CURR"
         } else {
@@ -960,7 +953,8 @@ DBgetEvalid <- function(states = NULL,
             ## Check evalType with evalType in database for state
             evalType.chklst <- unique(popevaltab$EVAL_TYP)
 
-            if (invtype == "ANNUAL") {
+            if (invtype %in% c("ANNUAL", "BOTH")) {
+            #if (invtype == "ANNUAL") {
               if (!all(evalTypelist[[state]] %in% evalType.chklst)) {
                 eType.invalid <- evalTypelist[[state]][!evalTypelist[[state]] %in% evalType.chklst]
                 warning("removing invalid evalType for ", state, ": ", 

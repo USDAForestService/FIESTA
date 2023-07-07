@@ -567,6 +567,9 @@ DBgetPlots <- function (states = NULL,
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
+  if ("evalCur" %in% input.params) {
+    eval_opts$Cur <- args$evalCur
+  }
   
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts,
@@ -818,8 +821,64 @@ DBgetPlots <- function (states = NULL,
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {
-    evalInfo <- tryCatch( suppressMessages(
-                    DBgetEvalid(states = states, 
+    if (invtype == "BOTH") {
+      message("getting evalution info for annual data...")
+      evalInfoA <- tryCatch( DBgetEvalid(states = states, 
+                          RS = RS, 
+                          datsource = datsource, 
+                          data_dsn = data_dsn, 
+                          dbconn = dbconn,
+                          dbconnopen = TRUE,
+                          invtype = "ANNUAL", 
+                          evalid = evalid, 
+                          evalCur = evalCur, 
+                          evalEndyr = evalEndyr, 
+                          evalAll = evalAll, 
+                          evalType = Type, 
+                          dbTabs = dbTabs,
+                          gui = gui),
+			error = function(e) {
+                  message(e,"\n")
+                  return(NULL) })
+      if (is.null(evalInfoA)) {
+        iseval <- FALSE
+      } else {
+
+        message("getting evalution info for periodic data...")
+        evalInfoP <- tryCatch( DBgetEvalid(states = states, 
+                          RS = RS, 
+                          datsource = datsource, 
+                          data_dsn = data_dsn, 
+                          dbconn = dbconn,
+                          dbconnopen = TRUE,
+                          invtype = "PERIODIC", 
+                          evalid = evalid, 
+                          evalCur = evalCur, 
+                          evalEndyr = evalEndyr, 
+                          evalAll = evalAll, 
+                          evalType = Type, 
+                          dbTabs = dbTabs,
+                          gui = gui),
+			error = function(e) {
+                  message(e,"\n")
+                  return(NULL) })
+       
+       evalInfo <- evalInfoA
+       if (!is.null(evalInfoP)) {
+         for (st in names(evalInfo$evalidlist)) {
+           evalInfo$evalidlist[[st]] <- 
+			c(evalInfo$evalidlist[[st]], evalInfoP$evalidlist[[st]])
+         }
+         evalInfo$invtype <- "BOTH"
+         evalInfo$invyrtab <- rbind(evalInfoP$invyrtab, evalInfo$invyrtab)
+         if (!is.null(evalInfoP$SURVEY)) {
+           evalInfo$SURVEY <- rbind(evalInfoP$SURVEY, evalInfo$SURVEY)
+         }         
+       }  
+     }    
+
+    } else {
+      evalInfo <- tryCatch( DBgetEvalid(states = states, 
                           RS = RS, 
                           datsource = datsource, 
                           data_dsn = data_dsn, 
@@ -832,10 +891,12 @@ DBgetPlots <- function (states = NULL,
                           evalAll = evalAll, 
                           evalType = Type, 
                           dbTabs = dbTabs,
-                          gui = gui)),
+                          gui = gui),
 			error = function(e) {
                   message(e,"\n")
                   return(NULL) })
+
+    }
     if (is.null(evalInfo)) {
       iseval <- FALSE
     }
@@ -843,7 +904,6 @@ DBgetPlots <- function (states = NULL,
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   evalidlist <- evalInfo$evalidlist
-  evalTypelist <- unlist(evalInfo$evalTypelist)
   invtype <- evalInfo$invtype
   invyrtab <- evalInfo$invyrtab
   if (length(evalidlist) > 0) {
@@ -864,37 +924,10 @@ DBgetPlots <- function (states = NULL,
     plotnm <- "PLOTe"
   }
 
-#  if (!is.null(evalTypelist)) {
-#    #Typelist <- unlist(evalTypelist)
-#    #Typelist <- sub("EXP", "", evalTypelist)
-#    Typelist <- lapply(evalTypelist, function(x) sub("EXP", "", x))
-
-#    if (any(c("VOL","CURR") %in% Typelist)) {
-#      if (!istree) {
-#        message("istree is set to FALSE... not including tree data")
-#      }
-#    }
-#    if ("P2VEG" %in% Typelist) {
-#      isveg=issubp <- TRUE
-#    } 
-#    if ("INV" %in% Typelist) {
-#      isinv=issubp <- TRUE
-#    } 
-#    if ("DWM" %in% Typelist) {
-#      isdwm <- TRUE
-#    }
-#    if ("CHNG" %in% Typelist) {
-#      ischng=issubp <- TRUE
-#    }
-#    if (any(c("GRM","GROW","MORT","REMV") %in% Typelist)) {
-#      ischng=issubp=isgrm=istree <- TRUE
-#    }
-#  } else {
-    if (!is.list(Type)) {
-      Typelist <- as.list(rep(Type, length(states)))
-      names(Typelist) <- states
-    }
-#  }
+  if (!is.list(Type)) {
+    Typelist <- as.list(rep(Type, length(states)))
+    names(Typelist) <- states
+  }
  
   ## Get state abbreviations and codes 
   ###########################################################
@@ -2393,7 +2426,7 @@ DBgetPlots <- function (states = NULL,
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
                            pvars2keep = "PLOT_STATUS_CD",
-                           evalInfo = evalInfo,
+                           SURVEY = SURVEY,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
           assign(paste0("xyCurx_", coordType), 
 			xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ])
@@ -2411,11 +2444,11 @@ DBgetPlots <- function (states = NULL,
                            data_dsn = data_dsn,
                            dbTabs = dbTabs,
                            eval = eval,
-                           eval_opts = eval_options(All = TRUE),
+                           eval_opts = eval_opts,
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
                            pvars2keep = "PLOT_STATUS_CD",
-                           evalInfo = evalInfo,
+                           SURVEY = SURVEY,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
           assign(paste0("xyx_", coordType), 
 			xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ])
