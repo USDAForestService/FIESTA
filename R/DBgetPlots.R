@@ -102,7 +102,7 @@
 #' \tab Cur \tab Most current measurement of plot in database\cr
 #' \tab Endyr \tab Most current measurement of plot in database in or
 #' before year\cr
-#' \tab All \tab All years for invtype (ANNUAL or PERIODIC)\cr
+#' \tab All \tab All years for invtype (ANNUAL or PERIODIC or BOTH)\cr
 #' \tab Type \tab Type of custom Evaluation (response)\cr 
 #' \tab invyrs \tab Specified inventory years (e.g., 2015:2018)\cr }
 #' 
@@ -243,7 +243,7 @@
 #' for a list of options.
 #' @param puniqueid String. Name of unique identifier in plot_layer in dbTabs.
 #' @param invtype String. Type of FIA inventory to extract ('PERIODIC',
-#' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
+#' 'ANNUAL', 'BOTH').
 #' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
 #' INTENSITY = 1 (FIA base grid).
 #' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
@@ -681,7 +681,7 @@ DBgetPlots <- function (states = NULL,
   subsetPOP <- TRUE
 
   ## Check invtype
-  invtypelst <- c('ANNUAL', 'PERIODIC')
+  invtypelst <- c('ANNUAL', 'PERIODIC', 'BOTH')
   invtype <- pcheck.varchar(invtype, varnm="invtype", checklst=invtypelst, 
 		caption="Inventory Type", gui=gui)
 

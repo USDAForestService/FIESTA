@@ -39,7 +39,7 @@ define RS.}
 the sqlite database (*.sqlite).}
 
 \item{invtype}{String. The type of FIA data to extract ('PERIODIC',
-'ANNUAL').  See further details below.}
+'ANNUAL', 'BOTH').  See further details below.}
 
 \item{evalCur}{Logical. If TRUE, the most current evalidation is extracted
 for state(s).}

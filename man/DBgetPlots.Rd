@@ -80,7 +80,7 @@ for a list of options.}
 \item{puniqueid}{String. Name of unique identifier in plot_layer in dbTabs.}
 
 \item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
-'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}
+'ANNUAL', 'BOTH').}
 
 \item{intensity1}{Logical. If TRUE, includes only plots where INTENSITY = 1.}
 
@@ -350,7 +350,7 @@ available states in database (states=NULL, RS=NULL).
 \tab Cur \tab Most current measurement of plot in database\cr
 \tab Endyr \tab Most current measurement of plot in database in or
 before year\cr
-\tab All \tab All years for invtype (ANNUAL or PERIODIC)\cr
+\tab All \tab All years for invtype (ANNUAL or PERIODIC or BOTH)\cr
 \tab Type \tab Type of custom Evaluation (response)\cr 
 \tab invyrs \tab Specified inventory years (e.g., 2015:2018)\cr }
 

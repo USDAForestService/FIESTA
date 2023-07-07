@@ -38,7 +38,7 @@
 #' @param data_dsn If datsource='sqlite', the file name (data source name) of
 #' the sqlite database (*.sqlite).
 #' @param invtype String. The type of FIA data to extract ('PERIODIC',
-#' 'ANNUAL').  See further details below.
+#' 'ANNUAL', 'BOTH').  See further details below.
 #' @param evalCur Logical. If TRUE, the most current evalidation is extracted
 #' for state(s).
 #' @param evalEndyr Number. The end year of the evaluation period of interest.
@@ -205,12 +205,19 @@ DBgetEvalid <- function(states = NULL,
   ## CHECK PARAMETER INPUTS
   ##################################################################
  
-  ## Check invtyp
+  ## Check invtype
   #####################################################
-  invtypelst <- c("ANNUAL", "PERIODIC")
+  invtypelst <- c("ANNUAL", "PERIODIC", "BOTH")
   invtype <- pcheck.varchar(var2check=invtype, varnm="invtype", 
 		gui=gui, checklst=invtypelst, caption="Inventory type?")
-  ann_inv <- ifelse (invtype == "ANNUAL", "Y", "N")
+  if (invtype == "ANNUAL") {
+    ann_inv <- "Y"
+  } else if (invtype == "PERIODIC") {
+    ann_inv <- "N"
+  } else {
+    ann_inv <- c("Y","N")
+  }
+
 
   ## Check database connection
   ######################################################
@@ -369,8 +376,8 @@ DBgetEvalid <- function(states = NULL,
   ## Get SURVEY table
   if (!is.null(surveynm)) {
     survey.qry <- paste0("select * from ", surveynm, 
-      	" where ann_inventory = '", ann_inv, 
-		"' and statecd in(", toString(stcdlst), ")")
+      	" where ann_inventory in(", addcommas(ann_inv, quotes=TRUE), 
+		") and statecd in(", toString(stcdlst), ")")
     if (datsource == "sqlite") {
       SURVEY <- setDT(DBI::dbGetQuery(dbconn, survey.qry)) 
     } else {
@@ -499,11 +506,12 @@ DBgetEvalid <- function(states = NULL,
           invyrtab <- invyrtab[invyrtab$ANN_INVENTORY == ann_inventory,]
         }
         returnevalid <- TRUE
+
       } else { 
         ## Create invyrtab (if pop tables do not exist but pop_plot_stratum_assgn table does)
 
         message("no SURVEY table in database... assuming ANNUAL inventory plots")
-        invtype <- "ANNUAL"
+        #invtype <- "ANNUAL"
 
         ## Check for pop_plot_stratum_assgn
         if (datsource == "sqlite") {
@@ -596,31 +604,14 @@ DBgetEvalid <- function(states = NULL,
 
     ## Check invyrtab. Data frame with inventory years by state
     if (is.null(invyrtab)) {
+
       if (!is.null(surveynm)) {
-        ## GET invtype & ann_inventory
-        ###########################################################
-        invlst <- c("ANNUAL", "PERIODIC")
-        if (is.null(invtype)) {
-          invtype <- select.list(invlst, title="Inventory Type", multiple=FALSE)
-          if (invtype == "") stop("")
-        } else {
-          if (!invtype %in% invlst) {
-            warning("invalid invtype")
-            invtype <- select.list(invlst, title="Select inventory type", multiple=FALSE)
-            if (invtype == "") stop("")
-          }
-        }
         ## Create table of state, inventory year
         invyrqry <- paste0("select distinct STATECD, STATENM, STATEAB, ANN_INVENTORY, 
 		INVYR from ", "SURVEY where STATENM IN(", 
 		toString(paste0("'", states, "'")), 
 		") and invyr <> 9999 and P3_OZONE_IND = 'N' order by STATECD, INVYR")
-
-        if (datsource == "sqlite") {
-          invyrtab <- DBI::dbGetQuery(dbconn, invyrqry)
-        } else {
-          invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
-        }
+        invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
         cat("Inventory years by state...", "\n" )
         message(paste0(utils::capture.output(invyrtab), collapse = "\n"))
 
@@ -681,7 +672,7 @@ DBgetEvalid <- function(states = NULL,
       stinvyr.vals <- as.list(states)
       names(stinvyr.vals) <- pcheck.states(names(stinvyr.vals), "MEANING")
     }
- 
+
     if (!is.null(evalid)) {
       evalresp <- TRUE
 
