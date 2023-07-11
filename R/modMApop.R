@@ -855,6 +855,6 @@ modMApop <- function(popType="VOL",
     return(returnlst)
   } 
   rm(returnlst)
-  gc()
+  # gc()
 }
 

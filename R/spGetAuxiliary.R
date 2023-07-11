@@ -568,7 +568,7 @@ spGetAuxiliary <- function(xyplt = NULL,
       sppltx <- unique(extpoly$spxyext)
 
       rm(extpoly)
-      gc()
+      # gc()
     } else {
       message(unitvar, " already in spplt... not extracting from unit_layer")
     }
@@ -628,7 +628,7 @@ spGetAuxiliary <- function(xyplt = NULL,
       prednames.cont <- extdat.rast.cont$outnames
       inputdf.cont <- extdat.rast.cont$inputdf
       rm(extdat.rast.cont)
-      gc() 
+      # gc() 
  
       if (NAto0) {
         for (col in prednames.cont) set(sppltx, which(is.na(sppltx[[col]])), col, 0)
@@ -778,7 +778,7 @@ spGetAuxiliary <- function(xyplt = NULL,
       if (npixels) npixels <- FALSE
       rm(zonaldat.rast.cont)
       rm(zonalext)
-      gc() 
+      # gc() 
     }
     unitzonal <- unitzonal[zonalDT.cont] 
   }
@@ -816,7 +816,7 @@ spGetAuxiliary <- function(xyplt = NULL,
       predfac <- c(predfac, prednames.cat)
       inputdf <- rbind(inputdf, inputdf.cat)
       rm(extdat.rast.cat)
-      gc() 
+      # gc() 
 
       if (NAto0) {
         for (col in prednames.cat) set(sppltx, which(is.na(sppltx[[col]])), col, 0)
@@ -923,7 +923,7 @@ spGetAuxiliary <- function(xyplt = NULL,
       if (npixels) npixels <- FALSE
       rm(zonaldat.rast.cat)
       rm(zonalext)
-      gc() 
+      # gc() 
     }
     tabs <- check.matchclass(unitzonal, zonalDT.cat, unitvar)
     unitzonal <- tabs$tab1

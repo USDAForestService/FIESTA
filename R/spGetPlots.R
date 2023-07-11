@@ -1204,7 +1204,7 @@ spGetPlots <- function(bnd = NULL,
                                 outfn.date = outfn.date, 
                                 add_layer = TRUE)) 
           rm(pop_plot_stratum_assgn)
-          gc()
+          # gc()
         } 
       }
       if (showsteps && !is.null(spxy) && !is.null(bndx)) {

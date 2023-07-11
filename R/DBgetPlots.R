@@ -1773,7 +1773,7 @@ DBgetPlots <- function (states = NULL,
         pltx <- nbrcnd[pltx]
         setkeyv(pltx, "PLT_CN")
         rm(nbrcnd)
-        gc()
+        # gc()
 
         nbrcndlst <- c("NBRCND", "NBRCNDSAMP", "NBRCNDFOR", "NBRCNDFTYP")
         pltvarlst2 <- unique(c(pltvarlst2, nbrcndlst))      
@@ -2184,7 +2184,7 @@ DBgetPlots <- function (states = NULL,
                                    outfn.date = outfn.date, 
                                    add_layer = TRUE))
         rm(condux)
-        gc()   
+        # gc()   
       } 
     }
     
@@ -2364,12 +2364,12 @@ DBgetPlots <- function (states = NULL,
                                         outfn.date = outfn.date, 
                                         add_layer = TRUE)) 
               rm(treex)
-              gc()
+              # gc()
             }
           }
           if (datsource == "datamart") {
             rm(TREE)
-            gc()
+            # gc()
           }
         }
       }
@@ -2600,13 +2600,13 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
             rm(seedx)
-            gc()
+            # gc()
           }              
         }
       }
       if (datsource == "datamart") {
         rm(SEEDLING)
-        gc()
+        # gc()
       }
     }
 
@@ -2739,7 +2739,7 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
             rm(p2veg_subplot_sppx)
-            gc()
+            # gc()
           }
         }
       }
@@ -2802,7 +2802,7 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date = outfn.date, 
                                 add_layer = TRUE))
             rm(p2veg_subp_structurex)
-            gc() 
+            # gc() 
           }
         }
       }
@@ -2810,7 +2810,7 @@ DBgetPlots <- function (states = NULL,
       if (datsource == "datamart") {
         if (exists("P2VEG_SUBPLOT_SPP")) rm(P2VEG_SUBPLOT_SPP)
         if (exists("P2VEG_SUBP_STRUCTURE")) rm(P2VEG_SUBP_STRUCTURE)
-        gc()
+        # gc()
       }
     }
 
@@ -2919,14 +2919,14 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date = outfn.date, 
                                 add_layer = TRUE)) 
             rm(invasive_subplot_sppx)
-            gc() 
+            # gc() 
           }
         }
       }
 
       if (datsource == "datamart") {
         if (exists("INVASIVE_SUBPLOT_SPP")) rm(INVASIVE_SUBPLOT_SPP)
-        gc()
+        # gc()
       }
     }
 
@@ -3054,7 +3054,7 @@ DBgetPlots <- function (states = NULL,
                                 add_layer = TRUE)) 
             index.unique.subpcx <- NULL
             rm(subpx)
-            gc()
+            # gc()
           }
         }
       }
@@ -3117,7 +3117,7 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date = outfn.date, 
                                 add_layer = TRUE)) 
             rm(subpcx)
-            gc() 
+            # gc() 
           } 
         }
       }
@@ -3125,7 +3125,7 @@ DBgetPlots <- function (states = NULL,
       if (datsource == "datamart") {
         if (exists("SUBPLOT")) rm(SUBPLOT)
         if (exists("SUBP_COND")) rm(SUBP_COND)
-        gc()
+        # gc()
       }
     }
 
@@ -3231,13 +3231,13 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE))
             rm(cond_dwm_calcx)
-            gc()
+            # gc()
           } 
         }
       }
       if (datsource == "datamart") {
         if (exists("COND_DWM_CALC")) rm(COND_DWM_CALC)
-        gc()
+        # gc()
       }
     }
 
@@ -3354,12 +3354,12 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
             rm(sccmx)
-            gc() 
+            # gc() 
           } 
         }
         if (datsource == "datamart") {
           if (exists("SUBP_COND_CHNG_MTRX")) rm(SUBP_COND_CHNG_MTRX)
-          gc()
+          # gc()
         }
       }
     }
@@ -3455,13 +3455,13 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE))
             rm(grmx)
-            gc()  
+            # gc()  
           } 
         }
       }
       if (datsource == "datamart") {
         if (exists("TREE_GRM_COMPONENT")) rm(TREE_GRM_COMPONENT)
-        gc()
+        # gc()
       }
     }
  
@@ -3780,7 +3780,7 @@ DBgetPlots <- function (states = NULL,
                                    outfn.date = outfn.date, 
                                    add_layer = TRUE))
         rm(pltx)
-        gc() 
+        # gc() 
       }
       if (savedata && !is.null(condx)) {
         message("saving cond table...")
@@ -3799,7 +3799,7 @@ DBgetPlots <- function (states = NULL,
                                    outfn.date = outfn.date, 
                                    add_layer = TRUE)) 
         rm(condx)
-        gc()
+        # gc()
       }  
       if (savedata && savePOP && !is.null(ppsax)) {
         message("saving pop_plot_stratum_assgn table...")
@@ -3817,11 +3817,11 @@ DBgetPlots <- function (states = NULL,
                                outfn.date = outfn.date, 
                                add_layer = TRUE)) 
         rm(ppsax)
-        gc()
+        # gc()
       }
     }
     rm(pltcondx)
-    gc()
+    # gc()
 
     if (datsource == "datamart" && datamartType == "SQLITE") {
       DBI::dbDisconnect(dbconn)

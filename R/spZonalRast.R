@@ -417,7 +417,7 @@ spZonalRast <- function(polyv,
       } 
     } 
     rm(zstats)
-    gc() 
+    # gc() 
   }  
 
   if (savedata) {

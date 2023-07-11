@@ -1095,7 +1095,7 @@ modGBpop <- function(popType = "VOL",
 		                 add_layer = TRUE))
     rm(condx)
     rm(pltcondx)
-    gc()
+    # gc()
 
     if (popType %in% c("CHNG") && !is.null(sccmx)) {
       message("saving sccmx...")
@@ -1110,7 +1110,7 @@ modGBpop <- function(popType = "VOL",
 		                 append_layer = append_layer,
 		                 add_layer = TRUE))
       rm(sccmx)
-      gc()
+      # gc()
     }
 
     if (!is.null(treef)) {
@@ -1126,7 +1126,7 @@ modGBpop <- function(popType = "VOL",
 		                 append_layer = append_layer,
 		                 add_layer = TRUE))
       rm(treef)
-      gc()
+      # gc()
     }
     if (!is.null(seedf)) {
       message("saving seedx...")
@@ -1141,7 +1141,7 @@ modGBpop <- function(popType = "VOL",
 		                 append_layer = append_layer,
 		                 add_layer = TRUE))
       rm(seedf)
-      gc()
+      # gc()
     }
     if (!is.null(vcondsppf)) {
       message("saving vcondsppx...")
@@ -1156,7 +1156,7 @@ modGBpop <- function(popType = "VOL",
 		                 append_layer = append_layer,
 		                 add_layer = TRUE))
       rm(vcondsppf)
-      gc()
+      # gc()
     }
     if (!is.null(vcondstrf)) {
       message("saving vcondstrx...")
@@ -1171,7 +1171,7 @@ modGBpop <- function(popType = "VOL",
 		                 append_layer = append_layer,
 		                 add_layer = TRUE))
       rm(vcondstrf)
-      gc()
+      # gc()
     }
     if (popType == "GRM" && !is.null(grmf) && !poponly) {
       message("saving grmx...")
@@ -1187,7 +1187,7 @@ modGBpop <- function(popType = "VOL",
 		                   append_layer = append_layer,
 		                   add_layer = TRUE))
         rm(grmf)
-        gc()
+        # gc()
       }
       if (!is.null(popcheck$beginf)) {
         message("saving beginx...")
@@ -1202,7 +1202,7 @@ modGBpop <- function(popType = "VOL",
 		                  append_layer = append_layer,
 		                  add_layer = TRUE))
         rm(beginf)
-        gc()
+        # gc()
       }
       if (!is.null(popcheck$midptf)) {
         message("saving midptx...")
@@ -1217,7 +1217,7 @@ modGBpop <- function(popType = "VOL",
 		                   append_layer = append_layer,
 		                   add_layer = TRUE))
         rm(midptf)
-        gc()
+        # gc()
       }
     }
 
@@ -1257,7 +1257,7 @@ modGBpop <- function(popType = "VOL",
     rm(pltassgnx)
     rm(unitarea)
     rm(stratalut)
-    gc()
+    # gc()
   }
 
 
@@ -1276,7 +1276,7 @@ modGBpop <- function(popType = "VOL",
   } 
 
   rm(popcheck)
-  gc()
+  # gc()
 
   if (returndata) {
     return(returnlst)

@@ -517,7 +517,7 @@ spExtractRast <- function(xyplt,
       }
       sppltx <- merge(sppltx, dat, by.x=xy.uniqueid, by.y="pid")
       rm(dat)
-      gc()
+      # gc()
 
       ## Set rast.NODATA values as NA
       #sppltx <- sppltx[!sppltx[[cname]] %in% rast.NODATA[[1]], ] 

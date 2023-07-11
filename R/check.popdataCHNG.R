@@ -244,7 +244,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType,
   if (is.null(dsn)) {
     rm(cond)
     rm(sccm)
-    gc()
+    # gc()
   }
 
 
@@ -711,35 +711,35 @@ check.popdataCHNG <- function(tabs, tabIDs, popType=popType,
             tab1txt="tree", tab2txt="cond", subsetrows=TRUE)
       returnlst$tuniqueid <- tuniqueid
       rm(treex)
-      gc()
+      # gc()
     }
     if (!is.null(seedx)) {
       ## Check that the values of tuniqueid in seedx are all in cuniqueid in pltcondx
       returnlst$seedf <- check.matchval(seedx, pltcondx, tuniqueid, cuniqueid, 
             tab1txt="seed", tab2txt="cond", subsetrows=TRUE)
       rm(seedx)
-      gc()
+      # gc()
     }
     if (!is.null(grmx)) {
       ## Check that the values of tuniqueid in grmx are all in cuniqueid in pltcondx
       returnlst$grmf <- check.matchval(grmx, pltcondx, tuniqueid, cuniqueid, 
             tab1txt="grm", tab2txt="cond", subsetrows=TRUE)
       rm(grmx)
-      gc()
+      # gc()
     }
     if (!is.null(beginx)) {
       ## Check that the values of tuniqueid in beginx are all in cuniqueid in pltcondx
       returnlst$beginf <- check.matchval(beginx, pltcondx, tuniqueid, cuniqueid, 
             tab1txt="begin", tab2txt="cond", subsetrows=TRUE)
       rm(beginx)
-      gc()
+      # gc()
     }
     if (!is.null(midptx)) {
       ## Check that the values of tuniqueid in midptx are all in cuniqueid in pltcondx
       returnlst$midptf <- check.matchval(midptx, pltcondx, tuniqueid, cuniqueid, 
             tab1txt="midpt", tab2txt="cond", subsetrows=TRUE)
       rm(midptx)
-      gc()
+      # gc()
     }
   }
   if (popType == "LULC") {

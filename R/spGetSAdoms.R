@@ -813,7 +813,7 @@ spGetSAdoms <- function(smallbnd,
   rm(largebndx)
   rm(maxbndx)
   if (helper_autoselect) rm(autoselectlst)
-  gc()
+  # gc()
 
 
   if (saveobj) {
