@@ -2342,7 +2342,7 @@ DBgetPlots <- function (states = NULL,
                 treex[, JENKINS_TOTAL_B1 := NULL][, JENKINS_TOTAL_B2 := NULL]
                 sppvarsnew <- c("BIOJENK_kg", "BIOJENK_lb")
               }
-              if (greenwt && "DRYBIO_AG" %in% names(tree)) {
+              if (greenwt && "DRYBIO_AG" %in% names(treex)) {
                 treex[, GREENBIO_AG := DRYBIO_AG * DRYWT_TO_GREENWT_CONVERSION]
                 sppvarsnew <- c(sppvarsnew, "DRYWT_TO_GREENWT_CONVERSION")		
               }                
