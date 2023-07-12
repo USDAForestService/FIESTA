@@ -55,6 +55,5 @@ URL: https://usdaforestservice.github.io/FIESTA/,
     https://github.com/USDAForestService/FIESTA
 BugReports: https://github.com/USDAForestService/FIESTA/issues
 LazyData: true
-SystemRequirements: C++11
 Encoding: UTF-8
 RoxygenNote: 7.2.3
