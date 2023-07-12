@@ -248,17 +248,21 @@
 #'                      
 #' # Use GREG Estimator to Estimate cubic foot volume of live trees in our
 #' # population
-#' modMAtree(MApopdat = MApopdat,
+#' mod1 <- modMAtree(MApopdat = MApopdat,
 #'           MAmethod = "greg",
 #'           estvar = "VOLCFNET",
 #'           estvar.filter = "STATUSCD == 1")
 #'           
+#' str(mod1)
+#'           
 #' # Use GREG Elastic Net Estimator to Estimate basal area of live trees in our
 #' # population
-#' modMAtree(MApopdat = MApopdat,
+#' mod2 <- modMAtree(MApopdat = MApopdat,
 #'           MAmethod = "gregEN",
 #'           estvar = "BA",
 #'           estvar.filter = "STATUSCD == 1")
+#'           
+#' str(mod2)
 #' }
 #' @export modMAtree
 modMAtree <- function(MApopdat, 
