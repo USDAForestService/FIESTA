@@ -31,7 +31,7 @@
 #' @param keepcutbreaks Logical. If TRUE, the cutbreaks used for creating
 #' classes are appended to dataset.
 #' @param dsn String. Data source name of database with x.
-#' @param conn Open database connection.
+#' @param dbconn Open database dbconnection.
 #' @param overwrite Logical. If TRUE, and the class name already exists 
 #' in x, overwrites class name.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
@@ -100,7 +100,7 @@ datLUTclass <- function(x,
                         vars2keep = NULL, 
                         keepcutbreaks = FALSE, 
                         dsn = NULL,
-                        conn = NULL,
+                        dbconn = NULL,
                         overwrite = TRUE,
                         savedata = FALSE,
                         savedata_opts = NULL, 
@@ -157,29 +157,27 @@ datLUTclass <- function(x,
 
 
   ##################################################################
-  ## Check database connection (conn)
+  ## Check database connection (dbconn)
   ##################################################################
   isdb <- FALSE 
 
-  ## Check dsn
-  ###############################################
-  if (!is.null(dsn)) {
-    conn <- DBtestSQLite(dsn, dbconnopen = TRUE, 
+  ## Check dbconn and dsn
+  ####################################################################
+  if (!is.null(dbconn)) {
+    if (!DBI::dbIsValid(dbconn)) {
+      stop("invalid database dbconnection") 
+    }
+    isdb <- TRUE
+  } else if (!is.null(dsn)) {
+    dbconn <- DBtestSQLite(dsn, dbconnopen = TRUE, 
                              createnew = FALSE, returnpath = FALSE)
-    if (is.null(conn)) {
+    if (is.null(dbconn)) {
       warning("invalid database")
       exit()
     } else {
       isdb <- TRUE
     }
-    tablst <- DBI::dbListTables(conn)
-  } else if (!is.null(conn)) {
-     if (!DBI::dbIsValid(conn)) {
-       stop("invalid database connection") 
-     }
-     isdb <- TRUE
-     tablst <- DBI::dbListTables(conn)
-  }
+  } 
 
   
   ##################################################################
@@ -188,10 +186,10 @@ datLUTclass <- function(x,
 
   ## Check datx
   ########################################################
-  datx <- pcheck.table(x, conn=conn, gui=gui, 
+  datx <- pcheck.table(x, conn=dbconn, gui=gui, 
                        caption="Data table?", returnDT=TRUE)
   if (isdb) {
-    datnmlst <- DBI::dbListFields(conn, datx)
+    datnmlst <- DBI::dbListFields(dbconn, datx)
   } else {
     if (is.null(datx)) {
       message("invalid x")
@@ -210,7 +208,7 @@ datLUTclass <- function(x,
   if (isdb) {
     uniqueval.qry <- paste("select distinct", xvar, "from", datx,
                            "order by", xvar)
-    uniqueval <- na.omit(DBI::dbGetQuery(conn, uniqueval.qry))[[1]]
+    uniqueval <- na.omit(DBI::dbGetQuery(dbconn, uniqueval.qry))[[1]]
   } else {
     if (!is.numeric(datx[[xvar]])) stop("xvar must be a numeric vector in x")
     uniqueval <- sort(unique(na.omit(datx[[xvar]])))
@@ -352,15 +350,15 @@ datLUTclass <- function(x,
 
   if (isdb) {
     if (overwrite && LUTclassnm %in% datnmlst) {
-      remove.qry <- paste("ALTER TABLE", datx, 
+      dropcol.qry <- paste("ALTER TABLE", datx, 
                           "DROP COLUMN", LUTclassnm)
-      DBI::dbSendQuery(conn, remove.qry)
+      DBI::dbSendQuery(dbconn, dropcol.qry)
     }
 
     varchar <- paste0("varchar(", max(nchar(cutlabels)) + 3, ")")
     alter.qry <- paste("ALTER TABLE", datx, 
                        "ADD", LUTclassnm, varchar)
-    DBI::dbSendQuery(conn, alter.qry)
+    DBI::dbSendQuery(dbconn, alter.qry)
 
     ## Build classify query
     classify1.qry <- paste("UPDATE", datx, "SET", LUTclassnm, "= (CASE")
@@ -379,13 +377,13 @@ datLUTclass <- function(x,
     #classify.qry <- paste0(classify1.qry, classify2.qry, " END); Commit;")
     classify.qry <- paste0(classify1.qry, classify2.qry, " END)")
     message(classify.qry)
-    DBI::dbSendQuery(conn, classify.qry)
-    messagedf(DBI::dbListFields(conn, datx))
-    #DBI::dbCommit(conn)
+    DBI::dbSendQuery(dbconn, classify.qry)
+    messagedf(DBI::dbListFields(dbconn, datx))
+    #DBI::dbCommit(dbconn)
     tabcnt.qry <- paste("select", LUTclassnm, ", count(*) COUNT from", datx,
                        "group by", LUTclassnm)
-    tabcnt <- DBI::dbGetQuery(conn, tabcnt.qry)
-    #DBI::dbCommit(conn)
+    tabcnt <- DBI::dbGetQuery(dbconn, tabcnt.qry)
+    #DBI::dbCommit(dbconn)
     messagedf(tabcnt)
 
   } else {
@@ -472,7 +470,7 @@ datLUTclass <- function(x,
   }
 
   if (isdb) {
-    DBI::dbDisconnect(conn)
+    DBI::dbDisconnect(dbconn)
   }
 
   return(xLUTlst)
