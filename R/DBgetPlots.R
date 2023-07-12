@@ -2328,10 +2328,10 @@ DBgetPlots <- function (states = NULL,
             #if (any(names(treex) %in% treenavars)) 
             #  treex <- DT_NAto0(treex, treenavars)
 
-            if (defaultVars)
+            if ("DIA" %in% names(treex)) {
               ## Create new tree variables - basal area
               treex[, BA := DIA * DIA * 0.005454]
-
+            }
             ## Create new biomass variables
             if (!is.null(sppvars)) {
               treenames <- names(treex)
@@ -2340,8 +2340,12 @@ DBgetPlots <- function (states = NULL,
                 treex[, BIOJENK_kg := exp(JENKINS_TOTAL_B1 + JENKINS_TOTAL_B2 * log(DIA * 2.54))]
                 treex[, BIOJENK_lb := BIOJENK_kg * 2.2046]		## Converts back to tons
                 treex[, JENKINS_TOTAL_B1 := NULL][, JENKINS_TOTAL_B2 := NULL]
-                sppvarsnew <- c(sppvars, "BIOJENK_kg", "BIOJENK_lb")
+                sppvarsnew <- c("BIOJENK_kg", "BIOJENK_lb")
               }
+              if (greenwt && "DRYBIO_AG" %in% names(tree)) {
+                treex[, GREENBIO_AG := DRYBIO_AG * DRYWT_TO_GREENWT_CONVERSION]
+                sppvarsnew <- c(sppvarsnew, "DRYWT_TO_GREENWT_CONVERSION")		
+              }                
               setcolorder(treex, c(treenames, sppvarsnew)) 
             } 
             ## Append data
