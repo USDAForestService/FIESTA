@@ -219,17 +219,21 @@
 #'                      predfac = "tnt")
 #'
 #' # Use GREG estimator to estimate area of forest land in our population
-#' modMAarea(MApopdat = MApopdat, 
+#' mod1 <- modMAarea(MApopdat = MApopdat, 
 #'           MAmethod = "greg", 
 #'           landarea = "FOREST")
+#' 
+#' str(mod1)
 #'           
 #' # Use GREG estimator to estimate area of forest land by forest type and
 #' # stand-size class
-#' modMAarea(MApopdat = MApopdat,
+#' mod2 <- modMAarea(MApopdat = MApopdat,
 #'           MAmethod = "greg",
 #'           landarea = "FOREST",
 #'           rowvar = "FORTYPCD",
 #'           colvar = "STDSZCD")
+#'           
+#' str(mod2)
 #' }
 #' @export modMAarea
 modMAarea <- function(MApopdat, 
