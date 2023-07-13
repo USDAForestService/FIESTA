@@ -535,7 +535,7 @@ DBgetPlots <- function (states = NULL,
 	PREV_PLT_CN=dbqueries=REF_SPECIES=PLOT=PLOTe=POP_PLOT_STRATUM_ASSGNe <- NULL
   plotnm=plotgeomnm=ppsanm=condnm=treenm=seednm=vsubpsppnm=vsubpstrnm=invsubpnm=
 	subplotnm=subpcondnm=sccmnm=grmnm=dwmnm=surveynm=evalidnm=
-     pltcondx <- NULL
+     pltcondx=GREENBIO_AG=DRYBIO_AG=DRYWT_TO_GREENWT_CONVERSION <- NULL
 
 
   ## Define functions
@@ -2251,8 +2251,7 @@ DBgetPlots <- function (states = NULL,
           ttvars <- toString(paste0("t.", tcols))
           
           if (is.null(ttvars)) {
-            message("no columns in tree table")
-            exit()
+            stop("no columns in tree table")
           }
           
         } else {

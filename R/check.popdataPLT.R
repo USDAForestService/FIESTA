@@ -253,9 +253,9 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       if (!is.null(evalid)) {
         unitareaqry <- paste(unitareaqry, "where evalid in(", toString(popevalid), ")")
       }
-      unitarea <- suppressMessages(pcheck.table(unitarea, tab_dsn=dsn, 
+      unitarea <- pcheck.table(unitarea, tab_dsn=dsn, 
            tabnm="unitarea", caption="unitarea?",
-		nullcheck=nullcheck, tabqry=unitareaqry, returnsf=FALSE))
+		nullcheck=nullcheck, tabqry=unitareaqry, returnsf=FALSE)
     }
  
     if (strata && is.character(stratalut) && !is.null(chkdbtab(tablst, stratalut))) {

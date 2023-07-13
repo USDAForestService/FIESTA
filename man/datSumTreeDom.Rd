@@ -54,6 +54,8 @@ datSumTreeDom(
   returnDT = TRUE,
   savedata = FALSE,
   savedata_opts = NULL,
+  dbconn = NULL,
+  dbconnopen = FALSE,
   gui = FALSE
 )
 }
@@ -212,6 +214,10 @@ returns data.frame object(s).}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'tdomsum'.}
+
+\item{dbconn}{Open database connection.}
+
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 }

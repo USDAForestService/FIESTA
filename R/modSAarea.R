@@ -48,8 +48,6 @@
 #' model.
 #' @param SApackage String. Small area package to use ('JoSAE', 'sae', 'hbsae')
 #' @param SAmethod String. Small area method to use ('unit', 'area')
-#' @param estseed String. Use seedling data only or add to tree data. Seedling
-#' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
 #' @param largebnd.unique String. Name of the large boundary unique identifer
 #' to define plots within a model extent. If NULL, all plots are used for model
 #' extent.
@@ -169,7 +167,6 @@ modSAarea <- function(SApopdatlst = NULL,
                       prednames = NULL, 
                       SApackage = "JoSAE", 
                       SAmethod = "area", 
-                      estseed = "none", 
                       largebnd.unique = NULL, 
                       landarea = "FOREST", 
                       pcfilter = NULL, 

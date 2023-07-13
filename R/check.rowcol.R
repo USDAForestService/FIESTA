@@ -51,8 +51,7 @@ check.rowcol <- function(gui=FALSE, esttype, conn=NULL, treef=NULL, seedf=NULL, 
   if (!is.null(treef)) {
     if (is.character(treef) && isdb) {
       if (!treef %in% tablst) {
-        warning(seedf, " not in database")
-        exit()
+        stop(seedf, " not in database")
       } else {
         tnames <- DBI::dbListFields(conn, treef)
       }
@@ -63,8 +62,7 @@ check.rowcol <- function(gui=FALSE, esttype, conn=NULL, treef=NULL, seedf=NULL, 
   if (!is.null(seedf)) {
     if (is.character(seedf) && isdb) {
       if (!seedf %in% tablst) {
-        warning(seedf, " not in database")
-        exit()
+        stop(seedf, " not in database")
       } else {
         snames <- DBI::dbListFields(conn, seedf)
       }

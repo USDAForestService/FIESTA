@@ -220,7 +220,7 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
                   message(e)
 			return(NULL) })
     if (is.null(writechk)) {
-      exit()
+      stop()
     }
 
     ## Write new names to *.csv file

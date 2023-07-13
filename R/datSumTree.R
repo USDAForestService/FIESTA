@@ -101,6 +101,8 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'treesum'. 
+#' @param dbconn Open database connection.
+#' @param dbconnopen Logical. If TRUE, keep database connection open.
 #' @param gui Logical. If gui, user is prompted for parameters.
 #' 
 #' @return A list of the following items: \item{treedat}{ Data frame. Plot or
@@ -123,7 +125,7 @@
 #' treesum[treesum$PLT_CN == 40404737010690,]
 #' FIESTA::WYtree[FIESTA::WYtree$PLT_CN == 40404737010690,]
 #' @export datSumTree
-datSumTree <- function(tree = NULL, 
+datSumTree <- function(tree = NULL,
                        seed = NULL, 
                        cond = NULL,
                        plt = NULL, 
@@ -157,8 +159,10 @@ datSumTree <- function(tree = NULL,
                        tround = 5, 
                        checkNA = FALSE, 
                        returnDT = TRUE,
-                       savedata = FALSE, 
+                       savedata = FALSE,
                        savedata_opts = NULL,
+                       dbconn = NULL,
+                       dbconnopen = FALSE,
                        gui = FALSE) {
   ####################################################################################
   ## DESCRIPTION: Aggregates tree variable(s) to plot(/cond)-level, 
@@ -862,7 +866,8 @@ datSumTree <- function(tree = NULL,
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
         out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
         overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-        add_layer=add_layer, append_layer=append_layer, gui=gui)
+        add_layer=add_layer, append_layer=append_layer, out_conn=dbconn, 
+        dbconnopen=TRUE, gui=gui)
     outfolder <- outlst$outfolder
     out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
@@ -873,8 +878,9 @@ datSumTree <- function(tree = NULL,
     if (is.null(out_layer)) {
       out_layer <- "treesum"
     }
+    out_conn <- outlst$out_conn
   }
-  
+ 
   ################################################################################  
   ################################################################################  
   ### DO WORK
@@ -1225,43 +1231,42 @@ datSumTree <- function(tree = NULL,
     }
   }
 
-
   #### WRITE TO FILE 
   #############################################################
   if (savedata) {
     if (pltsp) {
       spExportSpatial(sumdat, 
-            savedata_opts=list(outfolder=outfolder, 
-                                  out_fmt=out_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer=out_layer,
-                                  outfn.pre=outfn.pre, 
-                                  outfn.date=outfn.date, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer, 
-                                  add_layer=TRUE))
+            savedata_opts=list(outfolder = outfolder, 
+                               out_fmt = out_fmt, 
+                               out_dsn = out_dsn, 
+                               out_layer = out_layer,
+                               outfn.pre = outfn.pre, 
+                               outfn.date = outfn.date, 
+                               overwrite_layer = overwrite_layer,
+                               append_layer = append_layer, 
+                               add_layer = TRUE))
     } else {
-      datExportData(sumdat, 
-            savedata_opts=list(outfolder=outfolder, 
-                                  out_fmt=out_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer=out_layer,
-                                  outfn.pre=outfn.pre, 
-                                  outfn.date=outfn.date, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer,
-                                  add_layer=TRUE)) 
-
-      datExportData(meta, 
-            savedata_opts=list(outfolder=outfolder, 
-                                  out_fmt=out_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer="meta",
-                                  outfn.pre=outfn.pre, 
-                                  outfn.date=outfn.date, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer,
-                                  add_layer=TRUE)) 
+      out_conn <- datExportData(sumdat, dbconn = out_conn, dbconnopen = TRUE,
+            savedata_opts=list(outfolder = outfolder, 
+                               out_fmt = out_fmt, 
+                               out_dsn = out_dsn, 
+                               out_layer = out_layer,
+                               outfn.pre = outfn.pre, 
+                               outfn.date = outfn.date, 
+                               overwrite_layer = overwrite_layer,
+                               append_layer = append_layer,
+                               add_layer = TRUE)) 
+ 
+      datExportData(meta, dbconn = out_conn, dbconnopen = FALSE,
+            savedata_opts=list(outfolder = outfolder, 
+                               out_fmt = out_fmt, 
+                               out_dsn = out_dsn, 
+                               out_layer = "meta",
+                               outfn.pre = outfn.pre, 
+                               outfn.date = outfn.date, 
+                               overwrite_layer = overwrite_layer,
+                               append_layer = append_layer,
+                               add_layer = TRUE)) 
 
     }
   } 

@@ -31,7 +31,8 @@
 #' @param keepcutbreaks Logical. If TRUE, the cutbreaks used for creating
 #' classes are appended to dataset.
 #' @param dsn String. Data source name of database with x.
-#' @param dbconn Open database dbconnection.
+#' @param dbconn Open database connection.
+#' @param dbconnopen Logica. If TRUE, keep database connection open.
 #' @param overwrite Logical. If TRUE, and the class name already exists 
 #' in x, overwrites class name.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
@@ -101,6 +102,7 @@ datLUTclass <- function(x,
                         keepcutbreaks = FALSE, 
                         dsn = NULL,
                         dbconn = NULL,
+                        dbconnopen = FALSE,
                         overwrite = TRUE,
                         savedata = FALSE,
                         savedata_opts = NULL, 
@@ -172,8 +174,7 @@ datLUTclass <- function(x,
     dbconn <- DBtestSQLite(dsn, dbconnopen = TRUE, 
                              createnew = FALSE, returnpath = FALSE)
     if (is.null(dbconn)) {
-      warning("invalid database")
-      exit()
+      stop("invalid database")
     } else {
       isdb <- TRUE
     }
@@ -192,8 +193,7 @@ datLUTclass <- function(x,
     datnmlst <- DBI::dbListFields(dbconn, datx)
   } else {
     if (is.null(datx)) {
-      message("invalid x")
-      exit()
+      stop("invalid x")
     }
     issf <- ifelse ("sf" %in% class(datx), TRUE, FALSE)
     if (issf) datx <- data.table(datx) 
@@ -315,7 +315,8 @@ datLUTclass <- function(x,
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
         out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
         overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-        add_layer=add_layer, append_layer=append_layer, gui=gui)
+        add_layer=add_layer, append_layer=append_layer, gui=gui,
+        out_conn=dbconn, dbconnopen=dbconnopen)
     outfolder <- outlst$outfolder
     out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
@@ -352,13 +353,13 @@ datLUTclass <- function(x,
     if (overwrite && LUTclassnm %in% datnmlst) {
       dropcol.qry <- paste("ALTER TABLE", datx, 
                           "DROP COLUMN", LUTclassnm)
-      DBI::dbSendQuery(dbconn, dropcol.qry)
+      DBI::dbExecute(dbconn, dropcol.qry)
     }
 
     varchar <- paste0("varchar(", max(nchar(cutlabels)) + 3, ")")
     alter.qry <- paste("ALTER TABLE", datx, 
                        "ADD", LUTclassnm, varchar)
-    DBI::dbSendQuery(dbconn, alter.qry)
+    DBI::dbExecute(dbconn, alter.qry)
 
     ## Build classify query
     classify1.qry <- paste("UPDATE", datx, "SET", LUTclassnm, "= (CASE")
@@ -377,13 +378,12 @@ datLUTclass <- function(x,
     #classify.qry <- paste0(classify1.qry, classify2.qry, " END); Commit;")
     classify.qry <- paste0(classify1.qry, classify2.qry, " END)")
     message(classify.qry)
-    DBI::dbSendQuery(dbconn, classify.qry)
+    DBI::dbExecute(dbconn, classify.qry)
     messagedf(DBI::dbListFields(dbconn, datx))
-    #DBI::dbCommit(dbconn)
+ 
     tabcnt.qry <- paste("select", LUTclassnm, ", count(*) COUNT from", datx,
                        "group by", LUTclassnm)
     tabcnt <- DBI::dbGetQuery(dbconn, tabcnt.qry)
-    #DBI::dbCommit(dbconn)
     messagedf(tabcnt)
 
   } else {
@@ -455,7 +455,7 @@ datLUTclass <- function(x,
                                   append_layer=append_layer, 
                                   add_layer=TRUE))
     } else {
-      datExportData(datx, 
+      datExportData(datx, dbconn=dbconn,
             savedata_opts=list(outfolder=outfolder, 
                                   out_fmt=out_fmt, 
                                   out_dsn=out_dsn, 

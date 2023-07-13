@@ -63,8 +63,7 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
         conn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE, 
                              createnew = FALSE, returnpath = FALSE)
         if (is.null(conn)) {
-          warning("invalid database")
-          exit()
+          stop("invalid database")
         } else {
           isdb <- TRUE
         }
@@ -293,8 +292,7 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
         returnlst$treef <- treef
       } else {
         if (!is.data.frame(treex)) {
-          warning("treex must be a data.frame object")
-          exit()
+          stop("treex must be a data.frame object")
         }
 
         ## Check that the values of tuniqueid in treex are all in cuniqueid in condf
@@ -317,8 +315,7 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
         returnlst$seedf <- seedf
       } else {
         if (!is.data.frame(seedx)) {
-          warning("treex must be a data.frame object")
-          exit()
+          stop("treex must be a data.frame object")
         }
 
         seedf <- check.matchval(seedx, pltcondf, tuniqueid, cuniqueid, 

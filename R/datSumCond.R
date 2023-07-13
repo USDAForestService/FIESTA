@@ -45,7 +45,9 @@
 #' @param savedata Logical. If TRUE, saves data to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
-#' default = 'condsum'. 
+#' default = 'condsum'.
+#' @param dbconn Open database connection.
+#' @param dbconnopen Logical. If TRUE, keep database connection open. 
 #' @param gui Logical. If gui, user is prompted for parameters.
 #' 
 #' @return A list of the following items: \item{condsum}{ Data frame.
@@ -87,6 +89,8 @@ datSumCond <- function(cond = NULL,
                        returnDT = TRUE,
                        savedata = FALSE, 
                        savedata_opts = NULL,
+                          dbconn = NULL,
+                          dbconnopen = FALSE,
                        gui = FALSE){
   
   #####################################################################################
@@ -331,7 +335,8 @@ datSumCond <- function(cond = NULL,
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
         out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
         overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-        add_layer=add_layer, append_layer=append_layer, gui=gui)
+        add_layer=add_layer, append_layer=append_layer, out_conn=dbconn, 
+         dbconnopen=TRUE, gui=gui)
     outfolder <- outlst$outfolder
     out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
@@ -342,6 +347,7 @@ datSumCond <- function(cond = NULL,
     if (is.null(out_layer)) {
       out_layer <- "condsum"
     }
+    out_conn = outlst$out_conn
   }
   
 
@@ -464,7 +470,7 @@ datSumCond <- function(cond = NULL,
                                   append_layer = append_layer, 
                                   add_layer = TRUE))
     } else {
-      datExportData(sumdat, 
+      datExportData(sumdat, dbconn = out_conn, dbconnopen = FALSE,
               savedata_opts=list(outfolder = outfolder, 
                                   out_fmt = out_fmt, 
                                   out_dsn = out_dsn, 

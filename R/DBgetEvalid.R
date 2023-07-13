@@ -131,7 +131,6 @@ DBgetEvalid <- function(states = NULL,
   if (gui) {
     evalCur=evalAll=evalType <- NULL
   }
-  exit <- function() { invokeRestart("abort") }
   
   
   ## Set global variables
@@ -757,8 +756,7 @@ DBgetEvalid <- function(states = NULL,
         ppsanm <- chkdbtab(dbtablst, ppsa_layer)
         if (is.null(ppsanm)) {
           warning("must include pop_plot_stratum_assgn table in database when eval='FIA'\n")
-          message("database tables: ", toString(dbtablst))
-          exit()
+          stop("database tables: ", toString(dbtablst))
         }
 
         ## Create lookup and get code for evalType

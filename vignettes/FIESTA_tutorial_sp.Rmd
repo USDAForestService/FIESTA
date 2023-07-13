@@ -376,10 +376,10 @@ The `spClipPoly` function clips (intersects) a polygon vector layer with another
 <details>
   <summary>View Example</summary>
   
-We first subsect the USAco `SpatialPolygons` layer with `WYbighorn`. Note: you must download USAco from the `geodata` package. See the "Set Up" section above.
+We first subsect the WYco `SpatialPolygons` layer with `WYbighorn`. Note: you must download USAco from the `geodata` package and subset to Wyoming. See the "Set Up" section above.
   
 ```{r}
-WYbhco <- spClipPoly(polyv = USAco,
+WYbhco <- spClipPoly(polyv = WYco,
                              clippolyv = WYbh)
 
 ```
@@ -388,8 +388,8 @@ We can now check and display `WYbighorn_co` with labels.
 
 ```{r}
 head(WYbhco)
-plot(sf::st_geometry(WYbhco['NAME_2']), col = sf.colors(nrow(WYbhco)))
-coords <- sf::st_coordinates(st_centroid(sf::st_geometry(WYbhco)))
+plot(sf::st_geometry(WYbhco['NAME_2']), col = sf::sf.colors(nrow(WYbhco)))
+coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(WYbhco)))
 text(coords[,"X"], coords[,"Y"], WYbhco[["NAME_2"]])
 ```
 
@@ -423,10 +423,10 @@ WYbhMW.fornf <- spClipRast(fornffn,
 
 Finally, we display the results:
 ```{r}
-WYbhMWprj <- crsCompare(WYbhMW, 
-                        rasterInfo(WYbhMW.fornf)$crs)$x
-raster::plot(raster::raster(WYbhMW.fornf))
-plot(st_geometry(WYbhMWprj), 
+WYbhMWprj <- FIESTAutils::crsCompare(WYbhMW, 
+                        FIESTAutils::rasterInfo(WYbhMW.fornf)$crs)$x
+terra::plot(terra::rast(WYbhMW.fornf))
+plot(sf::st_geometry(WYbhMWprj), 
      border = "red", 
      add = TRUE)
 ```
@@ -533,13 +533,15 @@ slp <- terra::terrain(dem,
                       v = "slope",
                       unit = "degrees",
                       filename = slpfn, 
-                      overwrite = TRUE)
+                      overwrite = TRUE,
+                      NAflag = -99999.0)
 aspfn <- paste0(outfolder, "/WYbh_asp.img")
 asp <- terra::terrain(dem,
                       v = "aspect",
                       unit = "degrees", 
                       filename = aspfn,
-                      overwrite = TRUE)
+                      overwrite = TRUE,
+                      NAflag = -99999.0)
 ```
 
 Finally, we extract estimation unit and zonal raster statistics (i.e., mean).
@@ -774,7 +776,7 @@ polyUnion <- spUnionPoly(polyv1 = USAco[USAco$NAME_1 == "Wyoming",],
                          polyv2 = WYbh, 
                          areacalc = TRUE)
 
-plot(st_geometry(polyUnion))
+plot(sf::st_geometry(polyUnion))
 head(polyUnion)
 ```
 
