@@ -8,7 +8,7 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options for saving data. If out_layer = NULL, default = 'datsp'.
 #' 
-#' @return An sf spatial object is written to outfolder.
+#' @return No return value. An sf spatial object is written to outfolder.
 #' @note If out_fmt='shp':\cr The ESRI shapefile driver truncates variable
 #' names to 10 characters or less. Variable names are changed before export
 #' using an internal function (trunc10shp). Name changes are output to the
@@ -139,8 +139,9 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
       if (DBI::dbCanConnect(RSQLite::SQLite(), out_dsn)) {
         sqlconn <- DBI::dbConnect(RSQLite::SQLite(), out_dsn, loadable.extensions = TRUE)
         tablst <- DBI::dbListTables(sqlconn)
+        DBI::dbDisconnect(sqlconn)
         if (length(tablst) == 0 || !"SpatialIndex" %in% tablst) {
-          stop(paste(out_dsn, "is a Spatialite database... "))
+          stop(paste(out_dsn, "is not a Spatialite database... "))
         }
       } 
       if (out_layer %in% tablst) {
@@ -220,7 +221,7 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
                   message(e)
 			return(NULL) })
     if (is.null(writechk)) {
-      exit()
+      return()
     }
 
     ## Write new names to *.csv file
@@ -232,5 +233,7 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
 
   } else {
     stop(out_fmt, " currently not supported")
-  }  
+  }
+  
+  return()
 }
