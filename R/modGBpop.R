@@ -860,7 +860,7 @@ modGBpop <- function(popType = "VOL",
   if (!is.null(unitvar2)) {
     condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
   }
-
+ 
   if (adj == "none") {
     setkeyv(condx, c(cuniqueid, condid))
     areawtnm <- areawt
@@ -1280,5 +1280,7 @@ modGBpop <- function(popType = "VOL",
 
   if (returndata) {
     return(returnlst)
-  } 
+  } else {
+    return(invisible())
+  }
 }

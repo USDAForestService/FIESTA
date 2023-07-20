@@ -19,6 +19,7 @@ datLUTclass(
   keepcutbreaks = FALSE,
   dsn = NULL,
   dbconn = NULL,
+  dbconnopen = FALSE,
   overwrite = TRUE,
   savedata = FALSE,
   savedata_opts = NULL,
@@ -65,7 +66,9 @@ classes are appended to dataset.}
 
 \item{dsn}{String. Data source name of database with x.}
 
-\item{dbconn}{Open database dbconnection.}
+\item{dbconn}{Open database connection.}
+
+\item{dbconnopen}{Logica. If TRUE, keep database connection open.}
 
 \item{overwrite}{Logical. If TRUE, and the class name already exists 
 in x, overwrites class name.}

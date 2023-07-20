@@ -67,6 +67,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
       dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
     }
     tablst <- DBI::dbListTables(dbconn)
+    #DBI::dbDisconnect(dbconn)
     chk <- TRUE
     SCHEMA.<- NULL
     dbqueries <- list()
@@ -132,12 +133,12 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   if (is.null(cond)) {
     stop("must include cond table")
   }
-  condx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
+  condx <- pcheck.table(cond, tab_dsn=dsn, conn=dbconn,
            tabnm="cond", caption="cond table?",
-		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE))
-  treex <- suppressMessages(pcheck.table(tree, tab_dsn=dsn, 
+		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE)
+  treex <- pcheck.table(tree, tab_dsn=dsn, conn=dbconn,
            tabnm="tree", caption="Tree table?",
-		nullcheck=nullcheck, gui=gui, tabqry=treeqry, returnsf=FALSE))
+		nullcheck=nullcheck, gui=gui, tabqry=treeqry, returnsf=FALSE)
  
   ## Define cdoms2keep
   cdoms2keep <- names(condx)
@@ -437,8 +438,10 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ###################################################################################
   ## Check seedling data
   ###################################################################################
-  seedx <- pcheck.table(seed, tab_dsn=dsn, tabnm="seed", caption="Seedling table?",
-		nullcheck=nullcheck, gui=gui, tabqry=seedqry, returnsf=FALSE)
+  seedx <- pcheck.table(seed, tab_dsn=dsn, conn=dbconn, 
+                        tabnm="seed", caption="Seedling table?", 
+                        nullcheck=nullcheck, gui=gui, 
+                        tabqry=seedqry, returnsf=FALSE)
   if (!is.null(seedx)) {
     suniqueid <- tabIDs[["seed"]]
 

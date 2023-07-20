@@ -253,7 +253,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       if (!is.null(evalid)) {
         unitareaqry <- paste(unitareaqry, "where evalid in(", toString(popevalid), ")")
       }
-      unitarea <- pcheck.table(unitarea, tab_dsn=dsn, 
+      unitarea <- pcheck.table(unitarea, tab_dsn=dsn, conn=dbconn,
            tabnm="unitarea", caption="unitarea?",
 		nullcheck=nullcheck, tabqry=unitareaqry, returnsf=FALSE)
     }
@@ -271,12 +271,12 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   ###################################################################################
   ## Import tables
   ###################################################################################
-  pltx <- suppressMessages(pcheck.table(plt, tab_dsn=dsn, 
+  pltx <- pcheck.table(plt, tab_dsn=dsn, conn=dbconn, 
            tabnm="plt", caption="plot table?",
-		nullcheck=nullcheck, tabqry=plotqry, returnsf=FALSE))
-  pltassgnx <- suppressMessages(pcheck.table(pltassgn, tab_dsn=dsn, 
+		nullcheck=nullcheck, tabqry=plotqry, returnsf=FALSE)
+  pltassgnx <- pcheck.table(pltassgn, tab_dsn=dsn, conn=dbconn,
            tabnm="pltassgn", caption="plot assignments?", 
-           nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE))
+           nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE)
 
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
@@ -592,7 +592,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   ## Strata - Generate table of plots by strata, including nonsampled plots (P2POINTCNT)
   ######################################################################################
   if (strata) {
-    stratalut <- pcheck.table(stratalut, tab_dsn=dsn, tabnm="stratalut",
+    stratalut <- pcheck.table(stratalut, tab_dsn=dsn, tabnm="stratalut", conn=dbconn,
 		caption="stratalut table?", nullcheck=nullcheck, tabqry=stratalutqry,
 		returnsf=FALSE)
     if (!stratindb && !is.null(evalid)) {
