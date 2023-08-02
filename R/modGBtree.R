@@ -499,18 +499,18 @@ modGBtree <- function(GBpopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, conn=conn, 
-                      treef=treef, seedf=seedf,
-	                condf=pltcondf, cuniqueid=cuniqueid, 
-	                tuniqueid=tuniqueid, estseed=estseed,
-	                rowvar=rowvar, colvar=colvar, 
-	                row.FIAname=row.FIAname, col.FIAname=col.FIAname,
- 	                row.orderby=row.orderby, col.orderby=col.orderby, 
-	                row.add0=row.add0, col.add0=col.add0, 
-	                title.rowvar=title.rowvar, title.colvar=title.colvar, 
-	                rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-	                rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-	                landarea=landarea, states=states)
+  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, conn=conn,
+                     treef=treef, seedf=seedf,
+                     condf=pltcondf, cuniqueid=cuniqueid,
+                     tuniqueid=tuniqueid, estseed=estseed,
+                     rowvar=rowvar, colvar=colvar,
+                     row.FIAname=row.FIAname, col.FIAname=col.FIAname,
+                     row.orderby=row.orderby, col.orderby=col.orderby,
+                     row.add0=row.add0, col.add0=col.add0,
+                     title.rowvar=title.rowvar, title.colvar=title.colvar,
+                     rowlut=rowlut, collut=collut, rowgrp=rowgrp,
+                     rowgrpnm=rowgrpnm, rowgrpord=rowgrpord,
+                     landarea=landarea, states=states)
   treef <- rowcolinfo$treef
   seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf

@@ -110,7 +110,8 @@ check.rowcol <- function(gui=FALSE, esttype, conn=NULL, treef=NULL, seedf=NULL, 
     condf <- merge(condf,
 	FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")],
 			by.x="DSTRBCD1", by.y="VALUE")
-    cnames[cnames == "GROUPCD"] <- "DSTRBGRP"
+    names(condf)[names(condf) == "GROUPCD"] <- "DSTRBGRP"
+    cnames <- names(condf)
     domvarlst <- c(domvarlst, "DSTRBGRP")
   }
   domvarlst.not <- cnames[!cnames %in% domvarlst]
