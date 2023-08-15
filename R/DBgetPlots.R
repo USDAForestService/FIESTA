@@ -1090,9 +1090,18 @@ DBgetPlots <- function (states = NULL,
   ### Saving data
   ########################################################################
 
+  ## Check returndata
+  returndata <- pcheck.logical(returndata, varnm="returndata", 
+		title="Return data?", first="YES", gui=gui)
+
   ## Check savedata
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data to outfolder?", first="YES", gui=gui)
+
+  if (!returndata && !savedata) {
+    message("both returndata and savedata are FALSE... how would you like output")
+    return(NULL)
+  }
 
   ## Check saveqry
   saveqry <- pcheck.logical(saveqry, varnm="saveqry", 
@@ -1178,6 +1187,83 @@ DBgetPlots <- function (states = NULL,
     }
   }
 
+  ## Check data tables
+  ##########################################################
+  if (!is.null(PLOTe)) {
+    PLOT <- PLOTe
+  } else {
+    plotnm <- NULL
+  }
+  if (!is.null(POP_PLOT_STRATUM_ASSGNe)) {
+    POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGNe
+  } else {
+    ppsanm <- NULL
+  }
+
+  if (datsource == "sqlite" && !is.null(dbconn)) {
+     
+    ## Check to make sure layers are in database
+    plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
+    if (is.null(plotnm)) {
+      message("there is no PLOT table in database")
+    } else {
+      pltflds <- DBI::dbListFields(dbconn, plotnm)
+    }
+    condnm <- chkdbtab(dbtablst, cond_layer, stopifnull=TRUE)
+    condflds <- DBI::dbListFields(dbconn, condnm)
+    if (is.null(condnm)) {
+      pltcondflds <- pltflds
+    } else {
+      pltcondflds <- c(pltflds, condflds)
+    }
+
+    if (savePOP || iseval) {
+      ppsanm <- chkdbtab(dbtablst, ppsa_layer)
+      if (is.null(ppsanm)) {
+        ppsanm <- chkdbtab(dbtablst, "ppsa", stopifnull=TRUE)
+      } else {
+        ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
+      }
+    } 
+    if ((iseval || measCur) && is.null(surveynm)) {
+      surveynm <- chkdbtab(dbtablst, survey_layer)
+    }
+
+    if (plotgeom) {
+      plotgeomnm <- chkdbtab(dbtablst, plotgeom_layer)
+      if (is.null(plotgeomnm)) {
+        message("there is no plotgeom table in database")
+        plotgeom <- FALSE
+      } else {
+        plotgeomflds <- DBI::dbListFields(dbconn, plotgeomnm)
+        pltcondflds <- c(pltcondflds, plotgeomflds)
+      }
+    } 
+
+    ## Other tables
+    if (!is.null(othertables)) {
+      for (othertable in othertables) {
+        othertable <- chkdbtab(dbtablst, othertable)
+        if (is.null(othertable)) {
+          othertables <- othertables[othertables != othertable]
+          othertables2 <- othertables
+        }
+      }
+    }
+
+    ## Check for indices
+    #########################################
+    if (evalCur || measCur) {       
+      chk <- chkidx(dbconn, plotnm, c("STATECD", "UNITCD", "COUNTYCD", "PLOT"))
+      if (is.null(chk)) {
+        message("to speed query... add an index to the plot table")
+        message("createidx(dbconn, '", plotnm, 
+                   "', c('STATECD', 'UNITCD', 'COUNTYCD', 'PLOT'))")
+      }
+    }
+  }
+
+
   ###################################################################################
   ## Loop through states
   ###################################################################################
@@ -1192,16 +1278,6 @@ DBgetPlots <- function (states = NULL,
       }
     }
 
-    if (!is.null(PLOTe)) {
-      PLOT <- PLOTe
-    } else {
-      plotnm <- NULL
-    }
-    if (!is.null(POP_PLOT_STRATUM_ASSGNe)) {
-      POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGNe
-    } else {
-      ppsanm <- NULL
-    }
     evalid <- NULL
     state <- states[i]
     message("\ngetting data for ", state, "...")
@@ -1220,58 +1296,7 @@ DBgetPlots <- function (states = NULL,
 
     ## Get PLOT/COND data 
     ###################################################
-    if (datsource == "sqlite") {
-     
-      ## Check to make sure layers are in database
-      plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
-      if (is.null(plotnm)) {
-        message("there is no PLOT table in database")
-      } else {
-        pltflds <- DBI::dbListFields(dbconn, plotnm)
-      }
-      condnm <- chkdbtab(dbtablst, cond_layer, stopifnull=TRUE)
-      condflds <- DBI::dbListFields(dbconn, condnm)
-      if (is.null(condnm)) {
-        pltcondflds <- pltflds
-      } else {
-        pltcondflds <- c(pltflds, condflds)
-      }
-
-      if (savePOP || iseval) {
-        ppsanm <- chkdbtab(dbtablst, ppsa_layer)
-        if (is.null(ppsanm)) {
-          ppsanm <- chkdbtab(dbtablst, "ppsa", stopifnull=TRUE)
-        } else {
-          ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
-        }
-      } 
-      if ((iseval || measCur) && is.null(surveynm)) {
-        surveynm <- chkdbtab(dbtablst, survey_layer)
-      }
-
-      if (plotgeom) {
-        plotgeomnm <- chkdbtab(dbtablst, plotgeom_layer)
-        if (is.null(plotgeomnm)) {
-          message("there is no plotgeom table in database")
-          plotgeom <- FALSE
-        } else {
-          plotgeomflds <- DBI::dbListFields(dbconn, plotgeomnm)
-          pltcondflds <- c(pltcondflds, plotgeomflds)
-        }
-      } 
-
-      ## Other tables
-      if (!is.null(othertables)) {
-        for (othertable in othertables) {
-          othertable <- chkdbtab(dbtablst, othertable)
-          if (is.null(othertable)) {
-            othertables <- othertables[othertables != othertable]
-            othertables2 <- othertables
-          }
-        }
-      }
-       
-    } else if (datsource == "datamart") {
+    if (datsource == "datamart") {
 
       ## PLOT table
       if (datamartType == "CSV") { 
@@ -3792,8 +3817,7 @@ DBgetPlots <- function (states = NULL,
       if (savedata && !is.null(spconddatx)) {
         message("saving spatial condition data...")
         index.unique.spconddat <- NULL
-        #if (!append_layer) index.unique.spconddatx <- "PLT_CN"
-        index.unique.spconddatx <- "PLT_CN"
+        if (!append_layer) index.unique.spconddatx <- "PLT_CN"
         datExportData(spconddatx, 
               index.unique = index.unique.spconddatx,
               savedata_opts = list(outfolder = outfolder, 
