@@ -148,7 +148,7 @@ in query.  See notes for variable descriptions.}
 are included in dataset (NF_SAMPLING_STATUS_CD = 1). See below for more
 details.}
 
-\item{subcycle99}{Logical. If TRUE, excludes plots with SUBCYCLE = 99. These
+\item{subcycle99}{Logical. If TRUE, includes plots with SUBCYCLE = 99. These
 plots are plots that are measured more than once and are not included in the
 estimation process.}
 

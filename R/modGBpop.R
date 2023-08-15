@@ -90,6 +90,7 @@
 #' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
 #' level; 'plot' - adjustments are calculated at plot-level. Adjustments are
 #' only calculated for annual inventory plots (DESIGNCD=1).
+#' @param defaultVars Logical. If TRUE, a set of default variables are selected.
 #' @param unitvar String. Name of the estimation unit variable in unitarea and
 #' cond or pltassgn data frame with estimation unit assignment for each plot
 #' (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.
@@ -250,6 +251,7 @@ modGBpop <- function(popType = "VOL",
                      areawt = "CONDPROP_UNADJ", 
                      areawt2 = NULL,
                      adj = "samp", 
+                     defaultVars = TRUE, 
                      unitvar = NULL, 
                      unitarea = NULL, 
                      areavar = "ACRES", 
@@ -1066,10 +1068,10 @@ modGBpop <- function(popType = "VOL",
   ## Save data frames
   ##################################################################
   if (savedata) {
-    if (out_fmt == "sqlite") {
-      returnlst$pop_fmt <- "sqlite"
-      returnlst$pop_dsn <- file.path(outfolder, out_dsn)
-    }
+#    if (out_fmt == "sqlite") {
+#      returnlst$pop_fmt <- "sqlite"
+#      returnlst$pop_dsn <- file.path(outfolder, out_dsn)
+#    }
     message("saving condx...")
     datExportData(condx, 
           savedata_opts=list(outfolder = outfolder, 

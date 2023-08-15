@@ -16,6 +16,7 @@ modGBpop(
   areawt = "CONDPROP_UNADJ",
   areawt2 = NULL,
   adj = "samp",
+  defaultVars = TRUE,
   unitvar = NULL,
   unitarea = NULL,
   areavar = "ACRES",
@@ -78,6 +79,8 @@ weights (e.g., CONDPROP_UNADJ).}
 'plot').  'samp' - adjustments are calculated at strata/estimation unit
 level; 'plot' - adjustments are calculated at plot-level. Adjustments are
 only calculated for annual inventory plots (DESIGNCD=1).}
+
+\item{defaultVars}{Logical. If TRUE, a set of default variables are selected.}
 
 \item{unitvar}{String. Name of the estimation unit variable in unitarea and
 cond or pltassgn data frame with estimation unit assignment for each plot

@@ -1,9 +1,10 @@
-check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
-	pfromqry, palias, pjoinid, whereqry, adj, ACI, pltx=NULL, puniqueid="CN", 
-	dsn=NULL, dbconn=NULL, condid="CONDID", areawt="CONDPROP_UNADJ", areawt2 = NULL,
-	MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, diavar="DIA",
-	areawt_micr="MICRPROP_UNADJ", areawt_subp="SUBPPROP_UNADJ", areawt_macr="MACRPROP_UNADJ",
-	nonsamp.cfilter=NULL, nullcheck=FALSE, cvars2keep=NULL, gui=FALSE){
+check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid, 
+    pfromqry, palias, pjoinid, whereqry, adj, ACI, pltx=NULL, puniqueid="CN",
+    dsn=NULL, dbconn=NULL, condid="CONDID", areawt="CONDPROP_UNADJ", areawt2 = NULL,
+    MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, diavar="DIA",
+    areawt_micr="MICRPROP_UNADJ", areawt_subp="SUBPPROP_UNADJ",   
+    areawt_macr="MACRPROP_UNADJ", defaultVars=FALSE,
+    nonsamp.cfilter=NULL, nullcheck=FALSE, cvars2keep=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs for AREA/VOL estimation
@@ -72,13 +73,17 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     SCHEMA.<- NULL
     dbqueries <- list()
 
-
+ 
     ## Create query for cond
     #########################################
     if (all(!is.null(cond), is.character(cond), cond %in% tablst)) {
       dbcvars <- DBI::dbListFields(dbconn, cond)
-      cvars <-  DBvars.default()$condvarlst
-      cvars <- cvars[cvars %in% dbcvars]
+      if (defaultVars) {
+        cvars <-  DBvars.default()$condvarlst
+        cvars <- cvars[cvars %in% dbcvars]
+      } else {
+        cvars <- dbcvars
+      }
 
       if (is.null(pfromqry)) {
         cfromqry <- paste0(SCHEMA., cond, " c")
@@ -96,10 +101,14 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     #########################################
     if (all(!is.null(tree), is.character(tree), tree %in% tablst)) {
       dbtvars <- DBI::dbListFields(dbconn, tree)
-      treevars <-  DBvars.default(istree=TRUE)$treevarlst
-      tsumvars <-  DBvars.default(istree=TRUE)$tsumvarlst
-      tvars <- unique(c(treevars, tsumvars))
-      tvars <- tvars[tvars %in% dbtvars]
+
+      if (defaultVars) {
+        treevars <-  DBvars.default(istree=TRUE)$treevarlst
+        tsumvars <-  DBvars.default(istree=TRUE)$tsumvarlst
+        tvars <- unique(c(treevars, tsumvars))
+      } else {
+        tvars <- dbtvars
+      }
 
       if (!is.null(pfromqry)) {
         tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., tree,

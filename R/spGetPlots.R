@@ -344,7 +344,7 @@ spGetPlots <- function(bnd = NULL,
   datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		gui=gui, checklst=datsourcelst, caption="Plot data source?",
            stopifinvalid=TRUE)
-
+ 
   if (is.null(xy_datsource) && is.null(datsource)) {
     stop("xy_datsource and/or datsource are invalid")
   } else if (is.null(xy_datsource)) {
@@ -639,6 +639,9 @@ spGetPlots <- function(bnd = NULL,
                          clipxy = clipxy, 
                          showsteps = FALSE, 
                          returnxy = TRUE)
+          if (is.null(xydat)) {
+            return(NULL)
+          }
           spxy <- xydat$spxy
           pltids <- xydat$pltids
           states <- xydat$states
@@ -1126,6 +1129,7 @@ spGetPlots <- function(bnd = NULL,
           message("there are ", abs(nrow(plt) - nrow(stpltids)), 
 			" plots in ", state, " that do not match pltids")
           #spxy[!spxy[[xyjoinid]] %in% plt[[pjoinid]],] 
+          messagedf(stpltids[!stpltids[[xyjoinid]] %in% PLOT[[pjoinid]],])
         }
         pids <- plt[[puniqueid]]
 

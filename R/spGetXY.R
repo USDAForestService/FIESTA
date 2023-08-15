@@ -446,6 +446,9 @@ spGetXY <- function(bnd,
                      invtype = invtype,
                      intensity1 = intensity1,
                      issp = TRUE)
+    if (is.null(xydat)) {
+      return(NULL)
+    }
     spxy <- xydat$spxy
     xy.uniqueid <- "PLT_CN"
     xyjoinid <- xydat$xyjoinid
