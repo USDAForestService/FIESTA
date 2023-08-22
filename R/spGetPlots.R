@@ -1065,6 +1065,7 @@ spGetPlots <- function(bnd = NULL,
         stateFilterDB <- paste(stateFilterDB, "&", stateFilter) 
         rm(stateFilter)
       }
+
       dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 

@@ -533,7 +533,8 @@ DBgetPlots <- function (states = NULL,
 	NF_SAMPLING_STATUS_CD=NF_COND_STATUS_CD=ACI_NFS=OWNCD=OWNGRPCD=INVYR=
 	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=SEEDSUBP6=
 	PREV_PLT_CN=dbqueries=REF_SPECIES=PLOT=PLOTe=POP_PLOT_STRATUM_ASSGNe <- NULL
-  plotnm=plotgeomnm=ppsanm=condnm=treenm=seednm=vsubpsppnm=vsubpstrnm=invsubpnm=
+  plotnm=plotgeomnm=ppsanm=ppsanme=condnm=treenm=seednm=
+     vsubpsppnm=vsubpstrnm=invsubpnm=
 	subplotnm=subpcondnm=sccmnm=grmnm=dwmnm=surveynm=evalidnm=
      pltcondx=GREENBIO_AG=DRYBIO_AG=DRYWT_TO_GREENWT_CONVERSION <- NULL
 
@@ -545,7 +546,7 @@ DBgetPlots <- function (states = NULL,
       ACTUAL = c("LON_ACTUAL", "LAT_ACTUAL"),
       PUBLIC = c("LON_PUBLIC", "LAT_PUBLIC"))
   }  
-  
+ 
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -553,6 +554,7 @@ DBgetPlots <- function (states = NULL,
 
   dotargs <- c(list(...))
   args <- as.list(environment())
+  #args <- as.list(.GlobalEnv)
   args <- args[!names(args) %in% names(dotargs)]
   args <- args[names(args) %in% names(matchargs)]
   args <- append(args, dotargs)
@@ -913,17 +915,18 @@ DBgetPlots <- function (states = NULL,
   }
   dbconn <- evalInfo$dbconn
   SURVEY <- evalInfo$SURVEY
+  POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
   if (!is.null(SURVEY)) {
     surveynm <- "SURVEY"
   }
   if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
     POP_PLOT_STRATUM_ASSGNe <- POP_PLOT_STRATUM_ASSGN
-    ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+    psanme <- "POP_PLOT_STRATUM_ASSGNe"
   } else if (!is.null(evalInfo$PLOT)) {
     PLOTe <- evalInfo$PLOT
     plotnm <- "PLOTe"
   }
-
+ 
   if (!is.list(Type)) {
     Typelist <- as.list(rep(Type, length(states)))
     names(Typelist) <- states
@@ -1194,11 +1197,6 @@ DBgetPlots <- function (states = NULL,
   } else {
     plotnm <- NULL
   }
-  if (!is.null(POP_PLOT_STRATUM_ASSGNe)) {
-    POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGNe
-  } else {
-    ppsanm <- NULL
-  }
 
   if (datsource == "sqlite" && !is.null(dbconn)) {
      
@@ -1263,11 +1261,12 @@ DBgetPlots <- function (states = NULL,
     }
   }
 
-
   ###################################################################################
   ## Loop through states
   ###################################################################################
+  pb <- utils::txtProgressBar(min=0, max=length(states))
   for (i in 1:length(states)) {
+    utils::setTxtProgressBar(pb, i)
 
     if (savedata) {
       if (i > 1) { 
@@ -1297,7 +1296,6 @@ DBgetPlots <- function (states = NULL,
     ## Get PLOT/COND data 
     ###################################################
     if (datsource == "datamart") {
-
       ## PLOT table
       if (datamartType == "CSV") { 
         if (is.null(plotnm)) { 
@@ -1335,9 +1333,9 @@ DBgetPlots <- function (states = NULL,
       } else {
         pltcondflds <- condflds
       }
-
+ 
       if (iseval || savePOP) {
-        if (is.null(ppsanm)) {
+        if (is.null(ppsanme)) {
           ## POP_PLOT_STRATUM_ASSGN table (ZIP FILE) - 
           ## To get estimation unit & stratum assignment for each plot. 
           POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbr, 
@@ -1346,7 +1344,7 @@ DBgetPlots <- function (states = NULL,
         ppsanm <- "POP_PLOT_STRATUM_ASSGN"
         ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
       }   
-    
+ 
       ## SURVEY table
       if (iseval && measCur && is.null(surveynm)) {
         SURVEY <- DBgetCSV("SURVEY", stabbr, returnDT=TRUE, stopifnull=FALSE) 
@@ -3901,6 +3899,7 @@ DBgetPlots <- function (states = NULL,
       DBI::dbDisconnect(dbconn)
     }
   } ## end loop for states
+  close(pb)
 
   if (savedata && saveSURVEY) {
     message("saving survey table...")
