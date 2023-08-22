@@ -509,8 +509,8 @@ modGBpop <- function(popType = "VOL",
     popevalid <- as.character(evalid)
     substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
 		formatC(FIESTAutils::ref_popType[FIESTAutils::ref_popType$popType %in% popType, "EVAL_TYP_CD"], width=2, flag="0")
-    evalid <- as.character(evalid)
-    substr(evalid, nchar(evalid)-1, nchar(evalid)) <- "01"
+    #evalid <- as.character(evalid)
+    #substr(evalid, nchar(evalid)-1, nchar(evalid)) <- "01"
   } 
   if (popType %in% c("GROW", "MORT", "REMV")) {
     popType <- "GRM"

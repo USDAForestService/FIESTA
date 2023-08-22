@@ -375,8 +375,9 @@ modSApop <- function(popType="VOL",
   popevalid <- as.character(evalid)
   if (!is.null(evalid)) {
     substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
-		FIESTAutils::ref_popType[FIESTAutils::ref_popType$popType %in% popType, "EVAL_TYP_CD"]
+		formatC(FIESTAutils::ref_popType[FIESTAutils::ref_popType$popType %in% popType, "EVAL_TYP_CD"], width=2, flag="0")
   } 
+
 
   ###################################################################################
   ## Load data
