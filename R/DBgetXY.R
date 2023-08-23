@@ -807,17 +807,7 @@ DBgetXY <- function (states = NULL,
       }
     }
   } else {
-  
-    ## Check for indices
-    if (evalCur || measCur) {       
-      chk <- chkidx(dbconn, xynm, c("STATECD", "UNITCD", "COUNTYCD", "PLOT"))
-      if (is.null(chk)) {
-        message("to speed query... add an index to the plot table")
-        message("createidx(dbconn, '", xynm, 
-                   "', c('STATECD', 'UNITCD', 'COUNTYCD', 'PLOT'))")
-      }
-    }
-  
+   
     plotnm <- NULL
     if (measCur) {
       xyvarsA <- paste0("p.", unique(xyvars)) 
