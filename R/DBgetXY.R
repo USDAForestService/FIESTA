@@ -688,6 +688,17 @@ DBgetXY <- function (states = NULL,
       if (!is.null(plotnm)) {
         pltflds <- DBI::dbListFields(dbconn, plotnm)
       }
+	  
+	  ## Check for indices
+      if (evalCur || measCur) {       
+        chk <- chkidx(dbconn, plotnm, c("STATECD", "UNITCD", "COUNTYCD", "PLOT"))
+        if (is.null(chk)) {
+          message("to speed query... add an index to the plot table")
+          message("createidx(dbconn, '", plotnm, 
+                   "', c('STATECD', 'UNITCD', 'COUNTYCD', 'PLOT'))")
+        }
+      }
+ 
     } else {
       PLOT <- pcheck.table(plot_layer, stopifnull=TRUE, stopifinvalid=TRUE)
       plotnm <- "PLOT"
@@ -796,6 +807,17 @@ DBgetXY <- function (states = NULL,
       }
     }
   } else {
+  
+    ## Check for indices
+    if (evalCur || measCur) {       
+      chk <- chkidx(dbconn, xynm, c("STATECD", "UNITCD", "COUNTYCD", "PLOT"))
+      if (is.null(chk)) {
+        message("to speed query... add an index to the plot table")
+        message("createidx(dbconn, '", xynm, 
+                   "', c('STATECD', 'UNITCD', 'COUNTYCD', 'PLOT'))")
+      }
+    }
+  
     plotnm <- NULL
     if (measCur) {
       xyvarsA <- paste0("p.", unique(xyvars)) 
