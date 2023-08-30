@@ -32,7 +32,7 @@ Depends:
 Imports:
     data.table,
     DBI,
-    FIESTAutils (>= 1.1.8.9000),
+    FIESTAutils,
     gdalraster,
     grDevices,
     graphics,
@@ -41,7 +41,6 @@ Imports:
     sf,
     sqldf,
     utils
-Remotes: USDAForestService/FIESTAutils
 Suggests: 
     knitr,
     geodata,
