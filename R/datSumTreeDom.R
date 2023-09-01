@@ -258,8 +258,8 @@ datSumTreeDom <- function(tree = NULL,
                           returnDT = TRUE,
                           savedata = FALSE,
                           savedata_opts = NULL,
-                             dbconn = NULL,
-                             dbconnopen = FALSE,
+                          dbconn = NULL,
+                          dbconnopen = FALSE,
                           gui = FALSE){
   ####################################################################################
   ## DESCRIPTION: Aggregates tree domain data (ex. species) to condition or plot level  
@@ -487,7 +487,7 @@ datSumTreeDom <- function(tree = NULL,
       tsumuniqueid <- c(tsumuniqueid, condid)
     }
   }
-
+  
   if (seedonly) {
     tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", 	
 		checklst=seednames, caption="UniqueID variable - seed", 
@@ -661,7 +661,6 @@ datSumTreeDom <- function(tree = NULL,
     }
   }
 
-
   #####################################################################
   ## Get tree data
   #####################################################################
@@ -684,7 +683,6 @@ datSumTreeDom <- function(tree = NULL,
     seedx <- setDT(sqldf::sqldf(seed.qry, dbname=dbname))
     setkeyv(seedx, tsumuniqueid)
   }
-
 
   ## Check cond and plot tables
   ########################################################################
@@ -1306,13 +1304,12 @@ datSumTreeDom <- function(tree = NULL,
     }
     out_conn = outlst$out_conn
   }
-  
+
   ################################################################################  
   ################################################################################  
   ### DO WORK
   ################################################################################ 
   ################################################################################  
-
   if (getadjplot) {
 
     if (bysubp) {
@@ -1328,9 +1325,12 @@ datSumTreeDom <- function(tree = NULL,
       treex <- tabs$tab1
       subpcx <- tabs$tab2
 
-      adjfacdata <- getadjfactorPLOT(treex=treex, seedx=seedx, condx=subpcx, 
-		tuniqueid=c(tuniqueid, subpid), cuniqueid=c(subpuniqueid, subpid),
-		areawt="CONDPROP_UNADJ")
+      adjfacdata <- getadjfactorPLOT(treex = treex, 
+	                     seedx = seedx, 
+					     condx = subpcx,
+						 tuniqueid = c(tuniqueid, subpid), 
+						 cuniqueid = c(subpuniqueid, subpid),
+						 areawt = "CONDPROP_UNADJ")
       condx <- adjfacdata$condx
       cuniqueid <- c(subpuniqueid, subpid)
  
@@ -1364,10 +1364,15 @@ datSumTreeDom <- function(tree = NULL,
       condx <- datFilter(x=condx, xfilter=cond.nonsamp.filter, 
 		title.filter="cond.nonsamp.filter")$xf
 
-      adjfacdata <- getadjfactorVOL(treex=treex, seedx=seedx, condx=condx, 
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid, adj=TRUE)
+      adjfacdata <- getadjfactorVOL(treex = treex, 
+	                         seedx = seedx, 
+							 condx = condx,
+							 tuniqueid = tuniqueid, 
+							 cuniqueid = cuniqueid, 
+							 adj = TRUE)
       condx <- adjfacdata$condx
-      varadjlst <- c("ADJ_FACTOR_COND", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
+      varadjlst <- c("ADJ_FACTOR_COND", "ADJ_FACTOR_SUBP", 
+					 "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
       if (any(varadjlst %in% names(condx))) {
         varadjlst <- varadjlst[varadjlst %in% names(condx)]
         condx[, (varadjlst) := NULL]
@@ -1433,7 +1438,7 @@ datSumTreeDom <- function(tree = NULL,
       tdomtotnm <- paste0(tdomprefix, "TOT")
     }
   }
-
+ 
   ## GET NAME FOR SUMMED TREE VARIABLE FOR ALL TREE DOMAINS (IF PROPORTION = TRUE)
   if (proportion) denomvar <- paste0(newname, "_ALL")
 
@@ -1553,7 +1558,7 @@ datSumTreeDom <- function(tree = NULL,
     tdomvarlut <- merge(ref_spgrpcd, tdomvarlut, by.x="VALUE", by.y="SPGRPCD")
     names(tdomvarlut)[names(tdomvarlut) %in% c("VALUE", "MEANING")] <- c("SPGRPCD", "SPGRPNM")
   }        
- 
+
   ## Generate barplot
   if (tdombarplot) {
     ## Frequency

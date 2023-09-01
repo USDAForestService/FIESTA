@@ -14,7 +14,7 @@ datPivot(
   NAto0 = TRUE,
   dropNAxvar = TRUE,
   dropNAyvar = TRUE,
-  pvar.round = 2,
+  pvar.round = 6,
   savedata = FALSE,
   savedata_opts = NULL,
   gui = FALSE

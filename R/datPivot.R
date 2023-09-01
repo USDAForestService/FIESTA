@@ -50,8 +50,8 @@ datPivot <- function(x,
                      NAto0 = TRUE, 
                      dropNAxvar = TRUE, 
                      dropNAyvar = TRUE, 
-                     pvar.round = 2, 
-	                   savedata = FALSE, 
+                     pvar.round = 6,
+					 savedata = FALSE, 
                      savedata_opts = NULL, 
                      gui = FALSE){
 

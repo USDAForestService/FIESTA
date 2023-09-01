@@ -1252,7 +1252,7 @@ DBgetPlots <- function (states = NULL,
     ## Check for indices
     #########################################
     if (evalCur || measCur) {       
-      chk <- chkidx(dbconn, plotnm, c("STATECD", "UNITCD", "COUNTYCD", "PLOT"))
+      chk <- checkidx(dbconn, plotnm, c("STATECD", "UNITCD", "COUNTYCD", "PLOT"))
       if (is.null(chk)) {
         message("to speed query... add an index to the plot table")
         message("createidx(dbconn, '", plotnm, 

@@ -904,9 +904,9 @@ datSumTree <- function(tree = NULL,
 
       adjfacdata <- getadjfactorPLOT(treex = treex, seedx = seedx, 
                                      condx = subpcx, 
-		                          tuniqueid = c(tuniqueid, subpid), 
+		                             tuniqueid = c(tuniqueid, subpid), 
                                      cuniqueid = c(subpuniqueid, subpid),
-		                          areawt = "CONDPROP_UNADJ")
+		                             areawt = "CONDPROP_UNADJ")
       condx <- adjfacdata$condx
       cuniqueid <- c(subpuniqueid, subpid)
       tuniqueid <- c(tuniqueid, subpid)
@@ -960,8 +960,11 @@ datSumTree <- function(tree = NULL,
       treex <- tabs$tab1
       condx <- tabs$tab2
 
-      adjfacdata <- getadjfactorPLOT(treex=treex, seedx=seedx, condx=condx, 
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
+      adjfacdata <- getadjfactorPLOT(treex = treex, 
+	                                 seedx = seedx, 
+									 condx = condx, 
+		                             tuniqueid = tuniqueid, 
+									 cuniqueid = cuniqueid)
       condx <- adjfacdata$condx
       varadjlst <- c("ADJ_FACTOR_COND", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
       if (any(varadjlst %in% names(condx))) {
