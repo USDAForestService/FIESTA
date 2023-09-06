@@ -32,7 +32,9 @@
 #' classes are appended to dataset.
 #' @param dsn String. Data source name of database with x.
 #' @param dbconn Open database connection.
-#' @param dbconnopen Logica. If TRUE, keep database connection open.
+#' @param dbconnopen Logical. If TRUE, keep database connection open.
+#' @param dbwrite Logical. If TRUE, write class column to database table x.
+#' @param dbreturn Logical. If TRUE, return table with class column.
 #' @param overwrite Logical. If TRUE, and the class name already exists 
 #' in x, overwrites class name.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
@@ -44,7 +46,7 @@
 #' @return \item{xLUT}{ Input data table with look-up table variable(s). }
 #' \item{LUTclassnm}{ Name of the classified variable. } \item{LUT}{ Look-up
 #' table with categories. }
-#' 
+#'tablst
 #' If savedata = TRUE, a comma-delimited file is output to the outfolder as
 #' outfn.  If outfn = NULL, the name of the file will be datlut_'date'.csv.
 #' @note The look-up table format must be similar to the following table Set
@@ -103,6 +105,8 @@ datLUTclass <- function(x,
                         dsn = NULL,
                         dbconn = NULL,
                         dbconnopen = FALSE,
+						dbwrite = FALSE,
+						dbreturn = TRUE, 
                         overwrite = TRUE,
                         savedata = FALSE,
                         savedata_opts = NULL, 
@@ -161,43 +165,95 @@ datLUTclass <- function(x,
   ##################################################################
   ## Check database connection (dbconn)
   ##################################################################
-  isdb <- FALSE 
+  isdb=issf <- FALSE 
 
   ## Check dbconn and dsn
   ####################################################################
   if (!is.null(dbconn)) {
     if (!DBI::dbIsValid(dbconn)) {
-      stop("invalid database dbconnection") 
+      message("invalid database dbconnection") 
+	  return(NULL)
     }
     isdb <- TRUE
   } else if (!is.null(dsn)) {
     dbconn <- DBtestSQLite(dsn, dbconnopen = TRUE, 
-                             createnew = FALSE, returnpath = FALSE)
+                           createnew = FALSE, returnpath = FALSE)
     if (is.null(dbconn)) {
       stop("invalid database")
     } else {
       isdb <- TRUE
     }
   } 
+  if (isdb) {
+    tablst <- DBI::dbListTables(dbconn)
+	if (length(tablst) == 0) {
+	  message("no tables in database")
+	  return(NULL)
+	}
+	
+  	datnm <- chkdbtab(tablst, x)
+	if (is.null(datnm)) {
+	  if ("data.frame" %in% class(x)) {
+	    isdb <- FALSE
+		datx <- x
+	  } else {
+	    return(NULL)
+	  }
+	}
+  }
 
-  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-
+  
   ## Check datx
   ########################################################
-  datx <- pcheck.table(x, conn=dbconn, gui=gui, 
-                       caption="Data table?", returnDT=TRUE)
   if (isdb) {
-    datnmlst <- DBI::dbListFields(dbconn, datx)
+    datnmlst <- DBI::dbListFields(dbconn, datnm)
+	
+	## Check dbwrite 
+    dbwrite <- pcheck.logical(dbwrite, 
+	                          varnm = "dbwrite", 
+	                          title = "Write to database?", 
+                              first = "NO", gui=gui)
+
+	## Check dbreturn 
+    dbreturn <- pcheck.logical(dbreturn, 
+	                           varnm = "dbreturn", 
+	                           title = "Return data from database?", 
+                               first="NO", gui=gui)
+	
+	if (dbreturn) {
+      datx <- pcheck.table(datnm, conn=dbconn, gui=gui, 
+                       caption="Data table?", returnDT=TRUE)
+	  if (is.null(datx)) {
+        message("invalid x")
+	    return(NULL)
+      }
+
+	  datidx <- checkidx(dbconn, datnm)
+	  if (!is.null(datidx) && !is.na(datidx$cols)) {
+	    datx.idx <- strsplit(datidx$cols, "\\,")[[1]]
+		if (all(datx.idx %in% datnmlst)) {
+		  datkey <- datx.idx
+		} else {
+		  datkey <- datx.idx[datx.idx %in% datnmlst]
+		}
+	  }
+	}
+
   } else {
+    datx <- pcheck.table(x, gui=gui, 
+                       caption="Data table?", returnDT=TRUE)
+
     if (is.null(datx)) {
-      stop("invalid x")
+      message("invalid x")
+	  return(NULL)
     }
     issf <- ifelse ("sf" %in% class(datx), TRUE, FALSE)
     if (issf) datx <- data.table(datx) 
     datnmlst <- names(datx) 
+	datkey <- key(datx)
   }   
 
   ## Check xvar
@@ -205,19 +261,19 @@ datLUTclass <- function(x,
   xvar <- pcheck.varchar(xvar, "xvar", datnmlst, gui=gui,
 		caption="Join variable in dat", stopifnull=TRUE)
 
-  if (isdb) {
-    uniqueval.qry <- paste("select distinct", xvar, "from", datx,
+  ## Get unique values
+  if (isdb && !dbreturn) {
+    uniqueval.qry <- paste("select distinct", xvar, "from", datnm,
                            "order by", xvar)
     uniqueval <- na.omit(DBI::dbGetQuery(dbconn, uniqueval.qry))[[1]]
   } else {
     if (!is.numeric(datx[[xvar]])) stop("xvar must be a numeric vector in x")
     uniqueval <- sort(unique(na.omit(datx[[xvar]])))
   }
-
+ 
   ## Get min and max values for xvar in dat
   xvar.min <- min(uniqueval)
   xvar.max <- max(uniqueval)
-
 
   ## Check LUT
   ########################################################
@@ -227,31 +283,9 @@ datLUTclass <- function(x,
   } else {
     LUTx <- pcheck.table(LUT, gui=gui, tabnm="LUT", caption="Look up table?")
   }
-
-  if (is.null(LUTx)) {
-    if (is.null(cutbreaks)) {
-      stop("must include LUTx or cutbreaks")
-    } else if (!is.vector(cutbreaks) || !is.numeric(cutbreaks)) {
-      stop("cutbreaks must be a numeric vector")
-    } else if (all(cutbreaks < xvar.min) || all(cutbreaks > xvar.max)) {
-      stop("all cutbreaks values are outside range of xvar values")
-    } else {
-      if (is.null(cutlabels)) {
-        val <- as.numeric(ifelse(label.dec == 0, 0, 
-		ifelse(label.dec == 1, 0.1, paste0(".", rep(0, label.dec-1), 1))))
-        maxbreaks <- c(cutbreaks[-1] - val) 
-        cutlabels <- paste(cutbreaks[-length(cutbreaks)], maxbreaks, sep="-")
-        cutlabels[length(cutlabels)] <- paste0(cutbreaks[length(cutbreaks)-1],"+")
-      } else {
-        if (length(cutlabels) != length(cutbreaks)-1)
-          stop("cutlabels must be length ", length(cutbreaks)-1)
-      }
-    }
-    if (!is.null(LUTclassnm)) {
-      if (!is.character(LUTclassnm)) stop("LUTclassnm must be character")
-    }
-  } else {
-
+ 
+  if (!is.null(LUTx)) { 
+  
     ## Check minvar and maxvar
     ########################################################
     LUTnmlst <- names(LUTx)
@@ -261,7 +295,8 @@ datLUTclass <- function(x,
     minvar <- pcheck.varchar(minvar, "minvar", LUTnmlst, gui=gui,
 		caption="LUT min variable", stopifnull=TRUE)
     if (all(LUTx[[minvar]] > xvar.max)) {
-      stop("all minvar values are greter than max xvar value")
+      message("all minvar values are greter than max xvar value")
+	  return(NULL)
     }
     LUTnmlst <- LUTnmlst[LUTnmlst != minvar]
     if (is.null(maxvar) && any(grepl("MAX", LUTnmlst, ignore.case=TRUE))) {
@@ -270,8 +305,10 @@ datLUTclass <- function(x,
     maxvar <- pcheck.varchar(maxvar, "maxvar", LUTnmlst, gui=gui,
 		caption="LUT max variable", stopifnull=FALSE)
     if (!is.null(maxvar)) {
-      if (all(LUTx[[maxvar]] < xvar.min)) 
-        stop("all maxvar values are greater than min xvar value")
+      if (all(LUTx[[maxvar]] < xvar.min)) {
+        message("all maxvar values are greater than min xvar value")
+		return(NULL)
+	  }
     } else {
       val <- as.numeric(ifelse(label.dec == 0, 0, 
 		ifelse(label.dec == 1, 0.1, paste0(".", rep(0, label.dec-1), 1))))
@@ -283,8 +320,9 @@ datLUTclass <- function(x,
     ## Check LUTclassnm - get cutlabels
     ########################################################
     LUTnmlst <- LUTnmlst[LUTnmlst != maxvar]
-    LUTclassnm <- pcheck.varchar(LUTclassnm, "LUTclassnm", LUTnmlst, gui=gui,
-		caption="LUT class name")
+    LUTclassnm <- pcheck.varchar(LUTclassnm, "LUTclassnm", 
+	                LUTnmlst, gui=gui,
+		            caption="LUT class name")
 
     ## If LUTclassnm=NULL, create a class
     if (is.null(LUTclassnm)) {
@@ -292,8 +330,60 @@ datLUTclass <- function(x,
     } else {
       cutlabels <- LUTx[[LUTclassnm]]
     }
+	
+	## Check vars2keep
+	if (!is.null(vars2keep)) {
+	  if (any(!vars2keep %in% names(LUTx))) {
+	    missvars <- vars2keep[!vars2keep %in% names(LUTx)]
+        message("vars2keep not in LUT: ", toString(missvars))
+		if (length(missvars) > 0) {
+		  vars2keep <- vars2keep[vars2keep %in% names(LUTx)]
+		}
+      }
+    }	  
   }
+ 
+  ## Check cutbreaks
+  if (is.null(cutbreaks)) {
+    message("must include LUTx or cutbreaks")
+	return(NULL)
+  } else if (!is.vector(cutbreaks) || !is.numeric(cutbreaks)) {
+    message("cutbreaks must be a numeric vector")
+	return(NULL)
+  } else if (all(cutbreaks < xvar.min) || all(cutbreaks > xvar.max)) {
+    message("all cutbreaks values are outside range of xvar values")
+	return(NULL)
+  } else if (any(uniqueval < min(cutbreaks)) || any(uniqueval >= max(cutbreaks))) {
+    gtvals <- sort(unique(uniqueval[which(uniqueval < min(cutbreaks) | 
+                          uniqueval >= max(cutbreaks))]))
+    message(paste("values are outside of cutbreaks range:", 
+			paste(gtvals, collapse=", ")))
+  } 
+  
+  ## Check cutlabels
+  if (is.null(cutlabels)) {
+    val <- as.numeric(ifelse(label.dec == 0, 0, 
+    ifelse(label.dec == 1, 0.1, paste0(".", rep(0, label.dec-1), 1))))
+    maxbreaks <- c(cutbreaks[-1] - val) 
+    cutlabels <- paste(cutbreaks[-length(cutbreaks)], maxbreaks, sep="-")
+    cutlabels[length(cutlabels)] <- paste0(cutbreaks[length(cutbreaks)-1],"+")
+  } else {
+    if (length(cutlabels) != length(cutbreaks)-1) {
+      message("cutlabels must be length ", length(cutbreaks)-1)
+      return(NULL)
+    }
+  }  
 
+  ## Check LUTclassnm  
+  if (!is.null(LUTclassnm)) {
+    if (!is.character(LUTclassnm)) {
+	  message("LUTclassnm must be character")
+      return(NULL)
+	}
+  } else {
+    LUTclassnm <- paste0(xvar, "CL")
+  }
+  
   ### Check NAto0
   NAto0 <- pcheck.logical(NAto0, varnm="NAequal10", 
 		title="Change NA values to 0?", first="YES", gui=gui)
@@ -302,13 +392,25 @@ datLUTclass <- function(x,
   if (!is.null(vars2keep)) {
     if (!is.character(vars2keep)) stop("vars2keep must be character")
     missvar <- vars2keep[!vars2keep %in% names(LUTx)]
-    if (length(missvar) > 0) 
-      stop("vars2keep variables invalid: ", toString(vars2keep))
+    if (length(missvar) > 0) {
+      message("vars2keep variables invalid: ", toString(vars2keep))
+	  return(NULL)
+	}
   }
 
   ## Check savedata 
-  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
-                             first="NO", gui=gui)
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
+                             title = "Save data table?", 
+                             first = "NO", gui=gui)
+  
+  ## Check overwrite 
+  overwrite <- pcheck.logical(overwrite, varnm="overwrite", 
+                             title = "Overwrite column?", 
+                             first = "NO", gui=gui)
+  if (!overwrite) {
+    LUTclassnm <- checknm(LUTclassnm, datnmlst)
+  } 
+
   
   ## Check output parameters
   if (savedata) {
@@ -333,62 +435,24 @@ datLUTclass <- function(x,
   ## DO THE WORK 
   ############################################################################
 
-  ## Test values
-  if (any(uniqueval < min(cutbreaks)) || any(uniqueval >= max(cutbreaks))) {
-    gtvals <- sort(unique(uniqueval[which(uniqueval < min(cutbreaks) | 
-                          uniqueval >= max(cutbreaks))]))
-    message(paste("values are outside of cutbreaks range:", 
-			paste(gtvals, collapse=", ")))
-  }
-
-  if (is.null(LUTclassnm)) {
-    LUTclassnm <- paste0(xvar, "CL")
-  }
-  if (!overwrite) {
-    LUTclassnm <- checknm(LUTclassnm, datnmlst)
+  ## Classify xvar column
+  if (isdb && dbwrite) {
+    dbcl <- dbclassify(dbconn, 
+	             tabnm = datnm,
+			     classcol = xvar, 
+			     cutbreaks = cutbreaks,
+			     cutlabels = cutlabels,
+			     classnm = LUTclassnm,
+			     overwrite = overwrite,
+			     NAto0 = NAto0)
+	if (is.null(dbcl)) {
+	  return(NULL)
+	}
   } 
-
-
-  if (isdb) {
-    if (overwrite && LUTclassnm %in% datnmlst) {
-      dropcol.qry <- paste("ALTER TABLE", datx, 
-                          "DROP COLUMN", LUTclassnm)
-      DBI::dbExecute(dbconn, dropcol.qry)
-    }
-
-    varchar <- paste0("varchar(", max(nchar(cutlabels)) + 3, ")")
-    alter.qry <- paste("ALTER TABLE", datx, 
-                       "ADD", LUTclassnm, varchar)
-    DBI::dbExecute(dbconn, alter.qry)
-
-    ## Build classify query
-    classify1.qry <- paste("UPDATE", datx, "SET", LUTclassnm, "= (CASE")
-
-    classify2.qry <- {}
-    if (NAto0) {
-      classify2.qry <- paste(" WHEN", xvar, "is null THEN '0'")
-    }
   
-    for (i in 1:(length(cutbreaks)-1)) {    
-      classify2.qry <- paste(classify2.qry, 
-                         "WHEN", xvar, ">=", cutbreaks[i], "AND", 
-                                xvar, "<", cutbreaks[i+1], "THEN", 
-                                paste0("'", cutlabels[i], "'"))
-    }
-    #classify.qry <- paste0(classify1.qry, classify2.qry, " END); Commit;")
-    classify.qry <- paste0(classify1.qry, classify2.qry, " END)")
-    message(classify.qry)
-    DBI::dbExecute(dbconn, classify.qry)
-    messagedf(DBI::dbListFields(dbconn, datx))
- 
-    tabcnt.qry <- paste("select", LUTclassnm, ", count(*) COUNT from", datx,
-                       "group by", LUTclassnm)
-    tabcnt <- DBI::dbGetQuery(dbconn, tabcnt.qry)
-    messagedf(tabcnt)
-
-  } else {
-    datx[, (LUTclassnm) := cut(datx[[xvar]], breaks=cutbreaks, labels=cutlabels, 
-		right=FALSE)]  
+  if (!isdb || dbreturn && !is.null(datx)) {
+    datx[, (LUTclassnm) := cut(datx[[xvar]], breaks=cutbreaks, 
+	         labels=cutlabels, right=FALSE)]  
 
     if (NAto0) {
       datx[is.na(datx[[LUTclassnm]]), (LUTclassnm) := 0] 
@@ -398,9 +462,20 @@ datLUTclass <- function(x,
   LUTx2 <- data.table(cutbreaks[-length(cutbreaks)], cutlabels)
   names(LUTx2) <- c(paste0(xvar, "_cutbreaks"), LUTclassnm)  
 
+  ## Append vars2keep if LUTx
   if (!is.null(vars2keep)) {
-    if (isdb) {
-      message("vars2keep is not available for database yet")
+    if (isdb && dbwrite) {
+	  for (LUTvar in vars2keep) {
+        dbclv <- dbclassify(dbconn, 
+	             tabnm = datnm,
+			     classcol = xvar, 
+			     cutbreaks = cutbreaks,
+			     cutlabels = LUTx[[LUTvar]],
+			     classnm = LUTvar,
+			     overwrite = overwrite,
+			     NAto0 = NAto0)
+	   }
+	 
     } else {
       datx <- merge(datx, LUTx[, c(LUTclassnm, vars2keep), with=FALSE], 
                 by=LUTclassnm, all.x=TRUE)
@@ -411,17 +486,27 @@ datLUTclass <- function(x,
         message("there are ", navals, " NA values in ", xvar, 
                 " that did not get classified")
       }
-      LUTx2 <- merge(LUTx2, LUTx[, c(LUTclassnm, vars2keep), with=FALSE], 
-                 by=LUTclassnm)
     }
+	LUTx2 <- merge(LUTx2, LUTx[, c(LUTclassnm, vars2keep), with=FALSE], 
+                 by=LUTclassnm)
   } 
+  
+  ## Append cutbreak column
   if (keepcutbreaks) {
     if (isdb) {
-      message("keepcutbreaks is not available for database yet")
+      dbclv <- dbclassify(dbconn, 
+	             tabnm = datnm,
+			     classcol = xvar, 
+			     cutbreaks = cutbreaks,
+			     cutlabels = cutbreaks,
+			     classnm = paste0(LUTclassnm, "_brks"),
+			     overwrite = overwrite,
+			     NAto0 = NAto0)	  
     } else {
+	  cutbreakvar <- paste0(xvar, "_cutbreaks")
       datx <- merge(datx, LUTx2, by=LUTclassnm, all.x=TRUE)
-      setcolorder(datx, c(datnmlst, paste0(xvar, "_cutbreaks")))
-      setnames(datx, paste0(xvar, "_cutbreaks"), paste0(LUTclassnm, "_brks"))
+      setcolorder(datx, c(datnmlst, cutbreakvar))
+      setnames(datx, cutbreakvar, paste0(LUTclassnm, "_brks"))
     }
   }    
        
@@ -433,9 +518,15 @@ datLUTclass <- function(x,
     } else {
       datx <- setDF(datx)
     }
+	xLUTlst <- list(xLUT=datx)
+  } else {
+    if (dbreturn) {
+      xLUTlst <- list(xLUT=datx)
+	} else {
+      xLUTlst <- list(xLUT=datnm)
+	}
   }
 
-  xLUTlst <- list(xLUT=datx)
   xLUTlst$LUTclassnm <- LUTclassnm
   xLUTlst$LUT <- LUTx2
 

@@ -61,7 +61,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
       }
       if (is.null(title.ref)) title.ref <- ""
     }
-
+ 
     ## GENERATE TABLE TITLES AND outfn
     ###########################################################################
     if (is.null(title.main) || title.main == "") {
@@ -112,7 +112,6 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
             title.unitsd <- title.unitsd[1]
           }
         }
-
         if (is.null(title.estvarn)) {
           ref_estvarn <- ref_estvar[ref_estvar$ESTVAR == estvarn, ]
           if (nrow(ref_estvarn) == 0) {
@@ -159,11 +158,12 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
           ## Get title.yvar
           title.yvar <- ref_estvar[ref_estvar$ESTTITLE == title.estvarn, "ESTTITLE1"]
           filternm <- ref_estvar[ref_estvar$ESTTITLE == title.estvarn, "FILTERNM"][1]
-          if (is.null(title.filter)) {
-            if (!is.null(filternm) && !is.na(filternm) && filternm != "") {
-              title.filter <- filternm
-            }
-          }
+ #         if (is.null(title.filter)) {
+ #           if (!is.null(filternm) && !is.na(filternm) && filternm != "") {
+ #             title.filter <- filternm
+ #           }
+ #         }
+
           if (!is.null(title.unitsn)) {
             title.yvar <- paste0(title.yvar, ", in ", title.unitsn[1])
           }
@@ -219,7 +219,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
         title.part1 <- paste0(title.part1, title.unitsn2)
         title.unitsn <- title.unitsn[1]
       }
-
+	  
       ## title.part2
       ####################################################################
       title.rowgrp2 <- if(!is.null(title.rowgrp)) paste(" and", title.rowgrp)

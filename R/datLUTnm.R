@@ -3,9 +3,10 @@
 #' Merge a look-up table to append new variables, names, or categories to x.
 #' 
 #' 
+#' @param xvar String. Name of variable in the data table to join to.
 #' @param x Data frame or comma-delimited file (*.csv). The data table with
 #' variable to classify.
-#' @param xvar String. Name of variable in the data table to join to.
+#' @param uniquex String. Unique values to match, if x is NULL.
 #' @param LUT Data frame or comma-delimited file (*.csv). Name of the file with
 #' collapsed classes (If FIAname=FALSE).
 #' @param LUTvar String. Name of variable in LUT with values matching that
@@ -17,15 +18,23 @@
 #' for LUTnewvar.
 #' @param FIAname Logical. If TRUE, get FIA reference name based on (ref_codes)
 #' within FIESTA.
-#' @param uniquex String. Unique values of SPCD to match, if x is NULL.
+#' @param group Logical. If TRUE and FIA=TRUE, the group variables in reference
+#' table (ref_codes) are merged to data table (GROUPCD, GROUPNM).
 #' @param NAclass String. NA values in xvar will be changed to NAclass.
-#' @param group Logical. If TRUE, the group variables in reference table
-#' (ref_codes) are merged to data table (GROUPCD, GROUPNM).
 #' @param add0 Logical. IF TRUE, keep all codes in look up table. If FALSE,
 #' only include codes that are in x.
+#' @param spcdname String. Name for species output type ('COMMON', 'SCIENTIFIC', 
+#' 'SYMBOL', 'COMMON_SCIENTIFIC').
 #' @param stopifmiss Logical. IF TRUE, stops function if missing codes in LUTx.
 #' @param xtxt String.* Name of x table for more useful information in
 #' warnings.
+#' @param dsn String. Data source name of database with x.
+#' @param dbconn Open database connection.
+#' @param dbconnopen Logica. If TRUE, keep database connection open.
+#' @param dbwrite Logical. If TRUE, write class column to database table x.
+#' @param dbreturn Logical. If TRUE, return table with class column.
+#' @param overwrite Logical. If TRUE, and the class name already exists 
+#' in x, overwrites class name.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
@@ -64,19 +73,26 @@
 #' WYcond3 <- WYcondlut2$xLUT
 #' head(WYcond3[WYcond3$FORTYPCD > 0, ])
 #' @export datLUTnm
-datLUTnm <- function(x = NULL, 
-                     xvar = NULL, 
+datLUTnm <- function(xvar, 
+                     x = NULL, 
+                     uniquex = NULL,
                      LUT = NULL, 
                      LUTvar = NULL, 
                      LUTnewvar = NULL, 
                      LUTnewvarnm = NULL, 
                      FIAname = FALSE,
-                     uniquex = NULL,
+					 group = FALSE, 
                      NAclass = "Other", 
-                     group = FALSE, 
                      add0 = FALSE, 
+					 spcdname = "COMMON_SCIENTIFIC",
                      stopifmiss = FALSE, 
                      xtxt = NULL,
+					 dsn = NULL,
+                     dbconn = NULL,
+                     dbconnopen = FALSE,
+					 dbwrite = FALSE,
+				     dbreturn = TRUE, 
+                     overwrite = TRUE,
                      savedata = FALSE, 
                      savedata_opts = NULL, 
                      gui = FALSE){
@@ -95,7 +111,7 @@ datLUTnm <- function(x = NULL,
     Filters <- rbind(Filters, csv=c("Comma-delimited files (*.csv)", "*.csv"))
 
   ## Set global variables
-  VALUE <- NULL 
+  VALUE=uniqueval=datnm <- NULL 
   returnlst <- list()
   
   ##################################################################
@@ -134,34 +150,102 @@ datLUTnm <- function(x = NULL,
     }
   }
   
+  
+  ##################################################################
+  ## Check database connection (dbconn)
+  ##################################################################
+  isdb=issf <- FALSE 
+
+  ## Check dbconn and dsn
+  ####################################################################
+  if (!is.null(dbconn)) {
+    if (!DBI::dbIsValid(dbconn)) {
+      message("invalid database dbconnection") 
+	  return(NULL)
+    }
+    isdb <- TRUE
+  } else if (!is.null(dsn)) {
+    dbconn <- DBtestSQLite(dsn, dbconnopen = TRUE, 
+                           createnew = FALSE, returnpath = FALSE)
+    if (is.null(dbconn)) {
+      stop("invalid database")
+    } else {
+      isdb <- TRUE
+    }
+  } 
+  if (isdb) {
+    tablst <- DBI::dbListTables(dbconn)
+	if (length(tablst) == 0) {
+	  message("no tables in database")
+	  return(NULL)
+	}
+	
+  	datnm <- chkdbtab(tablst, x)
+	if (is.null(datnm)) { 
+	  if ("data.frame" %in% class(x)) {
+	    isdb <- FALSE
+		datx <- x
+	  } else {
+	    return(NULL)
+	  }
+	}
+  }
+  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  isdt <- FALSE
-
+ 
   ## Check datx
   ########################################################
-  isdatatable <- FALSE
-  datx <- pcheck.table(x, gui=gui, caption="Data table?")
-  if (is.null(datx)) {
-    if (is.character(x) && length(x) > 1) {
-      datnmlst <- x
-    } else {
-      stop("invalid x")
-    }
-  } else {
-    if ("data.table" %in% class(datx)) {
-      isdatatable <- TRUE
-      datkey <- key(datx)
-    }
-    datnmlst <- names(datx)
-    isdt <- TRUE
-  }
+  if (isdb) {
+    datnmlst <- DBI::dbListFields(dbconn, datnm)
+	
+	## Check dbwrite 
+    dbwrite <- pcheck.logical(dbwrite, 
+	                          varnm = "dbwrite", 
+	                          title = "Write to database?", 
+                              first = "NO", gui=gui)
 
-  ## Check xvar
-  ##########################################
-  xvar <- pcheck.varchar(xvar, "xvar", datnmlst, gui=gui,
-		caption="Join variable in dat", stopifnull=TRUE)
+	## Check dbreturn 
+    dbreturn <- pcheck.logical(dbreturn, 
+	                           varnm = "dbreturn", 
+	                           title = "Return data from database?", 
+                               first="NO", gui=gui)
+	
+	if (dbreturn) {
+      datx <- pcheck.table(datnm, conn=dbconn, gui=gui, 
+                       caption="Data table?", returnDT=TRUE)
+	  if (is.null(datx)) {
+        message("invalid x")
+	    return(NULL)
+      }
+
+	  datidx <- checkidx(dbconn, datnm)
+	  if (!is.null(datidx) && !is.na(datidx$cols)) {
+	    datx.idx <- strsplit(datidx$cols, "\\,")[[1]]
+		if (all(datx.idx %in% datnmlst)) {
+		  datkey <- datx.idx
+		} else {
+		  datkey <- datx.idx[datx.idx %in% datnmlst]
+		}
+	  }
+	}
+
+  } else {
+    datx <- pcheck.table(x, gui=gui, 
+                       caption="Data table?", returnDT=TRUE)
+	if (is.null(datx)) {
+      if (is.character(x) && length(x) > 1) {
+        datnmlst <- x
+	  }
+    } else {  
+	  
+      issf <- ifelse ("sf" %in% class(datx), TRUE, FALSE)
+      if (issf) datx <- data.table(datx) 
+      datnmlst <- names(datx) 
+	  datkey <- key(datx)
+	}
+  }
 
   ## Check LUT
   ########################################################
@@ -180,36 +264,86 @@ datLUTnm <- function(x = NULL,
     message("LUT is null and FIAname=FALSE")
     return(NULL)
   }
- 
-  if (FIAname) {
-    ## Get FIA reference table for xvar
-    xvar.ref <- getRefobject(toupper(xvar))
-    if (is.null(xvar.ref)) {
-      if (xvar == "SPCD") {
-        return(datLUTspp(x=x, uniquex=uniquex, add0=add0,
-                  stopifmiss=stopifmiss, 
-                  xtxt=xtxt, savedata=savedata,
-                  savedata_opts=savedata_opts))
-      } else {
-        stop(paste("no reference name for", xvar))
-      }
-    }
-  }
 
-  ## Check group
-  group <- pcheck.logical(group, varnm="group", title="Variable group?", 
-		first="NO", gui=gui)
+ ## Check group
+  if (FIAname) {
+    group <- pcheck.logical(group, varnm="group", title="Variable group?", 
+		  first="NO", gui=gui)
+  } else {
+     group <- FALSE
+  }
 
   ## Check uniquex
   #############################################################
-  if (is.null(uniquex)) {
-    if (is.null(datx)) {
-      message("both uniquex and datx are NULL... returning all values")
+  if (is.null(uniquex) && is.null(x)) {
+    message("both uniquex and x are NULL")
+	return(NULL)
+  } else if (!is.null(uniquex) && is.null(x)) {
+	if (FIAname) {
+	  datnmlst <- sort(unique(ref_codes$VARIABLE))
+	} else if (!is.null(LUTx)) {
+      datnmlst <- names(LUTx)
+    }		
+  } 
+  
+  ## Check xvar
+  ##########################################
+  xvar <- pcheck.varchar(xvar, "xvar", datnmlst, gui=gui,
+		caption="Join variable in dat", stopifnull=TRUE)
+ 
+  ## Check add0 
+  add0 <- pcheck.logical(add0, varnm="add0", title="Add 0 values to missing codes?", 
+                             first="NO", gui=gui)
+
+  
+  ## Get unique values
+  if (isdb && !dbreturn) {
+    uniqueval.qry <- paste("select distinct", xvar, "from", datnm,
+                           "order by", xvar)
+    uniqueval <- na.omit(DBI::dbGetQuery(dbconn, uniqueval.qry))[[1]]
+  } else if (!is.null(datx)) {
+    if (!is.numeric(datx[[xvar]])) {
+	  #message("xvar must be a numeric vector in x")
+	  uniqueval <- sort(unique(as.numeric(as.character(datx[[xvar]]))))
     } else {
-      uniquex <- sort(unique(datx[[xvar]]))
+      #uniquex <- sort(unique(na.omit(datx[[xvar]])))
+      uniqueval <- sort(unique(datx[[xvar]]))
     }
   }
-
+  if (!is.null(uniquex)) {
+    if (!is.null(uniqueval)) {
+	  if (!all(uniquex %in% uniqueval)) {
+	    missval <- uniquex[!uniquex %in% uniqueval]
+		if (length(missval) > 0) {
+		  message("uniquex values missing: ", toString(missval)) 
+		} else {
+		  message("no uniquex in x... returning NULL")
+		  return(NULL)
+		}
+	  } 
+	  uniquex <- uniquex[uniquex %in% uniqueval]
+	  
+	  if (add0 && length(uniquex) < length(uniqueval)) {
+        message("add0 = TRUE and uniquex less than uniqueval... using all values")
+	  }
+	} 
+  }
+  	   
+  if (xvar == "SPCD") {
+	return(datLUTspp(x = datx, 
+		             uniquex = uniquex, 
+				     spcdname = spcdname,
+                     add0 = add0, 
+				     stopifmiss = stopifmiss, 
+                     xtxt = xtxt, 
+				     dbconn = dbconn,
+					 dbconnopen = dbconnopen,
+					 dbwrite = dbwrite,
+					 dbreturn = dbreturn,
+					 overwrite = overwrite,
+					 savedata = savedata,
+                     savedata_opts = savedata_opts))
+  }
 
   #######################################################################
   ## Check LUTvar
@@ -225,33 +359,77 @@ datLUTnm <- function(x = NULL,
       } else {
         stop("invalid LUTvar")
       }
-    }
-    if (group) {
-      if ("GROUPCD" %in% LUTnmlst) LUTnewvars <- unique(c(LUTnewvars, "GROUPCD"))
-      if ("GROUPNM" %in% LUTnmlst) LUTnewvars <- unique(c(LUTnewvars, "GROUPNM"))
-    }
-
+    } else if (LUTvar != xvar && checknm(xvar, LUTnmlst) == xvar) {
+	  setnames(LUTx, LUTvar, xvar)
+	  LUTvar <- xvar
+	}
+	
+	## Check LUTnewvar
     LUTnmlst <- LUTnmlst[!LUTnmlst %in% LUTvar]
     if (length(LUTnmlst) == 0) {
       LUTnewvar <- NULL
     } else {
       LUTnewvar <- pcheck.varchar(LUTnewvar, "LUTnewvar", LUTnmlst, gui=gui,
 		caption="New variable(s)", multiple=TRUE)
-      if (length(LUTnewvar) == 0) LUTnewvar <- LUTnmlst
-    }
-
+      if (length(LUTnewvar) == 0) {
+	    if (gui) {
+          LUTnewvar <- select.list(LUTnewvarlst, title=paste("LUT", xvar, "NEW"), 
+							multiple=TRUE)
+          if (length(LUTnewvar) == 0) stop("")
+        } else {
+          if (length(LUTnmlst) == 1) {
+            LUTnewvar <- LUTnmlst
+          } else {
+            LUTnewvar <- NULL
+          }
+        }
+      }
+	}
+	if (!is.null(LUTnewvar)) {
+	  if (!all(LUTnewvar %in% LUTnmlst)) { 
+        notin <- LUTnewvar[which(!LUTnewvar %in% LUTnmlst)]
+        warning("check LUTnewvar. Invalid name: ", toString(notin))
+        LUTnewvar <- select.list(LUTnmlst, title=paste("LUT", xvar, "NEW"), 
+			multiple=TRUE)
+        if (length(LUTnewvar) == 0) stop("")
+	  }
+	}  
+  
     if (!is.null(LUTnewvarnm)) {
-      if (length(LUTnewvarnm) != length(LUTnewvar)) 
-        stop("LUTnewvarnm must be same number as LUTnewvar")
-
+      if (length(LUTnewvarnm) != length(LUTnewvar)) {
+        message("LUTnewvarnm must be same number as LUTnewvar")
+		LUTnewvarnm <- LUTnewvar
+	  }
+	  for (i in 1:length(LUTnewvar)) {
+	    newvar <- LUTnewvar[i]
+		newvarnm <- LUTnewvarnm[i]
+	    if (checknm(newvarnm, LUTnmlst) == newvarnm) {
+	      setnames(LUTx, newvar, newvarnm)
+		  LUTnewvar[LUTnewvar %in% newvar] <- newvarnm
+	    }
+	  }
     } else {
       LUTnewvarnm <- LUTnewvar
     }
-    LUTnmlst <- names(LUTx)
-    LUTnewvarlst <- LUTnmlst[which(LUTnmlst != LUTvar)]
+		
+	#LUTnewvars <- LUTnewvar
+    if (group) {
+      if ("GROUPCD" %in% LUTnmlst) LUTnewvar <- unique(c(LUTnewvar, "GROUPCD"))
+      if ("GROUPNM" %in% LUTnmlst) LUTnewvar <- unique(c(LUTnewvar, "GROUPNM"))
+	  LUTnewvarnm <- c(LUTnewvarnm, "GROUPCD", "GROUPNM")
+    }
+	
+	## Subset columns of LUTx
+	LUTx <- LUTx[, c(LUTvar, LUTnewvar), with=FALSE]
  
-  } else if (FIAname) {
+ ## Subset rows of LUTx
+	if (!add0 && !is.null(uniquex)) {
+	  LUTx <- LUTx[LUTx[[LUTvar]] %in% uniquex, ]
+	}
 
+  } else if (FIAname) {
+    xvar.ref <- getRefobject(toupper(xvar))
+	
     ## Check if DSTRBCD
     #################################################
     LUTvar <- ifelse (FIAname && length(grep("DSTRBCD", xvar)) == 1, "DSTRBCD", xvar)
@@ -262,8 +440,8 @@ datLUTnm <- function(x = NULL,
         group <- FALSE
       }
     }
-
-    ## Get FIA reference table for xvar
+     
+	## Get FIA reference table for xvar
     #################################################
     lutvars <- c("VALUE", "MEANING")
     grpvars <- {}
@@ -325,7 +503,7 @@ datLUTnm <- function(x = NULL,
         stop("LUTvar not in LUTx")
       }
 
-      if (!is.null(datx) || !is.null(uniquex)) {
+      if (!is.null(datx) && !is.null(uniquex)) {
         ## Subset LUT values to only those in datx
         if (sum(LUTx[[LUTvar]] %in% uniquex, na.rm=TRUE) == 0) {
           message(paste("no rows exist for", LUTvar))
@@ -333,38 +511,11 @@ datLUTnm <- function(x = NULL,
         }
       }
     }
-
-    LUTnmlst <- names(LUTx)
-    LUTnewvarlst <- LUTnmlst[which(LUTnmlst != LUTvar)]
   } 
 
   ### Check NAclass
   if (!is.character(NAclass) && length(NAclass) != 1) {
     stop("NAclass must be a character string of length 1")
-  }
-
-  ### GET LUTnewvar
-  ###########################################
-  if (length(LUTnewvarlst) > 0) {
-    if (is.null(LUTnewvar)) {
-      if (gui) {
-        LUTnewvar <- select.list(LUTnewvarlst, title=paste("LUT", xvar, "NEW"), 
-			multiple=TRUE)
-        if (length(LUTnewvar) == 0) stop("")
-      } else {
-        if (length(LUTnewvarlst) == 1) {
-          LUTnewvar <- LUTnewvarlst
-        } else {
-          stop("must include LUTnewvar")
-        }
-      }
-    } else if (!all(LUTnewvar %in% LUTnewvarlst)) { 
-      notin <- LUTnewvar[which(!LUTnewvar %in% LUTnewvarlst)]
-      warning("check LUTnewvar. Invalid name: ", toString(notin))
-      LUTnewvar <- select.list(LUTnewvarlst, title=paste("LUT", xvar, "NEW"), 
-			multiple=TRUE)
-      if (length(LUTnewvar) == 0) stop("")
-    }
   }
  
   ## Check savedata 
@@ -388,18 +539,17 @@ datLUTnm <- function(x = NULL,
       out_layer <- "datlut"
     }
   }
-  
-
+ 
   ############################################################################
   ## DO THE WORK 
   ############################################################################
   ### SELECT RELEVANT COLUMNS FROM LUT & MERGE TO x.
-  if (!is.null(datx)) {
+  if ((!isdb || dbreturn) && !is.null(datx)) {
     if (!is.null(LUTnewvar) && length(LUTnewvar) != 0) {
       if (is.null(xtxt)) xtxt <- xvar
       ## Check that the all values of LUTvar in datx are all in xvar in LUTx
-      check.matchval(datx, LUTx, xvar, LUTvar, tab1txt=xtxt, tab2txt=paste(xtxt, "lut"),
-		stopifmiss=stopifmiss)
+      check.matchval(datx, LUTx, xvar, LUTvar, tab1txt=xtxt, 
+			tab2txt=paste(xtxt, "lut"), stopifmiss=stopifmiss)
 
       ## Check if class of xvar in datx matches class of xvar in LUTx
       tabs <- check.matchclass(datx, LUTx, xvar, LUTvar, 
@@ -407,8 +557,8 @@ datLUTnm <- function(x = NULL,
       datx <- tabs$tab1
       LUTx <- tabs$tab2
 
-      LUTnewvar2 <- sapply(LUTnewvar, checknm, names(datx))
-      if (!identical(LUTnewvar2, LUTnewvar)) {
+      LUTnewvar2 <- sapply(LUTnewvar, checknm, names(datx))	  
+      if (all(LUTnewvar2 == LUTnewvar)) {
         setnames(LUTx, LUTnewvar, LUTnewvar2)
         LUTnewvar <- LUTnewvar2
       }
@@ -437,13 +587,14 @@ datLUTnm <- function(x = NULL,
   }
   
   ## Get all values of LUTx newvars
-  LUTnewvar.vals <- unique(unlist(lapply(LUTx[,LUTnewvar, with=FALSE], as.character)))
+  LUTnewvar.vals <- unique(unlist(lapply(LUTx[,LUTvar, with=FALSE], as.character)))
 
 
-  ## Add records if not other values exist in xLUT
+  ## Add records if no values exist in xLUT
   if (!is.null(datx)) {
     ## If NA values and NAclass != NULL, add NA to LUT
-    if (!is.null(NAclass) && sum(is.na(xLUT[[xvar]])) > 0 && all(!is.na(LUTx[[LUTvar]]))) {
+    if (!is.null(NAclass) && sum(is.na(xLUT[[xvar]])) > 0 && 
+			all(!is.na(LUTx[[LUTvar]]))) {
       NAclass <- checknm(NAclass, LUTnewvar.vals) 
 
       LUTxrow <- rep(NA, ncol(LUTx))
@@ -485,15 +636,15 @@ datLUTnm <- function(x = NULL,
         }        
       }
       LUTx <- rbind(LUTx, as.list(LUTxrow))
-    }
+    } 
   }  
           
   ## Return list
   ########################################################
-  if (isdt && isdatatable) {
-    xLUT <- data.table(xLUT)
-    setkeyv(xLUT, datkey)
-    returnlst$xLUT <- xLUT
+  if ((!isdb || dbreturn) && !is.null(datx)) {
+	returnlst$xLUT <- xLUT
+  } else {
+    returnlst$xLUT <- datnm
   }
 
   if (!is.null(LUTnewvarnm) || !is.null(LUTnewvar)) {
@@ -501,7 +652,7 @@ datLUTnm <- function(x = NULL,
   } else {
     returnlst$xLUTnm <- NULL
   }
-  returnlst$LUT <- LUTx
+  returnlst$LUT <- LUTx[, c(LUTvar, LUTnewvar), with=FALSE]
 
   if (group) {
     returnlst$grpcode <- grpcode
@@ -511,10 +662,9 @@ datLUTnm <- function(x = NULL,
   #### WRITE TO FILE 
   #############################################################
   if (savedata) {
-    if (isdt) {
-      if ("sf" %in% class(datx)) {
-        spExportSpatial(xLUT, 
-              savedata_opts=list(outfolder=outfolder, 
+    if ("sf" %in% class(datx)) {
+      spExportSpatial(xLUT, 
+            savedata_opts=list(outfolder=outfolder, 
                                  out_fmt=outsp_fmt, 
                                  out_dsn=out_dsn, 
                                  out_layer=out_layer,
@@ -523,9 +673,9 @@ datLUTnm <- function(x = NULL,
                                  overwrite_layer=overwrite_layer,
                                  append_layer=append_layer, 
                                  add_layer=TRUE))
-      } else {
-        datExportData(xLUT, 
-              savedata_opts=list(outfolder=outfolder, 
+    } else {
+      datExportData(xLUT, 
+            savedata_opts=list(outfolder=outfolder, 
                                  out_fmt=out_fmt, 
                                  out_dsn=out_dsn, 
                                  out_layer=out_layer,
@@ -535,7 +685,6 @@ datLUTnm <- function(x = NULL,
                                  append_layer=append_layer,
                                  add_layer=TRUE))
                     
-      }
     }
     datExportData(LUTx, 
           savedata_opts=list(outfolder = outfolder, 

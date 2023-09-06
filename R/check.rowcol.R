@@ -243,7 +243,7 @@ check.rowcol <- function(gui=FALSE, esttype, conn=NULL, treef=NULL, seedf=NULL, 
         rowlut <- pcheck.table(rowlut, tabnm=rowlut, caption="Row look up?")
       }
     }
- 
+
     ##################################################################################
     ## Check for lookup tables
     ##################################################################################
@@ -285,7 +285,6 @@ check.rowcol <- function(gui=FALSE, esttype, conn=NULL, treef=NULL, seedf=NULL, 
                              group=rowLUTgrp, add0=row.add0)
           condf <- setDT(rowLUT$xLUT)
           rowlut <- setDT(rowLUT$LUT)
-
           rowLUTnm <- rowLUT$xLUTnm
           if (rowgrp) {
             rowgrpord <- rowLUT$grpcode

@@ -6,15 +6,20 @@
 \usage{
 datLUTspp(
   x = NULL,
-  xvar = "SPCD",
   uniquex = NULL,
   NAclass = "Other",
   group = FALSE,
   states = NULL,
-  name = "COMMON",
+  spcdname = "COMMON",
   add0 = FALSE,
   stopifmiss = FALSE,
   xtxt = NULL,
+  dsn = NULL,
+  dbconn = NULL,
+  dbconnopen = FALSE,
+  dbwrite = FALSE,
+  dbreturn = TRUE,
+  overwrite = TRUE,
   savedata = FALSE,
   savedata_opts = NULL,
   gui = FALSE
@@ -23,8 +28,6 @@ datLUTspp(
 \arguments{
 \item{x}{Data frame or comma-delimited file (*.csv). The data table with
 variable to classify.}
-
-\item{xvar}{String. Name of variable in the data table to join to.}
 
 \item{uniquex}{String. Unique values of SPCD to match, if x is NULL.}
 
@@ -38,8 +41,8 @@ ref_codes, SPGRPCD Variable.}
 
 \item{states}{String. Name of state(s) the x table is from.}
 
-\item{name}{String. Name for species output type ('COMMON', 'SCIENTIFIC', 
-'SYMBOL').}
+\item{spcdname}{String. Name for species output type ('COMMON', 'SCIENTIFIC', 
+'SYMBOL', 'COMMON_SCIENTIFIC').}
 
 \item{add0}{Logical. IF TRUE, keep all codes in look up table. If FALSE,
 only include codes that are in x.}
@@ -48,6 +51,19 @@ only include codes that are in x.}
 
 \item{xtxt}{String.* Name of x table for more useful information in
 warnings.}
+
+\item{dsn}{String. Data source name of database with x.}
+
+\item{dbconn}{Open database connection.}
+
+\item{dbconnopen}{Logica. If TRUE, keep database connection open.}
+
+\item{dbwrite}{Logical. If TRUE, write class column to database table x.}
+
+\item{dbreturn}{Logical. If TRUE, return table with class column.}
+
+\item{overwrite}{Logical. If TRUE, and the class name already exists 
+in x, overwrites class name.}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
 

@@ -588,6 +588,7 @@ In this example, we look at adding rows and columns to output, including FIA nam
 
 ```{r}
 ## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013
+
 area1.3 <- modGBarea(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
