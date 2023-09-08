@@ -1927,7 +1927,7 @@ DBgetPlots <- function (states = NULL,
       }
       pltx <- pltx[, pltvarlst2, with=FALSE]
       setkeyv(pltx, "CN")
-
+ 
       ## Create combined unique identifier to subset other tables
       pcondID <- condx[, paste(PLT_CN, CONDID)]
     }
@@ -4028,7 +4028,7 @@ DBgetPlots <- function (states = NULL,
   }
  
   ## Write out plot/condition counts to comma-delimited file.
-  if (savedata) {
+  if (savedata && !is.null(pltcnt)) {
     message("saving pltcnt table...")
 
     datExportData(pltcnt, 
