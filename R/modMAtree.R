@@ -630,10 +630,13 @@ modMAtree <- function(MApopdat,
   } 
   ## Append name of package and method to outfile name
   outfn.estpse <- paste0(outfn.estpse, "_modMA_mase", "_", MAmethod) 
+  
 
   #####################################################################################
   ## GENERATE ESTIMATES
   #####################################################################################
+  
+  
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(((rowvar == "TOTAL" || length(unique(tdomdat[[rowvar]])) > 1) ||
 		(!is.null(tdomvarlst) && length(tdomvarlst) > 1)), TRUE, FALSE)
@@ -661,34 +664,66 @@ modMAtree <- function(MApopdat,
     }
   }
   
+  ## do modelselect here?
+  if (MAmethod == "greg" && modelselect == T) {
+    
+    pltlvl <- tdomdat[ , lapply(.SD, sum, na.rm = TRUE), 
+                       by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames),
+                       .SDcols=response]
+    
+    y <- pltlvl[[response]]
+    xsample <- pltlvl[ , prednames, drop = F]
+    xpop <- unitlut[ , prednames, drop = F]
+    N <- sum(npixels[["npixels"]])
+    
+    preds.selected <- gregEN.select(y = y,
+                                    xsample = xsample,
+                                    xpop = xpop,
+                                    N = N,
+                                    alpha = 0.5)
+    
+    if (length(preds.selected) == 0 || is.null(preds.selected)) {
+      
+      warning("No variables selected in model selection, proceeding with all predictors listed in prednames.")
+      
+    } else {
+     
+      prednames <- preds.selected 
+      
+    }
+    
+  }
+  
+  
+  
 #  if (addtotal) {
     ## Get total estimate and merge area
-    tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames), .SDcols=response]
-    unit_totestlst <- lapply(estunits, MAest.unit, 
-                        dat=tdomdattot, cuniqueid=cuniqueid, 
-                        unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
-                        MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-                        domain="TOTAL", response=response, npixels=npixels, 
-                        FIA=FIA, modelselect=modelselect, getweights=getweights,
-                        var_method=var_method)
-    unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
-    unit_weights <- do.call(rbind, sapply(unit_totestlst, '[', "weights")) 
-    unit_weights$areaweights <- unit_weights$weights * sum(unitarea[[areavar]])
-    if (MAmethod %in% c("greg", "gregEN")) {
-      predselectlst$totest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
-    }
-    tabs <- check.matchclass(unitarea, unit_totest, unitvar)
-    unitarea <- tabs$tab1
-    unit_totest <- tabs$tab2
-    setkeyv(unit_totest, unitvar)
-    unit_totest <- unit_totest[unitarea, nomatch=0]
-    if (totals) {
-      unit_totest <- getpse(unit_totest, areavar=areavar, esttype=esttype)
-    } else {
-      unit_totest <- getpse(unit_totest, esttype=esttype)
-    }      
-#  }
+   tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+	 by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames), .SDcols=response]
+   unit_totestlst <- lapply(estunits, MAest.unit, 
+                      dat=tdomdattot, cuniqueid=cuniqueid, 
+                      unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
+                      MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
+                      domain="TOTAL", response=response, npixels=npixels, 
+                      FIA=FIA, getweights=getweights,
+                      var_method=var_method)
+   unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
+   unit_weights <- do.call(rbind, sapply(unit_totestlst, '[', "weights")) 
+   unit_weights$areaweights <- unit_weights$weights * sum(unitarea[[areavar]])
+   if (MAmethod %in% c("greg", "gregEN")) {
+     predselectlst$totest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
+   }
+   tabs <- check.matchclass(unitarea, unit_totest, unitvar)
+   unitarea <- tabs$tab1
+   unit_totest <- tabs$tab2
+   setkeyv(unit_totest, unitvar)
+   unit_totest <- unit_totest[unitarea, nomatch=0]
+   if (totals) {
+     unit_totest <- getpse(unit_totest, areavar=areavar, esttype=esttype)
+   } else {
+     unit_totest <- getpse(unit_totest, esttype=esttype)
+   }      
+
 
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
@@ -699,7 +734,7 @@ modMAtree <- function(MApopdat,
                         unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                         MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                         domain=rowvar, response=response, npixels=npixels, 
-                        FIA=FIA, modelselect=modelselect, getweights=getweights,
+                        FIA=FIA, getweights=getweights,
                         var_method=var_method)
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
@@ -714,7 +749,7 @@ modMAtree <- function(MApopdat,
                             unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                             MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                             domain=colvar, response=response, npixels=npixels, 
-                            FIA=FIA, modelselect=modelselect, var_method=var_method)
+                            FIA=FIA, var_method=var_method)
       unit_colest <- do.call(rbind, sapply(unit_colestlst, '[', "unitest"))
       if (MAmethod %in% c("greg", "gregEN")) {
         predselectlst$colest <- do.call(rbind, sapply(unit_colestlst, '[', "predselect"))
@@ -729,7 +764,7 @@ modMAtree <- function(MApopdat,
                                unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                                MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                                domain="grpvar", response=response, npixels=npixels, 
-                               FIA=FIA, modelselect=modelselect, var_method=var_method)
+                               FIA=FIA, var_method=var_method)
       unit_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "unitest"))
       if (MAmethod %in% c("greg", "gregEN")) {
         predselectlst$grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
