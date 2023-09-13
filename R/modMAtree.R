@@ -648,6 +648,37 @@ modMAtree <- function(MApopdat,
 	ifelse(MAmethod == "gregEN", "gregElasticNet", 
 	ifelse(MAmethod == "ratio", "ratioEstimator", "horvitzThompson"))))
   message("generating estimates using mase::", masemethod, " function...\n")
+  
+  ## do modelselect here?
+  if (MAmethod == "greg" && modelselect == T) {
+    
+    pltlvl <- tdomdat[ , lapply(.SD, sum, na.rm = TRUE), 
+                       by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames),
+                       .SDcols=response]
+    
+    y <- pltlvl[[response]]
+    xsample <- pltlvl[ , prednames, with = F, drop = F]
+    xpop <- unitlut[ , prednames, with = F, drop = F]
+    N <- sum(npixels[["npixels"]])
+    
+    preds.selected <- gregEN.select(y = y,
+                                    xsample = xsample,
+                                    xpop = xpop,
+                                    N = N,
+                                    alpha = 0.5)
+    
+    if (length(preds.selected) == 0 || is.null(preds.selected)) {
+      
+      warning("No variables selected in model selection, proceeding with all predictors listed in prednames.")
+      
+    } else {
+      
+      prednames <- preds.selected 
+      
+    }
+    
+  }
+  
   if (!MAmethod %in% c("HT", "PS")) {
     message("using the following predictors...", toString(prednames))
   }
@@ -663,37 +694,6 @@ modMAtree <- function(MApopdat,
       var_method <- "LinHTSRS"
     }
   }
-  
-  ## do modelselect here?
-  if (MAmethod == "greg" && modelselect == T) {
-    
-    pltlvl <- tdomdat[ , lapply(.SD, sum, na.rm = TRUE), 
-                       by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames),
-                       .SDcols=response]
-    
-    y <- pltlvl[[response]]
-    xsample <- pltlvl[ , prednames, drop = F]
-    xpop <- unitlut[ , prednames, drop = F]
-    N <- sum(npixels[["npixels"]])
-    
-    preds.selected <- gregEN.select(y = y,
-                                    xsample = xsample,
-                                    xpop = xpop,
-                                    N = N,
-                                    alpha = 0.5)
-    
-    if (length(preds.selected) == 0 || is.null(preds.selected)) {
-      
-      warning("No variables selected in model selection, proceeding with all predictors listed in prednames.")
-      
-    } else {
-     
-      prednames <- preds.selected 
-      
-    }
-    
-  }
-  
   
   
 #  if (addtotal) {
