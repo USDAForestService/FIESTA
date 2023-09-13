@@ -652,6 +652,7 @@ modMAtree <- function(MApopdat,
   ## do modelselect here?
   if (MAmethod == "greg" && modelselect == T) {
     
+    # want to do variable selection on plot level data...
     pltlvl <- tdomdat[ , lapply(.SD, sum, na.rm = TRUE), 
                        by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames),
                        .SDcols=response]
@@ -669,11 +670,12 @@ modMAtree <- function(MApopdat,
     
     if (length(preds.selected) == 0 || is.null(preds.selected)) {
       
-      warning("No variables selected in model selection, proceeding with all predictors listed in prednames.")
+      warning("No variables selected in model selection, proceeding with all possible predictors. \n")
       
     } else {
       
       prednames <- preds.selected 
+      message(paste0("Predictors ", "[", paste0(prednames, collapse = ", "), "]", " were chosen in model selection.\n"))
       
     }
     
