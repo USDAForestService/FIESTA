@@ -662,8 +662,8 @@ modMAtree <- function(MApopdat,
     N <- sum(npixels[["npixels"]])
     
     preds.selected <- gregEN.select(y = y,
-                                    xsample = xsample,
-                                    xpop = xpop,
+                                    x_sample = xsample,
+                                    x_pop = xpop,
                                     N = N,
                                     alpha = 0.5)
     
