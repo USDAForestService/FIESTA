@@ -605,7 +605,7 @@ DBgetXY <- function (states = NULL,
     names(XYdf) <- toupper(names(XYdf))
     xyflds <- names(XYdf)
   }
-
+ 
   ## Check xy.uniqueid
   xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
 		gui=gui, checklst=xyflds, caption="UniqueID variable of xy",
@@ -690,7 +690,7 @@ DBgetXY <- function (states = NULL,
       }
 	  
 	  ## Check for indices
-      if (evalCur || measCur) {       
+      if (evalCur || measCur) {  	  
         chk <- checkidx(dbconn, plotnm, c("STATECD", "UNITCD", "COUNTYCD", "PLOT"))
         if (is.null(chk)) {
           message("to speed query... add an index to the plot table")

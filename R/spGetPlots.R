@@ -544,7 +544,7 @@ spGetPlots <- function(bnd = NULL,
       if (!is.null(states)) {
         states <- pcheck.states(states)
       }
-  
+
       if (clipxy) {
         ###########################################################################
         ## Get XY

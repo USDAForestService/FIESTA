@@ -39,7 +39,8 @@ DBgetSQLite <- function (states = NULL,
 
   ## Set options
   opts <- options()
-  options(timeout = max(1000000, getOption("timeout")))
+  options(timeout = max(100000, getOption("timeout")))
+  #options(download.file.method="libcurl", url.method="libcurl")
   on.exit(options(opts))
 
   ## Set URL where data files are
