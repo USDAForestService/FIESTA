@@ -5,7 +5,7 @@
 \alias{ref_conversion}
 \title{Reference table - for generating tables.}
 \format{
-An object of class \code{data.frame} with 7 rows and 4 columns.
+An object of class \code{data.frame} with 9 rows and 4 columns.
 }
 \source{
 Conversion table.
