@@ -749,14 +749,14 @@ domain = "TOTAL"
       setnames(tdomdat, estvar.name, estvar.name.micr)
     }
 
-yn = estvar.name.subp
-y2n = estvar.name.micr
-yd = pmeassubp.name
-y2d = pmeasmicr.name
-ysum = tdomdat
-dsum = pmeasprop
-uniqueid = cuniqueid
-domain = rowvar
+#yn = estvar.name.subp
+#y2n = estvar.name.micr
+#yd = pmeassubp.name
+#y2d = pmeasmicr.name
+#ysum = tdomdat
+#dsum = pmeasprop
+#uniqueid = cuniqueid
+#domain = rowvar
 
 
     unit_rowest <- Ratio2Size(yn = estvar.name.subp, 
