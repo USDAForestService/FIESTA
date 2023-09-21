@@ -83,14 +83,14 @@
 #' (e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is
 #' prompted.  Use tfilter="NONE" if no filters.
 #' @param lbs2tons Logical. If TRUE, converts biomass or carbon variables from
-#' pounds to tons. If metric=TRUE, converts to metric tons, else short tons.
+#' pounds to tons (1 pound = 0.0005 short tons). 
 #' @param metric Logical. If TRUE, converts response to metric units based on
-#' FIESTA::ref_conversion, if tsumvar is in FIESTAutils::ref_estvar. Note: if TPA,
-#' TPA is converted to trees per hectare (TPH: 1 / (1/ tpavar * 0.4046860)).
+#' FIESTA::ref_conversion, if tsumvar is in FIESTAutils::ref_units. Note: if TPA,
+#' TPA is converted to trees per hectare (TPH: 1/ tpavar * 0.4046860).
 #' @param tdomvar String. The tree domain (tdom) variable used to aggregate by
 #' (e.g., "SPCD", "SPGRPCD").
 #' @param tdomvarlst String (vector). List of specific tree domains of tdomvar
-#' to aggregate (ex. c(108, 202)). If NULL, all domains of tdomvar are used.
+#' to aggregate (e.g., c(108, 202)). If NULL, all domains of tdomvar are used.
 #' @param tdomvar2 String. A second tree domain variable to use to aggregate by
 #' (e.g. "DIACL").  The variables, tdomvar and tdomvar2 will be concatenated
 #' before summed.
@@ -129,8 +129,6 @@
 #' for estimate, adjTPA=4. The default is 1.
 #' @param NAto0 Logical. If TRUE, convert NA values to 0.
 #' @param tround Number. The number of digits to round to. If NULL, default=6.
-#' @param checkNA Logical. If TRUE, checks if NA values exist in necessary
-#' variables.
 #' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
 #' returns data.frame object(s).
 #' @param savedata Logical. If TRUE, saves data to outfolder.
@@ -144,18 +142,20 @@
 #' @return tdomdata - a list of the following objects:
 #' 
 #' \item{tdomdat}{ Data frame. Plot or condition-level table with aggregated
-#' tree domain (tdom) attributes (filtered). } \item{tdomsum}{ Data frame. The
-#' tdom look-up table with data aggregated by species. } \item{tdomvar}{
-#' String. Name of the tdom variable used to aggregate by. } \item{tsumvar}{
-#' String. Name of the aggregated output variable. } \item{tdomlst}{ Vector.
-#' List of the aggregated tree data in tdomdat. } \item{tdomdat.pres}{ Data
-#' frame. Plot or condition-level table with aggregated tree domain attributes
-#' represented as presence/absence (1/0). } \item{tdomdat.prop}{ Data frame.
-#' Plot or condition-level table with aggregated tree domain attributes
-#' represented as proportion of total by plot. } \item{tdomdat.cov}{ Data
-#' frame. Plot or condition-level table with aggregated tree domain attributes
-#' represented as percent cover, multipying cover attribute by tdom proportion
-#' by plot. }
+#' tree domain (tdom) attributes (filtered). } 
+#' \item{tdomsum}{ Data frame. The tdom look-up table with data aggregated 
+#' by species. } 
+#' \item{tdomvar}{ String. Name of the tdom variable used to aggregate by. }
+#' \item{tsumvar}{ String. Name of the aggregated output variable. } 
+#' \item{tdomlst}{ Vector. List of the aggregated tree data in tdomdat. } 
+#' \item{tdomdat.pres}{ Data frame. Plot or condition-level table with 
+#' aggregated tree domain attributes represented as presence/absence (1/0). } 
+#' \item{tdomdat.prop}{ Data frame. Plot or condition-level table with 
+#' aggregated tree domain attributes represented as proportion of total by 
+#' plot. } 
+#' \item{tdomdat.cov}{ Data frame. Plot or condition-level table with 
+#' aggregated tree domain attributes represented as percent cover, multipying 
+#' cover attribute by tdom proportion by plot. }
 #' 
 #' If savedata=TRUE\cr - tdomdat will be saved to the outfolder
 #' ('tdomprefix'_DAT.csv). \cr - a text file of input parameters is saved to
@@ -254,7 +254,6 @@ datSumTreeDom <- function(tree = NULL,
                           NAto0 = FALSE, 
                           adjTPA = 1,
                           tround = 5, 
-                          checkNA = FALSE, 
                           returnDT = TRUE,
                           savedata = FALSE,
                           savedata_opts = NULL,
@@ -277,14 +276,16 @@ datSumTreeDom <- function(tree = NULL,
 
   ## Set global variables  
   COND_STATUS_CD=COUNT=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=
-	seedx=estunits=TREECOUNT_CALC=cond.nonsamp.filter=ref_spcd <- NULL
+	seedx=tunits=TREECOUNT_CALC=cond.nonsamp.filter=ref_spcd <- NULL
   checkNApvars <- {}
   checkNAcvars <- {}
   checkNAtvars <- {}
   seedclnm <- "<1"
   parameters <- FALSE
+  ref_units <- FIESTAutils::ref_units
   ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry <- NULL
+  checkNA <- FALSE
 
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
@@ -849,9 +850,11 @@ datSumTreeDom <- function(tree = NULL,
 
   ## Check lbs2tons
   ##########################################################################
-  lbs2tons <- pcheck.logical(lbs2tons, varnm="lbs2tons", title="Pounds to tons?", 
+  if (!addseed) {
+    lbs2tons <- pcheck.logical(lbs2tons, varnm="lbs2tons", title="Pounds to tons?", 
 		first="YES", gui=gui, stopifnull=TRUE)
-
+  }
+  
   ## Check metric
   ##########################################################################
   metric <- pcheck.logical(metric, varnm="metric", title="Metric?", 
@@ -893,7 +896,7 @@ datSumTreeDom <- function(tree = NULL,
 
   ## Check for NA values in necessary variables in all tables
   ###########################################################################
-  if (checkNA) {
+  if (checkNA && !seedonly) {
     treex.na <- sapply(checkNAtvars, 
 		function(x, treex){ sum(is.na(treex[,x, with=FALSE])) }, treex)
     if (any(treex.na) > 0) {
@@ -939,7 +942,7 @@ datSumTreeDom <- function(tree = NULL,
   ###########################################################################
   if (tsumvar != "COUNT") {
     if (tsumvar %in% ref_estvar$ESTVAR) { 
-      estunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tsumvar])
+      tunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tsumvar])
     } else {
       if (metric) {
         message(tsumvar, " not in ref_estvar... no metric conversion")
@@ -949,13 +952,13 @@ datSumTreeDom <- function(tree = NULL,
       }
     }
     if (metric) {
-      metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tsumvar])
-      if (estunits != metricunits) {
-        cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
-			metricunits]
+      metricunits <- ref_units$METRICUNITS[ref_units$ESTVAR == tsumvar]
+      if (tunits != metricunits) {
+        convfac <- ref_conversion$CONVERSION[ref_conversion$METRIC == 
+		metricunits]
         tsumvarm <- paste0(tsumvar, "_m")
-        treex[, (tsumvarm) := get(eval(tsumvar)) * cfactor]
-        estunits <- metricunits
+        treex[, (tsumvarm) := get(eval(tsumvar)) * convfac]
+        tunits <- metricunits
         tsumvar <- tsumvarm
       }
     }
@@ -990,7 +993,7 @@ datSumTreeDom <- function(tree = NULL,
     ## If metric, convert tpavar to trees per hectare
     if (metric) {
       tpa.m <- paste0(tpavar, "_m")
-      treex[, (tpa.m) := 1 / ((1/ get(eval(tpavar)) * 0.4046860))]
+      treex[, (tpa.m) := get(eval(tpavar)) * 1 / 0.40468564]
       tpavar <- tpa.m
     }
   }
@@ -1857,7 +1860,9 @@ datSumTreeDom <- function(tree = NULL,
     }
     tdomdata$tdomdat <- sumtreef
   }
-  tdomdata$estunits <- estunits
+  if (length(tunits) > 0) {
+    tdomdata$tunits <- tunits
+  }
   if (proportion) {
     if (returnDT) {
       sumtreef.prop <- setDF(sumtreef.prop)

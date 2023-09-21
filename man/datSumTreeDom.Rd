@@ -50,7 +50,6 @@ datSumTreeDom(
   NAto0 = FALSE,
   adjTPA = 1,
   tround = 5,
-  checkNA = FALSE,
   returnDT = TRUE,
   savedata = FALSE,
   savedata_opts = NULL,
@@ -133,17 +132,17 @@ include condition table.}
 prompted.  Use tfilter="NONE" if no filters.}
 
 \item{lbs2tons}{Logical. If TRUE, converts biomass or carbon variables from
-pounds to tons. If metric=TRUE, converts to metric tons, else short tons.}
+pounds to tons (1 pound = 0.0005 short tons).}
 
 \item{metric}{Logical. If TRUE, converts response to metric units based on
-FIESTA::ref_conversion, if tsumvar is in FIESTAutils::ref_estvar. Note: if TPA,
-TPA is converted to trees per hectare (TPH: 1 / (1/ tpavar * 0.4046860)).}
+FIESTA::ref_conversion, if tsumvar is in FIESTAutils::ref_units. Note: if TPA,
+TPA is converted to trees per hectare (TPH: 1/ tpavar * 0.4046860).}
 
 \item{tdomvar}{String. The tree domain (tdom) variable used to aggregate by
 (e.g., "SPCD", "SPGRPCD").}
 
 \item{tdomvarlst}{String (vector). List of specific tree domains of tdomvar
-to aggregate (ex. c(108, 202)). If NULL, all domains of tdomvar are used.}
+to aggregate (e.g., c(108, 202)). If NULL, all domains of tdomvar are used.}
 
 \item{tdomvar2}{String. A second tree domain variable to use to aggregate by
 (e.g. "DIACL").  The variables, tdomvar and tdomvar2 will be concatenated
@@ -203,9 +202,6 @@ for estimate, adjTPA=4. The default is 1.}
 
 \item{tround}{Number. The number of digits to round to. If NULL, default=6.}
 
-\item{checkNA}{Logical. If TRUE, checks if NA values exist in necessary
-variables.}
-
 \item{returnDT}{Logical. If TRUE, returns data.table object(s). If FALSE,
 returns data.frame object(s).}
 
@@ -225,18 +221,20 @@ default = 'tdomsum'.}
 tdomdata - a list of the following objects:
 
 \item{tdomdat}{ Data frame. Plot or condition-level table with aggregated
-tree domain (tdom) attributes (filtered). } \item{tdomsum}{ Data frame. The
-tdom look-up table with data aggregated by species. } \item{tdomvar}{
-String. Name of the tdom variable used to aggregate by. } \item{tsumvar}{
-String. Name of the aggregated output variable. } \item{tdomlst}{ Vector.
-List of the aggregated tree data in tdomdat. } \item{tdomdat.pres}{ Data
-frame. Plot or condition-level table with aggregated tree domain attributes
-represented as presence/absence (1/0). } \item{tdomdat.prop}{ Data frame.
-Plot or condition-level table with aggregated tree domain attributes
-represented as proportion of total by plot. } \item{tdomdat.cov}{ Data
-frame. Plot or condition-level table with aggregated tree domain attributes
-represented as percent cover, multipying cover attribute by tdom proportion
-by plot. }
+tree domain (tdom) attributes (filtered). } 
+\item{tdomsum}{ Data frame. The tdom look-up table with data aggregated 
+by species. } 
+\item{tdomvar}{ String. Name of the tdom variable used to aggregate by. }
+\item{tsumvar}{ String. Name of the aggregated output variable. } 
+\item{tdomlst}{ Vector. List of the aggregated tree data in tdomdat. } 
+\item{tdomdat.pres}{ Data frame. Plot or condition-level table with 
+aggregated tree domain attributes represented as presence/absence (1/0). } 
+\item{tdomdat.prop}{ Data frame. Plot or condition-level table with 
+aggregated tree domain attributes represented as proportion of total by 
+plot. } 
+\item{tdomdat.cov}{ Data frame. Plot or condition-level table with 
+aggregated tree domain attributes represented as percent cover, multipying 
+cover attribute by tdom proportion by plot. }
 
 If savedata=TRUE\cr - tdomdat will be saved to the outfolder
 ('tdomprefix'_DAT.csv). \cr - a text file of input parameters is saved to

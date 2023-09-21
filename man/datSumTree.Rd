@@ -37,7 +37,6 @@ datSumTree(
   adjTPA = 1,
   NAto0 = FALSE,
   tround = 5,
-  checkNA = FALSE,
   returnDT = TRUE,
   savedata = FALSE,
   savedata_opts = NULL,
@@ -126,12 +125,12 @@ include condition table.}
 prompted.  Use tfilter="NONE" if no filters.}
 
 \item{lbs2tons}{Logical. If TRUE, converts biomass or carbon variables from
-pounds to tons. If metric=TRUE, converts to metric tons, else short tons.}
+pounds to tons (1 pound = 0.0005 short tons).}
 
 \item{metric}{Logical. If TRUE, converts response to metric units based on
 FIESTA::ref_conversion, if any variable in tsumvarlst is in
-FIESTAutils::ref_estvar.  Note: if TPA, TPA is converted to trees per hectare
-(TPH: 1 / (1/ tpavar * 0.4046860)).}
+FIESTAutils::ref_units.  Note: if TPA, TPA is converted to trees per hectare
+(TPH: 1/ tpavar * 0.4046860).}
 
 \item{getadjplot}{Logical. If TRUE, adjustments are calculated for
 nonsampled conditions on plot.}
@@ -151,9 +150,6 @@ for estimate, adjTPA=4. The default is 1.}
 
 \item{tround}{Number. The number of digits to round to. If NULL, default=5.}
 
-\item{checkNA}{Logical. If TRUE, checks if NA values exist in necessary
-variables.}
-
 \item{returnDT}{Logical. If TRUE, returns data.table object(s). If FALSE,
 returns data.frame object(s).}
 
@@ -170,9 +166,14 @@ default = 'treesum'.}
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
-A list of the following items: \item{treedat}{ Data frame. Plot or
-condition-level table with aggregated tree attributes. } \item{sumvars}{
-String vector. Name(s) of the output aggregated tree attributes. }
+A list of the following items: 
+\item{treedat}{ Data frame. Plot or condition-level table with aggregated 
+tree attributes. } 
+\item{sumvars}{ String vector. Name(s) of the output aggregated tree 
+attributes. }
+\item{tunitlst}{ String list. Units of output, when available. }
+\item{tfilter}{ String list. Filter used. }
+\item{meta}{ Data frame. Associated metadata, when available. }
 
 If savedata=TRUE\cr - treedat will be saved to the outfolder. \cr - a text
 file of input parameters is saved to outfolder

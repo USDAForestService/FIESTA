@@ -76,11 +76,11 @@
 #' (e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is
 #' prompted.  Use tfilter="NONE" if no filters.
 #' @param lbs2tons Logical. If TRUE, converts biomass or carbon variables from
-#' pounds to tons. If metric=TRUE, converts to metric tons, else short tons.
+#' pounds to tons (1 pound = 0.0005 short tons). 
 #' @param metric Logical. If TRUE, converts response to metric units based on
 #' FIESTA::ref_conversion, if any variable in tsumvarlst is in
-#' FIESTAutils::ref_estvar.  Note: if TPA, TPA is converted to trees per hectare
-#' (TPH: 1 / (1/ tpavar * 0.4046860)).
+#' FIESTAutils::ref_units.  Note: if TPA, TPA is converted to trees per hectare
+#' (TPH: 1/ tpavar * 0.4046860).
 #' @param getadjplot Logical. If TRUE, adjustments are calculated for
 #' nonsampled conditions on plot.
 #' @param adjtree Logical. If TRUE, trees are individually adjusted by
@@ -93,8 +93,6 @@
 #' for estimate, adjTPA=4. The default is 1.
 #' @param NAto0 Logical. If TRUE, convert NA values to 0.
 #' @param tround Number. The number of digits to round to. If NULL, default=5.
-#' @param checkNA Logical. If TRUE, checks if NA values exist in necessary
-#' variables.
 #' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
 #' returns data.frame object(s).
 #' @param savedata Logical. If TRUE, saves data to outfolder.
@@ -105,9 +103,14 @@
 #' @param dbconnopen Logical. If TRUE, keep database connection open.
 #' @param gui Logical. If gui, user is prompted for parameters.
 #' 
-#' @return A list of the following items: \item{treedat}{ Data frame. Plot or
-#' condition-level table with aggregated tree attributes. } \item{sumvars}{
-#' String vector. Name(s) of the output aggregated tree attributes. }
+#' @return A list of the following items: 
+#' \item{treedat}{ Data frame. Plot or condition-level table with aggregated 
+#' tree attributes. } 
+#' \item{sumvars}{ String vector. Name(s) of the output aggregated tree 
+#' attributes. }
+#' \item{tunitlst}{ String list. Units of output, when available. }
+#' \item{tfilter}{ String list. Filter used. }
+#' \item{meta}{ Data frame. Associated metadata, when available. }
 #' 
 #' If savedata=TRUE\cr - treedat will be saved to the outfolder. \cr - a text
 #' file of input parameters is saved to outfolder
@@ -157,7 +160,6 @@ datSumTree <- function(tree = NULL,
                        adjTPA = 1, 
                        NAto0 = FALSE, 
                        tround = 5, 
-                       checkNA = FALSE, 
                        returnDT = TRUE,
                        savedata = FALSE,
                        savedata_opts = NULL,
@@ -174,9 +176,9 @@ datSumTree <- function(tree = NULL,
 
   ## Set global variables  
   COND_STATUS_CD=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
-      seedx=TREECOUNT_CALC=estunits=fname=NF_SUBP_STATUS_CD=
+      seedx=TREECOUNT_CALC=fname=NF_SUBP_STATUS_CD=
       CONDPROP_UNADJ=MACRPROP_UNADJ=SUBPPROP_UNADJ=sumbcvars=treex=
-      cond.nonsamp.filter=meta  <- NULL
+      cond.nonsamp.filter=meta=tunits=tunitlst  <- NULL
 
 
   ## If gui.. set variables to NULL
@@ -187,8 +189,9 @@ datSumTree <- function(tree = NULL,
   checkNAtvars <- {}
   parameters <- FALSE
   ref_estvar <- FIESTAutils::ref_estvar
+  ref_units <- FIESTAutils::ref_units
   twhereqry=swhereqry=tfromqry=sfromqry <- NULL
-
+  checkNA <- FALSE
 
   ## For documentation
   # subplot Dataframe or comma-delimited file (*.csv). If getadjplot=TRUE, 
@@ -1048,7 +1051,7 @@ datSumTree <- function(tree = NULL,
   }   
  
   ## ADDS '_TPA' TO VARIABLE NAME, MULTIPLIES BY TPA_UNADJ, AND DIVIDES BY adjfac
-  estunits <- list()
+  tunitlst <- list()
   for (tvar in tsumvarlst) {
     if (!is.null(tfilter)) {
       ref <- ref_estvar[ref_estvar$ESTVAR %in% tvar, ] 
@@ -1061,7 +1064,7 @@ datSumTree <- function(tree = NULL,
 	
     if (tvar %in% c(tuniqueid, tpavars)) {
       tvar <- "COUNT"
-	  tunits <- "number of trees"
+	  tunits <- "trees"
     }
 	tvarnew <- tvar
     if (tvar != "COUNT") {
@@ -1071,7 +1074,6 @@ datSumTree <- function(tree = NULL,
 		  tvarnew <- paste0(tvarnew, "_TON")
 		  message("converting ", tvar, " from pounds to tons...")
 		  treex[, (tvarnew) := get(eval(tvar)) * 0.09290304]
-		  #estunits[[tvartons]] <- "tons"		  
 		  tunits <- "tons"
 		  if (metric) {
 		  	message("converting ", tvar, " from tons to metric tons...")
@@ -1090,28 +1092,20 @@ datSumTree <- function(tree = NULL,
           tunits <- "kilograms"			
 		}
  	  } else {
-	    if (tvar %in% ref_estvar$ESTVAR) { 
-          tunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tvar])
-        } else if (metric) {
-          message(tvar, " not in ref_estvar... no metric conversion")
-          metric <- FALSE
+	    if (tvar %in% ref_units$VARIABLE) { 
+          tunits <- unique(ref_units$UNITS[ref_units$VARIABLE == tvar])
         } else {
           message(tvar, " not in ref_estvar... no units found")
+		  metric <- FALSE
         }
       
         if (metric) {
-          metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tvar])
-		  if (length(metricunits) > 1) {
-		    warning("multiple units available: ", toString(metricunits), "... returning NULL")
-		    return(NULL)
-		  }
-          if (estunits != metricunits) {
-            convfac <- ref_conversion$CONVERSION[ref_conversion$METRIC == metricunits]
-            tvarm <- paste0(tvar, "_m")
-            treex[, (tvarm) := get(eval(tvar)) * convfac]
-            tvarnew <- tvarm
-			tunits <- metricunits
-		  }
+          metricunits <- ref_units$METRICUNITS[ref_units$VARIABLE == tvar]
+          convfac <- ref_conversion$CONVERSION[ref_conversion$METRIC ==    metricunits]
+          tvarm <- paste0(tvar, "_m")
+          treex[, (tvarm) := get(eval(tvar)) * convfac]
+          tvarnew <- tvarm
+	      tunits <- metricunits
         }
       }
     } 
@@ -1143,7 +1137,6 @@ datSumTree <- function(tree = NULL,
       if (metric) {
 	  	message("converting ", tpavar, " from trees per acre to trees per hectare...")
  	    tpa.m <- sub("TPA", "TPH", tpavar)
-		acre2hect <- 0.40468564
         #treex[, (tpa.m) := 1 / ((1/ get(eval(tpavar)) * acre2hect))]
         treex[, (tpa.m) := get(eval(tpavar)) * 1 / 0.40468564]
         tpavar <- tpa.m
@@ -1192,14 +1185,6 @@ datSumTree <- function(tree = NULL,
       newname2 <- newname
     }
 
- #   if (tvar %in% c(biovars, carbvars)) {
- #     unittxt <- ifelse (lbs2tons, "TONS", "LBS")
- #
- #     ## Apply new name
- #     setnames(treex, newname2, paste0(newname2, "_", unittxt))
- #     newname2 <- paste0(newname2, "_", unittxt)
- #   }
-
     tsumvarlst2 <- c(tsumvarlst2, newname2)
     if (getnm) {
       if (toupper(tfunstr) != "SUM") {
@@ -1211,7 +1196,7 @@ datSumTree <- function(tree = NULL,
     } else {
       tsumvarnmlst2 <- tsumvarnmlst
     } 
-	estunits[[newname2]] <- tunits
+	tunitlst[[newname2]] <- tunits
   }
  
   ######################################################################## 
@@ -1363,7 +1348,9 @@ datSumTree <- function(tree = NULL,
     sumdat <- setDF(sumdat)
   }
   sumtreelst <- list(treedat=sumdat, sumvars=tsumvarnmlst2)
-  sumtreelst$estunits <- estunits
+  if (length(tunitlst) > 0) {
+    sumtreelst$tunitlst <- tunitlst
+  }
   if (!is.null(tfilter)) {
     sumtreelst$tfilter <- tfilter
   }
