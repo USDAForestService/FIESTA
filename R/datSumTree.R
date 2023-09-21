@@ -1048,6 +1048,7 @@ datSumTree <- function(tree = NULL,
   }   
  
   ## ADDS '_TPA' TO VARIABLE NAME, MULTIPLIES BY TPA_UNADJ, AND DIVIDES BY adjfac
+  estunits <- list()
   for (tvar in tsumvarlst) {
     if (!is.null(tfilter)) {
       ref <- ref_estvar[ref_estvar$ESTVAR %in% tvar, ] 
@@ -1060,28 +1061,57 @@ datSumTree <- function(tree = NULL,
 	
     if (tvar %in% c(tuniqueid, tpavars)) {
       tvar <- "COUNT"
+	  tunits <- "number of trees"
     }
+	tvarnew <- tvar
     if (tvar != "COUNT") {
-      if (tvar %in% ref_estvar$ESTVAR) { 
-        estunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tvar])
-      } else {
-        if (metric) {
+	  if (tvar %in% vars2convert && (lbs2tons || metric)) {
+	    tunits <- "pounds"
+	    if (lbs2tons) {
+		  tvarnew <- paste0(tvarnew, "_TON")
+		  message("converting ", tvar, " from pounds to tons...")
+		  treex[, (tvarnew) := get(eval(tvar)) * 0.09290304]
+		  #estunits[[tvartons]] <- "tons"		  
+		  tunits <- "tons"
+		  if (metric) {
+		  	message("converting ", tvar, " from tons to metric tons...")
+		    tvarm <- paste0(tvar, "_m")
+	        convfac <- 0.90718474
+			treex[, (tvarm) := get(eval(tvarnew)) * convfac]
+			tvarnew <- tvarm
+			tunits <- "metric tons"
+		  } 
+		} else {
+		  message("converting ", tvar, " from pounds to kilograms...")
+		  tvarm <- paste0(tvar, "_m")
+		  convfac <- 0.45359237
+		  treex[, (tvarm) := get(eval(tvar)) * convfac]			
+          tvarnew <- tvarm			
+          tunits <- "kilograms"			
+		}
+ 	  } else {
+	    if (tvar %in% ref_estvar$ESTVAR) { 
+          tunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tvar])
+        } else if (metric) {
           message(tvar, " not in ref_estvar... no metric conversion")
           metric <- FALSE
         } else {
           message(tvar, " not in ref_estvar... no units found")
         }
-      }
-    
-      if (metric) {
-        metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tvar])
-        if (estunits != metricunits) {
-          cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
-			metricunits]
-          tvarm <- paste0(tvar, "_m")
-          treex[, (tvarm) := get(eval(tvar)) * cfactor]
-          estunits <- metricunits
-          tvar <- tvarm
+      
+        if (metric) {
+          metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tvar])
+		  if (length(metricunits) > 1) {
+		    warning("multiple units available: ", toString(metricunits), "... returning NULL")
+		    return(NULL)
+		  }
+          if (estunits != metricunits) {
+            convfac <- ref_conversion$CONVERSION[ref_conversion$METRIC == metricunits]
+            tvarm <- paste0(tvar, "_m")
+            treex[, (tvarm) := get(eval(tvar)) * convfac]
+            tvarnew <- tvarm
+			tunits <- metricunits
+		  }
         }
       }
     } 
@@ -1101,9 +1131,9 @@ datSumTree <- function(tree = NULL,
 
       ## Add filter name (e.g., live/dead) to newname
       if (!is.null(fname) && !is.na(fname)) {
-        newname <- paste0(tvar, "_TPA", "_", fname)
+        newname <- paste0(tvarnew, "_TPA", "_", fname)
       } else {
-        newname <- paste0(tvar, "_TPA")
+        newname <- paste0(tvarnew, "_TPA")
       }
       ## Adjust by adjTPA variable (Default is 1)
       if (adjTPA > 1) {
@@ -1111,33 +1141,33 @@ datSumTree <- function(tree = NULL,
       }
       ## If metric, convert tpavar to trees per hectare
       if (metric) {
-        #tpa.m <- paste0(tpavar, "_m")
-	    tpa.m <- sub("TPA", "TPH", tpavar)
-		acre2hect <- ref_conversion$CONVERSION[ref_conversion$ENGLISH == "acres" & 
-					ref_conversion$METRIC == "hectares"]
-        treex[, (tpa.m) := 1 / ((1/ get(eval(tpavar)) * acre2hect))]
+	  	message("converting ", tpavar, " from trees per acre to trees per hectare...")
+ 	    tpa.m <- sub("TPA", "TPH", tpavar)
+		acre2hect <- 0.40468564
+        #treex[, (tpa.m) := 1 / ((1/ get(eval(tpavar)) * acre2hect))]
+        treex[, (tpa.m) := get(eval(tpavar)) * 1 / 0.40468564]
         tpavar <- tpa.m
       }
-      treex[, (newname) := get(eval(tvar)) * get(eval(tpavar))]
+      treex[, (newname) := get(eval(tvarnew)) * get(eval(tpavar))]
 
       if (addseed && tvar=="COUNT" && tpavar %in% names(seedx)) {
         #seedx[, COUNT := TREECOUNT_CALC]
         if (adjTPA > 1) {
           seedx[, (tpavar) := get(eval(tpavar)) * adjTPA]
         }
-        seedx[, (newname) := get(eval(tvar)) * get(eval(tpavar))]
+        seedx[, (newname) := get(eval(tvarnew)) * get(eval(tpavar))]
         seedcountvar=treecountvar <- newname
       }
     } else {
       if (!is.null(fname) && !is.na(fname)) {
-        newname <- paste0(tvar, "_", fname)
-        setnames(treex, tvar, newname)
+        newname <- paste0(tvarnew, "_", fname)
+        setnames(treex, tvarnew, newname)
       } else {
-        newname <- tvar
+        newname <- tvarnew
       }
       if (addseed && tvar=="COUNT") {
         #seedx[, COUNT := TREECOUNT_CALC]
-        seedx[, (newname) := get(eval(tvar)) * TREECOUNT_CALC]
+        seedx[, (newname) := get(eval(tvarnew)) * TREECOUNT_CALC]
         seedcountvar=treecountvar <- newname
       }
     }
@@ -1162,13 +1192,13 @@ datSumTree <- function(tree = NULL,
       newname2 <- newname
     }
 
-    if (tvar %in% c(biovars, carbvars)) {
-      unittxt <- ifelse (lbs2tons, "TONS", "LBS")
-
-      ## Apply new name
-      setnames(treex, newname2, paste0(newname2, "_", unittxt))
-      newname2 <- paste0(newname2, "_", unittxt)
-    }
+ #   if (tvar %in% c(biovars, carbvars)) {
+ #     unittxt <- ifelse (lbs2tons, "TONS", "LBS")
+ #
+ #     ## Apply new name
+ #     setnames(treex, newname2, paste0(newname2, "_", unittxt))
+ #     newname2 <- paste0(newname2, "_", unittxt)
+ #   }
 
     tsumvarlst2 <- c(tsumvarlst2, newname2)
     if (getnm) {
@@ -1181,6 +1211,7 @@ datSumTree <- function(tree = NULL,
     } else {
       tsumvarnmlst2 <- tsumvarnmlst
     } 
+	estunits[[newname2]] <- tunits
   }
  
   ######################################################################## 
