@@ -1260,7 +1260,7 @@ DBgetPlots <- function (states = NULL,
       }
     }
   }
-
+ 
   ###################################################################################
   ## Loop through states
   ###################################################################################
@@ -1417,7 +1417,7 @@ DBgetPlots <- function (states = NULL,
         }
       }
     }
-
+ 
     ###########################################################################
     ## From query
     ###########################################################################
@@ -2670,7 +2670,7 @@ DBgetPlots <- function (states = NULL,
 	        }
           }
           if (savedata) {
-            message("saving seed table...")
+            message("saving seedling table...")
             index.unique.seedx <- NULL
             if (!append_layer) {
               index.unique.seedx <- c("PLT_CN", "CONDID", "SUBP")
@@ -2727,9 +2727,7 @@ DBgetPlots <- function (states = NULL,
         P2VEG_SUBPLOT_SPP <- 
 		      DBgetCSV("P2VEG_SUBPLOT_SPP", stabbr, returnDT=TRUE, 
 		      stopifnull=FALSE)
-        if (is.null(P2VEG_SUBPLOT_SPP)) {
-          message("there is no P2VEG_SUBPLOT_SPP table in datamart")
-        } else {
+        if (!is.null(P2VEG_SUBPLOT_SPP)) {
           vsubpsppnm <- "P2VEG_SUBPLOT_SPP"
           names(P2VEG_SUBPLOT_SPP) <- toupper(names(P2VEG_SUBPLOT_SPP))
           vsppflds <- names(P2VEG_SUBPLOT_SPP)
@@ -2738,9 +2736,7 @@ DBgetPlots <- function (states = NULL,
         P2VEG_SUBP_STRUCTURE <- 
 		      DBgetCSV("P2VEG_SUBP_STRUCTURE", stabbr, returnDT=TRUE, 
 		      stopifnull=FALSE)
-        if (is.null(P2VEG_SUBP_STRUCTURE)) {
-          message("there is no P2VEG_SUBP_STRUCTURE table in datamart")
-        } else {
+        if (!is.null(P2VEG_SUBP_STRUCTURE)) {
           vsubpstrnm <- "P2VEG_SUBP_STRUCTURE"
           names(P2VEG_SUBP_STRUCTURE) <- toupper(names(P2VEG_SUBP_STRUCTURE))
           vstrflds <- names(P2VEG_SUBP_STRUCTURE)
@@ -2748,9 +2744,7 @@ DBgetPlots <- function (states = NULL,
       } else if (datsource %in% c("csv", "obj")) {
         P2VEG_SUBPLOT_SPP <- pcheck.table(vsubpspp_layer, 
 					stopifnull=TRUE, stopifinvalid=TRUE)
-        if (is.null(P2VEG_SUBPLOT_SPP)) {
-          message("the P2VEG_SUBPLOT_SPP is invalid")
-        } else {
+        if (!is.null(P2VEG_SUBPLOT_SPP)) {
           vsubpsppnm <- "P2VEG_SUBPLOT_SPP"
           names(P2VEG_SUBPLOT_SPP) <- toupper(names(P2VEG_SUBPLOT_SPP))
           vsppflds <- names(P2VEG_SUBPLOT_SPP)
@@ -2809,13 +2803,14 @@ DBgetPlots <- function (states = NULL,
           p2veg_subplot_sppx <- p2veg_subplot_sppx[paste(PLT_CN, CONDID) %in% pcondID,]
 
           if (returndata) {
-		  	if ("vsubpspp" %in% names(tabs)) {
-              tabs$vsubpspp <- rbind(tabs$vsubpspp, data.frame(p2veg_subplot_sppx))
+		  	if ("p2veg_subplot_spp" %in% names(tabs)) {
+              tabs$p2veg_subplot_spp <- rbind(tabs$p2veg_subplot_spp, 
+							data.frame(p2veg_subplot_sppx))
 	        } else {
-	          tabs$vsubpspp <- data.frame(p2veg_subplot_sppx)
+	          tabs$p2veg_subplot_spp <- data.frame(p2veg_subplot_sppx)
 	        }
- 	        if (!"vsubpspp" %in% names(tabIDs)) {
-              tabIDs$vsubpspp <- "PLT_CN"
+ 	        if (!"p2veg_subplot_spp" %in% names(tabIDs)) {
+              tabIDs$p2veg_subplot_spp <- "PLT_CN"
 	        }
           }
           if (savedata) {
@@ -2883,13 +2878,14 @@ DBgetPlots <- function (states = NULL,
           p2veg_subp_structurex <- p2veg_subp_structurex[paste(PLT_CN, CONDID) %in% pcondID,]
 
           if (returndata) {
-		  	if ("vsubpstr" %in% names(tabs)) {
-              tabs$vsubpstr <- rbind(tabs$vsubpstr, data.frame(p2veg_subp_structurex))
+		  	if ("p2veg_subp_structure" %in% names(tabs)) {
+              tabs$p2veg_subp_structure <- 
+					rbind(tabs$p2veg_subp_structure, data.frame(p2veg_subp_structurex))
 	        } else {
-	          tabs$vsubpstr <- data.frame(p2veg_subp_structurex)
+	          tabs$p2veg_subp_structure <- data.frame(p2veg_subp_structurex)
 	        }
- 	        if (!"vsubpstr" %in% names(tabIDs)) {
-              tabIDs$vsubpstr <- "PLT_CN"
+ 	        if (!"p2veg_subp_structure" %in% names(tabIDs)) {
+              tabIDs$p2veg_subp_structure <- "PLT_CN"
 	        }
           }
           if (savedata) {
@@ -2942,9 +2938,7 @@ DBgetPlots <- function (states = NULL,
         INVASIVE_SUBPLOT_SPP <- 
 		      DBgetCSV("INVASIVE_SUBPLOT_SPP", stabbr, returnDT=TRUE, 
 		      stopifnull=FALSE)
-        if (is.null(P2VEG_SUBPLOT_SPP)) {
-          message("there is no INVASIVE_SUBPLOT_SPP table in datamart")
-        } else {
+        if (!is.null(P2VEG_SUBPLOT_SPP)) {
           invsubpnm <- "INVASIVE_SUBPLOT_SPP"
           names(INVASIVE_SUBPLOT_SPP) <- toupper(names(INVASIVE_SUBPLOT_SPP))
           invflds <- names(INVASIVE_SUBPLOT_SPP)
@@ -2954,9 +2948,7 @@ DBgetPlots <- function (states = NULL,
 
         INVASIVE_SUBPLOT_SPP <- pcheck.table(invsubp_layer, 
 					stopifnull=TRUE, stopifinvalid=TRUE)
-        if (is.null(INVASIVE_SUBPLOT_SPP)) {
-          message("the INVASIVE_SUBPLOT_SPP is invalid")
-        } else {
+        if (!is.null(INVASIVE_SUBPLOT_SPP)) {
           invsubpnm <- "INVASIVE_SUBPLOT_SPP"
           names(INVASIVE_SUBPLOT_SPP) <- toupper(names(INVASIVE_SUBPLOT_SPP))
           invflds <- names(INVASIVE_SUBPLOT_SPP)
@@ -3006,13 +2998,14 @@ DBgetPlots <- function (states = NULL,
           invasive_subplot_sppx <- invasive_subplot_sppx[paste(PLT_CN, CONDID) %in% pcondID,]
 
           if (returndata) {
-		  	if ("invsubp" %in% names(tabs)) {
-              tabs$invsubp <- rbind(tabs$invsubp, data.frame(invasive_subplot_sppx))
+		  	if ("invasive_subplot_spp" %in% names(tabs)) {
+              tabs$invasive_subplot_spp <- rbind(tabs$invasive_subplot_spp, 
+						data.frame(invasive_subplot_sppx))
 	        } else {
-	          tabs$invsubp <- data.frame(invasive_subplot_sppx)
+	          tabs$invasive_subplot_spp <- data.frame(invasive_subplot_sppx)
 	        }
- 	        if (!"invsubp" %in% names(tabIDs)) {
-              tabIDs$invsubp <- "PLT_CN"
+ 	        if (!"invasive_subplot_spp" %in% names(tabIDs)) {
+              tabIDs$invasive_subplot_spp <- "PLT_CN"
 	        }
           }
           if (savedata) {
@@ -3076,18 +3069,14 @@ DBgetPlots <- function (states = NULL,
           subpflds <- names(SUBPLOT)
         }
         SUBP_COND <- DBgetCSV("SUBP_COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
-        if (is.null(SUBP_COND)) {
-          message("there is no SUBP_COND table in datamart")
-        } else {
+        if (!is.null(SUBP_COND)) {
           subpcondnm <- "SUBP_COND"
           subpcflds <- names(SUBP_COND)
         }
       } else if (datsource %in% c("csv", "obj")) {
         SUBPLOT <- pcheck.table(subplot_layer, 
 					stopifnull=TRUE, stopifinvalid=TRUE)
-        if (is.null(SUBPLOT)) {
-          message("the SUBPLOT table is invalid")
-        } else {
+        if (!is.null(SUBPLOT)) {
           subplotnm <- "SUBPLOT"
           names(SUBPLOT) <- toupper(names(SUBPLOT))
           subpflds <- names(SUBPLOT)
@@ -3273,18 +3262,14 @@ DBgetPlots <- function (states = NULL,
       } else if (datsource == "datamart") {
         COND_DWM_CALC <- DBgetCSV("COND_DWM_CALC", stabbr, returnDT=TRUE, 
 		      stopifnull=FALSE)
-        if (is.null(COND_DWM_CALC)) {
-          message("there is no COND_DWM_CALC table in datamart")
-        } else {
+        if (!is.null(COND_DWM_CALC)) {
           dwmnm <- "COND_DWM_CALC"
           dwmflds <- names(COND_DWM_CALC)
         }
       } else if (datsource %in% c("csv", "obj")) {
         COND_DWM_CALC <- pcheck.table(dwm_layer, 
 					stopifnull=TRUE, stopifinvalid=TRUE)
-        if (is.null(COND_DWM_CALC)) {
-          message("the COND_DWM_CALC is invalid")
-        } else {
+        if (!is.null(COND_DWM_CALC)) {
           dwmnm <- "COND_DWM_CALC"
           names(COND_DWM_CALC) <- toupper(names(COND_DWM_CALC))
           dwmflds <- names(COND_DWM_CALC)
@@ -3328,7 +3313,7 @@ DBgetPlots <- function (states = NULL,
                     message("COND_DWM_CALC query is invalid")
                     return(NULL) })
         }
-        if (!is.null(cond_dwm_calcx) && nrow(cond_dwm_calcx) != 0) {
+        if (!is.null(cond_dwm_calcx) && nrow(cond_dwm_calcx) != 0) {		
           dbqueries$dwm <- dwmqry
 
           cond_dwm_calcx <- setDT(cond_dwm_calcx)
@@ -3338,13 +3323,14 @@ DBgetPlots <- function (states = NULL,
           ## Subset overall filters from condx
           cond_dwm_calcx <- cond_dwm_calcx[paste(PLT_CN, CONDID) %in% pcondID,]
           if (returndata) {
-		  	if ("dwm" %in% names(tabs)) {
-              tabs$dwm <- rbind(tabs$dwm, data.frame(cond_dwm_calcx))
+		  	if ("cond_dwm_calc" %in% names(tabs)) {
+              tabs$cond_dwm_calc <- rbind(tabs$cond_dwm_calc, 
+							data.frame(cond_dwm_calcx))
 	        } else {
-	          tabs$dwm <- data.frame(cond_dwm_calcx)
+	          tabs$cond_dwm_calc <- data.frame(cond_dwm_calcx)
 	        }
- 	        if (!"dwm" %in% names(tabIDs)) {
-              tabIDs$dwm <- "PLT_CN"
+ 	        if (!"cond_dwm_calc" %in% names(tabIDs)) {
+              tabIDs$cond_dwm_calc <- "PLT_CN"
 	        }
           }
           if (savedata) {
@@ -3394,18 +3380,14 @@ DBgetPlots <- function (states = NULL,
       } else if (datsource == "datamart") {
         SUBP_COND_CHNG_MTRX <- DBgetCSV("SUBP_COND_CHNG_MTRX", stabbr, 
 		      returnDT=TRUE, stopifnull=FALSE)
-        if (is.null(SUBP_COND_CHNG_MTRX)) {
-          message("there is no SUBP_COND_CHNG_MTRX table in datamart")
-        } else {
+        if (!is.null(SUBP_COND_CHNG_MTRX)) {
           sccmnm <- "SUBP_COND_CHNG_MTRX"
           sccmflds <- names(SUBP_COND_CHNG_MTRX)
         }
       } else if (datsource %in% c("csv", "obj")) {
         SUBP_COND_CHNG_MTRX <- pcheck.table(sccm_layer, 
 					stopifnull=TRUE, stopifinvalid=TRUE)
-        if (is.null(SUBP_COND_CHNG_MTRX)) {
-          message("the SUBP_COND_CHNG_MTRX is invalic")
-        } else {
+        if (!is.null(SUBP_COND_CHNG_MTRX)) {
           sccmnm <- "SUBP_COND_CHNG_MTRX"
           names(SUBP_COND_CHNG_MTRX) <- toupper(names(SUBP_COND_CHNG_MTRX))
           sccmflds <- names(SUBP_COND_CHNG_MTRX)
@@ -3510,10 +3492,7 @@ DBgetPlots <- function (states = NULL,
       ## GRM data
       if (datsource == "sqlite") {
         grmnm <- chkdbtab(dbtablst, grm_layer)
-        if (is.null(grmnm)) {
-          message("there is no TREE_GRM_COMPONENT table in database")
-          isgrm <- FALSE
-        } else {
+        if (!is.null(grmnm)) {
           ## Get TREE_GRM_COMPONENT fields
           grmflds <- DBI::dbListFields(dbconn, grmnm)
         }
@@ -3572,13 +3551,14 @@ DBgetPlots <- function (states = NULL,
           grmx <- grmx[grmx$PLT_CN %in% pltx$CN,]
 
           if (returndata) {
-		  	if ("grm" %in% names(tabs)) {
-              tabs$grm <- rbind(tabs$grm, data.frame(grmx))
+		  	if ("tree_grm_component" %in% names(tabs)) {
+              tabs$tree_grm_component <- rbind(tabs$tree_grm_component, 
+						data.frame(grmx))
 	        } else {
-	          tabs$grm <- data.frame(grmx)
+	          tabs$tree_grm_component <- data.frame(grmx)
 	        }
- 	        if (!"grm" %in% names(tabIDs)) {
-              tabIDs$grm <- "PLT_CN"
+ 	        if (!"tree_grm_component" %in% names(tabIDs)) {
+              tabIDs$tree_grm_component <- "PLT_CN"
 	        }
           }
           if (savedata) {
@@ -3620,7 +3600,6 @@ DBgetPlots <- function (states = NULL,
           if (datsource == "sqlite") {
             othertabnm <- chkdbtab(dbtablst, othertable)
             if (is.null(othertabnm)) {
-              message(othertable, " does not exist in database")
               othertables <- othertables[othertables != othertable]
             }
           } else if (datsource == "datamart") {

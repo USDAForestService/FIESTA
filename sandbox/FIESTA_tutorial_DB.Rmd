@@ -324,7 +324,7 @@ dat1 <- DBgetPlots(states = "Rhode Island",
                   issp = TRUE
                   )
 names(dat1)
-plt1 <- dat1$tabs$plt
+plt1 <- dat1$tabs$plot
 spxy1 <- dat1$xy_PUBLIC
 table(plt1$INVYR)
 
@@ -367,7 +367,7 @@ dat2 <- DBgetPlots(states = "Delaware",
                    plotgeom = TRUE)
 names(dat2)
 tabs2 <- dat2$tabs
-plt2 <- tabs2$plt
+plt2 <- tabs2$plot
 
 ## subplot and subp_cond tables are added to tabs list
 names(tabs2)
@@ -634,7 +634,7 @@ dat11 <- DBgetPlots(states = "Vermont",
 names(dat11)
 tabs11 <- dat11$tabs
 names(tabs11)
-plt11 <- tabs11$plt
+plt11 <- tabs11$plot
 
 table(plt11$INVYR)
 
@@ -659,7 +659,7 @@ dat12 <- DBgetPlots(states = "Wyoming",
 names(dat12)
 tabs12 <- dat12$tabs
 names(tabs12)
-plt12 <- tabs12$plt
+plt12 <- tabs12$plot
 
 table(plt12$STATECD, plt12$INVYR)
 
@@ -685,7 +685,7 @@ dat13 <- DBgetPlots(states = "Vermont",
                     issp = TRUE
                     )
 tabs13 <- dat13$tabs
-plt13 <- tabs13$plt
+plt13 <- tabs13$plot
 spxy13 <- dat13$xy_PUBLIC
 
 ## With only P2 plots (intensity1 = TRUE)
