@@ -36,7 +36,9 @@ estimator to match FIA estimates.}
 \item{prednames}{String vector. Name(s) of predictor variables to include in
 model.}
 
-\item{modelselect}{Boolean. TRUE if you want model selection to occur.}
+\item{modelselect}{Logical. If TRUE, an elastic net regression model is fit 
+to the entire plot level data, and the variables selected in that model are 
+used for the proceeding estimation.}
 
 \item{landarea}{String. The sample area filter for estimates ('ALL',
 'FOREST', 'TIMBERLAND').  If landarea=FOREST, filtered to COND_STATUS_CD =
@@ -71,6 +73,10 @@ of options. Only used when savedata = TRUE.}
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modMApop() if MApopdat is NULL.}
+
+\item{modelselect_bydomain}{Logical. If TRUE, modelselection will occur at 
+the domain level as specified by rowvar and/or colvar and not at the level of
+the entire sample.}
 }
 \value{
 If FIA=TRUE or unitvar=NULL and colvar=NULL, one data frame is
