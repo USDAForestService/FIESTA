@@ -229,6 +229,7 @@ spGetAuxiliary <- function(xyplt = NULL,
 
   ## Set global variables
   value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat=AOI <- NULL
+  badrast <- {}
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -679,7 +680,6 @@ spGetAuxiliary <- function(xyplt = NULL,
     #zonalDT.cont.names <- {}
     message(paste("extracting zonal statistics...")) 
 
-    badrast <- {}
     preds <- {}
     for (i in 1:length(rastlst.contfn)) {
       rastfn <- rastlst.contfn[i]
