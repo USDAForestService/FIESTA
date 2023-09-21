@@ -914,8 +914,7 @@ DBgetEvalid <- function(states = NULL,
                 returnlst <- list(states=states, rslst=rslst,
                 		evalidlist=evalidlist,
                 		invtype=invtype, invyrtab=invyrtab,
-                		invyrs=invyrs, evalType=evalTypelist,
-                		FS_FIADB=FS_FIADB)		  
+                		invyrs=invyrs, evalType=evalTypelist)		  
 		      }
 	          popevalgrptab <- POP_EVAL_GRPstcd
 	        }
