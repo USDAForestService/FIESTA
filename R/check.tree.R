@@ -79,9 +79,9 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     tdomdata <- datSumTreeDom(tree=treef, seed=seedf, cond=condf, plt=plt, 
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
            bycond=bycond, condid=condid, tsumvar=estvarn, TPA=estvarn.TPA, 
-           tdomtot=esttotn, tdomtotnm=estvarn.name, tfilter=estvarn.filter, 
-		tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
-		adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE, pivot=pivot, metric=metric,
+           tdomtot=esttotn, tdomtotnm=estvarn.name, tfilter=estvarn.filter,
+           tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
+           adjvar=adjvar, adjTPA=adjTPA, pivot=pivot, metric=metric,
            addseed=addseed, seedonly=seedonly))
     if (is.null(tdomdata)) return(NULL)
     tdomdat <- tdomdata$tdomdat
@@ -98,10 +98,10 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     treedata <- datSumTree(tree=treef, seed=seedf, cond=condf, plt=plt, 
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
            bycond=bycond, condid=condid,
- 		tsumvarlst=estvarn, tsumvarnmlst=estvarn.name, TPA=estvarn.TPA,
-		tfilter=estvarn.filter, adjtree=adjtree, 
-           adjvar=adjvar, adjTPA=adjTPA, checkNA=FALSE,
- 		metric=metric, addseed=addseed, seedonly=seedonly))
+           tsumvarlst=estvarn, tsumvarnmlst=estvarn.name, TPA=estvarn.TPA,
+           tfilter=estvarn.filter, adjtree=adjtree, 
+           adjvar=adjvar, adjTPA=adjTPA,
+           metric=metric, addseed=addseed, seedonly=seedonly))
     if (is.null(treedata)) return(NULL)
     tdomdat <- treedata$treedat
     tdomvarn <- treedata$sumvars
@@ -141,10 +141,10 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
       tdomdata <- datSumTreeDom(tree=treef, seed=seedf, cond=condf, plt=plt, 
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
            bycond=bycond, condid=condid,
-		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name,
-		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, 
+           tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name,
+           tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, 
            adjtree=adjtree, adjvar=adjvar, adjTPA=adjTPA, 
-           checkNA=FALSE, pivot=pivot, metric=metric,
+           pivot=pivot, metric=metric,
            addseed=addseed, seedonly=seedonly))
       if (is.null(tdomdata)) {
         message("invalid denominator... returning null")
@@ -175,9 +175,9 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
       treedata <- datSumTree(tree=treef, seed=seedf, cond=condf, plt=plt, 
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
            bycond=bycond, condid=condid,
- 		tsumvarlst=estvard, tsumvarnmlst=estvard.name, TPA=estvard.TPA,
-		tfilter=estvard.filter, adjtree=adjtree, adjTPA=adjTPA, 
-           checkNA=FALSE, metric=metric,
+           tsumvarlst=estvard, tsumvarnmlst=estvard.name, TPA=estvard.TPA,
+           tfilter=estvard.filter, adjtree=adjtree, adjTPA=adjTPA, 
+           metric=metric,
            addseed=addseed, seedonly=seedonly))
       if (is.null(treedata)) return(NULL)
       tdomdatd <- treedata$treedat
