@@ -289,6 +289,7 @@ modMAtree <- function(MApopdat,
                       title_opts = NULL, 
                       savedata_opts = NULL, 
                       gui = FALSE, 
+                      modelselect_bydomain = FALSE,
                       ...){
 
   ########################################################################################

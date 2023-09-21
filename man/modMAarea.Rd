@@ -21,6 +21,7 @@ modMAarea(
   title_opts = NULL,
   savedata_opts = NULL,
   gui = FALSE,
+  modelselect_bydomain = FALSE,
   ...
 )
 }
@@ -72,11 +73,11 @@ of options. Only used when savedata = TRUE.}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
-\item{...}{Parameters for modMApop() if MApopdat is NULL.}
-
 \item{modelselect_bydomain}{Logical. If TRUE, modelselection will occur at 
 the domain level as specified by rowvar and/or colvar and not at the level of
 the entire sample.}
+
+\item{...}{Parameters for modMApop() if MApopdat is NULL.}
 }
 \value{
 If FIA=TRUE or unitvar=NULL and colvar=NULL, one data frame is
