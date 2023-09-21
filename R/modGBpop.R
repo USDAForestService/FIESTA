@@ -603,7 +603,7 @@ modGBpop <- function(popType = "VOL",
       predfac <- auxdat$predfac
 
       if (strata) {
-        if (is.null(strvar)) {    
+        if (is.null(strvar) || !strvar %in% auxdat$prednames) {    
           if (!is.null(predfac) && length(predfac) == 1) {
             strvar <- predfac
           } else {
