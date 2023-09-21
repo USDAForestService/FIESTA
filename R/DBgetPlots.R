@@ -990,7 +990,7 @@ DBgetPlots <- function (states = NULL,
 
     subsetPOP <- TRUE
 
-    if (!is.null(subcycle99) && !subcycle99) {
+    if (!is.null(subcycle99) && subcycle99) {
       message("subcycle99 plots are not included in FIA evaluations") 
     } 
     subcycle99 <- FALSE
@@ -3448,13 +3448,13 @@ DBgetPlots <- function (states = NULL,
           sccmx <- sccmx[paste(sccmx$PLT_CN, sccmx$CONDID) %in% pcondID,]
 
           if (returndata) {
-		  	if ("sccm" %in% names(tabs)) {
-              tabs$sccm <- rbind(tabs$sccm, data.frame(sccmx))
+		  	if ("subp_cond_chng_mtrx" %in% names(tabs)) {
+              tabs$subp_cond_chng_mtrx <- rbind(tabs$subp_cond_chng_mtrx, data.frame(sccmx))
 	        } else {
-	          tabs$sccm <- data.frame(sccmx)
+	          tabs$subp_cond_chng_mtrx <- data.frame(sccmx)
 	        }
- 	        if (!"sccm" %in% names(tabIDs)) {
-              tabIDs$sccm <- "PLT_CN"
+ 	        if (!"subp_cond_chng_mtrx" %in% names(tabIDs)) {
+              tabIDs$subp_cond_chng_mtrx <- "PLT_CN"
 	        }
           }
           if (savedata) {
