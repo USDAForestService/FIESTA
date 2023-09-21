@@ -224,5 +224,5 @@ datPivot <- function(x,
                               add_layer=TRUE))
   }
     
-  return(data.table(ptab))
+  return(data.frame(ptab))
 }
