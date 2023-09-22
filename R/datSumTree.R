@@ -1073,7 +1073,7 @@ datSumTree <- function(tree = NULL,
 	    if (lbs2tons) {
 		  tvarnew <- paste0(tvarnew, "_TON")
 		  message("converting ", tvar, " from pounds to tons...")
-		  treex[, (tvarnew) := get(eval(tvar)) * 0.09290304]
+		  treex[, (tvarnew) := get(eval(tvar)) * 0.0005]
 		  tunits <- "tons"
 		  if (metric) {
 		  	message("converting ", tvar, " from tons to metric tons...")
