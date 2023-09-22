@@ -1496,7 +1496,8 @@ datSumTreeDom <- function(tree = NULL,
     ## If pivot=TRUE, aggregate tree domain data
     ######################################################################## 
     tdoms <- datPivot(tdomtreef, pvar=newname, xvar=tsumuniqueid,
-			yvar=tdomvarnm, pvar.round=tround)
+			yvar=tdomvarnm, pvar.round=tround, returnDT=TRUE)
+	tdoms <- setDT(tdoms)
 
     ## check if tree domain in tdomlst.. if not, create column with all 0 values
     tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% tsumuniqueid]

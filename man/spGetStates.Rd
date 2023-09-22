@@ -11,7 +11,7 @@ spGetStates(
   stbnd.att = "COUNTYFIPS",
   RS = NULL,
   states = NULL,
-  overlap = 2,
+  overlap = 1,
   showsteps = FALSE,
   savebnd = FALSE,
   savedata_opts = NULL

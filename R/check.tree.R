@@ -38,7 +38,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
   }
   ## GET NAME FOR ESTIMATION VARIABLE FOR ALL TREE DOMAINS
   if (!is.null(estvarn.name) && !is.character(estvarn.name)) {
-     stop("invalid estvarn.name.. must be a string")
+    stop("invalid estvarn.name.. must be a string")
   }
 
   ## TO INCREASE TREES PER ACRE IF ONLY USING 1 SUBPLOT
