@@ -51,7 +51,7 @@ datSumTree(
 \item{seed}{Dataframe or comma-delimited file (*.csv). The seedling table.}
 
 \item{cond}{Dataframe or comma-delimited file (*.csv). Condition-level table
-to join the aggregated tree data to, if bycond=TRUE. This table also may be
+to join the aggregated Ftree data to, if bycond=TRUE. This table also may be
 used for condition proportion or strata variables used if adjcond or
 adjstrata = TRUE (See details below).  This table is optional.}
 

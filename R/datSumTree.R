@@ -24,7 +24,7 @@
 #' @param tree Dataframe or comma-delimited file (*.csv). The tree-level table.
 #' @param seed Dataframe or comma-delimited file (*.csv). The seedling table.
 #' @param cond Dataframe or comma-delimited file (*.csv). Condition-level table
-#' to join the aggregated tree data to, if bycond=TRUE. This table also may be
+#' to join the aggregated Ftree data to, if bycond=TRUE. This table also may be
 #' used for condition proportion or strata variables used if adjcond or
 #' adjstrata = TRUE (See details below).  This table is optional.
 #' @param plt Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
@@ -1073,22 +1073,20 @@ datSumTree <- function(tree = NULL,
 	    if (lbs2tons) {
 		  tvarnew <- paste0(tvarnew, "_TON")
 		  message("converting ", tvar, " from pounds to tons...")
-		  treex[, (tvarnew) := get(eval(tvar)) * 0.0005]
+		  convfac <- 0.0005
 		  tunits <- "tons"
 		  if (metric) {
 		  	message("converting ", tvar, " from tons to metric tons...")
-		    tvarm <- paste0(tvar, "_m")
-	        convfac <- 0.90718474
-			treex[, (tvarm) := get(eval(tvarnew)) * convfac]
-			tvarnew <- tvarm
+		    tvarnew <- paste0(tvarnew, "m")
+	        convfac <- 0.0005 * 0.90718474
 			tunits <- "metric tons"
 		  } 
+		  treex[, (tvarnew) := get(eval(tvar)) * convfac]
 		} else {
 		  message("converting ", tvar, " from pounds to kilograms...")
-		  tvarm <- paste0(tvar, "_m")
+		  tvarnew <- paste0(tvar, "_m")
 		  convfac <- 0.45359237
-		  treex[, (tvarm) := get(eval(tvar)) * convfac]			
-          tvarnew <- tvarm			
+		  treex[, (tvarnew) := get(eval(tvar)) * convfac]			
           tunits <- "kilograms"			
 		}
  	  } else {
@@ -1130,7 +1128,7 @@ datSumTree <- function(tree = NULL,
         newname <- paste0(tvarnew, "_TPA")
       }
       ## Adjust by adjTPA variable (Default is 1)
-      if (adjTPA > 1) {
+      if (adjTPA > 1 && !seedonly) {
         treex[, (tpavar) := get(eval(tpavar)) * adjTPA]
       }
       ## If metric, convert tpavar to trees per hectare

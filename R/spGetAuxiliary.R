@@ -607,6 +607,7 @@ spGetAuxiliary <- function(xyplt = NULL,
   ###############################################################################
   ## 3) Continuous raster layers - Extract values and get zonal statistics
   ###############################################################################
+  preds <- {}
   if (!is.null(rastlst.cont)) {
  
     if (extract) {
@@ -680,7 +681,6 @@ spGetAuxiliary <- function(xyplt = NULL,
     #zonalDT.cont.names <- {}
     message(paste("extracting zonal statistics...")) 
 
-    preds <- {}
     for (i in 1:length(rastlst.contfn)) {
       rastfn <- rastlst.contfn[i]
       if (inherits(rastfn, "list")) {
