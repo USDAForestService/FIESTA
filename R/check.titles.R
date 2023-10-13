@@ -47,6 +47,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
     ########################################################
     ## Reference title
     if (is.null(title.ref)) {
+      title.state <- NULL
       if (!is.null(states))
         title.state <- paste(as.character(states), collapse=" and ")
       if (!is.null(invyrs)) {

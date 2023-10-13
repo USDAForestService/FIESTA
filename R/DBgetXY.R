@@ -559,7 +559,6 @@ DBgetXY <- function (states = NULL,
                   return(NULL) })
       ppsanm <- "POP_PLOT_STRATUM_ASSGN"
     }
-
     XYdf <- pcheck.table(xy, stopifnull=FALSE)
     if (is.null(XYdf)) {
       if (is.character(xy) && exists(xy) && !is.null(get(xy))) {

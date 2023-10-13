@@ -37,7 +37,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   if (!is.null(maxbndx)) {
     message("dissolving maxbnd polygons...")
     maxbndxd <- sf_dissolve(maxbndx, maxbnd.unique, areacalc=FALSE)
-
+     
     ## get intersection of maxbndx and smallbndx to select intersecting maxbnds
     ## Note: use tabulateIntersections with fewer smallbnd polygons - faster
 #    if (nrow(smallbndx) < 200) {

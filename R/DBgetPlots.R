@@ -546,6 +546,18 @@ DBgetPlots <- function (states = NULL,
       ACTUAL = c("LON_ACTUAL", "LAT_ACTUAL"),
       PUBLIC = c("LON_PUBLIC", "LAT_PUBLIC"))
   }  
+  get_evalidtyp <- function(evalid, typcd) {
+    ## DESCRIPTION: gets an FIA evalid from list if exists 
+    if (any(evalid[endsWith(as.character(evalid), typcd)])) {
+	  return(evalid[endsWith(as.character(evalid), typcd)])
+    } else if (any(evalid[endsWith(as.character(evalid), "01")])) {
+      return(evalid[endsWith(as.character(evalid), "01")])
+    } else if (any(evalid[endsWith(as.character(evalid), "00")])) {
+      return(evalid[endsWith(as.character(evalid), "00")])
+    } else {
+      return(evalid[1])
+    }	 
+  }  
  
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -729,13 +741,40 @@ DBgetPlots <- function (states = NULL,
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
   getType <- ifelse (is.null(evalid), TRUE, FALSE)
+  Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", "CHNG", 
+	             "GROW", "MORT", "REMV", "GRM")
   if (gui) {
-    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", 
-	             "CHNG", "GROW", "MORT", "REMV", "GRM")
     Type <- select.list(Typelst, title="eval type", 
 		preselect="VOL", multiple=TRUE)
     if (length(Type)==0) Type <- "VOL"
   } 
+  Typemiss <- Type[!Type %in% Typelst]
+  if (length(Typemiss) > 0) {
+    stop("Type must be in following list: \n", toString(Typelst))
+  }
+  if (any(Type == "VOL") && !istree) {
+    message("eval Type includes 'VOL', but istree = FALSE... no trees included")
+  }
+  if (any(Type == "P2VEG")) isveg=issubp <- TRUE  # P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE
+  if (any(Type == "INV")) isinv=issubp <- TRUE  # INVASIVE_SUBPLOT_SPP
+  if (any(Type == "CHNG")) ischng <- TRUE # SUBP_COND_CHNG_MTR
+  if (any(Type == "DWM")) isdwm <- TRUE  # COND_DWM_CALC
+  if (any(Type %in% c("GROW", "MORT", "REMV", "GRM"))) ischng=isgrm <- TRUE
+  
+  if (isveg && invtype == "PERIODIC") {
+    message("understory vegetation data only available for annual data\n")
+    isveg <- FALSE
+  }
+ 
+  biojenk <- pcheck.logical(biojenk, varnm="biojenk", 
+		title="Jenkins biomass?", first="NO", gui=gui)
+
+  greenwt <- pcheck.logical(greenwt, varnm="greenwt", 
+		title="Green weight?", first="NO", gui=gui)
+
+  if ((biojenk || greenwt) && !istree) {
+    istree <- TRUE
+  }
 
   ## Check coordType
   ####################################################################
@@ -861,6 +900,7 @@ DBgetPlots <- function (states = NULL,
       iseval <- FALSE
     }
   }
+
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   evalidlist <- evalInfo$evalidlist
@@ -884,63 +924,6 @@ DBgetPlots <- function (states = NULL,
   } else if (!is.null(evalInfo$PLOT)) {
     PLOTe <- evalInfo$PLOT
     plotnm <- "PLOTe"
-  }
- 
-  if (!is.null(evalTypelist)) {
-    Typelist <- evalTypelist
-	
-  } else {
-    if (!is.list(Type)) {
-      Typelist <- as.list(rep(Type, length(states)))
-      names(Typelist) <- states
-	}
-  }
-
-  if (any(unlist(Typelist) %in% c("VOL"))) {
-    if (!istree) {
-      message("eval Type includes 'VOL', but istree = FALSE... no trees included")
-    }
-  } 
-  if (any(unlist(Typelist) == "P2VEG")) {
-    # understory vegetation tables 
-    # (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE)
-    isveg=issubp <- TRUE
-  } 
-  if (any(unlist(Typelist) == "INV")) {
-    # understory vegetation tables 
-    # (INVASIVE_SUBPLOT_SPP)
-    isinv=issubp <- TRUE
-  } 
-  if (any(unlist(Typelist) == "DWM")) {
-    # summarized condition-level down woody debris table (COND_DWM_CALC)
-    isdwm <- TRUE
-  }
-  if (any(unlist(Typelist) == "CHNG")) {
-    # current and previous conditions, subplot-level - sccm (SUBP_COND_CHNG_MTRX) 
-    ischng <- TRUE
-	if (istree) {
-	  Typelist <- lapply(Typelist, function(x) gsub("CHNG", "GRM", x))
-	}
-  }
-  if (any(unlist(Typelist) %in% c("GROW", "MORT", "REMV"))) {
-    Type <- "GRM"
-  }
-  if (any(unlist(Typelist) == "GRM")) {
-    ischng=isgrm <- TRUE
-  }
-  if (isveg && invtype == "PERIODIC") {
-    message("understory vegetation data only available for annual data\n")
-    isveg <- FALSE
-  }
- 
-  biojenk <- pcheck.logical(biojenk, varnm="biojenk", 
-		title="Jenkins biomass?", first="NO", gui=gui)
-
-  greenwt <- pcheck.logical(greenwt, varnm="greenwt", 
-		title="Green weight?", first="NO", gui=gui)
-
-  if ((biojenk || greenwt) && !istree) {
-    istree <- TRUE
   }
  
   ## Get state abbreviations and codes 
@@ -1499,33 +1482,29 @@ DBgetPlots <- function (states = NULL,
     ## If FIA evaluation, get all plot from all evaluations.
     if (iseval) {
       evalid <- evalidlist[[state]]
-      Types <- Typelist[[state]]
+      Types <- evalTypelist[[state]]
       evalFilter <- paste0("ppsa.EVALID IN(", toString(evalid), ")")
 
       if ("P2VEG" %in% Type) {
-        evalid.veg <- evalid[endsWith(as.character(evalid), "10")]
-        if (length(evalid.veg) == 0) stop("must include evaluation ending in 10")
+	    evalid.veg <- get_evalidtyp(evalid, "10")
         evalFilter.veg <- paste("ppsa.EVALID =", evalid.veg)
       } else {
         evalFilter.veg <- evalFilter
       }
       if ("INV" %in% Type) {
-        evalid.inv <- evalid[endsWith(as.character(evalid), "09")]
-        if (length(evalid.inv) == 0) stop("must include evaluation ending in 09")
+	    evalid.inv <- get_evalidtyp(evalid, "10")
         evalFilter.inv <- paste("ppsa.EVALID =", evalid.inv)
       } else {
         evalFilter.inv <- evalFilter
       }
       if ("DWM" %in% Type) {
-        evalid.dwm <- evalid[endsWith(as.character(evalid), "07")]
-        if (length(evalid.dwm) == 0) stop("must include evaluation ending in 07")
+	  	evalid.dwm <- get_evalidtyp(evalid, "07")
         evalFilter.dwm <- paste("ppsa.EVALID =", evalid.dwm)
       } else {
         evalFilter.dwm <- evalFilter
       }
       if (any(c("GROW", "MORT", "REMV", "GRM") %in% Type)) {
-        evalid.grm <- evalid[endsWith(as.character(evalid), "03")]
-        if (length(evalid.grm) == 0) stop("must include evaluation ending in 03")
+	  	evalid.grm <- get_evalidtyp(evalid, "03")
         evalFilter.grm <- paste("ppsa.EVALID =", evalid.grm)
       } else {
         evalFilter.grm <- evalFilter
@@ -2917,7 +2896,7 @@ DBgetPlots <- function (states = NULL,
           } 
         }
 		if (!"xy" %in% names(dbqueries[[state]])) {
-          dbqueries[[state]]$xy <- xyqry
+          dbqueries[[state]]$xy <- xydat$xyqry
 	    }
       }
     }
@@ -2993,13 +2972,13 @@ DBgetPlots <- function (states = NULL,
           seedx <- tryCatch( DBI::dbGetQuery(dbconn, seed.qry),
 			error=function(e) {
                     message("seed query is invalid\n")
-                    message(seedqry)
+                    message(seed.qry)
                     return(NULL) })
         } else {
-          seedx <- tryCatch( sqldf::sqldf(seedqry, stringsAsFactors=FALSE),
+          seedx <- tryCatch( sqldf::sqldf(seed.qry, stringsAsFactors=FALSE),
 			error=function(e) {
                     message("seed query is invalid\n")
-                    message(seedqry)
+                    message(seed.qry)
                     return(NULL) })
         }
         if (!is.null(seedx) && nrow(seedx) != 0 && length(ssvars) > 0) {

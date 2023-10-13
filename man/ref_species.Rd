@@ -5,7 +5,7 @@
 \alias{ref_species}
 \title{Reference table - Code definitions.}
 \format{
-An object of class \code{data.frame} with 2677 rows and 14 columns.
+An object of class \code{data.frame} with 2677 rows and 19 columns.
 }
 \source{
 Imported from comma-delimited file.
