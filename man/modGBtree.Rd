@@ -9,6 +9,7 @@ modGBtree(
   estvar,
   estvar.filter = NULL,
   estseed = "none",
+  woodland = TRUE,
   landarea = "FOREST",
   pcfilter = NULL,
   rowvar = NULL,
@@ -35,6 +36,10 @@ syntax (e.g., 'STATUSCD == 1').}
 
 \item{estseed}{String. Use seedling data only or add to tree data. Seedling
 estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').}
+
+\item{woodland}{Logical. If TRUE, include woodland tree species where 
+measured. If FALSE, only include timber species. See FIESTA::ref_species$
+WOODLAND ='Y/N'.}
 
 \item{landarea}{String. The condition-level filter for defining land area
 ('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1;
