@@ -64,6 +64,9 @@
 #' tdomvar must be 'SPCD' or 'SPGRPCD'.
 #' @param seedonly Logical. If TRUE, seedling counts only. Note: tdomvar
 #' must be 'SPCD' or 'SPGRPCD'.
+#' @param woodland Logical. If TRUE, include woodland tree species where 
+#' measured. If FALSE, only include timber species. See FIESTA::ref_species$
+#' WOODLAND ='Y/N'.
 #' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 #' respective trees-per-acre variable (see details) to get per-acre
 #' measurements.
@@ -148,6 +151,7 @@ datSumTree <- function(tree = NULL,
                        tsumvarnmlst = NULL, 
                        addseed = FALSE, 
                        seedonly = FALSE,
+					   woodland = TRUE,
                        TPA = TRUE, 
                        tfun = sum, 
                        ACI = FALSE, 
@@ -178,7 +182,7 @@ datSumTree <- function(tree = NULL,
   COND_STATUS_CD=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
       seedx=TREECOUNT_CALC=fname=NF_SUBP_STATUS_CD=
       CONDPROP_UNADJ=MACRPROP_UNADJ=SUBPPROP_UNADJ=sumbcvars=treex=
-      cond.nonsamp.filter=meta=tunits=tunitlst  <- NULL
+      cond.nonsamp.filter=meta=tunits=tunitlst=ref_sppnm=woodlandnm <- NULL
 
 
   ## If gui.. set variables to NULL
@@ -191,7 +195,7 @@ datSumTree <- function(tree = NULL,
   ref_estvar <- FIESTAutils::ref_estvar
   ref_units <- FIESTAutils::ref_units
   twhereqry=swhereqry=tfromqry=sfromqry <- NULL
-  checkNA <- FALSE
+  checkNA=woodlandref <- FALSE
 
   ## For documentation
   # subplot Dataframe or comma-delimited file (*.csv). If getadjplot=TRUE, 
@@ -290,6 +294,17 @@ datSumTree <- function(tree = NULL,
   bysubp <- pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
 		first="YES", gui=gui, stopifnull=TRUE)
 
+  ## Check addseed
+  addseed <- pcheck.logical(addseed, varnm="addseed", title="Add seeds?", 
+		first="NO", gui=gui)
+
+  ## Check seedonly
+  seedonly <- pcheck.logical(seedonly, varnm="seedonly", title="Seed only?", 
+		first="NO", gui=gui)
+		
+  ## Check woodland
+  woodland <- pcheck.logical(woodland, varnm="woodland", title="Include woodland?", 
+		first="YES", gui=gui)
 
   ## Check tree, seed tables
   ###########################################################################
@@ -301,12 +316,24 @@ datSumTree <- function(tree = NULL,
       treenames <- names(treex)
       treenm <- "treex"
     }
-    seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
-    if (!is.null(seedx)) {
-      seedx <- setDT(int64tochar(seedx))
-      seednames <- names(seedx)
-      seednm <- "seedx"
-    }
+	if (addseed || seedonly) {
+      seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
+      if (!is.null(seedx)) {
+        seedx <- setDT(int64tochar(seedx))
+        seednames <- names(seedx)
+        seednm <- "seedx"
+      }
+	}	
+	if (!woodland) {
+	  woodlandnm <- findnm("WOODLAND", treenames, returnNULL=TRUE)
+	  if (is.null(woodlandnm)) {
+	    woodlandref <- TRUE	  
+        ref_sppnm <- "ref_species"
+	    woodlandnm <- "WOODLAND"
+	    refspcdnm <- "SPCD"
+	    spcdnm <- findnm("SPCD", treenames)
+	  }
+    }	
 
   } else {
     dbname <- data_dsn
@@ -318,21 +345,36 @@ datSumTree <- function(tree = NULL,
       treenames <- DBI::dbListFields(dbconn, treex)
       treenm <- treex
     }
-    seedx <- chkdbtab(dbtablst, seed)
-    if (!is.null(seedx)) {
-      seednames <- DBI::dbListFields(dbconn, seedx)
-      seednm <- seedx
+	if (addseed || seedonly) {
+      seedx <- chkdbtab(dbtablst, seed)
+      if (!is.null(seedx)) {
+        seednames <- DBI::dbListFields(dbconn, seedx)
+        seednm <- seedx
+      }
     }
+    if (!woodland) {
+	  woodlandnm <- findnm("WOODLAND", treenames, returnNULL=TRUE)
+	  if (is.null(woodlandnm)) {
+	    woodlandref <- TRUE	  
+        ref_sppnm <- chkdbtab(dbtablst, "REF_SPECIES")
+        if (!is.null(ref_sppnm)) {
+          refflds <- DBI::dbListFields(dbconn, ref_sppnm)
+          woodlandnm <- findnm("WOODLAND", refflds, returnNULL=TRUE)
+		  refspcdnm <- findnm("SPCD", refflds)
+		  spcdnm <- findnm("SPCD", treenames)
+		  if (is.null(woodlandnm)) {
+		    warning("WOODLAND attribute not in ref_species table... returning NULL")
+		    return(NULL)
+		  }
+        } else {
+		  warning("ref_species table not in database... returning NULL")
+		  return(NULL)
+        }
+      }	    
+    }	
+	
     DBI::dbDisconnect(dbconn)
   }
-
-  ## Check addseed
-  addseed <- pcheck.logical(addseed, varnm="addseed", title="Add seeds?", 
-		first="NO", gui=gui)
-
-  ## Check seedonly
-  seedonly <- pcheck.logical(seedonly, varnm="seedonly", title="Seed only?", 
-		first="NO", gui=gui)
 
   if (is.null(treex) && is.null(seedx)) {
     stop("must include tree and/or seed table")
@@ -429,11 +471,18 @@ datSumTree <- function(tree = NULL,
   if (addseed || seedonly) {
     sfromqry <- paste("FROM", seednm)
   }
-
+  if (!woodland && woodlandref) {
+    tfromqry <- paste0(tfromqry, 
+	    "\n JOIN ", ref_sppnm, " ref ON(", treenm, ".", spcdnm, " = ref.", refspcdnm, ")")  
+  }
   selectvars <- tsumuniqueid
   if (!is.null(tfilter)) {
     if (!seedonly) {
-      twhereqry <- paste("WHERE", RtoSQL(tfilter, x=treenames))
+	  if (is.null(twhereqry)) {
+        twhereqry <- paste("WHERE", RtoSQL(tfilter, x=treenames))
+	  } else {
+        twhereqry <- paste(twhereqry, "AND", RtoSQL(tfilter, x=treenames))
+      }	  
     }
     if (addseed || seedonly) {
       sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
@@ -441,6 +490,13 @@ datSumTree <- function(tree = NULL,
         swhereqry <- paste("WHERE", RtoSQL(tfilter))
       }
     }
+	if (!woodland) {
+	  if (is.null(twhereqry)) {
+        twhereqry <- paste("WHERE", woodlandnm, "== N")
+	  } else {
+        twhereqry <- paste(twhereqry, "AND", woodlandnm, "== 'N'")
+      }	 
+    }	  
   }
       
   ### Check tsumvarlst

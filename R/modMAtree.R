@@ -51,6 +51,9 @@
 #' syntax (e.g., 'STATUSCD == 1').
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
+#' @param woodland Logical. If TRUE, include woodland tree species where 
+#' measured. If FALSE, only include timber species. See FIESTA::ref_species$
+#' WOODLAND ='Y/N'.
 #' @param landarea String. The condition-level filter for defining land area
 #' ('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1;
 #' if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0.
@@ -270,6 +273,7 @@ modMAtree <- function(MApopdat,
                       estvar, 
                       estvar.filter = NULL, 
                       estseed = "none", 
+					  woodland = TRUE,
                       landarea = "FOREST", 
                       pcfilter = NULL, 
                       rowvar = NULL, 
@@ -481,8 +485,9 @@ modMAtree <- function(MApopdat,
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
                 cuniqueid=cuniqueid, condid=condid, treex=treex, seedx=seedx, 
-                estseed=estseed, sumunits=sumunits, landarea=landarea, 
-                ACI.filter=ACI.filter, pcfilter=pcfilter, allin1=allin1, 
+                estseed=estseed, woodland=woodland, 
+				sumunits=sumunits, landarea=landarea, 
+				ACI.filter=ACI.filter, pcfilter=pcfilter, allin1=allin1, 
                 estround=estround, pseround=pseround, divideby=divideby, 
                 addtitle=addtitle, returntitle=returntitle, 
                 rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
@@ -497,6 +502,7 @@ modMAtree <- function(MApopdat,
   seedf <- estdat$seedf
   tuniqueid <- estdat$tuniqueid
   estseed <- estdat$estseed
+  woodland <- estdat$woodland
   sumunits <- estdat$sumunits
   landarea <- estdat$landarea
   allin1 <- estdat$allin1
@@ -572,7 +578,7 @@ modMAtree <- function(MApopdat,
                   tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
                   esttype=esttype, estvarn=estvar, estvarn.filter=estvar.filter, 
                   esttotn=TRUE, tdomvar=tdomvar, tdomvar2=tdomvar2, 
-                  adjtree=adjtree, metric=metric)
+                  adjtree=adjtree, metric=metric, woodland=woodland)
   if (is.null(treedat)) return(NULL)
   tdomdat <- treedat$tdomdat
 
