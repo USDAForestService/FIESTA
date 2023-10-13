@@ -1,8 +1,8 @@
 check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL, 
-     totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN", condid="CONDID", 
+    totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN", condid="CONDID", 
 	treex=NULL, seedx=NULL, vcondx=NULL, tuniqueid="PLT_CN",
-	estseed="none", vuniqueid="PLT_CN", sumunits=FALSE, landarea=NULL,
-	ACI.filter=NULL, pcfilter=NULL, TPA=TRUE, allin1=FALSE,
+	estseed="none", woodland=TRUE, vuniqueid="PLT_CN", sumunits=FALSE, 
+	landarea=NULL, ACI.filter=NULL, pcfilter=NULL, TPA=TRUE, allin1=FALSE,
 	estround=6, pseround=3, divideby=NULL, addtitle=TRUE, returntitle=TRUE,
 	rawdata=FALSE, rawonly=FALSE, savedata=FALSE, outfolder=NULL,
 	overwrite_dsn=FALSE, overwrite_layer=TRUE, outfn.pre=NULL, outfn.date=TRUE,
@@ -325,6 +325,12 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
     }
     returnlst$tuniqueid <- tuniqueid
     returnlst$estseed <- estseed
+	
+	## Check woodland
+    woodland <- pcheck.logical(woodland, varnm="woodland", title="Include woodland?", 
+		first="YES", gui=gui)
+	returnlst$woodland <- woodland
+
   }
 
   if (esttype == "P2VEG") {
