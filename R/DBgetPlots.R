@@ -4234,6 +4234,21 @@ DBgetPlots <- function (states = NULL,
   } ## end loop for states
   close(pb)
 
+  if (savedata {
+    message("saving ref_species...")
+
+    datExportData(ref_species, 
+        savedata_opts=list(outfolder = outfolder, 
+                           out_fmt = out_fmt, 
+                           out_dsn = out_dsn, 
+                           out_layer = "ref_species",
+                           outfn.pre = outfn.pre, 
+                           overwrite_layer = overwrite_layer,
+                           append_layer = append_layer,
+                           outfn.date = outfn.date, 
+                           add_layer = TRUE)) 
+  }
+ 
   if (savedata && saveSURVEY) {
     message("saving survey table...")
 
@@ -4324,6 +4339,7 @@ DBgetPlots <- function (states = NULL,
     names(evaliddf) <- c("STATECD", "STATE", "EVALID")
     evaliddf <- evaliddf[order(evaliddf$STATECD), ]
     returnlst$evalid <- evalidlist
+	returnlst$ref_species <- ref_species
 
 #    if (savedata) {
 #      append_layer2 <- ifelse(overwrite, FALSE, append_layer)
