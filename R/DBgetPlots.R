@@ -532,7 +532,7 @@ DBgetPlots <- function (states = NULL,
 	SITECLCD=RESERVCD=JENKINS_TOTAL_B1=JENKINS_TOTAL_B2=POP_PLOT_STRATUM_ASSGN=
 	NF_SAMPLING_STATUS_CD=NF_COND_STATUS_CD=ACI_NFS=OWNCD=OWNGRPCD=INVYR=
 	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=SEEDSUBP6=
-	PREV_PLT_CN=dbqueries=REF_SPECIES=PLOT=PLOTe=POP_PLOT_STRATUM_ASSGNe <- NULL
+	PREV_PLT_CN=dbqueries=REF_SPECIES=PLOT=PLOTe=POP_PLOT_STRATUM_ASSGNe=TRE_CN <- NULL
   plotnm=plotgeomnm=ppsanm=ppsanme=condnm=treenm=seednm=
      vsubpsppnm=vsubpstrnm=invsubpnm=
 	subplotnm=subpcondnm=sccmnm=grmnm=dwmnm=surveynm=evalidnm=
@@ -679,7 +679,6 @@ DBgetPlots <- function (states = NULL,
     }
   }
 
-
   ## Define variables
   actual=getinvyr <- FALSE
   SCHEMA <- ""
@@ -775,7 +774,7 @@ DBgetPlots <- function (states = NULL,
   if ((biojenk || greenwt) && !istree) {
     istree <- TRUE
   }
-
+ 
   ## Check coordType
   ####################################################################
   coordTypelst <- c("PUBLIC", "ACTUAL")
@@ -1116,8 +1115,8 @@ DBgetPlots <- function (states = NULL,
     warning("tree data object is too big.. writing to folder, no returned object")
     #savedata <- TRUE
     treeReturn <- FALSE
-  }
-
+  } 
+  
   ## Check outfolder, outfn.date, overwrite_dsn
   ###########################################################
   if (savedata | saveqry | parameters | !treeReturn | !returndata) {
@@ -2363,7 +2362,7 @@ DBgetPlots <- function (states = NULL,
 		}
       }
     }
-  
+ 
     ##############################################################
     ## Tree data
     ##############################################################
@@ -2398,7 +2397,7 @@ DBgetPlots <- function (states = NULL,
           treeflds <- names(TREE)
         }
       }
- 
+
       message("\n",
       	"## STATUS: Getting tree data from TREE (", stabbr, ") ...", "\n")
       if (is.null(treenm)) {
@@ -2451,7 +2450,6 @@ DBgetPlots <- function (states = NULL,
                     message("TREE query is invalid")
                     return(NULL) })
         }
-
         if (!is.null(treex) && nrow(treex) != 0) {
 		  if (!"tree" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$tree <- tree.qry
@@ -2459,7 +2457,8 @@ DBgetPlots <- function (states = NULL,
 
           treex <- setDT(treex)
           treex[, PLT_CN := as.character(PLT_CN)]
-          setkey(treex, PLT_CN, CONDID)
+          treex[, CN := as.character(CN)]
+          setkey(treex, CN)
 
           ## Subset overall filters from condx
           treex <- treex[paste(treex$PLT_CN, treex$CONDID) %in% pcondID,]
@@ -2475,6 +2474,103 @@ DBgetPlots <- function (states = NULL,
               condx <- condx[condx$PLT_CN %in% treex$PLT_CN, ]
             }
           }
+		  
+          ## Write query to outfolder
+          if (saveqry) {
+            treeqryfn <- DBgetfn("tree", invtype,
+                                   outfn.pre, stabbr,
+                                   evalid = evalid,
+                                   qry = TRUE,
+                                   outfolder = outfolder,
+                                   overwrite = overwrite_layer,
+                                   outfn.date = outfn.date, 
+                                   ext = "txt")
+            outfile <- file(treeqryfn, "w")
+            cat(  treeqryfn, "\n", file=outfile)
+            close(outfile)
+          }
+
+          ## Make sure these variables are numeric
+          nbrvars <- c(FIESTAutils::ref_units$VARIABLE, "BHAGE")
+          if (any(nbrvars %in% names(treex)))
+             nbrvars <- nbrvars[which(nbrvars %in% names(treex))]
+          treex[, (nbrvars) := lapply(.SD, check.numeric), .SDcols=nbrvars]
+
+          ## Change NA values to 0 values
+          #if (any(names(treex) %in% treenavars))
+            #  treex <- DT_NAto0(treex, treenavars)
+
+          if ("DIA" %in% names(treex)) {
+            ## Create new tree variables - basal area
+            treex[, BA := DIA * DIA * 0.005454]
+          }
+		  
+          ## Create new biomass variables
+          if (!is.null(sppvars)) {
+
+            sppsql <- paste("select SPCD,", paste(sppvars, collapse=","),
+                              "from ref_species")
+            ref_spp <- tryCatch( sqldf::sqldf(sppsql),
+                        error=function(e) stop("spp query is invalid"))
+            if (!is.null(ref_spp)) {
+              treenames <- names(treex)
+              treex <- merge(treex, ref_spp, by="SPCD")
+
+              if (biojenk) {
+                sppvarsnew <- {}
+                if (!"BIOJENK_kg" %in% treenames) {
+                  treex[, BIOJENK_kg := exp(JENKINS_TOTAL_B1 + 
+                                     JENKINS_TOTAL_B2 * log(DIA * 2.54))]
+                  treex[, JENKINS_TOTAL_B1 := NULL][, JENKINS_TOTAL_B2 := NULL]                  
+                  sppvarsnew <- c(sppvarsnew[!sppvarsnew %in% 
+                          c("JENKINS_TOTAL_B1", "JENKINS_TOTAL_B2")], "BIOJENK_kg")
+                }
+                if (!"BIOJENK_lb" %in% treenames) {
+                  treex[, BIOJENK_lb := BIOJENK_kg * 2.2046] ## Converts back to lbs
+                  sppvarsnew <- c(sppvarsnew, "BIOJENK_lb")
+                }
+              }
+              if (greenwt && "DRYBIO_AG" %in% treenames && 
+                      !"GREENBIO_AG" %in% treenames) {
+                treex[, GREENBIO_AG := DRYBIO_AG * DRYWT_TO_GREENWT_CONVERSION]
+                sppvarsnew <- c(sppvarsnew, "DRYWT_TO_GREENWT_CONVERSION")		
+              }  
+              setcolorder(treex, c(treenames, sppvarsnew))
+            }
+          }
+		  
+          ## Append data
+          if (treeReturn && returndata) {
+			if ("tree" %in% names(tabs)) {
+              tabs$tree <- rbind(tabs$tree, data.frame(treex))
+			} else {
+			  tabs$tree <- data.frame(treex)
+			}
+			if (!"tree" %in% names(tabIDs)) {
+              tabIDs$tree <- "PLT_CN"
+			}
+          }
+          if ((savedata || !treeReturn)) {
+            message("saving tree table...")
+            index.unique.treex <- NULL
+            if (!append_layer) {
+              index.unique.treex <- list(c("PLT_CN", "CONDID", "SUBP", "TREE"), "TREE_CN",
+				                              "PREV_TREE_CN")
+            }
+            datExportData(treex, 
+                 index.unique = index.unique.treex,
+                 savedata_opts = list(outfolder = outfolder, 
+                                out_fmt = out_fmt, 
+                                out_dsn = out_dsn, 
+                                out_layer = "tree",
+                                outfn.pre = outfn.pre, 
+                                overwrite_layer = overwrite_layer,
+                                append_layer = append_layer,
+                                outfn.date = outfn.date, 
+                                add_layer = TRUE)) 
+            #rm(treex)
+            #gc()
+          }		  
 		  
 		  ##############################################################
           ## Tree unioned data
@@ -2539,10 +2635,10 @@ DBgetPlots <- function (states = NULL,
               }
 
               ## Check ACI
-              if (!ACI) {
-                ACIpltID <- condux[COND_STATUS_CD == 1, paste(PLT_CN, CONDID)]
-                treeux <- treeux[paste(treeux$PLT_CN, treeux$CONDID) %in% ACIpltID,]
-              }
+              #if (!ACI) {
+              #  ACIpltID <- condux[COND_STATUS_CD == 1, paste(PLT_CN, CONDID)]
+              #  treeux <- treeux[paste(treeux$PLT_CN, treeux$CONDID) %in% ACIpltID,]
+              #}
 
               ## Write query to outfolder
               if (saveqry) {

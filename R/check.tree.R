@@ -5,7 +5,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
 	esttotn=TRUE, estvard=NULL, estvard.TPA=TRUE, estvard.filter=NULL,
 	estvard.name=NULL, esttotd=TRUE, tdomvar=NULL, tdomvar2=NULL,
 	adjtree=FALSE, adjvar="tadjfac", adjtpa=FALSE, metric=FALSE, 
-	ACI=FALSE, woodland=TRUE) {
+	ACI=FALSE, woodland="Y") {
 
   ###################################################################################
   ### GETS ESTIMATION DATA FROM TREE TABLE

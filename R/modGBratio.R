@@ -44,9 +44,10 @@
 #' @param GBpopdat List. Population data objects returned from modGBpop().
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
-#' @param woodland Logical. If TRUE, include woodland tree species where 
-#' measured. If FALSE, only include timber species. See FIESTA::ref_species$
-#' WOODLAND ='Y/N'.
+#' @param woodland String. If woodland = 'Y', include woodland tree species  
+#' where measured. If woodland = 'N', only include timber species. See 
+#' FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
+#' woodland species.
 #' @param ratiotype String. The type of ratio estimates ("PERACRE", "PERTREE").
 #' @param landarea String. The sample area filter for estimates ("FOREST",
 #' "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD = 1; If
@@ -294,7 +295,7 @@
 modGBratio <- function(GBpopdat, 
                        estseed = "none", 
                        ratiotype = "PERACRE", 
-					   woodland = TRUE,
+					   woodland = "Y",
                        landarea = "FOREST", 
                        pcfilter = NULL, 
                        estvarn = NULL, 

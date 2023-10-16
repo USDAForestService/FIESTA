@@ -64,9 +64,10 @@
 #' tdomvar must be 'SPCD' or 'SPGRPCD'.
 #' @param seedonly Logical. If TRUE, seedling counts only. Note: tdomvar
 #' must be 'SPCD' or 'SPGRPCD'.
-#' @param woodland Logical. If TRUE, include woodland tree species where 
-#' measured. If FALSE, only include timber species. See FIESTA::ref_species$
-#' WOODLAND ='Y/N'.
+#' @param woodland String. If woodland = 'Y', include woodland tree species  
+#' where measured. If woodland = 'N', only include timber species. See 
+#' FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
+#' woodland species.
 #' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 #' respective trees-per-acre variable (see details) to get per-acre
 #' measurements.
@@ -151,7 +152,7 @@ datSumTree <- function(tree = NULL,
                        tsumvarnmlst = NULL, 
                        addseed = FALSE, 
                        seedonly = FALSE,
-					   woodland = TRUE,
+					   woodland = "Y",
                        TPA = TRUE, 
                        tfun = sum, 
                        ACI = FALSE, 
@@ -182,7 +183,7 @@ datSumTree <- function(tree = NULL,
   COND_STATUS_CD=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
       seedx=TREECOUNT_CALC=fname=NF_SUBP_STATUS_CD=
       CONDPROP_UNADJ=MACRPROP_UNADJ=SUBPPROP_UNADJ=sumbcvars=treex=
-      cond.nonsamp.filter=meta=tunits=tunitlst=ref_sppnm=woodlandnm <- NULL
+      cond.nonsamp.filter=meta=tunits=tunitlst <- NULL
 
 
   ## If gui.. set variables to NULL
@@ -204,14 +205,20 @@ datSumTree <- function(tree = NULL,
 
 
   ## SET VARIABLE LISTS
-  biovars <- c("DRYBIO_AG", "DRYBIO_BG", "DRYBIO_WDLD_SPP", "DRYBIO_SAPLING",
- 	"DRYBIO_STUMP", "DRYBIO_TOP", "DRYBIO_BOLE", "DRYBIOT", "DRYBIOM", "DRYBIOTB",
- 	"JBIOTOT")
+  biovars <- c("DRYBIO_BOLE", "DRYBIO_STUMP", "DRYBIO_BG", "DRYBIO_SAWLOG", 
+               "DRYBIO_AG", "DRYBIO_STEM", "DRYBIO_STEM_BARK", "DRYBIO_STUMP_BARK", "DRYBIO_BOLE_BARK", "DRYBIO_BRANCH", "DRYBIO_FOLIAGE",     "DRYBIO_SAWLOG_BARK",
+			   "DRYBIOT", "DRYBIOM", "DRYBIOTB", "JBIOTOT")
   carbvars <- c("CARBON_BG", "CARBON_AG")
 
   ## SET VARIABLES TO CONVERT (from pounds to short tons.. * 0.0005)
   vars2convert <- c(biovars, carbvars, paste(biovars, "TPA", sep="_"), 
 	paste(carbvars, "TPA", sep="_"))
+	
+  timberonly <- FIESTAutils::ref_units[FIESTAutils::ref_units$WOODLAND == "N", 
+			"VARIABLE"]
+  woodlandvars <- FIESTAutils::ref_units[FIESTAutils::ref_units$WOODLAND == "Y", 
+			"VARIABLE"]
+  
 
   growvars <- c("TPAGROW_UNADJ", "GROWCFGS", "GROWBFSL", "GROWCFAL", "FGROWCFGS", 
 	"FGROWBFSL", "FGROWCFAL")
@@ -303,12 +310,13 @@ datSumTree <- function(tree = NULL,
 		first="NO", gui=gui)
 		
   ## Check woodland
-  woodland <- pcheck.logical(woodland, varnm="woodland", title="Include woodland?", 
-		first="YES", gui=gui)
+  woodlandlst <- c("Y", "N", "only")
+  woodland <- pcheck.varchar(var2check=woodland, varnm="woodland", 
+		checklst=woodlandlst, gui=gui, caption="Woodland?") 
 
   ## Check tree, seed tables
   ###########################################################################
-  treenm=seednm=dbname <- NULL
+  treenm=seednm=dbname=ref_sppnm=woodlandnm <- NULL
   if (datsource %in% c("obj", "csv")) {
     treex <- pcheck.table(tree, gui=gui, tabnm="tree", caption="Tree table?")
     if (!is.null(treex)) {
@@ -316,15 +324,13 @@ datSumTree <- function(tree = NULL,
       treenames <- names(treex)
       treenm <- "treex"
     }
-	if (addseed || seedonly) {
-      seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
-      if (!is.null(seedx)) {
-        seedx <- setDT(int64tochar(seedx))
-        seednames <- names(seedx)
-        seednm <- "seedx"
-      }
-	}	
-	if (!woodland) {
+    seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
+    if (!is.null(seedx)) {
+      seedx <- setDT(int64tochar(seedx))
+      seednames <- names(seedx)
+      seednm <- "seedx"
+    }
+	if (woodland %in% c("N", "only")) {
 	  woodlandnm <- findnm("WOODLAND", treenames, returnNULL=TRUE)
 	  if (is.null(woodlandnm)) {
 	    woodlandref <- TRUE	  
@@ -345,14 +351,12 @@ datSumTree <- function(tree = NULL,
       treenames <- DBI::dbListFields(dbconn, treex)
       treenm <- treex
     }
-	if (addseed || seedonly) {
-      seedx <- chkdbtab(dbtablst, seed)
-      if (!is.null(seedx)) {
-        seednames <- DBI::dbListFields(dbconn, seedx)
-        seednm <- seedx
-      }
+    seedx <- chkdbtab(dbtablst, seed)
+    if (!is.null(seedx)) {
+      seednames <- DBI::dbListFields(dbconn, seedx)
+      seednm <- seedx
     }
-    if (!woodland) {
+	if (woodland %in% c("N", "only")) {
 	  woodlandnm <- findnm("WOODLAND", treenames, returnNULL=TRUE)
 	  if (is.null(woodlandnm)) {
 	    woodlandref <- TRUE	  
@@ -471,10 +475,11 @@ datSumTree <- function(tree = NULL,
   if (addseed || seedonly) {
     sfromqry <- paste("FROM", seednm)
   }
-  if (!woodland && woodlandref) {
+  if (woodland %in% c("N", "only") && woodlandref) {
     tfromqry <- paste0(tfromqry, 
 	    "\n JOIN ", ref_sppnm, " ref ON(", treenm, ".", spcdnm, " = ref.", refspcdnm, ")")  
   }
+  
   selectvars <- tsumuniqueid
   if (!is.null(tfilter)) {
     if (!seedonly) {
@@ -490,11 +495,19 @@ datSumTree <- function(tree = NULL,
         swhereqry <- paste("WHERE", RtoSQL(tfilter))
       }
     }
-	if (!woodland) {
+	if (woodland %in% c("N", "only")) {
 	  if (is.null(twhereqry)) {
-        twhereqry <- paste("WHERE", woodlandnm, "== N")
+	    if (woodland == "N") {
+          twhereqry <- paste("WHERE", woodlandnm, "== 'N'")
+		} else {
+          twhereqry <- paste("WHERE", woodlandnm, "== 'Y'")
+        }		  
 	  } else {
-        twhereqry <- paste(twhereqry, "AND", woodlandnm, "== 'N'")
+	    if (woodland == "N") {
+          twhereqry <- paste(twhereqry, "AND", woodlandnm, "== 'N'")
+		} else {
+          twhereqry <- paste(twhereqry, "AND", woodlandnm, "== 'Y'")
+        }		
       }	 
     }	  
   }
@@ -509,6 +522,10 @@ datSumTree <- function(tree = NULL,
       tsumvarlst[tsumvarlst == tuniqueid] <- "TPA_UNADJ"
     }
     tselectvars <- unique(c(selectvars, tsumvarlst))
+	
+#	if (woodland %in% c("N", "only") && !any(tsumvarlst %in% woodlandvars)) {
+#      warning("tsumvarlst does not have any variables that include woodland...")
+#    }
   } 
   
   ## check seed table
@@ -1346,13 +1363,26 @@ datSumTree <- function(tree = NULL,
       if (any(tsumvarlst %in% c(biovars, carbvars))) {
         bcvars <- tsumvarlst[tsumvarlst %in% c(biovars, carbvars)]
         refbcvars <- unlist(lapply(bcvars, function(x) tree_ref$VARIABLE[grepl(x, tree_ref$VARIABLE)]))
-
-        unittxt <- ifelse(lbs2tons, "tons", "lbs")
+        
+		if (!metric) {
+          unittxt <- ifelse(lbs2tons, "tons", "lbs")
+		} else {
+		  unittxt <- ifelse(lbs2tons, "metric tons", "kilograms")
+		}
         tree_ref[tree_ref$VARIABLE %in% refbcvars, "DESCRIPTION"] <- 
 			paste0(tree_ref[tree_ref$VARIABLE %in% refbcvars, "DESCRIPTION"], " (in ", unittxt, ")")    
         tree_ref[tree_ref$VARIABLE %in% refbcvars, "VARIABLE"] <- 
 			paste0(tree_ref[tree_ref$VARIABLE %in% refbcvars, "VARIABLE"], "_", toupper(unittxt))
       } 
+	  if (woodland == "N") {
+	    tree_ref[tree_ref$VARIABLE %in% timberonly, "DESCRIPTION"] <- 
+			paste(tree_ref[tree_ref$VARIABLE %in% timberonly, "DESCRIPTION"],
+			"- timber only")
+	  } else if (woodland == "only") {
+	    tree_ref[tree_ref$VARIABLE %in% woodlandvars, "DESCRIPTION"] <- 
+			paste(tree_ref[tree_ref$VARIABLE %in% woodland, "DESCRIPTION"],
+			"- woodland only")
+      }	  
    
       meta <- rbind(meta, tree_ref)
     }

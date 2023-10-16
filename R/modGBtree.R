@@ -54,9 +54,10 @@
 #' syntax (e.g., 'STATUSCD == 1').
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
-#' @param woodland Logical. If TRUE, include woodland tree species where 
-#' measured. If FALSE, only include timber species. See FIESTA::ref_species$
-#' WOODLAND ='Y/N'.
+#' @param woodland String. If woodland = 'Y', include woodland tree species  
+#' where measured. If woodland = 'N', only include timber species. See 
+#' FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
+#' woodland species.
 #' @param landarea String. The condition-level filter for defining land area
 #' ('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1;
 #' if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0.
@@ -279,7 +280,7 @@ modGBtree <- function(GBpopdat,
                       estvar, 
                       estvar.filter = NULL, 
                       estseed = "none", 
-					  woodland = TRUE,
+					  woodland = "Y",
                       landarea = "FOREST", 
                       pcfilter = NULL, 
                       rowvar = NULL, 
@@ -588,7 +589,8 @@ modGBtree <- function(GBpopdat,
   #####################################################################################
   ### Get titles for output tables
   #####################################################################################
-  alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
+  alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, 
+                    estseed=estseed, woodland=woodland, 
 	                sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
 	                title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
 	                title.colvar=title.colvar, title.unitvar=title.unitvar, 

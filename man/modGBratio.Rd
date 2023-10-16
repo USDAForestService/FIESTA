@@ -8,7 +8,7 @@ modGBratio(
   GBpopdat,
   estseed = "none",
   ratiotype = "PERACRE",
-  woodland = TRUE,
+  woodland = "Y",
   landarea = "FOREST",
   pcfilter = NULL,
   estvarn = NULL,
@@ -35,9 +35,10 @@ estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').}
 
 \item{ratiotype}{String. The type of ratio estimates ("PERACRE", "PERTREE").}
 
-\item{woodland}{Logical. If TRUE, include woodland tree species where 
-measured. If FALSE, only include timber species. See FIESTA::ref_species$
-WOODLAND ='Y/N'.}
+\item{woodland}{String. If woodland = 'Y', include woodland tree species
+where measured. If woodland = 'N', only include timber species. See 
+FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
+woodland species.}
 
 \item{landarea}{String. The sample area filter for estimates ("FOREST",
 "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD = 1; If

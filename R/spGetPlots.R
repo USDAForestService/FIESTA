@@ -1079,7 +1079,7 @@ spGetPlots <- function(bnd = NULL,
                          returndata = TRUE,
                          evalInfo = evalInfost,
                          ...
-                         )
+                         )					 
       tabs <- dat$tabs
       tabIDs <- dat$tabIDs
       pop_plot_stratum_assgn <- dat$pop_plot_stratum_assgn

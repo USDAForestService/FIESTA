@@ -1,7 +1,7 @@
 check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL, 
     totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN", condid="CONDID", 
 	treex=NULL, seedx=NULL, vcondx=NULL, tuniqueid="PLT_CN",
-	estseed="none", woodland=TRUE, vuniqueid="PLT_CN", sumunits=FALSE, 
+	estseed="none", woodland="Y", vuniqueid="PLT_CN", sumunits=FALSE, 
 	landarea=NULL, ACI.filter=NULL, pcfilter=NULL, TPA=TRUE, allin1=FALSE,
 	estround=6, pseround=3, divideby=NULL, addtitle=TRUE, returntitle=TRUE,
 	rawdata=FALSE, rawonly=FALSE, savedata=FALSE, outfolder=NULL,
@@ -326,9 +326,10 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
     returnlst$tuniqueid <- tuniqueid
     returnlst$estseed <- estseed
 	
-	## Check woodland
-    woodland <- pcheck.logical(woodland, varnm="woodland", title="Include woodland?", 
-		first="YES", gui=gui)
+    ## Check woodland
+    woodlandlst <- c("Y", "N", "only")
+    woodland <- pcheck.varchar(var2check=woodland, varnm="woodland", 
+		checklst=woodlandlst, gui=gui, caption="Woodland?") 
 	returnlst$woodland <- woodland
 
   }

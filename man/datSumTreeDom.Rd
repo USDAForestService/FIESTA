@@ -24,7 +24,7 @@ datSumTreeDom(
   tsumvar = NULL,
   addseed = FALSE,
   seedonly = FALSE,
-  woodland = TRUE,
+  woodland = "Y",
   TPA = TRUE,
   tfun = sum,
   ACI = FALSE,
@@ -117,9 +117,10 @@ tdomvar must be 'SPCD' or 'SPGRPCD'.}
 \item{seedonly}{Logical. If TRUE, seedling counts only. Note: tdomvar
 must be 'SPCD' or 'SPGRPCD'.}
 
-\item{woodland}{Logical. If TRUE, include woodland tree species where 
-measured. If FALSE, only include timber species. See FIESTA::ref_species$
-WOODLAND ='Y/N'.}
+\item{woodland}{String. If woodland = 'Y', include woodland tree species
+where measured. If woodland = 'N', only include timber species. See 
+FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
+woodland species.}
 
 \item{TPA}{Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 respective trees-per-acre variable (see details) to get per-acre

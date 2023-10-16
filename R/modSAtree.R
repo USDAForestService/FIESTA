@@ -50,9 +50,10 @@
 #' @param SAmethod String. Small area method to use ('unit', 'area')
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
-#' @param woodland Logical. If TRUE, include woodland tree species where 
-#' measured. If FALSE, only include timber species. See FIESTA::ref_species$
-#' WOODLAND ='Y/N'.
+#' @param woodland String. If woodland = 'Y', include woodland tree species  
+#' where measured. If woodland = 'N', only include timber species. See 
+#' FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
+#' woodland species.
 #' @param largebnd.unique String. Name of the large boundary unique identifer
 #' to define plots within a model extent. If NULL, all plots are used for model
 #' extent.
@@ -185,7 +186,7 @@ modSAtree <- function(SApopdatlst = NULL,
                       SApackage = "JoSAE", 
                       SAmethod = "area", 
                       estseed = "none", 
-					  woodland = TRUE,
+					  woodland = "Y",
                       largebnd.unique = NULL, 
                       landarea = "FOREST", 
                       pcfilter = NULL, 
@@ -691,7 +692,7 @@ modSAtree <- function(SApopdatlst = NULL,
       #####################################################################################
       adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
       treedat <- check.tree(gui=gui, treef=rowcolinfo$treef, 
-                        seedf=rowcolinfo$seedf, estseed=estseed, 
+                        seedf=rowcolinfo$seedf, estseed=estseed, woodland=woodland,
                         bycond=TRUE, condf=rowcolinfo$condf, bytdom=rowcolinfo$bytdom, 
                         tuniqueid=tuniqueid, cuniqueid=cuniqueid, esttype=esttype, 
                         estvarn=estvar, estvarn.filter=estvar.filter, esttotn=TRUE, 
