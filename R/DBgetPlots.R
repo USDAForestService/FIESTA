@@ -4234,7 +4234,7 @@ DBgetPlots <- function (states = NULL,
   } ## end loop for states
   close(pb)
 
-  if (savedata {
+  if (savedata) {
     message("saving ref_species...")
 
     datExportData(ref_species, 
