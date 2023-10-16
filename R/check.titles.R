@@ -124,6 +124,9 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
         }
         if (is.null(title.estvarn)) {
           ref_estvarn <- ref_estvar[ref_estvar$ESTVAR == estvarn, ]
+		  if (estvarn %in% estvartw) {
+		    ref_estvarn <- ref_estvarn[ref_estvarn$WOODLAND == woodland, ]
+		  }
           if (nrow(ref_estvarn) == 0) {
             title.estvarn <- estvarn
           } else if (estseed %in% c("add", "only")) {
@@ -182,12 +185,6 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
           }
         }
         title.part1 <- title.estvarn
-		if (woodland == "only" && grepl("trees", title.part1)) {
-		  title.part1 <- sub("trees", "woodland trees", title.part1)
-        } else if (woodland == "N" && estvarn %in% estvartw &&
-                   !grepl("timber", title.part1)) {
-	      title.part1 <- sub("trees", "timber trees", title.part1)
-		}
         if (esttype == "RATIO" && ratiotype == "PERTREE") {
           if (is.null(title.estvard)) {
             ref_estvard <- ref_estvar[ref_estvar$ESTVAR == estvarn, ]
