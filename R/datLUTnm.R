@@ -221,7 +221,7 @@ datLUTnm <- function(xvar,
       }
 
 	  datidx <- checkidx(dbconn, datnm)
-	  if (!is.null(datidx) && !is.na(datidx$cols)) {
+	  if (!is.null(datidx) && any(!is.na(datidx$cols))) {
 	    datx.idx <- strsplit(datidx$cols, "\\,")[[1]]
 		if (all(datx.idx %in% datnmlst)) {
 		  datkey <- datx.idx

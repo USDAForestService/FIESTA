@@ -1280,6 +1280,10 @@ modGBpop <- function(popType = "VOL",
   rm(popcheck)
   # gc()
 
+  if (!is.null(dbconn)) {
+    DBI::dbDisconnect(dbconn)
+  }
+
   if (returndata) {
     return(returnlst)
   } else {
