@@ -147,7 +147,10 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
                 ## Find matching filter in ref_estvar. If more than 1, uses first.
                 gfind <- sapply(estfilters, function(x, ref_estvarn)
         			grep(gsub("\\s", "", x), gsub("\\s", "", ref_estvarn$ESTFILTER)),
-				ref_estvarn)
+				    ref_estvarn)
+				if (any(grepl("DIA<5", gsub(" ", "", names(gfind))))) {
+                  gfind <- gfind[gsub(" ", "", names(gfind)) == "DIA<5"][[1]][1]		
+				}								
                 if (length(gfind) > 1 && any(lapply(gfind, length) > 0)) {
                   gfind <- gfind[1]
                 }
