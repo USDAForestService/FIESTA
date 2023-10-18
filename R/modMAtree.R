@@ -69,7 +69,9 @@
 #' an input data frame (i.e., plt, cond, tree).
 #' @param prednames String vector. Name(s) of predictor variables to include in
 #' model.
-#' @param modelselect Logical. If TRUE, variable selection occurs. 
+#' @param modelselect Logical. If TRUE, an elastic net regression model is fit 
+#' to the entire plot level data, and the variables selected in that model are 
+#' used for the proceeding estimation.
 #' @param FIA Logical. If TRUE, the finite population term is removed from
 #' estimator to match FIA estimates.
 #' @param bootstrap Logical. If TRUE, returns bootstrap variance estimates,
@@ -84,6 +86,9 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @param gui Logical. If gui, user is prompted for parameters.
+#' @param modelselect_bydomain Logical. If TRUE, modelselection will occur at 
+#' the domain level as specified by rowvar and/or colvar and not at the level of
+#' the entire sample.
 #' @param ...  Parameters for modMApop() if MApopdat is NULL.
 #' @return If FIA=TRUE or unitvar=NULL and colvar=NULL, one data frame is
 #' returned with tree estimates and percent sample errors. Otherwise, a list is
@@ -289,6 +294,7 @@ modMAtree <- function(MApopdat,
                       title_opts = NULL, 
                       savedata_opts = NULL, 
                       gui = FALSE, 
+                      modelselect_bydomain = FALSE,
                       ...){
 
   ########################################################################################
@@ -652,6 +658,39 @@ modMAtree <- function(MApopdat,
 	ifelse(MAmethod == "gregEN", "gregElasticNet", 
 	ifelse(MAmethod == "ratio", "ratioEstimator", "horvitzThompson"))))
   message("generating estimates using mase::", masemethod, " function...\n")
+  
+  if (MAmethod == "greg" && modelselect == T) {
+    
+    # want to do variable selection on plot level data...
+    pltlvl <- tdomdat[ , lapply(.SD, sum, na.rm = TRUE), 
+                       by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames),
+                       .SDcols=response]
+    
+    y <- pltlvl[[response]]
+    xsample <- pltlvl[ , prednames, with = F, drop = F]
+    xpop <- unitlut[ , prednames, with = F, drop = F]
+    N <- sum(npixels[["npixels"]])
+    
+    preds.selected <- gregEN.select(y = y,
+                                    x_sample = xsample,
+                                    x_pop = xpop,
+                                    N = N,
+                                    alpha = 0.5)
+    
+    if (length(preds.selected) == 0 || is.null(preds.selected)) {
+      
+      warning("No variables selected in model selection, proceeding with all possible predictors. \n")
+      
+    } else {
+      
+      prednames <- preds.selected 
+      message(paste0("Predictors ", "[", paste0(prednames, collapse = ", "), "]", " were chosen in model selection.\n"))
+      
+    }
+    
+    
+  }
+  
   if (!MAmethod %in% c("HT", "PS")) {
     message("using the following predictors...", toString(prednames))
   }
@@ -677,7 +716,7 @@ modMAtree <- function(MApopdat,
                         unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                         MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                         domain="TOTAL", response=response, npixels=npixels, 
-                        FIA=FIA, modelselect=modelselect, getweights=getweights,
+                        FIA=FIA, modelselect=modelselect_bydomain, getweights=getweights,
                         var_method=var_method)
     unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
     unit_weights <- do.call(rbind, sapply(unit_totestlst, '[', "weights")) 
@@ -706,7 +745,7 @@ modMAtree <- function(MApopdat,
                         unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                         MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                         domain=rowvar, response=response, npixels=npixels, 
-                        FIA=FIA, modelselect=modelselect, getweights=getweights,
+                        FIA=FIA, modelselect=modelselect_bydomain, getweights=getweights,
                         var_method=var_method)
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
@@ -721,7 +760,7 @@ modMAtree <- function(MApopdat,
                             unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                             MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                             domain=colvar, response=response, npixels=npixels, 
-                            FIA=FIA, modelselect=modelselect, var_method=var_method)
+                            FIA=FIA, modelselect=modelselect_bydomain, var_method=var_method)
       unit_colest <- do.call(rbind, sapply(unit_colestlst, '[', "unitest"))
       if (MAmethod %in% c("greg", "gregEN")) {
         predselectlst$colest <- do.call(rbind, sapply(unit_colestlst, '[', "predselect"))
@@ -736,7 +775,7 @@ modMAtree <- function(MApopdat,
                                unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                                MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                                domain="grpvar", response=response, npixels=npixels, 
-                               FIA=FIA, modelselect=modelselect, var_method=var_method)
+                               FIA=FIA, modelselect=modelselect_bydomain, var_method=var_method)
       unit_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "unitest"))
       if (MAmethod %in% c("greg", "gregEN")) {
         predselectlst$grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
