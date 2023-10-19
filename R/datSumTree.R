@@ -735,7 +735,7 @@ datSumTree <- function(tree = NULL,
       treex <- check.matchval(treex, condx, tjoinid, cjoinid,
 		  tab1txt="tree", tab2txt="cond")
     }
-print("XXXXX2")	
+
     if (addseed || seedonly) {
       ## Check if class of tuniqueid matches class of cuniqueid
       tabs <- check.matchclass(seedx, condx, tjoinid, cjoinid)
