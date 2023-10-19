@@ -436,7 +436,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   if (!is.null(evalid) && !is.null(invyrs)) {
     invyrsnm <- pcheck.varchar(var2check="INVYR",
 	       checklst=names(pltx), warn="INVYR variable not in plt")
-    invyrsmiss <- invyrs[!all(countycd %in% unique(pltx[[invyrsnm]]))]
+    invyrsmiss <- invyrs[!all(invyrs %in% unique(pltx[[invyrsnm]]))]
     if (length(invyrsmiss) > 0) {
       stop("invalid invyrs: ", toString(invyrsmiss))
     }

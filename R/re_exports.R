@@ -61,6 +61,10 @@ ref_domain <- FIESTAutils::ref_domain
 #' @export
 ref_estvar <- FIESTAutils::ref_estvar
 
+#' @inherit FIESTAutils::ref_units source title
+#' @export
+ref_units <- FIESTAutils::ref_units
+
 #' @inherit FIESTAutils::ref_statecd references source title
 #' @export
 ref_statecd <- FIESTAutils::ref_statecd
