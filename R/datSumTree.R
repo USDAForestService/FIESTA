@@ -218,7 +218,6 @@ datSumTree <- function(tree = NULL,
 			"VARIABLE"]
   woodlandvars <- FIESTAutils::ref_units[FIESTAutils::ref_units$WOODLAND == "Y", 
 			"VARIABLE"]
-  
 
   growvars <- c("TPAGROW_UNADJ", "GROWCFGS", "GROWBFSL", "GROWCFAL", "FGROWCFGS", 
 	"FGROWBFSL", "FGROWCFAL")
@@ -598,11 +597,13 @@ datSumTree <- function(tree = NULL,
   }
 
   if (adjtree && !getadjplot) {
-    if (!adjvar %in% treenames) {
-      message(adjvar, " variable not in tree table... setting getadjplot=TRUE")
-      getadjplot <- TRUE
-    } else {
-      tselectvars <- unique(c(tselectvars, adjvar))
+    if (!seedonly) {
+      if (!adjvar %in% treenames) {
+        message(adjvar, " variable not in tree table... setting getadjplot=TRUE")
+        getadjplot <- TRUE
+      } else {
+        tselectvars <- unique(c(tselectvars, adjvar))
+      }
     }
     if (addseed || seedonly) {
       if (!adjvar %in% seednames) {
@@ -613,7 +614,6 @@ datSumTree <- function(tree = NULL,
       }
     }
   }
-
 
   ########################################################################
   ########################################################################
@@ -628,6 +628,11 @@ datSumTree <- function(tree = NULL,
     }
     #message(tree.qry)
     treex <- setDT(sqldf::sqldf(tree.qry, dbname=dbname))
+	
+	if (nrow(treex) == 0) {
+	  message("no trees found")
+	  return(NULL)
+	}
     setkeyv(treex, tsumuniqueid)
   }
 
@@ -639,6 +644,13 @@ datSumTree <- function(tree = NULL,
     }
     #message(seed.qry)
     seedx <- setDT(sqldf::sqldf(seed.qry, dbname=dbname))
+    if (nrow(treex) == 0) {
+	  message("no seedlings found")
+	  if (addseed) addseed <- FALSE
+	  if (seedonly) {
+	    return(NULL)
+	  }
+	}
     setkeyv(seedx, tsumuniqueid)
   }
 
@@ -712,7 +724,11 @@ datSumTree <- function(tree = NULL,
       tjoinid <- tuniqueid
       cjoinid <- cuniqueid  
     }
-
+print("XXXXX")
+print(tjoinid)
+print(cjoinid)
+print(head(treex))
+print(head(condx))
     if (!seedonly) {
       ## Check if class of tuniqueid matches class of cuniqueid
       tabs <- check.matchclass(treex, condx, tjoinid, cjoinid)
@@ -723,7 +739,7 @@ datSumTree <- function(tree = NULL,
       treex <- check.matchval(treex, condx, tjoinid, cjoinid,
 		  tab1txt="tree", tab2txt="cond")
     }
-	
+print("XXXXX2")	
     if (addseed || seedonly) {
       ## Check if class of tuniqueid matches class of cuniqueid
       tabs <- check.matchclass(seedx, condx, tjoinid, cjoinid)

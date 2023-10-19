@@ -74,12 +74,13 @@
 #' be unique. If using most current XY coordinates, use identifier for a plot
 #' (e.g., PLOT_ID).
 #' @param showsteps Logical. If TRUE, display data in device window.
+#' @param returnxy Logical. If TRUE, save xy coordinates to outfolder.
 #' @param returndata Logical. If TRUE, returns data objects.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
-#' @param savebnd Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a
-#' SpatiaLite database.
-#' @param returnxy Logical. If TRUE, save xy coordinates to outfolder.
-#' @param exportsp Logical. If returnxy=TRUE, if TRUE, saves xy data as 
+#' @param savexy Logical. If TRUE, and savedata=TRUE, saves XY data to outfolder.
+#' @param savebnd Logical. If TRUE, and savedata=TRUE, saves bnd. If 
+#' out_fmt='sqlite', saves to a SpatiaLite database.
+#' @param exportsp Logical. If TRUE, and savedata=TRUE, saves xy data as 
 #' spatial data. If FALSE, saves xy data as table.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. 
@@ -163,10 +164,11 @@ spGetPlots <- function(bnd = NULL,
                        clipxy = TRUE, 
                        pjoinid = NULL, 
                        showsteps = FALSE, 
+					   returnxy = FALSE,
                        returndata = TRUE,
                        savedata = FALSE,
+					   savexy = FALSE,
                        savebnd = FALSE, 
-                       returnxy = TRUE, 
                        exportsp = FALSE, 
                        savedata_opts = NULL,
                        spXYdat = NULL,
@@ -734,6 +736,11 @@ spGetPlots <- function(bnd = NULL,
   returndata <- pcheck.logical(returndata, varnm="returndata", 
                       title="Return data?", first="YES", gui=gui)  
 
+  ## Check savexy
+  #############################################################################
+  savexy <- pcheck.logical(savexy, varnm="savexy", 
+                           title="Save XY data?", first="NO", gui=gui)
+
   ## Check savedata
   #############################################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 
@@ -1233,8 +1240,9 @@ spGetPlots <- function(bnd = NULL,
   #############################################################################
   ## Save tables
   #############################################################################
-  if (savebnd) {
-    spExportSpatial(bndx, 
+  if (savedata) {
+    if (savebnd) {
+      spExportSpatial(bndx, 
                     savedata_opts=list(outfolder=outfolder, 
                                        out_fmt=out_fmt, 
                                        out_dsn=out_dsn, 
@@ -1244,14 +1252,13 @@ spGetPlots <- function(bnd = NULL,
                                        overwrite_layer=overwrite_layer,
                                        append_layer=append_layer, 
                                        add_layer=TRUE))   
-  }
+    }
  
-  if (savedata) {
-    if (returnxy) {   
+    if (savexy) {
       if (!is.null(spxy)) {
         if (exportsp) {
           spExportSpatial(spxy,
-                savedata_opts=list(outfolder=outfolder,
+             savedata_opts=list(outfolder=outfolder,
                               out_fmt=out_fmt,
                               out_dsn=out_dsn,
                               out_layer="spxyplt",
@@ -1262,37 +1269,38 @@ spGetPlots <- function(bnd = NULL,
                               add_layer=TRUE))
         } else {
           datExportData(sf::st_drop_geometry(spxy), 
-                        savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-                              out_dsn=out_dsn, 
-                              out_layer="xyplt",
-                              outfn.pre=outfn.pre, 
-                              outfn.date=outfn.date, 
-                              overwrite_layer=overwrite_layer,
-                              append_layer=append_layer,
-                              add_layer=TRUE)) 
-        }
-      }
+                    savedata_opts=list(outfolder=outfolder, 
+                    out_fmt=out_fmt, 
+                    out_dsn=out_dsn, 
+                    out_layer="xyplt",
+                    outfn.pre=outfn.pre, 
+                    outfn.date=outfn.date, 
+                    overwrite_layer=overwrite_layer,
+                    append_layer=append_layer,
+                    add_layer=TRUE)) 
+	    }
+      } 
     } else {
       datExportData(pltids, 
         savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-                              out_dsn=out_dsn, 
-                              out_layer="pltids",
-                              outfn.pre=outfn.pre, 
-                              outfn.date=outfn.date, 
-                              overwrite_layer=overwrite_layer,
-                              append_layer=append_layer,
-                              add_layer=TRUE)) 
-    }
-  } 
+                           out_fmt=out_fmt, 
+                           out_dsn=out_dsn, 
+                           out_layer="pltids",
+                           outfn.pre=outfn.pre, 
+                           outfn.date=outfn.date, 
+                           overwrite_layer=overwrite_layer,
+                           append_layer=append_layer,
+                           add_layer=TRUE)) 
+    } 
+  }
   
+  if (returnxy && !is.null(spxy)) {
+    returnlst$spxy <- spxy
+  }
+ 
   if (returndata) {
     returnlst$tabs <- tabs2save
     returnlst$tabIDs <- tabIDs
-    if (returnxy && !is.null(spxy)) {
-      returnlst$spxy <- spxy
-    }
     returnlst$pltids <- pltids
     #returnlst$clip_polyv <- bndx
 

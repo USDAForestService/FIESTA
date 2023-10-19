@@ -465,10 +465,12 @@ modGBpop <- function(popType = "VOL",
   saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
   
- 
   ## Check output
   ########################################################
   if (savedata) {
+    if (out_fmt == "sqlite" && is.null(out_dsn)) {
+	  out_dsn <- "GBpopdat.db"
+	}
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
                   out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
                   overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,

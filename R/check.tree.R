@@ -94,7 +94,6 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     estunitsn <- tdomdata$estunits
 
   } else {
- 
     suppressWarnings(
     treedata <- datSumTree(tree=treef, seed=seedf, cond=condf, plt=plt, 
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 

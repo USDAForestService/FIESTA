@@ -90,7 +90,6 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     pvars2keep <- c(pvars2keep, "NF_SAMPLING_STATUS_CD", "NF_PLOT_STATUS_CD")
   }
 
-
   ## Check unit.action
   ########################################################
   unit.actionlst <- c("keep", "remove", "combine")
@@ -108,8 +107,6 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   } else if (popType == "INV") {
     pvars2keep <- c(pvars2keep, "INVASIVE_SAMPLING_STATUS_CD", "INVASIVE_SPECIMEN_RULE_CD")
   }  
-
-
 
   ## Check strata, strvars
   ###################################################################################
@@ -165,6 +162,15 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     tablst <- DBI::dbListTables(dbconn)
     ppsanm=pltassgnqry <- NULL
 	
+	## Check name of plt
+	if (!is.null(plt)) {
+	  if (plt == "plot" && "plt" %in% tablst) {
+		plt <- "plt"
+	  } else if (plt == "plt" && "plot" %in% tablst) {
+		plt <- "plot"
+	  }
+	}
+	
     ## Filter for population data
 	if (is.data.frame(pltassgn)) {
       evalidnm <- findnm("EVALID", names(pltassgn), returnNULL = TRUE)
@@ -201,8 +207,8 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
           pjoinid <- pltassgnid
         } else {
           palias <- "p"
-          pfromqry <- suppressMessages(getpfromqry(popevalid, dsn=dsn, 
-				ppsanm=ppsanm, ppsaid=pltassgnid, pjoinid=pjoinid))
+          pfromqry <- getpfromqry(popevalid, dsn=dsn, ppsanm=ppsanm, 
+				ppsaid=pltassgnid, pjoinid=pjoinid, plotnm=plt, dbconn=dbconn)
         }
         whereqry <- paste0("where evalid in(", toString(evalid), ")")
         popwhereqry <- paste0("where evalid in(", toString(popevalid), ")")
@@ -210,23 +216,23 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       } else if (measCur) {
         palias <- "p"
         pfromqry <- getpfromqry(varCur="MEASYEAR", Endyr=measEndyr, dsn=dsn,
-		               plotnm=plt)
+		               plotnm=plt, dbconn=dbconn)
         pltassgnqry <- paste("select p.* from", pfromqry)
       } else if (!is.null(invyrs)) {
         palias <- "p"
-        pfromqry <- getpfromqry(invyrs=invyrs, dsn=dsn, plotnm=plt)
+        pfromqry <- getpfromqry(invyrs=invyrs, dsn=dsn, plotnm=plt, dbconn=dbconn)
         whereqry <- paste0("where invyrs in(", toString(invyrs), ")")
         pltassgnqry <- paste("select p.* from", pfromqry, whereqry)
       } else {
         whereqry <- NULL
         if (!is.null(ppsanm)) {
           palias <- "ppsa"
-          pfromqry <- paste0("plot p INNER JOIN ", ppsanm,
+          pfromqry <- paste0(plt, " p INNER JOIN ", ppsanm,
 			" ON(p.", pjoinid, " = ", ppsanm, ".", pltassgnid, ")")
         } else {
           palias <- "p"
           if (!is.null(plt) && is.character(plt) && plt %in% tablst) {
-            pfromqry <- "plot p"
+            pfromqry <- paste(plt, "p")
           } else {
             pfromqry <- NULL
           }
@@ -285,11 +291,11 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   ## Import tables
   ###################################################################################
   pltx <- pcheck.table(plt, tab_dsn=dsn, conn=dbconn, 
-           tabnm="plt", caption="plot table?",
-		nullcheck=nullcheck, tabqry=plotqry, returnsf=FALSE)
+                       tabnm="plt", caption="plot table?",
+		               nullcheck=nullcheck, tabqry=plotqry, returnsf=FALSE)
   pltassgnx <- pcheck.table(pltassgn, tab_dsn=dsn, conn=dbconn_pltassgn,
-           tabnm="pltassgn", caption="plot assignments?", 
-           nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE)
+                            tabnm="pltassgn", caption="plot assignments?", 
+                            nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE)
 
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
