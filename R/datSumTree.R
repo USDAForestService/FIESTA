@@ -724,11 +724,7 @@ datSumTree <- function(tree = NULL,
       tjoinid <- tuniqueid
       cjoinid <- cuniqueid  
     }
-print("XXXXX")
-print(tjoinid)
-print(cjoinid)
-print(head(treex))
-print(head(condx))
+
     if (!seedonly) {
       ## Check if class of tuniqueid matches class of cuniqueid
       tabs <- check.matchclass(treex, condx, tjoinid, cjoinid)
