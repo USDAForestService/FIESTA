@@ -566,17 +566,18 @@ modMAarea <- function(MApopdat,
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
   estunits <- sort(unique(cdomdat[[unitvar]]))
-
+  response <- estvar.name
+  
   masemethod <- ifelse(MAmethod == "PS", "postStrat", 
 	ifelse(MAmethod == "greg", "greg", 
 	ifelse(MAmethod == "gregEN", "gregElasticNet", 
 	ifelse(MAmethod == "ratio", "ratioEstimator", "horvitzThompson"))))
   message("generating estimates using mase::", masemethod, " function...\n")
-  
+
   if (MAmethod == "greg" && modelselect == T) {
     
     # want to do variable selection on plot level data...
-    pltlvl <- tdomdat[ , lapply(.SD, sum, na.rm = TRUE), 
+    pltlvl <- cdomdat[ , lapply(.SD, sum, na.rm = TRUE), 
                        by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames),
                        .SDcols=response]
     
