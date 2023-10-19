@@ -587,12 +587,11 @@ modMApop <- function(popType="VOL",
   ###################################################################################
   pltcheck <- check.popdataPLT(dsn=dsn, tabs=popTabs, tabIDs=popTabIDs, 
       pltassgn=pltassgn, pltassgnid=pltassgnid, pjoinid=pjoinid, 
-      module="MA", popType=popType, popevalid=popevalid, adj=adj, ACI=ACI, 
-      evalid=evalid, measCur=measCur, measEndyr=measEndyr, 
-      measEndyr.filter=measEndyr.filter, invyrs=invyrs, intensity=intensity,
-      nonsamp.pfilter=nonsamp.pfilter, unitarea=unitarea, areavar=areavar, 
-      unitvar=unitvar, unitvar2=unitvar2, areaunits=areaunits, 
-      unit.action=unit.action, prednames=prednames, predfac=predfac)
+      module="MA", popType=popType, popevalid=popevalid, adj=adj, 
+	  popFilter=popFilter, nonsamp.pfilter=nonsamp.pfilter, 
+	  unitarea=unitarea, areavar=areavar, unitvar=unitvar, 
+	  unitvar2=unitvar2, areaunits=areaunits, unit.action=unit.action, 
+      prednames=prednames, predfac=predfac)
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid

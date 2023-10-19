@@ -452,7 +452,7 @@ modGBtree <- function(GBpopdat,
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
-  
+ 
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
