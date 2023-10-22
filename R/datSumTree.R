@@ -480,18 +480,19 @@ datSumTree <- function(tree = NULL,
   }
   
   selectvars <- tsumuniqueid
+  tfilter <- RtoSQL(tfilter, x=treenames)
   if (!is.null(tfilter)) {
     if (!seedonly) {
 	  if (is.null(twhereqry)) {
-        twhereqry <- paste("WHERE", RtoSQL(tfilter, x=treenames))
+        twhereqry <- paste("WHERE", tfilter)
 	  } else {
-        twhereqry <- paste(twhereqry, "AND", RtoSQL(tfilter, x=treenames))
+        twhereqry <- paste(twhereqry, "AND", tfilter)
       }	  
     }
     if (addseed || seedonly) {
       sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
       if (!is.null(sfilter)) {
-        swhereqry <- paste("WHERE", RtoSQL(tfilter))
+        swhereqry <- paste("WHERE", tfilter)
       }
     }
 	if (woodland %in% c("N", "only")) {
@@ -526,7 +527,7 @@ datSumTree <- function(tree = NULL,
 #      warning("tsumvarlst does not have any variables that include woodland...")
 #    }
   } 
-  
+
   ## check seed table
   if (seedonly || addseed) {
     if (!any(tsumvarlst %in% c("TPA_UNADJ", "PLT_CN"))) {
@@ -580,7 +581,6 @@ datSumTree <- function(tree = NULL,
     }
   }
 
-
   ## CHECK getadjplot and adjtree
   ###########################################################  
   getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
@@ -626,11 +626,14 @@ datSumTree <- function(tree = NULL,
     if (!is.null(twhereqry)) {
       tree.qry <- paste(tree.qry, "\n", twhereqry)
     }
-    #message(tree.qry)
-    treex <- setDT(sqldf::sqldf(tree.qry, dbname=dbname))
-	
+    treex <- tryCatch(setDT(sqldf::sqldf(tree.qry, dbname=dbname)),
+			  	  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
 	if (nrow(treex) == 0) {
 	  message("no trees found")
+	  message(tree.qry)
 	  return(NULL)
 	}
     setkeyv(treex, tsumuniqueid)
@@ -642,10 +645,14 @@ datSumTree <- function(tree = NULL,
     if (!is.null(swhereqry)) {
       seed.qry <- paste(seed.qry, "\n", swhereqry)
     }
-    #message(seed.qry)
-    seedx <- setDT(sqldf::sqldf(seed.qry, dbname=dbname))
-    if (nrow(treex) == 0) {
+    seedx <- tryCatch(setDT(sqldf::sqldf(seed.qry, dbname=dbname)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    if (nrow(seedx) == 0) {
 	  message("no seedlings found")
+	  message(seed.qry)
 	  if (addseed) addseed <- FALSE
 	  if (seedonly) {
 	    return(NULL)
@@ -653,7 +660,6 @@ datSumTree <- function(tree = NULL,
 	}
     setkeyv(seedx, tsumuniqueid)
   }
-
 
   ## Check cond and plot tables
   ########################################################################
@@ -682,8 +688,7 @@ datSumTree <- function(tree = NULL,
       subpnames <- names(subplotx)
     }
   }
-
-
+ 
   ## Check if have correct data for adjusting plots
   ##########################################################################
   if (getadjplot) {
@@ -859,7 +864,6 @@ datSumTree <- function(tree = NULL,
     }
   }
 
-
   ## Check for NA values in necessary variables in all tables
   ###########################################################################
   if (checkNA && !seedonly) {
@@ -1015,7 +1019,6 @@ datSumTree <- function(tree = NULL,
   ### DO WORK
   ################################################################################ 
   ################################################################################  
-
   if (getadjplot) {
 
     if (bysubp) {
