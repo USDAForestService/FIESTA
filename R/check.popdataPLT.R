@@ -1,5 +1,5 @@
 check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid, 
-	pjoinid, module, popType, popevalid, adj, popFilter=popFilters(), 
+	pjoinid, module, popType, popevalid, adj, popFilter, 
 	nonsamp.pfilter=NULL, unitarea=NULL, areavar, unitvar, unitvar2=NULL, 
 	areaunits, unit.action="keep", removetext="unitarea", strata=FALSE, 
 	stratalut=NULL, strvar=NULL, stratcombine=TRUE, pivot=FALSE, nonresp=FALSE, 

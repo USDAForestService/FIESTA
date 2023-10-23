@@ -318,16 +318,17 @@ modWFpop <- function(popType = "VOL",
   }
   
   ## Set user-supplied popFilters values
+  popFilter2 <- popFilters_defaults_list
   if (length(popFilter) > 0) {
     for (i in 1:length(popFilter)) {
       if (names(popFilter)[[i]] %in% names(popFilters_defaults_list)) {
-        assign(names(popFilter)[[i]], popFilter[[i]])
+		popFilter2[[names(popFilter)[[i]]]] <- popFilter[[i]]
       } else {
         stop(paste("Invalid parameter: ", names(popFilter)[[i]]))
       }
     }
   }
-  
+   
   ## Set savedata defaults
   savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
@@ -470,14 +471,17 @@ modWFpop <- function(popType = "VOL",
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "CHNG", "GRM")
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
 		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
-  if (!is.null(evalid)) {
-    popevalid <- as.character(evalid)
+  if (!is.null(popFilter2$evalid)) {
+    popevalid <- as.character(popFilter2$evalid)
     substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
-		FIESTAutils::ref_popType[FIESTAutils::ref_popType$popType %in% popType, "EVAL_TYP_CD"]
-    evalid <- as.character(evalid)
-    substr(evalid, nchar(evalid)-1, nchar(evalid)) <- "01"
+		formatC(FIESTAutils::ref_popType[FIESTAutils::ref_popType$popType %in% popType, "EVAL_TYP_CD"], 
+		width=2, flag="0")
+    #evalid <- as.character(evalid)
+    #substr(evalid, nchar(evalid)-1, nchar(evalid)) <- "01"
   } 
-
+  if (popType %in% c("GROW", "MORT", "REMV")) {
+    popType <- "GRM"
+  }
  
   ###################################################################################
   ## Load data
@@ -626,7 +630,7 @@ modWFpop <- function(popType = "VOL",
   pltcheck <- check.popdataPLT(dsn=dsn, tabs=popTabs, tabIDs=popTabIDs, 
       pltassgn=pltassgn, pltassgnid=pltassgnid, pjoinid=pjoinid, 
       module="GB", popType=popType, popevalid=popevalid, adj=adj, 
-	  popFilter=popFilter, nonsamp.pfilter=nonsamp.pfilter, 
+	  popFilter=popFilter2, nonsamp.pfilter=nonsamp.pfilter, 
 	  unitarea=unitarea, areavar=areavar, unitvar=unitvar, 
 	  unitvar2=unitvar2, areaunits=areaunits, unit.action=unit.action, 
 	  strata=strata, stratalut=stratalut, strvar=strvar, pivot=pivot, 
