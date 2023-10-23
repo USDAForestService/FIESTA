@@ -373,8 +373,8 @@ modSApop <- function(popType="VOL",
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "CHNG", "GRM")
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
 		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
-  if (!is.null(popFilter2$evalid)) {
-    popevalid <- as.character(popFilter2$evalid)
+  popevalid <- as.character(popFilter2$evalid)
+  if (!is.null(popevalid)) {
     substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
 		formatC(FIESTAutils::ref_popType[FIESTAutils::ref_popType$popType %in% popType, "EVAL_TYP_CD"], 
 		width=2, flag="0")
