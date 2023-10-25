@@ -33,7 +33,7 @@ Imports:
     data.table,
     DBI,
     FIESTAutils (>= 1.1.8.9000),
-    gdalraster (>= 1.5.1),
+    gdalraster,
     grDevices,
     graphics,
     methods,
@@ -41,7 +41,7 @@ Imports:
     sf,
     sqldf,
     utils
-Remotes: USDAForestService/FIESTAutils, USDAForestService/gdalraster
+Remotes: USDAForestService/FIESTAutils
 Suggests: 
     knitr,
     geodata,
