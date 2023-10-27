@@ -77,10 +77,10 @@
 #' @param returnxy Logical. If TRUE, save xy coordinates to outfolder.
 #' @param returndata Logical. If TRUE, returns data objects.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
-#' @param savexy Logical. If TRUE, and savedata=TRUE, saves XY data to outfolder.
+#' @param savexy Logical. If TRUE, saves XY data to outfolder.
 #' @param savebnd Logical. If TRUE, and savedata=TRUE, saves bnd. If 
 #' out_fmt='sqlite', saves to a SpatiaLite database.
-#' @param exportsp Logical. If TRUE, and savedata=TRUE, saves xy data as 
+#' @param exportsp Logical. If TRUE, and savexy=TRUE, saves xy data as 
 #' spatial data. If FALSE, saves xy data as table.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. 
@@ -164,7 +164,7 @@ spGetPlots <- function(bnd = NULL,
                        clipxy = TRUE, 
                        pjoinid = NULL, 
                        showsteps = FALSE, 
-					   returnxy = FALSE,
+					   returnxy = TRUE,
                        returndata = TRUE,
                        savedata = FALSE,
 					   savexy = FALSE,
@@ -456,6 +456,11 @@ spGetPlots <- function(bnd = NULL,
 
     ## Check pltids
     pltids <- pcheck.table(pltids)
+
+    ## Check xyjoinid
+    xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
+	      checklst=names(pltids), gui=gui, caption="JoinID in pltids?", 
+		stopifnull=FALSE)
  
     if (!is.null(pltids)) {
       Endyr.filter <- check.logic(pltids, Endyr.filter)
@@ -463,7 +468,7 @@ spGetPlots <- function(bnd = NULL,
       ## Check xyjoinid
       xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 		checklst=names(pltids), gui=gui, caption="JoinID in pltids?",
- 		stopifnull=TRUE)  
+ 		stopifnull=TRUE)		
  
       ## Check stbnd.att
       stbnd.att <- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
@@ -1130,17 +1135,16 @@ spGetPlots <- function(bnd = NULL,
       }
 
       if (nrow(stpltids) > 0) {
-
         ## Subset data to stpltids
         plt <- PLOT[PLOT[[pjoinid]] %in% stpltids[[xyjoinid]],]
         if (nrow(plt) != nrow(stpltids)) {
           message("there are ", abs(nrow(plt) - nrow(stpltids)), 
 			" plots in ", state, " that do not match pltids")
           #spxy[!spxy[[xyjoinid]] %in% plt[[pjoinid]],] 
-          messagedf(stpltids[!stpltids[[xyjoinid]] %in% PLOT[[pjoinid]],])
+          messagedf(stpltids[[xyjoinid]][!stpltids[[xyjoinid]] %in% PLOT[[pjoinid]]])
         }
         pids <- plt[[puniqueid]]
-
+		
         ## Subset other tables in list
         stcliptabs$plt <- plt
         for (tabnm in names(tabs)[names(tabs) != "plt"]) {
@@ -1243,21 +1247,21 @@ spGetPlots <- function(bnd = NULL,
   if (savedata) {
     if (savebnd) {
       spExportSpatial(bndx, 
-                    savedata_opts=list(outfolder=outfolder, 
-                                       out_fmt=out_fmt, 
-                                       out_dsn=out_dsn, 
-                                       out_layer="bnd",
-                                       outfn.pre=outfn.pre, 
-                                       outfn.date=outfn.date, 
-                                       overwrite_layer=overwrite_layer,
-                                       append_layer=append_layer, 
-                                       add_layer=TRUE))   
+             savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="bnd",
+                                outfn.pre=outfn.pre, 
+                                outfn.date=outfn.date, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer, 
+                                add_layer=TRUE))   
     }
- 
-    if (savexy) {
-      if (!is.null(spxy)) {
-        if (exportsp) {
-          spExportSpatial(spxy,
+  }
+  if (savexy) {
+    if (!is.null(spxy)) {
+      if (exportsp) {
+        spExportSpatial(spxy,
              savedata_opts=list(outfolder=outfolder,
                               out_fmt=out_fmt,
                               out_dsn=out_dsn,
@@ -1267,8 +1271,8 @@ spGetPlots <- function(bnd = NULL,
                               overwrite_layer=overwrite_layer,
                               append_layer=append_layer,
                               add_layer=TRUE))
-        } else {
-          datExportData(sf::st_drop_geometry(spxy), 
+      } else {
+        datExportData(sf::st_drop_geometry(spxy), 
                     savedata_opts=list(outfolder=outfolder, 
                     out_fmt=out_fmt, 
                     out_dsn=out_dsn, 
@@ -1278,11 +1282,10 @@ spGetPlots <- function(bnd = NULL,
                     overwrite_layer=overwrite_layer,
                     append_layer=append_layer,
                     add_layer=TRUE)) 
-	    }
-      } 
+	  }
     } else {
       datExportData(pltids, 
-        savedata_opts=list(outfolder=outfolder, 
+          savedata_opts=list(outfolder=outfolder, 
                            out_fmt=out_fmt, 
                            out_dsn=out_dsn, 
                            out_layer="pltids",

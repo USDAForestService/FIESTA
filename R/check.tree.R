@@ -72,7 +72,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
 
 
   ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (NUMERATOR)
-  #####################################################################################
+  ###############################################################################
   if (bytdom) {
     pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
 
@@ -108,16 +108,16 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     estunitsn <- treedata$estunits
   }
 
-  ###################################################################################
+  #############################################################################
   ### GET ESTIMATION DATA (& TREE DOMAIN DATA) FROM TREE TABLE AND
   ### AGGREGATE TO CONDITION (DENOMINATOR)
-  ###################################################################################
+  #############################################################################
 
   if (ratiotype == "PERTREE") {
 
-    #################################################################################
+    ###########################################################################
     ### GETS ESTIMATION DATA (DENOMINATOR)
-    #################################################################################
+    ###########################################################################
 
     ## GET TREE ESTIMATION VARIABLE (DENOMINATOR) AND CHECK IF IN TREE DATA SET
     if (is.null(estvard))
@@ -133,7 +133,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
       stop("invalid estvard.name.. must be a string")
 
     ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (DENOMINATOR)
-    #################################################################################
+    ############################################################################
     if (bytdom) {
       pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
 

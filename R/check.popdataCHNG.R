@@ -1,11 +1,11 @@
-check.popdataCHNG <- function(tabs, tabIDs, popType=popType, 
-     pltassgnx, pltassgnid, pfromqry, palias, pjoinid, whereqry, 
-     adj, ACI, pltx=NULL, puniqueid="CN", dsn=NULL, dbconn=NULL, 
-     condid="CONDID", areawt="CONDPROP_UNADJ",
-     MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, diavar="DIA",
-     areawt_micr="MICRPROP_UNADJ", areawt_subp="SUBPPROP_UNADJ", 
-     areawt_macr="MACRPROP_UNADJ",
-     nonsamp.cfilter=NULL, nullcheck=FALSE, cvars2keep=NULL, gui=FALSE){
+check.popdataCHNG <- function(tabs, tabIDs, popType = popType, 
+     pltassgnx, pltassgnid, pfromqry, palias, pjoinid, whereqry, adj, ACI, 
+     pltx = NULL, puniqueid = "CN", dsn = NULL, dbconn = NULL, 
+     condid = "CONDID", areawt = "CONDPROP_UNADJ",
+     MICRO_BREAKPOINT_DIA = 5, MACRO_BREAKPOINT_DIA = NULL, diavar = "DIA",
+     areawt_micr = "MICRPROP_UNADJ", areawt_subp = "SUBPPROP_UNADJ", 
+     areawt_macr = "MACRPROP_UNADJ",
+     nonsamp.cfilter = NULL, nullcheck = FALSE, cvars2keep = NULL, gui = FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs for CHNG popType

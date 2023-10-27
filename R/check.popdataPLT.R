@@ -41,7 +41,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   STATECD=PLOT_STATUS_CD=PSTATUSCD=plotsampcnt=nfplotsampcnt=INVYR=
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=pfromqry=pltassgnqry=unitareaqry=stratalutqry=whereqry=palias=
-	P2POINTCNT=plt=dbconn_pltassgn <- NULL
+	P2POINTCNT=plt=dbconn_pltassgn=popwhereqry <- NULL
 
 
   ###################################################################################
@@ -171,8 +171,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 		plt <- "plot"
 	  }
 	}
-	evalid <- popFilter$evalid
-	invyrs <- popFilter$invyrs
+
 	if (!is.null(evalid)) {	
       ## Filter for population data
 	  if (is.data.frame(pltassgn)) {
@@ -209,7 +208,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
           pjoinid <- pltassgnid
         } else {
           palias <- "p"
-          pfromqry <- getpfromqry(popevalid, dsn=dsn, ppsanm=ppsanm, 
+          pfromqry <- getpfromqry(evalid=evalid, popevalid, ppsanm=ppsanm, 
 				ppsaid=pltassgnid, pjoinid=pjoinid, plotnm=plt, dbconn=dbconn)
         }
         whereqry <- paste0("where evalid in(", toString(evalid), ")")
@@ -269,7 +268,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       if (!is.null(evalid) && !is.null(evalidnm)) {
         unitareaqry <- paste(unitareaqry, "where", evalidnm, "in(", toString(popevalid), ")")
       }
-      unitarea <- pcheck.table(unitarea, tab_dsn=dsn, conn=dbconn,
+      unitarea <- pcheck.table(unitarea, conn=dbconn,
            tabnm="unitarea", caption="unitarea?",
 		    nullcheck=nullcheck, tabqry=unitareaqry, returnsf=FALSE)
     } 
@@ -283,7 +282,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       if (!is.null(evalid) && !is.null(evalidnm)) {
         stratalutqry <- paste(stratalutqry, "where", evalidnm, "in(", toString(popevalid), ")")
       }
-	  stratalut <- pcheck.table(stratalut, tab_dsn=dsn, conn=dbconn,
+	  stratalut <- pcheck.table(stratalut, conn=dbconn,
           tabnm="stratalut", caption="stratalut?",
 		  nullcheck=nullcheck, tabqry=stratalutqry, returnsf=FALSE)
     }
@@ -292,10 +291,10 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   ###################################################################################
   ## Import tables
   ###################################################################################
-  pltx <- pcheck.table(plt, tab_dsn=dsn, conn=dbconn, 
+  pltx <- pcheck.table(plt, conn=dbconn, 
                        tabnm="plt", caption="plot table?",
 		               nullcheck=nullcheck, tabqry=plotqry, returnsf=FALSE)
-  pltassgnx <- pcheck.table(pltassgn, tab_dsn=dsn, conn=dbconn_pltassgn,
+  pltassgnx <- pcheck.table(pltassgn, conn=dbconn_pltassgn,
                             tabnm="pltassgn", caption="plot assignments?", 
                             nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE)
 
@@ -323,7 +322,6 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
         }
         pltx <- pltx[!is.na(pltx[[puniqueid]]), ]
       }
-
       ## Set key
       setkeyv(pltx, puniqueid)
     }
@@ -345,6 +343,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
         pltassgnx <- datFilter(pltassgnx, getfilter("EVALID", popevalid, syntax="R"))$xf
         if (nrow(pltassgnx) == 0) {
           stop("evalid removed all records")
+		  return(NULL)
         }
       }
       if (any(duplicated(pltassgnx[[pltassgnid]]))) {
@@ -400,6 +399,14 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     }
   }
 
+  ## Check for duplicate plots
+  locvars <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
+  locvars <- locvars[locvars %in% names(pltx)] 
+  if (any(pltx[, duplicated(.SD), .SDcols=locvars]) & (!popType %in% c("GRM", "CHNG"))) {
+    warning("duplicated plot locations exist... invalid for estimation")
+	return(NULL)
+  }
+
   ##################################################################################
   ## Check filter(s) for population data
   ##################################################################################
@@ -426,7 +433,8 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 	       checklst=names(pltx), warn="INTENSITY variable not in plt")
     intensitymiss <- intensity[!all(intensity %in% unique(pltx[[intensitynm]]))]
     if (length(intensitymiss) > 0) {
-      stop("invalid intensity: ", toString(intensitymiss))
+      warning("invalid intensity: ", toString(intensitymiss))
+	  return(NULL)
     }
     intensity.filter <- getfilter(intensitynm, intensity)
     pltx <- datFilter(pltx, intensity.filter)$xf
@@ -438,7 +446,8 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 	       checklst=names(pltx), warn="INVYR variable not in plt")
     invyrsmiss <- invyrs[!all(invyrs %in% unique(pltx[[invyrsnm]]))]
     if (length(invyrsmiss) > 0) {
-      stop("invalid invyrs: ", toString(invyrsmiss))
+      warning("invalid invyrs: ", toString(invyrsmiss))
+	  return(NULL)
     }
     invyrs.filter <- getfilter(invyrsnm, invyrs)
     pltx <- datFilter(pltx, invyrs.filter)$xf
@@ -489,11 +498,13 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 
     if (any(prednames %in% pmissvars)) {
       prednames[which(!prednames %in% pmissvars)]
-      stop("predname not in tables: ", paste(prednames, collapse=", "))
+      warning("predname not in tables: ", paste(prednames, collapse=", "))
+	  return(NULL)
     }
     if (any(unitvars %in% pmissvars)) {
       unitvars[which(!unitvars %in% pmissvars)]
-      stop("unitvar not in tables: ", paste(unitvars, collapse=", "))
+      warning("unitvar not in tables: ", paste(unitvars, collapse=", "))
+	  return(NULL)
     }
   }
   #pdoms2keep <- unique(pdoms2keep[which(!pdoms2keep %in% pmissvars)])
@@ -601,7 +612,8 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     if (!is.null(ecol)) {
       unitarea <- unitarea[unitarea[[ecol]] %in% popevalid,]
       if (nrow(unitarea) == 0) {
-        stop("evalid in unitarea does not match popevalid")
+        warning("evalid in unitarea does not match popevalid")
+		return(NULL)
       }
     }
   }
@@ -617,7 +629,8 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       if (!is.null(ecol)) {
         stratalut <- stratalut[stratalut[[ecol]] %in% popevalid,]
         if (nrow(stratalut) == 0) {
-          stop("evalid in stratalut does not match evalid")
+          warning("evalid in stratalut does not match evalid")
+		  return(NULL)
         }
       }
     }
@@ -688,9 +701,9 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   pltx <- data.table(pltx[, unique(c(puniqueid, pdoms2keep, pvars2keep)), with=FALSE])
   setkeyv(pltx, puniqueid)
 
-  returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid, pltx=pltx, 
-           pfromqry=pfromqry, whereqry=whereqry, palias=palias, 
-           puniqueid=puniqueid, pjoinid=pjoinid, popevalid=popevalid, 
+  returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid, pltx=pltx,
+        pfromqry=pfromqry, whereqry=whereqry, popwhereqry=popwhereqry, 
+		puniqueid=puniqueid, pjoinid=pjoinid, popevalid=popevalid, palias=palias, 
 		unitvar=unitvar, unitarea=unitarea, unitvar2=unitvar2, areavar=areavar, 
 		areaunits=areaunits, unit.action=unit.action, ACI=ACI, 
  		P2POINTCNT=as.data.frame(P2POINTCNT), 
