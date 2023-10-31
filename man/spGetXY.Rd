@@ -10,7 +10,7 @@ spGetXY(
   bnd.filter = NULL,
   states = NULL,
   RS = NULL,
-  xy_datsource = "datamart",
+  xy_datsource,
   xy_dsn = NULL,
   xy = "PLOT",
   xy_opts = xy_options(),
@@ -23,6 +23,7 @@ spGetXY(
   invtype = "ANNUAL",
   intensity1 = FALSE,
   pvars2keep = NULL,
+  bndvars2keep = NULL,
   clipxy = TRUE,
   showsteps = FALSE,
   returnxy = TRUE,
@@ -92,7 +93,11 @@ be unique. If using most current XY coordinates, use identifier for a plot
 \item{intensity1}{Logical. If TRUE, includes only XY coordinates where 
 INTENSITY = 1 (FIA base grid).}
 
-\item{pvars2keep}{String vector. One or more variables in pltTab to append to output.}
+\item{pvars2keep}{String vector. One or more variables in plot table to 
+append to output.}
+
+\item{bndvars2keep}{String vector. One or more variables in bnd to 
+append to output.}
 
 \item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
 

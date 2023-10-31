@@ -332,22 +332,40 @@ datBarplot <- function(x,
       datxbp <- datxbp[match(as.character(x.order), datxbp[[xvar]]),]    
     }
   }
-
+print("TEST")
+print(ylim)
+print(datxbp)
+print(yvar)
+save(datxbp, file="E:/workspace/erinB/NEPA_carbon/datxbp.rda")
   ## ylim
   ######################
   if (is.null(ylim)) {
     ## Set minimum ylim
-    ylim.min <- ifelse(min(datxbp[,yvar, with=FALSE]) < 0, min(datxbp[,yvar, with=FALSE]), 0)
+    if (all(is.na(datxbp[,yvar, with = FALSE]))) {
+      ylim.min <- min(datxbp[,xvar, with=FALSE], na.rm=TRUE)
+	} else {  
+      ylim.min <- ifelse(min(datxbp[,yvar, with=FALSE], na.rm=TRUE) < 0, 
+							min(datxbp[,yvar, with=FALSE], na.rm=TRUE), 0)
+    }
 
     ## Set maximum ylim  
     if (errbars) {
-      ylim.max <- max(1.04 * (datxbp[,yvar, with=FALSE] + datxbp[,sevar, with=FALSE]),
- 			na.rm=TRUE)
+      ylim.max <- max(1.04 * 
+			datxbp[,yvar, with=FALSE] + datxbp[,sevar, with=FALSE], na.rm=TRUE)
     } else {
-      ylim.max <- max(datxbp[,yvar, with=FALSE])
+	  if (all(is.na(datxbp[,yvar, with=FALSE]))) {
+	    ylim.max <- 0
+	  } else {
+        ylim.max <- max(datxbp[,yvar, with=FALSE], na.rm=TRUE)
+	  }
     }
+	## Not sure how to handle this (when est.se = NaN) ... set to 0 for now
+	if (ylim.min == "-Inf") ylim.min <- 0
+	if (ylim.max == "-Inf") ylim.max <- 0
     ylim <- c(ylim.min, ylim.max)
-
+	if (any(ylim == "-Inf")) {
+	  print("YES")
+	}
   } else {
     if (length(ylim) != 2) {
       stop("ylim must be format c(min,max)")

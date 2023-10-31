@@ -682,6 +682,10 @@ modSApop <- function(popType="VOL",
         stop("must include smallbnd.domain for smallbnd")
       }
     } 
+    ## Check for AOI column
+	if (!"AOI" %in% names(smallbnd)) {
+	  smallbnd$AOI <- 1
+	}
     returnlst$smallbnd <- smallbnd
     returnlst$smallbnd.domain <- smallbnd.domain
   }

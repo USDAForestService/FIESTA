@@ -69,7 +69,10 @@
 #' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
 #' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
 #' INTENSITY = 1 (FIA base grid).
-#' @param pvars2keep String vector. One or more variables in pltTab to append to output.
+#' @param pvars2keep String vector. One or more variables in plot table to 
+#' append to output.
+#' @param bndvars2keep String vector. One or more variables in bnd to 
+#' append to output.
 #' @param clipxy Logical. If TRUE, clips xy data to bnd.
 #' @param showsteps Logical. If TRUE, display data in device window.
 #' @param returnxy Logical. If TRUE, returns XY coordinates.
@@ -130,7 +133,7 @@ spGetXY <- function(bnd,
                     bnd.filter = NULL, 
                     states = NULL, 
                     RS = NULL, 
-                    xy_datsource = "datamart", 
+                    xy_datsource, 
                     xy_dsn = NULL, 
                     xy = "PLOT",
                     xy_opts = xy_options(),
@@ -143,6 +146,7 @@ spGetXY <- function(bnd,
                     invtype = "ANNUAL", 
                     intensity1 = FALSE, 
                     pvars2keep = NULL, 
+					bndvars2keep = NULL,
                     clipxy = TRUE, 
                     showsteps = FALSE, 
                     returnxy = TRUE, 
@@ -315,6 +319,19 @@ spGetXY <- function(bnd,
   } else {
     clipxy <- FALSE
   }
+  
+  ## Check bndvars2keep
+  if (!is.null(bndvars2keep)) {
+    bndvars.miss <- bndvars2keep[!bndvars2keep %in% names(bndx)]
+	if (length(bndvars.miss) > 0) {
+	  message("bndvars2keep not in bnd: ", toString(bndvars.miss))
+	  if (length(bndvars.miss) == length(bndvars2keep)) {
+	    bndvars2keep <- NULL
+	  } else {
+	    bndvars2keep <- bndvars2keep[!bndvars2keep %in% bndvars.miss]
+	  }
+	}
+  }
 
   ## Check Endyr.filter
   #############################################################################
@@ -396,7 +413,6 @@ spGetXY <- function(bnd,
     } else {
       stcds <- ref_statecd$VALUE[ref_statecd$MEANING %in% statedat$states]
     }
-    message("boundary intersected states: ", toString(statenames))
   } else {
     stop("must include bndx or states")
   }
@@ -408,7 +424,7 @@ spGetXY <- function(bnd,
     spxy <- xy
 
   } else if (xy_datsource == "gdb") {
-    stop("cannot write to geodatabases")
+    stop("cannot read from to geodatabases")
 #
 #    ## Check for data tables in database
 #    ###########################################################
@@ -445,6 +461,7 @@ spGetXY <- function(bnd,
                      pjoinid = pjoinid,
                      invtype = invtype,
                      intensity1 = intensity1,
+					 pvars2keep = pvars2keep,
                      issp = TRUE)
     if (is.null(xydat)) {
       return(NULL)
@@ -486,7 +503,7 @@ spGetXY <- function(bnd,
       plot(sf::st_geometry(spxy), add=TRUE, col="blue")
     }
   } 
- 
+  
   ## Add a STATECD variable to spxy if not already there
   stunitco.names <- c("STATECD", "UNITCD", "COUNTYCD", "COUNTYFIPS")
   statevars <- stunitco.names[!stunitco.names %in% names(spxy)]
@@ -501,6 +518,15 @@ spGetXY <- function(bnd,
     prjdat <- crsCompare(spxy, bndx) 
     spxy <- prjdat$x
   }
+  
+  ## Add bndvars2keep variable to spxy if not already there
+  if (!is.null(bndvars2keep)) {
+    spxy <- spExtractPoly(spxy, 
+                          xy.uniqueid = xy.uniqueid, 
+                          polyvlst = bndx, 
+                          polyvarlst = bndvars2keep)$spxyext
+  }
+
 
   ## Subset columns of spxy
   #spxy <- spxy[, unique(c(xy.uniqueid, xyjoinid, stunitco.names))]

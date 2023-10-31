@@ -297,10 +297,10 @@ modMAtree <- function(MApopdat,
                       modelselect_bydomain = FALSE,
                       ...){
 
-  ########################################################################################
+  ##################################################################################
   ## DESCRIPTION: 
   ## Generates model-assisted estimates by domain (and estimation unit)
-  ######################################################################################
+  ##################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0 && is.null(MApopdat)) {
@@ -576,9 +576,9 @@ modMAtree <- function(MApopdat,
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
 
-  #####################################################################################
+  #################################################################################
   ### GET ESTIMATION DATA FROM TREE TABLE
-  #####################################################################################
+  #################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed, 
                   bycond=TRUE, condf=condf, bytdom=bytdom, 
@@ -616,9 +616,9 @@ modMAtree <- function(MApopdat,
   tdomvarlst <- treedat$tdomvarlst
   estunits <- treedat$estunits
 
-  #####################################################################################
+  #################################################################################
   ### GET TITLES FOR OUTPUT TABLES
-  #####################################################################################
+  #################################################################################
   alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
                       sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
                       title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
@@ -644,9 +644,9 @@ modMAtree <- function(MApopdat,
   ## Append name of package and method to outfile name
   outfn.estpse <- paste0(outfn.estpse, "_modMA_mase", "_", MAmethod) 
 
-  #####################################################################################
+  #################################################################################
   ## GENERATE ESTIMATES
-  #####################################################################################
+  #################################################################################
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(((rowvar == "TOTAL" || length(unique(tdomdat[[rowvar]])) > 1) ||
 		(!is.null(tdomvarlst) && length(tdomvarlst) > 1)), TRUE, FALSE)
@@ -686,9 +686,7 @@ modMAtree <- function(MApopdat,
       prednames <- preds.selected 
       message(paste0("Predictors ", "[", paste0(prednames, collapse = ", "), "]", " were chosen in model selection.\n"))
       
-    }
-    
-    
+    }  
   }
   
   if (!MAmethod %in% c("HT", "PS")) {
@@ -787,9 +785,9 @@ modMAtree <- function(MApopdat,
     }
   }
 
-  ###################################################################################
+  ###############################################################################
   ## Check add0 and Add area
-  ###################################################################################
+  ###############################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit_rowest)) {
     unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
@@ -858,9 +856,9 @@ modMAtree <- function(MApopdat,
     setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
  
-  ###################################################################################
+  ###############################################################################
   ## GENERATE OUTPUT TABLES
-  ###################################################################################
+  ###############################################################################
   message("getting output...")
   estnm <- "est"
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 

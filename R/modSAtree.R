@@ -791,6 +791,7 @@ modSAtree <- function(SApopdatlst = NULL,
       dunitlut$AOI <- 1
     }
 
+## Testing
 #dunitlut <- data.table(SApopdat$dunitlut)
 #dat=tdomdattot
 #largebnd.val=largebnd.vals
@@ -886,17 +887,20 @@ modSAtree <- function(SApopdatlst = NULL,
 #dat=tdomdatsum
 #largebnd.val=largebnd.vals
 #domain=rowcolinfo$rowvar
-#largebnd.unique=lunique
+#largebnd.unique="LARGEBND"
  
       dunit_rowestlst <- 
 		tryCatch(
 			lapply(largebnd.vals, SAest.large, 
-				dat=tdomdatsum, cuniqueid=cuniqueid, 
-				largebnd.unique=largebnd.unique, dunitlut=dunitlut, dunitvar="DOMAIN",
+				dat=tdomdatsum, 
+				cuniqueid=cuniqueid, largebnd.unique=largebnd.unique, 
+				dunitlut=dunitlut, dunitvar="DOMAIN",
 				prednames=prednames, domain=rowcolinfo$rowvar,
-				response=response, showsteps=showsteps, savesteps=savesteps,
-				stepfolder=stepfolder, prior=prior, modelselect=modelselect,
-				multest=multest, SApackage=SApackage, SAmethod=SAmethod),
+				response=response, 
+				showsteps=showsteps, savesteps=savesteps,
+				stepfolder=stepfolder, prior=prior, 
+				modelselect=modelselect, multest=multest, 
+				SApackage=SApackage, SAmethod=SAmethod),
      	 	error=function(e) {
 			message("error with estimates of ", response, " by ", rowvar, "...")
 			message(e, "\n")
@@ -957,6 +961,11 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Combine estimates
   estdf <- do.call(rbind, estlst)
 
+  ## Check for AOI column
+  if (!"AOI" %in% names(estdf)) {
+    estdf$AOI <- 1
+  }	
+
   if (multest || SAmethod == "unit") {
     predselect.unitdf <- data.frame(DOMAIN=names(predselectlst.unit), 
 					do.call(rbind, predselectlst.unit))
@@ -979,11 +988,11 @@ modSAtree <- function(SApopdatlst = NULL,
     #estdf$AOI <- NULL
 
   } else if (addSAdomsdf && !is.null(SAdomvars)) {
-    SAdomvars <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
-    SAdomvars <- unique(SAdomvars[!SAdomvars %in% names(estdf)])
-    
-    if (length(SAdomvars) == 0) stop("invalid SAdomvars")
-    estdf <- merge(setDF(SAdomsdfbind)[, unique(c("DOMAIN", SAdomvars))], 
+    SAdomvars2 <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
+    SAdomvars2 <- unique(SAdomvars2[!SAdomvars2 %in% names(estdf)])
+ 
+    if (length(SAdomvars2) != 0) 
+    estdf <- merge(setDF(SAdomsdfbind)[, unique(c("DOMAIN", SAdomvars2))], 
 					estdf, by="DOMAIN")
     estdf <- estdf[order(-estdf$AOI, estdf[["DOMAIN"]]),]
   } else {
@@ -994,6 +1003,11 @@ modSAtree <- function(SApopdatlst = NULL,
 
     ## Combine estimates
     estdf_row <- do.call(rbind, estlst_row)
+
+    ## Check for AOI column
+    if (!"AOI" %in% names(estdf)) {
+      estdf_row$AOI <- 1
+    }	
 
     if (multest || SAmethod == "unit") {
       predselect.unitdf_row <- data.frame(DOMAIN=names(predselectlst.unit_row), 
@@ -1011,7 +1025,8 @@ modSAtree <- function(SApopdatlst = NULL,
     ## Merge SAdom attributes to estdf_row
     if (addSAdomsdf && is.null(SAdomvars)) {
       SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% names(estdf_row)])
-      estdf_row <- merge(setDF(SAdomsdfbind)[, c("DOMAIN", SAdomvars2)], estdf_row, by="DOMAIN")
+      estdf_row <- merge(setDF(SAdomsdfbind)[, c("DOMAIN", SAdomvars2)], 
+					estdf_row, by="DOMAIN")
       estdf_row <- estdf_row[order(-estdf_row$AOI, estdf_row[["DOMAIN"]]),]
 
     } else if (addSAdomsdf && !is.null(SAdomvars)) {
@@ -1026,7 +1041,7 @@ modSAtree <- function(SApopdatlst = NULL,
       estdf_row <- estdf_row[order(-estdf_row$AOI, estdf_row[["DOMAIN"]]),]
     }
   }
-
+ 
   ## Define nhat
   ##################################
   if (SAmethod == "unit") {
@@ -1118,17 +1133,22 @@ modSAtree <- function(SApopdatlst = NULL,
 
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, 
-                     unique(c("DOMAIN", rowcolinfo$rowvar, "nhat", "nhat.se", "NBRPLT.gt0", "estimator")),
+                     unique(c("DOMAIN", rowcolinfo$rowvar, 
+					 "nhat", "nhat.se", "NBRPLT.gt0", "estimator")),
  				with=FALSE]
     setkeyv(dunit_rowest, "DOMAIN")
-  
-    ## Merge dunitarea
-    tabs <- check.matchclass(dunitareabind, dunit_rowest, "DOMAIN")
-    dunitareabind <- tabs$tab1
-    dunit_rowest <- tabs$tab2
-    dunit_rowest <- merge(dunit_rowest, 
-                        dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
-  
+	
+    ###############################################################################
+    ## Check add0 and Add area
+    ###############################################################################
+    if (!is.null(dunit_rowest)) {
+      dunit_rowest <- add0unit(x=dunit_rowest, xvar=rowcolinfo$rowvar, uniquex=uniquerow, 
+		       unitvar=dunitvar, xvar.add0=row.add0)
+      tabs <- check.matchclass(dunitareabind, dunit_rowest, dunitvar)
+      dunitareabind <- tabs$tab1
+      dunit_rowest <- tabs$tab2
+	}
+    
     if (!is.null(dunit_rowest)) {
       dunit_rowest[, nhat.var := nhat.se^2]
 
@@ -1170,7 +1190,6 @@ modSAtree <- function(SApopdatlst = NULL,
   } 
   ## Append name of package and method to outfile name
   outfn.estpse2 <- paste0(outfn.estpse, "_modSA_", SApackage, "_", SAmethod) 
-
 
   ###################################################################################
   ## GENERATE OUTPUT TABLES

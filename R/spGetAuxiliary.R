@@ -348,7 +348,12 @@ spGetAuxiliary <- function(xyplt = NULL,
     ## Check unit_layer
     unit_layerx <- pcheck.spatial(layer=unit_layer, dsn=unit_dsn, gui=gui, 
 		caption="Domain spatial polygons?", stopifnull=TRUE)
- 
+		
+    ## Remove empty geometries
+ 	if (sum(sf::st_is_empty(unit_layerx)) > 0) {
+	  unit_layerx <- unit_layerx[!sf::st_is_empty(unit_layerx),]
+	}
+
     ## Check unitvar
     unitvar <- pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
 		checklst=names(unit_layerx), caption="Domain variable", 
@@ -733,7 +738,7 @@ spGetAuxiliary <- function(xyplt = NULL,
 			return(NULL) })
         if (is.null(zonaldat.rast.cont)) {
           badrast <- c(badrast, i)
-          message("\nerror when calculating zonal statistics for ", rastnm)
+          message("\nerror when calculating zonal statistics for ", rastnm, "\n")
           break
         }
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
@@ -762,7 +767,7 @@ spGetAuxiliary <- function(xyplt = NULL,
      	 	error=function(e) {
 			return(NULL) })
         if (is.null(zonaldat.rast.cont)) {
-          message("\nerror when calculating zonal statistics for ", rastnm)
+          message("\nerror when calculating zonal statistics for ", rastnm, "\n")
           badrast <- c(badrast, i)
           break
         }

@@ -36,6 +36,12 @@
 #' @param grm_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Tree growth, removal, mortality data 
 #' (TREE_GRM_COMPONENT). 
+#' @param grmb_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Tree growth, removal, mortality begin data 
+#' (TREE_GRM_BEGIN). 
+#' @param grmm_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Tree growth, removal, mortality midpoint data 
+#' (TREE_GRM_MIDPT). 
 #' @param survey_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Population survey (SURVEY) data. 
 #' @param popeval_layer R object, comma-delimited file(*.csv), or name of
@@ -79,6 +85,8 @@ dbTables <- function(plot_layer = "PLOT",
                      dwm_layer = "COND_DWM_CALC",
                      sccm_layer = "SUBP_COND_CHNG_MTRX",
                      grm_layer = "TREE_GRM_COMPONENT",
+					 grmb_layer = "TREE_GRM_BEGIN",
+					 grmm_layer = "TREE_GRM_MIDPT",
                      survey_layer = "SURVEY",
                      popeval_layer = "POP_EVAL",
                      popevalgrp_layer = "POP_EVAL_GRP",

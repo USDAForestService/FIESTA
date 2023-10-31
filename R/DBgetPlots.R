@@ -1280,6 +1280,7 @@ DBgetPlots <- function (states = NULL,
 		p2veg_subplot_sppx=p2veg_subp_structurex=invasive_subplot_sppx=
 		subpx=subpcx=cond_dwm_calcx=sccmx=
 		ppsax=spconddatx=cond_chngx <- NULL   
+    nochngdata <- FALSE
 
     if (!is.null(othertables)) {
       for (j in 1:length(othertables)) {
@@ -1831,7 +1832,6 @@ DBgetPlots <- function (states = NULL,
 			        na.rm=TRUE), 2)), by="PLT_CN"]
           setnames(ccRMRSplt, c("PLT_CN", "CCRMRSPLT"))
           pltx <- ccRMRSplt[pltx]
-
           pltvarlst2 <- c(pltvarlst2, "CCRMRSPLT")
         }
         ## CCPLT: plot level canopy cover variable based on CRCOV
@@ -1935,13 +1935,13 @@ DBgetPlots <- function (states = NULL,
       } else {
         message("no previous plots exist for this dataset")
       }
-      ischng <- FALSE
+      nochngdata <- TRUE
     }
 
     ###############################################################
     ## Get unioned change tables 
     ###############################################################
-    if (all(ischng, !is.null(pltx))) {
+    if (all(ischng, !nochngdata, !is.null(pltx))) {
      
       pcvarsa <- toString(c(paste0("p.", pltvarlst), paste0("c.", condvarlst)))
       pcvarsb <- toString(c(paste0("pplot.", pltvarlst), paste0("pcond.", condvarlst)))
@@ -2216,7 +2216,7 @@ DBgetPlots <- function (states = NULL,
             savedata_opts = list(outfolder = outfolder, 
                                    out_fmt = out_fmt, 
                                    out_dsn = out_dsn, 
-                                   out_layer = "pltu",
+                                   out_layer = "plotu",
                                    outfn.pre = outfn.pre, 
                                    overwrite_layer = overwrite_layer,
                                    append_layer = append_layer,
@@ -2299,7 +2299,7 @@ DBgetPlots <- function (states = NULL,
 												AND sccm.CONDID = c.CONDID 
 												AND sccm.PREVCOND = pcond.CONDID)")
 
-        sccm.qry <- paste("select distinct", toString(paste0("sccm.", sccmvars)), 
+        sccm.qry <- paste("select", sccmvars, 
 		                  " \nfrom", sccmfromqry, 
                           " \nwhere", paste0(evalFilter.grm, stateFilters))
 
@@ -2315,7 +2315,9 @@ DBgetPlots <- function (states = NULL,
                     message("SUBP_COND_CHNG_MTRX query is invalid")
                     return(NULL) })
         }
-
+        if (is.null(sccmx)) {
+		  message(sccm.qry)
+		}
         if (!is.null(sccmx) && nrow(sccmx) != 0) {
 	  	  if (!"subp_cond_chng_mtrx" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$subp_cond_chng_mtrx <- sccm.qry
@@ -2575,7 +2577,7 @@ DBgetPlots <- function (states = NULL,
 		  ##############################################################
           ## Tree unioned data
           ##############################################################
-		  if (isgrm && !is.null(treex)) {
+		  if (all(isgrm, !nochngdata, !is.null(treex))) {
 		
 		    ttvarsa <- ttvars
 		    ttvarsb <- gsub("t.", "ptree.", ttvars)
@@ -2742,12 +2744,35 @@ DBgetPlots <- function (states = NULL,
                 ## Get TREE_GRM_COMPONENT fields
                 grmflds <- DBI::dbListFields(dbconn, grmnm)
               }
+			  grmbnm <- chkdbtab(dbtablst, grmb_layer)
+              if (!is.null(grmbnm)) {
+                ## Get TREE_GRM_BEGIN fields
+                grmbflds <- DBI::dbListFields(dbconn, grmbnm)
+              }
+			  grmmnm <- chkdbtab(dbtablst, grmm_layer)
+              if (!is.null(grmmnm)) {
+                ## Get TREE_GRM_MIDPT fields
+                grmmflds <- DBI::dbListFields(dbconn, grmmnm)
+              }
+
             } else if (datsource == "datamart") {
               TREE_GRM_COMPONENT <- DBgetCSV("TREE_GRM_COMPONENT", stabbr, 
 		            returnDT=TRUE, stopifnull=FALSE)
               if (!is.null(TREE_GRM_COMPONENT)) {
                 grmnm <- "TREE_GRM_COMPONENT"
                 grmflds <- names(TREE_GRM_COMPONENT)
+              }
+              TREE_GRM_BEGIN <- DBgetCSV("TREE_GRM_BEGIN", stabbr, 
+		            returnDT=TRUE, stopifnull=FALSE)
+              if (!is.null(TREE_GRM_BEGIN)) {
+                grmbnm <- "TREE_GRM_BEGIN"
+                grmbflds <- names(TREE_GRM_BEGIN)
+              }
+              TREE_GRM_MIDPT <- DBgetCSV("TREE_GRM_MIDPT", stabbr, 
+		            returnDT=TRUE, stopifnull=FALSE)
+              if (!is.null(TREE_GRM_MIDPT)) {
+                grmmnm <- "TREE_GRM_MIDPT"
+                grmmflds <- names(TREE_GRM_MIDPT)
               }
             } else if (datsource %in% c("csv", "obj")) {
               TREE_GRM_COMPONENT <- pcheck.table(grm_layer, 
@@ -2757,10 +2782,24 @@ DBgetPlots <- function (states = NULL,
                 names(TREE_GRM_COMPONENT) <- toupper(names(TREE_GRM_COMPONENT))
                 grmflds <- names(TREE_GRM_COMPONENT)
               }
+              TREE_GRM_BEGIN <- pcheck.table(grmb_layer, 
+					stopifnull=TRUE, stopifinvalid=TRUE)
+              if (!is.null(TREE_GRM_BEGIN)) {
+                grmbnm <- "TREE_GRM_BEGIN"
+                names(TREE_GRM_BEGIN) <- toupper(names(TREE_GRM_BEGIN))
+                grmbflds <- names(TREE_GRM_BEGIN)
+              }
+              TREE_GRM_MIDPT <- pcheck.table(grmm_layer, 
+					stopifnull=TRUE, stopifinvalid=TRUE)
+              if (!is.null(TREE_GRM_MIDPT)) {
+                grmmnm <- "TREE_GRM_MIDPT"
+                names(TREE_GRM_MIDPT) <- toupper(names(TREE_GRM_MIDPT))
+                grmmflds <- names(TREE_GRM_MIDPT)
+              }
             }
 
             if (is.null(grmnm)) {
-              grmx <- NULL
+              grmx=grmbx=grmmx <- NULL
               #isgrm <- NULL
             } else {
 
@@ -2829,15 +2868,19 @@ DBgetPlots <- function (states = NULL,
                   # gc()  
                 } 
               }
+			  if (datsource == "datamart") {
+                if (exists("TREE_GRM_COMPONENT")) rm(TREE_GRM_COMPONENT)
+                # gc()
+              }
 		
 		      ## TREE_GRM_BEGIN
 	          #######################################################################
 
               ## Create query for TREE_GRM_BEGIN
               grmbfromqry <- paste0(pfromqry, " JOIN ", SCHEMA.,
-				grmnm, " grm ON (grm.PLT_CN = p.", puniqueid, ")")
+				grmbnm, " grmb ON (grmb.PLT_CN = p.", puniqueid, ")")
 
-              grmb.qry <- paste("select distinct grm.* \nfrom", grmbfromqry, 
+              grmb.qry <- paste("select distinct grmb.* \nfrom", grmbfromqry, 
 		                "\nwhere", paste0(evalFilter.grm, stateFilters))
 
 	          ## Query SQLite database or R object
@@ -2867,43 +2910,113 @@ DBgetPlots <- function (states = NULL,
                 grmbx <- grmbx[treeux$CN,]
 
                 if (returndata) {
-		  	      if ("tree_grm_component" %in% names(tabs)) {
-                    tabs$tree_grm_component <- rbind(tabs$tree_grm_component, 
-						data.frame(grmx))
+		  	      if ("tree_grm_begin" %in% names(tabs)) {
+                    tabs$tree_grm_begin <- rbind(tabs$tree_grm_begin, 
+						data.frame(grmbx))
 	              } else {
-	                tabs$tree_grm_component <- data.frame(grmx)
+	                tabs$tree_grm_begin <- data.frame(grmbx)
 	              }
- 	              if (!"tree_grm_component" %in% names(tabIDs)) {
-                    tabIDs$tree_grm_component <- "PLT_CN"
+ 	              if (!"tree_grm_begin" %in% names(tabIDs)) {
+                    tabIDs$tree_grm_begin <- "PLT_CN"
 	              }
                 }
                 if (savedata) {
                   index.unique.grmx <- NULL
                   if (!append_layer) index.unique.grmx <- c("TRE_CN")
-                  datExportData(grmx, 
+                  datExportData(grmbx, 
                       index.unique = index.unique.grmx,
                       savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
-                                out_layer="tree_grm_component",
+                                out_layer="tree_grm_begin",
                                 outfn.pre=outfn.pre, 
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE))
-                  rm(grmx)
+                  rm(grmbx)
+                  # gc()  
+                }
+                if (datsource == "datamart") {
+                  if (exists("TREE_GRM_BEGIN")) rm(TREE_GRM_BEGIN)
+                  # gc()
+                }				
+              }
+            
+		      ## TREE_GRM_MIDPT
+	          #######################################################################
+
+              ## Create query for TREE_GRM_MIDPT
+              grmmfromqry <- paste0(pfromqry, " JOIN ", SCHEMA.,
+				grmmnm, " grmm ON (grmm.PLT_CN = p.", puniqueid, ")")
+
+              grmm.qry <- paste("select distinct grmm.* \nfrom", grmmfromqry, 
+		                "\nwhere", paste0(evalFilter.grm, stateFilters))
+
+	          ## Query SQLite database or R object
+              if (datsource == "sqlite") {
+                grmmx <- tryCatch( DBI::dbGetQuery(dbconn, grmm.qry),
+			      error=function(e) {
+                    message("TREE_GRM_MIDPT query is invalid")
+                    return(NULL) })
+
+              } else {
+                grmmx <- tryCatch( sqldf::sqldf(grmm.qry, stringsAsFactors=FALSE),
+			      error=function(e) {
+                    message("TREE_GRM_MIDPT query is invalid")
+                    return(NULL) })
+              }
+              if (!is.null(grmmx) && nrow(grmmx) != 0) {
+	  	        if (!"tree_grm_midpt" %in% names(dbqueries[[state]])) {
+                  dbqueries[[state]]$tree_grm_midpt <- grmm.qry
+	            }
+
+                grmmx <- setDT(grmmx)
+                grmmx[, PLT_CN := as.character(PLT_CN)]
+                grmmx[, TRE_CN := as.character(TRE_CN)]
+                setkey(grmmx, TRE_CN)
+
+                ## Subset overall filters from condx
+                grmmx <- grmmx[treeux$CN,]
+
+                if (returndata) {
+		  	      if ("tree_grm_midpt" %in% names(tabs)) {
+                    tabs$tree_grm_midpt <- rbind(tabs$tree_grm_midpt, 
+						data.frame(grmmx))
+	              } else {
+	                tabs$tree_grm_midpt <- data.frame(grmmx)
+	              }
+ 	              if (!"tree_grm_midpt" %in% names(tabIDs)) {
+                    tabIDs$tree_grm_midpt <- "PLT_CN"
+	              }
+                }
+                if (savedata) {
+                  index.unique.grmx <- NULL
+                  if (!append_layer) index.unique.grmx <- c("TRE_CN")
+                  datExportData(grmmx, 
+                      index.unique = index.unique.grmx,
+                      savedata_opts = list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="tree_grm_midpt",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE))
+                  rm(grmmx)
                   # gc()  
                 } 
               }
-            }
-            if (datsource == "datamart") {
-              if (exists("TREE_GRM_COMPONENT")) rm(TREE_GRM_COMPONENT)
-              # gc()
+			  if (datsource == "datamart") {
+                if (exists("TREE_GRM_MIDPT")) rm(TREE_GRM_MIDPT)
+                # gc()
+              }
             }
           }
           if (datsource == "datamart") {
             rm(TREE)
-            # gc()
+            gc()
           }
         }
 	  }
@@ -4184,7 +4297,7 @@ DBgetPlots <- function (states = NULL,
                                    append_layer = append_layer,
                                    outfn.date = outfn.date, 
                                    add_layer = TRUE))
-        rm(pltx)
+        #rm(pltx)
         # gc() 
       }
       if (savedata && !is.null(condx)) {
@@ -4203,7 +4316,7 @@ DBgetPlots <- function (states = NULL,
                                    append_layer = append_layer,
                                    outfn.date = outfn.date, 
                                    add_layer = TRUE)) 
-        rm(condx)
+        #rm(condx)
         # gc()
       }  
       if (savedata && savePOP && !is.null(ppsax)) {
@@ -4226,7 +4339,7 @@ DBgetPlots <- function (states = NULL,
       }
     }
     rm(pltcondx)
-    # gc()
+    gc()
 
     if (datsource == "datamart" && datamartType == "SQLITE") {
       DBI::dbDisconnect(dbconn)

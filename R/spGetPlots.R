@@ -164,7 +164,7 @@ spGetPlots <- function(bnd = NULL,
                        clipxy = TRUE, 
                        pjoinid = NULL, 
                        showsteps = FALSE, 
-					   returnxy = TRUE,
+					   returnxy = FALSE,
                        returndata = TRUE,
                        savedata = FALSE,
 					   savexy = FALSE,
@@ -453,22 +453,17 @@ spGetPlots <- function(bnd = NULL,
     } 
 
   } else {   ## is.null(spXYdat) 
-
+ 
     ## Check pltids
     pltids <- pcheck.table(pltids)
 
-    ## Check xyjoinid
-    xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-	      checklst=names(pltids), gui=gui, caption="JoinID in pltids?", 
-		stopifnull=FALSE)
- 
     if (!is.null(pltids)) {
       Endyr.filter <- check.logic(pltids, Endyr.filter)
 
       ## Check xyjoinid
       xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 		checklst=names(pltids), gui=gui, caption="JoinID in pltids?",
- 		stopifnull=TRUE)		
+ 		stopifnull=TRUE)  
  
       ## Check stbnd.att
       stbnd.att <- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 

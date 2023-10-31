@@ -544,7 +544,10 @@ modGBpop <- function(popType = "VOL",
       unitvar2 <- GBdata$unitvar2
     }    
     if (strata) { 
-      if (is.null(strvar)) {    
+      if (is.null(strvar)) {
+        if (!is.null(GBdata$strvar)) {
+          strvar <- GBdata$strvar
+        }		  
         if (!is.null(predfac) && length(predfac) == 1) {
           strvar <- predfac
         } else {
@@ -555,6 +558,7 @@ modGBpop <- function(popType = "VOL",
       if (!is.null(unitzonal) && is.null(stratalut)) {
         stratalut <- strat.pivot(unitzonal, unitvars=c(unitvar, unitvar2), 
                       strvar, strwtvar=strwtvar)
+		pivot <- FALSE
       }
     }
   } else {

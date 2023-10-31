@@ -106,7 +106,7 @@
 #' @export DBgetXY
 DBgetXY <- function (states = NULL, 
                      RS = NULL, 
-                     xy_datsource = "datamart", 
+                     xy_datsource, 
                      xy_dsn = NULL, 
                      xy = "PLOT", 
                      xy_opts = xy_options(),
@@ -257,7 +257,6 @@ DBgetXY <- function (states = NULL,
   intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
 		title="Single intensity?", first="YES", gui=gui)
 
-
   ###########################################################################
   ## Check XY database 
   ###########################################################################
@@ -272,7 +271,7 @@ DBgetXY <- function (states = NULL,
       stop("no data in ", xy_datsource)
     }
   }
-
+ 
   ## Check xy database
   ####################################################################
   if (all(list(class(xy), class(plot_layer)) == "character") && 
@@ -283,7 +282,7 @@ DBgetXY <- function (states = NULL,
   } else {
     xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
   }
-
+ 
   ###########################################################################
   ## Check plot database (if xyisplot = FALSE)
   ###########################################################################
@@ -531,6 +530,7 @@ DBgetXY <- function (states = NULL,
   }
   pvars2keep <- unique(c("STATECD", "UNITCD", "COUNTYCD", "PLOT", 
 					pvars2keep))
+
   if (!iseval) {
     pvars2keep <- unique(pvars2keep, "SRV_CN")
   }    
@@ -624,7 +624,7 @@ DBgetXY <- function (states = NULL,
   } else {
     pvars2keep <- NULL
   }
- 
+
   ####################################################################
   ## Check plot table
   ####################################################################
@@ -653,7 +653,7 @@ DBgetXY <- function (states = NULL,
     }
 
   } else if (!xyisplot && !is.null(pvars2keep)) {    
- 
+
     ## Check plot table
     ########################################################
     if (datsource == "datamart") {
@@ -706,9 +706,10 @@ DBgetXY <- function (states = NULL,
     }
 
     ## Check plot variables
-    ########################################################
+    ########################################################	
     if (!all(pvars2keep %in% pltflds)) {
       pmiss <- pvars2keep[!pvars2keep %in% pltflds]
+	  
       if (any(pmiss %in% XYvarlst)) {
         xymiss <- pmiss[pmiss %in% XYvarlst]
         if (length(xymiss) > 0) {
@@ -719,10 +720,15 @@ DBgetXY <- function (states = NULL,
         if (length(pmiss) < length(pvars2keep)) {
           pvars <- pvars2keep[!pvars2keep %in% pmiss]
         }
-      }
+      } else {
+
+	    message("missing variable: ", toString(pmiss))
+		pvars <- pvars2keep[!pvars2keep %in% pmiss] 
+	  }
     } else {
       pvars <- pvars2keep
     }
+
     if (!is.null(plotnm) && length(pvars) > 0) {
       ## Check xyjoinid
       xyjoinid <- findnm(xyjoinid, xyflds, returnNULL=TRUE)
@@ -804,9 +810,19 @@ DBgetXY <- function (states = NULL,
           plotnm <- NULL
         }
       }
-    }
+    } else {
+
+      if (measCur) {
+        ## Check xyjoinid
+        xyjoinid <- findnm(xyjoinid, xyflds, returnNULL=TRUE)
+        if (is.null(xyjoinid)) {
+          message("xyjoinid is NULL... using ", xy.uniqueid, " to join to plot table")
+          xyjoinid <- xy.uniqueid
+        }
+	  }
+      xyvarsA <- paste0("xy.", unique(xyvars)) 
+	}
   } else {
-   
     plotnm <- NULL
     if (measCur) {
       xyvarsA <- paste0("p.", unique(xyvars)) 
@@ -814,7 +830,7 @@ DBgetXY <- function (states = NULL,
       xyvarsA <- paste0("xy.", unique(xyvars)) 
     }
   }
- 
+
   ###########################################################################
   ## Build filter
   ###########################################################################
@@ -1046,7 +1062,7 @@ DBgetXY <- function (states = NULL,
 				" GROUP BY statecd, ", yrvar, 
 				" ORDER BY statecd, ", yrvar) 
   }
- 
+
   ## Create invyrtab query 
   ###########################################################
   xycoords.qry <- paste0("select distinct ", toString(xyvarsA), 
