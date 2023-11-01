@@ -332,11 +332,7 @@ datBarplot <- function(x,
       datxbp <- datxbp[match(as.character(x.order), datxbp[[xvar]]),]    
     }
   }
-print("TEST")
-print(ylim)
-print(datxbp)
-print(yvar)
-save(datxbp, file="E:/workspace/erinB/NEPA_carbon/datxbp.rda")
+
   ## ylim
   ######################
   if (is.null(ylim)) {
@@ -363,9 +359,7 @@ save(datxbp, file="E:/workspace/erinB/NEPA_carbon/datxbp.rda")
 	if (ylim.min == "-Inf") ylim.min <- 0
 	if (ylim.max == "-Inf") ylim.max <- 0
     ylim <- c(ylim.min, ylim.max)
-	if (any(ylim == "-Inf")) {
-	  print("YES")
-	}
+	
   } else {
     if (length(ylim) != 2) {
       stop("ylim must be format c(min,max)")
@@ -440,7 +434,6 @@ save(datxbp, file="E:/workspace/erinB/NEPA_carbon/datxbp.rda")
   }
 
   if (any(is.na(x[[xvar]]))) {
-    print(x)
     message("xvar has NA values... removing")
     x <- x[!is.na(x[[xvar]]),]
   }
