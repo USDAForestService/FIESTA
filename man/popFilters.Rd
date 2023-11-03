@@ -12,6 +12,7 @@ popFilters(
   measEndyr = NULL,
   measEndyr.filter = NULL,
   ACI = FALSE,
+  AOIonly = FALSE,
   ...
 )
 }
@@ -35,6 +36,9 @@ before measEndyr.}
 in R syntax (e.g., 'AOI == 1').}
 
 \item{ACI}{Logical. If TRUE, including All Condition Inventory (ACI) plots.}
+
+\item{AOIonly}{Logical. If TRUE, and there is an AOI (1/0) attribute in the
+population data, only AOI=1 are used for estimation.}
 
 \item{...}{For extendibility.}
 }

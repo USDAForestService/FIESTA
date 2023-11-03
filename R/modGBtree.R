@@ -437,7 +437,7 @@ modGBtree <- function(GBpopdat,
   pop_fmt <- GBpopdat$pop_fmt
   pop_dsn <- GBpopdat$pop_dsn
 
- 
+
   ########################################
   ## Check area units
   ########################################
@@ -450,7 +450,7 @@ modGBtree <- function(GBpopdat,
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
- 
+
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -543,7 +543,7 @@ modGBtree <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
- 
+
   ###############################################################################
   ### Get estimation data from tree table
   ###############################################################################
@@ -584,6 +584,7 @@ modGBtree <- function(GBpopdat,
   tdomvarlst <- treedat$tdomvarlst
   estunits <- treedat$estunits
  
+
   ###############################################################################
   ### Get titles for output tables
   ###############################################################################
@@ -610,7 +611,7 @@ modGBtree <- function(GBpopdat,
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
- 
+
   ############################################################################
   ## GENERATE ESTIMATES
   ############################################################################

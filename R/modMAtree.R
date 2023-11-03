@@ -485,8 +485,7 @@ modMAtree <- function(MApopdat,
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
-  
-  
+     
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -616,6 +615,7 @@ modMAtree <- function(MApopdat,
   tdomvarlst <- treedat$tdomvarlst
   estunits <- treedat$estunits
 
+
   #################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #################################################################################
@@ -658,7 +658,7 @@ modMAtree <- function(MApopdat,
 	ifelse(MAmethod == "gregEN", "gregElasticNet", 
 	ifelse(MAmethod == "ratio", "ratioEstimator", "horvitzThompson"))))
   message("generating estimates using mase::", masemethod, " function...\n")
-  
+ 
   if (MAmethod == "greg" && modelselect == T) {
     
     # want to do variable selection on plot level data...

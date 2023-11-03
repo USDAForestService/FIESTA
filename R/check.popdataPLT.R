@@ -469,6 +469,10 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     }
     intensity.filter <- getfilter(intensitynm, intensity)
     pltx <- datFilter(pltx, intensity.filter)$xf
+	if (nrow(pltx) == 0) {
+	  warning("intensity pop filter returned 0 records")
+	  return(NULL)
+	}
   }
  
   ## Subset popFilter - invyrs (if additional to evalid)
@@ -482,6 +486,22 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     }
     invyrs.filter <- getfilter(invyrsnm, invyrs)
     pltx <- datFilter(pltx, invyrs.filter)$xf
+	if (nrow(pltx) == 0) {
+	  warning("invry pop filter returned 0 records")
+	  return(NULL)
+	}
+  }
+
+  ## Subset popFilter - AOIonly
+  if (!is.null(popFilter$AOIonly) && popFilter$AOIonly) {
+    AOInm <- pcheck.varchar(var2check="AOI",
+	       checklst=names(pltx), warn="AOI variable not in plt")
+    AOI.filter <- getfilter(AOInm, 1)
+    pltx <- datFilter(pltx, paste(AOInm, "== 1"))$xf
+	if (nrow(pltx) == 0) {
+	  warning("AOI pop filter returned 0 records")
+	  return(NULL)
+	}
   }
 
   ######################################################################################

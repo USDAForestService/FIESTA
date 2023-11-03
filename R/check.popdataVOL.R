@@ -5,7 +5,8 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     MICRO_BREAKPOINT_DIA = 5, MACRO_BREAKPOINT_DIA = NULL, diavar = "DIA",
     areawt_micr = "MICRPROP_UNADJ", areawt_subp = "SUBPPROP_UNADJ",   
     areawt_macr = "MACRPROP_UNADJ", defaultVars = FALSE,
-    nonsamp.cfilter = NULL, nullcheck = FALSE, cvars2keep = NULL, gui = FALSE){
+    nonsamp.cfilter = NULL, nullcheck = FALSE, pvars2keep = NULL, 
+	cvars2keep = NULL, gui = FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs for AREA/VOL estimation
@@ -58,6 +59,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     assign(tabnm, tabs[[tabnm]])
   }
   cuniqueid <- tabIDs[["cond"]]
+
 
   ###################################################################################
   ## Database queries
@@ -214,7 +216,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     cvars <- unique(c(cuniqueid, names(condx)[!names(condx) %in% names(pltx)])) 
     condx <- condx[, cvars, with=FALSE]
 
-
     ## Check if class of puniqueid in pltx matches class of puniqueid in condx
     tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
     condx <- tabchk$tab1
@@ -262,6 +263,13 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Check condition data
   ###################################################################################
   pltcondnmlst <- names(pltcondx)
+
+  ## Check for pvars2keep
+  #############################################################################
+  if (!all(pvars2keep %in% pltcondnmlst)) {
+    pvars2keep <- pvars2keep[!pvars2keep %in% pltcondnmlst] 
+    message("variables not in dataset: ", toString(pvars2keep))
+  }
 
   ## Check for COND_STATUS_CD and create ACI filter
   #############################################################################
@@ -513,7 +521,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
 		paste(names(svars.na[svars.na > 0]), collapse=", "))
     }
   }
-
+ 
   ########################################################################
   ## Separate tables for estimation
   ########################################################################

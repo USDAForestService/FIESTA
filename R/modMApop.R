@@ -275,6 +275,8 @@ modMApop <- function(popType="VOL",
   ONEUNIT=n.total=expcondtab=bndx <- NULL
   strata <- FALSE
   adj <- ifelse(adjplot, "plot", "none")
+  areawt2 <- NULL
+  pvars2keep <- NULL
   
   
   ##################################################################
@@ -597,7 +599,7 @@ modMApop <- function(popType="VOL",
 	  popFilter=popFilter2, nonsamp.pfilter=nonsamp.pfilter, 
 	  unitarea=unitarea, areavar=areavar, unitvar=unitvar, 
 	  unitvar2=unitvar2, areaunits=areaunits, unit.action=unit.action, 
-      prednames=prednames, predfac=predfac)
+      prednames=prednames, predfac=predfac, pvars2keep=pvars2keep)
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
@@ -633,9 +635,11 @@ modMApop <- function(popType="VOL",
     ###################################################################################
     popcheck <- check.popdataVOL(gui=gui, 
                tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
-               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
-               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
-               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
+               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
+			   whereqry=whereqry, adj=adj, ACI=ACI, 
+			   pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
+               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter,
+			   areawt=areawt, areawt2=areawt2, pvars2keep=pvars2keep)
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$condx
     pltcondx <- popcheck$pltcondx
