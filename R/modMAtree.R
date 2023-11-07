@@ -279,7 +279,7 @@ modMAtree <- function(MApopdat,
                       estvar, 
                       estvar.filter = NULL, 
                       estseed = "none", 
-					  woodland = "Y",
+					            woodland = "Y",
                       landarea = "FOREST", 
                       pcfilter = NULL, 
                       rowvar = NULL, 
@@ -658,7 +658,8 @@ modMAtree <- function(MApopdat,
 	ifelse(MAmethod == "gregEN", "gregElasticNet", 
 	ifelse(MAmethod == "ratio", "ratioEstimator", "horvitzThompson"))))
   message("generating estimates using mase::", masemethod, " function...\n")
- 
+  
+  predselect.overall <- NULL
   if (MAmethod == "greg" && modelselect == T) {
     
     # want to do variable selection on plot level data...
@@ -681,22 +682,18 @@ modMAtree <- function(MApopdat,
     
     N <- sum(npixels[["npixels"]])
     
-    preds.selected <- gregEN.select(y = y,
-                                    x_sample = xsample,
-                                    x_pop = xpop_totals,
-                                    N = N,
-                                    alpha = 0.5)
+    # since we want to do modelselection + get the coefficients, just use MAest.greg
+    coefs_select <- MAest.greg(y = y,
+                               N = N,
+                               x_sample = setDF(xsample),
+                               x_pop = xpop_totals,
+                               modelselect = TRUE)
     
-    if (length(preds.selected) == 0 || is.null(preds.selected)) {
+    predselect.overall <- coefs_select$predselect
+    prednames <- names(predselect.overall[ ,(!is.na(predselect.overall))[1,], with = F])
+    message(paste0("Predictors ", "[", paste0(prednames, collapse = ", "), "]", " were chosen in model selection.\n"))
+  
       
-      warning("No variables selected in model selection, proceeding with all possible predictors. \n")
-      
-    } else {
-      
-      prednames <- preds.selected 
-      message(paste0("Predictors ", "[", paste0(prednames, collapse = ", "), "]", " were chosen in model selection.\n"))
-      
-    }  
   }
   
   if (!MAmethod %in% c("HT", "PS")) {
@@ -943,7 +940,7 @@ modMAtree <- function(MApopdat,
     rawdat$module <- "MA"
     rawdat$esttype <- "TREE"
     rawdat$MAmethod <- MAmethod
-    rawdat$predselect.overall <- prednames
+    rawdat$predselect.overall <- predselect.overall
     rawdat$predselectlst <- predselectlst
     rawdat$estvar <- estvar
     rawdat$estvar.filter <- estvar.filter
