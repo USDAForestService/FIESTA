@@ -943,6 +943,7 @@ modMAtree <- function(MApopdat,
     rawdat$module <- "MA"
     rawdat$esttype <- "TREE"
     rawdat$MAmethod <- MAmethod
+    rawdat$predselect.overall <- prednames
     rawdat$predselectlst <- predselectlst
     rawdat$estvar <- estvar
     rawdat$estvar.filter <- estvar.filter
