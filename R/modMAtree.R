@@ -279,7 +279,7 @@ modMAtree <- function(MApopdat,
                       estvar, 
                       estvar.filter = NULL, 
                       estseed = "none", 
-					  woodland = "Y",
+					            woodland = "Y",
                       landarea = "FOREST", 
                       pcfilter = NULL, 
                       rowvar = NULL, 
@@ -658,7 +658,8 @@ modMAtree <- function(MApopdat,
 	ifelse(MAmethod == "gregEN", "gregElasticNet", 
 	ifelse(MAmethod == "ratio", "ratioEstimator", "horvitzThompson"))))
   message("generating estimates using mase::", masemethod, " function...\n")
- 
+  
+  predselect.overall <- NULL
   if (MAmethod == "greg" && modelselect == T) {
     
     # want to do variable selection on plot level data...
@@ -668,25 +669,31 @@ modMAtree <- function(MApopdat,
     
     y <- pltlvl[[response]]
     xsample <- pltlvl[ , prednames, with = F, drop = F]
-    xpop <- unitlut[ , prednames, with = F, drop = F]
+    
+    # need to go means -> totals -> summed totals
+    xpop <- unitlut[ , c(unitvar, prednames), with = F, drop = F]
+    xpop_npix <- merge(xpop, npixels, by = unitvar, all.x = TRUE)
+    # multiply unitvar level population means by corresponding npixel values to get population level totals
+    xpop_npix[ ,2:ncol(xpop)] <- lapply(xpop_npix[ ,2:ncol(xpop)], function(x) xpop_npix[["npixels"]] * x)
+    # sum those values
+    xpop_totals <- colSums(xpop_npix[ ,2:ncol(xpop)])
+    # format xpop for mase input
+    xpop_totals <- data.frame(as.list(xpop_totals))
+    
     N <- sum(npixels[["npixels"]])
     
-    preds.selected <- gregEN.select(y = y,
-                                    x_sample = xsample,
-                                    x_pop = xpop,
-                                    N = N,
-                                    alpha = 0.5)
+    # since we want to do modelselection + get the coefficients, just use MAest.greg
+    coefs_select <- MAest.greg(y = y,
+                               N = N,
+                               x_sample = setDF(xsample),
+                               x_pop = xpop_totals,
+                               modelselect = TRUE)
     
-    if (length(preds.selected) == 0 || is.null(preds.selected)) {
+    predselect.overall <- coefs_select$predselect
+    prednames <- names(predselect.overall[ ,(!is.na(predselect.overall))[1,], with = F])
+    message(paste0("Predictors ", "[", paste0(prednames, collapse = ", "), "]", " were chosen in model selection.\n"))
+  
       
-      warning("No variables selected in model selection, proceeding with all possible predictors. \n")
-      
-    } else {
-      
-      prednames <- preds.selected 
-      message(paste0("Predictors ", "[", paste0(prednames, collapse = ", "), "]", " were chosen in model selection.\n"))
-      
-    }  
   }
   
   if (!MAmethod %in% c("HT", "PS")) {
@@ -933,6 +940,7 @@ modMAtree <- function(MApopdat,
     rawdat$module <- "MA"
     rawdat$esttype <- "TREE"
     rawdat$MAmethod <- MAmethod
+    rawdat$predselect.overall <- predselect.overall
     rawdat$predselectlst <- predselectlst
     rawdat$estvar <- estvar
     rawdat$estvar.filter <- estvar.filter
