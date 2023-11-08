@@ -403,7 +403,6 @@ modSApop <- function(popType="VOL",
     puniqueid <- SAdata$puniqueid
     pjoinid <- SAdata$pjoinid
     predfac <- SAdata$predfac
-    zonalnames <- SAdata$zonalnames
 
     if (is.null(prednames)) {
       prednames <- SAdata$prednames

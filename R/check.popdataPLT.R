@@ -4,7 +4,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 	areaunits, unit.action="keep", removetext="unitarea", strata=FALSE, 
 	stratalut=NULL, strvar=NULL, stratcombine=TRUE, pivot=FALSE, nonresp=FALSE, 
 	prednames=NULL, predfac=NULL, pvars2keep=NULL, pdoms2keep=NULL, 
-	nullcheck=FALSE, gui=FALSE) {
+	nullcheck=FALSE, defaultVars=TRUE, gui=FALSE) {
 
   ###################################################################################
   ## DESCRIPTION: Checks plot data inputs
@@ -55,10 +55,11 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   ## Define plt variables
   #########################################################################
   pvars2keep <- unique(pvars2keep) 
-  pdoms2keep <- c("STATECD", "UNITCD", "COUNTYCD", "INVYR", "PLOT_STATUS_CD", 
-	"PLOT_NONSAMPLE_REASN_CD", "PSTATUSCD", "INTENSITY", "MEASYEAR", "RDDISTCD", 
-	"WATERCD", "ELEV", "ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "DESIGNCD", "EMAP_HEX")
-
+  pdoms <- c("STATECD", "UNITCD", "COUNTYCD", "INVYR", "PLOT_STATUS_CD", 
+	  "PLOT_NONSAMPLE_REASN_CD", "PSTATUSCD", "INTENSITY", "MEASYEAR", "RDDISTCD", 
+	  "WATERCD", "ELEV", "ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "DESIGNCD", "EMAP_HEX")
+  
+  
   ## Get tables from tabs
   ########################################################
   for (tabnm in names(tabs)) {
@@ -331,6 +332,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
                             tabnm="pltassgn", caption="plot assignments?", 
                             nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE)
 
+
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
   ###################################################################################
@@ -513,7 +515,12 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 #  if (length(pvarsmiss) > 0) {
 #    stop("missing variables: ", paste(pvarsmiss, collapse=", "))
 #  }
-
+  if (defaultVars) {
+    pdoms2keep <- pdoms
+  } else {
+    pdoms2keep <- pltnmlst
+  }
+  
   ## Check missing pdoms2keep variables in pltx
   ###########################################################################
   pmissvars <- pdoms2keep[which(!pdoms2keep %in% pltnmlst)]
@@ -752,6 +759,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   pvars2keep <- pvars2keep[pvars2keep %in% names(pltx)]
   pltx <- data.table(pltx[, unique(c(puniqueid, pdoms2keep, pvars2keep)), with=FALSE])
   setkeyv(pltx, puniqueid)
+
 
   returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid, pltx=pltx,
         pfromqry=pfromqry, whereqry=whereqry, popwhereqry=popwhereqry, 

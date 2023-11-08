@@ -740,11 +740,11 @@ modSAarea <- function(SApopdatlst = NULL,
       dunitareabind[[dunitvar]] <- NULL
     }
 
-dunitlut <- data.table(SApopdat$dunitlut)
-dat=tdomdattot
-largebnd.val=largebnd.vals
-domain="TOTAL"
-largebnd.unique=largebnd.unique
+#dunitlut <- data.table(SApopdat$dunitlut)
+#dat=tdomdattot
+#largebnd.val=largebnd.vals
+#domain="TOTAL"
+#largebnd.unique=largebnd.unique
 
     dunit_totestlst <- 
 	tryCatch(
