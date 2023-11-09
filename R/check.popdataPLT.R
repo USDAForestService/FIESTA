@@ -211,7 +211,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
         pfromqry <- getpfromqry(evalid=evalid, popevalid, ppsanm=ppsanm, 
 				ppsaid=pltassgnid, pjoinid=pjoinid, plotnm=plt, dbconn=dbconn)
 	  }
-    } else if (popFilter$measCur) {
+    } else if (!is.null(popFilter$measCur) && popFilter$measCur) {
       palias <- "p"
       pfromqry <- getpfromqry(varCur="MEASYEAR", Endyr=popFilter$measEndyr, 
 		               dsn=dsn, plotnm=plt, dbconn=dbconn)
@@ -443,7 +443,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   ## Check filter(s) for population data
   ##################################################################################
   if (!datindb) {
-    if (!is.null(pltx) && (popFilter$measCur || !is.null(popFilter$measEndyr))) {
+    if (!is.null(pltx) && (!is.null(popFilter$measCur) && popFilter$measCur || !is.null(popFilter$measEndyr))) {
       pltx <- getPlotCur(pltx, Endyr=popFilter$measEndyr, varCur="MEASYEAR",
 				Endyr.filter=popFilter$measEndyr.filter)
     } else if (!is.null(invyrs)) {
