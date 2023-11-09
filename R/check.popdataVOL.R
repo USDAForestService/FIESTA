@@ -83,6 +83,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
       if (defaultVars) {
         cvars <-  DBvars.default()$condvarlst
         cvars <- cvars[cvars %in% dbcvars]
+		cvars <- cvars[cvars %in% dbcvars]
       } else {
         cvars <- dbcvars
       }
@@ -108,6 +109,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
         treevars <-  DBvars.default(istree=TRUE)$treevarlst
         tsumvars <-  DBvars.default(istree=TRUE)$tsumvarlst
         tvars <- unique(c(treevars, tsumvars))
+		tvars <- tvars[tvars %in% dbtvars]
       } else {
         tvars <- dbtvars
       }
@@ -152,7 +154,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
  
   ## Define cdoms2keep
   cdoms2keep <- names(condx)
-
 
   ###############################################################################
   ## Check uniqueids and merge cond with plt

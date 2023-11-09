@@ -5,13 +5,13 @@
 \title{List of population tables.}
 \usage{
 popTables(
-  cond = NULL,
-  plt = NULL,
-  tree = NULL,
-  seed = NULL,
-  vsubpspp = NULL,
-  vsubpstr = NULL,
-  invsubp = NULL,
+  cond = "COND",
+  plt = "PLOT",
+  tree = "TREE",
+  seed = "SEEDLING",
+  vsubpspp = "P2VEG_SUBPLOT_SPP",
+  vsubpstr = "P2VEG_SUBP_STRUCTURE",
+  invsubp = "P2VEG_SUBP_STRUCTURE",
   subplot = NULL,
   subp_cond = NULL,
   dwm = NULL,
