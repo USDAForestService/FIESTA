@@ -397,11 +397,9 @@ modGBtree <- function(GBpopdat,
     }
   }
 
-
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  
   list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
 	                "tuniqueid", "ACI.filter", "unitarea", "unitvar", "stratalut",
                   "strvar", "plotsampcnt", "condsampcnt")
@@ -439,7 +437,7 @@ modGBtree <- function(GBpopdat,
   pop_fmt <- GBpopdat$pop_fmt
   pop_dsn <- GBpopdat$pop_dsn
 
- 
+
   ########################################
   ## Check area units
   ########################################
@@ -452,7 +450,7 @@ modGBtree <- function(GBpopdat,
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
- 
+
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -502,9 +500,9 @@ modGBtree <- function(GBpopdat,
     invyr <- sort(unique(pltcondf$INVYR))
   }
  
-  ###################################################################################
+  #############################################################################
   ### Check row and column data
-  ###################################################################################
+  #############################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, conn=conn,
                      treef=treef, seedf=seedf,
                      condf=pltcondf, cuniqueid=cuniqueid,
@@ -545,10 +543,10 @@ modGBtree <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
- 
-  #####################################################################################
+
+  ###############################################################################
   ### Get estimation data from tree table
-  #####################################################################################
+  ###############################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed,
                   bycond=TRUE, condf=condf, bytdom=bytdom, 
@@ -586,15 +584,17 @@ modGBtree <- function(GBpopdat,
   tdomvarlst <- treedat$tdomvarlst
   estunits <- treedat$estunits
  
-  #####################################################################################
+
+  ###############################################################################
   ### Get titles for output tables
-  #####################################################################################
+  ###############################################################################
   alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, 
                     estseed=estseed, woodland=woodland, 
 	                sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
 	                title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
 	                title.colvar=title.colvar, title.unitvar=title.unitvar, 
-	                title.filter=title.filter, title.unitsn=estunits, title.estvarn=title.estvar, 
+	                title.filter=title.filter, title.unitsn=estunits, 
+					title.estvarn=title.estvar, 
 	                unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
  	                estvarn=estvar, estvarn.filter=estvar.filter, 
 	                addtitle=addtitle, returntitle=returntitle, 
@@ -611,7 +611,7 @@ modGBtree <- function(GBpopdat,
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
- 
+
   ############################################################################
   ## GENERATE ESTIMATES
   ############################################################################

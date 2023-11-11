@@ -260,7 +260,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     pltx[[unitvar12]] <- paste(pltx[[unitvar2]], pltx[[unitvar]], sep="-")
     if (!is.null(unitarea)) {
       unitarea[[unitvar12]] <- paste(unitarea[[unitvar2]], unitarea[[unitvar]], sep="-")
-      unitarea[, c(unitvar, unitvar2) := NULL]
+      #unitarea[, c(unitvar, unitvar2) := NULL]
     }
   
     if (!is.null(RHGlut)) {

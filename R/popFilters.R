@@ -10,14 +10,9 @@
 #' @param invyrs Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).
 #' @param intensity Integer code. Code(s) indicating intensity to use for
 #' population.
-#' @param measCur Logical. Inventory span defining variable. If TRUE, extract
-#' plots with most current measurement for state(s).
-#' @param measEndyr Logical. Inventory span defining variable. If TRUE, extract
-#' plots with most current measurement for state(s) for years measured in or
-#' before measEndyr.
-#' @param measEndyr.filter Filter for extracting plots using measEndyr. Must be
-#' in R syntax (e.g., 'AOI == 1').
 #' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.
+#' @param AOIonly Logical. If TRUE, and there is an AOI (1/0) attribute in the
+#' population data, only AOI=1 are used for estimation.
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for population
 #' data filters.
@@ -28,8 +23,7 @@
 #' @export popFilters
 
 popFilters <- function(evalid = NULL, invyrs = NULL, intensity = NULL,
-                       measCur = FALSE, measEndyr = NULL, 
-                       measEndyr.filter = NULL, ACI = FALSE, ...) {
+                       ACI = FALSE, AOIonly = FALSE, ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(popFilters)))

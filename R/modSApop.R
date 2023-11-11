@@ -231,10 +231,10 @@ modSApop <- function(popType="VOL",
   returnSApopdat <- FALSE
   nonsamp.pfilter=nonsamp.cfilter <- NULL 
   returnlst <- list(module = "SA")
-  pvars2keep=cvars2keep=NULL
   adj <- ifelse(adjplot, "plot", "none")
-
-  
+  areawt2 <- NULL
+  pvars2keep <- "AOI"
+   
   # dunitvar2=NULL
   # pvars2keep=NULL
   # cvars2keep=NULL
@@ -244,10 +244,7 @@ modSApop <- function(popType="VOL",
  
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=stratcombinelut <- NULL
-  dunitvar2=NULL
-  adj <- "plot"
-  
-  
+ 
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -406,7 +403,6 @@ modSApop <- function(popType="VOL",
     puniqueid <- SAdata$puniqueid
     pjoinid <- SAdata$pjoinid
     predfac <- SAdata$predfac
-    zonalnames <- SAdata$zonalnames
 
     if (is.null(prednames)) {
       prednames <- SAdata$prednames
@@ -535,8 +531,8 @@ modSApop <- function(popType="VOL",
       module="SA", popType=popType, popevalid=popevalid, adj=adj, 
 	  popFilter=popFilter2, nonsamp.pfilter=nonsamp.pfilter, 
 	  unitarea=dunitarea, areavar=areavar, unitvar=dunitvar, 
-	  unitvar2=dunitvar2, areaunits=areaunits, unit.action=unit.action, 
-      prednames=prednames, predfac=predfac, pvars2keep="AOI")
+	  unitvar2=unitvar2, areaunits=areaunits, unit.action=unit.action, 
+      prednames=prednames, predfac=predfac, pvars2keep=pvars2keep)
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
@@ -570,9 +566,11 @@ modSApop <- function(popType="VOL",
     ###################################################################################
     popcheck <- check.popdataVOL(gui=gui, 
                tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
-               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
-               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
-               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, cvars2keep="AOI")
+               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
+			   whereqry=whereqry, adj=adj, ACI=ACI, 
+			   pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
+               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
+			   areawt=areawt, areawt2=areawt2, cvars2keep="AOI")
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$condx
     pltcondx <- popcheck$pltcondx
@@ -590,7 +588,7 @@ modSApop <- function(popType="VOL",
   if (is.null(treef) && is.null(seedf)) {
     stop("must include tree data")
   }
- 
+
   ###################################################################################
   ## Check auxiliary data
   ###################################################################################
@@ -682,6 +680,10 @@ modSApop <- function(popType="VOL",
         stop("must include smallbnd.domain for smallbnd")
       }
     } 
+    ## Check for AOI column
+	if (!"AOI" %in% names(smallbnd)) {
+	  smallbnd$AOI <- 1
+	}
     returnlst$smallbnd <- smallbnd
     returnlst$smallbnd.domain <- smallbnd.domain
   }

@@ -6,7 +6,7 @@
 \usage{
 modGBchng(
   GBpopdat,
-  chngtype = "TOTAL",
+  chngtype = "total",
   landarea = "FOREST",
   pcfilter = NULL,
   rowvar = NULL,
@@ -24,7 +24,7 @@ modGBchng(
 \arguments{
 \item{GBpopdat}{List. Population data objects returned from modGBpop().}
 
-\item{chngtype}{String. The type of change estimates ('TOTAL', 'ANNUAL').}
+\item{chngtype}{String. The type of change estimates ('total', 'annual').}
 
 \item{landarea}{String. The sample area filter for estimates ("ALL",
 "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
@@ -181,7 +181,7 @@ on plot (i.e. accessible nonforest, nonsampled nonforest)\cr
 \tab RESERVCD \tab If landarea=TIMBERLAND. Reserved status.\cr
 
 \tab pltassgn \tab puniqueid \tab Unique identifier for each plot, to link
-to cond (ex. CN).\cr 
+to cond (e.g., CN).\cr 
 \tab \tab STATECD \tab Identifies state each plot is located in.\cr \tab \tab INVYR \tab Identifies inventory year of each
 plot.\cr 
 \tab \tab PLOT_STATUS_CD \tab Status of each plot (i.e. sampled, nonsampled). If not included, all plots are assumed as sampled.\cr }

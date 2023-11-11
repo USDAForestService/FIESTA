@@ -300,15 +300,14 @@ modGBpop <- function(popType = "VOL",
   if (returndata) {
     returnlst <- list(module = "GB")
   }
-  
-  
+ 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
     	treef=seedf=grmf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=
 	sccmx=cond_pcondx=lulcx=popevalid <- NULL
   condid <- "CONDID"
-  
-  
+  pvars2keep <- NULL
+
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -343,7 +342,7 @@ modGBpop <- function(popType = "VOL",
       }
     }
   }
-  
+
   ## Set popFilters defaults
   popFilters_defaults_list <- formals(popFilters)[-length(formals(popFilters))]
   
@@ -453,8 +452,8 @@ modGBpop <- function(popType = "VOL",
       }
     }
   } 
- 
-  ##################################################################
+
+ ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
   
@@ -544,7 +543,10 @@ modGBpop <- function(popType = "VOL",
       unitvar2 <- GBdata$unitvar2
     }    
     if (strata) { 
-      if (is.null(strvar)) {    
+      if (is.null(strvar)) {
+        if (!is.null(GBdata$strvar)) {
+          strvar <- GBdata$strvar
+        }		  
         if (!is.null(predfac) && length(predfac) == 1) {
           strvar <- predfac
         } else {
@@ -555,13 +557,17 @@ modGBpop <- function(popType = "VOL",
       if (!is.null(unitzonal) && is.null(stratalut)) {
         stratalut <- strat.pivot(unitzonal, unitvars=c(unitvar, unitvar2), 
                       strvar, strwtvar=strwtvar)
+		pivot <- FALSE
       }
     }
   } else {
     ## Extract list objects
     if (!is.null(pltdat)) {
-      popTabs <- pltdat$tabs
-      popTabIDs <- pltdat$tabIDs
+	  tabnames <- if (sum(names(pltdat$tabs) %in% names(popTables())) == 0) {
+	    stop("no tables exist in pltdat")
+      }			  
+      popTabs <- pltdat$tabs[names(pltdat$tabs) %in% names(popTables())]
+      popTabIDs <- pltdat$tabIDs[names(pltdat$tabIDs) %in% names(popTableIDs())]
       pjoinid <- pltdat$pjoinid
     }
     if (!is.null(stratdat)) {
@@ -617,10 +623,9 @@ modGBpop <- function(popType = "VOL",
       }
     }
   } 
- 
+
   ## Set user-supplied popTable values 
   popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
-
   if (length(popTabs) > 0) {
     for (i in 1:length(popTabs)) {
       if (names(popTabs)[[i]] %in% names(popTables_defaults_list)) {
@@ -632,7 +637,6 @@ modGBpop <- function(popType = "VOL",
   } else {
     stop("need to include popTabs")
   }
-
   list.items <- c("cond")
   if (popType == "VOL") {
     list.items <- c(list.items, "tree")
@@ -646,7 +650,10 @@ modGBpop <- function(popType = "VOL",
   if (popType == "CHNG") {
     list.items <- c(list.items, "sccm")
   }
-  popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
+  
+  ## Check popTabs
+  popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items, stopifnull=TRUE)
+
 
   ## Set user-supplied popTabIDs values
   ### Check for invalid parameters first
@@ -675,7 +682,8 @@ modGBpop <- function(popType = "VOL",
 	  popFilter=popFilter2, nonsamp.pfilter=nonsamp.pfilter, 
       unitarea=unitarea, areavar=areavar, unitvar=unitvar, 
       unitvar2=unitvar2, areaunits=areaunits, unit.action=unit.action, 
-      strata=strata, stratalut=stratalut, strvar=strvar, pivot=pivot)
+      strata=strata, stratalut=stratalut, strvar=strvar, pivot=pivot,
+	  pvars2keep=pvars2keep, defaultVars=defaultVars)
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
@@ -716,7 +724,8 @@ modGBpop <- function(popType = "VOL",
           whereqry=whereqry, adj=adj, ACI=ACI, 
           pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
           condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
-          areawt=areawt, areawt2=areawt2)
+          areawt=areawt, areawt2=areawt2, pvars2keep=pvars2keep,
+		  defaultVars = defaultVars)
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$condx
     pltcondx <- popcheck$pltcondx
@@ -742,7 +751,7 @@ modGBpop <- function(popType = "VOL",
           whereqry=whereqry, adj=adj, ACI=ACI, 
           pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
           condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
-          cvars2keep="REMPER")
+          cvars2keep="REMPER", pvars2keep=pvars2keep)
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$sccm_condx
     sccmx <- popcheck$sccmx
@@ -766,7 +775,8 @@ modGBpop <- function(popType = "VOL",
           pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
           whereqry=whereqry, adj=adj, ACI=ACI, 
           pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn, 
-          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
+          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
+		  pvars2keep=pvars2keep)
     pltcondx <- popcheck$pltcondx
     pltassgnx <- popcheck$pltassgnx
     pltassgnid <- popcheck$pltassgnid
@@ -787,7 +797,8 @@ modGBpop <- function(popType = "VOL",
           pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
           whereqry=whereqry, adj=adj, ACI=ACI, 
           pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
-          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
+          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
+		  pvars2keep=pvars2keep)
     condx <- popcheck$condx
     pltcondx <- popcheck$pltcondx
     cuniqueid <- popcheck$cuniqueid

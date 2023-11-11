@@ -587,9 +587,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           setcolorder(unit_rowest, c(unitvars,
 			names(unit_rowest)[!names(unit_rowest) %in% unitvars]))
         }
-        ## Set order of table
-        setorderv(unit_rowest, c(unitvars, rowvar))
 
+        ## Set order of table
+        setorderv(unit_rowest, c(unitvars, rowvar))		
         setnames(unit_rowest, rowvar, title.rowvar)
         rawdat$unit_rowest <- setDF(unit_rowest)
         rawdat.tabs <- c(rawdat.tabs, "unit_rowest")

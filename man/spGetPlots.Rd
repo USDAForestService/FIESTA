@@ -114,12 +114,12 @@ be unique. If using most current XY coordinates, use identifier for a plot
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
 
-\item{savexy}{Logical. If TRUE, and savedata=TRUE, saves XY data to outfolder.}
+\item{savexy}{Logical. If TRUE, saves XY data to outfolder.}
 
 \item{savebnd}{Logical. If TRUE, and savedata=TRUE, saves bnd. If 
 out_fmt='sqlite', saves to a SpatiaLite database.}
 
-\item{exportsp}{Logical. If TRUE, and savedata=TRUE, saves xy data as 
+\item{exportsp}{Logical. If TRUE, and savexy=TRUE, saves xy data as 
 spatial data. If FALSE, saves xy data as table.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list

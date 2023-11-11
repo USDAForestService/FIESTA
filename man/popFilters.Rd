@@ -8,10 +8,8 @@ popFilters(
   evalid = NULL,
   invyrs = NULL,
   intensity = NULL,
-  measCur = FALSE,
-  measEndyr = NULL,
-  measEndyr.filter = NULL,
   ACI = FALSE,
+  AOIonly = FALSE,
   ...
 )
 }
@@ -24,17 +22,10 @@ population.}
 \item{intensity}{Integer code. Code(s) indicating intensity to use for
 population.}
 
-\item{measCur}{Logical. Inventory span defining variable. If TRUE, extract
-plots with most current measurement for state(s).}
-
-\item{measEndyr}{Logical. Inventory span defining variable. If TRUE, extract
-plots with most current measurement for state(s) for years measured in or
-before measEndyr.}
-
-\item{measEndyr.filter}{Filter for extracting plots using measEndyr. Must be
-in R syntax (e.g., 'AOI == 1').}
-
 \item{ACI}{Logical. If TRUE, including All Condition Inventory (ACI) plots.}
+
+\item{AOIonly}{Logical. If TRUE, and there is an AOI (1/0) attribute in the
+population data, only AOI=1 are used for estimation.}
 
 \item{...}{For extendibility.}
 }

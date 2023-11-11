@@ -1,9 +1,9 @@
 check.popdataDWM <- function(tabs, tabIDs, pltassgnx, pltassgnid,
      pfromqry, palias, pjoinid, whereqry, 
-     adj, ACI, pltx=NULL, puniqueid="CN", dsn=NULL, dbconn=NULL,
-     condid="CONDID", areawt="CONDPROP_UNADJ",
-     nonsamp.cfilter=NULL, nullcheck=FALSE, cvars2keep=NULL,
-     dwmvars2keep=NULL, gui=FALSE){
+     adj, ACI, pltx = NULL, puniqueid = "CN", dsn = NULL, dbconn = NULL,
+     condid = "CONDID", areawt = "CONDPROP_UNADJ",
+     nonsamp.cfilter = NULL, nullcheck = FALSE, pvars2keep = NULL,
+	 cvars2keep = NULL, dwmvars2keep = NULL, gui = FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs for DWM estimation
@@ -214,6 +214,13 @@ check.popdataDWM <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Check condition data
   ###################################################################################
   pltcondnmlst <- names(pltcondx)
+  
+    ## Check for pvars2keep
+  #############################################################################
+  if (!all(pvars2keep %in% pltcondnmlst)) {
+    pvars2keep <- pvars2keep[!pvars2keep %in% pltcondnmlst] 
+    message("variables not in dataset: ", toString(pvars2keep))
+  }
 
   ## Check for COND_STATUS_CD and create ACI filter
   #############################################################################

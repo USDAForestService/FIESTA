@@ -150,7 +150,7 @@ DBgetEvalid <- function(states = NULL,
   SCHEMA. <- ""
 
   ## Define evalType choices
-  evalTypelst <- c("ALL", "CURR", "VOL", "GRM", "P2VEG", "INV", "DWM", "CHNG")
+  evalTypelst <- unique(c(sub("EXP", "", FIESTAutils::ref_evaltyp$EVAL_TYP), "GRM"))
 #  evalTypelst <- c("ALL", "CURR", "VOL", "CHNG", "DWM", "GROW", "MORT", "REMV", 
 #		"CRWN", "INV", "P2VEG")
 
@@ -286,7 +286,7 @@ DBgetEvalid <- function(states = NULL,
 		"RS"])
   rslst[rslst %in% c("NERS", "NCRS")] <- "NRS"
   rslst <- unique(rslst)
- 
+  
 
   #########################################################################
   ## Get database tables - POP_EVAL, POP_EVAL_TYPE, SURVEY
@@ -310,10 +310,10 @@ DBgetEvalid <- function(states = NULL,
       }
       message("states in database: ", toString(stcdlst))
     }
-    surveynm <- chkdbtab(dbtablst, "SURVEY")
-    popevalnm <- chkdbtab(dbtablst, "POP_EVAL")
-    popevalgrpnm <- chkdbtab(dbtablst, "POP_EVAL_GRP")
-    popevaltypnm <- chkdbtab(dbtablst, "POP_EVAL_TYP")
+	surveynm <- chkdbtab(dbtablst, survey_layer)
+    popevalnm <- chkdbtab(dbtablst, popeval_layer)
+    popevalgrpnm <- chkdbtab(dbtablst, popevalgrp_layer)
+    popevaltypnm <- chkdbtab(dbtablst, popevaltyp_layer)
 
   } else if (datsource == "datamart") {
     SURVEY <- DBgetCSV("SURVEY", stcdlst, 
@@ -424,8 +424,8 @@ DBgetEvalid <- function(states = NULL,
   }
  
   if (all(is.null(popevalnm) && is.null(popevaltypnm) && is.null(popevalgrpnm))) {
-    nopoptables <- TRUE
- 
+	nopoptables <- TRUE
+		
     state.qry <- paste("select distinct statecd from", plotnm)
     if (datsource == "sqlite") {
       stcdlstdb <- tryCatch( DBI::dbGetQuery(dbconn, state.qry)[[1]],
@@ -504,100 +504,128 @@ DBgetEvalid <- function(states = NULL,
           invyrtab <- invyrtab[invyrtab$ANN_INVENTORY == ann_inventory,]
         }
         returnevalid <- TRUE
+      }
+	}  
+  } else { 
+    ## Create invyrtab (if pop tables do not exist but pop_plot_stratum_assgn table does)
 
-      } else { 
-        ## Create invyrtab (if pop tables do not exist but pop_plot_stratum_assgn table does)
+    message("SURVEY table does not exist in database... assuming ANNUAL inventory plots")
+    #invtype <- "ANNUAL"
 
-        message("no SURVEY table in database... assuming ANNUAL inventory plots")
-        #invtype <- "ANNUAL"
+    ## Check for pop_plot_stratum_assgn
+    if (datsource == "sqlite") {
+      ppsanm <- chkdbtab(dbtablst, ppsa_layer)
+      if (!is.null(ppsanm)) {
+        ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
+      } 
 
-        ## Check for pop_plot_stratum_assgn
-        if (datsource == "sqlite") {
-          ppsanm <- chkdbtab(dbtablst, ppsa_layer)
-          if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
-            ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-            ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
-          } else {
-            warning("there is no pop_plot_stratum_assgn table in database")
-          }
+    } else if (datsource == "DATAMART") {
+      POP_PLOT_STRATUM_ASSGN <- DBgetCSV("PLOT", stcdlst, 
+                            returnDT=TRUE, stopifnull=FALSE)
+      if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
+        ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+        ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
+      } else {
+        message("pop_plot_stratum_assgn is not in datamart\n")
+      }
 
-        } else if (datsource == "DATAMART") {
-          POP_PLOT_STRATUM_ASSGN <- DBgetCSV("PLOT", stcdlst, 
-                              returnDT=TRUE, stopifnull=FALSE)
-          if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
-            ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-            ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
-          } else {
-            warning("pop_plot_stratum_assgn is not in datamart")
-          }
-
-        } else {
-          POP_PLOT_STRATUM_ASSGN <- pcheck.table(ppsa_layer, 
+    } else {  
+	  ## Check for pop_plot_stratum_assgn 
+      POP_PLOT_STRATUM_ASSGN <- pcheck.table(ppsa_layer, 
 						stopifnull=FALSE, stopifinvalid=FALSE)
-          ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-          if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
-            ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-            ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
-          } 
-        }
+	  if (!is.null(POP_PLOT_STRATUM_ASSGN) && is.data.frame(POP_PLOT_STRATUM_ASSGN)) {
+        ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+        ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
+      } 
+    }
 
-        if (!is.null(ppsanm)) {
-          invyrnm <- findnm("INVYR", ppsaflds, returnNULL=TRUE) 
+    if (!is.null(ppsanm)) {
+      invyrnm <- findnm("INVYR", ppsaflds, returnNULL=TRUE) 
   
-          ## Check evalids 
-          evalid.qry <- paste("select distinct evalid from ", ppsanm) 
+      ## Check evalids 
+      evalid.qry <- paste("select distinct evalid from ", ppsanm) 
+      if (datsource == "sqlite") {
+        evalidindb <- DBI::dbGetQuery(dbconn, evalid.qry)
+      } else {
+        evalidindb <- sqldf::sqldf(evalid.qry)
+      }
+	  if (is.null(evalid)) {
+	  		
+	    ## Get invyrtab
+		if (!is.null(invyrnm)) {
+          invqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", ppsanm, 
+							"group by statecd, invyr") 
           if (datsource == "sqlite") {
-            evalidindb <- DBI::dbGetQuery(dbconn, evalid.qry)
+            invyrtab <- DBI::dbGetQuery(dbconn, invqry)
           } else {
-            evalidindb <- sqldf::sqldf(evalid.qry)
-          }
-          if (!all(evalid %in% evalidindb)) {
-            missevalid <- sort(!evalid[evalid %in% evalidindb])
-            warning(ppsa_layer, " is missing evalids: ", toString(missevalid))
-            ppsanm <- NULL
-          } else {
-            if (!is.null(invyrnm)) {
-              invqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", ppsanm, 
-			"where evalid in(", toString(evalid), ") group by statecd, invyr") 
-              if (datsource == "sqlite") {
-                invyrtab <- DBI::dbGetQuery(dbconn, invqry)
-              } else {
-                invyrtab <- sqldf::sqldf(invqry)
-              } 
-            } else {
-              if (!is.null(plotnm)) {
-                invyrnm <- findnm("INVYR", pltflds)  
-                if (!is.null(invyrnm)) {     
-                  invqry <- paste("select p.statecd, p.invyr, count(*) from", 
-				ppsanm, "ppsa", "join", plotnm, 
-				"p on(p.CN = ppsa.PLT_CN) where evalid in(", toString(evalid), 
-				") group by p.statecd, p.invyr")
-                    if (datsource == "sqlite") {
-                    invyrtab <- DBI::dbGetQuery(dbconn, invqry)
-                  } else {
-                    invyrtab <- sqldf::sqldf(invqry)
-                  }
-                }
-              }
-            }
-          }
+            invyrtab <- sqldf::sqldf(invqry)
+          } 
         } else {
-          ## Create invyrtab (if no pop tables or pop_plot_stratum_assgn)
-
           if (!is.null(plotnm)) {
             invyrnm <- findnm("INVYR", pltflds)  
             if (!is.null(invyrnm)) {     
-              invqry <- paste("select statecd, invyr, count(*) from", 
+              invqry <- paste("select p.statecd, p.invyr, count(*) from", 
+								plotnm, "p group by p.statecd, p.invyr")
+								
+             if (datsource == "sqlite") {
+                invyrtab <- DBI::dbGetQuery(dbconn, invqry)
+              } else {
+                invyrtab <- sqldf::sqldf(invqry)
+              }
+            }
+          }
+        }	  
+      } else if (!all(evalid %in% evalidindb)) {
+        missevalid <- sort(!evalid[evalid %in% evalidindb])
+        warning(ppsa_layer, " is missing evalids: ", toString(missevalid))
+        ppsanm <- NULL
+		
+      } else {
+        if (!is.null(invyrnm)) {
+          invqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", ppsanm, 
+							"where evalid in(", toString(evalid), 
+							") group by statecd, invyr") 
+          if (datsource == "sqlite") {
+            invyrtab <- DBI::dbGetQuery(dbconn, invqry)
+          } else {
+            invyrtab <- sqldf::sqldf(invqry)
+          } 
+        } else {
+          if (!is.null(plotnm)) {
+            invyrnm <- findnm("INVYR", pltflds)  
+            if (!is.null(invyrnm)) {     
+              invqry <- paste("select p.statecd, p.invyr, count(*) from", 
+								ppsanm, "ppsa", "join", plotnm, 
+								"p on(p.CN = ppsa.PLT_CN) where evalid in(", toString(evalid), 
+								") group by p.statecd, p.invyr")
+								
+             if (datsource == "sqlite") {
+                invyrtab <- DBI::dbGetQuery(dbconn, invqry)
+              } else {
+                invyrtab <- sqldf::sqldf(invqry)
+              }
+            }
+          }
+        }
+	  }	  
+    } else {
+      ## Create invyrtab (if no pop tables or pop_plot_stratum_assgn)
+      if (!is.null(plotnm)) {
+        invyrnm <- findnm("INVYR", pltflds)  
+        if (!is.null(invyrnm)) {     
+          invqry <- paste("select statecd, invyr, count(*) from", 
 				plotnm, "where statecd in(", toString(stcdlst), 
 				") group by statecd, invyr")
-              invyrtab <- DBI::dbGetQuery(dbconn, invqry)
-            }
+          if (datsource == "sqlite") {
+            invyrtab <- DBI::dbGetQuery(dbconn, invqry)
+          } else {
+            invyrtab <- sqldf::sqldf(invqry)
           }
         }
       } ## End create invyrtab
     }
   } ## End check evalid
- 
+  
   if (!returnevalid) {
 
     ## Check invyrtab. Data frame with inventory years by state
@@ -634,18 +662,21 @@ DBgetEvalid <- function(states = NULL,
       if (!"INVYR" %in% names(invyrtab)) {
         stop("INVYR must be in invyrtab")
       }
-      evalEndyr <- as.list(tapply(invyrtab$INVYR, invyrtab$STATECD, max))
-      names(evalEndyr) <- pcheck.states(as.numeric(names(evalEndyr)), 
-		statereturn="MEANING")
-
+	  if (!is.null(evalEndyr)) {
+	    invEndyr <- evalEndyr
+	  } else {
+        invEndyr <- as.list(tapply(invyrtab$INVYR, invyrtab$STATECD, max))
+        names(invEndyr) <- pcheck.states(as.numeric(names(invEndyr)), 
+		  statereturn="MEANING")
+      }
       if (!is.null(evalid)) {
         ## Check evalid
         if (length(evalid) != length(states)) {
-          warning("evalid must be a named list matching states.. using evalEndyr")
+          warning("invalid evalid... does not match states in data")
         } else if (length(evalid) > 1 && !all(names(evalid) %in% states)) {
-          warning("evalid names do not match states... using evalEndyr")
-        } else if (sum(evalid == evalEndyr[names(evalid)]) < length(evalid)) {
-          warning("invalid evalid... using evalEndyr")
+          warning("invalid evalid... does not match states in data")
+        } else if (sum(evalid == invEndyr[names(evalid)]) < length(evalid)) {
+          warning("invalid evalid... using end year in data")
         } 
       }  
     }
@@ -759,11 +790,11 @@ DBgetEvalid <- function(states = NULL,
       }
  
       if (datsource == "sqlite" && nopoptables) {
-        ppsanm <- chkdbtab(dbtablst, ppsa_layer)
-        if (is.null(ppsanm)) {
-          warning("must include pop_plot_stratum_assgn table in database when eval='FIA'\n")
-          stop("database tables: ", toString(dbtablst))
-        }
+        #ppsanm <- chkdbtab(dbtablst, ppsa_layer)
+        #if (is.null(ppsanm)) {
+        #  warning("must include pop_plot_stratum_assgn table in database when eval='FIA'\n")
+        #  stop("database tables: ", toString(dbtablst))
+        #}
 
         ## Create lookup and get code for evalType
         evalCode <- c("00","01","01","03")
@@ -1010,7 +1041,6 @@ DBgetEvalid <- function(states = NULL,
     }
   }  ## returnevalid
  
-
   returnlst <- list(states=states, rslst=rslst, 
                     evalidlist=evalidlist, 
                     invtype=invtype, invyrtab=invyrtab, 
@@ -1021,8 +1051,8 @@ DBgetEvalid <- function(states = NULL,
   ## Return population information
   returnlst$SURVEY <- SURVEY
   returnlst$PLOT <- PLOT
-  if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
-    returnlst$POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGN
+  if (!is.null(ppsanm)) {
+    returnlst$POP_PLOT_STRATUM_ASSGN <- ppsanm
   }
   #returnlst$POP_EVAL <- POP_EVAL[EVALID %in% unlist(evalidlist),]
 

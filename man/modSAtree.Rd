@@ -22,7 +22,7 @@ modSAtree(
   na.fill = "NONE",
   savedata = FALSE,
   savesteps = FALSE,
-  multest = FALSE,
+  multest = TRUE,
   addSAdomsdf = TRUE,
   SAdomvars = NULL,
   savemultest = FALSE,
