@@ -555,7 +555,11 @@ modGBpop <- function(popType = "VOL",
       } 
       strwtvar <- "strwt" 
       if (!is.null(unitzonal) && is.null(stratalut)) {
-        stratalut <- strat.pivot(unitzonal, unitvars=c(unitvar, unitvar2), 
+	    byunitvars <- c(unitvar, unitvar2)
+		if ("AOI" %in% names(unitzonal)) {
+		  byunitvars <- c(byunitvars, "AOI")
+		}
+        stratalut <- strat.pivot(unitzonal, unitvars=byunitvars, 
                       strvar, strwtvar=strwtvar)
 		pivot <- FALSE
       }
@@ -740,7 +744,7 @@ modGBpop <- function(popType = "VOL",
     areawt2 <- popcheck$areawt2
     tpropvars <- popcheck$tpropvars
   }
- 
+
   if (popType %in% c("CHNG", "GRM")) {
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
@@ -831,15 +835,26 @@ modGBpop <- function(popType = "VOL",
   ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
-  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
-              unitvar=unitvar, unitvar2=unitvar2, 
-              unitarea=unitarea, areavar=areavar, 
-              minplotnum.unit=minplotnum.unit, unit.action=unit.action, 
-              strata=strata, auxlut=stratalut, strvar=strvar, 
-              stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
-              removeifnostrata=TRUE, getwt=getwt, 
-              getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT,
-              auxtext="stratalut")
+  auxdat <- check.auxiliary(pltx = pltassgnx, 
+                            puniqueid = pltassgnid,
+							unitvar = unitvar, 
+							unitvar2 = unitvar2,
+							unitarea = unitarea, 
+							areavar = areavar,
+							minplotnum.unit = minplotnum.unit, 
+							unit.action = unit.action,
+							strata = strata, 
+							auxlut = stratalut, 
+							strvar = strvar,
+							stratcombine = stratcombine, 
+							minplotnum.strat = minplotnum.strat,
+							removeifnostrata = TRUE, 
+							getwt = getwt,
+							getwtvar = getwtvar, 
+							strwtvar = strwtvar, 
+							P2POINTCNT = P2POINTCNT,
+							auxtext = "stratalut",
+							AOI = popFilter$AOIonly)
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
@@ -883,7 +898,7 @@ modGBpop <- function(popType = "VOL",
     if (adj == "samp") {
       message("calculating adjustment factors...")
     }      
-
+	
     if (popType %in% c("ALL", "VOL", "CURR")) {
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 
@@ -1023,7 +1038,6 @@ modGBpop <- function(popType = "VOL",
     setkeyv(unitarea, unitvars)
   }
   setorderv(stratalut, c(unitvars, strvar))
-
 
   if (returndata) {
     returnlst$popType <- popType

@@ -672,7 +672,9 @@ modMApop <- function(popType="VOL",
                   makedummy = makedummy, 
                   npixelvar = npixelvar, 
                   standardize = standardize,
-                  auxtext = "unitlut", removetext = "unitarea", )
+                  auxtext = "unitlut", 
+				  removetext = "unitarea", 
+				  AOI = popFilter$AOIonly)
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar

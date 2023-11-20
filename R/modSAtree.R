@@ -709,17 +709,36 @@ modSAtree <- function(SApopdatlst = NULL,
       tdomdat <- treedat$tdomdat
 
       if (rowcolinfo$rowvar != "TOTAL") {
-        if (!rowcolinfo$row.add0) {
+        #if (!rowcolinfo$row.add0) {
           if (any(is.na(tdomdat[[rowcolinfo$rowvar]]))) {
-            tdomdat <- tdomdat[!is.na(tdomdat[[rowcolinfo$rowvar]]), ]
-          }
-        }
-        if (!rowcolinfo$col.add0) {
-          if (any(is.na(tdomdat[[rowcolinfo$colvar]]))) {
-            tdomdat <- tdomdat[!is.na(tdomdat[[rowcolinfo$colvar]]), ]
-          }
+	        if (!row.FIAname) {
+		      rval <- ifelse (any(!is.na(tdomdat[[rowcolinfo$rowvar]]) & tdomdat[[rowcolinfo$rowvar]] == 0), 
+			                          max(tdomdat[[rowcolinfo$rowvar]], na.rm=TRUE), 0)
+		      tdomdat[is.na(tdomdat[[rowcolinfo$rowvar]]), rowcolinfo$rowvar] <- rval
+		      levels(uniquerow[[rowcolinfo$rowvar]]) <- c(levels(uniquerow[[rowcolinfo$rowvar]]), as.character(rval))
+		      uniquerow[is.na(uniquerow[[rowcolinfo$rowvar]]), rowcolinfo$rowvar] <- as.character(rval)
+            } else {
+              tdomdat <- tdomdat[!is.na(tdomdat[[rowcolinfo$rowvar]]), ]
+            }
+		  }
+        #}
+        if (rowcolinfo$colvar != "NONE") {
+          #if (!rowcolinfo$col.add0) {
+            if (any(is.na(tdomdat[[rowcolinfo$colvar]]))) {
+	          if (!col.FIAname) {
+		        cval <- ifelse (any(!is.na(tdomdat[[rowcolinfo$colvar]]) & tdomdat[[rowcolinfo$colvar]] == 0), 
+				                        max(tdomdat[[rowcolinfo$colvar]], na.rm=TRUE), 0)
+		        tdomdat[is.na(tdomdat[[rowcolinfo$colvar]]), rowcolinfo$colvar] <- cval
+			    levels(uniquecol[[rowcolinfo$colvar]]) <- c(levels(uniquecol[[colvar]]), as.character(cval))
+			    uniquecol[is.na(uniquecol[[rowcolinfo$colvar]]), rowcolinfo$colvar] <- as.character(cval)
+		      } else {
+                tdomdat <- tdomdat[!is.na(tdomdat[[rowcolinfo$colvar]]), ]
+              }
+			}
+          #}
         }
       }
+	  
       tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
       #tdomdat <- DT_NAto0(tdomdat, estvar.name, 0)
     }

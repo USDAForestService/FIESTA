@@ -20,7 +20,7 @@ DBgetPlots(
   isseed = FALSE,
   biojenk = FALSE,
   greenwt = FALSE,
-  plotgeom = FALSE,
+  addplotgeom = FALSE,
   othertables = NULL,
   getxy = TRUE,
   xy_datsource = NULL,
@@ -95,7 +95,7 @@ database (SUBPLOT, SUBP_COND).}
 
 \item{greenwt}{Logical. If TRUE, green weight biomass is calculated.}
 
-\item{plotgeom}{Logical. If TRUE, variables from the PLOTGEOM table are
+\item{addplotgeom}{Logical. If TRUE, variables from the PLOTGEOM table are
 appended to the plot table.}
 
 \item{othertables}{String Vector. Name of other table(s) in FIADB to include
