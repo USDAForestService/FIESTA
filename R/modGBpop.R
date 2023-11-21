@@ -223,6 +223,7 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @examples 
+#' \donttest{
 #' GBpopdat <- modGBpop(
 #' popTabs = list(cond = FIESTA::WYcond,  
 #'                tree = FIESTA::WYtree,        
@@ -239,6 +240,7 @@
 #' )
 #' 
 #' str(GBpopdat, max.level = 1)
+#' }
 #' @export modGBpop
 modGBpop <- function(popType = "VOL",
                      popTabs = popTables(),

@@ -252,6 +252,7 @@ in rowlut/collut, set row.orderby/col.orderby equal to the variable name of
 the code variable in rowlut/collut.
 }
 \examples{
+\donttest{
 GBpopdat <- modGBpop(
 popTabs = list(cond = FIESTA::WYcond,  
                tree = FIESTA::WYtree,        
@@ -281,6 +282,7 @@ rowvar = "FORTYPCD",
 sumunits = TRUE            
 )
 str(forest_area_by_forest_type, max.level = 1)
+}
 }
 \references{
 Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.;

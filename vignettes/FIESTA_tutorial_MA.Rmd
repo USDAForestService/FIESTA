@@ -34,6 +34,10 @@ knitr::knit_hooks$set(
 )
 ```
 
+```{r, echo=-1}
+data.table::setDTthreads(2)
+```
+
 ## Model-Assisted (MA) module overview
 
 `FIESTA`'s Model-Assisted (MA) module calculates population estimates and their sampling errors by taking advantage of available model-assisted survey estimators from the `mase` R package (McConville, et al. 2018). These estimators can use a variety of auxiliary data to build models and predict over a response variable of interest, while using a bias-correction term so that the bias of the model does not depend on model mis-specification. 

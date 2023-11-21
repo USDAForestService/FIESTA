@@ -202,6 +202,7 @@
 #' Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.
 #' @keywords data
 #' @examples 
+#' \donttest{
 #' # Load necessary data from FIESTA
 #' ## Point data
 #' icepntfn <- system.file("extdata",
@@ -259,7 +260,8 @@
 #'   title_opts = list(title.rowvar = "Land Cover (2011)")
 #' )
 #' 
-#' cover1.unit.area.sum$est             
+#' cover1.unit.area.sum$est   
+#' }          
 #' @export modPB
 modPB <- function(PBpopdat = NULL, 
                   tabtype = "PCT", 
