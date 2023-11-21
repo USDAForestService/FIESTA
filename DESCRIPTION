@@ -23,7 +23,11 @@ Authors@R:
              family = "White",
              role = c("aut", "cre"),
              email = "graysonwhite13@gmail.com",
-             comment = c(ORCID = "0000-0003-4993-2792")))
+             comment = c(ORCID = "0000-0003-4993-2792")),
+      person(given = "Joshua",
+             family = "Yamamoto",
+             role = "aut",
+             email = "joshuayamamoto5@gmail.com"))
 Description: A research estimation tool for analysts that work with sample-based
     inventory data from the U.S. Department of Agriculture, Forest Service,
     Forest Inventory and Analysis (FIA) Program. 
