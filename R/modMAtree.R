@@ -695,15 +695,18 @@ modMAtree <- function(MApopdat,
     xpop_totals <- data.frame(as.list(xpop_totals))
     
     N <- sum(npixels[["npixels"]])
+    xpop_means <- xpop_totals/N
     
     # since we want to do modelselection + get the coefficients, just use MAest.greg
     coefs_select <- MAest.greg(y = y,
                                N = N,
                                x_sample = setDF(xsample),
-                               x_pop = xpop_totals,
+                               x_pop = xpop_means,
                                modelselect = TRUE)
+  
     
     predselect.overall <- coefs_select$predselect
+  
     prednames <- names(predselect.overall[ ,(!is.na(predselect.overall))[1,], with = F])
     message(paste0("Predictors ", "[", paste0(prednames, collapse = ", "), "]", " were chosen in model selection.\n"))
   
