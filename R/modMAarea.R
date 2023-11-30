@@ -596,11 +596,12 @@ modMAarea <- function(MApopdat,
     xpop_totals <- data.frame(as.list(xpop_totals))
     
     N <- sum(npixels[["npixels"]])
+    xpop_means <- xpop_totals/N
     
     coefs_select <- MAest.greg(y = y,
                                N = N,
                                x_sample = setDF(xsample),
-                               x_pop = xpop_totals,
+                               x_pop = xpop_means,
                                modelselect = TRUE)
     
     predselect.overall <- coefs_select$predselect
