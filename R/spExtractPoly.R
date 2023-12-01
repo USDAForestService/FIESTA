@@ -406,7 +406,10 @@ spExtractPoly <- function(xyplt,
                                          },
                                          id = xy.uniqueid)
       
-      spxyext <- data.table::rbindlist(st_join_lst)
+      # rbindlist not perfectly compatible with sf so need to set as 
+      # data.frame and then sf class
+      spxyext_dt <- data.table::rbindlist(st_join_lst)
+      spxyext <- sf::st_as_sf(data.table::setDF(spxyext_dt))
       parallel::stopCluster(cl)
     } else {
       spxyext <- sf::st_join(sppltx, polyv)
