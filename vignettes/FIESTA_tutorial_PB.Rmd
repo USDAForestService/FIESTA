@@ -35,6 +35,10 @@ knitr::knit_hooks$set(
 )
 ```
 
+```{r, echo=-1}
+data.table::setDTthreads(2)
+```
+
 
 ## Photo-based (PB) module overview
 

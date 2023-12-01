@@ -289,6 +289,7 @@ classes following in order, it is combined with the estimation unit previous
 in order.
 }
 \examples{
+\donttest{
 GBpopdat <- modGBpop(
 popTabs = list(cond = FIESTA::WYcond,  
                tree = FIESTA::WYtree,        
@@ -305,6 +306,7 @@ strata_opts = strata_options(getwt = TRUE)
 )
 
 str(GBpopdat, max.level = 1)
+}
 }
 \references{
 Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.;

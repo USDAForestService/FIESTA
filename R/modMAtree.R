@@ -589,20 +589,34 @@ modMAtree <- function(MApopdat,
   tdomdat <- treedat$tdomdat
 
   if (rowvar != "TOTAL") {
-    if (!row.add0) {
+    #if (!row.add0) {
       if (any(is.na(tdomdat[[rowvar]]))) {
-        tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]), ]
-      }
-    }
-    if (colvar != "NONE") {
-      if (!col.add0) {
-        if (any(is.na(tdomdat[[colvar]]))) {
-          tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]), ]
+	    if (!row.FIAname) {
+		  rval <- ifelse (any(!is.na(tdomdat[[rowvar]]) & tdomdat[[rowvar]] == 0), max(tdomdat[[rowvar]], na.rm=TRUE), 0)
+		  tdomdat[is.na(tdomdat[[rowvar]]), rowvar] <- rval
+		  levels(uniquerow[[rowvar]]) <- c(levels(uniquerow[[rowvar]]), as.character(rval))
+		  uniquerow[is.na(uniquerow[[rowvar]]), rowvar] <- as.character(rval)
+        } else {
+          tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]), ]
         }
-      }
+	   }
+    #}
+    if (colvar != "NONE") {
+      #if (!col.add0) {
+        if (any(is.na(tdomdat[[colvar]]))) {
+	      if (!col.FIAname) {
+		    cval <- ifelse (any(!is.na(tdomdat[[colvar]]) & tdomdat[[colvar]] == 0), max(tdomdat[[colvar]], na.rm=TRUE), 0)
+		    tdomdat[is.na(tdomdat[[colvar]]), colvar] <- cval
+			levels(uniquecol[[colvar]]) <- c(levels(uniquecol[[colvar]]), as.character(cval))
+			uniquecol[is.na(uniquecol[[colvar]]), colvar] <- as.character(cval)
+		  } else {
+            tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]), ]
+          }
+		}
+      #}
     }
   }
-
+  
   ## Merge tdomdat with condx
   xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
   condx <- xchk$tab1
@@ -681,15 +695,18 @@ modMAtree <- function(MApopdat,
     xpop_totals <- data.frame(as.list(xpop_totals))
     
     N <- sum(npixels[["npixels"]])
+    xpop_means <- xpop_totals/N
     
     # since we want to do modelselection + get the coefficients, just use MAest.greg
     coefs_select <- MAest.greg(y = y,
                                N = N,
                                x_sample = setDF(xsample),
-                               x_pop = xpop_totals,
+                               x_pop = xpop_means,
                                modelselect = TRUE)
+  
     
     predselect.overall <- coefs_select$predselect
+  
     prednames <- names(predselect.overall[ ,(!is.na(predselect.overall))[1,], with = F])
     message(paste0("Predictors ", "[", paste0(prednames, collapse = ", "), "]", " were chosen in model selection.\n"))
   

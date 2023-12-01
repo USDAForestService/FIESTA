@@ -198,14 +198,21 @@ spClipRast <- function(rast,
   
   ## Check NODATA
   if (is.null(NODATA)) {
-    if (!is.null(NODATA) && (!is.numeric(NODATA) || length(NODATA) > 1)) {
+	if (is.na(nodata)) {
+	  nodata <- getDefaultNodata(rast.dtyp)
+	} 
+  } else {
+    if (!is.numeric(NODATA) || length(NODATA) > 1) {
       stop("NODATA must be numeric")
-    }
+	} else {
+	  nodata <- NODATA
+	}
   }
   
   ## Check buffdist
-  if (!is.null(buffdist)) 
+  if (!is.null(buffdist)) {
     if (!is.numeric(buffdist)) stop("invalid buffdist... must be numeric")
+  }
   
   ## Check maskByPolygons
   maskByPolygons <- pcheck.logical(maskByPolygons, varnm="maskByPolygons", 
@@ -277,8 +284,14 @@ spClipRast <- function(rast,
   
   
   ## Clip raster
-  clipRaster(src=clippolyvprj, srcfile=rastfn, src_band=bands, dstfile=outfilenm, 
-             fmt=fmt, maskByPolygons=maskByPolygons, init=NODATA, dstnodata=NODATA, 
+  clipRaster(src = clippolyvprj, 
+             srcfile = rastfn, 
+			 src_band = bands, 
+			 dstfile = outfilenm, 
+             fmt = fmt, 
+			 maskByPolygons = maskByPolygons, 
+			 init = nodata, 
+			 dstnodata = nodata, 
              options = co)
    
   return(outfilenm)    

@@ -1,8 +1,8 @@
 Package: FIESTA
 Type: Package
 Title: Forest Inventory Estimation and Analysis
-Version: 3.5.4.9000
-Date: 2023-05-30
+Version: 3.6.0.9000
+Date: 2023-11-21
 Authors@R:
     c(person(given = "Tracey",
              family = "Frescino",
@@ -23,7 +23,11 @@ Authors@R:
              family = "White",
              role = c("aut", "cre"),
              email = "graysonwhite13@gmail.com",
-             comment = c(ORCID = "0000-0003-4993-2792")))
+             comment = c(ORCID = "0000-0003-4993-2792")),
+      person(given = "Joshua",
+             family = "Yamamoto",
+             role = "aut",
+             email = "joshuayamamoto5@gmail.com"))
 Description: A research estimation tool for analysts that work with sample-based
     inventory data from the U.S. Department of Agriculture, Forest Service,
     Forest Inventory and Analysis (FIA) Program. 
@@ -32,7 +36,7 @@ Depends:
 Imports:
     data.table,
     DBI,
-    FIESTAutils (>= 1.1.8.9000),
+    FIESTAutils (>= 1.2.0),
     gdalraster,
     grDevices,
     graphics,
@@ -41,7 +45,6 @@ Imports:
     sf,
     sqldf,
     utils
-Remotes: USDAForestService/FIESTAutils
 Suggests: 
     knitr,
     geodata,

@@ -35,6 +35,10 @@ knitr::knit_hooks$set(
 )
 ```
 
+```{r, echo=-1}
+data.table::setDTthreads(2)
+```
+
 ## Overview
 
 `FIESTA`'s Estimation Modules combine multiple functions from `FIESTA` or other packages to generate estimates across a user-defined population(s) using different estimation strategies. Each module has an associated `mod*pop` function for compiling the population data and calculations, including adjustments for nonresponse and standardizing auxiliary data. The output form the `mod*pop` functions are input directly into the `mod*estimation` modules.

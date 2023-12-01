@@ -240,6 +240,7 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @examples
+#' \donttest{
 #' GBpopdat <- modGBpop(
 #'   popTabs = list(cond = FIESTA::WYcond,  
 #'                  tree = FIESTA::WYtree,        
@@ -275,6 +276,7 @@
 #'   returntitle = TRUE           # out - return title information
 #' )
 #' str(tree1.2, max.level = 1)
+#' }
 #' @export modGBtree
 modGBtree <- function(GBpopdat, 
                       estvar, 
@@ -558,20 +560,33 @@ modGBtree <- function(GBpopdat,
   tdomdat <- treedat$tdomdat
 
   if (rowvar != "TOTAL") {
-    if (!row.add0) {
+    #if (!row.add0) {
       if (any(is.na(tdomdat[[rowvar]]))) {
-        tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]), ]
-      }
-    }
-    if (colvar != "NONE") {
-      if (!col.add0) {
-        if (any(is.na(tdomdat[[colvar]]))) {
-          tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]), ]
+	    if (!row.FIAname) {
+		  rval <- ifelse (any(!is.na(tdomdat[[rowvar]]) & tdomdat[[rowvar]] == 0), max(tdomdat[[rowvar]], na.rm=TRUE), 0)
+		  tdomdat[is.na(tdomdat[[rowvar]]), rowvar] <- rval
+		  levels(uniquerow[[rowvar]]) <- c(levels(uniquerow[[rowvar]]), as.character(rval))
+		  uniquerow[is.na(uniquerow[[rowvar]]), rowvar] <- as.character(rval)
+        } else {
+          tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]), ]
         }
-      }
+	   }
+    #}
+    if (colvar != "NONE") {
+      #if (!col.add0) {
+        if (any(is.na(tdomdat[[colvar]]))) {
+	      if (!col.FIAname) {
+		    cval <- ifelse (any(!is.na(tdomdat[[colvar]]) & tdomdat[[colvar]] == 0), max(tdomdat[[colvar]], na.rm=TRUE), 0)
+		    tdomdat[is.na(tdomdat[[colvar]]), colvar] <- cval
+			levels(uniquecol[[colvar]]) <- c(levels(uniquecol[[colvar]]), as.character(cval))
+			uniquecol[is.na(uniquecol[[colvar]]), colvar] <- as.character(cval)
+		  } else {
+            tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]), ]
+          }
+		}
+      #}
     }
-  }
-  
+  } 
   ## Merge tdomdat with condx
   xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
   condx <- xchk$tab1
@@ -584,7 +599,6 @@ modGBtree <- function(GBpopdat,
   tdomvarlst <- treedat$tdomvarlst
   estunits <- treedat$estunits
  
-
   ###############################################################################
   ### Get titles for output tables
   ###############################################################################
@@ -651,7 +665,6 @@ modGBtree <- function(GBpopdat,
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		    by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
     tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
-
     unit_rowest <- GBest.pbar(sumyn = estvar.name, 
                               ysum = tdomdatsum,
                               uniqueid = cuniqueid, 
@@ -659,7 +672,7 @@ modGBtree <- function(GBpopdat,
                               unitvar = unitvar, 
                               strvar = strvar, 
                               domain = rowvar)
-
+							  
     if (colvar != "NONE") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		      by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]

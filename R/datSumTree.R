@@ -124,6 +124,7 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
+#' \donttest{
 #' # Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
 #' treesum <- datSumTree(tree = FIESTA::WYtree,
 #'                       tsumvarlst = "TPA_UNADJ")$treedat
@@ -131,6 +132,7 @@
 #' # Check results
 #' treesum[treesum$PLT_CN == 40404737010690,]
 #' FIESTA::WYtree[FIESTA::WYtree$PLT_CN == 40404737010690,]
+#' }
 #' @export datSumTree
 datSumTree <- function(tree = NULL,
                        seed = NULL, 

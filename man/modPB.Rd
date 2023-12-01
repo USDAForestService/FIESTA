@@ -248,6 +248,7 @@ in rowlut/collut, set row.orderby/col.orderby equal to the variable name of
 the code variable in rowlut/collut.
 }
 \examples{
+\donttest{
 # Load necessary data from FIESTA
 ## Point data
 icepntfn <- system.file("extdata",
@@ -305,7 +306,8 @@ cover1.unit.area.sum <- modPB(
   title_opts = list(title.rowvar = "Land Cover (2011)")
 )
 
-cover1.unit.area.sum$est             
+cover1.unit.area.sum$est   
+}          
 }
 \references{
 Frescino, Tracey S.; Moisen, Gretchen G.; Megown, Kevin A.;

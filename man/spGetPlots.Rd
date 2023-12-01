@@ -26,7 +26,7 @@ spGetPlots(
   clipxy = TRUE,
   pjoinid = NULL,
   showsteps = FALSE,
-  returnxy = FALSE,
+  returnxy = TRUE,
   returndata = TRUE,
   savedata = FALSE,
   savexy = FALSE,

@@ -164,7 +164,7 @@ spGetPlots <- function(bnd = NULL,
                        clipxy = TRUE, 
                        pjoinid = NULL, 
                        showsteps = FALSE, 
-					   returnxy = FALSE,
+					   returnxy = TRUE,
                        returndata = TRUE,
                        savedata = FALSE,
 					   savexy = FALSE,
@@ -321,7 +321,7 @@ spGetPlots <- function(bnd = NULL,
       }
     }
   }
- 
+
   ##################################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################################      
@@ -427,7 +427,7 @@ spGetPlots <- function(bnd = NULL,
     evalCur=evalAll <- FALSE
     evalEndyr <- NULL
   }
- 
+
   ## Check spXYdat
   if (!is.null(spXYdat)) {
     spxy <- spXYdat$spxy
@@ -463,7 +463,16 @@ spGetPlots <- function(bnd = NULL,
       ## Check xyjoinid
       xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 		checklst=names(pltids), gui=gui, caption="JoinID in pltids?",
- 		stopifnull=TRUE)  
+ 		stopifnull=FALSE)  
+	  if (is.null(xyjoinid)) {
+	    message("xyjoinid is NULL... using xy.uniqueid: ", xy.uniqueid)
+	    xyjoinid <- xy.uniqueid
+
+        ## Check xyjoinid
+        xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
+		  checklst=names(pltids), gui=gui, caption="JoinID in pltids?",
+ 		  stopifnull=TRUE)
+      }		  
  
       ## Check stbnd.att
       stbnd.att <- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
