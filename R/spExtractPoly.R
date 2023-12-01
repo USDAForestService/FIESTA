@@ -412,9 +412,6 @@ spExtractPoly <- function(xyplt,
       spxyext <- sf::st_join(sppltx, polyv)
       spxyext <- spxyext[!duplicated(spxyext[[xy.uniqueid]]), ]
     }
-    
-    
-    spxyext <- unique(sf::st_join(sppltx, polyv))
 
     ## Set polyvarnm
     ########################################################  
