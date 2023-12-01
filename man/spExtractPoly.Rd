@@ -19,7 +19,8 @@ spExtractPoly(
   exportNA = FALSE,
   spMakeSpatial_opts = NULL,
   savedata_opts = NULL,
-  gui = FALSE
+  gui = FALSE,
+  ncores = NULL
 )
 }
 \arguments{
@@ -69,6 +70,8 @@ of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'polyext'.}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
+
+\item{ncores}{Integer. Number of cores to use for extracting values.}
 }
 \value{
 \item{pltdat}{ SpatialPointsDataFrame object or data frame. Input
