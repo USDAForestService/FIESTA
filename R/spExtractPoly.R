@@ -43,6 +43,7 @@
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'polyext'.
 #' @param gui Logical. If gui, user is prompted for parameters.
+#' @param ncores Integer. Number of cores to use for extracting values. 
 #'
 #' @return \item{pltdat}{ SpatialPointsDataFrame object or data frame. Input
 #' point data with extracted raster values appended. For multi-part polygons,
@@ -113,7 +114,8 @@ spExtractPoly <- function(xyplt,
                           exportNA = FALSE, 
                           spMakeSpatial_opts = NULL,
                           savedata_opts = NULL, 
-                          gui = FALSE){
+                          gui = FALSE,
+                          ncores = NULL){
   ######################################################################################
   ## DESCRIPTION: 
   ## Extracts values from one or more polygon layers and appends to input spatial layer 
@@ -293,6 +295,27 @@ spExtractPoly <- function(xyplt,
       out_layer <- "polyext"
     }
   }
+  
+  # check ncores arg
+  if (!is.null(ncores)) {
+    if (!isNamespaceLoaded('parallel')) {
+      stop("ncores > 1 requires 'parallel' namespace.")
+    }
+    if (length(ncores) != 1) {
+      stop("ncores must be an integer vector of length == 1")
+    } else if (!is.numeric(ncores)) {
+      stop("ncores must be a numeric value")
+    } else if (ncores > 1) {
+      nbrcores <- parallel::detectCores()
+      if (ncores > nbrcores) {
+        message("ncores is greater than number of available cores")
+        ncores <- nbrcores
+      }
+      message("Using ", nbrcores, " cores...")
+    }
+  } else {
+    ncores <- 1
+  }
  
   ########################################################################
   ### DO THE WORK
@@ -363,8 +386,35 @@ spExtractPoly <- function(xyplt,
 
     ## Extract data from polygon
     ######################################################## 
-    #spxyext <- sf::st_intersection(sppltx, polyv[, polyvars])
-    spxyext <- unique(sf::st_join(sppltx, polyv))
+    if (ncores > 1) {
+      # split-apply-combine approach
+      cl <- parallel::makeCluster(ncores)
+      parallel::clusterExport(cl, "polyv", envir = environment())
+      parallel::clusterEvalQ(cl, library(sf))
+      
+      n <- nrow(sppltx)
+      sections <- rep(1:ncores, each = ceiling(n/ncores), length.out = n)
+      sppltx_lst <- split(sppltx, f = sections)
+      
+      # st_join each section in parallel
+      # remove duplicate plots at this step too
+      st_join_lst <- parallel::parLapply(cl,
+                                         X = sppltx_lst,
+                                         fun = function(x, id) {
+                                           ext <- sf::st_join(x, polyv)
+                                           ext[!duplicated(ext[[id]]), ]
+                                         },
+                                         id = xy.uniqueid)
+      
+      # rbindlist not perfectly compatible with sf so need to set as 
+      # data.frame and then sf class
+      spxyext_dt <- data.table::rbindlist(st_join_lst)
+      spxyext <- sf::st_as_sf(data.table::setDF(spxyext_dt))
+      parallel::stopCluster(cl)
+    } else {
+      spxyext <- sf::st_join(sppltx, polyv)
+      spxyext <- spxyext[!duplicated(spxyext[[xy.uniqueid]]), ]
+    }
 
     ## Set polyvarnm
     ########################################################  
