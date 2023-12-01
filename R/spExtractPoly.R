@@ -299,10 +299,10 @@ spExtractPoly <- function(xyplt,
   # check ncores arg
   if (!is.null(ncores)) {
     if (!isNamespaceLoaded('parallel')) {
-      stop("ncores > 1 requres 'parallel' namespace.")
+      stop("ncores > 1 requires 'parallel' namespace.")
     }
     if (length(ncores) != 1) {
-      stop("ncores must be an integer vector fo length == 1")
+      stop("ncores must be an integer vector of length == 1")
     } else if (!is.numeric(ncores)) {
       stop("ncores must be a numeric value")
     } else if (ncores > 1) {
