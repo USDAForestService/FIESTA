@@ -17,11 +17,11 @@ test_that("datPivot Testing", {
                     xfilter = "STATUSCD == 1")
 
   CN <- 40404730010690
-  test2_subset <- test2[test2$PLT_CN == CN, "113",][[1]]
+  test2_subset <- round(test2[test2$PLT_CN == CN, "X113",][[1]], 2)
   test2_subset_char <- as.character(test2_subset)
 
   input1 <- WYtree[WYtree$PLT_CN == CN, ]
-  input2 <- sum(input1[input1$SPCD == 113 & input1$STATUSCD == 1, "VOLCFNET"])
+  input2 <- round(sum(input1[input1$SPCD == 113 & input1$STATUSCD == 1, "VOLCFNET"]), 2)
   input3_final <- formatC(input2)
 
   expect_equal(test2_subset_char, input3_final)
