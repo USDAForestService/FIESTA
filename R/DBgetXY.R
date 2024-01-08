@@ -257,6 +257,10 @@ DBgetXY <- function (states = NULL,
   ####################################################################
   intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
 		title="Single intensity?", first="YES", gui=gui)
+  intensity <- NULL
+  if (intensity1) {
+	intensity <- 1
+  }
 
   ###########################################################################
   ## Check XY database 
@@ -584,9 +588,10 @@ DBgetXY <- function (states = NULL,
       rm(xy)	  
     }
   } else if (xy_datsource == "sqlite") {
-  
+
     if (!is.character(xy)) {
-      stop("invalid xy")
+      message("invalid xy")
+	  return(NULL)
     }
     ## Check pop_plot_stratum_assgn
   	if (iseval) {
@@ -927,12 +932,12 @@ DBgetXY <- function (states = NULL,
 				"\n ORDER BY ", invarsA) 
     }
   } 
-  
 
   ###########################################################################
   ## Build filter
   ###########################################################################
   if (xyisplot || is.null(plotnm)) {
+
     pnm <- xynm
     pid <- xy.uniqueid
     pflds <- xyflds
@@ -944,7 +949,7 @@ DBgetXY <- function (states = NULL,
 	pltvars <- pvars
   }
   popSURVEY <- FALSE
-  if (!is.null(SURVEY) && "SRV_CN" %in% names(get(pnm))) {
+  if (!is.null(SURVEY) && "SRV_CN" %in% pltflds) {
     popSURVEY <- TRUE
   }
 
@@ -999,9 +1004,9 @@ DBgetXY <- function (states = NULL,
       setkeyv(get(pnm), pid)
 	} 
   
-    withqry <- getwithqry(evalid = unlist(evalidlist), 
+    withqry <- getpwithqry(evalid = unlist(evalidlist), 
            pjoinid = pid,
-           intensity1 = intensity1,
+           intensity = intensity,
            plotnm = pnm,
 		   pltflds = pflds,
            ppsanm = ppsanm,
@@ -1021,9 +1026,9 @@ DBgetXY <- function (states = NULL,
 		setkeyv(get(pnm), pid)
 	  } 
 
-	  withqry <- getwithqry(states = stcds, 
+	  withqry <- getpwithqry(states = stcds, 
            pjoinid = pid,
-           intensity1 = intensity1,
+           intensity = intensity,
            plotnm = pnm,
 		   pltflds = pflds,
            invyrs = unlist(invyrs),
@@ -1038,9 +1043,9 @@ DBgetXY <- function (states = NULL,
 		setkeyv(get(pnm), pid)
 	  } 
 	
-      withqry <- getwithqry(states = stcds, 
+      withqry <- getpwithqry(states = stcds, 
            pjoinid = pid,
-           intensity1 = intensity1,
+           intensity = intensity,
            plotnm = pnm,
 		   pltflds = pflds,
            measyears = unlist(measyrs),
@@ -1058,12 +1063,12 @@ DBgetXY <- function (states = NULL,
 		setkeyv(get(pnm), keyvars)
 	  } 
 	  	  		
-      withqry <- getwithqry(states = stcds, 
+      withqry <- getpwithqry(states = stcds, 
 	                        plotCur = TRUE,
 	                        Endyr = measEndyr,	                        
                             varCur = varCur, 
                             SCHEMA. = SCHEMA., 
-                            intensity1 = intensity1, 
+                            intensity = intensity, 
                             plotnm = pnm,
                             pjoinid = pid,
                             surveynm = surveynm,
@@ -1078,9 +1083,9 @@ DBgetXY <- function (states = NULL,
 		setkeyv(get(pnm), pid)
 	  } 
 	
-      withqry <- getwithqry(states = stcds, 
+      withqry <- getpwithqry(states = stcds, 
            pjoinid = pid,
-           intensity1 = intensity1,
+           intensity = intensity,
            plotnm = pnm,
 		   pltflds = pflds,
            allyrs = TRUE,

@@ -944,7 +944,7 @@ datSumTreeDom <- function(tree = NULL,
 		first="NO", gui=gui)
   if (!ACI) {
     if (is.null(condx) || (!"COND_STATUS_CD" %in% condnames)) {
-      #message("COND_STATUS_CD not in table, assuming forested plots with no ACI plots")
+      message("COND_STATUS_CD not in table, assuming forested plots with no ACI plots")
     } else {
       cond.ids <- na.omit(condx[COND_STATUS_CD == 1, 
 		do.call(paste, .SD), .SDcols = cjoinid])

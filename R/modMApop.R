@@ -466,7 +466,10 @@ modMApop <- function(popType="VOL",
   DWM_types <- c("CWD", "FWD_SM", "FWD_LG", "DUFF")
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "CHNG", "GRM")
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
-		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
+		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifinvalid=FALSE)
+  if (is.null(popType)) {
+    message("popType is invalid... must be from following list:\n", toString(evalTyplst))
+  }
   popevalid <- as.character(popFilter2$evalid)
   if (!is.null(popevalid)) {
     substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
@@ -674,7 +677,7 @@ modMApop <- function(popType="VOL",
                   standardize = standardize,
                   auxtext = "unitlut", 
 				  removetext = "unitarea", 
-				  AOI = popFilter$AOIonly)
+				  AOI = popFilter2$AOIonly)
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
@@ -757,6 +760,44 @@ modMApop <- function(popType="VOL",
   if (is.null(key(unitarea))) {
      setkeyv(unitarea, unitvar)
   }
+  
+  
+  ###################################################################################
+  ## Add new variables to pltcondx for estimation
+  ###################################################################################
+  ## Get order of pltcondx columns
+  pltcondxcols <- names(pltcondx)
+  newcols <- {}
+  
+  if (!"LANDSTATUSCD" %in% names(pltcondx) && "LANDSTATUSCD" %in% names(pltcondx)) {
+    ## Add LANDSTATUSCD based on the following lookup table
+    LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
+                    LANDSTATUSCD = c(rep(1, 6), rep(2, 2), rep(3, 6), 4),
+                    LANDSTATUSNM = c(rep("Timberland", 6), 
+                                     rep("Other forestland", 2), 
+                                     rep("Reserved productive forestland", 6),
+                                         "Reserved other forestland"))
+    pltcondx$LANDSTATUS <- with(pltcondx, COND_STATUS_CD * 100 + RESERVCD * 10 + SITECLCD)
+    pltcondx <- merge(pltcondx, LANDSTATUSlut, by="LANDSTATUS", all.x=TRUE)
+    pltcondx$LANDSTATUS <- NULL
+    newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
+  }
+
+  if (!"FORTYPGRPCD" %in% names(pltcondx) && "FORTYPCD" %in% names(pltcondx)) {
+    ## Add FORTYPGRPCD to pltcondx if not already in dataset
+    #pltcondx <- addFORTYPGRPCD(pltcondx)
+    ref_fortyp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
+    names(ref_fortyp) <- c("FORTYPCD", "FORTYPGRPCD")
+    pltcondx <- merge(pltcondx, ref_fortyp, by="FORTYPCD", all.x=TRUE)
+    newcols <- c(newcols, "FORTYPGRPCD")
+  }
+  
+  ## Move new columns to end of table
+  setcolorder(pltcondx, c(pltcondxcols, newcols))
+
+  
+  ## Build list of data to return
+  ###################################################################################
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
              cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter,
              unitarea=unitarea, areavar=areavar, areaunits=areaunits,

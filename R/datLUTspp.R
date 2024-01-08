@@ -242,8 +242,8 @@ datLUTspp <- function(x = NULL,
  
   ## Get unique values
   if (isdb && !dbreturn) {
-    uniqueval.qry <- paste("select distinct", xvar, "from", datnm,
-                           "order by", xvar)
+    uniqueval.qry <- paste("SELECT DISTINCT", xvar, "FROM", datnm,
+                           "ORDER BY", xvar)
     uniqueval <- na.omit(DBI::dbGetQuery(dbconn, uniqueval.qry))[[1]]
   } else if (!is.null(datx)) {
     if (!is.numeric(datx[[xvar]])) {
@@ -415,8 +415,8 @@ datLUTspp <- function(x = NULL,
     datx <- tabs$tab1
     LUTx <- tabs$tab2
  
-    all.x <- ifelse(add0, TRUE, FALSE)
-    xLUT <- merge(datx, LUTx, by.x=xvar, by.y=LUTvar, all.x=all.x)
+    #all.x <- ifelse(add0, TRUE, FALSE)
+    xLUT <- merge(datx, LUTx, by.x=xvar, by.y=LUTvar, all.x=TRUE)
  
     ## Get all values of LUTx newvars
     LUTnewvar.vals <- unique(unlist(lapply(LUTx[,LUTnewvar, with=FALSE], as.character)))

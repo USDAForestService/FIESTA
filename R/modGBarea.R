@@ -378,7 +378,6 @@ modGBarea <- function(GBpopdat,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  
   list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
   "ACI.filter", "unitarea", "unitvar", "stratalut", "strvar",
   "plotsampcnt", "condsampcnt")
@@ -407,6 +406,8 @@ modGBarea <- function(GBpopdat,
   strwtvar <- GBpopdat$strwtvar
   strunitvars <- c(unitvar, strvar)
   strata <- GBpopdat$strata
+  pop_fmt <- GBpopdat$pop_fmt
+  pop_dsn <- GBpopdat$pop_dsn
 
 
   ########################################
@@ -425,11 +426,12 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
-                cuniqueid=cuniqueid, condid=condid, sumunits=sumunits, 
-                landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
-                allin1=allin1, estround=estround, pseround=pseround,
-                divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
+  estdat <- check.estdata(esttype=esttype, pop_fmt=pop_fmt, pop_dsn=pop_dsn, 
+                pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid, 
+				sumunits=sumunits, totals=totals, landarea=landarea, 
+				ACI.filter=ACI.filter, pcfilter=pcfilter, 
+				allin1=allin1, estround=estround, pseround=pseround, 
+				divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
                 rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
                 outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
                 overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
@@ -439,6 +441,7 @@ modGBarea <- function(GBpopdat,
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
   sumunits <- estdat$sumunits
+  totals <- estdat$totals
   landarea <- estdat$landarea
   allin1 <- estdat$allin1
   estround <- estdat$estround
@@ -461,7 +464,7 @@ modGBarea <- function(GBpopdat,
   if ("INVYR" %in% names(pltcondf)) {
     invyr <- sort(unique(pltcondf$INVYR))
   }
- 
+
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -474,14 +477,16 @@ modGBarea <- function(GBpopdat,
                   title.rowvar=title.rowvar, title.colvar=title.colvar, 
                   rowlut=rowlut, collut=collut, 
                   rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-                  landarea=landarea)
+                  landarea=landarea, states=states,
+				  cvars2keep="COND_STATUS_CD")
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
-  domain <- rowcolinfo$grpvar
+  rowvarnm <- rowcolinfo$rowvarnm
+  colvarnm <- rowcolinfo$colvarnm
   row.orderby <- rowcolinfo$row.orderby
   col.orderby <- rowcolinfo$col.orderby
   row.add0 <- rowcolinfo$row.add0
@@ -492,7 +497,7 @@ modGBarea <- function(GBpopdat,
   title.rowgrp <- rowcolinfo$title.rowgrp
   grpvar <- rowcolinfo$grpvar
   rm(rowcolinfo)
-
+ 
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
     uniquecol <- data.table(unitarea[[unitvar]])
@@ -648,7 +653,7 @@ modGBarea <- function(GBpopdat,
   }
  
   if (!is.null(unit_grpest)) {
-    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, 
+   unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, 
                             uniquex=uniquerow, unitvar=unitvar, 
                             xvar.add0=row.add0, xvar2=colvar, 
                             uniquex2=uniquecol, xvar2.add0=col.add0)
@@ -743,7 +748,7 @@ modGBarea <- function(GBpopdat,
       totunit <- getpse(totunit, esttype=esttype)
     }      
   }          
- 
+
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
@@ -751,17 +756,21 @@ modGBarea <- function(GBpopdat,
   estnm <- "est" 
  
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	      unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
-	      unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
- 	      rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol,
- 	      rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
-	      allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref,
- 	      title.rowvar=title.rowvar, title.colvar=title.colvar, title.rowgrp=title.rowgrp,
- 	      title.unitvar=title.unitvar, title.estpse=title.estpse, title.est=title.est,
- 	      title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
-	      outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
-	      estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
-	      returntitle=returntitle, estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
+	        unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
+	        unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
+ 	        rowvar=rowvarnm, colvar=colvarnm, uniquerow=uniquerow, uniquecol=uniquecol,
+ 	        rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
+	        allin1=allin1, savedata=savedata, addtitle=addtitle, 
+			title.ref=title.ref, title.colvar=title.colvar, 
+			title.rowvar=title.rowvar, title.rowgrp=title.rowgrp,
+ 	        title.unitvar=title.unitvar, title.estpse=title.estpse, 
+			title.est=title.est, title.pse=title.pse, 
+			rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
+			outfolder=outfolder, outfn.date=outfn.date, 
+			overwrite=overwrite_layer, estnm=estnm, 
+	        estround=estround, pseround=pseround, divideby=divideby, 
+	        returntitle=returntitle, estnull=estnull, psenull=psenull, 
+			raw.keep0=raw.keep0) 
  
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
@@ -777,6 +786,18 @@ modGBarea <- function(GBpopdat,
   }
  
   if (rawdata) {
+    ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
+    UNITStot <- sort(unique(unit_totest[[unitvar]]))
+    NBRPLTtot <- stratalut[stratalut[[unitvar]] %in% UNITStot, list(NBRPLT = sum(n.strata, na.rm=TRUE)), 
+	                  by=unitvars]
+
+	if ("unit_totest" %in% names(tabs$rawdat)) {
+	  tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
+	}
+	if (sumunits && "totest" %in% names(tabs$rawdat)) {
+	  tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
+	}
+
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(cdomdat)
     if (savedata) {

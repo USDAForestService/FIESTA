@@ -418,6 +418,7 @@ tree1 <- modSAtree(
     estvar = estvar,             # est - net cubic-foot volume
     estvar.filter = live_trees   # est - live trees only
     )
+
 ```
 
 With both `modSAtree` and `modSAarea`, `FIESTA` will return your requested estimates specified with the `SApackage` and `SAmethod` arguments in the `est` item, but will return all possible estimates in the `multest` item. We can see these estimates below:

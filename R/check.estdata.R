@@ -1,12 +1,12 @@
-check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL, 
-    totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN", condid="CONDID", 
-	treex=NULL, seedx=NULL, vcondx=NULL, tuniqueid="PLT_CN",
-	estseed="none", woodland="Y", vuniqueid="PLT_CN", sumunits=FALSE, 
-	landarea=NULL, ACI.filter=NULL, pcfilter=NULL, TPA=TRUE, allin1=FALSE,
-	estround=6, pseround=3, divideby=NULL, addtitle=TRUE, returntitle=TRUE,
-	rawdata=FALSE, rawonly=FALSE, savedata=FALSE, outfolder=NULL,
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, outfn.pre=NULL, outfn.date=TRUE,
-	append_layer=FALSE, raw_fmt="csv", raw_dsn=NULL, gui=FALSE){
+check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE, 
+    pltcondf=NULL, cuniqueid="PLT_CN", condid="CONDID", treex=NULL, seedx=NULL, 
+	vcondx=NULL, tuniqueid="PLT_CN", vuniqueid="PLT_CN", sumunits=FALSE, 
+	estseed="none", woodland="Y", landarea=NULL, ACI.filter=NULL, pcfilter=NULL, 
+	TPA=TRUE, tpavar="TPA_UNADJ", allin1=FALSE, estround=6, pseround=3, 
+	divideby=NULL, addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
+	savedata=FALSE, outfolder=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
+	outfn.pre=NULL, outfn.date=TRUE, append_layer=FALSE, raw_fmt="csv", 
+	raw_dsn=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs
@@ -52,33 +52,45 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
 
   ## Check pop_fmt and pop_dsn
   ###############################################
-  if (!is.null(pop_fmt)) {
-    if (!pop_fmt %in% c("sqlite")) {
-      stop("invalid pop_fmt")
-    } 
+  if (!is.null(pop_dsn)) {
+    if (is.null(pop_fmt) || pop_fmt == "") {
+      #pop_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'shp')
+	  message("pop_fmt is invalid... checking pop_dsn extension")
+	  pop_ext <- getext(pop_dsn)
+	  if (pop_ext %in% c("db", "db3", "sqlite")) {
+        pop_fmt == "sqlite"
+	  } else { 
+	    stop("fmt not available")
+	  }
+	}
     if (pop_fmt == "sqlite") {
-      if (is.null(pop_dsn)) {
-        stop("pop_dsn is null")
-      } else {
-        conn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE, 
-                             createnew = FALSE, returnpath = FALSE)
-        if (is.null(conn)) {
-          stop("invalid database")
-        } else {
-          isdb <- TRUE
-        }
-        tablst <- DBI::dbListTables(conn)
-      }
+      conn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE, 
+                         createnew = FALSE, returnpath = FALSE)
     }
+	if (is.null(conn)) {
+      stop("invalid database")
+    } else {
+      isdb <- TRUE
+    }
+    tablst <- DBI::dbListTables(conn)
   }
 
-
+  ## Check pltcondf
+  ###########################################################################
+  pltcondf <- pcheck.table(pltcondf, conn = conn, stopifnull = TRUE, 
+                       stopifinvalid = TRUE)
+  setkeyv(pltcondf, c(cuniqueid, condid))
+  
   ###########################################################################
   ## Apply pcfilter (plot and cond filters) to pltcondf table
   ###########################################################################
   pltcondnmlst <- names(pltcondf)
-  pltcondf <- datFilter(x=pltcondf, xfilter=pcfilter, title.filter="plt filter?",
-		gui=gui, filternm="pcfilter", xnm="pltcondf")$xf
+  pltcondf <- datFilter(x = pltcondf, 
+                        xfilter = pcfilter, 
+						title.filter = "plt filter?",
+						gui = gui, 
+						filternm = "pcfilter", 
+						xnm = "pltcondf")$xf
   if (is.null(pltcondf)) {
     message(paste(pcfilter, "removed all records"))
     return(NULL)
@@ -148,6 +160,7 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
       return(NULL)
     }
   }
+
 
   ## Check sumunits
   ########################################################
@@ -260,7 +273,8 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
 	addtitle=addtitle, returntitle=returntitle, estround=estround, pseround=pseround,
  	landarea=landarea, rawdata=rawdata, rawonly=rawonly, savedata=savedata,
 	outfolder=outfolder, overwrite_layer=overwrite_layer, append_layer=append_layer,
-	rawfolder=rawfolder, raw_fmt=raw_fmt, raw_dsn=raw_dsn)
+	rawfolder=rawfolder, raw_fmt=raw_fmt, raw_dsn=raw_dsn, pop_fmt=pop_fmt, 
+	pop_dsn=pop_dsn)
 
 
   if (esttype %in% c("TREE", "RATIO", "SEED")) {
@@ -274,55 +288,61 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
       seedx <- NULL
     } else {
       if (is.null(seedx)) {
-        stop("no seedling data in population data")
+        message("no seedling data in population data")
+		return(NULL)
       }
     }
 
+ 	## Check treex and seedx
+    ###########################################################################
     if (estseed != "only") {
-      if (is.null(treex)) {
-        stop("must include tree data for esttype ", esttype)
-      }
- 
-      if (isdb) {
-        if (is.character(treex)) {
-          treef <- chkdbtab(tablst, treex, stopifnull=TRUE)
-        } else {
-          stop("treex must be character name for tree   table in database")
-        }
-        returnlst$treef <- treef
-      } else {
-        if (!is.data.frame(treex)) {
-          stop("treex must be a data.frame object")
-        }
-
-        ## Check that the values of tuniqueid in treex are all in cuniqueid in condf
+      treex <- pcheck.table(treex, conn = conn, stopifnull = TRUE, 
+                       stopifinvalid = TRUE, checkonly = TRUE)				
+      if (is.data.frame(treex)) {
+        ## Check the values of tuniqueid in treex are all in cuniqueid in pltcondf
         treef <- check.matchval(treex, pltcondf, tuniqueid, cuniqueid, 
                       tab1txt="tree", tab2txt="cond", subsetrows=TRUE)
         returnlst$treef <- setDT(treef)
-      }
-    }
-    if (estseed %in% c("add", "only")) {
-      if (is.null(seedx)) {
-        stop("must include seed data for estseed = ", estseed)
-      }
-
-      if (isdb) {
-        if (is.character(seedx)) {
-          seedf <- chkdbtab(tablst, seedx, stopifnull=TRUE)
-        } else {
-          stop("seed must be character name for seedling table in database")
-        }
-        returnlst$seedf <- seedf
+		treenames <- names(treef)
       } else {
-        if (!is.data.frame(seedx)) {
-          stop("treex must be a data.frame object")
-        }
-
+	    returnlst$treef <- treex
+		treenames <- DBI::dbListFields(conn, treex)
+	  }
+    
+      ## check tuniqueid in tree table
+      tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui,
+	                   checklst=treenames, caption="tuniqueid")
+	  ## set key 			   
+      setkeyv(treef, c(tuniqueid, condid))
+     }
+	
+    if (estseed %in% c("add", "only")) {
+      seedx <- pcheck.table(seedx, conn = conn, stopifnull = TRUE, 
+                       stopifinvalid = TRUE, checkonly = TRUE)
+      if (is.data.frame(seedx)) {
+        ## Check the values of tuniqueid in seedx are all in cuniqueid in pltcondf
         seedf <- check.matchval(seedx, pltcondf, tuniqueid, cuniqueid, 
                        tab1txt="seed", tab2txt="cond", subsetrows=TRUE)
         returnlst$seedf <- setDT(seedf)
+		seednames <- names(seedf)
+      } else {
+	    returnlst$seedf <- seedx
+		seednames <- DBI::dbListFields(conn, seedx)
       }
-    }
+ 
+      ## check tuniqueid in tree table
+      tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui,
+	                   checklst=seednames, caption="tuniqueid")
+ 	  ## set key 			   
+      setkeyv(seedf, c(tuniqueid, condid))
+
+	  ## check tuniqueid in seed table	
+      if (!tuniqueid %in% seednames) {
+	    message(tuniqueid, " not in seed table")
+	    return(NULL)
+	  }
+	}
+	
     returnlst$tuniqueid <- tuniqueid
     returnlst$estseed <- estseed
 	
@@ -331,17 +351,21 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
     woodland <- pcheck.varchar(var2check=woodland, varnm="woodland", 
 		checklst=woodlandlst, gui=gui, caption="Woodland?") 
 	returnlst$woodland <- woodland
-
   }
 
   if (esttype == "P2VEG") {
-    if (!is.null(vcondx)) {
-      ## Check that the values of vuniqueid in vcondsppx are all in cuniqueid in condf
-      vcondf <- check.matchval(vcondx, pltcondf, c(vuniqueid, condid), c(cuniqueid, condid),
-		tab1txt="vcondx", tab2txt="cond", subsetrows=TRUE)
-     returnlst$vcondf <- vcondf
-     returnlst$vuniqueid <- vuniqueid
-    }
+    vcondx <- pcheck.table(vcondx, conn = conn, stopifnull = TRUE, 
+                       stopifinvalid = TRUE, checkonly = TRUE)
+    if (is.data.frame(vcondx)) {
+      ## Check the values of vuniqueid in vcondsppx are all in cuniqueid in pltcondf
+      vcondf <- check.matchval(vcondx, pltcondf, c(vuniqueid, condid), 
+				c(cuniqueid, condid), tab1txt="vcondx", tab2txt="cond", 
+				subsetrows=TRUE)
+	  returnlst$vcondf <- vcondf
+	} else {
+      returnlst$vcondf <- vcondx
+	}
+    returnlst$vuniqueid <- vuniqueid
   }
 
   if (esttype %in% c("AREA", "TREE")) {
@@ -354,4 +378,3 @@ check.estdata <- function(esttype, pop_fmt=NULL, pop_dsn=NULL,
 
   return(returnlst)
 }
-

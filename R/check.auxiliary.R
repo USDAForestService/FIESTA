@@ -362,7 +362,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
                                unitvar=unitvar, strvar=strvar, 
                                stratcombine=stratcombine, 
                                unitcombine=unitcombine, 
-                               vars2combine=vars2combine)
+                               vars2combine=vars2combine)						 
     auxlut <- collapse$strlut
     unitvar <- collapse$unitvar
     strvar <- collapse$strvar
@@ -376,6 +376,12 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 
     if (stratcombine || unitcombine) {
       unitstrgrplut <- collapse$unitstrgrplut
+    }
+	
+	## If more than one unitvar, 
+    ## split the concatenated unitvar variable to keep original columns
+    if (!is.null(unitvar2)) {
+      auxlut[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
     }
   }
 
@@ -493,12 +499,12 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   setkeyv(pltx, puniqueid)
 
   ## Set column order
-  if (length(unitvars) > 1) {
-    setcolorder(auxlut, c(unitvars, strunitvars, 
-			names(auxlut)[!names(auxlut) %in% c(unitvars, strunitvars)]))
-  } else {
+  #if (length(unitvars) > 1) {
+  #  setcolorder(auxlut, c(unitvars, strunitvars, 
+  #			names(auxlut)[!names(auxlut) %in% c(unitvars, strunitvars)]))
+  #} else {
     setcolorder(auxlut, c(strunitvars, names(auxlut)[!names(auxlut) %in% strunitvars]))
-  }
+  #}
 
   returnlst <- list(pltx=as.data.table(pltx),
 		auxlut=as.data.table(auxlut),

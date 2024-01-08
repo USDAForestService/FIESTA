@@ -66,7 +66,8 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     assign(tabnm, tabs[[tabnm]])
   }
   puniqueid <- tabIDs[["plt"]]
- 
+
+
   ###################################################################################
   ## Check parameters
   ###################################################################################
@@ -185,7 +186,6 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
         stop("pltassgnid is invalid")
       }
 	}
-	
     if (!is.null(evalid)) {	
       ## Filter for population data
 	  evalidnm <- chkdbtab(ppsaflds, "EVALID", stopifnull=TRUE)
@@ -193,14 +193,14 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 	    evalidvals <- sort(unique(pltassgn[[evalidnm]]))
 	  } else {
         evalidvals <- DBI::dbGetQuery(dbconn_pltassgn, 
-			paste("select distinct", evalidnm, "from", ppsanm))[[1]]
+			paste("SELECT DISTINCT", evalidnm, "FROM", ppsanm))[[1]]
       }
       if (any(!evalid %in% evalidvals)) {
         stop("evalids are missing: ", toString(evalid[!evalid %in% evalidvals]))
       } 
-      whereqry <- paste0("where ", evalidnm, " in(", toString(evalid), ")")
-      popwhereqry <- paste0("where ", evalidnm, " in(", toString(popevalid), ")")
-      pltassgnqry <- paste("select * from", ppsanm, popwhereqry)
+      #whereqry <- paste0("\nWHERE ", evalidnm, " IN(", toString(evalid), ")")
+      whereqry <- paste0("\nWHERE ", evalidnm, " IN(", toString(popevalid), ")")
+      pltassgnqry <- paste0("SELECT * FROM ", ppsanm, whereqry)
 	  
       if (is.null(plt)) {
         palias <- "ppsa"
@@ -217,18 +217,19 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 		               dsn=dsn, plotnm=plt, dbconn=dbconn)
 	  if (!is.null(ppsanm)) {
 	    ppsaalias <- "ppsa"
-        pltassgnqry <- paste0("select ", ppsaalias, ".* from ", pfromqry,
-			          " \nJOIN ", ppsanm, " ", ppsaalias, " ON(", 
+        pltassgnqry <- paste0("SELECT ", ppsaalias, ".* ",
+		              "\nFROM ", pfromqry,
+			          "\nJOIN ", ppsanm, " ", ppsaalias, " ON(", 
 					  palias, ".", puniqueid, " = ", ppsaalias, ".", pltassgnid, 
-					  ") \n", whereqry)
+					  ")", whereqry)
 
 	  }
     } else if (!is.null(invyrs)) {
 	  if (is.null(plt)) {
 	    invyrnm <- chkdbtab(ppsaflds, "INVYR", stopifnull=TRUE)
-		whereqry <- paste0("where ", invyrnm, " in(", toString(invyrs), ")")
-		pltassgnqry <- paste0("select ", ppsaalias, ".* from ",  
-	                  ppsanm, " \n", whereqry)
+		whereqry <- paste0("\nWHERE ", invyrnm, " IN(", toString(invyrs), ")")
+		pltassgnqry <- paste0("SELECT ", ppsaalias, ".* ",
+		              "\nFROM ", ppsanm, whereqry)
 	  } else {
 	    palias <- "p"
         pfromqry <- getpfromqry(invyrs=invyrs, plotCur=FALSE, dsn=dsn, 
@@ -254,11 +255,12 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 		      invyrnm <- invyrnmppsa
 		    }
 		  }
-		  whereqry <- paste0("where ", invyrnm, " in(", toString(invyrs), ")")
-		  pltassgnqry <- paste0("select ", ppsaalias, ".* from ", pfromqry, 
-	                  " \nJOIN ", ppsanm, " ", ppsaalias, " ON(", 
+		  whereqry <- paste0("\nWHERE ", invyrnm, " IN(", toString(invyrs), ")")
+		  pltassgnqry <- paste0("SELECT ", ppsaalias, ".* ",
+		              "\nFROM ", pfromqry, 
+	                  "\nJOIN ", ppsanm, " ", ppsaalias, " ON(", 
 					  palias, ".", puniqueid, " = ", ppsaalias, ".", pltassgnid, 
-					  ") \n", whereqry)
+					  ")", whereqry)
 	    } 
       }		
     } else {
@@ -272,23 +274,27 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
         pfromqry <- paste0(plt, " p INNER JOIN ", ppsanm,
 			" ON(p.", pjoinid, " = ", ppsanm, ".", pltassgnid, ")")
 	  }
-      pltassgnqry <- paste("select * from", ppsanm)	  
+      pltassgnqry <- paste("SELECT * FROM", ppsanm)	  
     }
  
     if (!is.null(pfromqry)) {
       pvars <- paste0(palias, ".*")
       ppvars <- paste0("pplot", ".*")
-      plotqry <- paste("select distinct", palias, ".* from", pfromqry)
+      plotqry <- paste0("SELECT DISTINCT ", palias, ".* ",
+	            "\nFROM ", pfromqry)
       if (popType == "CHNG") {
-        plot1qry <- paste0("select distinct ", pvars, " from ", pfromqry, 
-        		" JOIN ", plt, " pplot ON (pplot", ".", puniqueid, " = ", 
+        plot1qry <- paste0("SELECT DISTINCT ", pvars, 
+		        "\nFROM ", pfromqry, 
+        		"\nJOIN ", plt, " pplot ON (pplot", ".", puniqueid, " = ", 
 				palias, ".PREV_PLT_CN) ", whereqry)
-        plot2qry <- paste0("select distinct ", ppvars, " from ", pfromqry, 
-        		" JOIN ", plt, " pplot ON (pplot", ".", puniqueid, " = ", 
+        plot2qry <- paste0("SELECT DISTINCT ", ppvars, 
+		        "\nFROM ", pfromqry, 
+        		"\nJOIN ", plt, " pplot ON (pplot", ".", puniqueid, " = ", 
 				palias, ".PREV_PLT_CN) ", whereqry)
-        plotqry <- paste(plot1qry, "UNION", plot2qry)
+        plotqry <- paste(plot1qry, "\nUNION", plot2qry)
       } else {
-        plotqry <- paste("select distinct", pvars, "from", pfromqry, whereqry)
+        plotqry <- paste0("SELECT DISTINCT ", pvars, 
+		                  "\nFROM ", pfromqry, whereqry)
       }
       #dbqueries$plot <- plotqry
     }
@@ -297,10 +303,10 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       unitindb <- TRUE
       unitarea_layer <- chkdbtab(tablst, unitarea)
 	  unitareaflds <- DBI::dbListFields(dbconn, unitarea_layer)
-      unitareaqry <- paste("select * from", unitarea_layer)
+      unitareaqry <- paste("SELECT * FROM", unitarea_layer)
 	  evalidnm <- findnm("EVALID", unitareaflds, returnNULL = TRUE) 
       if (!is.null(evalid) && !is.null(evalidnm)) {
-        unitareaqry <- paste(unitareaqry, "where", evalidnm, "in(", toString(popevalid), ")")
+        unitareaqry <- paste(unitareaqry, "WHERE", evalidnm, "IN(", toString(popevalid), ")")
       }
       unitarea <- pcheck.table(unitarea, conn=dbconn,
            tabnm="unitarea", caption="unitarea?",
@@ -311,15 +317,20 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       stratindb <- TRUE
       stratalut_layer <- chkdbtab(tablst, stratalut)
 	  stratalutflds <- DBI::dbListFields(dbconn, stratalut_layer)
-      stratalutqry <- paste("select * from", stratalut_layer)
+      stratalutqry <- paste("SELECT * FROM", stratalut_layer)
 	  evalidnm <- findnm("EVALID", unitareaflds, returnNULL = TRUE) 
       if (!is.null(evalid) && !is.null(evalidnm)) {
-        stratalutqry <- paste(stratalutqry, "where", evalidnm, "in(", toString(popevalid), ")")
+        stratalutqry <- paste(stratalutqry, "WHERE", evalidnm, "IN(", toString(popevalid), ")")
       }
 	  stratalut <- pcheck.table(stratalut, conn=dbconn,
           tabnm="stratalut", caption="stratalut?",
 		  nullcheck=nullcheck, tabqry=stratalutqry, returnsf=FALSE)
     }
+  } else {
+    if (all(sapply(tabs, is.character))) {
+	  message("all popTabs are character... but dsn is missing")
+	  return(NULL)
+	}
   }
  
   ###################################################################################
@@ -566,6 +577,13 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     }
   }
   #pdoms2keep <- unique(pdoms2keep[which(!pdoms2keep %in% pmissvars)])
+  
+  ## Check for duplicate plots
+  if (any(duplicated(pltassgnx[[pltassgnid]]))) {
+    message("duplicate plots exist...  returning NULL... check popFilters")
+    return(NULL)
+  }
+  
 
   ## Get state(s) and inventory year(s) (for titles)
   ############################################################
@@ -626,7 +644,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   ######################################################################################
   if (popType %in% c("GRM", "CHNG", "LULC") && "REMPER" %in% names(pltx)) {
     ## Remove plots that have no remeasurement data
-    pltx <- pltx[!is.na(pltx$REMPER), ]
+    #pltx <- pltx[!is.na(pltx$REMPER), ]
   }
 
 
@@ -759,7 +777,6 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   pvars2keep <- pvars2keep[pvars2keep %in% names(pltx)]
   pltx <- data.table(pltx[, unique(c(puniqueid, pdoms2keep, pvars2keep)), with=FALSE])
   setkeyv(pltx, puniqueid)
-
 
   returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid, pltx=pltx,
         pfromqry=pfromqry, whereqry=whereqry, popwhereqry=popwhereqry, 
