@@ -6,6 +6,15 @@ library("FIESTA")
 
 
 # Set up user settings and download paths
+
+## Add these files to the auxdata_example directory and add your credentials
+
+### Filename: .netrc
+### Contents: machine urs.earthdata.nasa.gov login uid_goes_here password password_goes_here
+
+### Filename: .urs_cookies
+### Contents: empty
+
 ```{r setup, include = F}
 netrc_path <- "./auxdata_example/.netrc"
 cookie_path <- "./auxdata_example/.urs_cookies"
@@ -14,9 +23,11 @@ download_folder <- "./auxdata_example/downloads"
 
 
 # Set data and download location
+
+## This is where you can change the url of the data you are downloading as well as the downloaded filename
 ```{r setup, include = F}
 
-data_url <- "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/HLSS30.020/HLS.S30.T13TCK.2023364T180741.v2.0/HLS.S30.T13TCK.2023364T180741.v2.0.B03.tif"#"https://disc2.gesdisc.eosdis.nasa.gov/data/TRMM_RT/TRMM_3B42RT_Daily.7/2000/03/3B42RT_Daily.20000301.7.nc4"
+data_url <- "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/HLSS30.020/HLS.S30.T13TCK.2023364T180741.v2.0/HLS.S30.T13TCK.2023364T180741.v2.0.B03.tif"
 filename <- "landsat.tif"
 ```
 
@@ -65,8 +76,6 @@ auxiliaryData <- spGetAuxiliary(xyplt = WYspplt,
                               rastlst.cont = rastlst.cont,
                               rastlst.cont.name = rastlst.cont.name,
                               rastlst.cont.stat = "mean",
-                              asptransform = TRUE,
-                              rast.asp = data,
                               keepNA = FALSE,
                               showext = FALSE,
                               savedata = FALSE)
