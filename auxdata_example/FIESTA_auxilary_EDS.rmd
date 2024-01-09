@@ -1,21 +1,25 @@
 # Set up r
 ```{r setup, include = F}
 library(httr)
+library("FIESTA")
 ```
 
-# Set up user settings
+
+# Set up user settings and download paths
 ```{r setup, include = F}
 netrc_path <- "./auxdata_example/.netrc"
 cookie_path <- "./auxdata_example/.urs_cookies"
+download_folder <- "./auxdata_example/downloads"
 ```
+
 
 # Set data and download location
-
 ```{r setup, include = F}
 
-data_url <- "https://disc2.gesdisc.eosdis.nasa.gov/data/TRMM_RT/TRMM_3B42RT_Daily.7/2000/03/3B42RT_Daily.20000301.7.nc4"
-downloaded_file_path <- "./auxdata_example/myfile.nc4"
+data_url <- "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/HLSS30.020/HLS.S30.T13TCK.2023364T180741.v2.0/HLS.S30.T13TCK.2023364T180741.v2.0.B03.tif"#"https://disc2.gesdisc.eosdis.nasa.gov/data/TRMM_RT/TRMM_3B42RT_Daily.7/2000/03/3B42RT_Daily.20000301.7.nc4"
+filename <- "landsat.tif"
 ```
+
 
 # Download the Data
 ```{r setup, include = F}
@@ -27,20 +31,20 @@ set_config(config(followlocation = 1,
                   cookiefile = cookie_path,
                   cookiejar = cookie_path))
 
+downloaded_file_path <- paste(download_folder, "/", filename, sep = "")
+
 httr::GET(url = data_url, write_disk(downloaded_file_path, overwrite = TRUE))
 ```
 
 
 # Translate downloaded data to Auxiliary data
-
 ```{r setup, include = F}
 WYbhfn <- system.file("extdata",
                       "sp_data/WYbighorn_adminbnd.shp",
                       package = "FIESTA")
 
-data_path <- system.file(downloaded_file_path)
-
-data <- rast(data_path)
+library(terra)
+data <- rast(downloaded_file_path)
 data_name <- "Input_Data"
 
 # Get Wyoming Plots
@@ -54,7 +58,7 @@ WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
 rastlst.cont <- c(data)
 rastlst.cont.name <- c(data_name)
 
-modeldat <- spGetAuxiliary(xyplt = WYspplt,
+auxiliaryData <- spGetAuxiliary(xyplt = WYspplt,
                               uniqueid = "CN",
                               unit_layer = WYbhfn,
                               unitvar = NULL,
@@ -62,9 +66,40 @@ modeldat <- spGetAuxiliary(xyplt = WYspplt,
                               rastlst.cont.name = rastlst.cont.name,
                               rastlst.cont.stat = "mean",
                               asptransform = TRUE,
-                              rast.asp = asp,
+                              rast.asp = data,
                               keepNA = FALSE,
                               showext = FALSE,
                               savedata = FALSE)
+
+```
+
+
+# Use auxiliary data in Small Area population
+```{r setup, include = F}
+
+WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+
+smallbnd <- WYbhdistfn
+smallbnd.domain <- "DISTRICTNA"
+
+SApltdat <- spGetPlots(bnd = WYbhdistfn,
+                       xy_datsource = "obj",
+                       xy = WYplt,
+                       xy_opts = list(xy.uniqueid = "CN", xvar = "LON_PUBLIC", 
+                                    yvar = "LAT_PUBLIC", xy.crs = 4269),
+                       datsource = "obj",
+                       istree = TRUE,
+                       isseed = TRUE,
+                       dbTabs = list(plot_layer = WYplt, cond_layer = WYcond,
+                                   tree_layer = WYtree, seed_layer = WYseed),
+                       eval = "custom",
+                       eval_opts = list(invyrs = 2011:2013),
+                       showsteps = TRUE,
+                       returnxy = TRUE)
+
+SApopdat <- modSApop(pltdat = SApltdat,
+                     auxdat = auxiliaryData,
+                     smallbnd = WYbhdistfn,
+		             smallbnd.domain = smallbnd.domain)
 
 ```
