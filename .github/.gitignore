@@ -1,1 +1,4 @@
 *.html
+
+/auxdata_example/.netrc
+/auxdata_example/.urs_cookies
