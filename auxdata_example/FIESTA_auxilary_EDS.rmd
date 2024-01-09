@@ -1,0 +1,70 @@
+# Set up r
+```{r setup, include = F}
+library(httr)
+```
+
+# Set up user settings
+```{r setup, include = F}
+netrc_path <- "./auxdata_example/.netrc"
+cookie_path <- "./auxdata_example/.urs_cookies"
+```
+
+# Set data and download location
+
+```{r setup, include = F}
+
+data_url <- "https://disc2.gesdisc.eosdis.nasa.gov/data/TRMM_RT/TRMM_3B42RT_Daily.7/2000/03/3B42RT_Daily.20000301.7.nc4"
+downloaded_file_path <- "./auxdata_example/myfile.nc4"
+```
+
+# Download the Data
+```{r setup, include = F}
+# Set Configuration for authentication
+set_config(config(followlocation = 1,
+                  netrc = 1,
+                  netrc_file = netrc_path,
+                  cookie = cookie_path,
+                  cookiefile = cookie_path,
+                  cookiejar = cookie_path))
+
+httr::GET(url = data_url, write_disk(downloaded_file_path, overwrite = TRUE))
+```
+
+
+# Translate downloaded data to Auxiliary data
+
+```{r setup, include = F}
+WYbhfn <- system.file("extdata",
+                      "sp_data/WYbighorn_adminbnd.shp",
+                      package = "FIESTA")
+
+data_path <- system.file(downloaded_file_path)
+
+data <- rast(data_path)
+data_name <- "Input_Data"
+
+# Get Wyoming Plots
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
+                                xy.uniqueid = "CN",
+                                xvar = "LON_PUBLIC",
+                                yvar = "LAT_PUBLIC",
+                                xy.crs = 4269)
+
+# Run sp Get Auxiliary
+rastlst.cont <- c(data)
+rastlst.cont.name <- c(data_name)
+
+modeldat <- spGetAuxiliary(xyplt = WYspplt,
+                              uniqueid = "CN",
+                              unit_layer = WYbhfn,
+                              unitvar = NULL,
+                              rastlst.cont = rastlst.cont,
+                              rastlst.cont.name = rastlst.cont.name,
+                              rastlst.cont.stat = "mean",
+                              asptransform = TRUE,
+                              rast.asp = asp,
+                              keepNA = FALSE,
+                              showext = FALSE,
+                              savedata = FALSE)
+
+```
