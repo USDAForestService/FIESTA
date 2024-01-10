@@ -693,6 +693,7 @@ modGBpop <- function(popType = "VOL",
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
+  pltvars <- pltcheck$pvars
   pfromqry <- pltcheck$pfromqry
   palias <- pltcheck$palias
   pjoinid <- pltcheck$pjoinid
@@ -758,7 +759,7 @@ modGBpop <- function(popType = "VOL",
           pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
           condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
           cvars2keep="REMPER", pvars2keep=pvars2keep,
-		  defaultVars = defaultVars)
+		  defaultVars = defaultVars, pltvars = pltvars)
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$sccm_condx
     sccmx <- popcheck$sccmx
@@ -954,6 +955,12 @@ modGBpop <- function(popType = "VOL",
       sccmx <- sccmx[stratalut[,c(strunitvars, areaadj), with=FALSE]]
       sccmx$SUBPTYP_PROP_ADJ <- sccmx$SUBPTYP_PROP_CHNG * sccmx[[areaadj]]
       areawtnm <- "SUBPTYP_PROP_ADJ"
+	  
+      ## If more than one unitvar, 
+      ## split the concatenated unitvar variable to keep original columns
+      if (!is.null(unitvar2)) {
+        sccmx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+      }
     }
 
     if (popType == "DWM") {
@@ -1087,6 +1094,7 @@ modGBpop <- function(popType = "VOL",
  
     returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
             cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
+			pltassgnx=pltassgnx, pltassgnid=pltassgnid,
             unitarea=unitarea, areavar=areavar, 
             areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, 
             strata=strata, stratalut=data.table(stratalut), 

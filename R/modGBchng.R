@@ -378,11 +378,12 @@ modGBchng <- function(GBpopdat,
   estvar.name <- GBpopdat$estvar.area
   stratcombinelut <- GBpopdat$stratcombinelut
   strwtvar <- GBpopdat$strwtvar
-  strunitvars <- c(unitvar, strvar)
+  strunitvars <- c(unitvars, strvar)
   strata <- GBpopdat$strata
   pop_fmt <- GBpopdat$pop_fmt
   pop_dsn <- GBpopdat$pop_dsn
-
+  pltassgnx <- GBpopdat$pltassgnx
+  pltassgnid <- GBpopdat$pltassgnid
 
   ## Check chngtype
   ########################################################
@@ -503,8 +504,9 @@ modGBchng <- function(GBpopdat,
 #  }
   
 #  groupby.qry <- paste0("c.", cuniqueid, ", c.", condid)
-  groupby.qry <- paste0("ESTN_UNIT, ", "STRATUMCD, ", "c.", cuniqueid, ", c.", condid)
-#  groupby.qry <- paste0("ESTN_UNIT, ", "STRATUMCD, ", "c.", cuniqueid)
+
+  groupby.qry <- paste0(toString(paste0("sccm.", strunitvars)), ", c.", cuniqueid, ", c.", condid)
+#  groupby.qry <- paste0(toString(strunitvars), ", "c.", cuniqueid)
   prev_rowvar <- paste0("PREV_", rowvar)
 
   if (rowvar != "TOTAL") {
@@ -582,6 +584,12 @@ modGBchng <- function(GBpopdat,
   cdomdat <- condf_chng
   cdomdat$TOTAL <- 1
 
+  if (length(unitvars) == 2) {
+    cdomdat[, (unitvar) := paste(cdomdat[[unitvars[1]]], cdomdat[[unitvars[2]]], sep="-")]
+	strunitvars <- c(unitvar, strvar)
+  }
+	
+	
   ###################################################################################
   ### Get titles for output tables
   ###################################################################################

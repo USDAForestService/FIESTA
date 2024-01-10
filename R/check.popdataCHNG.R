@@ -1,6 +1,6 @@
 check.popdataCHNG <- function(tabs, tabIDs, popType = popType, 
      pltassgnx, pltassgnid, pfromqry, palias, pjoinid, whereqry, adj, ACI, 
-     pltx = NULL, puniqueid = "CN", dsn = NULL, dbconn = NULL, 
+     pltx = NULL, puniqueid = "CN", pltvars = NULL, dsn = NULL, dbconn = NULL, 
      condid = "CONDID", areawt = "CONDPROP_UNADJ",
      MICRO_BREAKPOINT_DIA = 5, MACRO_BREAKPOINT_DIA = NULL, diavar = "DIA",
      areawt_micr = "MICRPROP_UNADJ", areawt_subp = "SUBPPROP_UNADJ", 
@@ -62,8 +62,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   }
   puniqueid <- tabIDs[["plt"]]
   cuniqueid <- tabIDs[["cond"]]
-  pltuid <- tabIDs[["pltu"]]
-  conduid <- tabIDs[["condu"]]
   sccmid <- tabIDs[["sccm"]]
   lulcid <- "PLT_CN"
 
@@ -113,6 +111,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     }
 
   } else {
+    plotnm <- "plot"
     condnm <- "cond"
     sccmnm <- "sccm"
 
@@ -156,7 +155,9 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
 
 
   ## Get default variables for plot
-  pltvars <- DBvars.default()$pltvarlst
+  if (is.null(pltvars)) {
+    pltvars <- "*"
+  }
 
   ## Get where statement for plot change query
   rempernm <- findnm("REMPER", pltflds)
@@ -173,13 +174,13 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   }
   
   ## Build query for plot change
-  pltuqry <- paste0("SELECT DISTINCT ", 
+  pltuqry <- paste0("SELECT ", 
 				toString(paste0(palias, ".", pltvars)), 
 					"\nFROM ", pchgfromqry, pchgwhereqry,
-			  "\nUNION \nSELECT DISTINCT ", 
+			  "\nUNION \nSELECT ", 
 				toString(paste0("pplot.", pltvars)), 
 					"\nFROM ", pchgfromqry, pchgwhereqry)
-  dbqueries$pltu <- pltuqry
+  dbqueries$plt <- pltuqry
 
   if (defaultVars) {
     ## Get default variables for cond
@@ -196,10 +197,10 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
 			" pcond ON (pcond.", cuniqueid, " = ", palias, ".PREV_PLT_CN)")
 
   ## Build query for cond change
-  conduqry <- paste0("SELECT DISTINCT ", 
+  conduqry <- paste0("SELECT ", 
 				toString(paste0("c.", condvars)), 
 			  "\nFROM ", cchgfromqry, pchgwhereqry,
-			  "\nUNION \nSELECT DISTINCT ", 
+			  "\nUNION \nSELECT ", 
 				      toString(paste0("pcond.", condvars)), 
 			  "\nFROM ", cchgfromqry, pchgwhereqry)
   dbqueries$condu <- conduqry

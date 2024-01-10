@@ -1701,11 +1701,11 @@ DBgetPlots <- function (states = NULL,
 
       ## Create pltcond query
       if (addplotgeom) {
-        pltcond.qry <- paste("select distinct", pcvars, 
+        pltcond.qry <- paste("select ", pcvars, 
 		                     "\nfrom", pcgeomfromqry, 
                              "\nwhere", xfilter)
       } else {  
-        pltcond.qry <- paste("select distinct", pcvars, 
+        pltcond.qry <- paste("select ", pcvars, 
 		                     "\nfrom", pcfromqry, 
                              "\nwhere", xfilter)
       }
@@ -1963,12 +1963,12 @@ DBgetPlots <- function (states = NULL,
     ## Get unioned change tables 
     ###############################################################
     if (all(ischng, !nochngdata, !is.null(pltx))) {
-     
-      pcvarsa <- toString(c(paste0("p.", pltvarlst), paste0("c.", condvarlst)))
-      pcvarsb <- toString(c(paste0("pplot.", pltvarlst), paste0("pcond.", condvarlst)))
-
+ 
+ 	  pcvarsb <- gsub("p\\.", "pplot\\.", pcvars)
+ 	  pcvarsb <- gsub("c\\.", "pcond\\.", pcvarsb)
+	  
       if (addplotgeom) {
-        chgfromqry <- paste0(pcfromqry,
+        chgfromqry <- paste0(pcgeomfromqry,
            " \nJOIN ", SCHEMA., plot_layer, " pplot ON (pplot.CN = p.PREV_PLT_CN)",
 		   " \nJOIN ", SCHEMA., cond_layer, " pcond ON (pcond.PLT_CN = p.PREV_PLT_CN)")
       } else {
@@ -1978,18 +1978,17 @@ DBgetPlots <- function (states = NULL,
       }
 
       ## Unioned condition table
-      pltconduqrya <- paste("select distinct", pcvarsa,
+      pltcondu.qrya <- paste("select distinct", pcvars,
 							"\nfrom", chgfromqry,
 							"\nwhere", paste0(evalFilter.grm, stateFilters))
-      pltconduqryb <- paste("select distinct", pcvarsb,
+      pltcondu.qryb <- paste("select distinct", pcvarsb,
 	                        "\nfrom", chgfromqry, 
 							"\nwhere", paste0(evalFilter.grm, stateFilters))
-      pltcondu.qry <- paste(pltconduqrya, "\nUNION\n", pltconduqryb)
+      pltcondu.qry <- paste(pltcondu.qrya, "\nUNION\n", pltcondu.qryb)
 	  
 	  if (!"pltcondu" %in% names(dbqueries[[state]])) {
         dbqueries[[state]]$pltcondu <- pltcondu.qry
 	  }
-
 
       ## Run pltcondu query
       #####################################################################################
@@ -2050,8 +2049,9 @@ DBgetPlots <- function (states = NULL,
         if ("PREV_PLTCN" %in% names(pltux))
           pltux[, PREV_PLTCN := as.character(PREV_PLTCN)]
       }
+
       if (!is.null(condvarlst) && "CONDID" %in% names(pltcondux)) {
-        condux <- unique(pltcondx[, condvarlst2, with=FALSE])
+        condux <- pltcondux[, condvarlst2, with=FALSE]
         condux[, PLT_CN := as.character(PLT_CN)]
         setkey(condux, PLT_CN, CONDID)
       }
@@ -2220,6 +2220,11 @@ DBgetPlots <- function (states = NULL,
  	    if (!"pltu" %in% names(tabIDs)) {
           tabIDs$pltu <- "CN"
 	    }
+		if ("condu" %in% names(tabs)) {
+		  tabs$condu <- rbind(tabs$condu, data.frame(condux))
+		} else {
+		  tabs$condu <- data.frame(condux)
+		}
       }
 
       if (savedata) {

@@ -282,7 +282,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       ppvars <- paste0("pplot", ".*")
       plotqry <- paste0("SELECT DISTINCT ", palias, ".* ",
 	            "\nFROM ", pfromqry)
-      if (popType == "CHNG") {
+      if (popType == "TEST") {
         plot1qry <- paste0("SELECT DISTINCT ", pvars, 
 		        "\nFROM ", pfromqry, 
         		"\nJOIN ", plt, " pplot ON (pplot", ".", puniqueid, " = ", 
@@ -332,7 +332,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 	  return(NULL)
 	}
   }
- 
+
   ###################################################################################
   ## Import tables
   ###################################################################################
@@ -347,6 +347,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
   ###################################################################################
+  pvars <- {}
   if (!is.null(pltx) || !is.null(pltassgnx)) {
     if (!is.null(pltx)) {
       pltnmlst <- names(pltx)
@@ -357,7 +358,8 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
         dups <- pltx[[puniqueid]][duplicated(pltx[[puniqueid]])]
         warning(paste("plt records are not unique in: plt:", toString(dups)))
       }
-
+      pvars <- c(pvars, puniqueid)
+	  
       ## Check for NA values in necessary variables in plt table
       pltx.na <- sum(is.na(pltx[[puniqueid]]))
       if (pltx.na > 0) {
@@ -777,10 +779,16 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   pvars2keep <- pvars2keep[pvars2keep %in% names(pltx)]
   pltx <- data.table(pltx[, unique(c(puniqueid, pdoms2keep, pvars2keep)), with=FALSE])
   setkeyv(pltx, puniqueid)
+  
+  if (is.null(pvars)) {
+    pvars <- c(puniqueid, pdoms2keep, pvars2keep)
+  } else {
+    pvars <- c(pvars, pdoms2keep, pvars2keep)
+  }
 
   returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid, pltx=pltx,
         pfromqry=pfromqry, whereqry=whereqry, popwhereqry=popwhereqry, 
-		puniqueid=puniqueid, pjoinid=pjoinid, popevalid=popevalid, palias=palias, 
+		puniqueid=puniqueid, pvars=pvars, pjoinid=pjoinid, popevalid=popevalid, palias=palias, 
 		unitvar=unitvar, unitarea=unitarea, unitvar2=unitvar2, areavar=areavar, 
 		areaunits=areaunits, unit.action=unit.action, ACI=ACI, 
  		P2POINTCNT=as.data.frame(P2POINTCNT), 
