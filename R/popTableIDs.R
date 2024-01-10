@@ -17,8 +17,6 @@
 #' @param cond_dwm_calc String. 
 #' @param sccm String. 
 #' @param grm String. 
-#' @param pltu String. 
-#' @param condu String. 
 #' @param begin String. 
 #' @param midpt String. 
 #' @param ... For extendibility.
@@ -41,8 +39,6 @@ popTableIDs <- function(cond = "PLT_CN",
                         cond_dwm_calc = "PLT_CN",
                         sccm = "PLT_CN", 
                         grm = "PLT_CN",
-                        pltu = "PLT_CN", 
-                        condu = "PLT_CN",
                         begin = "PLT_CN",
                         midpt = "PLT_CN",
                         ...) {

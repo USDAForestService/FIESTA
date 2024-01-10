@@ -40,10 +40,6 @@
 #' Subplot-level data (SUBP_COND_CHNG_MTRX).
 #' @param grm DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Tree-level growth, removal, and mortality data (TREE_GRM_COMPONENT).
-#' @param pltu DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Plot-level data with unioned previous and current plots.
-#' @param condu DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Condition-level data with unioned previous and current plots.
 #' @param begin DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Tree-level growth, removal, and mortality data (TREE_GRM_BEGIN).
 #' @param midpt DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
@@ -68,8 +64,6 @@ popTables <- function(cond = "COND",
                       dwm = NULL,
                       sccm = NULL,
                       grm = NULL,
-                      pltu = NULL, 
-                      condu = NULL, 
                       begin = NULL,
                       midpt = NULL,
                       ...) {

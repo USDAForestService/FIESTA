@@ -17,8 +17,6 @@ popTables(
   dwm = NULL,
   sccm = NULL,
   grm = NULL,
-  pltu = NULL,
-  condu = NULL,
   begin = NULL,
   midpt = NULL,
   ...
@@ -71,12 +69,6 @@ Subplot-level data (SUBP_COND_CHNG_MTRX).}
 
 \item{grm}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 Tree-level growth, removal, and mortality data (TREE_GRM_COMPONENT).}
-
-\item{pltu}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Plot-level data with unioned previous and current plots.}
-
-\item{condu}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Condition-level data with unioned previous and current plots.}
 
 \item{begin}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 Tree-level growth, removal, and mortality data (TREE_GRM_BEGIN).}
