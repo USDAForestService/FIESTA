@@ -45,6 +45,8 @@ Imports:
     sf,
     sqldf,
     utils
+Remotes:
+    USDAForestService/FIESTAutils
 Suggests: 
     knitr,
     geodata,
