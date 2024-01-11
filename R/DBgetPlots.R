@@ -924,7 +924,7 @@ DBgetPlots <- function (states = NULL,
   if (!is.null(SURVEY)) {
     surveynm <- "SURVEY"
   }
- 
+
   POP_PLOT_STRATUM_ASSGNe <- evalInfo$POP_PLOT_STRATUM_ASSGN
   PLOTe <- evalInfo$PLOT
 
@@ -1259,7 +1259,7 @@ DBgetPlots <- function (states = NULL,
   ###################################################################################
   ###################################################################################
   pb <- utils::txtProgressBar(min=0, max=length(states))
-  
+ 
   for (i in 1:length(states)) {
     utils::setTxtProgressBar(pb, i)
 
@@ -1519,7 +1519,7 @@ DBgetPlots <- function (states = NULL,
       } else {
         evalFilter.dwm <- evalFilter
       }
-      if (any(c("GROW", "MORT", "REMV", "GRM") %in% Type)) {
+      if (any(c("GROW", "MORT", "REMV", "GRM", "CHNG") %in% Type)) {
 	  	evalid.grm <- get_evalidtyp(evalid, "03")
         evalFilter.grm <- paste("ppsa.EVALID =", evalid.grm)
       } else {
@@ -2225,6 +2225,9 @@ DBgetPlots <- function (states = NULL,
 		} else {
 		  tabs$condu <- data.frame(condux)
 		}
+ 	    if (!"condu" %in% names(tabIDs)) {
+          tabIDs$condu <- "PLT_CN"
+	    }
       }
 
       if (savedata) {
@@ -4175,6 +4178,7 @@ DBgetPlots <- function (states = NULL,
         ppsax <- tryCatch( sqldf::sqldf(ppsaqry, stringsAsFactors=FALSE), 
 			error=function(e) return(NULL))
       }
+
       if(!is.null(ppsax) && nrow(ppsax) != 0){
         ppsax <- setDT(ppsax)
         ppsax[, PLT_CN := as.character(PLT_CN)]
@@ -4522,8 +4526,7 @@ DBgetPlots <- function (states = NULL,
 #			outfn.date=outfn.date, overwrite_layer=overwrite,
 #			append_layer=append_layer2, outfn.pre=outfn.pre)
 #    }
-  }
-  
+  } 
   #if (saveqry) cat("\n", paste("Saved queries to:", outfolder), "\n") 
 
 

@@ -1148,11 +1148,15 @@ spGetPlots <- function(bnd = NULL,
           messagedf(stpltids[[xyjoinid]][!stpltids[[xyjoinid]] %in% PLOT[[pjoinid]]])
         }
         pids <- plt[[puniqueid]]
-		
+#print(pids)	
         ## Subset other tables in list
         stcliptabs$plt <- plt
         for (tabnm in names(tabs)[names(tabs) != "plt"]) {
-          stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids, ] 
+          if (tabIDs[[tabnm]] %in% names(tabs[[tabnm]])) {
+            stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids, ] 
+		  } else {
+		    stcliptabs[[tabnm]] <- tabs[[tabnm]]
+		  }
         }
       }
 

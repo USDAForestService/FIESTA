@@ -223,7 +223,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   }
   
   ## This query is used for estimates
-  sccmqry <- paste0("SELECT sccm.* \nFROM ", pfromqry,  
+  sccmqry <- paste0("SELECT distinct sccm.* \nFROM ", pfromqry,  
                 	"\nJOIN ", SCHEMA., sccmnm, 
 				    " sccm ON (sccm.", sccmid, " = p.", puniqueid, ") ", 
 					whereqry) 

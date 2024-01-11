@@ -476,7 +476,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     } else {
       ## Check for strwt
       if (!strwtvar %in% names(auxlut)) {
-        stop(strwtvar, " not in stratalut... include getwtvar and getwt=TRUE")
+        stop(strwtvar, " not in stratalut... include getwtvar and getwt=TRUE in strata_opts parameter")
       }
       ## Check to see if sum(strwt) = 1
       test <- auxlut[, round(sum(get(strwtvar), na.rm=TRUE)), by=unitvar]

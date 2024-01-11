@@ -449,7 +449,6 @@ DBgetXY <- function (states = NULL,
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {
-
     evalInfo <- tryCatch(
 				DBgetEvalid(states = states, 
                           RS = RS, 
@@ -463,7 +462,7 @@ DBgetXY <- function (states = NULL,
                           evalCur = evalCur, 
                           evalEndyr = evalEndyr, 
                           evalAll = evalAll,
-                          evalType = evalType,
+                          evalType = Type,
                           gui = gui),
 			error = function(e) {
                   message(e,"\n")
@@ -492,7 +491,7 @@ DBgetXY <- function (states = NULL,
     surveynm <- "SURVEY"
 	setkey(SURVEY, "CN")
   }
-  
+ 
   if (is.null(POP_PLOT_STRATUM_ASSGN)) {
     POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
   }
