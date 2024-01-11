@@ -3145,13 +3145,23 @@ DBgetPlots <- function (states = NULL,
 	      xvarnm <- xvar
 	    } else if (xycoords[1] %in% xynames) {
 		  xvarnm <- xycoords[1]
+		} else if (xvar == "LON" && "LON_PUBLIC" %in% xynames) {
+		  xvarnm <- "LON_PUBLIC"
+		} else {
+		  message(xvar, " not in data")
+		  return(NULL)
 		}
 	    if (yvar %in% xynames) {
 	      yvarnm <- yvar
 		} else if (xycoords[2] %in% xynames) {
 		  yvarnm <- xycoords[2]
+		} else if (yvar == "LAT" && "LAT_PUBLIC" %in% xynames) {
+		  yvarnm <- "LAT_PUBLIC"
+		} else {
+		  message(xvar, " not in data")
+		  return(NULL)
 		}
- 
+
 		if (!"xy" %in% names(dbqueries[[state]])) {
           dbqueries[[state]]$xy <- xydat$xyqry
 	    }
