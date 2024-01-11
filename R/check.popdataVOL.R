@@ -368,6 +368,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     pltcondx[, areawt2 := eval(parse(text=areawt2))]
     cvars2keep <- c(cvars2keep, "areawt2")
   }
+  cvars2keep <- c(cvars2keep, areawt_subp, areawt_macr)
 
   ###################################################################################
   ###################################################################################

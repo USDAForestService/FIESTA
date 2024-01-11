@@ -584,6 +584,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
 #  #areawt <- "SUBPTYP_PROP_CHNG"
 #  condx[[areawt]] <- check.numeric(condx[[areawt]])
 
+  cvars2keep <- c(cvars2keep, areawt_subp, areawt_macr)
   sccm_condx[[areawt]] <- check.numeric(sccm_condx[[areawt]])
 
 
