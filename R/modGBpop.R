@@ -648,13 +648,26 @@ modGBpop <- function(popType = "VOL",
     list.items <- c(list.items, "tree")
   }
   if (popType == "P2VEG") {
-    list.items <- c(list.items, "vsubpstr", "subplot", "subp_cond")
+    list.items <- c(list.items, "subplot", "subp_cond")
+    if (all(is.null(findnm("vsubpstr", names(popTabs), returnNULL=TRUE)), 
+	       is.null(findnm("p2veg_subp_structure", names(popTabs), returnNULL=TRUE)))) {
+	  message("need subp_cond_chng_mtrx table")
+	  stop()
+	}	 
   }
   if (popType == "DWM") {
-    list.items <- c(list.items, "cond_dwm_calc")
+    if (all(is.null(findnm("dwm", names(popTabs), returnNULL=TRUE)), 
+	       is.null(findnm("cond_dwm_calc", names(popTabs), returnNULL=TRUE)))) {
+	  message("need cond_dwm_calc table")
+	  stop()
+	}	 
   }
   if (popType == "CHNG") {
-    list.items <- c(list.items, "sccm")
+    if (all(is.null(findnm("sccm", names(popTabs), returnNULL=TRUE)), 
+	       is.null(findnm("subp_cond_chng_mtrx", names(popTabs), returnNULL=TRUE)))) {
+	  message("need subp_cond_chng_mtrx table")
+	  stop()
+	}	 
   }
   
   ## Check popTabs

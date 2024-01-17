@@ -23,11 +23,20 @@
 #' @param vsubpspp DF/DT, R object, comma-delimited file(*.csv), or layer in
 #' dsn.  Vegetation species-level data with one record for each species
 #' (P2VEG_SUBPLOT_SPP).
+#' @param p2veg_subplot_spp DF/DT, R object, comma-delimited file(*.csv), or 
+#' layer in dsn. Vegetation species-level data with one record for each species
+#' (P2VEG_SUBPLOT_SPP).
 #' @param vsubpstr DF/DT, R object, comma-delimited file(*.csv), or layer in
 #' dsn. Vegetation species-structure data with one record for each species
 #' (P2VEG_SUBP_STRUCTURE).
+#' @param p2veg_subp_structure DF/DT, R object, comma-delimited file(*.csv), 
+#' or layer in dsn. Vegetation species-structure data with one record for each 
+#' species (P2VEG_SUBP_STRUCTURE).
 #' @param invsubp DF/DT, R object, comma-delimited file(*.csv), or layer in
 #' dsn. Invasive species data with one record for each species
+#' (INVASIVE_SUBPLOT_SPP).
+#' @param invasive_subplot_spp DF/DT, R object, comma-delimited file(*.csv), 
+#' or layer in dsn. Invasive species data with one record for each species
 #' (INVASIVE_SUBPLOT_SPP).
 #' @param subplot DF/DT, R object, comma-delimited file(*.csv), or layer in
 #' dsn. Subplot-level data with one record for each species (SUBPLOT).
@@ -35,15 +44,29 @@
 #' dsn. Subplot condition-level data with one record for each species
 #' (SUBP_COND).
 #' @param dwm DF/DT, R object, comma-delimited file(*.csv), or layer 
-#' in dsn. Calculated down woody material.
+#' in dsn. Calculated down woody material (COND_DWM_CALC).
+#' @param cond_dwm_calc DF/DT, R object, comma-delimited file(*.csv), or layer 
+#' in dsn. Calculated down woody material (COND_DWM_CALC).
 #' @param sccm DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Subplot-level data (SUBP_COND_CHNG_MTRX).
+#' @param subp_cond_chng_mtrx DF/DT, R object, comma-delimited file(*.csv), 
+#' or layer in dsn. Subplot-level data (SUBP_COND_CHNG_MTRX).
 #' @param grm DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Tree-level growth, removal, and mortality data (TREE_GRM_COMPONENT).
+#' @param tree_grm_component DF/DT, R object, comma-delimited file(*.csv), 
+#' or layer in dsn. Tree-level growth, removal, and mortality data (TREE_GRM_COMPONENT).
 #' @param begin DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Tree-level growth, removal, and mortality data (TREE_GRM_BEGIN).
+#' @param tree_grm_begin DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Tree-level growth, removal, and mortality data (TREE_GRM_BEGIN).
 #' @param midpt DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Tree-level growth, removal, and mortality data (TREE_GRM_MIDPT).
+#' @param tree_grm_midpt DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Tree-level growth, removal, and mortality data (TREE_GRM_MIDPT).
+#' @param pltu DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Plot data unioned with remeasured plot data.
+#' @param condu DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Cond data unioned with remeasured cond data.
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for strata.
 #' @author Grayson W. White
@@ -57,15 +80,25 @@ popTables <- function(cond = "COND",
                       tree = "TREE", 
                       seed = "SEEDLING", 
                       vsubpspp = "P2VEG_SUBPLOT_SPP", 
+					  p2veg_subplot_spp = "P2VEG_SUBPLOT_SPP",
                       vsubpstr = "P2VEG_SUBP_STRUCTURE", 
-                      invsubp = "P2VEG_SUBP_STRUCTURE",
-                      subplot = NULL, 
-                      subp_cond = NULL, 
-                      dwm = NULL,
-                      sccm = NULL,
-                      grm = NULL,
-                      begin = NULL,
-                      midpt = NULL,
+					  p2veg_subp_structure = "P2VEG_SUBP_STRUCTURE",
+                      invsubp = "INVASIVE_SUBPLOT_SPP",
+					  invasive_subplot_spp = "INVASIVE_SUBPLOT_SPP",
+                      subplot = "SUBPLOT", 
+                      subp_cond = "SUBP_COND", 
+                      dwm = "COND_DWM_CALC",
+					  cond_dwm_calc = "COND_DWM_CALC",
+                      sccm = "SUBP_COND_CHNG_MTRX",
+					  subp_cond_chng_mtrx = "SUBP_COND_CHNG_MTRX",
+                      grm = "TREE_GRM_COMPONENT",
+					  tree_grm_component = "TREE_GRM_COMPONENT",
+                      begin = "TREE_GRM_BEGIN",
+					  tree_grm_begin = "TREE_GRM_BEGIN",
+                      midpt = "TREE_GRM_MIDPT",
+					  tree_grm_midpt = "TREE_GRM_MIDPT",
+					  pltu = "pltu",
+					  condu = "condu",
                       ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]

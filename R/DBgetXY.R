@@ -316,17 +316,22 @@ DBgetXY <- function (states = NULL,
 
   if (datsource == "sqlite" && !is.null(data_dsn)) {
     if (!is.null(xy_dsn) && data_dsn == xy_dsn) {
-      dbconn <- suppressMessages(DBtestSQLite(data_dsn, 
-				dbconnopen=TRUE, showlist=FALSE))
+      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
     } else {
       dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
     }
     dbtablst <- DBI::dbListTables(dbconn)
     if (length(dbtablst) == 0) {
-      stop("no data in ", datsource)
+      message("no data in ", datsource)
+	  return(NULL)
     }
   }
- 
+  
+  if (datsource == "sqlite" && is.null(data_dsn)) {
+    message("datsource=", datsource, " but data_dsn=NULL... returning NULL")
+	return(NULL)
+  }
+
   ## Check eval
   ####################################################################
   evallst <- c('FIA', 'custom')

@@ -53,16 +53,43 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   cvars2keep <- unique(c(cvars2keep, areawt, "PROP_BASIS"))
   pdoms2keep <- c("INVYR", "STATECD", "UNITCD", "COUNTYCD", "PLOT_STATUS_CD", 
 			"MEASYEAR", "RDISTCD", "WATERCD", "ECOSUBCD", "CONGCD")
+  datindb <- FALSE
  
-  sccm=lulc=grm=treex=seedx=pltnm <- NULL
+  sccm=lulc=grm=treex=seedx=condnm <- NULL
 
-  ## Get tables from tabs
-  for (tabnm in names(tabs)) {
-    assign(tabnm, tabs[[tabnm]])
+
+  ## Check name of PLOT table
+  pltnm <- findnm("plotu", names(tabs), returnNULL = TRUE)
+  if (is.null(pltnm)) {
+    pltnm <- findnm("pltu", names(tabs), returnNULL = TRUE)
   }
-  puniqueid <- tabIDs[["plt"]]
-  cuniqueid <- tabIDs[["cond"]]
-  sccmid <- tabIDs[["sccm"]]
+  if (is.null(pltnm)) {
+    pltnm <- findnm("plot", names(tabs), returnNULL = TRUE)
+  }
+  if (is.null(pltnm)) {
+    pltnm <- findnm("plt", names(tabs), returnNULL = TRUE)
+  } 
+  assign(pltnm, tabs[[pltnm]])
+  puniqueid <- tabIDs[[pltnm]]
+ 
+  ## Check name of COND table
+  condnm <- findnm("condu", names(tabs), returnNULL = TRUE)
+  if (is.null(condnm)) {
+    condnm <- findnm("cond", names(tabs), returnNULL = TRUE)
+  }
+  if (is.null(pltnm)) {
+    condnm <- findnm("cond", names(tabs), returnNULL = TRUE)
+  } 
+  assign(condnm, tabs[[condnm]])
+  cuniqueid <- tabIDs[[condnm]]
+
+  ## Check name of SUBP_COND_CHNG_MTRX table
+  sccmnm <- findnm("subp_cond_chng_mtrx", names(tabs), returnNULL = TRUE)
+  if (is.null(sccmnm)) {
+    sccmnm <- findnm("sccm", names(tabs), returnNULL = TRUE)
+  } 
+  assign(sccmnm, tabs[[sccmnm]])
+  sccmid <- tabIDs[[sccmnm]]
   lulcid <- "PLT_CN"
 
   SCHEMA. <- NULL
@@ -72,7 +99,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   if (is.null(palias)) {
     palias <- "p"
   }
-
 
   ###################################################################################
   ## Database queries
@@ -90,53 +116,49 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     drv <- "SQLite"
 
     ## Check plt in database
-    if (!all(!is.null(plt), is.character(plt), plt %in% tablst)) {    
-      stop("need PLOT table in database")
+    if (!all(!is.null(pltnm), is.character(pltnm), pltnm %in% tablst)) {    
+      message("need PLOT table in database")
+	  return(NULL)
     } else {
-      pltnm <- plt
-	  pltflds <- DBI::dbListFields(dbconn, plt)
+	  pltflds <- DBI::dbListFields(dbconn, pltnm)
     }
     ## Check cond in database
-    if (!all(!is.null(cond), is.character(cond), cond %in% tablst)) { 
-      stop("need COND table in database")
+    if (!all(!is.null(condnm), is.character(condnm), condnm %in% tablst)) { 
+      message("need COND table in database")
+	  return(NULL)
     } else {
-      condnm <- cond
-	  condflds <- DBI::dbListFields(dbconn, cond)
+	  condflds <- DBI::dbListFields(dbconn, condnm)
     } 
     ## Check sccm in database
-    if (!all(!is.null(sccm), is.character(sccm), sccm %in% tablst)) {
-      stop("need SUBP_COND_CHNG_MTRX table in database")
+    if (!all(!is.null(sccmnm), is.character(sccmnm), sccmnm %in% tablst)) {
+      message("need SUBP_COND_CHNG_MTRX table in database")
+	  return(NULL)
     } else {
       sccmnm <- sccm
     }
 
   } else {
-    plotnm <- "plot"
-    condnm <- "cond"
-    sccmnm <- "sccm"
 
     ## Get remeasured plot/condition data
-	if (!is.null(cond)) {
-      cond <- pcheck.table(cond, tab_dsn=dsn, 
+	if (!is.null(condnm)) {
+      assign(condnm, pcheck.table(get(condnm), tab_dsn=dsn, 
            tabnm="cond", caption="Remeasured condition data?", 
-           nullcheck=nullcheck, gui=gui, returnsf=FALSE)
-	  condnm <- "cond"
-	  condflds <- names(cond)
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+	  condflds <- names(get(condnm))
 	}
 
     ## Get remeasured plot data
-    if (!is.null(plt)) {
-      plt <- pcheck.table(plt, tab_dsn=dsn, 
+    if (!is.null(pltnm)) {
+      assign(pltnm, pcheck.table(get(pltnm), tab_dsn=dsn, 
            tabnm="plt", caption="Remeasured plot data?", 
-           nullcheck=nullcheck, gui=gui, returnsf=FALSE)
-      pltnm <- "plt"
-	  pltflds <- names(plt)
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+	  pltflds <- names(get(pltnm))
     } 
 
     ## Get subplot matrix data for generating estimates
-    sccm <- pcheck.table(sccm, tab_dsn=dsn, 
+    assign(sccmnm, pcheck.table(get(sccmnm), tab_dsn=dsn, 
            tabnm="sccm", caption="sccm table?", 
-           nullcheck=nullcheck, gui=gui, returnsf=FALSE)
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
   }  
 
   if (is.null(pfromqry)) {
@@ -152,7 +174,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
 	          "\nJOIN ", SCHEMA., pltnm, 
                 " pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
   }
-
 
   ## Get default variables for plot
   if (is.null(pltvars)) {
@@ -257,16 +278,78 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   ## Import tables
   #########################################################################
   if (datindb) {
-    COND <- data.table(DBI::dbGetQuery(dbconn, conduqry))
-    PLOT <- data.table(DBI::dbGetQuery(dbconn, pltuqry))
-    sccmx <- data.table(DBI::dbGetQuery(dbconn, sccmqry))
-    sccm_condx <- data.table(DBI::dbGetQuery(dbconn, sccm_condqry))
+    COND <- tryCatch(
+	          data.table(DBI::dbGetQuery(dbconn, conduqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    PLOT <- tryCatch(
+	          data.table(DBI::dbGetQuery(dbconn, pltuqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    sccmx <- tryCatch(
+	          data.table(DBI::dbGetQuery(dbconn, sccmqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    sccm_condx <- tryCatch(
+	          data.table(DBI::dbGetQuery(dbconn, sccm_condqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
   } else {
-    COND <- data.table(sqldf::sqldf(conduqry))  
-    PLOT <- data.table(sqldf::sqldf(pltuqry))
-    sccmx <- data.table(sqldf::sqldf(sccmqry))
-    sccm_condx <- data.table(sqldf::sqldf(sccm_condqry))
+    COND <- tryCatch(
+	          data.table(sqldf::sqldf(conduqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    PLOT <- tryCatch(
+	          data.table(sqldf::sqldf(pltuqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    sccmx <- tryCatch(
+	          data.table(sqldf::sqldf(sccmqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    sccm_condx <- tryCatch(
+	          data.table(sqldf::sqldf(sccm_condqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
   }
+
+  if (is.null(COND) || nrow(COND) == 0) {
+    message("invalid ", condnm)
+	message(conduqry)
+    return(NULL)
+  }
+  if (is.null(PLOT) || nrow(PLOT) == 0) {
+    message("invalid ", pltnm)
+	message(pltuqry)
+    return(NULL)
+  }
+  if (is.null(sccmx) || nrow(sccmx) == 0) {
+    message("invalid ", sccmnm)
+	message(sccmqry)
+    return(NULL)
+  }
+  if (is.null(sccm_condx) || nrow(sccm_condx) == 0) {
+    message("invalid ", sccmnm)
+	message(sccm_condqry)
+    return(NULL)
+  }
+
 
   ## Import tables
   #########################################################################
@@ -276,11 +359,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
 #  }   
 #  sccmx <- data.table(sqldf::sqldf(sccmqry, dbname=dsn, drv=drv))
 
-  if (is.null(dsn)) {
-    rm(cond)
-    rm(sccm)
-    # gc()
-  }
 
   ##########################################################################
   ## Get remeasured tree and seed data queries for GRM

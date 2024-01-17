@@ -907,7 +907,7 @@ DBgetPlots <- function (states = NULL,
       iseval <- FALSE
     }
   }
-  
+
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   evalidlist <- evalInfo$evalidlist
@@ -997,7 +997,7 @@ DBgetPlots <- function (states = NULL,
     ACI <- FALSE
     allyrs <- FALSE
   }
-  
+ 
   ## Set maxstates 
   ###########################################################
   ##  The number of states to append together, while still small enough to return 
@@ -1186,7 +1186,7 @@ DBgetPlots <- function (states = NULL,
   ## Check data tables
   ##########################################################
   if (datsource == "sqlite" && !is.null(dbconn)) {
-     
+  
     ## Check to make sure layers are in database
     plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
     if (is.null(plotnm)) {
