@@ -308,7 +308,7 @@ modGBpop <- function(popType = "VOL",
     	treef=seedf=grmf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=
 	sccmx=cond_pcondx=lulcx=popevalid <- NULL
   condid <- "CONDID"
-  pvars2keep <- NULL
+  pvars2keep=unitlevels <- NULL
 
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -702,7 +702,7 @@ modGBpop <- function(popType = "VOL",
       unitarea=unitarea, areavar=areavar, unitvar=unitvar, 
       unitvar2=unitvar2, areaunits=areaunits, unit.action=unit.action, 
       strata=strata, stratalut=stratalut, strvar=strvar, pivot=pivot,
-	  pvars2keep=pvars2keep, defaultVars=defaultVars)
+	  pvars2keep=pvars2keep, defaultVars=defaultVars, unitlevels=unitlevels)
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
@@ -720,6 +720,7 @@ modGBpop <- function(popType = "VOL",
   areavar <- pltcheck$areavar
   areaunits <- pltcheck$areaunits
   unit.action <- pltcheck$unit.action
+  unitlevels <- unitlevels
   stratcombine <- pltcheck$stratcombine
   strata <- pltcheck$strata
   stratalut <- pltcheck$stratalut
@@ -860,6 +861,7 @@ modGBpop <- function(popType = "VOL",
 							areavar = areavar,
 							minplotnum.unit = minplotnum.unit, 
 							unit.action = unit.action,
+							unitlevels = unitlevels,
 							strata = strata, 
 							auxlut = stratalut, 
 							strvar = strvar,
@@ -880,9 +882,9 @@ modGBpop <- function(popType = "VOL",
   strvar <- auxdat$strvar
   strwtvar <- auxdat$strwtvar
   stratcombinelut <- auxdat$stratcombinelut
+  stratwarnlut <- auxdat$stratwarnlut
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvar, strvar)
-
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
@@ -903,7 +905,7 @@ modGBpop <- function(popType = "VOL",
 
   ## If more than one unitvar, 
   ## split the concatenated unitvar variable to keep original columns
-  if (!is.null(unitvar2)) {
+  if (unitvar != "unitnew" && !is.null(unitvar2)) {
     condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
   }
  
@@ -1130,7 +1132,9 @@ modGBpop <- function(popType = "VOL",
     if (strata) {
       if (!is.null(stratcombinelut)) {
         returnlst$stratcombinelut <- stratcombinelut
-      }
+      } else if (!is.null(stratwarnlut)) {
+	    returnlst$stratwarnlut <- stratwarnlut
+	  }
     }
     if (!is.null(evalid)) {
       returnlst$evalid <- evalid

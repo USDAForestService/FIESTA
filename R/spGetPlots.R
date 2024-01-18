@@ -729,7 +729,7 @@ spGetPlots <- function(bnd = NULL,
       message("pltids have duplicate xyjoinids")
     }
   }
- 
+
   ## Check showsteps
   #############################################################################
   showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
@@ -979,7 +979,10 @@ spGetPlots <- function(bnd = NULL,
         }
         pids1 <- plt1[[puniqueid]]
 		ppltidnm1 <- findnm("PREV_PLT_CN", names(plt1), returnNULL = TRUE)
-	    ppltids1 <- plt1[plt1[[puniqueid]] %in% pids1, ppltidnm1] 
+		if (any(Type %in% c("CHNG", "GRM"))) { 
+	      ppltids1 <- plt1[plt1[[puniqueid]] %in% pids1, ppltidnm1] 
+		  pids1 <- c(pids1, ppltids1)
+		}
 
         ## Subset other tables in list
         stcliptabs$plt <- plt1
@@ -992,7 +995,7 @@ spGetPlots <- function(bnd = NULL,
               # condu1 <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids1,ppltids1), ]
               # stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], condu1)
             # }   						  
-            stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids1,ppltids1), ]			
+            stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids1, ]			
 		  } else {
             stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], 
 				tabs2[[tabnm]][tabs2[[tabnm]][[tabIDs[[tabnm]]]] %in% pids1, ])
@@ -1050,7 +1053,10 @@ spGetPlots <- function(bnd = NULL,
         }
         pids2 <- plt2[[puniqueid]]
 		ppltidnm2 <- findnm("PREV_PLT_CN", names(plt2), returnNULL = TRUE)
-	    ppltids2 <- plt2[plt2[[puniqueid]] %in% pids2, ppltidnm2] 
+		if (any(Type %in% c("CHNG", "GRM"))) { 
+	      ppltids2 <- plt2[plt2[[puniqueid]] %in% pids2, ppltidnm2] 
+		  pids2 <- c(pids2, ppltids2)
+		}
 
         ## Subset other tables in list
         stcliptabs$plt <- rbind(stcliptabs$plt, plt2)
@@ -1065,7 +1071,7 @@ spGetPlots <- function(bnd = NULL,
               # condu2 <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids2,ppltids2), ]
               # stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], condu2)
             # }   						  
-            stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids2,ppltids2), ]			
+            stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids2, ]			
 		  } else {
             stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], 
 				tabs2[[tabnm]][tabs2[[tabnm]][[tabIDs[[tabnm]]]] %in% pids2, ])
@@ -1177,8 +1183,11 @@ spGetPlots <- function(bnd = NULL,
           messagedf(stpltids[[xyjoinid]][!stpltids[[xyjoinid]] %in% PLOT[[pjoinid]]])
         }
         pids <- plt[[puniqueid]]
-		ppltidnm <- findnm("PREV_PLT_CN", names(plt), returnNULL = TRUE)
-	    ppltids <- plt[plt[[puniqueid]] %in% pids, ppltidnm] 
+		ppltidnm <- findnm("PREV_PLT_CN", names(plt), returnNULL = TRUE)	     
+		if (any(Type %in% c("CHNG", "GRM"))) { 
+	      ppltids <- plt[plt[[puniqueid]] %in% pids, ppltidnm] 
+		  pids <- c(pids, ppltids)
+		}
 		
 #print(pids)	
         ## Subset other tables in list
@@ -1192,7 +1201,7 @@ spGetPlots <- function(bnd = NULL,
               # condu <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids,ppltids), ]
               # stcliptabs[[tabnm]] <- condu
             # }  
-            stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids,ppltids), ]			
+            stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids, ]			
 		  } else {
 		    stcliptabs[[tabnm]] <- tabs[[tabnm]]
 		  }

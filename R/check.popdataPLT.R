@@ -4,7 +4,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
 	areaunits, unit.action="keep", removetext="unitarea", strata=FALSE, 
 	stratalut=NULL, strvar=NULL, stratcombine=TRUE, pivot=FALSE, nonresp=FALSE, 
 	prednames=NULL, predfac=NULL, pvars2keep=NULL, pdoms2keep=NULL, 
-	nullcheck=FALSE, defaultVars=TRUE, gui=FALSE) {
+	nullcheck=FALSE, defaultVars=TRUE, unitlevels=NULL, gui=FALSE) {
 
   ###################################################################################
   ## DESCRIPTION: Checks plot data inputs
@@ -712,6 +712,20 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       }
     }
  
+ 	## CHeck unitlevels for collapsing
+	if (!is.null(unitlevels)) {
+	  unitvals <- unique(stratalut[[unitvar]])
+	  if (length(unitlevels) != length(unitvals)) {
+		misslevels <- unitvals[!unitvals %in% unitlevels]
+	    message("unitlevels does not match unitvals... missing: ", toString(misslevels))
+		return(NULL)
+      } else if (any(is.na(match(unitlevels, unitvals)))) {
+	    difflevels <- unitvals[is.na(match(unitlevels, unitvals))]
+	    message("unitlevels does not match unitvals... missing: ", toString(difflevels))
+		return(NULL)
+      }		
+    } 	
+ 
     if (pivot) {
       strwtvar <- "strwt"
       unitvars <- unitvars[unitvars %in% names(stratalut)]
@@ -723,6 +737,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     P2POINTCNT <- pltx[, list(P2POINTCNT=uniqueN(get(puniqueid))),
 		by=c(unitvars, strvar)]
     setkeyv(P2POINTCNT, c(unitvars, strvar))
+		
  
     ## If nonresp, get Response Homogeneity Groups for WestFest
     #####################################################################
@@ -745,7 +760,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     strvar <- NULL
     pltassgnvars <- unique(c(pltassgnvars, prednames))
   }
-   
+
   #############################################################################
   ## Generate and apply nonsamp.pfilter
   #############################################################################
@@ -790,7 +805,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
         pfromqry=pfromqry, whereqry=whereqry, popwhereqry=popwhereqry, 
 		puniqueid=puniqueid, pvars=pvars, pjoinid=pjoinid, popevalid=popevalid, palias=palias, 
 		unitvar=unitvar, unitarea=unitarea, unitvar2=unitvar2, areavar=areavar, 
-		areaunits=areaunits, unit.action=unit.action, ACI=ACI, 
+		areaunits=areaunits, unit.action=unit.action, unitlevels=unitlevels, ACI=ACI, 
  		P2POINTCNT=as.data.frame(P2POINTCNT), 
 		plotsampcnt=as.data.frame(plotsampcnt), pdoms2keep=pdoms2keep, 
 		states=states, invyrs=lapply(invyrs,I), dbconn=dbconn)

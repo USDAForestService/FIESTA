@@ -59,37 +59,59 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
 
 
   ## Check name of PLOT table
-  pltnm <- findnm("plotu", names(tabs), returnNULL = TRUE)
-  if (is.null(pltnm)) {
-    pltnm <- findnm("pltu", names(tabs), returnNULL = TRUE)
+  pltnmchk <- findnm("plotu", names(tabs), returnNULL = TRUE)
+  if (is.null(pltnmchk)) {
+    pltnmchk <- findnm("pltu", names(tabs), returnNULL = TRUE)
   }
-  if (is.null(pltnm)) {
-    pltnm <- findnm("plot", names(tabs), returnNULL = TRUE)
+  if (is.null(pltnmchk)) {
+    pltnmchk <- findnm("plot", names(tabs), returnNULL = TRUE)
   }
-  if (is.null(pltnm)) {
-    pltnm <- findnm("plt", names(tabs), returnNULL = TRUE)
+  if (is.null(pltnmchk)) {
+    pltnmchk <- findnm("plt", names(tabs), returnNULL = TRUE)
   } 
-  assign(pltnm, tabs[[pltnm]])
-  puniqueid <- tabIDs[[pltnm]]
+ 
+  if (is.null(pltnmchk)) {
+    message("plot data needed for CHNG estimates")
+	return(NULL)
+  }
+
+  if (is.character(tabs[[pltnmchk]])) {  
+    pltnm <- tabs[[pltnmchk]]
+  } else {
+    pltnm <- "pltu"
+  }
+  assign(pltnm, tabs[[pltnmchk]])
+  puniqueid <- tabIDs[[pltnmchk]]
  
   ## Check name of COND table
-  condnm <- findnm("condu", names(tabs), returnNULL = TRUE)
-  if (is.null(condnm)) {
-    condnm <- findnm("cond", names(tabs), returnNULL = TRUE)
+  condnmchk <- findnm("condu", names(tabs), returnNULL = TRUE)
+  if (is.null(condnmchk)) {
+    condnmchk <- findnm("cond", names(tabs), returnNULL = TRUE)
   }
-  if (is.null(pltnm)) {
-    condnm <- findnm("cond", names(tabs), returnNULL = TRUE)
+  if (is.null(condnmchk)) {
+    condnmchk <- findnm("cond", names(tabs), returnNULL = TRUE)
   } 
-  assign(condnm, tabs[[condnm]])
-  cuniqueid <- tabIDs[[condnm]]
+  if (is.character(tabs[[condnmchk]])) {  
+    condnm <- tabs[[condnmchk]]
+  } else {
+    condnm <- "condu"
+  }
+  assign(condnm, tabs[[condnmchk]])
+  cuniqueid <- tabIDs[[condnmchk]]
+
 
   ## Check name of SUBP_COND_CHNG_MTRX table
-  sccmnm <- findnm("subp_cond_chng_mtrx", names(tabs), returnNULL = TRUE)
-  if (is.null(sccmnm)) {
-    sccmnm <- findnm("sccm", names(tabs), returnNULL = TRUE)
+  sccmnmchk <- findnm("subp_cond_chng_mtrx", names(tabs), returnNULL = TRUE)
+  if (is.null(sccmnmchk)) {
+    sccmnmchk <- findnm("sccm", names(tabs), returnNULL = TRUE)
   } 
-  assign(sccmnm, tabs[[sccmnm]])
-  sccmid <- tabIDs[[sccmnm]]
+  if (is.character(tabs[[sccmnmchk]])) {  
+    sccmnm <- tabs[[sccmnmchk]]
+  } else {
+    sccmnm <- "sccm"
+  }
+  assign(sccmnm, tabs[[sccmnmchk]])
+  sccmid <- tabIDs[[sccmnmchk]]
   lulcid <- "PLT_CN"
 
   SCHEMA. <- NULL
@@ -133,10 +155,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     if (!all(!is.null(sccmnm), is.character(sccmnm), sccmnm %in% tablst)) {
       message("need SUBP_COND_CHNG_MTRX table in database")
 	  return(NULL)
-    } else {
-      sccmnm <- sccm
     }
-
   } else {
 
     ## Get remeasured plot/condition data
@@ -242,7 +261,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   } else {
     chgwhereqry <- paste0(pchgwhereqry, "\n  AND ", chgwhere)
   }
-  
+
   ## This query is used for estimates
   sccmqry <- paste0("SELECT distinct sccm.* \nFROM ", pfromqry,  
                 	"\nJOIN ", SCHEMA., sccmnm, 
@@ -349,7 +368,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
 	message(sccm_condqry)
     return(NULL)
   }
-
 
   ## Import tables
   #########################################################################
