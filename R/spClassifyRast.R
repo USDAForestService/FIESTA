@@ -169,15 +169,16 @@ spClassifyRast <- function(rastfn,
       expr <- paste0(expr, "ifelse (A >= ", cutbreaks[i], 
 					" & A < ", cutbreaks[i + 1], ", ", i, ", ") 
 	}
+
   }
-  expr <- paste0(expr, "255", paste(rep(")", length(cutbreaks)), collapse=""))  
+  expr <- paste0(expr, abs(rast.nodata), paste(rep(")", length(cutbreaks)), collapse=""))  
   message(expr)
   
   lut <- data.frame(MIN = cutbreaks, 
                     MAX = c(cutbreaks[-1], paste0(cutbreaks[length(cutbreaks)], "+")), 
 					CLASS = seq(1:length(cutbreaks))) 
   
-  
+
   ####################################################################
   ## Reclass raster
   ####################################################################
