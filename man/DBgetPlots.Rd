@@ -67,8 +67,12 @@ is populated. See FIESTA::ref_statecd for reference to RS and states.}
 \item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).}
 
-\item{dbTabs}{List of database tables the user would like returned.
-See help(dbTables) for a list of options.}
+\item{dbTabs}{List. Source of tables needed for estimation based on what
+is defined in eval_opts(Type). The source can be a layer in data_dsn or
+a comma delimited file. For example, if Type='P2VEG', vsubpspp_layer 
+and/or vsubpstr_layer must be defined. Defaults are 'P2VEG_SUBPLOT_SPP'
+and 'P2VEG_SUBP_STRUCTURE', respectively.
+ See help(dbTables) for a list of options.}
 
 \item{eval}{String. Type of evaluation time frame for data extraction 
 ('FIA', 'custom'). See eval_opts for more further options.}
