@@ -15,6 +15,8 @@
 #' @param bnd.filter String. Optional filter of bnd_layer.
 #' @param buffdist Number. The distance to buffer the polygon before clipping
 #' raster, in units of raster.
+#' @param nodataclass Integer. Class number to assign NODATA values to.
+#' @param gethist Logical. If TRUE, returns a histogram of pixel values by class.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @return Data.
@@ -27,6 +29,8 @@ spClassifyRast <- function(rastfn,
                            bnd_dsn = NULL, 
                            bnd.filter = NULL, 
 						   buffdist = NULL,
+						   nodataclass = NULL,
+						   gethist = FALSE,
                            savedata_opts = NULL) {
 
 
@@ -93,6 +97,15 @@ spClassifyRast <- function(rastfn,
   rast.crs <- rasterInfo(rast)$crs
   rast.nodata <- rasterInfo(rast)$nodata_value
   rast.datatype <- rasterInfo(rast)$datatype
+  
+
+  ## Get nodata value of ref raster.
+  ## If the nodata values was not assigned (NA), then use a default value.
+  if (is.na(rast.nodata)) {
+	nodata <- getDefaultNodata(rast.datatype)
+  } else {
+	nodata <- rast.nodata
+  }
 
 
   ## Check cutbreaks
@@ -135,13 +148,6 @@ spClassifyRast <- function(rastfn,
 	  cliprastfn <- tempfile("clip_rast", fileext="tif")
     }
 	
-	## Get nodata value of ref raster.
-	## If the nodata values was not assigned (NA), then use a default value.
-	if (is.na(rast.nodata)) {
-	  nodata <- getDefaultNodata(rast.datatype)
-	} else {
-	  nodata <- rast.nodata
-	}
 	  
    ####################################################################
    ## Clip raster
@@ -159,6 +165,7 @@ spClassifyRast <- function(rastfn,
   
     cliprastfn <- rast
   }
+
   
   ## Create expression based on cut breaks
   expr <- ""
@@ -169,15 +176,29 @@ spClassifyRast <- function(rastfn,
       expr <- paste0(expr, "ifelse (A >= ", cutbreaks[i], 
 					" & A < ", cutbreaks[i + 1], ", ", i, ", ") 
 	}
-
   }
-  expr <- paste0(expr, abs(rast.nodata), paste(rep(")", length(cutbreaks)), collapse=""))  
-  message(expr)
-  
+  expr <- paste0(expr, nodata, paste(rep(")", length(cutbreaks)), collapse="")) 
+
+ 
   lut <- data.frame(MIN = cutbreaks, 
                     MAX = c(cutbreaks[-1], paste0(cutbreaks[length(cutbreaks)], "+")), 
 					CLASS = seq(1:length(cutbreaks))) 
   
+
+  if (!is.null(nodataclass)) { 
+    classvalues <- lut$CLASS
+	if (!is.vector(nodataclass) || length(nodataclass) != 1) {
+	  message("invalid nodataclass... must be a vector of length 1")
+	  return(NULL)
+	} else if (!nodataclass %in% lut$CLASS) {
+	  message("invalid nodataclass... must be in: ", toString(lut$CLASS))
+	  return(NULL)
+	}
+    expr <- paste0("ifelse (is.na(A), ", nodataclass, ", ", expr, ")")
+  }             	
+ 
+  message(expr)
+
 
   ####################################################################
   ## Reclass raster
@@ -190,21 +211,41 @@ spClassifyRast <- function(rastfn,
 				   dtName = "Byte", 
 				   fmt = "GTiff",
 				   options = c("COMPRESS=DEFLATE"),
-                   nodata_value = 255,
+                   nodata_value = nodata,
 				   setRasterNodataValue = TRUE,
 				   write_mode = "overwrite"
 				   )
+ 
 
-
-   ####################################################################
-   ## Save lookup table to outfolder
-   ####################################################################
-   datExportData(lut, 
+  ####################################################################
+  ## Save lookup table to outfolder
+  ####################################################################
+  datExportData(lut, 
           savedata_opts = list(outfolder = outfolder, 
 		                       out_fmt = "csv", 
 							   out_layer = paste0(out_layer, "_lut")))
 
+  returnlst <- list(outfn=outfn, lut=lut)
+  
+  
+  if (gethist) {
+  
+    ## get min/max value
+    ds <- new(gdalraster::GDALRaster, outfn, read_only=TRUE)
+    minmax <- ds$getMinMax(band=1, approx_ok=FALSE)
+    rast.min <- minmax[1]
+    rast.max <- minmax[2]
 
-  return(list(outfn=outfn, lut=lut))
+
+    histdf <- data.frame(
+	             value = seq(1:length(cutbreaks)), 
+                 pixels = ds$getHistogram(band=1, 
+				              min=rast.min, max=rast.max+1,
+							  num_buckets=length(cutbreaks),
+							  incl_out_of_range=FALSE, approx_ok=FALSE))
+    returnlst$histdf <- histdf
+  }
+
+  return(returnlst)
 }
 
