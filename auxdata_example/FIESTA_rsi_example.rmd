@@ -1,0 +1,165 @@
+
+
+# Using auxiliary data in FIESTA can help enhance your result. One resource for auxiliary data is EarthData Search: a NASA repository for Earth Science data.
+
+## Follow this tutorial and learn how to implement auxiliary data from EarthData Search (https://search.earthdata.nasa.gov/search)
+
+# ############################################################
+
+# SET UP
+
+# ############################################################
+
+
+## This section will include the following
+
+* Set up R packages
+* Set up user settings and files
+* Set up download file
+
+## Set up R packages
+```{r setup, include = F}
+library(rsi)
+library("FIESTA")
+```
+
+
+```{r setup, include = F}
+spectral_indices()
+
+aoi <- sf::st_point(c(-107.34041007184679, 44.48965583058798))
+aoi <- sf::st_set_crs(sf::st_sfc(aoi), 4326)
+aoi <- sf::st_buffer(sf::st_transform(aoi, 5070), 10)
+
+landsat_image_red <- get_stac_data(
+  aoi,
+  start_date = "2022-06-01",
+  end_date = "2022-06-30",
+  pixel_x_size = 30,
+  pixel_y_size = 30,
+  asset_names = c("red"),
+  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+  collection = "landsat-c2-l2",
+  mask_band = "qa_pixel",
+  mask_function = landsat_mask_function,
+  output_filename = tempfile(fileext = ".tif"),
+  item_filter_function = landsat_platform_filter,
+  platforms = c("landsat-9", "landsat-8")
+)
+
+landsat_image_green <- get_stac_data(
+  aoi,
+  start_date = "2022-06-01",
+  end_date = "2022-06-30",
+  pixel_x_size = 30,
+  pixel_y_size = 30,
+  asset_names = c("green"),
+  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+  collection = "landsat-c2-l2",
+  mask_band = "qa_pixel",
+  mask_function = landsat_mask_function,
+  output_filename = tempfile(fileext = ".tif"),
+  item_filter_function = landsat_platform_filter,
+  platforms = c("landsat-9", "landsat-8")
+)
+
+landsat_image_blue <- get_stac_data(
+  aoi,
+  start_date = "2022-06-01",
+  end_date = "2022-06-30",
+  pixel_x_size = 30,
+  pixel_y_size = 30,
+  asset_names = c("blue"),
+  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+  collection = "landsat-c2-l2",
+  mask_band = "qa_pixel",
+  mask_function = landsat_mask_function,
+  output_filename = tempfile(fileext = ".tif"),
+  item_filter_function = landsat_platform_filter,
+  platforms = c("landsat-9", "landsat-8")
+)
+
+terra::plot(terra::rast(landsat_image))
+
+```
+
+
+# ############################################################
+
+# USE DATA IN FIESTA
+
+# ############################################################
+
+## Translate downloaded data to Auxiliary data
+```{r setup, include = F}
+
+# Set up data necessary for spGetAuxiliary function
+WYbhfn <- system.file("extdata",
+                      "sp_data/WYbighorn_adminbnd.shp",
+                      package = "FIESTA")
+
+# Import downloaded data as raster file
+library(terra)
+data_red <- rast(landsat_image_red)
+data_green <- rast(landsat_image_green)
+data_blue <- rast(landsat_image_blue)
+
+# Get Wyoming Plots
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
+                               xy.uniqueid = "CN",
+                               xvar = "LON_PUBLIC",
+                               yvar = "LAT_PUBLIC",
+                               xy.crs = 4269)
+
+# Run sp Get Auxiliary
+rastlst.cont <- c(data_red, data_green, data_blue)
+rastlst.cont.name <- c("red", "green", "blue")
+
+auxiliaryData <- spGetAuxiliary(xyplt = WYspplt,
+                                uniqueid = "CN",
+                                unit_layer = WYbhfn,
+                                unitvar = NULL,
+                                rastlst.cont = rastlst.cont,
+                                rastlst.cont.name = rastlst.cont.name,
+                                rastlst.cont.stat = "mean",
+                                keepNA = FALSE,
+                                showext = FALSE,
+                                savedata = FALSE)
+
+```
+
+
+
+## Use auxiliary data in Small Area population
+```{r setup, include = F}
+# Setting up necessary data for modSApop function
+WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+
+smallbnd <- WYbhdistfn
+smallbnd.domain <- "DISTRICTNA"
+
+SApltdat <- spGetPlots(bnd = WYbhdistfn,
+                       xy_datsource = "obj",
+                       xy = WYplt,
+                       xy_opts = list(xy.uniqueid = "CN", xvar = "LON_PUBLIC", 
+                                      yvar = "LAT_PUBLIC", xy.crs = 4269),
+                       datsource = "obj",
+                       istree = TRUE,
+                       isseed = TRUE,
+                       dbTabs = list(plot_layer = WYplt, cond_layer = WYcond,
+                                     tree_layer = WYtree, seed_layer = WYseed),
+                       eval = "custom",
+                       eval_opts = list(invyrs = 2011:2013),
+                       showsteps = TRUE,
+                       returnxy = TRUE)
+
+# Use Auxiliary Data in modSApop
+SApopdat <- modSApop(pltdat = SApltdat, auxdat = auxiliaryData,
+                     smallbnd = WYbhdistfn, smallbnd.domain = smallbnd.domain)
+```
+
+
+
+
+
+
