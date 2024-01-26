@@ -35,7 +35,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
   ## Set global variables
   rawfolder <- NULL
   isdb <- FALSE
-
+  whereqry <- NULL
 
   #############################################################################
   ## Check esttype
@@ -84,6 +84,9 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
   ###########################################################################
   ## Apply pcfilter (plot and cond filters) to pltcondf table
   ###########################################################################
+  if (!is.null(pcfilter)) {
+    whereqry <- paste0("\nWHERE ", RtoSQL(pcfilter))
+  }
   pltcondnmlst <- names(pltcondf)
   pltcondf <- datFilter(x = pltcondf, 
                         xfilter = pcfilter, 
@@ -138,7 +141,14 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
       }
     }
   }
-
+  if (!is.null(landarea.filter)) {
+    if (!is.null(whereqry)) {
+      whereqry <- paste0(whereqry, "\n", RtoSQL(landarea.filter))
+	} else {
+	  whereqry <- paste0("\nWHERE ", RtoSQL(landarea.filter))
+    }	  
+  }
+  
   ###################################################################################
   ## Apply landarea filters
   ###################################################################################
@@ -274,7 +284,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
  	landarea=landarea, rawdata=rawdata, rawonly=rawonly, savedata=savedata,
 	outfolder=outfolder, overwrite_layer=overwrite_layer, append_layer=append_layer,
 	rawfolder=rawfolder, raw_fmt=raw_fmt, raw_dsn=raw_dsn, pop_fmt=pop_fmt, 
-	pop_dsn=pop_dsn)
+	pop_dsn=pop_dsn, whereqry=whereqry)
 
 
   if (esttype %in% c("TREE", "RATIO", "SEED")) {

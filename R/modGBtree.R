@@ -494,6 +494,7 @@ modGBtree <- function(GBpopdat,
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
   rawfolder <- estdat$rawfolder
+  whereqry <- estdat$whereqry
   conn <- estdat$conn
 
   if ("STATECD" %in% names(pltcondf)) {
@@ -518,7 +519,7 @@ modGBtree <- function(GBpopdat,
                      rowlut=rowlut, collut=collut, rowgrp=rowgrp,
                      rowgrpnm=rowgrpnm, rowgrpord=rowgrpord,
                      landarea=landarea, states=states, 
-					 cvars2keep="COND_STATUS_CD")
+					 cvars2keep="COND_STATUS_CD", whereqry=whereqry)
   treef <- rowcolinfo$treef
   seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf

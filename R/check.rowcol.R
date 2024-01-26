@@ -4,7 +4,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
 	domvarlst=NULL, domlut=NULL, title.rowvar=NULL, title.colvar=NULL, 
  	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
-	title.rowgrp=NULL, landarea=NULL, states=NULL, cvars2keep=NULL){
+	title.rowgrp=NULL, landarea=NULL, states=NULL, cvars2keep=NULL,
+	whereqry=NULL){
 
   ####################################################################################
   ## CHECKS ROW AND COLUMN INFO
@@ -310,6 +311,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
         cuniquex.qry <- 
 		     paste0("SELECT DISTINCT ", rowvar, 
 		            "\nFROM ", condfnm,
+                    whereqry,					
 					"\nORDER BY ", rowvar)
 	  
 	    if (isdb) {
@@ -427,7 +429,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
              paste0("SELECT DISTINCT ", rowvar, 
                     "\nFROM ", condfnm, " c ",
                     "\nLEFT OUTER JOIN ", treefnm, " t ON(c.", cuniqueid, " = t.", tuniqueid, 
-                    " AND c.", condid, " = t.", condid, ")", 								 
+                    " AND c.", condid, " = t.", condid, ")", 
+                    whereqry, 					
                     "\nORDER BY ", rowvar)
 		} else {				  
           tuniquex.qry <- 
@@ -451,7 +454,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                  paste0("SELECT DISTINCT ", rowvar, 
                     "\nFROM ", condfnm, " c ",
                     "\nLEFT OUTER JOIN ", seedfnm, " t ON(c.", cuniqueid, " = t.", tuniqueid, 
-                    " AND c.", condid, " = t.", condid, ")", 								 
+                    " AND c.", condid, " = t.", condid, ")", 
+                    whereqry,					
                     "\nORDER BY ", rowvar)
 		    } else {			
               suniquex.qry <- 
@@ -718,6 +722,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
         cuniquex.qry <- 
 		     paste0("SELECT DISTINCT ", colvar, 
 		            "\nFROM ", condfnm,
+					whereqry,
 					"\nORDER BY ", colvar)
 	  
 	    if (isdb) {
@@ -795,7 +800,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
              paste0("SELECT DISTINCT ", colvar, 
                     "\nFROM ", condfnm, " c ",
                     "\nLEFT OUTER JOIN ", treefnm, " t ON(c.", cuniqueid, " = t.", tuniqueid, 
-                    " AND c.", condid, " = t.", condid, ")", 								 
+                    " AND c.", condid, " = t.", condid, ")", 
+                    whereqry,					
                     "\nORDER BY ", colvar)
 		} else {				  
           tuniquex.qry <- 
@@ -820,6 +826,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                     "\nFROM ", condfnm, " c ",
                     "\nLEFT OUTER JOIN ", seedfnm, " t ON(c.", cuniqueid, " = t.", tuniqueid, 
                     " AND c.", condid, " = t.", condid, ")", 								 
+                    whereqry,					
                     "\nORDER BY ", colvar)
 		    } else {				  
               suniquex.qry <- 
@@ -1034,7 +1041,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
         setkeyv(uniquerow, rowvar)
       }
     }
-  } else if (rowvar %in% treenames) {
+  } else if (rowvar %in% tnames) {
     if (!is.null(row.orderby) && row.orderby != "NONE") {
 	  if (estseed == "only") {
         uniquerow <- unique(seedf[,c(rowgrpord, rowgrpnm, row.orderby, rowvar), with=FALSE])
