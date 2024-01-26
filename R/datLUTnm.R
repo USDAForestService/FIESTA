@@ -315,7 +315,11 @@ datLUTnm <- function(xvar,
 	  if (!all(uniquex %in% uniqueval)) {
 	    missval <- uniquex[!uniquex %in% uniqueval]
 		if (length(missval) > 0) {
-		  message("uniquex values missing: ", toString(missval)) 
+		  if (!all(is.na(missval))) {
+		    message("uniquex values missing: ", toString(missval)) 
+          } else {
+            uniqueval <- c(uniqueval, NA)
+          }			
 		} else {
 		  message("no uniquex in x... returning NULL")
 		  return(NULL)

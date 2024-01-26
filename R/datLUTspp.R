@@ -240,7 +240,7 @@ datLUTspp <- function(x = NULL,
   add0 <- pcheck.logical(add0, varnm="add0", title="Add 0 values to missing codes?", 
                              first="NO", gui=gui)
  
-  ## Get unique values
+  ## Get unique values from data table
   if (isdb && !dbreturn) {
     uniqueval.qry <- paste("SELECT DISTINCT", xvar, "FROM", datnm,
                            "ORDER BY", xvar)
@@ -254,51 +254,48 @@ datLUTspp <- function(x = NULL,
       uniqueval <- sort(unique(datx[[xvar]]))
     }
   }
+  if (length(uniqueval) == 0) {
+    message("no values exist in data for ", xvar)
+  }
+  
+  ## Check if all values in uniquex are in dataset
   if (!is.null(uniquex)) {
-    if (!is.null(uniqueval)) {
-	  if (!all(uniquex %in% uniqueval)) {
-	    missval <- uniquex[!uniquex %in% uniqueval]
-		if (length(missval) > 0) {
+ 	if (!all(uniquex %in% uniqueval)) {
+	  missval <- uniquex[!uniquex %in% uniqueval]
+      if (length(missval) > 0) {
+		if (!all(is.na(missval))) {
 		  message("uniquex values missing: ", toString(missval)) 
-		} else {
-		  message("no uniquex in x... returning NULL")
-		  return(NULL)
-		}
+        } else {
+          uniqueval <- c(uniqueval, NA)
+        }			
+      } else {
+		message("no uniquex in x... returning NULL")
+		return(NULL)
 	  } 
 	  uniquex <- uniquex[uniquex %in% uniqueval]
 	  
-	  if (add0 && length(uniquex) < length(uniqueval)) {
+	  if (add0 && (length(uniquex) < length(uniqueval))) {
         message("add0 = TRUE and uniquex less than uniqueval... using all values")
 	  }
-	  
-	  if (!all(uniquex %in% unique(ref_spp$SPCD))) {
-        missval <- uniquex[!uniquex %in% unique(ref_spp$SPCD)]
-        warning("missing values in ref_species: ", toString(missval))
-      } else {
-        if (!add0) {
-          ref_spp <- ref_spp[ref_spp$SPCD %in% uniquex, ]
-          if (length(ref_spp) == 0) {
-            stop("SPCD values do not match ref_species values")
-          }
-        }
-      }
-	} 
+	}
   } else {
-
-    ## Check for missing values in ref_spp
-    if (!all(uniqueval %in% unique(ref_spp$SPCD))) {
-      missval <- uniqueval[!uniqueval %in% unique(ref_spp$SPCD)]
+	uniquex <- uniqueval
+  }
+	  
+  ## Check if all values in dataset are in ref_species
+  if (!all(uniquex %in% unique(ref_spp$SPCD))) {
+    missval <- uniquex[!uniquex %in% unique(ref_spp$SPCD)]
+    if (!all(is.na(missval))) {
       warning("missing values in ref_species: ", toString(missval))
-    } else {
-      if (!add0) {
-        ref_spp <- ref_spp[ref_spp$SPCD %in% uniqueval, ]
-        if (length(ref_spp) == 0) {
-          stop("SPCD values do not match ref_species values")
-        }
-      }
-    }
-  }   
- 
+      return(NULL)
+	}
+  } 
+  
+  ## Subset ref_spp table 
+  if (!add0) {
+    ref_spp <- ref_spp[ref_spp$SPCD %in% uniquex, ]
+  }
+   
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
                              first="NO", gui=gui)
@@ -442,7 +439,7 @@ datLUTspp <- function(x = NULL,
   }
 
   ## Add records if no other values exist in xLUT
-  if (!is.null(uniquex) && !all(uniquex %in% LUTx[[xvar]])) {
+  if (!all(uniquex %in% LUTx[[xvar]])) {
     xvals <- unique(na.omit(uniquex))
     missvals <- xvals[which(!xvals %in% unique(LUTx[[LUTvar]]))]
 

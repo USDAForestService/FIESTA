@@ -225,8 +225,11 @@ DBgetEvalid <- function(states = NULL,
     datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		gui=gui, checklst=datsourcelst, caption="Data source?",
            stopifnull=TRUE, stopifinvalid=TRUE)
-
-    if (datsource == "sqlite" && !is.null(data_dsn)) {
+    if (datsource == "sqlite") {
+	  if (is.null(data_dsn)) {
+	    message("dsn is NULL")
+		return(NULL)
+	  }
       dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
       dbtablst <- DBI::dbListTables(dbconn)
       if (length(dbtablst) == 0) {

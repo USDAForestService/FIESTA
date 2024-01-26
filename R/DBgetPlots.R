@@ -908,7 +908,8 @@ DBgetPlots <- function (states = NULL,
 
     }
     if (is.null(evalInfo)) {
-      iseval <- FALSE
+	  message("returning NULL")
+      return(NULL)
     }
   }
 

@@ -716,9 +716,9 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 	  cuniquex <- NULL
       if (!is.null(condf)) {
         cuniquex.qry <- 
-		     paste0("SELECT DISTINCT ", rowvar, 
+		     paste0("SELECT DISTINCT ", colvar, 
 		            "\nFROM ", condfnm,
-					"\nORDER BY ", rowvar)
+					"\nORDER BY ", colvar)
 	  
 	    if (isdb) {
           cuniquex <- DBI::dbGetQuery(dbconn, cuniquex.qry)[[1]]
@@ -1034,26 +1034,44 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
         setkeyv(uniquerow, rowvar)
       }
     }
-  } else if (rowvar %in% names(treef)) {
+  } else if (rowvar %in% treenames) {
     if (!is.null(row.orderby) && row.orderby != "NONE") {
-      uniquerow <- unique(treef[,c(rowgrpord, rowgrpnm, row.orderby, rowvar), with=FALSE])
-      setkeyv(uniquerow, c(rowgrpord, rowgrpnm, row.orderby))
+	  if (estseed == "only") {
+        uniquerow <- unique(seedf[,c(rowgrpord, rowgrpnm, row.orderby, rowvar), with=FALSE])
+        setkeyv(uniquerow, c(rowgrpord, rowgrpnm, row.orderby))
+	  } else {
+        uniquerow <- unique(treef[,c(rowgrpord, rowgrpnm, row.orderby, rowvar), with=FALSE])
+        setkeyv(uniquerow, c(rowgrpord, rowgrpnm, row.orderby))
 
-      if (estseed == "add" && !is.null(seedf)) {
-        if (all(c(rowvar, row.orderby) %in% names(seedf)) && rowvar == "DIACL") {
-          if (is.factor(uniquerow[[rowvar]])) {
-            levels(uniquerow[[rowvar]]) <- c(seedclnm, levels(uniquerow[[rowvar]]))
+        if (estseed == "add" && !is.null(seedf)) {
+          if (all(c(rowvar, row.orderby) %in% names(seedf)) && rowvar == "DIACL") {
+            if (is.factor(uniquerow[[rowvar]])) {
+              levels(uniquerow[[rowvar]]) <- c(seedclnm, levels(uniquerow[[rowvar]]))
+            }
+            if (is.factor(uniquerow[[row.orderby]])) {
+              levels(uniquerow[[row.orderby]]) <- c(seedclord, levels(uniquerow[[row.orderby]]))
+            }
+            uniqueseed <- data.table(seedclord, seedclnm)
+            setnames(uniqueseed, c(col.orderby, colvar))
+            uniquerow <- rbindlist(list(uniqueseed, uniquerow))
           }
-          if (is.factor(uniquerow[[row.orderby]])) {
-            levels(uniquerow[[row.orderby]]) <- c(seedclord, levels(uniquerow[[row.orderby]]))
-          }
-          uniqueseed <- data.table(seedclord, seedclnm)
-          setnames(uniqueseed, c(col.orderby, colvar))
-          uniquerow <- rbindlist(list(uniqueseed, uniquerow))
-        }
+		}
       }
     } else {
-      if (is.factor(treef[[rowvar]])) {
+	  if (estseed == "only") {
+        if (is.factor(seedf[[rowvar]])) {         
+          rowlevels <- levels(seedf[[rowvar]])       
+          uniquerow <- as.data.table(rowlevels)
+          names(uniquerow) <- rowvar
+          uniquerow[[rowvar]] <- sort(uniquerow[[rowvar]])
+        } else {
+          rowvals <- sort(na.omit(unique(seedf[, rowvar, with=FALSE][[1]])))          
+          uniquerow <- as.data.table(rowvals)
+          names(uniquerow) <- rowvar
+          uniquerow[[rowvar]] <- sort(uniquerow[[rowvar]])
+          setkeyv(uniquerow, rowvar)
+        }	  
+      } else if (is.factor(treef[[rowvar]])) {
         if ((estseed == "add" && !is.null(seedf)) && 
           (rowvar %in% names(seedf) && rowvar == "DIACL")) {
           rowlevels <- c(seedclnm, levels(treef[[rowvar]]))
