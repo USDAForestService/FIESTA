@@ -82,10 +82,10 @@ check.popdataPLT <- function(dsn,
   ## Define plt variables
   ##############################################################################
   pvars2keep <- unique(pvars2keep) 
-  pdoms <- c("STATECD", "UNITCD", "COUNTYCD", "INVYR", "PLOT_STATUS_CD", 
+  pdoms <- unique(c("STATECD", "UNITCD", "COUNTYCD", "INVYR", "PLOT_STATUS_CD", 
              "PLOT_NONSAMPLE_REASN_CD", "PSTATUSCD", "INTENSITY", "MEASYEAR",
              "RDDISTCD", "WATERCD", "ELEV", "ELEV_PUBLIC", "ECOSUBCD", "CONGCD",
-             "DESIGNCD", "EMAP_HEX")
+             "DESIGNCD", "EMAP_HEX", pdoms2keep))
   
   ## Get tables from tabs
   ##############################################################################
@@ -369,7 +369,7 @@ check.popdataPLT <- function(dsn,
                             tabnm="pltassgn", caption="plot assignments?", 
                             nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE)
   
-  
+
   ##############################################################################
   ## Check and merge plt, pltassgn, cond
   ##############################################################################
@@ -620,7 +620,7 @@ check.popdataPLT <- function(dsn,
       names(invyrs) <- pcheck.states(names(invyrs))
     }
   }
-  
+
   ## Generate table of sampled/nonsampled plots
   ## (if ACI, nonforest status included)
   ##############################################################################
@@ -795,7 +795,7 @@ check.popdataPLT <- function(dsn,
       return(NULL)
     }
   }
-  
+ 
   ##############################################################################
   ## Split tables
   ##############################################################################
@@ -804,9 +804,9 @@ check.popdataPLT <- function(dsn,
   setkeyv(pltassgnx, pltassgnid)
   
   ## Subset columns for pltassgn table
-  pdoms2keep <- pdoms2keep[pdoms2keep %in% names(pltx)]
+  pvars2keep <- unique(c(puniqueid, pdoms2keep, pdoms, pvars2keep))
   pvars2keep <- pvars2keep[pvars2keep %in% names(pltx)]
-  pltx <- data.table(pltx[, unique(c(puniqueid, pdoms2keep, pvars2keep)), with=FALSE])
+  pltx <- data.table(pltx[, pvars2keep, with=FALSE])
   setkeyv(pltx, puniqueid)
   
   if (is.null(pvars)) {
