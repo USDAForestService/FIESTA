@@ -9,6 +9,7 @@
 #' @param plt String. Unique identifier of plot in plt.
 #' @param tree String. Unique identifier of plot in tree and seed.
 #' @param seed String.
+#' @param seedling String.
 #' @param vsubpspp String.
 #' @param p2veg_subplot_spp String.
 #' @param vsubpstr String.
@@ -41,6 +42,7 @@ popTableIDs <- function(cond = "PLT_CN",
                         plt = "CN", 
                         tree = "PLT_CN", 
                         seed = "PLT_CN",
+						seedling = "PLT_CN",
                         vsubpspp = "PLT_CN", 
 						p2veg_subplot_spp = "PLT_CN",
                         vsubpstr = "PLT_CN",

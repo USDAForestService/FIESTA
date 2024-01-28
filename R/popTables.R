@@ -20,6 +20,8 @@
 #' condition-level. See details for necessary variables to include.
 #' @param seed DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Seedling data with one record for each seedling count.
+#' @param seedling DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Seedling data with one record for each seedling count.
 #' @param vsubpspp DF/DT, R object, comma-delimited file(*.csv), or layer in
 #' dsn.  Vegetation species-level data with one record for each species
 #' (P2VEG_SUBPLOT_SPP).
@@ -79,6 +81,7 @@ popTables <- function(cond = "COND",
                       plt = "PLOT", 
                       tree = "TREE", 
                       seed = "SEEDLING", 
+                      seedling = "SEEDLING", 
                       vsubpspp = "P2VEG_SUBPLOT_SPP", 
 					  p2veg_subplot_spp = "P2VEG_SUBPLOT_SPP",
                       vsubpstr = "P2VEG_SUBP_STRUCTURE", 

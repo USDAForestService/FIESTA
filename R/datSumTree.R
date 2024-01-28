@@ -469,7 +469,6 @@ datSumTree <- function(tree = NULL,
     }
   }
 
-
   ## Build query parts for tree table
   ##################################################
   tfromqry <- paste("FROM", treenm)
@@ -482,7 +481,7 @@ datSumTree <- function(tree = NULL,
   }
   
   selectvars <- tsumuniqueid
-  tfilter <- RtoSQL(tfilter, x=treenames)
+  tfilter <- check.logic(treenames, statement=tfilter, stopifinvalid=FALSE)
   if (!is.null(tfilter)) {
     if (!seedonly) {
 	  if (is.null(twhereqry)) {
@@ -490,6 +489,8 @@ datSumTree <- function(tree = NULL,
 	  } else {
         twhereqry <- paste(twhereqry, "AND", tfilter)
       }	  
+    } else {
+	  tfilter <- RtoSQL(tfilter, x=treenames)
     }
     if (addseed || seedonly) {
       sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
@@ -858,7 +859,7 @@ datSumTree <- function(tree = NULL,
 	  } 
 	  if (addseed ||seedonly) {
 	    if (bycond) {
-          seedx <- treex[paste(get(eval(tuniqueid)), get(eval(condid))) %in% cond.ids]
+          seedx <- seedx[paste(get(eval(tuniqueid)), get(eval(condid))) %in% cond.ids]
         } else {
           seedx <- seedx[get(eval(tuniqueid)) %in% cond.ids]
         }

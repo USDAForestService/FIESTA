@@ -446,8 +446,6 @@ DBgetXY <- function (states = NULL,
 
   ####################################################################
   ## Get states, Evalid and/or invyrs info
-  ####################################################################
-  ## Get states, Evalid and/or invyrs info
   ##########################################################
   if (!is.null(evalInfo)) {
     list.items <- c("states", "invtype")
