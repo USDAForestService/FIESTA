@@ -9,6 +9,7 @@ popTableIDs(
   plt = "CN",
   tree = "PLT_CN",
   seed = "PLT_CN",
+  seedling = "PLT_CN",
   vsubpspp = "PLT_CN",
   p2veg_subplot_spp = "PLT_CN",
   vsubpstr = "PLT_CN",
@@ -40,6 +41,8 @@ popTableIDs(
 \item{tree}{String. Unique identifier of plot in tree and seed.}
 
 \item{seed}{String.}
+
+\item{seedling}{String.}
 
 \item{vsubpspp}{String.}
 

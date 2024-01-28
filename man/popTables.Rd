@@ -9,6 +9,7 @@ popTables(
   plt = "PLOT",
   tree = "TREE",
   seed = "SEEDLING",
+  seedling = "SEEDLING",
   vsubpspp = "P2VEG_SUBPLOT_SPP",
   p2veg_subplot_spp = "P2VEG_SUBPLOT_SPP",
   vsubpstr = "P2VEG_SUBP_STRUCTURE",
@@ -50,6 +51,9 @@ Tree-level data with one record for each tree. Tree data are aggregated to
 condition-level. See details for necessary variables to include.}
 
 \item{seed}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Seedling data with one record for each seedling count.}
+
+\item{seedling}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 Seedling data with one record for each seedling count.}
 
 \item{vsubpspp}{DF/DT, R object, comma-delimited file(*.csv), or layer in

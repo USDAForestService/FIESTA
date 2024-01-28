@@ -651,7 +651,7 @@ modGBarea <- function(GBpopdat,
     }      
     setkeyv(unit_colest, c(unitvar, colvar))
   }
- 
+
   if (!is.null(unit_grpest)) {
    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, 
                             uniquex=uniquerow, unitvar=unitvar, 
@@ -659,7 +659,7 @@ modGBarea <- function(GBpopdat,
                             uniquex2=uniquecol, xvar2.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
-    unit_grpest <- tabs$tab2
+    unit_grpest <- tabs$tab2 
 
     if (!is.null(row.orderby) && row.orderby != "NONE") {
       if (!is.null(col.orderby) && col.orderby != "NONE") {
@@ -754,7 +754,6 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   message("getting output...")
   estnm <- "est" 
- 
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
 	        unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
 	        unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
@@ -771,7 +770,7 @@ modGBarea <- function(GBpopdat,
 	        estround=estround, pseround=pseround, divideby=divideby, 
 	        returntitle=returntitle, estnull=estnull, psenull=psenull, 
 			raw.keep0=raw.keep0) 
- 
+
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
