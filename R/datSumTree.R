@@ -479,19 +479,19 @@ datSumTree <- function(tree = NULL,
     tfromqry <- paste0(tfromqry, 
 	    "\n JOIN ", ref_sppnm, " ref ON(", treenm, ".", spcdnm, " = ref.", refspcdnm, ")")  
   }
-  
+
   selectvars <- tsumuniqueid
-  tfilter <- check.logic(treenames, statement=tfilter, stopifinvalid=FALSE)
+ 
   if (!is.null(tfilter)) {
     if (!seedonly) {
-	  if (is.null(twhereqry)) {
+      tfilter <- check.logic(treenames, statement=tfilter, stopifinvalid=FALSE)
+      tfilter <- RtoSQL(tfilter, x=treenames)
+ 	  if (is.null(twhereqry)) {
         twhereqry <- paste("WHERE", tfilter)
 	  } else {
         twhereqry <- paste(twhereqry, "AND", tfilter)
-      }	  
-    } else {
-	  tfilter <- RtoSQL(tfilter, x=treenames)
-    }
+      }	 
+    }	  
     if (addseed || seedonly) {
       sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
       if (!is.null(sfilter)) {
@@ -514,7 +514,7 @@ datSumTree <- function(tree = NULL,
       }	 
     }	  
   }
-      
+
   ### Check tsumvarlst
   ###########################################################  
   if (!seedonly) {
