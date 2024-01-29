@@ -482,11 +482,11 @@ datSumTree <- function(tree = NULL,
 
   selectvars <- tsumuniqueid
  
-  if (!is.null(tfilter)) {
+  if (!is.null(tfilter) && tfilter != "") {
     if (!seedonly) {
       tfilter <- check.logic(treenames, statement=tfilter, stopifinvalid=FALSE)
       tfilter <- RtoSQL(tfilter, x=treenames)
- 	  if (is.null(twhereqry)) {
+      if (is.null(twhereqry)) {
         twhereqry <- paste("WHERE", tfilter)
 	  } else {
         twhereqry <- paste(twhereqry, "AND", tfilter)
@@ -494,8 +494,9 @@ datSumTree <- function(tree = NULL,
     }	  
     if (addseed || seedonly) {
       sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
+      sfilter <- RtoSQL(sfilter, x=seednames)
       if (!is.null(sfilter)) {
-        swhereqry <- paste("WHERE", tfilter)
+        swhereqry <- paste("WHERE", sfilter)
       }
     }
 	if (woodland %in% c("N", "only")) {
