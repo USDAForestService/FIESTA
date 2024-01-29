@@ -791,7 +791,16 @@ modMApop <- function(popType="VOL",
     pltcondx <- merge(pltcondx, ref_fortyp, by="FORTYPCD", all.x=TRUE)
     newcols <- c(newcols, "FORTYPGRPCD")
   }
-  
+
+  if (!"DSTRBGRP" %in% names(pltcondx) && "DSTRBCD1" %in% names(pltcondx)) {
+    ## Add FORTYPGRPCD to pltcondx if not already in dataset
+    #pltcondx <- addFORTYPGRPCD(pltcondx)
+    ref_dstrbcd <- ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")]
+    names(ref_dstrbcd) <- c("DSTRBCD1", "DSTRBGRP")
+    pltcondx <- merge(pltcondx, ref_dstrbcd, by="DSTRBCD1", all.x=TRUE)
+    newcols <- c(newcols, "DSTRBGRP")
+  }
+   
   ## Move new columns to end of table
   setcolorder(pltcondx, c(pltcondxcols, newcols))
 
