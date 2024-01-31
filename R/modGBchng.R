@@ -540,7 +540,7 @@ modGBchng <- function(GBpopdat,
 #    select.qry <- groupby.qry
   }
  
-  if (chngtype == "ANNUAL") {
+  if (chngtype == "annual") {
     condf_chng.qry <- paste0("SELECT ", select.qry, ",", 
                               "\n       SUM(", estvar.name, " / 4 / c.REMPER) AS ysum")
   } else {
