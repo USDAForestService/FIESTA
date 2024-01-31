@@ -416,6 +416,9 @@ modMAarea <- function(MApopdat,
   predfac <- MApopdat$predfac
   strvar <- MApopdat$strvar
   adj <- MApopdat$adj
+  pop_fmt <- MApopdat$pop_fmt
+  pop_dsn <- MApopdat$pop_dsn
+  
  
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
@@ -450,13 +453,14 @@ modMAarea <- function(MApopdat,
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
-                  cuniqueid=cuniqueid, condid=condid, sumunits=sumunits, 
-                  landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
-                  allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
-                  addtitle=addtitle, returntitle=returntitle, 
-                  rawdata=rawdata, rawonly=rawonly, 
-                  savedata=savedata, outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+  estdat <- check.estdata(esttype=esttype, pop_fmt=pop_fmt, pop_dsn=pop_dsn, 
+                  pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid, 
+				  sumunits=sumunits, totals=totals, landarea=landarea, 
+                  ACI.filter=ACI.filter, pcfilter=pcfilter, 
+                  allin1=allin1, estround=estround, pseround=pseround, 
+				  divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
+                  rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
+                  outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
                   overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
                   outfn.date=outfn.date, append_layer=append_layer, 
                   raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
@@ -490,20 +494,25 @@ modMAarea <- function(MApopdat,
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, condf=pltcondf, 
-                    cuniqueid=cuniqueid, rowvar=rowvar, colvar=colvar, 
+  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
+                    condf=pltcondf, cuniqueid=cuniqueid, 
+					rowvar=rowvar, colvar=colvar, 
                     row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
                     row.orderby=row.orderby, col.orderby=col.orderby, 
                     row.add0=row.add0, col.add0=col.add0, 
                     title.rowvar=title.rowvar, title.colvar=title.colvar, 
-                    rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-                    rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea)
+                    rowlut=rowlut, collut=collut, 
+					rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+					landarea=landarea, states=states,
+				    cvars2keep="COND_STATUS_CD")
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
+  rowvarnm <- rowcolinfo$rowvarnm
+  colvarnm <- rowcolinfo$colvarnm
   row.orderby <- rowcolinfo$row.orderby
   col.orderby <- rowcolinfo$col.orderby
   row.add0 <- rowcolinfo$row.add0
@@ -538,14 +547,16 @@ modMAarea <- function(MApopdat,
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
-  alltitlelst <- check.titles(dat=cdomdat, esttype=esttype, sumunits=sumunits, 
-                    title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar, 
-                    title.rowgrp=title.rowgrp, title.colvar=title.colvar, 
-                    title.unitvar=title.unitvar, title.filter=title.filter, 
-                    title.unitsn=areaunits, unitvar=unitvar, 
-                    rowvar=rowvar, colvar=colvar, addtitle=addtitle, returntitle=returntitle, 
-                    rawdata=rawdata, invyrs=invyrs, landarea=landarea, 
-                    pcfilter=pcfilter, allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
+  alltitlelst <- check.titles(dat=cdomdat, esttype=esttype, 
+                    sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
+					title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+					title.colvar=title.colvar, title.unitvar=title.unitvar, 
+					title.filter=title.filter, title.unitsn=areaunits, 
+					unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
+					addtitle=addtitle, returntitle=returntitle, 
+                    rawdata=rawdata, states=states, invyrs=invyrs, 
+					landarea=landarea, pcfilter=pcfilter, 
+					allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -788,18 +799,21 @@ modMAarea <- function(MApopdat,
   estnm <- "est"
 
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-                unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
-                unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest, 
-                rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol, 
-                rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
-                allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref, 
-                title.colvar=title.colvar, title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
-                title.unitvar=title.unitvar, title.estpse=title.estpse, 
-                title.est=title.est, title.pse=title.pse, rawdata=rawdata, 
-                rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
-                outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, 
-                estround=estround, pseround=pseround, divideby=divideby, returntitle=returntitle, 
-                estnull=estnull, psenull=psenull)
+            unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
+            unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest, 
+            rowvar=rowvarnm, colvar=colvarnm, uniquerow=uniquerow, uniquecol=uniquecol, 
+            rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
+            allin1=allin1, savedata=savedata, addtitle=addtitle, 
+			title.ref=title.ref, title.colvar=title.colvar, 
+			title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+            title.unitvar=title.unitvar, title.estpse=title.estpse, 
+            title.est=title.est, title.pse=title.pse, 
+			rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
+			outfolder=outfolder, outfn.date=outfn.date, 
+			overwrite=overwrite_layer, estnm=estnm, 
+            estround=estround, pseround=pseround, divideby=divideby, 
+			returntitle=returntitle, estnull=estnull, psenull=psenull,
+			raw.keep0=raw.keep0)
  
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse

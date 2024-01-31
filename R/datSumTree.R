@@ -469,7 +469,6 @@ datSumTree <- function(tree = NULL,
     }
   }
 
-
   ## Build query parts for tree table
   ##################################################
   tfromqry <- paste("FROM", treenm)
@@ -480,21 +479,24 @@ datSumTree <- function(tree = NULL,
     tfromqry <- paste0(tfromqry, 
 	    "\n JOIN ", ref_sppnm, " ref ON(", treenm, ".", spcdnm, " = ref.", refspcdnm, ")")  
   }
-  
+
   selectvars <- tsumuniqueid
-  tfilter <- RtoSQL(tfilter, x=treenames)
-  if (!is.null(tfilter)) {
+ 
+  if (!is.null(tfilter) && tfilter != "") {
     if (!seedonly) {
-	  if (is.null(twhereqry)) {
+      tfilter <- check.logic(treenames, statement=tfilter, stopifinvalid=FALSE)
+      tfilter <- RtoSQL(tfilter, x=treenames)
+      if (is.null(twhereqry)) {
         twhereqry <- paste("WHERE", tfilter)
 	  } else {
         twhereqry <- paste(twhereqry, "AND", tfilter)
-      }	  
-    }
+      }	 
+    }	  
     if (addseed || seedonly) {
       sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
+      sfilter <- RtoSQL(sfilter, x=seednames)
       if (!is.null(sfilter)) {
-        swhereqry <- paste("WHERE", tfilter)
+        swhereqry <- paste("WHERE", sfilter)
       }
     }
 	if (woodland %in% c("N", "only")) {
@@ -513,7 +515,7 @@ datSumTree <- function(tree = NULL,
       }	 
     }	  
   }
-      
+
   ### Check tsumvarlst
   ###########################################################  
   if (!seedonly) {
@@ -858,7 +860,7 @@ datSumTree <- function(tree = NULL,
 	  } 
 	  if (addseed ||seedonly) {
 	    if (bycond) {
-          seedx <- treex[paste(get(eval(tuniqueid)), get(eval(condid))) %in% cond.ids]
+          seedx <- seedx[paste(get(eval(tuniqueid)), get(eval(condid))) %in% cond.ids]
         } else {
           seedx <- seedx[get(eval(tuniqueid)) %in% cond.ids]
         }

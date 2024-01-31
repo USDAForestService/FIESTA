@@ -276,8 +276,9 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   #############################################################################
   if (!"COND_STATUS_CD" %in% pltcondnmlst) {
     message("COND_STATUS_CD not in dataset.. assuming all sampled conditions")
-    cvars2keep <- cvars2keep[cvars2keep != "COND_STATUS_CD"]
-  }
+  } else {
+    #cvars2keep <- c(cvars2keep, "COND_STATUS_CD")
+  }  
 
   #############################################################################
   ## Generate table of sampled/nonsampled conditions from condx
@@ -367,6 +368,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     pltcondx[, areawt2 := eval(parse(text=areawt2))]
     cvars2keep <- c(cvars2keep, "areawt2")
   }
+  cvars2keep <- c(cvars2keep, areawt_subp, areawt_macr)
 
   ###################################################################################
   ###################################################################################

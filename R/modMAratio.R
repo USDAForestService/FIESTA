@@ -373,6 +373,8 @@ modMAratio <- function(MApopdat,
   estvar.area <- MApopdat$estvar.area
   adj <- MApopdat$adj
   expcondtab <- MApopdat$expcondtab
+  pop_fmt <- MApopdat$pop_fmt
+  pop_dsn <- MApopdat$pop_dsn
   
   
   if (is.null(prednames)) {
@@ -401,20 +403,18 @@ modMAratio <- function(MApopdat,
     setkeyv(unitarea, unitvar)
   }
   
-  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
-                          cuniqueid=cuniqueid, condid=condid, 
-                          treex=treex, seedx=seedx, estseed=estseed, woodland=woodland,
-                          sumunits=sumunits, landarea=landarea, 
-                          ACI.filter=ACI.filter, pcfilter=pcfilter, 
-                          allin1=allin1, estround=estround, pseround=pseround, 
-                          divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-                          rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
-                          outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-                          overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
-                          outfn.date=outfn.date, append_layer=append_layer, 
-                          raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
-  
-  
+  estdat <- check.estdata(esttype=esttype, pop_fmt=pop_fmt, pop_dsn=pop_dsn, 
+                pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid, 
+                treex=treex, seedx=seedx, estseed=estseed, woodland=woodland,
+				sumunits=sumunits, landarea=landarea,
+				ACI.filter=ACI.filter, pcfilter=pcfilter,
+				allin1=allin1, estround=estround, pseround=pseround,
+				divideby=divideby, addtitle=addtitle, returntitle=returntitle,
+				rawdata=rawdata, rawonly=rawonly, savedata=savedata,
+				outfolder=outfolder, overwrite_dsn=overwrite_dsn,
+				overwrite_layer=overwrite_layer, outfn.pre=outfn.pre,
+				outfn.date=outfn.date, append_layer=append_layer,
+				raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui) 
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -447,16 +447,19 @@ modMAratio <- function(MApopdat,
     invyr <- sort(unique(pltcondf$INVYR))
   }
   
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf, 
-                             condf=pltcondf, cuniqueid=cuniqueid, 
-                             tuniqueid=tuniqueid, estseed=estseed,
-                             rowvar=rowvar, colvar=colvar, 
-                             row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
-                             row.orderby=row.orderby, col.orderby=col.orderby, 
-                             row.add0=row.add0, col.add0=col.add0, 
-                             title.rowvar=title.rowvar, title.colvar=title.colvar, 
-                             rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-                             rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea) 
+  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
+                    treef=treef, seedf=seedf, 
+					condf=pltcondf, cuniqueid=cuniqueid, 
+					tuniqueid=tuniqueid, estseed=estseed, 
+					rowvar=rowvar, colvar=colvar, 
+					row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+					row.orderby=row.orderby, col.orderby=col.orderby,
+					row.add0=row.add0, col.add0=col.add0,
+					title.rowvar=title.rowvar, title.colvar=title.colvar,
+					rowlut=rowlut, collut=collut, rowgrp=rowgrp,
+					rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+					landarea=landarea, states=states, 
+					cvars2keep="COND_STATUS_CD") 
   treef <- rowcolinfo$treef
   seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf
@@ -477,17 +480,11 @@ modMAratio <- function(MApopdat,
   tdomvar <- rowcolinfo$tdomvar
   tdomvar2 <- rowcolinfo$tdomvar2
   grpvar <- rowcolinfo$grpvar
+  rm(rowcolinfo) 
   
   
   if (rowvar == "TOTAL") rowcol.total <- TRUE
-  
-  ## Generate a uniquecol for estimation units
-  if (!sumunits & colvar == "NONE") {
-    uniquecol <- data.table(unitarea[[unitvar]])
-    setnames(uniquecol, unitvar)
-    uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
-  }
-  
+    
   #####################################################################################
   ### Get estimation data from tree table
   #####################################################################################
@@ -504,36 +501,7 @@ modMAratio <- function(MApopdat,
   
   if (is.null(treedat)) return(NULL)
   tdomdat <- treedat$tdomdat
-  
-  if (rowvar != "TOTAL") {
-    #if (!row.add0) {
-      if (any(is.na(tdomdat[[rowvar]]))) {
-	    if (!row.FIAname) {
-		  rval <- ifelse (any(!is.na(tdomdat[[rowvar]]) & tdomdat[[rowvar]] == 0), max(tdomdat[[rowvar]], na.rm=TRUE), 0)
-		  tdomdat[is.na(tdomdat[[rowvar]]), rowvar] <- rval
-		  levels(uniquerow[[rowvar]]) <- c(levels(uniquerow[[rowvar]]), as.character(rval))
-		  uniquerow[is.na(uniquerow[[rowvar]]), rowvar] <- as.character(rval)
-        } else {
-          tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]), ]
-        }
-	   }
-    #}
-    if (colvar != "NONE") {
-      #if (!col.add0) {
-        if (any(is.na(tdomdat[[colvar]]))) {
-	      if (!col.FIAname) {
-		    cval <- ifelse (any(!is.na(tdomdat[[colvar]]) & tdomdat[[colvar]] == 0), max(tdomdat[[colvar]], na.rm=TRUE), 0)
-		    tdomdat[is.na(tdomdat[[colvar]]), colvar] <- cval
-			levels(uniquecol[[colvar]]) <- c(levels(uniquecol[[colvar]]), as.character(cval))
-			uniquecol[is.na(uniquecol[[colvar]]), colvar] <- as.character(cval)
-		  } else {
-            tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]), ]
-          }
-		}
-      #}
-    }
-  }
-  
+    
   ## Merge tdomdat with condx
   xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
   condx <- xchk$tab1
@@ -563,7 +531,14 @@ modMAratio <- function(MApopdat,
     tdomvarlstd <- NULL
     estunitsd <- areaunits
   }  
-  
+ 
+  ## Generate a uniquecol for estimation units
+  if (!sumunits & colvar == "NONE") {
+    uniquecol <- data.table(unitarea[[unitvar]])
+    setnames(uniquecol, unitvar)
+    uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
+  }
+ 
   #####################################################################################
   ### Get titles for output tables
   #####################################################################################

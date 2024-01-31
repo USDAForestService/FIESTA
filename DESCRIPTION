@@ -1,8 +1,8 @@
 Package: FIESTA
 Type: Package
 Title: Forest Inventory Estimation and Analysis
-Version: 3.6.0.9000
-Date: 2023-11-21
+Version: 3.6.1.9000
+Date: 2024-01-22
 Authors@R:
     c(person(given = "Tracey",
              family = "Frescino",
@@ -36,7 +36,7 @@ Depends:
 Imports:
     data.table,
     DBI,
-    FIESTAutils (>= 1.2.0),
+    FIESTAutils (>= 1.2.1),
     gdalraster,
     grDevices,
     graphics,
@@ -59,4 +59,4 @@ URL: https://usdaforestservice.github.io/FIESTA/,
 BugReports: https://github.com/USDAForestService/FIESTA/issues
 LazyData: true
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1

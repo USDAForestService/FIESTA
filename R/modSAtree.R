@@ -185,7 +185,7 @@ modSAtree <- function(SApopdatlst = NULL,
                       prednames = NULL, 
                       SApackage = "JoSAE", 
                       SAmethod = "area", 
-                      estseed = "none", 
+                      estseed = "none",
 					  woodland = "Y",
                       largebnd.unique = NULL, 
                       landarea = "FOREST", 
@@ -575,6 +575,9 @@ modSAtree <- function(SApopdatlst = NULL,
     adj <- SApopdat$adj
     estvar.area <- SApopdat$estvar.area
     predfac <- SApopdat$predfac
+    pop_fmt <- SApopdat$pop_fmt
+    pop_dsn <- SApopdat$pop_dsn
+
 
     ## check smallbnd.dom
     ########################################################
@@ -651,16 +654,19 @@ modSAtree <- function(SApopdatlst = NULL,
     ###################################################################################
     if (!sumunits) col.add0 <- TRUE
     if (!is.null(rowvar) && rowvar == "TOTAL") rowvar <- NULL
-    rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf, 
-                      condf=pltcondf, cuniqueid=cuniqueid, rowvar=rowvar, 
-                      colvar=colvar, 
+    rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
+	                  treef=treef, seedf=seedf, 
+                      condf=pltcondf, cuniqueid=cuniqueid,                      
+					  tuniqueid=tuniqueid, estseed=estseed,
+					  rowvar=rowvar, colvar=colvar, 
                       row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
                       row.orderby=row.orderby, col.orderby=col.orderby, 
                       row.add0=row.add0, col.add0=col.add0, 
                       title.rowvar=title.rowvar, title.colvar=title.colvar, 
                       rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
                       rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-                      landarea=landarea) 
+                      landarea=landarea, states=states, 
+					  cvars2keep="COND_STATUS_CD") 
     treef <- rowcolinfo$treef
     seedf <- rowcolinfo$seedf
     condf <- rowcolinfo$condf
@@ -668,7 +674,9 @@ modSAtree <- function(SApopdatlst = NULL,
     uniquecol <- rowcolinfo$uniquecol
     domainlst <- rowcolinfo$domainlst
     #rowvar <- rowcolinfo$rowvar
-    colvar <- rowcolinfo$colvar
+    #colvar <- rowcolinfo$colvar
+    #rowvarnm <- rowcolinfo$rowvarnm
+    #colvarnm <- rowcolinfo$colvarnm
     row.orderby <- rowcolinfo$row.orderby
     col.orderby <- rowcolinfo$col.orderby
     row.add0 <- rowcolinfo$row.add0
@@ -679,16 +687,9 @@ modSAtree <- function(SApopdatlst = NULL,
     tdomvar <- rowcolinfo$tdomvar
     tdomvar2 <- rowcolinfo$tdomvar2
     grpvar <- rowcolinfo$grpvar
-
     #rm(rowcolinfo)  
-
-    ## Generate a uniquecol for estimation units
-    if (!sumunits && colvar == "NONE") {
-      uniquecol <- data.table(dunitarea[[dunitvar]])
-      setnames(uniquecol, dunitvar)
-      uniquecol[[dunitvar]] <- factor(uniquecol[[dunitvar]])
-    }
-
+	
+	
     if (esttype == "TREE") {
       #####################################################################################
       ### Get estimation data from tree table, with plot-level adjustment for nonresponse
@@ -701,46 +702,42 @@ modSAtree <- function(SApopdatlst = NULL,
                         estvarn=estvar, estvarn.filter=estvar.filter, esttotn=TRUE, 
                         tdomvar=rowcolinfo$tdomvar, adjtree=adjtree, metric=metric)
       if (is.null(treedat)) return(NULL) 
+      tdomdat <- treedat$tdomdat
+	  
+      ## Merge tdomdat with condx
+      xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
+      condx <- xchk$tab1
+      tdomdat <- xchk$tab2
+      tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid), all.x=TRUE)	  
+	  
       estvar <- treedat$estvar
       estvar.name <- treedat$estvar.name
       estvar.filter <- treedat$estvar.filter
       tdomvarlst <- treedat$tdomvarlst
       estvarunits <- treedat$estunits
-      tdomdat <- treedat$tdomdat
-
-      if (rowcolinfo$rowvar != "TOTAL") {
-        #if (!rowcolinfo$row.add0) {
-          if (any(is.na(tdomdat[[rowcolinfo$rowvar]]))) {
-	        if (!row.FIAname) {
-		      rval <- ifelse (any(!is.na(tdomdat[[rowcolinfo$rowvar]]) & tdomdat[[rowcolinfo$rowvar]] == 0), 
-			                          max(tdomdat[[rowcolinfo$rowvar]], na.rm=TRUE), 0)
-		      tdomdat[is.na(tdomdat[[rowcolinfo$rowvar]]), rowcolinfo$rowvar] <- rval
-		      levels(uniquerow[[rowcolinfo$rowvar]]) <- c(levels(uniquerow[[rowcolinfo$rowvar]]), as.character(rval))
-		      uniquerow[is.na(uniquerow[[rowcolinfo$rowvar]]), rowcolinfo$rowvar] <- as.character(rval)
-            } else {
-              tdomdat <- tdomdat[!is.na(tdomdat[[rowcolinfo$rowvar]]), ]
-            }
-		  }
-        #}
-        if (rowcolinfo$colvar != "NONE") {
-          #if (!rowcolinfo$col.add0) {
-            if (any(is.na(tdomdat[[rowcolinfo$colvar]]))) {
-	          if (!col.FIAname) {
-		        cval <- ifelse (any(!is.na(tdomdat[[rowcolinfo$colvar]]) & tdomdat[[rowcolinfo$colvar]] == 0), 
-				                        max(tdomdat[[rowcolinfo$colvar]], na.rm=TRUE), 0)
-		        tdomdat[is.na(tdomdat[[rowcolinfo$colvar]]), rowcolinfo$colvar] <- cval
-			    levels(uniquecol[[rowcolinfo$colvar]]) <- c(levels(uniquecol[[colvar]]), as.character(cval))
-			    uniquecol[is.na(uniquecol[[rowcolinfo$colvar]]), rowcolinfo$colvar] <- as.character(cval)
-		      } else {
-                tdomdat <- tdomdat[!is.na(tdomdat[[rowcolinfo$colvar]]), ]
-              }
-			}
-          #}
-        }
+ 
+      ## Check for matching levels in x and xunique
+      if (!is.null(uniquerow)) {
+        chklevels <- checklevels(x = tdomdat, 
+	                         uniquex = uniquerow,
+							 xvar = rowvar) 
+	    tdomdat <- chklevels$x
+        uniquerow <- chklevels$uniquex	
       }
-	  
-      tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
-      #tdomdat <- DT_NAto0(tdomdat, estvar.name, 0)
+      if (!is.null(uniquecol)) {
+        chklevels <- checklevels(x = tdomdat, 
+	                         uniquex = uniquecol,
+							 xvar = colvar) 
+	    tdomdat <- chklevels$x
+        uniquecol <- chklevels$uniquex	
+      }
+    }
+	
+    ## Generate a uniquecol for estimation units
+    if (!sumunits && rowcolinfo$colvar == "NONE") {
+      uniquecol <- data.table(dunitarea[[dunitvar]])
+      setnames(uniquecol, dunitvar)
+      uniquecol[[dunitvar]] <- factor(uniquecol[[dunitvar]])
     }
 
     #####################################################################################
@@ -1186,13 +1183,15 @@ modSAtree <- function(SApopdatlst = NULL,
   title.dunitvar <- ifelse(is.null(title.unitvar), smallbnd.dom, title.unitvar)
   alltitlelst <- check.titles(esttype=esttype, estseed=estseed, 
                     sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
-                    title.rowvar=rowcolinfo$title.rowvar, title.colvar=title.colvar, 
+                    title.rowvar=rowcolinfo$title.rowvar, 
+					title.colvar=rowcolinfo$title.colvar, 
                     title.unitvar=title.dunitvar, title.filter=title.filter, 
-                    title.unitsn=estvarunits, title.estvarn=title.estvar, 
-                    unitvar="DOMAIN", rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
+                    title.unitsn=estvarunits, unitvar="DOMAIN", 
+					title.estvarn=title.estvar, 
+                    rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
                     estvarn=estvar, estvarn.filter=estvar.filter, 
-                    addtitle=addtitle, returntitle=returntitle, 
-                    rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
+                    addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
+                    states=states, invyrs=invyrs, landarea=landarea, 
                     pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
                     parameters=FALSE)
   title.dunitvar <- alltitlelst$title.unitvar
@@ -1215,20 +1214,23 @@ modSAtree <- function(SApopdatlst = NULL,
   ###################################################################################
   message("getting output...")
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-              unitvar="DOMAIN", unit_totest=dunit_totest, unit_rowest=dunit_rowest, 
-              unit_colest=dunit_colest, unit_grpest=dunit_grpest, 
-              rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
+              unitvar="DOMAIN", unit_totest=dunit_totest, 
+			  unit_rowest=dunit_rowest, unit_colest=dunit_colest, 
+			  unit_grpest=dunit_grpest, 
+              rowvar=rowcolinfo$rowvarnm, colvar=rowcolinfo$colvarnm, 
               uniquerow=rowcolinfo$uniquerow, uniquecol=rowcolinfo$uniquecol, 
-              rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
-              allin1=allin1, savedata=savedata, addtitle=addtitle, 
-              title.ref=title.ref, title.colvar=title.colvar, 
-              title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
-              title.unitvar=title.dunitvar, title.estpse=title.estpse, 
-              title.est=title.est, title.pse=title.pse, rawdata=rawdata, 
-              rawonly=rawonly, outfn.estpse=outfn.estpse2, outfolder=outfolder, 
-              outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, 
-              estround=estround, pseround=pseround, divideby=divideby, 
-              returntitle=returntitle, estnull=estnull, psenull=psenull) 
+              rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
+			  rowunit=rowunit, totunit=totunit, allin1=allin1, 
+			  savedata=savedata, addtitle=addtitle, title.ref=title.ref, 
+              title.colvar=rowcolinfo$title.colvar, title.rowvar=rowcolinfo$title.rowvar, 
+              title.rowgrp=title.rowgrp, title.unitvar=title.dunitvar, 
+			  title.estpse=title.estpse, title.est=title.est, 
+			  title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, 
+			  outfn.estpse=outfn.estpse2, outfolder=outfolder, 
+              outfn.date=outfn.date, overwrite=overwrite_layer, 
+			  estnm=estnm, estround=estround, pseround=pseround, 
+			  divideby=divideby, returntitle=returntitle, 
+			  estnull=estnull, psenull=psenull) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
@@ -1436,7 +1438,9 @@ modSAtree <- function(SApopdatlst = NULL,
         rawdat$predselect.area_row <- predselect.areadf_row
       }
     }
-    if (colvar != "NONE") rawdat$colvar <- colvar
+    if (rowcolinfo$colvar != "NONE") {
+	  rawdat$colvar <- rowcolinfo$colvar
+	}
     rawdat$areaunits <- areaunits
     rawdat$estunits <- estvarunits
     returnlst$raw <- rawdat  

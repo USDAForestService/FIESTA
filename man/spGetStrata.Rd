@@ -12,6 +12,7 @@ spGetStrata(
   unit_dsn = NULL,
   uniqueid = "PLT_CN",
   unitvar = NULL,
+  unitvar2 = NULL,
   unit.filter = NULL,
   strattype = "RASTER",
   strat_layer = NULL,
@@ -21,6 +22,7 @@ spGetStrata(
   areaunits = "acres",
   rast.NODATA = NULL,
   keepNA = FALSE,
+  ncores = 1,
   showext = FALSE,
   returnxy = FALSE,
   savedata = FALSE,
@@ -56,6 +58,9 @@ Note: raster unit layers are converted to polygon.}
 defining estimation units. If NULL, the unit_layer represents one estimation
 unit.}
 
+\item{unitvar2}{String. If unittype="POLY", name of attribute in unit_layer
+defining a second, hierarchical larger, estimation unit (e.g., Statecd).}
+
 \item{unit.filter}{String. Filter to subset unit_layer spatial layer.}
 
 \item{strattype}{String. Spatial layer type of strat_layer ("POLY",
@@ -86,6 +91,8 @@ keepNA=TRUE, NA values will not be in included in stratalut but will remain
 in pltassgn table.}
 
 \item{keepNA}{Logical. If TRUE, returns data frame of NA values.}
+
+\item{ncores}{Integer. Number of cores to use for extracting values.}
 
 \item{showext}{Logical. If TRUE, layer extents are displayed in plot window.}
 

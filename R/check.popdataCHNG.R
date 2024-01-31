@@ -1,12 +1,12 @@
 check.popdataCHNG <- function(tabs, tabIDs, popType = popType, 
      pltassgnx, pltassgnid, pfromqry, palias, pjoinid, whereqry, adj, ACI, 
-     pltx = NULL, puniqueid = "CN", dsn = NULL, dbconn = NULL, 
+     pltx = NULL, puniqueid = "CN", pltvars = NULL, dsn = NULL, dbconn = NULL, 
      condid = "CONDID", areawt = "CONDPROP_UNADJ",
      MICRO_BREAKPOINT_DIA = 5, MACRO_BREAKPOINT_DIA = NULL, diavar = "DIA",
      areawt_micr = "MICRPROP_UNADJ", areawt_subp = "SUBPPROP_UNADJ", 
      areawt_macr = "MACRPROP_UNADJ",
      nonsamp.cfilter = NULL, nullcheck = FALSE, pvars2keep = NULL, 
-	 cvars2keep = NULL, gui = FALSE){
+	 cvars2keep = NULL, defaultVars = TRUE, gui = FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs for CHNG popType
@@ -53,18 +53,65 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   cvars2keep <- unique(c(cvars2keep, areawt, "PROP_BASIS"))
   pdoms2keep <- c("INVYR", "STATECD", "UNITCD", "COUNTYCD", "PLOT_STATUS_CD", 
 			"MEASYEAR", "RDISTCD", "WATERCD", "ECOSUBCD", "CONGCD")
+  datindb <- FALSE
  
-  sccm=lulc=grm=treex=seedx=pltnm <- NULL
+  sccm=lulc=grm=treex=seedx=condnm <- NULL
 
-  ## Get tables from tabs
-  for (tabnm in names(tabs)) {
-    assign(tabnm, tabs[[tabnm]])
+
+  ## Check name of PLOT table
+  pltnmchk <- findnm("plotu", names(tabs), returnNULL = TRUE)
+  if (is.null(pltnmchk)) {
+    pltnmchk <- findnm("pltu", names(tabs), returnNULL = TRUE)
   }
-  puniqueid <- tabIDs[["plt"]]
-  cuniqueid <- tabIDs[["cond"]]
-  pltuid <- tabIDs[["pltu"]]
-  conduid <- tabIDs[["condu"]]
-  sccmid <- tabIDs[["sccm"]]
+  if (is.null(pltnmchk)) {
+    pltnmchk <- findnm("plot", names(tabs), returnNULL = TRUE)
+  }
+  if (is.null(pltnmchk)) {
+    pltnmchk <- findnm("plt", names(tabs), returnNULL = TRUE)
+  } 
+ 
+  if (is.null(pltnmchk)) {
+    message("plot data needed for CHNG estimates")
+	return(NULL)
+  }
+
+  if (is.character(tabs[[pltnmchk]])) {  
+    pltnm <- tabs[[pltnmchk]]
+  } else {
+    pltnm <- "pltu"
+  }
+  assign(pltnm, tabs[[pltnmchk]])
+  puniqueid <- tabIDs[[pltnmchk]]
+ 
+  ## Check name of COND table
+  condnmchk <- findnm("condu", names(tabs), returnNULL = TRUE)
+  if (is.null(condnmchk)) {
+    condnmchk <- findnm("cond", names(tabs), returnNULL = TRUE)
+  }
+  if (is.null(condnmchk)) {
+    condnmchk <- findnm("cond", names(tabs), returnNULL = TRUE)
+  } 
+  if (is.character(tabs[[condnmchk]])) {  
+    condnm <- tabs[[condnmchk]]
+  } else {
+    condnm <- "condu"
+  }
+  assign(condnm, tabs[[condnmchk]])
+  cuniqueid <- tabIDs[[condnmchk]]
+
+
+  ## Check name of SUBP_COND_CHNG_MTRX table
+  sccmnmchk <- findnm("subp_cond_chng_mtrx", names(tabs), returnNULL = TRUE)
+  if (is.null(sccmnmchk)) {
+    sccmnmchk <- findnm("sccm", names(tabs), returnNULL = TRUE)
+  } 
+  if (is.character(tabs[[sccmnmchk]])) {  
+    sccmnm <- tabs[[sccmnmchk]]
+  } else {
+    sccmnm <- "sccm"
+  }
+  assign(sccmnm, tabs[[sccmnmchk]])
+  sccmid <- tabIDs[[sccmnmchk]]
   lulcid <- "PLT_CN"
 
   SCHEMA. <- NULL
@@ -74,7 +121,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   if (is.null(palias)) {
     palias <- "p"
   }
-
 
   ###################################################################################
   ## Database queries
@@ -92,45 +138,46 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     drv <- "SQLite"
 
     ## Check plt in database
-    if (!all(!is.null(plt), is.character(plt), plt %in% tablst)) {    
-      stop("need PLOT table in database")
+    if (!all(!is.null(pltnm), is.character(pltnm), pltnm %in% tablst)) {    
+      message("need PLOT table in database")
+	  return(NULL)
     } else {
-      pltnm <- plt
+	  pltflds <- DBI::dbListFields(dbconn, pltnm)
     }
     ## Check cond in database
-    if (!all(!is.null(cond), is.character(cond), cond %in% tablst)) { 
-      stop("need COND table in database")
+    if (!all(!is.null(condnm), is.character(condnm), condnm %in% tablst)) { 
+      message("need COND table in database")
+	  return(NULL)
     } else {
-      condnm <- cond
+	  condflds <- DBI::dbListFields(dbconn, condnm)
     } 
     ## Check sccm in database
-    if (!all(!is.null(sccm), is.character(sccm), sccm %in% tablst)) {
-      stop("need SUBP_COND_CHNG_MTRX table in database")
-    } else {
-      sccmnm <- sccm
+    if (!all(!is.null(sccmnm), is.character(sccmnm), sccmnm %in% tablst)) {
+      message("need SUBP_COND_CHNG_MTRX table in database")
+	  return(NULL)
     }
-
   } else {
-    condnm <- "cond"
-    sccmnm <- "sccm"
 
     ## Get remeasured plot/condition data
-    cond <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
+	if (!is.null(condnm)) {
+      assign(condnm, pcheck.table(get(condnm), tab_dsn=dsn, 
            tabnm="cond", caption="Remeasured condition data?", 
            nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+	  condflds <- names(get(condnm))
+	}
 
     ## Get remeasured plot data
-    if (!is.null(plt)) {
-      plt <- suppressMessages(pcheck.table(plt, tab_dsn=dsn, 
+    if (!is.null(pltnm)) {
+      assign(pltnm, pcheck.table(get(pltnm), tab_dsn=dsn, 
            tabnm="plt", caption="Remeasured plot data?", 
            nullcheck=nullcheck, gui=gui, returnsf=FALSE))
-      pltnm <- "plt"
+	  pltflds <- names(get(pltnm))
     } 
 
     ## Get subplot matrix data for generating estimates
-    sccm <- pcheck.table(sccm, tab_dsn=dsn, 
+    assign(sccmnm, pcheck.table(get(sccmnm), tab_dsn=dsn, 
            tabnm="sccm", caption="sccm table?", 
-           nullcheck=nullcheck, gui=gui, returnsf=FALSE)
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
   }  
 
   if (is.null(pfromqry)) {
@@ -143,48 +190,59 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
 		" pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
   } else {
     pchgfromqry <- paste0(pfromqry, 
-	          " JOIN ", SCHEMA., pltnm, 
+	          "\nJOIN ", SCHEMA., pltnm, 
                 " pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
   }
 
-
   ## Get default variables for plot
-  pltvars <- DBvars.default()$pltvarlst
-
-  ## Get where statement for plot change query
-  pchgwhere <- paste0(palias, ".REMPER > 0") 
-  if (is.null(whereqry)) {
-    pchgwhereqry <- paste("WHERE", pchgwhere)
-  } else {
-    pchgwhereqry <- paste(whereqry, "and", pchgwhere)
+  if (is.null(pltvars)) {
+    pltvars <- "*"
   }
 
+  ## Get where statement for plot change query
+  rempernm <- findnm("REMPER", pltflds)
+  if (!is.null(rempernm)) {
+    remper.qry <- paste0(palias, ".", rempernm, " > 0") 
+  
+    if (is.null(whereqry)) {
+      pchgwhereqry <- paste0("\nWHERE ", remper.qry)
+    } else {
+      pchgwhereqry <- paste0(whereqry, "\n  AND ", remper.qry)
+    }
+  } else {
+    pchgwhereqry <- whereqry
+  }
+  
   ## Build query for plot change
-  pltuqry <- paste("select distinct", 
+  pltuqry <- paste0("SELECT ", 
 				toString(paste0(palias, ".", pltvars)), 
-					"from", pchgfromqry, pchgwhereqry,
-			  "UNION select distinct", 
+					"\nFROM ", pchgfromqry, pchgwhereqry,
+			  "\nUNION \nSELECT ", 
 				toString(paste0("pplot.", pltvars)), 
-					"from", pchgfromqry, pchgwhereqry)
-  dbqueries$pltu <- pltuqry
+					"\nFROM ", pchgfromqry, pchgwhereqry)
+  dbqueries$plt <- pltuqry
 
-  ## Get default variables for cond
-  condvars <-  DBvars.default()$condvarlst
+  if (defaultVars) {
+    ## Get default variables for cond
+    condvars <-  DBvars.default()$condvarlst
+  } else {
+    condvars <- condflds
+  }
 
   ## Get from statement for cond change query
   cchgfromqry <- paste0(pfromqry, 
-		" JOIN ", SCHEMA., condnm, 
+		"\nJOIN ", SCHEMA., condnm, 
 			" c ON (c.", cuniqueid, " = ", palias, ".", pjoinid, ")",
-      	" JOIN ", SCHEMA., condnm, 
+      	"\nJOIN ", SCHEMA., condnm, 
 			" pcond ON (pcond.", cuniqueid, " = ", palias, ".PREV_PLT_CN)")
 
   ## Build query for cond change
-  conduqry <- paste("select distinct", 
+  conduqry <- paste0("SELECT ", 
 				toString(paste0("c.", condvars)), 
-					"from", cchgfromqry, pchgwhereqry,
-			  "UNION select distinct", 
-				toString(paste0("pcond.", condvars)), 
-					"from", cchgfromqry, pchgwhereqry)
+			  "\nFROM ", cchgfromqry, pchgwhereqry,
+			  "\nUNION \nSELECT ", 
+				      toString(paste0("pcond.", condvars)), 
+			  "\nFROM ", cchgfromqry, pchgwhereqry)
   dbqueries$condu <- conduqry
 
 
@@ -193,19 +251,22 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   ##########################################################################
 
   ## This is used for calculation of adjustment factors and estimates
-  chgwhere <- "c.CONDPROP_UNADJ IS NOT NULL 
-			 	and COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0    
-                    	and COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0"
+  chgwhere <- paste0("c.CONDPROP_UNADJ IS NOT NULL",
+                "\n      AND ((sccm.SUBPTYP = 3 AND c.PROP_BASIS = 'MACR')",
+				"\n          OR (sccm.SUBPTYP = 1 AND c.PROP_BASIS = 'SUBP'))",
+			 	"\n      AND COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0",  
+                "\n      AND COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0")
   if (is.null(pchgwhereqry)) {
     chgwhereqry <- paste("WHERE", chgwhere)
   } else {
-    chgwhereqry <- paste(pchgwhereqry, "and", chgwhere)
+    chgwhereqry <- paste0(pchgwhereqry, "\n  AND ", chgwhere)
   }
 
   ## This query is used for estimates
-  sccmqry <- paste0("SELECT sccm.* FROM ", pfromqry,  
-                	" JOIN ", SCHEMA., sccmnm, 
-				" sccm ON (sccm.", sccmid, " = p.", puniqueid, ") ", whereqry) 
+  sccmqry <- paste0("SELECT distinct sccm.* \nFROM ", pfromqry,  
+                	"\nJOIN ", SCHEMA., sccmnm, 
+				    " sccm ON (sccm.", sccmid, " = p.", puniqueid, ") ", 
+					whereqry) 
 
   ## This query is used for calculation of adjustment factors
   sccm_condqry <- paste0(
@@ -222,31 +283,99 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
            SUM(sccm.SUBPTYP_PROP_CHNG * 
                   (CASE WHEN sccm.SUBPTYP = 2 THEN 1 ELSE 0 end)/4) AS MICRPROP_UNADJ,
            SUM(sccm.SUBPTYP_PROP_CHNG * 
-                  (CASE WHEN sccm.SUBPTYP = 3 THEN 1 ELSE 0 end)/4) AS MACRPROP_UNADJ
-           FROM ", cchgfromqry,  
-               	  " JOIN ", SCHEMA., sccmnm, " sccm ON (sccm.", sccmid, " = c.", cuniqueid, 
-                   " and sccm.prev_plt_cn = pcond.", cuniqueid,
-                   " and sccm.", condid, " = c.", condid, 
-                   " and sccm.prevcond = pcond.", condid, ") ", 
+                  (CASE WHEN sccm.SUBPTYP = 3 THEN 1 ELSE 0 end)/4) AS MACRPROP_UNADJ ",
+           "\nFROM ", cchgfromqry,  
+               	  "\nJOIN ", SCHEMA., sccmnm, " sccm ON (sccm.", sccmid, " = c.", cuniqueid, 
+                   "\n     AND sccm.prev_plt_cn = pcond.", cuniqueid,
+                   "\n     AND sccm.", condid, " = c.", condid, 
+                   "\n     AND sccm.prevcond = pcond.", condid, ") ", 
            chgwhereqry, 
-           " GROUP BY sccm.plt_cn, p.prev_plt_cn, sccm.condid")
+           "\nGROUP BY sccm.plt_cn, p.prev_plt_cn, sccm.condid")
   dbqueries$sccm_cond <- sccm_condqry
 
 
   ## Import tables
   #########################################################################
-  condx <- data.table(sqldf::sqldf(conduqry, dbname=dsn, drv=drv))
-  if (!is.null(pltnm)) {
-    pltx <- data.table(sqldf::sqldf(pltuqry, dbname=dsn, drv=drv))
-  }   
-  sccmx <- data.table(sqldf::sqldf(sccmqry, dbname=dsn, drv=drv))
-  sccm_condx <- data.table(sqldf::sqldf(sccm_condqry, dbname=dsn, drv=drv))
-
-  if (is.null(dsn)) {
-    rm(cond)
-    rm(sccm)
-    # gc()
+  if (datindb) {
+    COND <- tryCatch(
+	          data.table(DBI::dbGetQuery(dbconn, conduqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    PLOT <- tryCatch(
+	          data.table(DBI::dbGetQuery(dbconn, pltuqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    sccmx <- tryCatch(
+	          data.table(DBI::dbGetQuery(dbconn, sccmqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    sccm_condx <- tryCatch(
+	          data.table(DBI::dbGetQuery(dbconn, sccm_condqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+  } else {
+    COND <- tryCatch(
+	          data.table(sqldf::sqldf(conduqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    PLOT <- tryCatch(
+	          data.table(sqldf::sqldf(pltuqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    sccmx <- tryCatch(
+	          data.table(sqldf::sqldf(sccmqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
+    sccm_condx <- tryCatch(
+	          data.table(sqldf::sqldf(sccm_condqry)),
+				  error=function(e) {
+				  warning(e)
+  			      return(NULL)}
+                  )
   }
+
+  if (is.null(COND) || nrow(COND) == 0) {
+    message("invalid ", condnm)
+	message(conduqry)
+    return(NULL)
+  }
+  if (is.null(PLOT) || nrow(PLOT) == 0) {
+    message("invalid ", pltnm)
+	message(pltuqry)
+    return(NULL)
+  }
+  if (is.null(sccmx) || nrow(sccmx) == 0) {
+    message("invalid ", sccmnm)
+	message(sccmqry)
+    return(NULL)
+  }
+  if (is.null(sccm_condx) || nrow(sccm_condx) == 0) {
+    message("invalid ", sccmnm)
+	message(sccm_condqry)
+    return(NULL)
+  }
+
+  ## Import tables
+  #########################################################################
+#  condx <- data.table(sqldf::sqldf(conduqry, dbname=dsn, drv=drv))
+#  if (!is.null(pltnm)) {
+#    pltx <- data.table(sqldf::sqldf(pltuqry, dbname=dsn, drv=drv))
+#  }   
+#  sccmx <- data.table(sqldf::sqldf(sccmqry, dbname=dsn, drv=drv))
 
 
   ##########################################################################
@@ -353,7 +482,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   }
  
   ## Define cdoms2keep
-  cdoms2keep <- names(condx)
+  #cdoms2keep <- names(condx)
 
 
   ###################################################################################
@@ -369,66 +498,66 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   ## Check uniqueids and merge cond with plt
   ###############################################################################
   cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", gui=gui,
-		checklst=names(condx), caption="Unique identifier of plot",
+		checklst=condflds, caption="Unique identifier of plot",
 		warn=paste(cuniqueid, "not in cond table"), stopifnull=TRUE)
-  setkeyv(condx, cuniqueid)
+  #setkeyv(condx, cuniqueid)
 
   ## Check for NA values in necessary variables in cond table
-  condx.na <- sum(is.na(condx[[cuniqueid]]))
-  if (condx.na > 0) stop("NA values in ", cuniqueid)
+#  condx.na <- sum(is.na(condx[[cuniqueid]]))
+#  if (condx.na > 0) stop("NA values in ", cuniqueid)
 
   condid <- pcheck.varchar(var2check=condid, varnm="condid", gui=gui,
-		checklst=names(condx), caption="Unique identifier of plot",
+		checklst=condflds, caption="Unique identifier of plot",
 		warn=paste(condid, "not in cond table"), stopifinvalid=FALSE)
-  if (is.null(condid)) {
-    if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
-      condx[, CONDID := 1]
-      condid <- "CONDID"
-    } else {
-      stop("there is more than 1 record per plot... must include valid CONDID")
-    }
-  }
-  ## Check for NA values in necessary variables in cond table
-  condx.na <- sum(is.na(condx[[condid]]))
-  if (condx.na > 0) stop("NA values in ", condid)
+  # if (is.null(condid)) {
+    # if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
+      # condx[, CONDID := 1]
+      # condid <- "CONDID"
+    # } else {
+      # stop("there is more than 1 record per plot... must include valid CONDID")
+    # }
+  # }
+  # Check for NA values in necessary variables in cond table
+  # condx.na <- sum(is.na(condx[[condid]]))
+  # if (condx.na > 0) stop("NA values in ", condid)
 
-  ## Check if 1 plot-condition per record in cond
-  ######################################################
-  condid.dupid <- condx[duplicated(condx, by=c(cuniqueid, condid))][[cuniqueid]]
+  # Check if 1 plot-condition per record in cond
+  #####################################################
+  # condid.dupid <- condx[duplicated(condx, by=c(cuniqueid, condid))][[cuniqueid]]
 
-  if (length(condid.dupid) > 0) {
-    msg <- paste("check cuniqueid/condid... duplicate records")
-    if (length(condid.dupid) < 20) print(condid.dupid)
-    stop(msg)
-  }
-  setkeyv(condx, c(cuniqueid, condid))
+  # if (length(condid.dupid) > 0) {
+    # msg <- paste("check cuniqueid/condid... duplicate records")
+    # if (length(condid.dupid) < 20) print(condid.dupid)
+    # stop(msg)
+  # }
+  # setkeyv(condx, c(cuniqueid, condid))
 
   ## Merge pltx with condx
   ###########################################################
-  if (!is.null(pltx)) {
+  if (!is.null(PLOT)){
 
     ## Set key
-    setkeyv(pltx, puniqueid)
+    setkeyv(PLOT, puniqueid)
 
     ## Subset condition columns
-    cvars <- unique(c(cuniqueid, names(condx)[!names(condx) %in% names(pltx)])) 
-    condx <- condx[, cvars, with=FALSE]
+    cvars <- unique(c(cuniqueid, names(COND)[!names(COND) %in% names(PLOT)])) 
+    COND <- COND[, cvars, with=FALSE]
 
     ## Check if class of puniqueid in pltx matches class of puniqueid in condx
-    tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
-    condx <- tabchk$tab1
-    pltx <- tabchk$tab2
+    tabchk <- check.matchclass(COND, PLOT, cuniqueid, puniqueid)
+    COND <- tabchk$tab1
+    PLOT <- tabchk$tab2
 
     ## Check for matching unique identifiers of condx and pltx
-    condx <- check.matchval(condx, pltx, cuniqueid, puniqueid,
+    COND <- check.matchval(COND, PLOT, cuniqueid, puniqueid,
 			tab1txt=paste0("cond-", cuniqueid),
 			tab2txt=paste0("plt-", puniqueid), subsetrows=TRUE)
 
-    nrow.before <- nrow(pltx)
+    nrow.before <- nrow(PLOT)
 
     ## Merge cond to plt (Note: inner join to use only plots with sampled conditions)
-    pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
-    pltcondx <- tryCatch(merge(pltx[, pltcols, with=FALSE], condx,
+    pltcols <- unique(c(puniqueid, names(PLOT)[!names(PLOT) %in% names(COND)]))
+    pltcondx <- tryCatch(merge(PLOT[, pltcols, with=FALSE], COND,
 				by.x=puniqueid, by.y=cuniqueid),
      	 	error=function(e) {
 			return(NULL) })
@@ -449,7 +578,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
       message(abs(nrow.after - nrow.before), " plots were removed from population")
     }
   } else {
-    pltcondx <- condx
+    pltcondx <- COND
 
     ## Check for matching unique identifiers of pltcondx with pltassgnx
     ## Subset pltx to pltassgnx ids
@@ -551,6 +680,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
 #  #areawt <- "SUBPTYP_PROP_CHNG"
 #  condx[[areawt]] <- check.numeric(condx[[areawt]])
 
+  cvars2keep <- c(cvars2keep, areawt_subp, areawt_macr)
   sccm_condx[[areawt]] <- check.numeric(sccm_condx[[areawt]])
 
 
