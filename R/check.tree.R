@@ -69,7 +69,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
   } else {
     seedonly=addseed <- FALSE
   }
-
+  
 
   ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (NUMERATOR)
   ###############################################################################
@@ -86,22 +86,21 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
            addseed=addseed, seedonly=seedonly, woodland=woodland))
     if (is.null(tdomdata)) return(NULL)
     tdomdat <- tdomdata$tdomdat
-    if (!pivot) {
-      tdomdat <- tdomdat[!is.na(tdomdat[[tdomvar]]),]
-    }
+    #if (!pivot) {
+    #  tdomdat <- tdomdat[!is.na(tdomdat[[tdomvar]]),]
+    #}
     tdomvarn <- tdomdata$tdomtotnm
     tdomvarlstn <- tdomdata$tdomlst
     estunitsn <- tdomdata$estunits
 
   } else {
-    suppressWarnings(
     treedata <- datSumTree(tree=treef, seed=seedf, cond=condf, plt=plt, 
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
            bycond=bycond, condid=condid,
            tsumvarlst=estvarn, tsumvarnmlst=estvarn.name, TPA=estvarn.TPA,
            tfilter=estvarn.filter, adjtree=adjtree, 
            adjvar=adjvar, adjTPA=adjTPA,
-           metric=metric, addseed=addseed, seedonly=seedonly, woodland=woodland))
+           metric=metric, addseed=addseed, seedonly=seedonly, woodland=woodland)
     if (is.null(treedata)) return(NULL)
     tdomdat <- treedata$treedat
     tdomvarn <- treedata$sumvars

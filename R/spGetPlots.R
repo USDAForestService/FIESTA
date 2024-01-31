@@ -194,7 +194,7 @@ spGetPlots <- function(bnd = NULL,
   ## Set global variables
   xydat=stateFilter=stateFilterDB=countyfips=xypltx=evalidst=PLOT_ID=INVYR=
 	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc=dbconn=
-	bndx=evalInfo <- NULL
+	bndx=evalInfo=plt=pltu <- NULL
   isveg=ischng=isdwm <- FALSE
   cuniqueid=tuniqueid=duniqueid <- "PLT_CN"
   stbnd.att <- "COUNTYFIPS"
@@ -729,7 +729,7 @@ spGetPlots <- function(bnd = NULL,
       message("pltids have duplicate xyjoinids")
     }
   }
- 
+
   ## Check showsteps
   #############################################################################
   showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
@@ -978,11 +978,28 @@ spGetPlots <- function(bnd = NULL,
           message("plots where ", Endyr.filter, " do not match pltids")
         }
         pids1 <- plt1[[puniqueid]]
+		ppltidnm1 <- findnm("PREV_PLT_CN", names(plt1), returnNULL = TRUE)
+		if (any(Type %in% c("CHNG", "GRM"))) { 
+	      ppltids1 <- plt1[plt1[[puniqueid]] %in% pids1, ppltidnm1] 
+		  pids1 <- c(pids1, ppltids1)
+		}
 
         ## Subset other tables in list
         stcliptabs$plt <- plt1
-        for (tabnm in names(tabs1)[names(tabs1) != "plt"]) {
-          stcliptabs[[tabnm]] <- tabs1[[tabnm]][tabs1[[tabnm]][[tabIDs[[tabnm]]]] %in% pids1, ] 
+		for (tabnm in names(tabs2)[names(tabs2) != "plt"]) {
+          if (tabIDs[[tabnm]] %in% names(tabs[[tabnm]])) {
+		    # if (tabnm %in% c("plotu", "pltu")) {
+              # pltu1 <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids1,ppltids1), ]
+              # stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], pltu1)
+            # } else if (tabnm %in% ("condu")) {
+              # condu1 <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids1,ppltids1), ]
+              # stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], condu1)
+            # }   						  
+            stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids1, ]			
+		  } else {
+            stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], 
+				tabs2[[tabnm]][tabs2[[tabnm]][[tabIDs[[tabnm]]]] %in% pids1, ])
+		  }
         }
       }
       ## Get plots outside filter
@@ -1017,6 +1034,7 @@ spGetPlots <- function(bnd = NULL,
       pop_plot_stratum_assgn2 <- dat2$pop_plot_stratum_assgn
       evalid2 <- dat2$evalid
       PLOT2 <- tabs2$plt
+	  PLOT2u <- tabs2$pltu
 
       if (nrow(PLOT2) > length(unique(PLOT2[[puniqueid]]))) {
         if ("INVYR" %in% names(PLOT2)) {
@@ -1034,14 +1052,30 @@ spGetPlots <- function(bnd = NULL,
           message("plots outside filter do not match pltids")
         }
         pids2 <- plt2[[puniqueid]]
+		ppltidnm2 <- findnm("PREV_PLT_CN", names(plt2), returnNULL = TRUE)
+		if (any(Type %in% c("CHNG", "GRM"))) { 
+	      ppltids2 <- plt2[plt2[[puniqueid]] %in% pids2, ppltidnm2] 
+		  pids2 <- c(pids2, ppltids2)
+		}
 
         ## Subset other tables in list
         stcliptabs$plt <- rbind(stcliptabs$plt, plt2)
         pop_plot_stratum_assgn <- rbind(pop_plot_stratum_assgn1, pop_plot_stratum_assgn2)
 
         for (tabnm in names(tabs2)[names(tabs2) != "plt"]) {
+          if (tabIDs[[tabnm]] %in% names(tabs[[tabnm]])) {
+		    # if (tabnm %in% c("plotu", "pltu")) {
+              # pltu2 <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids2,ppltids2), ]
+              # stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], pltu2)
+            # } else if (tabnm %in% ("condu")) {
+              # condu2 <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids2,ppltids2), ]
+              # stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], condu2)
+            # }   						  
+            stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids2, ]			
+		  } else {
             stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], 
 				tabs2[[tabnm]][tabs2[[tabnm]][[tabIDs[[tabnm]]]] %in% pids2, ])
+		  }
         }
       }          
     } else {   ## Endyr.filter is null
@@ -1101,6 +1135,7 @@ spGetPlots <- function(bnd = NULL,
       pop_plot_stratum_assgn <- dat$pop_plot_stratum_assgn
       evalid <- dat$evalid
       PLOT <- tabs$plt
+	  PLOTu <- tabs$pltu
       puniqueid <- dat$puniqueid
       dbqueries <- dat$dbqueries
 
@@ -1108,7 +1143,7 @@ spGetPlots <- function(bnd = NULL,
         message("no data for ", stcd)
         break
       }
-
+	  
       ## Check pjoinid
       ##############################################
       pltfields <- names(PLOT)
@@ -1140,7 +1175,7 @@ spGetPlots <- function(bnd = NULL,
 
       if (nrow(stpltids) > 0) {
         ## Subset data to stpltids
-        plt <- PLOT[PLOT[[pjoinid]] %in% stpltids[[xyjoinid]],]
+        plt <- PLOT[PLOT[[pjoinid]] %in% stpltids[[xyjoinid]],]						
         if (nrow(plt) != nrow(stpltids)) {
           message("there are ", abs(nrow(plt) - nrow(stpltids)), 
 			" plots in ", state, " that do not match pltids")
@@ -1148,11 +1183,28 @@ spGetPlots <- function(bnd = NULL,
           messagedf(stpltids[[xyjoinid]][!stpltids[[xyjoinid]] %in% PLOT[[pjoinid]]])
         }
         pids <- plt[[puniqueid]]
+		ppltidnm <- findnm("PREV_PLT_CN", names(plt), returnNULL = TRUE)	     
+		if (any(Type %in% c("CHNG", "GRM"))) { 
+	      ppltids <- plt[plt[[puniqueid]] %in% pids, ppltidnm] 
+		  pids <- c(pids, ppltids)
+		}
 		
+#print(pids)	
         ## Subset other tables in list
         stcliptabs$plt <- plt
         for (tabnm in names(tabs)[names(tabs) != "plt"]) {
-          stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids, ] 
+          if (tabIDs[[tabnm]] %in% names(tabs[[tabnm]])) {
+		    # if (tabnm %in% c("plotu", "pltu")) {
+              # pltu <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids,ppltids), ]
+              # stcliptabs[[tabnm]] <- pltu
+            # } else if (tabnm %in% ("condu")) {
+              # condu <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids,ppltids), ]
+              # stcliptabs[[tabnm]] <- condu
+            # }  
+            stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids, ]			
+		  } else {
+		    stcliptabs[[tabnm]] <- tabs[[tabnm]]
+		  }
         }
       }
 

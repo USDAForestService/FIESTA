@@ -28,6 +28,8 @@
 #' @param unitvar String. If unittype="POLY", name of attribute in unit_layer
 #' defining estimation units. If NULL, the unit_layer represents one estimation
 #' unit.
+#' @param unitvar2 String. If unittype="POLY", name of attribute in unit_layer
+#' defining a second, hierarchical larger, estimation unit (e.g., Statecd).
 #' @param unit.filter String. Filter to subset unit_layer spatial layer.
 #' @param strattype String. Spatial layer type of strat_layer ("POLY",
 #' "RASTER").  Note: polygon strata layers are converted to raster.
@@ -50,6 +52,7 @@
 #' keepNA=TRUE, NA values will not be in included in stratalut but will remain
 #' in pltassgn table.
 #' @param keepNA Logical. If TRUE, returns data frame of NA values.
+#' @param ncores Integer. Number of cores to use for extracting values.
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
 #' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
 #' @param savedata Logical. If TRUE, the input data with extracted values are
@@ -149,7 +152,8 @@ spGetStrata <- function(xyplt,
                         unit_layer, 
                         unit_dsn = NULL, 
                         uniqueid = "PLT_CN", 
-                        unitvar = NULL, 
+                        unitvar = NULL,
+                        unitvar2 = NULL,						
                         unit.filter = NULL, 
                         strattype = "RASTER", 
                         strat_layer = NULL, 
@@ -159,6 +163,7 @@ spGetStrata <- function(xyplt,
                         areaunits = "acres", 
                         rast.NODATA = NULL, 
                         keepNA = FALSE, 
+                        ncores = 1,
                         showext = FALSE, 
                         returnxy = FALSE, 
                         savedata = FALSE, 
@@ -240,6 +245,23 @@ spGetStrata <- function(xyplt,
     }
   }
 
+  ## Check ncores
+  if (!is.null(ncores)) {
+    if (length(ncores) != 1) {
+      stop("ncores must be integer vector of length = 1")
+    } else if (!is.numeric(ncores)) {
+      stop("ncores must be integer vector of length = 1")
+    } else if (ncores > 1) {
+      nbrcores <- parallel::detectCores()
+      if (ncores > nbrcores) {
+        message("ncores is greater than number of available cores")
+        message("using ", nbrcores, " ncores")
+        ncores <- nbrcores
+      }
+    }     
+  } else {
+    ncores <- 1
+  }
 
   ##################################################################
   ## CHECK PARAMETER INPUTS
@@ -409,12 +431,21 @@ spGetStrata <- function(xyplt,
       ## Check unitvar
       unitvar <- pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
 		          checklst=names(unitlayerx), caption="Estimation unit variable", 
-		          warn=paste(unitvar, "not in unit_layer"))
+		          warn=paste(unitvar, "not in unit_layer"), multiple=FALSE)
+      unitvar2 <- pcheck.varchar(var2check=unitvar2, varnm="unitvar2", gui=gui, 
+		          checklst=names(unitlayerx), caption="Estimation unit variable", 
+		          warn=paste(unitvar2, "not in unit_layer"), multiple=FALSE)
       if (is.null(unitvar)) {
         unitlayerx$ONEUNIT <- 1
         unitvar <- "ONEUNIT"
+      } 
+	  
+	  if (!is.null(unitvar2)) {
+		unitvar_old <- unitvar
+	    unitlayerx$UNITVAR <- paste0(unitlayerx[[unitvar2]], "#", unitlayerx[[unitvar]]) 
+        unitvar <- "UNITVAR"		
       }
-
+	  
       ## Check projection and reproject spobj if different than rast
       unitlayerprj <- crsCompare(unitlayerx, rast.prj)$x
 
@@ -473,10 +504,15 @@ spGetStrata <- function(xyplt,
     }
 
     ## Extract values of raster layer to points
-    extrast <- spExtractRast(sppltx, rastlst=stratlayerfn, 
-		    var.name=strvar, xy.uniqueid=uniqueid, 
-		    keepNA=keepNA, exportNA=exportNA, rast.NODATA=rast.NODATA, 
-		    savedata_opts=savedata_opts)
+    extrast <- spExtractRast(sppltx, 
+	                         rastlst = stratlayerfn,
+							 var.name = strvar, 
+							 xy.uniqueid = uniqueid,
+							 keepNA = keepNA, 
+							 exportNA = exportNA, 
+							 rast.NODATA = rast.NODATA,
+							 ncores = ncores, 
+							 savedata_opts=savedata_opts)
     sppltx <- extrast$spplt
     pltdat <- extrast$sppltext
     rastfnlst <- extrast$rastfnlst
@@ -526,24 +562,27 @@ spGetStrata <- function(xyplt,
 		by=unitvar)
   }
 
-
+  ## Change name - count ti P2POINTCNT
+  if ("count" %in% names(stratalut)) {
+    setnames(stratalut, "count", "P2POINTCNT")
+  }
 
   ##################################################################
   ## Saving data
   ##################################################################
-#  if (returnxy) {
-#    xy.coords <- data.frame(sf::st_coordinates(sppltx))
-#    pltassgn <- data.frame(sf::st_drop_geometry(sppltx[, c(uniqueid, unitvar, strvar)]),
-#		xy.coords)
-#  } else {
-    #pltassgn <- sf::st_drop_geometry(sppltx[, c(uniqueid, unitvar, strvar)])
-    pltassgn <- sf::st_drop_geometry(sppltx)
-#  }
+  pltassgn <- sf::st_drop_geometry(sppltx)
+  if (!is.null(unitvar2)) {
+    pltassgn$UNITVAR <- NULL
+	unitvar <- unitvar_old
+	
+	unitarea <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",unitarea$UNITVAR), "#") )) ), unitarea)
+	setnames(unitarea, c("X1", "X2"), c(unitvar2, unitvar))
+	unitarea$UNITVAR <- NULL
 
-  #if (!is.data.table(stratalut)) stratalut <- setDT(stratalut)
-  #setkeyv(stratalut, c(unitvar, strvar)) 
-
-  
+	stratalut <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",stratalut$UNITVAR), "#") )) ), stratalut)
+	setnames(stratalut, c("X1", "X2"), c(unitvar2, unitvar))
+	stratalut$UNITVAR <- NULL
+  }	   
   spxy <- sppltx[, sppltx.names]
   
   if (savedata) {
@@ -599,9 +638,11 @@ spGetStrata <- function(xyplt,
   
   returnlst <- list(bnd=unitlayerx, pltassgn=setDF(pltassgn), 
 		  pltassgnid=uniqueid, unitarea=setDF(unitarea), 
-		  unitvar=unitvar, areavar=areavar, areaunits=areaunits,
+		  unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
+		  areaunits=areaunits,
 		  stratalut=setDF(stratalut), strvar=strvar, 
 		  getwt=FALSE, strwtvar="strwt")
+
   ## Returnxy
   if (returnxy) {
     ## Add coordinate variables

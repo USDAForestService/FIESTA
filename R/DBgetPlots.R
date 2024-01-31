@@ -234,7 +234,11 @@
 #' @param datsource String. Source of data ('datamart', 'sqlite').
 #' @param data_dsn String. If datsource='sqlite', the name of SQLite database
 #' (*.sqlite).
-#' @param dbTabs List of database tables the user would like returned.
+#' @param dbTabs List. Source of tables needed for estimation based on what
+#' is defined in eval_opts(Type). The source can be a layer in data_dsn or
+#' a comma delimited file. For example, if Type='P2VEG', vsubpspp_layer 
+#' and/or vsubpstr_layer must be defined. Defaults are 'P2VEG_SUBPLOT_SPP'
+#' and 'P2VEG_SUBP_STRUCTURE', respectively.
 #'  See help(dbTables) for a list of options.
 #' @param eval String. Type of evaluation time frame for data extraction 
 #' ('FIA', 'custom'). See eval_opts for more further options. 
@@ -904,10 +908,11 @@ DBgetPlots <- function (states = NULL,
 
     }
     if (is.null(evalInfo)) {
-      iseval <- FALSE
+	  message("returning NULL")
+      return(NULL)
     }
   }
-  
+
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   evalidlist <- evalInfo$evalidlist
@@ -924,7 +929,7 @@ DBgetPlots <- function (states = NULL,
   if (!is.null(SURVEY)) {
     surveynm <- "SURVEY"
   }
- 
+
   POP_PLOT_STRATUM_ASSGNe <- evalInfo$POP_PLOT_STRATUM_ASSGN
   PLOTe <- evalInfo$PLOT
 
@@ -997,7 +1002,7 @@ DBgetPlots <- function (states = NULL,
     ACI <- FALSE
     allyrs <- FALSE
   }
-  
+ 
   ## Set maxstates 
   ###########################################################
   ##  The number of states to append together, while still small enough to return 
@@ -1186,7 +1191,7 @@ DBgetPlots <- function (states = NULL,
   ## Check data tables
   ##########################################################
   if (datsource == "sqlite" && !is.null(dbconn)) {
-     
+  
     ## Check to make sure layers are in database
     plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
     if (is.null(plotnm)) {
@@ -1259,7 +1264,7 @@ DBgetPlots <- function (states = NULL,
   ###################################################################################
   ###################################################################################
   pb <- utils::txtProgressBar(min=0, max=length(states))
-  
+ 
   for (i in 1:length(states)) {
     utils::setTxtProgressBar(pb, i)
 
@@ -1519,7 +1524,7 @@ DBgetPlots <- function (states = NULL,
       } else {
         evalFilter.dwm <- evalFilter
       }
-      if (any(c("GROW", "MORT", "REMV", "GRM") %in% Type)) {
+      if (any(c("GROW", "MORT", "REMV", "GRM", "CHNG") %in% Type)) {
 	  	evalid.grm <- get_evalidtyp(evalid, "03")
         evalFilter.grm <- paste("ppsa.EVALID =", evalid.grm)
       } else {
@@ -1701,11 +1706,11 @@ DBgetPlots <- function (states = NULL,
 
       ## Create pltcond query
       if (addplotgeom) {
-        pltcond.qry <- paste("select distinct", pcvars, 
+        pltcond.qry <- paste("select ", pcvars, 
 		                     "\nfrom", pcgeomfromqry, 
                              "\nwhere", xfilter)
       } else {  
-        pltcond.qry <- paste("select distinct", pcvars, 
+        pltcond.qry <- paste("select ", pcvars, 
 		                     "\nfrom", pcfromqry, 
                              "\nwhere", xfilter)
       }
@@ -1963,12 +1968,12 @@ DBgetPlots <- function (states = NULL,
     ## Get unioned change tables 
     ###############################################################
     if (all(ischng, !nochngdata, !is.null(pltx))) {
-     
-      pcvarsa <- toString(c(paste0("p.", pltvarlst), paste0("c.", condvarlst)))
-      pcvarsb <- toString(c(paste0("pplot.", pltvarlst), paste0("pcond.", condvarlst)))
-
+ 
+ 	  pcvarsb <- gsub("p\\.", "pplot\\.", pcvars)
+ 	  pcvarsb <- gsub("c\\.", "pcond\\.", pcvarsb)
+	  
       if (addplotgeom) {
-        chgfromqry <- paste0(pcfromqry,
+        chgfromqry <- paste0(pcgeomfromqry,
            " \nJOIN ", SCHEMA., plot_layer, " pplot ON (pplot.CN = p.PREV_PLT_CN)",
 		   " \nJOIN ", SCHEMA., cond_layer, " pcond ON (pcond.PLT_CN = p.PREV_PLT_CN)")
       } else {
@@ -1978,18 +1983,17 @@ DBgetPlots <- function (states = NULL,
       }
 
       ## Unioned condition table
-      pltconduqrya <- paste("select distinct", pcvarsa,
+      pltcondu.qrya <- paste("select distinct", pcvars,
 							"\nfrom", chgfromqry,
 							"\nwhere", paste0(evalFilter.grm, stateFilters))
-      pltconduqryb <- paste("select distinct", pcvarsb,
+      pltcondu.qryb <- paste("select distinct", pcvarsb,
 	                        "\nfrom", chgfromqry, 
 							"\nwhere", paste0(evalFilter.grm, stateFilters))
-      pltcondu.qry <- paste(pltconduqrya, "\nUNION\n", pltconduqryb)
+      pltcondu.qry <- paste(pltcondu.qrya, "\nUNION\n", pltcondu.qryb)
 	  
 	  if (!"pltcondu" %in% names(dbqueries[[state]])) {
         dbqueries[[state]]$pltcondu <- pltcondu.qry
 	  }
-
 
       ## Run pltcondu query
       #####################################################################################
@@ -2050,8 +2054,9 @@ DBgetPlots <- function (states = NULL,
         if ("PREV_PLTCN" %in% names(pltux))
           pltux[, PREV_PLTCN := as.character(PREV_PLTCN)]
       }
+
       if (!is.null(condvarlst) && "CONDID" %in% names(pltcondux)) {
-        condux <- unique(pltcondx[, condvarlst2, with=FALSE])
+        condux <- pltcondux[, condvarlst2, with=FALSE]
         condux[, PLT_CN := as.character(PLT_CN)]
         setkey(condux, PLT_CN, CONDID)
       }
@@ -2219,6 +2224,14 @@ DBgetPlots <- function (states = NULL,
 	    }
  	    if (!"pltu" %in% names(tabIDs)) {
           tabIDs$pltu <- "CN"
+	    }
+		if ("condu" %in% names(tabs)) {
+		  tabs$condu <- rbind(tabs$condu, data.frame(condux))
+		} else {
+		  tabs$condu <- data.frame(condux)
+		}
+ 	    if (!"condu" %in% names(tabIDs)) {
+          tabIDs$condu <- "PLT_CN"
 	    }
       }
 
@@ -3137,13 +3150,23 @@ DBgetPlots <- function (states = NULL,
 	      xvarnm <- xvar
 	    } else if (xycoords[1] %in% xynames) {
 		  xvarnm <- xycoords[1]
+		} else if (xvar == "LON" && "LON_PUBLIC" %in% xynames) {
+		  xvarnm <- "LON_PUBLIC"
+		} else {
+		  message(xvar, " not in data")
+		  return(NULL)
 		}
 	    if (yvar %in% xynames) {
 	      yvarnm <- yvar
 		} else if (xycoords[2] %in% xynames) {
 		  yvarnm <- xycoords[2]
+		} else if (yvar == "LAT" && "LAT_PUBLIC" %in% xynames) {
+		  yvarnm <- "LAT_PUBLIC"
+		} else {
+		  message(xvar, " not in data")
+		  return(NULL)
 		}
- 
+
 		if (!"xy" %in% names(dbqueries[[state]])) {
           dbqueries[[state]]$xy <- xydat$xyqry
 	    }
@@ -4170,6 +4193,7 @@ DBgetPlots <- function (states = NULL,
         ppsax <- tryCatch( sqldf::sqldf(ppsaqry, stringsAsFactors=FALSE), 
 			error=function(e) return(NULL))
       }
+
       if(!is.null(ppsax) && nrow(ppsax) != 0){
         ppsax <- setDT(ppsax)
         ppsax[, PLT_CN := as.character(PLT_CN)]
@@ -4517,8 +4541,7 @@ DBgetPlots <- function (states = NULL,
 #			outfn.date=outfn.date, overwrite_layer=overwrite,
 #			append_layer=append_layer2, outfn.pre=outfn.pre)
 #    }
-  }
-  
+  } 
   #if (saveqry) cat("\n", paste("Saved queries to:", outfolder), "\n") 
 
 

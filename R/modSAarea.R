@@ -550,6 +550,9 @@ modSAarea <- function(SApopdatlst = NULL,
     adj <- SApopdat$adj
     estvar.area <- SApopdat$estvar.area
     predfac <- SApopdat$predfac
+    pop_fmt <- SApopdat$pop_fmt
+    pop_dsn <- SApopdat$pop_dsn
+	
 
     ## check smallbnd.dom
     ########################################################
@@ -633,15 +636,16 @@ modSAarea <- function(SApopdatlst = NULL,
                     title.rowvar=title.rowvar, title.colvar=title.colvar, 
                     rowlut=rowlut, collut=collut, 
                     rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-                    landarea=landarea) 
-    treef <- rowcolinfo$treef
-    seedf <- rowcolinfo$seedf
+                    landarea=landarea, states=states,
+				    cvars2keep="COND_STATUS_CD") 
     condf <- rowcolinfo$condf
     uniquerow <- rowcolinfo$uniquerow
     uniquecol <- rowcolinfo$uniquecol
     domainlst <- rowcolinfo$domainlst
     #rowvar <- rowcolinfo$rowvar
-    colvar <- rowcolinfo$colvar
+    #colvar <- rowcolinfo$colvar
+    #rowvarnm <- rowcolinfo$rowvarnm
+    #colvarnm <- rowcolinfo$colvarnm
     row.orderby <- rowcolinfo$row.orderby
     col.orderby <- rowcolinfo$col.orderby
     row.add0 <- rowcolinfo$row.add0
@@ -651,9 +655,9 @@ modSAarea <- function(SApopdatlst = NULL,
     bytdom <- rowcolinfo$bytdom
     tdomvar <- rowcolinfo$tdomvar
     tdomvar2 <- rowcolinfo$tdomvar2
-    grpvar <- rowcolinfo$grpvar
-    
+    grpvar <- rowcolinfo$grpvar    
     #rm(rowcolinfo)  
+	
     ## Generate a uniquecol for estimation units
     if (!sumunits && rowcolinfo$colvar == "NONE") {
       uniquecol <- data.table(dunitarea[[dunitvar]])
@@ -1120,17 +1124,18 @@ modSAarea <- function(SApopdatlst = NULL,
     }
   }
   estnm <- "est"
-  
+
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
   title.dunitvar <- ifelse(is.null(title.unitvar), smallbnd.dom, title.unitvar)
   alltitlelst <- check.titles(esttype=esttype, 
-	      sumunits=sumunits, title.main=title.main, 
-	      title.ref=title.ref, title.rowvar=rowcolinfo$title.rowvar, 
-	      title.colvar=rowcolinfo$title.colvar, title.unitvar=title.dunitvar, 
-	      title.filter=title.filter, title.unitsn=estvarunits, 
-	      unitvar="DOMAIN", rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
+	      sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
+	      title.rowvar=rowcolinfo$title.rowvar, 
+	      title.colvar=rowcolinfo$title.colvar, 
+		  title.unitvar=title.dunitvar, title.filter=title.filter, 
+		  title.unitsn=estvarunits, unitvar="DOMAIN", 
+		  rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
 	      addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
 	      states=states, invyrs=invyrs, landarea=landarea, 
 	      pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
@@ -1157,12 +1162,13 @@ modSAarea <- function(SApopdatlst = NULL,
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
             unitvar="DOMAIN", unit_totest=dunit_totest, 
             unit_rowest=dunit_rowest, unit_colest=dunit_colest, 
-            unit_grpest=dunit_grpest, rowvar=rowcolinfo$rowvar, 
-            colvar=rowcolinfo$colvar, uniquerow=rowcolinfo$uniquerow, 
-            uniquecol=rowcolinfo$uniquecol, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
+            unit_grpest=dunit_grpest, 
+			rowvar=rowcolinfo$rowvarnm, colvar=rowcolinfo$colvarnm, 
+			uniquerow=rowcolinfo$uniquerow, uniquecol=rowcolinfo$uniquecol, 
+            rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
             rowunit=rowunit, totunit=totunit, allin1=allin1, 
             savedata=savedata, addtitle=addtitle, title.ref=title.ref, 
-            title.colvar=title.colvar, title.rowvar=rowcolinfo$title.rowvar, 
+            title.colvar=rowcolinfo$title.colvar, title.rowvar=rowcolinfo$title.rowvar, 
             title.rowgrp=title.rowgrp, title.unitvar=title.dunitvar, 
             title.estpse=title.estpse, title.est=title.est, 
             title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, 
@@ -1251,7 +1257,7 @@ modSAarea <- function(SApopdatlst = NULL,
                                 add_layer=TRUE))
     }
   } 
- 
+
   if (multest && rowcolinfo$rowvar != "TOTAL" && !is.null(multestdf_row)){
     ## Merge dunitarea
     #tabs <- check.matchclass(dunitarea, multestdf, )
@@ -1374,7 +1380,9 @@ modSAarea <- function(SApopdatlst = NULL,
         rawdat$predselect.area_row <- predselect.areadf_row
       }
     }
-    if (colvar != "NONE") rawdat$colvar <- colvar
+    if (rowcolinfo$colvar != "NONE") {
+	  rawdat$colvar <- rowcolinfo$colvar
+	}
     rawdat$areaunits <- areaunits
     rawdat$estunits <- estvarunits
     returnlst$raw <- rawdat  

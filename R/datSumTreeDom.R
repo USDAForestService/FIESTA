@@ -638,8 +638,12 @@ datSumTreeDom <- function(tree = NULL,
  
   ## check seed table
   if (addseed || seedonly) {
+    if (addseed && tdomvar == "DIACL") {
+      seedx$DIACL <- "<1"
+	  seednames <- c(seednames, "DIACL")
+    }	  
     if (!tdomvar %in% seednames) {
-      message(tdomvar, "not in seed... no seeds included")
+      message(tdomvar, " not in seed... no seeds included")
       if (seedonly) {
         stop()
       } else {
@@ -647,7 +651,7 @@ datSumTreeDom <- function(tree = NULL,
       }
     }
     if (!is.null(tdomvar2) && !tdomvar2 %in% seednames) {
-      message(tdomvar2, "not in seed... no seeds included")
+      message(tdomvar2, " not in seed... no seeds included")
       if (seedonly) {
         stop()
       } else {
@@ -944,7 +948,7 @@ datSumTreeDom <- function(tree = NULL,
 		first="NO", gui=gui)
   if (!ACI) {
     if (is.null(condx) || (!"COND_STATUS_CD" %in% condnames)) {
-      #message("COND_STATUS_CD not in table, assuming forested plots with no ACI plots")
+      message("COND_STATUS_CD not in table, assuming forested plots with no ACI plots")
     } else {
       cond.ids <- na.omit(condx[COND_STATUS_CD == 1, 
 		do.call(paste, .SD), .SDcols = cjoinid])

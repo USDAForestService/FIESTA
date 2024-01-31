@@ -12,6 +12,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
   ## Set global variables
   estn=pse=keepvars=TOTAL=totest=rowest=colest=grpest <- NULL
+  rowvar <- ifelse(is.null(rowvar), "NONE", rowvar)
+  colvar <- ifelse(is.null(colvar), "NONE", colvar)
+  
 
   #####  TITLE INFO FOR TABLE COLUMNS
   ########################################################
@@ -141,10 +144,11 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
   if (sumunits) {
     ## Group estimates
-    if (!is.null(uniquerow))
-      keepvars.row <- names(uniquerow)[names(uniquerow) != rowvar]
-    if (!is.null(uniquecol))
-      keepvars.col <- names(uniquecol)[names(uniquecol) != colvar]
+    #if (!is.null(uniquerow))
+    #  keepvars.row <- names(uniquerow)[names(uniquerow) != rowvar]
+    #if (!is.null(uniquecol))
+    #  keepvars.col <- names(uniquecol)[names(uniquecol) != colvar]
+	keepvars.row=keepvars.col <- NULL
 
     ## GROUP TOTAL TABLE
     if (!is.null(unit_totest)) {
@@ -182,6 +186,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		max(nchar(na.omit(round(rowest[[psenm]], pseround)))))
       }
     }
+	
     if (!is.null(unit_colest)) {
       colest <- groupUnits(tabest=unit_colest, domain=colvar, estncol=estnm,
 			estncol.var=estnm.var, esttype=esttype, unitvar=unitvar,
@@ -201,6 +206,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		max(nchar(na.omit(round(colest[[psenm]], pseround)))))
       }
     }
+	
     if (!is.null(unit_grpest)) {
       grpest <- groupUnits(tabest=unit_grpest, domain=rowvar, estncol=estnm,
 			estncol.var=estnm.var, domvar2=colvar, esttype=esttype,
@@ -227,7 +233,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   ###################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################
-  if (colvar == "NONE") {
+  if (is.null(colvar) || colvar == "NONE") {
     if (sumunits) {
       if (rowvar == "TOTAL") {
         if (allin1) {

@@ -266,7 +266,6 @@ GBpopdat <- modGBpop(
   strata_opts = strata_options(getwt = TRUE)              # strata options
   )
 
-
 ```
 
 To get the names of the list components associated with the output of our call of `modGBpop`, we run the following code:
@@ -711,7 +710,6 @@ Note: Since we only have one estimation unit within the population of interest, 
   Let's also add a few more table options to control the forest type groups displayed in the table (rowlut) and fill the NULL values with 0s (estnull).
 
 ```{r}
-
 area2.2 <- modGBarea(
     GBpopdat = GBpopdat.bh,        # pop - population calculations for Bighorn NF, post-stratification
     landarea = "FOREST",           # est - forest land filter
@@ -1263,6 +1261,7 @@ head(tree2.1$est)
 We can also examine dead trees with the filter `estvar.filter = "STATUSCD == 2 & STANDING_DEAD_CD == 1"`. 
 
 ```{r}
+
 ## Net cubic-foot volume of dead trees (at least 5 inches diameter) by species and cause of death, 
 ##    Wyoming, 2011-2013
 tree2.2 <- modGBtree(
