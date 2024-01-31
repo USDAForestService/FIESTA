@@ -140,6 +140,30 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       char.width <- max(char.width,
 		max(nchar(na.omit(round(unit_grpest[[psenm]], pseround)))))
     }
+	
+	# ## Check for matching levels in x and xunique
+    # if (!is.null(uniquerow)) {
+      # chklevels <- checklevels(x = unit_grpest, 
+	                         # uniquex = uniquerow,
+							 # xvar = rowvar) 
+	  # unit_grpest <- chklevels$x
+      # uniquerow <- chklevels$uniquex	
+    # }
+    # if (!is.null(uniquecol)) {
+      # chklevels <- checklevels(x = unit_grpest, 
+	                         # uniquex = uniquecol,
+							 # xvar = colvar) 
+	  # unit_grpest <- chklevels$x
+      # uniquecol <- chklevels$uniquex	
+    # }
+ 
+    # chklevels <- checklevels(x = unit_colest, 
+	                         # uniquex = uniquecol,
+							 # xvar = colvar) 
+	# unit_colest <- chklevels$x
+  # }
+
+	
   }
 
   if (sumunits) {

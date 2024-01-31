@@ -565,6 +565,8 @@ datSumTreeDom <- function(tree = NULL,
   selectvars <- tsumuniqueid
   if (!is.null(tfilter)) {
     if (!seedonly) {
+      message("check filter for trees: ", tfilter)
+      tfilter <- check.logic(treenames, statement=tfilter, stopifinvalid=FALSE)
 	  if (is.null(twhereqry)) {
         twhereqry <- paste("WHERE", RtoSQL(tfilter, x=treenames))
 	  } else {
@@ -572,6 +574,7 @@ datSumTreeDom <- function(tree = NULL,
       }	  
     }
     if (addseed || seedonly) {
+      message("check filter for seeds: ", tfilter)
       sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
       if (!is.null(sfilter)) {
         swhereqry <- paste("WHERE", RtoSQL(tfilter))
@@ -593,7 +596,7 @@ datSumTreeDom <- function(tree = NULL,
       }	 
     }	
   }
- 
+
   ### Check tsumvar 
   ###########################################################  
   notdomdat <- ifelse(is.null(tsumvar) && presence, TRUE, FALSE)
@@ -650,13 +653,20 @@ datSumTreeDom <- function(tree = NULL,
         addseed <- FALSE
       }
     }
-    if (!is.null(tdomvar2) && !tdomvar2 %in% seednames) {
-      message(tdomvar2, " not in seed... no seeds included")
-      if (seedonly) {
-        stop()
-      } else {
-        addseed <- FALSE
-      }
+    if (!is.null(tdomvar2)) {
+      if (addseed && tdomvar2 == "DIACL") {
+        seedx$DIACL <- "<1"
+	    seednames <- c(seednames, "DIACL")
+      }	  
+
+	  if (!tdomvar2 %in% seednames) {
+        message(tdomvar2, " not in seed... no seeds included")
+        if (seedonly) {
+          stop()
+        } else {
+          addseed <- FALSE
+        }
+	  }
     }
     sselectvars <- unique(c(selectvars, tsumvar, tdomvar, tdomvar2))
   }
