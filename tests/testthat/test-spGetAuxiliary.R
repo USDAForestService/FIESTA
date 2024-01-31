@@ -1,5 +1,7 @@
 test_that("Get Auxiliary creates consistent output", {
 
+  skip_on_cran()
+
   # Set Up Data for spGetAuxiliary
   outfolder <- tempdir()
 

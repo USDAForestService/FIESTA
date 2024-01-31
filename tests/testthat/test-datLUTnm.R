@@ -1,5 +1,7 @@
 test_that("datLUTnm works as expected", {
 
+  skip_on_cran()
+
   # Test Look up table classification with Disturbance Type
   ref_dstrbcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "DSTRBCD",]
 

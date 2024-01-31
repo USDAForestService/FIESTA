@@ -1,5 +1,8 @@
 
 test_that("modGBarea Testing", {
+  
+  skip_on_cran()
+
   # Running GBpop
   GBpop <- modGBpop(popTabs = list(cond=WYcond, tree=WYtree),
                     pltassgn = WYpltassgn,

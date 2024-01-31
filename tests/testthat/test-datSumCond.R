@@ -1,6 +1,8 @@
 
 test_that("datSumCond Testing", {
   
+  skip_on_cran()
+
   # Test 1
   condsumdat <- datSumCond(cond = WYcond, csumvar = "LIVE_CANOPY_CVR_PCT")
   condsum <- condsumdat$condsum

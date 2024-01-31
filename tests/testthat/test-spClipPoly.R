@@ -1,5 +1,7 @@
 
 test_that("Clip polygon works as expected", {
+  
+  skip_on_cran()
 
   # Setup Admin Boundary to Clip
   WYbhfn <- system.file("extdata",

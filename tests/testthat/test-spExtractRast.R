@@ -1,6 +1,9 @@
 
 
 test_that("Extract Raster Values works", {
+  
+  skip_on_cran()
+
   # Set Up Data
   WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
                                  xy.uniqueid = "CN",

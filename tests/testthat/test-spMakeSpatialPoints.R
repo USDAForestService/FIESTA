@@ -2,6 +2,8 @@
 
 test_that("Make Spatial Points works", {
 
+  skip_on_cran()
+
   # Run Make Spatial Points with no Error
   expect_no_error(spMakeSpatialPoints(xyplt = WYplt,
                                       xy.uniqueid = "CN",
@@ -11,6 +13,8 @@ test_that("Make Spatial Points works", {
 })
 
 test_that("Make Spatial Points works with Shapefile Export", {
+
+  skip_on_cran()
 
   outfolder <- tempdir()
 

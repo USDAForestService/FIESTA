@@ -1,6 +1,9 @@
 
 # For `FIESTA`'s GB Module, the `modGBpop` function calculates and outputs: number of plots, adjustment factors, and an expansion factor by strata.
 test_that("modGBpop Testing", {
+  
+  skip_on_cran()
+
   # Running GBpop
   GBpop <- modGBpop(popTabs = list(cond=WYcond, tree=WYtree),
                     pltassgn = WYpltassgn,

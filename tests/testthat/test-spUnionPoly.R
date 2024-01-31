@@ -1,4 +1,7 @@
 test_that("Union Poly Works and creates expected SF object", {
+  
+  skip_on_cran()
+
   # Setup Admin Boundary to Clip
   WYbhfn <- system.file("extdata",
                         "sp_data/WYbighorn_adminbnd.shp",

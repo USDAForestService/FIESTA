@@ -1,5 +1,7 @@
 test_that("datLUTclass function works as expected", {
 
+  skip_on_cran()
+
   # Test Look up Table classification with utils ref table
   testLUT <- datLUTclass(x = WYtree,
                         xvar = "DIA",

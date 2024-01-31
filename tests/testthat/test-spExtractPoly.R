@@ -1,6 +1,8 @@
 
 test_that("Extract Polygon Attributes works", {
   
+  skip_on_cran()
+
   # Set Up Data
   WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
                                  xy.uniqueid = "CN",

@@ -2,6 +2,8 @@
 
 test_that("multiplication works", {
 
+  skip_on_cran()
+
   # Set Up Data
   WYbhfn <- system.file("extdata",
                         "sp_data/WYbighorn_adminbnd.shp",

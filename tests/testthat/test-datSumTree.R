@@ -1,6 +1,9 @@
 
 
 test_that("datSumTree Aboveground Biomass w/out Extrapolation", {
+  
+  skip_on_cran()
+
   # Using datSumTree - nonTPA  
   test1 <- datSumTree(tree = FIESTA::WYtree, ##
                       tsumvarlst = "DRYBIO_AG", ##tsumvarlst == tree-level variables to aggregate: in this case it is aboveground biomass

@@ -1,6 +1,8 @@
 
 test_that("Reproject of SF Vector Object works", {
 
+  skip_on_cran()
+
   WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
                                  xy.uniqueid = "CN",
                                  xvar = "LON_PUBLIC",

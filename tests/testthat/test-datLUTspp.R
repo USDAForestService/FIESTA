@@ -1,5 +1,7 @@
 test_that("datLUTspp returns expected results", {
   
+  skip_on_cran()
+
   # Test look up table classification of species common name
   testLUT_species <- datLUTspp(WYtree)
 
