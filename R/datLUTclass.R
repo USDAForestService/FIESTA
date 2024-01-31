@@ -452,7 +452,8 @@ datLUTclass <- function(x,
   
   if (!isdb || dbreturn && !is.null(datx)) {
     datx[, (LUTclassnm) := cut(datx[[xvar]], breaks=cutbreaks, 
-	         labels=cutlabels, right=FALSE)]  
+	         labels=cutlabels, right=FALSE)] 
+    datx[[LUTclassnm]] <- factor(datx[[LUTclassnm]], levels=cutlabels)			 
 
     if (NAto0) {
       datx[is.na(datx[[LUTclassnm]]), (LUTclassnm) := 0] 

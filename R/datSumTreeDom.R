@@ -638,8 +638,12 @@ datSumTreeDom <- function(tree = NULL,
  
   ## check seed table
   if (addseed || seedonly) {
+    if (addseed && tdomvar == "DIACL") {
+      seedx$DIACL <- "<1"
+	  seednames <- c(seednames, "DIACL")
+    }	  
     if (!tdomvar %in% seednames) {
-      message(tdomvar, "not in seed... no seeds included")
+      message(tdomvar, " not in seed... no seeds included")
       if (seedonly) {
         stop()
       } else {
@@ -647,7 +651,7 @@ datSumTreeDom <- function(tree = NULL,
       }
     }
     if (!is.null(tdomvar2) && !tdomvar2 %in% seednames) {
-      message(tdomvar2, "not in seed... no seeds included")
+      message(tdomvar2, " not in seed... no seeds included")
       if (seedonly) {
         stop()
       } else {
