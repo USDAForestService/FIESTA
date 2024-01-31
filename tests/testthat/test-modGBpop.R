@@ -15,10 +15,10 @@ test_that("modGBpop Testing", {
 
   # List of Names for output types
   GBpop_names <- list(c("module","popType", "condx", "pltcondx", "cuniqueid", "condid",
-                        "ACI.filter", "unitarea", "areavar", "areaunits", "unitvar", "unitvars",
+                        "ACI.filter", "pltassgnx", "pltassgnid", "unitarea", "areavar", "areaunits", "unitvar", "unitvars",
                         "strata", "stratalut",   "strvar", "strwtvar", "expcondtab", "plotsampcnt",
                         "condsampcnt", "states", "invyrs", "estvar.area", "adj", "P2POINTCNT",
-                        "treex", "tuniqueid", "adjtree"))
+                        "treex", "tuniqueid", "adjtree", "stratwarnlut"))
 
 
   GBpop_names_actual <- list(names(GBpop))
