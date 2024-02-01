@@ -88,6 +88,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
     whereqry <- paste0("\nWHERE ", RtoSQL(pcfilter))
   }
   pltcondnmlst <- names(pltcondf)
+  
   pltcondf <- datFilter(x = pltcondf, 
                         xfilter = pcfilter, 
 						title.filter = "plt filter?",
@@ -143,7 +144,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
   }
   if (!is.null(landarea.filter)) {
     if (!is.null(whereqry)) {
-      whereqry <- paste0(whereqry, "\n", RtoSQL(landarea.filter))
+      whereqry <- paste0(whereqry, " AND ", RtoSQL(landarea.filter))
 	} else {
 	  whereqry <- paste0("\nWHERE ", RtoSQL(landarea.filter))
     }	  
