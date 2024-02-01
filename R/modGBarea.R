@@ -545,7 +545,7 @@ modGBarea <- function(GBpopdat,
 
   message("getting estimates using GB...")
 #  if (addtotal) {
-    ## Get total estimate and merge area
+    ## Get total estimate and merge area	
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
     unit_totest <- GBest.pbar(sumyn = estvar.name, 
@@ -570,6 +570,7 @@ modGBarea <- function(GBpopdat,
 
   ## Get row estimate  
   if (rowvar != "TOTAL") {
+    cdomdat <- cdomdat[!is.na(cdomdat[[rowvar]]),] 	
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
     unit_rowest <- GBest.pbar(sumyn = estvar.name, 
@@ -583,6 +584,7 @@ modGBarea <- function(GBpopdat,
 
   ## Get column (and cell) estimate  
   if (colvar != "NONE") {
+    cdomdat <- cdomdat[!is.na(cdomdat[[colvar]]),] 	
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
     unit_colest <- GBest.pbar(sumyn = estvar.name, 

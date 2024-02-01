@@ -887,6 +887,7 @@ modSAtree <- function(SApopdatlst = NULL,
     estlst[[SApopdatnm]] <- dunit_est
 
     if (rowcolinfo$rowvar != "TOTAL") {
+      tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]),] 
       tdomdatsum <- setDT(tdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
                       by=c(largebnd.unique, dunitvar, cuniqueid, 
                            rowcolinfo$rowvar, prednames), .SDcols=estvar.name]

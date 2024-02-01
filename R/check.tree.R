@@ -86,6 +86,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
            addseed=addseed, seedonly=seedonly, woodland=woodland))
     if (is.null(tdomdata)) return(NULL)
     tdomdat <- tdomdata$tdomdat
+
     #if (!pivot) {
     #  tdomdat <- tdomdat[!is.na(tdomdat[[tdomvar]]),]
     #}

@@ -642,7 +642,6 @@ modGBtree <- function(GBpopdat,
   if (rowvar != "TOTAL") {
     ## CHeck this later - removing NA values from both colvar and rowvar
     tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]),] 
-
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		    by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
     unit_rowest <- GBest.pbar(sumyn = estvar.name, 
@@ -655,8 +654,7 @@ modGBtree <- function(GBpopdat,
 							  
     if (colvar != "NONE") {
      ## CHeck this later - removing NA values from both colvar and rowvar
-     tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]),] 
-	
+     tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]),] 	
      tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		      by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
       unit_colest <- GBest.pbar(sumyn = estvar.name, 

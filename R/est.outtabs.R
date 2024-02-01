@@ -210,7 +210,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		max(nchar(na.omit(round(rowest[[psenm]], pseround)))))
       }
     }
-	
     if (!is.null(unit_colest)) {
       colest <- groupUnits(tabest=unit_colest, domain=colvar, estncol=estnm,
 			estncol.var=estnm.var, esttype=esttype, unitvar=unitvar,
@@ -229,8 +228,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         char.width <- max(char.width,
 		max(nchar(na.omit(round(colest[[psenm]], pseround)))))
       }
-    }
-	
+    }	
     if (!is.null(unit_grpest)) {
       grpest <- groupUnits(tabest=unit_grpest, domain=rowvar, estncol=estnm,
 			estncol.var=estnm.var, domvar2=colvar, esttype=esttype,

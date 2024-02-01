@@ -1186,7 +1186,6 @@ datSumTreeDom <- function(tree = NULL,
   #####################################################################
   ## If tdomvar2 exists, concatenate the columns to one column (if pivot=TRUE)
   ## treex is the tree table after filtered tree domains
-
   flag <- ifelse(NAto0, "0", "")
   if (FIAname) {
     if (tdomvar == "SPCD") {
@@ -1212,15 +1211,21 @@ datSumTreeDom <- function(tree = NULL,
     tdomvarnm <- paste0(tdomvar, "NM") 
     maxchar <- max(sapply(tdomvarlst, function(x) {nchar(x)}))
 
-    treex[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
+    if (flag != "") {
+      treex[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
 			width=maxchar, flag=flag))]
-    tdomvarlst2 <- paste0(tdomprefix, formatC(tdomvarlst, width=maxchar, flag=flag))
-    #treex[, (tdomvarnm) := paste0(tdomprefix, get(eval(tdomvar)))]
-    #tdomvarlst2 <- paste0(tdomprefix, tdomvarlst)
-
+      tdomvarlst2 <- paste0(tdomprefix, formatC(tdomvarlst, width=maxchar, flag=flag))
+	} else {
+      treex[, (tdomvarnm) := paste0(tdomprefix, get(eval(tdomvar)))]
+      tdomvarlst2 <- paste0(tdomprefix, tdomvarlst)
+    }	  
     if (addseed) {
-      seedx[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
+	  if (flag != "") {
+        seedx[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
 			width=maxchar, flag=flag))]
+	  } else {
+        seedx[, (tdomvarnm):= paste0(tdomprefix, get(eval(tdomvar)))]
+	  }
     }
     #tdomvarlut <- data.frame(tdomvarlst, tdomvarlst2, stringsAsFactors=FALSE)
     #names(tdomvarlut) <- c(tdomvar, tdomvarnm) 
@@ -1235,7 +1240,7 @@ datSumTreeDom <- function(tree = NULL,
   ## GET tdomvarlst2 or CHECK IF ALL tree domains IN tdomvar2lst ARE INCLUDED IN tdomvar2.
   if (!is.null(tdomvar2)) {
     tdoms2 <- sort(unique(treex[[tdomvar2]]))
-
+	
     ## check seed table
     if (addseed) {
       if (tdomvar2 == "DIACL") {
@@ -1276,7 +1281,6 @@ datSumTreeDom <- function(tree = NULL,
     }
     if (!is.null(tdomvar2)) {
       treex <- treex[treex[[tdomvar2]] %in% tdomvar2lst,]
-
       if (FIAname) {
         if (tdomvar2 == "SPCD") {
           tdomdata <- datLUTspp(x=treex, spcdname=spcd_name)
@@ -1292,15 +1296,39 @@ datSumTreeDom <- function(tree = NULL,
           seedx <- sdomdata$xLUT
         }
       }
-
       if (is.numeric(treex[[tdomvar2]])) {
         maxchar2 <- max(sapply(tdomvar2lst, function(x) {nchar(x)}))
-        treex[, (tdomvarnm) := paste0(treex[[tdomvarnm]], "#", 
-            formatC(treex[[tdomvar2]], width=maxchar2, flag=flag))]
-
+	  
+        if (flag != "") {
+          treex[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar2)), 
+			width=maxchar2, flag=flag))]
+          tdomvarlst2 <- paste0(tdomprefix, formatC(tdomvarlst, width=maxchar, flag=flag))
+	    } else {
+          treex[, (tdomvarnm) := paste0(tdomprefix, get(eval(tdomvar)))]
+          tdomvarlst2 <- paste0(tdomprefix, tdomvarlst)
+        }	  
         if (addseed) {
-          seedx[, (tdomvarnm) := paste0(seedx[[tdomvarnm]], "#", 
-            formatC(seedx[[tdomvar2]], width=maxchar2, flag=flag))]
+	      if (flag != "") {
+            seedx[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
+			width=maxchar, flag=flag))]
+	      } else {
+            seedx[, (tdomvarnm):= paste0(tdomprefix, get(eval(tdomvar)))]
+	      }
+        }
+	  
+	    if (flag != "") {
+          treex[, (tdomvarnm) := paste0(treex[[tdomvarnm]], "#", 
+            formatC(treex[[tdomvar2]], width=maxchar2, flag=flag))]
+		} else {
+		  treex[, (tdomvarnm) := paste0(treex[[tdomvarnm]], "#", treex[[tdomvar2]])]      
+        }		
+        if (addseed) {
+		  if (flag != "") {
+            seedx[, (tdomvarnm) := paste0(seedx[[tdomvarnm]], "#", 
+              formatC(seedx[[tdomvar2]], width=maxchar2, flag=flag))]
+		  } else {
+		    seedx[, (tdomvarnm) := paste0(seedx[[tdomvarnm]], "#", seedx[[tdomvar2]])]
+		  }
         }
       } else {
         treex[, (tdomvarnm) := paste0(treex[[tdomvarnm]], "#", treex[[tdomvar2]])]
@@ -1746,7 +1774,7 @@ datSumTreeDom <- function(tree = NULL,
     if (proportion) sumtreef.prop <- tdoms.prop 
     if (presence) sumtreef.pres <- tdoms.pres
   }
-  
+ 
   if (savedata) {
     if (pltsp) {
       spExportSpatial(sumtreef, 

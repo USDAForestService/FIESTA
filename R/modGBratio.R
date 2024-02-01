@@ -477,7 +477,6 @@ modGBratio <- function(GBpopdat,
     setkeyv(unitarea, unitvar)
   }
   
-
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -524,7 +523,7 @@ modGBratio <- function(GBpopdat,
   if ("INVYR" %in% names(pltcondf)) {
     invyr <- sort(unique(pltcondf$INVYR))
   }
- 
+
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -566,8 +565,7 @@ modGBratio <- function(GBpopdat,
   rm(rowcolinfo) 
 
   if (rowvar == "TOTAL") rowcol.total <- TRUE
-
-
+  
   #####################################################################################
   ### Get estimation data from tree table
   #####################################################################################
@@ -583,7 +581,7 @@ modGBratio <- function(GBpopdat,
                   adjtree=adjtree, metric=metric, woodland=woodland)
   if (is.null(treedat)) return(NULL)
   tdomdat <- treedat$tdomdat
-  
+
   ## Merge tdomdat with condx
   xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
   condx <- xchk$tab1
@@ -614,17 +612,6 @@ modGBratio <- function(GBpopdat,
     tdomvarlstd <- NULL
     estunitsd <- areaunits
   }  
-  
-  if (!is.null(uniquerow) && is.factor(uniquerow[[rowvar]]) && any(levels(uniquerow[[rowvar]]) == "NA")) {
-    tdomdat$"NA" <- as.numeric(NA)
-	tdomvarlstn = c(tdomvarlstn, "NA")
-	row.addNA <- TRUE
-  }
-  if (!is.null(uniquecol) && is.factor(uniquecol[[colvar]]) && any(levels(uniquecol[[colvar]]) == "NA")) {
-    tdomdat$"NA" <- as.numeric(NA)
-	tdomvarlstn = c(tdomvarlstn, "NA")
-	col.addNA <- TRUE
-  }
 
   ## Generate a uniquecol for estimation units
   if (!sumunits & colvar == "NONE") {
@@ -682,7 +669,7 @@ modGBratio <- function(GBpopdat,
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvard.name]   
     tdomdat <- merge(tdomdat, cdomdattot, by=c(strunitvars, cuniqueid, "TOTAL"))
   }
- 
+
   ## Note: tdomdat is the summed response by condition (not domain)
   if (addtotal) {
     ## Get estimate for total
@@ -752,9 +739,7 @@ modGBratio <- function(GBpopdat,
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		        by=c(strunitvars, cuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
     }	 
-    if (row.addNA) {
-	  tdomdatsum[tdomdatsum[[rowvar]] == "NA", rowvar] <- NA
-	}  
+    tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]) & tdomdatsum[[rowvar]] != "NA",] 
     unit_rowest <- GBest.pbar(sumyn = estvarn.name, 
                               sumyd = estvard.name, 
                               ysum = tdomdatsum, 
@@ -767,9 +752,9 @@ modGBratio <- function(GBpopdat,
                               domain = rowvar)
  
     if (colvar != "NONE") {
-      if (!is.null(tdomvar)) {
+       if (!is.null(tdomvar)) {
         if (!is.null(tdomvar2)) {
-          tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
                   by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]    
         } else {
           if (tdomvar == colvar) {
@@ -795,11 +780,8 @@ modGBratio <- function(GBpopdat,
       } else {
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
                   by=c(strunitvars, cuniqueid, colvar), .SDcols=c(estvarn.name, estvard.name)]
-      }
-      if (col.addNA) {
-	    tdomdatsum[tdomdatsum[[colvar]] == "NA", colvar] <- NA
-	  }  
-	  
+      }	  
+      tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]) & tdomdatsum[[colvar]] != "NA",] 
       unit_colest <- GBest.pbar(sumyn = estvarn.name, 
                                 sumyd = estvard.name, 
                                 ysum = tdomdatsum, 
@@ -839,14 +821,9 @@ modGBratio <- function(GBpopdat,
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
             by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
       }
-	  
-      if (row.addNA) {
-	    tdomdatsum[tdomdatsum[[rowvar]] == "NA", rowvar] <- NA
-	  }  
-      if (col.addNA) {
-	    tdomdatsum[tdomdatsum[[colvar]] == "NA", colvar] <- NA
-	  }  
-      unit_grpest <- GBest.pbar(sumyn = estvarn.name, 
+      tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]) & tdomdatsum[[rowvar]] != "NA",] 
+      tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]) & tdomdatsum[[colvar]] != "NA",] 
+	  unit_grpest <- GBest.pbar(sumyn = estvarn.name, 
                                 sumyd = estvard.name, 
                                 ysum = tdomdatsum, 
                                 esttype =esttype, 
@@ -1024,7 +1001,7 @@ modGBratio <- function(GBpopdat,
 	      returntitle=returntitle, estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
-  
+ 
   if (!is.null(est2return)) {
     returnlst$est <- setDF(est2return)
   }
