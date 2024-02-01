@@ -502,9 +502,6 @@ modMAratio <- function(MApopdat,
   if (is.null(treedat)) return(NULL)
   tdomdat <- treedat$tdomdat
 
-print("OOOO")
-print(head(tdomdat))
-   
   ## Merge tdomdat with condx
   xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
   condx <- xchk$tab1

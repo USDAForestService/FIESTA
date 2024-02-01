@@ -36,7 +36,7 @@ Depends:
 Imports:
     data.table,
     DBI,
-    FIESTAutils (>= 1.2.1),
+    FIESTAutils (>= 1.2.1.9000),
     gdalraster,
     grDevices,
     graphics,
@@ -51,6 +51,8 @@ Suggests:
     sp,
     terra,
     rmarkdown
+Remotes:
+    USDAForestService/FIESTAutils
 VignetteBuilder: knitr
 License: GPL-3
 Copyright: See file COPYRIGHTS for details. 
