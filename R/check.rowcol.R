@@ -47,6 +47,13 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 	}
     return(x)
   }
+  
+  ref_growth_habit <- 
+  data.frame(GROWTH_HABIT_CD = c("SD", "ST", "GR", "FB", "SH", "TT", "LT", "TR", "NT"),
+             GROWTH_HABIT_NM = c("Seedlings/Saplings", "Seedlings", "Graminoids", 
+			             "Forbs", "Shrubs", "Trees", "Large trees", "Trees", "Non-tally"))
+			                  
+
 
   ## Check dbconn
   ###############################################
@@ -232,7 +239,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
           tdomvar=tdomvar, concat=concat)
     return(returnlst)
   }
-  
+
   if (rowvar != "NONE") {   
     rowuniquex <- NULL
     rowvarnm <- rowvar
@@ -240,7 +247,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     if (!is.null(row.FIAname) && row.FIAname) {
       ## Get FIA reference table for xvar
       xvar.ref <- getRefobject(toupper(rowvar))
-      if (is.null(xvar.ref) && toupper(rowvar) != "SPCD") {
+      if (is.null(xvar.ref) && !toupper(rowvar) %in% c("SPCD", "GROWTH_HABIT_CD")) {
         message(paste("no reference name for", rowvar))
         row.FIAname <- FALSE
       }
@@ -634,17 +641,25 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
           if (!is.null(rowlut)) row.add0 <- TRUE
 
           if (estseed != "only") {
-            if (rowvar == "SPCD") {
-              rowLUT <- datLUTspp(x = treef, 
+			if (rowvar == "GROWTH_HABIT_CD") {
+			  rowlut <- ref_growth_habit
+		      treef <- merge(treef, ref_growth_habit, by=rowvar, all.x=TRUE)
+			  rowLUTnm <- "GROWTH_HABIT_NM"
+			  rowlut <- data.table(rowlut[rowlut[[rowvar]] %in% treef[[rowvar]], ])
+			  rowlut <- rowlut[, lapply(.SD, makefactor)]
+	  
+			} else {
+              if (rowvar == "SPCD") {
+                rowLUT <- datLUTspp(x = treef, 
 			                      add0 = row.add0, xtxt="tree", 
 								  uniquex = tuniquex)
-            } else { 
-              if (!is.data.frame(treef)) { 
-			    x <- tnames 
-			  } else { 
-			    x <- treef 
-			  } 
-              rowLUT <- datLUTnm(x = x, 
+			  } else {
+			    if (!is.data.frame(treef)) { 
+			      x <- tnames 
+			    } else { 
+			      x <- treef 
+			    } 
+                rowLUT <- datLUTnm(x = x, 
 			                     xvar = rowvar, 
 								 LUT = rowlut, 
 								 FIAname = row.FIAname,
@@ -652,12 +667,13 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 								 add0 = row.add0, 
 								 xtxt = "tree", 
 								 uniquex = tuniquex)
-            }
-            if (!isdb) {
-              treef <- setDT(rowLUT$xLUT)
-            }
-            rowlut <- setDT(rowLUT$LUT)
-            rowLUTnm <- rowLUT$xLUTnm
+			  }
+              if (!isdb) {
+                treef <- setDT(rowLUT$xLUT)
+              }
+              rowlut <- setDT(rowLUT$LUT)
+              rowLUTnm <- rowLUT$xLUTnm
+			}
           }
 		  
           if (estseed %in% c("add", "only") && !is.null(seedf)) {
@@ -760,7 +776,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       ## Get FIA reference table for xvar
 
       xvar.ref <- getRefobject(toupper(colvar))
-      if (is.null(xvar.ref) && toupper(colvar) != "SPCD") {
+      if (is.null(xvar.ref) && !toupper(colvar) %in% c("SPCD", "GROWTH_HABIT_CD")) {
         message(paste("no reference name for", colvar))
         col.FIAname <- FALSE
       }
@@ -1087,6 +1103,15 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
           if (!is.null(collut)) col.add0 <- TRUE
 
           if (estseed != "only") {
+			if (colvar == "GROWTH_HABIT_CD") {
+			  collut <- ref_growth_habit
+		      treef <- merge(treef, ref_growth_habit, by=colvar, all.x=TRUE)
+			  colLUTnm <- "GROWTH_HABIT_NM"
+			  collut <- data.table(collut[collut[[colvar]] %in% treef[[colvar]], ])
+			  collut <- collut[, lapply(.SD, makefactor)]
+	  
+			} else {
+			
             if (colvar == "SPCD") {
               colLUT <- datLUTspp(x = treef, 
 			                      add0 = col.add0, xtxt="tree", 
@@ -1103,13 +1128,14 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 								 FIAname = col.FIAname,
 								 add0 = col.add0, 
 								 xtxt = "tree", 
-								 uniquex = tuniquex)
-            }
-            if (!isdb) {
-              treef <- setDT(colLUT$xLUT)
-            }
-            collut <- setDT(colLUT$LUT)
-            colLUTnm <- colLUT$xLUTnm
+								 uniquex = tuniquex) 
+              }								 
+              if (!isdb) {
+                treef <- setDT(colLUT$xLUT)
+              }
+              collut <- setDT(colLUT$LUT)
+              colLUTnm <- colLUT$xLUTnm
+			}
           }
           if (estseed %in% c("add", "only") && !is.null(seedf)) {
             if (colvar %in% snames) {
@@ -1223,8 +1249,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 #      stop("invalid rowlut... no duplicates allowed")
 #    }
     uniquerow <- rowlut
-    if (!is.null(row.orderby) && row.orderby != "NONE" && 
-	             row.orderby %in% names(uniquerow)) {
+    if (all(!is.factor(uniquerow[[rowvar]]), row.orderby != "NONE", 
+	         row.orderby %in% names(uniquerow))) {
 	  setorderv(uniquerow, row.orderby, na.last=TRUE)
 	}
   } else if (!is.null(uniquerow)) {
@@ -1301,7 +1327,19 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     } else if (!is.null(rowuniquex)) {
       uniquerow <- as.data.table(rowuniquex)
       names(uniquerow) <- rowvar
+
+	  if (rowvar == "GROWTH_HABIT_CD") {
+	    ghcodes <- ref_growth_habit[[rowvar]]
+	    ghord <- ghcodes[ghcodes %in% rowuniquex]
+	    if (length(ghord) < length(rowuniquex)) {
+	      missgh <- rowuniquex[!rowuniquex %in% ghord]
+          message("growth_habit_cd not in ref: ", toString(missgh)) 
+        } else {		  
+	      rowuniquex <- rowuniquex[match(ghord, rowuniquex)]
+	    }
+      }
       uniquerow[[rowvar]] <- factor(uniquerow[[rowvar]], levels=rowuniquex)
+	  setkeyv(uniquerow, rowvar)
 	
 	} else {
 	  if (is.factor(treef[[rowvar]])) {
@@ -1380,8 +1418,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 #      stop("invalid collut... no duplicates allowed")
 #    }
     uniquecol <- collut
-    if (!is.null(col.orderby) && col.orderby != "NONE" && 
-	             col.orderby %in% names(uniquecol)) {
+    if (all(!is.factor(uniquecol[[colvar]]), col.orderby != "NONE", 
+	         col.orderby %in% names(uniquecol))) {
 	  setorderv(uniquecol, col.orderby, na.last=TRUE)
 	}
   } else if (!is.null(uniquecol)) {
@@ -1451,8 +1489,20 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     } else if (!is.null(coluniquex)) {
       uniquecol <- as.data.table(coluniquex)
       names(uniquecol) <- colvar
+	  
+	  if (colvar == "GROWTH_HABIT_CD") {
+	    ghcodes <- c("SD", "ST", "GR", "FB", "SH", "TT", "LT", "TR", "NT")
+	    ghord <- ghcodes[ghcodes %in% coluniquex]
+	    if (length(ghord) < length(coluniquex)) {
+	      missgh <- coluniquex[!coluniquex %in% ghord]
+          message("growth_habit_cd not in ref: ", toString(missgh)) 
+        } else {		  
+	      coluniquex <- coluniquex[match(ghord, coluniquex)]
+	    }
+      }
       uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=coluniquex)
-	
+	  setkeyv(uniquecol, colvar)
+	  
 	} else {
 	  if (is.factor(treef[[colvar]])) {
         if (estseed == "add" && colvar == "DIACL") {
@@ -1532,7 +1582,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
   ## Create factors for ordering tables
   ##############################################################################
   if (!is.null(uniquerow)) {
-	
+
     ## Change SITECLCD to descending order
     if (row.FIAname && "SITECLCD" %in% names(uniquerow))
       uniquerow <- setorder(uniquerow, -SITECLCD)
@@ -1554,7 +1604,6 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 
     ## Create factors for ordering
 	uniquecol <- uniquecol[, lapply(.SD, makefactor)]
-	setkeyv(uniquecol, colvar)
   }
 
   ## Add a column for totals

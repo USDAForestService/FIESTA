@@ -5,7 +5,7 @@
 \alias{ref_estvar}
 \title{Reference table - for generating estimates}
 \format{
-An object of class \code{data.frame} with 174 rows and 10 columns.
+An object of class \code{data.frame} with 178 rows and 11 columns.
 }
 \usage{
 ref_estvar

@@ -487,6 +487,8 @@ modGBp2veg <- function(GBpopdat = NULL,
   domainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
+  rowvarnm <- rowcolinfo$rowvarnm
+  colvarnm <- rowcolinfo$colvarnm
   domain <- rowcolinfo$grpvar
   row.orderby <- rowcolinfo$row.orderby
   col.orderby <- rowcolinfo$col.orderby
@@ -968,7 +970,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
                 unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
                 unit_rowest=unit_rowest, unit_colest=unit_colest, 
-                unit_grpest=unit_grpest, rowvar=rowvar, colvar=colvar, 
+                unit_grpest=unit_grpest, rowvar=rowvarnm, colvar=colvarnm, 
                 uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp, 
                 rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
                 allin1=allin1, savedata=savedata, addtitle=addtitle, 

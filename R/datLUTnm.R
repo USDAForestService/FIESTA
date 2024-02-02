@@ -294,22 +294,27 @@ datLUTnm <- function(xvar,
   ## Check add0 
   add0 <- pcheck.logical(add0, varnm="add0", title="Add 0 values to missing codes?", 
                              first="NO", gui=gui)
-
-  
+ 
   ## Get unique values
   if (isdb && !dbreturn) {
     uniqueval.qry <- paste("SELECT DISTINCT", xvar, "FROM", datnm,
                            "ORDER BY", xvar)
     uniqueval <- na.omit(DBI::dbGetQuery(dbconn, uniqueval.qry))[[1]]
+	
   } else if (!is.null(datx)) {
     if (!is.numeric(datx[[xvar]])) {
-	  #message("xvar must be a numeric vector in x")
-	  uniqueval <- sort(unique(as.numeric(as.character(datx[[xvar]]))))
+	  if (is.factor(datx[[xvar]])) {
+	    #message("xvar must be a numeric vector in x")
+	    uniqueval <- sort(unique(as.numeric(as.character(datx[[xvar]]))))
+	  } else {
+	    uniqueval <- sort(unique(datx[[xvar]]))
+	  }
     } else {
       #uniquex <- sort(unique(na.omit(datx[[xvar]])))
       uniqueval <- sort(unique(datx[[xvar]]))
     }
   }
+
   if (!is.null(uniquex)) {
     if (!is.null(uniqueval)) {
 	  if (!all(uniquex %in% uniqueval)) {
@@ -453,6 +458,7 @@ datLUTnm <- function(xvar,
     ref <- setDT(FIESTAutils::ref_codes[FIESTAutils::ref_codes[["VARIABLE"]] == xvar.ref,
  		c(lutvars, grpvars)])
  
+ 
     ## Check LUTx - xvar in LUTx
     #################################################
     if (!is.null(LUTx)) {
@@ -507,7 +513,7 @@ datLUTnm <- function(xvar,
         stop("LUTvar not in LUTx")
       }
 
-      if (!is.null(datx) && !is.null(uniquex)) {
+      if (all(!is.null(datx), !is.null(uniquex), nrow(uniquex) > 0)) {
         ## Subset LUT values to only those in datx
         if (sum(LUTx[[LUTvar]] %in% uniquex, na.rm=TRUE) == 0) {
           message(paste("no rows exist for", LUTvar))

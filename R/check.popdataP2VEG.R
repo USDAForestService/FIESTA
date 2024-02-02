@@ -240,7 +240,7 @@ checktabs <- function(tabs, names) {
   ## Build from query for cond
   if (!is.null(condnm)) {
     if (is.null(pfromqry)) {
-      cfromqry <- paste0(SCHEMA., cond, " c")
+      cfromqry <- paste0(SCHEMA., condnm, " c")
     } else {
       cfromqry <- paste0(pfromqry, 
 	               "\nJOIN ", SCHEMA., condnm, 
@@ -291,25 +291,25 @@ checktabs <- function(tabs, names) {
   ###################################################################################
   ## Import tables
   ###################################################################################
-  condx <- suppressMessages(pcheck.table(get(condnm), tab_dsn=dsn, 
+  condx <- suppressMessages(pcheck.table(condnm, tab_dsn=dsn, 
            tabnm="cond", caption="cond table?",
 		   tabqry=condqry, stopifnull=TRUE))
 
-  subplotx <- suppressMessages(pcheck.table(get(subplot), tab_dsn=dsn, 
+  subplotx <- suppressMessages(pcheck.table(subplotnm, tab_dsn=dsn, 
            tabnm="subplot", caption="subplot table?", 
            tabqry=subplotqry, stopifnull=TRUE))
 		   
-  subp_condx <- suppressMessages(pcheck.table(get(subp_condnm), tab_dsn=dsn, 
+  subp_condx <- suppressMessages(pcheck.table(subp_condnm, tab_dsn=dsn, 
            tabnm="subp_cond", caption="subp_cond table?", 
            tabqry=subp_condqry, stopifnull=TRUE))
 
   if (!is.null(vsubpsppnm)) {
-    vsubpsppx <- suppressMessages(pcheck.table(get(vsubpsppnm), tab_dsn=dsn, 
+    vsubpsppx <- suppressMessages(pcheck.table(vsubpsppnm, tab_dsn=dsn, 
            tabnm="vsubpspp", caption="Veg Species table?", 
            tabqry=vsubpsppqry, stopifnull=FALSE))
   }
   
-  vsubpstrx <- suppressMessages(pcheck.table(get(vsubpstrnm), tab_dsn=dsn, 
+  vsubpstrx <- suppressMessages(pcheck.table(vsubpstrnm, tab_dsn=dsn, 
            tabnm="vsubpstr", caption="Veg Structure table?", 
            tabqry=vsubpstrqry, stopifnull=TRUE))
 
