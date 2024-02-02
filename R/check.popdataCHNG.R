@@ -114,6 +114,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   sccmid <- tabIDs[[sccmnmchk]]
   lulcid <- "PLT_CN"
 
+
   SCHEMA. <- NULL
   dbqueries <- list()
 
@@ -135,7 +136,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
     dbname <- dsn
-    drv <- "SQLite"
 
     ## Check plt in database
     if (!all(!is.null(pltnm), is.character(pltnm), pltnm %in% tablst)) {    
@@ -180,6 +180,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
            nullcheck=nullcheck, gui=gui, returnsf=FALSE))
   }  
 
+  ## Build pfromqry
   if (is.null(pfromqry)) {
     pfromqry <- paste0(SCHEMA., pltnm, " ", palias)
   }
@@ -197,6 +198,8 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   ## Get default variables for plot
   if (is.null(pltvars)) {
     pltvars <- "*"
+  } else {
+    pltvars <- unique(pltvars[pltvars %in% pltflds])
   }
 
   ## Get where statement for plot change query
@@ -212,7 +215,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   } else {
     pchgwhereqry <- whereqry
   }
-  
+
   ## Build query for plot change
   pltuqry <- paste0("SELECT ", 
 				toString(paste0(palias, ".", pltvars)), 
@@ -293,7 +296,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
            "\nGROUP BY sccm.plt_cn, p.prev_plt_cn, sccm.condid")
   dbqueries$sccm_cond <- sccm_condqry
 
-
   ## Import tables
   #########################################################################
   if (datindb) {
@@ -368,15 +370,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
 	message(sccm_condqry)
     return(NULL)
   }
-
-  ## Import tables
-  #########################################################################
-#  condx <- data.table(sqldf::sqldf(conduqry, dbname=dsn, drv=drv))
-#  if (!is.null(pltnm)) {
-#    pltx <- data.table(sqldf::sqldf(pltuqry, dbname=dsn, drv=drv))
-#  }   
-#  sccmx <- data.table(sqldf::sqldf(sccmqry, dbname=dsn, drv=drv))
-
 
   ##########################################################################
   ## Get remeasured tree and seed data queries for GRM
@@ -456,7 +449,6 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
            nullcheck=nullcheck, gui=gui, tabqry=midptqry, returnsf=FALSE))
 
   }
-
 
   if (popType == "LULC") {
 
@@ -542,6 +534,13 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     ## Subset condition columns
     cvars <- unique(c(cuniqueid, names(COND)[!names(COND) %in% names(PLOT)])) 
     COND <- COND[, cvars, with=FALSE]
+
+#save(PLOT, file="E:/workspace/_tmp/PLOT.rda")
+#save(COND, file="E:/workspace/_tmp/COND.rda")
+
+#load("E:/workspace/_tmp/PLOT.rda")
+#load("E:/workspace/_tmp/COND.rda")
+
 
     ## Check if class of puniqueid in pltx matches class of puniqueid in condx
     tabchk <- check.matchclass(COND, PLOT, cuniqueid, puniqueid)
