@@ -287,38 +287,34 @@ checktabs <- function(tabs, names) {
     vsubpsppqry <- paste("SELECT vsubpspp.* \nFROM", vsubpspp.fromqry, whereqry)
     dbqueries$vsubpspp <- vsubpsppqry
   }
- 
+
   ###################################################################################
   ## Import tables
   ###################################################################################
-  condx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
+  condx <- suppressMessages(pcheck.table(get(condnm), tab_dsn=dsn, 
            tabnm="cond", caption="cond table?",
-		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE,
-           stopifnull=FALSE))
+		   tabqry=condqry, stopifnull=TRUE))
 
-  subplotx <- suppressMessages(pcheck.table(subplot, tab_dsn=dsn, 
+  subplotx <- suppressMessages(pcheck.table(get(subplot), tab_dsn=dsn, 
            tabnm="subplot", caption="subplot table?", 
-           nullcheck=nullcheck, tabqry=subplotqry, returnsf=FALSE,
-           stopifnull=FALSE))
-  subp_condx <- suppressMessages(pcheck.table(subp_cond, tab_dsn=dsn, 
+           tabqry=subplotqry, stopifnull=TRUE))
+		   
+  subp_condx <- suppressMessages(pcheck.table(get(subp_condnm), tab_dsn=dsn, 
            tabnm="subp_cond", caption="subp_cond table?", 
-           nullcheck=nullcheck, tabqry=subp_condqry, returnsf=FALSE,
-           stopifnull=FALSE))
+           tabqry=subp_condqry, stopifnull=TRUE))
 
-  vsubpsppx <- suppressMessages(pcheck.table(vsubpspp, tab_dsn=dsn, 
+  if (!is.null(vsubpsppnm)) {
+    vsubpsppx <- suppressMessages(pcheck.table(get(vsubpsppnm), tab_dsn=dsn, 
            tabnm="vsubpspp", caption="Veg Species table?", 
-           nullcheck=nullcheck, gui=gui, tabqry=vsubpsppqry, returnsf=FALSE))
-  vsubpstrx <- suppressMessages(pcheck.table(vsubpstr, tab_dsn=dsn, 
+           tabqry=vsubpsppqry, stopifnull=FALSE))
+  }
+  
+  vsubpstrx <- suppressMessages(pcheck.table(get(vsubpstrnm), tab_dsn=dsn, 
            tabnm="vsubpstr", caption="Veg Structure table?", 
-           nullcheck=nullcheck, gui=gui, tabqry=vsubpstrqry, returnsf=FALSE))
+           tabqry=vsubpstrqry, stopifnull=TRUE))
 
- 
   ## Define cdoms2keep
   cdoms2keep <- names(condx)
-
-  if (is.null(vsubpsppx) && is.null(vsubpstrx)) {
-    stop("must include p2veg_subplot_spp and/or p2veg_subp_structure tables for popType='P2VEG'")
-  }
 
 
   ###############################################################################
@@ -659,7 +655,7 @@ checktabs <- function(tabs, names) {
   #############################################################################
   ## Check veg profile data (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE)
   #############################################################################
-  if (!is.null(vsubpsppx) && nrow(vsubpsppx) > 0) {
+  if (!is.null(vsubpsppnm) && nrow(vsubpsppx) > 0) {
     ## Define necessary variable for tree table
     vsubpsppnmlst <- names(vsubpsppx)
 
@@ -680,7 +676,7 @@ checktabs <- function(tabs, names) {
 	  pltcondnmlst <- pltcondnmlst[-(idplace + 1)]
       }
     }
-
+	
     ## Check that the values of vsubpsppid in vsubpsppx are all in cuniqueid in subp_condf
     vsubpsppf <- check.matchval(vsubpsppx, vcondx, c(vsubpsppid, condid),
 		tab1txt="vsubpspp", tab2txt="subp_cond", subsetrows=TRUE)
@@ -697,7 +693,8 @@ checktabs <- function(tabs, names) {
     ## Merge condition sums to pltcondx
     #vpltcondx <- merge(pltcondx, vcondsppf, all.x=TRUE)
   }
-  if (!is.null(vsubpstrx) && nrow(vsubpstrx) > 0) {
+  
+  if (!is.null(vsubpstrnm) && nrow(vsubpstrx) > 0) {
     ## Define necessary variable for tree table
     vsubpstrnmlst <- names(vsubpstrx)
 
