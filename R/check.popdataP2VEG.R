@@ -46,101 +46,251 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   datindb <- FALSE
   nonsamp.vfilter.fixed <- TRUE
 
+checktabs <- function(tabs, names) {
+  ## DESCRIPTION: check name in tabs list
+  
+  for (name in names) {
+    chk <- findnm(name, names(tabs), returnNULL = TRUE)
+	if (!is.null(chk)) {
+	  return(chk)
+    }
+  }
+  return(NULL)
+}
 
   ## Get tables from tabs
   ##########################################################  
-  cond=vsubpstr=vsubpspp=subplot=subp_cond <- NULL
-  ## Get tables from tabs
-  for (tabnm in names(tabs)) {
-    assign(tabnm, tabs[[tabnm]])
+  condnm=vsubpstrnm=vsubpsppnm=subplotnm=subp_condnm <- NULL
+
+  ## Check name of PLOT table
+  pltnmchk <- checktabs(tabs, c("plt", "plot"))
+  if (is.null(pltnmchk)) {
+    message("plot data needed for estimates")
+	return(NULL)
   }
-  cuniqueid <- tabIDs[["cond"]]
-  vsubpstrid <- tabIDs[["vsubpstr"]]
-  vsubpsppid <- tabIDs[["vsubpspp"]]
-  subplotid <- tabIDs[["subplot"]]
-  subp_condid <- tabIDs[["subp_cond"]]
+  if (is.character(tabs[[pltnmchk]])) {  
+    pltnm <- tabs[[pltnmchk]]
+  } else {
+    pltnm <- "pltx"
+  }
+  assign(pltnm, tabs[[pltnmchk]])
+ 
+  ## Check name of COND table
+  condnmchk <- checktabs(tabs, "cond")
+  if (is.null(condnmchk)) {
+    message("cond data needed for estimates")
+	return(NULL)
+  }
+  if (is.character(tabs[[condnmchk]])) {  
+    condnm <- tabs[[condnmchk]]
+  } else {
+    condnm <- "condu"
+  }
+  assign(condnm, tabs[[condnmchk]])
+  cuniqueid <- tabIDs[[condnmchk]]
+
+  ## Check name of P2VEG_SUBP_STRUCTURE table
+  vsubpstrchk <- checktabs(tabs, c("p2veg_subp_structure", "vsubpstr"))
+  if (is.character(tabs[[vsubpstrchk]])) {  
+    vsubpstrnm <- tabs[[vsubpstrchk]]
+  } else {
+    vsubpstrnm <- "vsubpstr"
+  }
+  assign(vsubpstrnm, tabs[[vsubpstrchk]])
+  vsubpstrid <- tabIDs[[vsubpstrchk]]
+
+  ## Check name of P2VEG_SUBPLOT_SPP table
+  vsubpsppchk <- checktabs(tabs, c("p2veg_subplot_spp", "vsubpspp"))
+  if (!is.null(vsubpsppchk)) {
+    if (is.character(tabs[[vsubpsppchk]])) {  
+      vsubpsppnm <- tabs[[vsubpsppchk]]
+    } else {
+      vsubpsppnm <- "vsubpspp"
+    }
+    assign(vsubpsppnm, tabs[[vsubpsppchk]])
+    vsubpsppid <- tabIDs[[vsubpsppchk]]
+  }
+  
+  ## Check name of SUBPLOT table
+  subplotchk <- checktabs(tabs, "subplot")
+  if (is.character(tabs[[subplotchk]])) {  
+    subplotnm <- tabs[[subplotchk]]
+  } else {
+    subplotnm <- "subplot"
+  }
+  assign(subplotnm, tabs[[subplotchk]])
+  subplotid <- tabIDs[[subplotchk]]
+
+  ## Check name of SUBP_COND table
+  subp_condchk <- checktabs(tabs, c("subp_cond", "subpcond"))
+  if (is.character(tabs[[subp_condchk]])) {  
+    subp_condnm <- tabs[[subp_condchk]]
+  } else {
+    subp_condnm <- "subp_cond"
+  }
+  assign(subp_condnm, tabs[[subp_condchk]])
+  subp_condid <- tabIDs[[subp_condchk]]
 
 
-  ## Check dsn and create queries to get population subset from database
+  SCHEMA. <- NULL
+  dbqueries <- list()
+
+  ## Check palias
+  if (is.null(palias)) {
+    palias <- "p"
+  }
+
+  ###################################################################################
+  ## Database queries
   ###################################################################################
   if (!is.null(dbconn) || 
 	(!is.null(dsn) && getext(dsn) %in% c("sqlite", "db", "db3", "sqlite3", "gpkg"))) {
+
     datindb <- TRUE
     if (is.null(dbconn)) {
       dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
     }
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
-    SCHEMA. <- NULL
-    dbqueries <- list()
+    dbname <- dsn
 
-
-    ## Create query for cond
-    #########################################
-    if (all(!is.null(cond), is.character(cond), cond %in% tablst)) {
-      #condvars <-  DBvars.default()$condvarlst
-
-      if (is.null(pfromqry)) {
-        cfromqry <- paste0(SCHEMA., cond, " c")
+    ## Check plt in database
+    if (!is.null(pltnm) && is.character(pltnm)) {    
+	  pltnm <- findnm(pltnm, tablst, returnNULL = TRUE)
+	  if (is.null(pltnm)) {
+        message("need PLOT table in database")
+	    return(NULL)
       } else {
-        cfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., cond,
-				" c ON (c.", cuniqueid, " = ", palias, ".", pjoinid, ")")
+	    pltflds <- DBI::dbListFields(dbconn, pltnm)
       }
-#     condqry <- paste("select distinct", toString(paste0("c.", condvars)), 
-#				"from", cfromqry, whereqry)
-      condqry <- paste("select distinct c.* from", cfromqry, whereqry)
-      dbqueries$cond <- condqry   
+	}
+    ## Check cond in database
+    condnm <- findnm(condnm, tablst, returnNULL = TRUE)
+	if (is.null(condnm)) {
+      message("need COND table in database")
+	  return(NULL)
+    } else {
+	  condflds <- DBI::dbListFields(dbconn, condnm)
     }
+    ## Check subplot in database
+    subplotnm <- findnm(subplotnm, tablst, returnNULL = TRUE)
+	if (is.null(subplotnm)) {
+      message("need SUBPLOT table in database")
+	  return(NULL)
+    }
+    ## Check subp_cond in database
+    subp_condnm <- findnm(subp_condnm, tablst, returnNULL = TRUE)
+	if (is.null(subp_condnm)) {
+      message("need SUBP_COND table in database")
+	  return(NULL)
+    }
+    ## Check P2VEG_SUBP_STRUCTURE in database
+    vsubpstrnm <- findnm(vsubpstrnm, tablst, returnNULL = TRUE)
+	if (is.null(vsubpstrnm)) {
+      message("need P2VEG_SUBP_STRUCTURE table in database")
+	  return(NULL)
+    }
+    ## Check P2VEG_SUBPLOT_SPP in database
+    vsubpsppnm <- findnm(vsubpsppnm, tablst, returnNULL = TRUE)
+	
+  } else {
 
-    ## Create query for subplot
-    #########################################
-    if (all(!is.null(subplot), is.character(subplot), subplot %in% tablst)) {
-      subpfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., subplot,
-				" subp ON (subp.PLT_CN = ", palias, ".", pjoinid, ")")
-      subplotqry <- paste("select distinct subp.* from", subpfromqry, whereqry)
-      dbqueries$subplot <- subplotqry
-    }
-    ## Create query for subp_cond
-    #########################################
-    if (all(!is.null(subp_cond), is.character(subp_cond), subp_cond %in% tablst)) {
-      subpcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., subp_cond,
-				" subpc ON (subpc.PLT_CN = ", palias, ".", pjoinid, ")")
-      subp_condqry <- paste("select distinct subpc.* from", subpcfromqry, whereqry)
-      dbqueries$subp_cond <- subp_condqry
-    }
+    ## Get remeasured plot/condition data
+	if (!is.null(condnm)) {
+      assign(condnm, pcheck.table(get(condnm), tab_dsn=dsn, 
+           tabnm="cond", caption="Remeasured condition data?", 
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+	  condflds <- names(get(condnm))
+	}
 
-    ## Create query for vsubpspp
-    #########################################
-    if (all(!is.null(vsubpspp), is.character(vsubpspp), vsubpspp %in% tablst)) {
-      if (!is.null(pfromqry)) {
-        vsubpspp.fromqry <- paste0(pfromqry, " JOIN ", SCHEMA., vsubpspp,
-				" vsubpspp ON (vsubpspp.PLT_CN = ", palias, ".", pjoinid, ")")
-      } else {
-        vsubpspp.fromqry <- paste(vsubpspp, "vsubpspp")
-      }
-      vsubpsppqry <- paste("select distinct vsubpspp.* from", vsubpspp.fromqry, whereqry)
-      dbqueries$vsubpspp <- vsubpsppqry
+    ## Get remeasured plot data
+    if (!is.null(pltnm)) {
+      assign(pltnm, pcheck.table(get(pltnm), tab_dsn=dsn, 
+           tabnm="plt", caption="Remeasured plot data?", 
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+	  pltflds <- names(get(pltnm))
+    } 
+
+    ## Get subplot data for generating estimates
+    assign(subplotnm, pcheck.table(get(subplotnm), tab_dsn=dsn, 
+           tabnm="subplot", caption="subplot table?", 
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+		   
+    ## Get subp_cond data for generating estimates
+    assign(subp_condnm, pcheck.table(get(subp_condnm), tab_dsn=dsn, 
+           tabnm="subp_cond", caption="subp_cond table?", 
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+		   
+    ## Get vsubpstr data for generating estimates
+    assign(vsubpstrnm, pcheck.table(get(vsubpstrnm), tab_dsn=dsn, 
+           tabnm="vsubpstr", caption="vsubpstr table?", 
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+
+    ## Get vsubpspp data for generating estimates
+    assign(vsubpsppnm, pcheck.table(get(vsubpsppnm), tab_dsn=dsn, 
+           tabnm="vsubpspp", caption="vsubpspp table?", 
+           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+  }  
+
+  ## Build pfromqry
+  if (is.null(pfromqry) && !is.null(pltnm)) {
+    pfromqry <- paste0(SCHEMA., pltnm, " ", palias)
+  }
+  
+  ## Build from query for cond
+  if (!is.null(condnm)) {
+    if (is.null(pfromqry)) {
+      cfromqry <- paste0(SCHEMA., cond, " c")
+    } else {
+      cfromqry <- paste0(pfromqry, 
+	               "\nJOIN ", SCHEMA., condnm, 
+				          " c ON (c.", cuniqueid, " = ", palias, ".", pjoinid, ")")
     }
-    ## Create query for vsubpstr
-    #########################################
-    if (all(!is.null(vsubpstr), is.character(vsubpstr), vsubpstr %in% tablst)) {
-      if (!is.null(pfromqry)) {
-        vsubpstr.fromqry <- paste0(pfromqry, " JOIN ", SCHEMA., vsubpstr,
+    condqry <- paste("SELECT c.* \nFROM", cfromqry, whereqry)
+    dbqueries$cond <- condqry
+  }	
+
+  ## Build from query for subplot
+  subpfromqry <- paste0(pfromqry, 
+                   "\nJOIN ", SCHEMA., subplotnm,
+				         " subp ON (subp.PLT_CN = ", palias, ".", pjoinid, ")")
+  subplotqry <- paste("SELECT subp.* \nFROM ", subpfromqry, whereqry)
+  dbqueries$subplot <- subplotqry
+    
+  ## Build query for subp_cond
+  subpcfromqry <- paste0(pfromqry, 
+                    "\nJOIN ", SCHEMA., subp_condnm,
+				        " subpc ON (subpc.PLT_CN = ", palias, ".", pjoinid, ")")
+  subp_condqry <- paste("SELECT subpc.* \nFROM", subpcfromqry, whereqry)
+  dbqueries$subp_cond <- subp_condqry
+
+  ## Build query for vsubpstr
+  if (!is.null(pfromqry)) {
+    vsubpstr.fromqry <- paste0(pfromqry, 
+	          "\nJOIN ", SCHEMA., vsubpstrnm,
 				" vsubpstr ON (vsubpstr.PLT_CN = ", palias, ".", pjoinid, ")")
-      } else {
-        vsubpstr.fromqry <- paste(vsubpspp, "vsubpstr")
-      }
-      vsubpstrqry <- paste("select distinct vsubpstr.* from", vsubpstr.fromqry, whereqry)
-      dbqueries$vsubpstr <- vsubpstrqry
+  } else {
+    vsubpstr.fromqry <- paste(vsubpsppnm, "vsubpstr")
+  }
+  vsubpstrqry <- paste("SELECT vsubpstr.* \nFROM", vsubpstr.fromqry, whereqry)
+  dbqueries$vsubpstr <- vsubpstrqry
+
+  ## Build query for vsubpspp
+  if (!is.null(vsubpsppnm)) {
+    if (!is.null(pfromqry)) {
+      vsubpspp.fromqry <- paste0(pfromqry, 
+	           "\nJOIN ", SCHEMA., vsubpsppnm,
+				" vsubpspp ON (vsubpspp.PLT_CN = ", palias, ".", pjoinid, ")")
+    } else {
+      vsubpspp.fromqry <- paste(vsubpsppnm, "vsubpspp")
     }
+    vsubpsppqry <- paste("SELECT vsubpspp.* \nFROM", vsubpspp.fromqry, whereqry)
+    dbqueries$vsubpspp <- vsubpsppqry
   }
  
   ###################################################################################
   ## Import tables
   ###################################################################################
-  if (is.null(cond)) {
-    stop("must include cond table")
-  }
   condx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
            tabnm="cond", caption="cond table?",
 		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE,
@@ -167,7 +317,7 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   cdoms2keep <- names(condx)
 
   if (is.null(vsubpsppx) && is.null(vsubpstrx)) {
-    stop("must include vsubpspp and/or vsubpstr tables for popType='P2VEG'")
+    stop("must include p2veg_subplot_spp and/or p2veg_subp_structure tables for popType='P2VEG'")
   }
 
 
