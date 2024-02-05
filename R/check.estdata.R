@@ -88,6 +88,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
     whereqry <- paste0("\nWHERE ", RtoSQL(pcfilter))
   }
   pltcondnmlst <- names(pltcondf)
+  
   pltcondf <- datFilter(x = pltcondf, 
                         xfilter = pcfilter, 
 						title.filter = "plt filter?",
@@ -143,7 +144,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
   }
   if (!is.null(landarea.filter)) {
     if (!is.null(whereqry)) {
-      whereqry <- paste0(whereqry, "\n", RtoSQL(landarea.filter))
+      whereqry <- paste0(whereqry, " AND ", RtoSQL(landarea.filter))
 	} else {
 	  whereqry <- paste0("\nWHERE ", RtoSQL(landarea.filter))
     }	  
@@ -308,11 +309,11 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
     if (estseed != "only") {
       treex <- pcheck.table(treex, conn = conn, stopifnull = TRUE, 
                        stopifinvalid = TRUE, checkonly = TRUE)				
-      if (is.data.frame(treex)) {
+       if (is.data.frame(treex)) {
         ## Check the values of tuniqueid in treex are all in cuniqueid in pltcondf
         treef <- check.matchval(treex, pltcondf, tuniqueid, cuniqueid, 
                       tab1txt="tree", tab2txt="cond", subsetrows=TRUE)
-        returnlst$treef <- setDT(treef)
+        returnlst$treef <- data.table(treef)
 		treenames <- names(treef)
       } else {
 	    returnlst$treef <- treex
@@ -333,7 +334,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
         ## Check the values of tuniqueid in seedx are all in cuniqueid in pltcondf
         seedf <- check.matchval(seedx, pltcondf, tuniqueid, cuniqueid, 
                        tab1txt="seed", tab2txt="cond", subsetrows=TRUE)
-        returnlst$seedf <- setDT(seedf)
+        returnlst$seedf <- data.table(seedf)
 		seednames <- names(seedf)
       } else {
 	    returnlst$seedf <- seedx

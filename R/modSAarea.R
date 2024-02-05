@@ -825,6 +825,7 @@ modSAarea <- function(SApopdatlst = NULL,
     estlst[[SApopdatnm]] <- dunit_est
 
     if (rowcolinfo$rowvar != "TOTAL") {
+      cdomdat <- cdomdat[!is.na(cdomdat[[rowvar]]),] 	
       cdomdatsum <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
                     by=c(largebnd.unique, dunitvar, cuniqueid, 
 					rowcolinfo$rowvar, prednames), .SDcols=estvar.name]

@@ -374,7 +374,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   invyrs <- GBpopdat$invyrs
   stratcombinelut <- GBpopdat$stratcombinelut
   strwtvar <- GBpopdat$strwtvar
-  areawt <- GBpopdat$areawt
+  areawt <- GBpopdat$estvar.area
   if (nonresp) {
     substrvar <- GBpopdat$substrvar
     nonsampplots <- GBpopdat$nonsampplots
@@ -453,6 +453,8 @@ modGBp2veg <- function(GBpopdat = NULL,
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
   rawfolder <- estdat$rawfolder
+  whereqry <- estdat$whereqry
+  conn <- estdat$conn
 
   if ("STATECD" %in% names(pltcondf)) {
     states <- pcheck.states(sort(unique(pltcondf$STATECD)))
@@ -464,6 +466,11 @@ modGBp2veg <- function(GBpopdat = NULL,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
+  if (!is.null(vfilter)) {
+    if (!is.null(whereqry)) {
+	  whereqry <- paste(whereqry, "AND", vfilter)
+	}
+  }  
   rowcolinfo <- check.rowcol(gui=gui, esttype="TREE", treef=vcondf, condf=pltcondf, 
                   cuniqueid=cuniqueid, rowvar=rowvar, colvar=colvar, 
                   row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
@@ -471,7 +478,8 @@ modGBp2veg <- function(GBpopdat = NULL,
                   row.add0=row.add0, col.add0=col.add0, 
                   title.rowvar=title.rowvar, title.colvar=title.colvar, 
                   rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-                  rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea)
+                  rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea,
+				  whereqry=whereqry)
   vcondf <- rowcolinfo$treef
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
@@ -479,6 +487,8 @@ modGBp2veg <- function(GBpopdat = NULL,
   domainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
+  rowvarnm <- rowcolinfo$rowvarnm
+  colvarnm <- rowcolinfo$colvarnm
   domain <- rowcolinfo$grpvar
   row.orderby <- rowcolinfo$row.orderby
   col.orderby <- rowcolinfo$col.orderby
@@ -960,7 +970,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
                 unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
                 unit_rowest=unit_rowest, unit_colest=unit_colest, 
-                unit_grpest=unit_grpest, rowvar=rowvar, colvar=colvar, 
+                unit_grpest=unit_grpest, rowvar=rowvarnm, colvar=colvarnm, 
                 uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp, 
                 rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
                 allin1=allin1, savedata=savedata, addtitle=addtitle, 
