@@ -384,7 +384,6 @@ DBgetXY <- function (states = NULL,
     }
   } 
 
-
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
   if (gui) {
@@ -1186,6 +1185,10 @@ DBgetXY <- function (states = NULL,
     if (issp) {
       outsp_layer <- paste0("sp", xyoutnm)
     }
+  } else {
+    if (issp) {
+	  outsp_layer <- paste0("sp", out_layer)
+	}
   }
 
   if (issp) {

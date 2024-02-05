@@ -757,6 +757,7 @@ modMAtree <- function(MApopdat,
 
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
+    tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]),] 
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, rowvar, strvar, prednames), .SDcols=response]
     unit_rowestlst <- lapply(estunits, MAest.unit, 
@@ -772,6 +773,7 @@ modMAtree <- function(MApopdat,
     }
 
     if (colvar != "NONE") {
+      tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]),] 	
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, colvar, strvar, prednames), .SDcols=response]
       unit_colestlst <- lapply(estunits, MAest.unit, 

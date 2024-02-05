@@ -544,7 +544,6 @@ modGBtree <- function(GBpopdat,
   grpvar <- rowcolinfo$grpvar
   rm(rowcolinfo)
 
-
   ###############################################################################
   ### Get estimation data from tree table
   ###############################################################################
@@ -563,28 +562,12 @@ modGBtree <- function(GBpopdat,
   condx <- xchk$tab1
   tdomdat <- xchk$tab2
   tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
-  
+   
   estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
   estunits <- treedat$estunits
-  
-  ## Check for matching levels in x and xunique
-  if (!is.null(uniquerow)) {
-    chklevels <- checklevels(x = tdomdat, 
-	                         uniquex = uniquerow,
-							 xvar = rowvar) 
-	tdomdat <- chklevels$x
-    uniquerow <- chklevels$uniquex	
-  }
-  if (!is.null(uniquecol)) {
-    chklevels <- checklevels(x = tdomdat, 
-	                         uniquex = uniquecol,
-							 xvar = colvar) 
-	tdomdat <- chklevels$x
-    uniquecol <- chklevels$uniquex	
-  }
  
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
@@ -592,7 +575,8 @@ modGBtree <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
- 
+  
+
   ###############################################################################
   ### Get titles for output tables
   ###############################################################################
@@ -656,6 +640,8 @@ modGBtree <- function(GBpopdat,
 
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
+    ## CHeck this later - removing NA values from both colvar and rowvar
+    tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]),] 
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		    by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
     unit_rowest <- GBest.pbar(sumyn = estvar.name, 
@@ -667,7 +653,9 @@ modGBtree <- function(GBpopdat,
                               domain = rowvar)
 							  
     if (colvar != "NONE") {
-      tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+     ## CHeck this later - removing NA values from both colvar and rowvar
+     tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]),] 	
+     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		      by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
       unit_colest <- GBest.pbar(sumyn = estvar.name, 
                                 ysum = tdomdatsum,
@@ -676,8 +664,8 @@ modGBtree <- function(GBpopdat,
                                 unitvar = unitvar, 
                                 strvar = strvar, 
                                 domain = colvar)
-
-      tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+	 
+     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		      by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
       unit_grpest <- GBest.pbar(sumyn =estvar.name, 
                                 ysum = tdomdatsum,
@@ -859,7 +847,7 @@ modGBtree <- function(GBpopdat,
 			estround=estround, pseround=pseround, divideby=divideby, 
 	        returntitle=returntitle, estnull=estnull, psenull=psenull, 
 			raw.keep0=raw.keep0) 
-			
+		
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 

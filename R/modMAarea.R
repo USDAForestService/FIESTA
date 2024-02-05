@@ -671,6 +671,7 @@ modMAarea <- function(MApopdat,
   
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
+    cdomdat <- cdomdat[!is.na(cdomdat[[rowvar]]),] 
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, rowvar, strvar, prednames), .SDcols=estvar.name]
 
@@ -687,6 +688,7 @@ modMAarea <- function(MApopdat,
     }
   }
   if (colvar != "NONE") {
+    cdomdat <- cdomdat[!is.na(cdomdat[[colvar]]),] 	
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, colvar, strvar, prednames), .SDcols=estvar.name]
 

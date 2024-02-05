@@ -446,7 +446,7 @@ modMAratio <- function(MApopdat,
   if ("INVYR" %in% names(pltcondf)) {
     invyr <- sort(unique(pltcondf$INVYR))
   }
-  
+ 
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
                     treef=treef, seedf=seedf, 
 					condf=pltcondf, cuniqueid=cuniqueid, 
@@ -468,6 +468,8 @@ modMAratio <- function(MApopdat,
   domainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
+  rowvarnm <- rowcolinfo$rowvarnm
+  colvarnm <- rowcolinfo$colvarnm
   row.orderby <- rowcolinfo$row.orderby
   col.orderby <- rowcolinfo$col.orderby
   row.add0 <- rowcolinfo$row.add0
@@ -481,7 +483,6 @@ modMAratio <- function(MApopdat,
   tdomvar2 <- rowcolinfo$tdomvar2
   grpvar <- rowcolinfo$grpvar
   rm(rowcolinfo) 
-  
   
   if (rowvar == "TOTAL") rowcol.total <- TRUE
     
@@ -497,11 +498,10 @@ modMAratio <- function(MApopdat,
                         estvard=estvard, estvard.filter=estvard.filter, 
                         esttotn=TRUE, esttotd=TRUE, 
                         tdomvar=tdomvar, tdomvar2=tdomvar2, 
-                        adjtree=adjtree, metric=metric, woodland=woodland)
-  
+                        adjtree=adjtree, metric=metric, woodland=woodland) 
   if (is.null(treedat)) return(NULL)
   tdomdat <- treedat$tdomdat
-    
+
   ## Merge tdomdat with condx
   xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
   condx <- xchk$tab1
@@ -566,7 +566,7 @@ modMAratio <- function(MApopdat,
   if(rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
-  
+
   #####################################################################################
   ## GENERATE ESTIMATES
   #####################################################################################
@@ -605,7 +605,7 @@ modMAratio <- function(MApopdat,
     
     
   }
-  
+
   # can do modelselect above this if we want
   message("using the following predictors...", toString(prednames))
   
@@ -626,8 +626,8 @@ modMAratio <- function(MApopdat,
   if (!is.null(tdomvar2)) {
     ddomvar <- "TOTAL"
     tdomdat <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                       by=c(unitvar, cuniqueid, ddomvar), .SDcols=tdomvarlstn]
-    tdomdat <- transpose2row(tdomdat, uniqueid=c(unitvar, cuniqueid, ddomvar),
+                       by=c(unitvar, prednames, cuniqueid, ddomvar), .SDcols=tdomvarlstn]
+    tdomdat <- transpose2row(tdomdat, uniqueid=c(unitvar, prednames, cuniqueid, ddomvar),
                              tvars=tdomvarlstn)
     setnames(tdomdat, "value", estvarn.name)
     suppressWarnings(tdomdat[, (grpvar) := tstrsplit(variable, "#")])[, variable := NULL]
@@ -636,7 +636,7 @@ modMAratio <- function(MApopdat,
                           by=c(unitvar, cuniqueid, "TOTAL"), .SDcols=estvard.name]   
     tdomdat <- merge(tdomdat, cdomdattot, by=c(unitvar, cuniqueid, "TOTAL"))
   }
-  
+
   if (addtotal) {
     ## Get estimate for total
     if (!is.null(tdomvar)) {
@@ -649,7 +649,7 @@ modMAratio <- function(MApopdat,
       tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
                             by=c(unitvar, cuniqueid, "TOTAL", prednames), .SDcols=c(estvarn.name, estvard.name)]
     }
-    
+	
     # unitarea should get passed as it includes the acres for each estimation unit
     # npixels should also get passed 
     
@@ -662,7 +662,6 @@ modMAratio <- function(MApopdat,
                              var_method=var_method)
     
   }
-  
   unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
   
   
@@ -677,7 +676,7 @@ modMAratio <- function(MApopdat,
                                              rhat.cv := rhat.se/rhat][,
                                                                       pse := rhat.cv*100]
   )
-  
+ 
   if (rowvar != "TOTAL") {
     if (!is.null(tdomvar)) {
       if (!is.null(tdomvar2)) {
@@ -697,19 +696,19 @@ modMAratio <- function(MApopdat,
       }
       if (rowvar %in% names(cdomdat)) {
         cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                              by=c(unitvar, cuniqueid, rowvar, prednames), .SDcols=estvard.name]
+                              by=c(unitvar, cuniqueid, rowvar), .SDcols=estvard.name]
         tdomdatsum <- merge(tdomdatsum, cdomdatsum, 
                             by=c(unitvar, cuniqueid, rowvar))
       } else {
         cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE),
-                              by=c(unitvar, cuniqueid, prednames), .SDcols=estvard.name]
+                              by=c(unitvar, cuniqueid), .SDcols=estvard.name]
         tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(unitvar, cuniqueid))
       }
     } else {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
                             by=c(unitvar, cuniqueid, rowvar, prednames), .SDcols=c(estvarn.name, estvard.name)]
     }
-    
+    tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]) & tdomdatsum[[rowvar]] != "NA",]     
     unit_rowestlst <- lapply(estunits, MAest.unit, 
                              dat=tdomdatsum, cuniqueid=cuniqueid, 
                              unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
@@ -719,7 +718,7 @@ modMAratio <- function(MApopdat,
                              var_method=var_method)
     
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
-    
+
     if (colvar != "NONE") {
       if (!is.null(tdomvar)) {
         if (!is.null(tdomvar2)) {
@@ -739,18 +738,18 @@ modMAratio <- function(MApopdat,
         }
         if (colvar %in% names(cdomdat)) {
           cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE),
-                                by=c(unitvar, cuniqueid, colvar, prednames), .SDcols=estvard.name]
+                                by=c(unitvar, cuniqueid, colvar), .SDcols=estvard.name]
           tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(unitvar, cuniqueid, colvar))
         } else {
           cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                                by=c(unitvar, cuniqueid, prednames), .SDcols=estvard.name]
+                                by=c(unitvar, cuniqueid), .SDcols=estvard.name]
           tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(unitvar, cuniqueid))
         }
       } else {
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
                               by=c(unitvar, cuniqueid, colvar, prednames), .SDcols=c(estvarn.name, estvard.name)]
       }
-      
+      tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]) & tdomdatsum[[colvar]] != "NA",]       
       unit_colestlst <- lapply(estunits, MAest.unit, 
                                dat=tdomdatsum, cuniqueid=cuniqueid, 
                                unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
@@ -760,7 +759,7 @@ modMAratio <- function(MApopdat,
                                var_method=var_method)
       
       unit_colest <- do.call(rbind, sapply(unit_colestlst, '[', "unitest"))
-      
+    
       if (!is.null(tdomvar)) {
         if (!is.null(tdomvar2)) {
           tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -777,11 +776,11 @@ modMAratio <- function(MApopdat,
           if (any(grpvar %in% names(cdomdat))) {
             mergevar <- grpvar[grpvar %in% names(cdomdat)]
             cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                                  by=c(unitvar, cuniqueid, mergevar, prednames), .SDcols=estvard.name]
+                                  by=c(unitvar, cuniqueid, mergevar), .SDcols=estvard.name]
             tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(unitvar, cuniqueid, mergevar))
           } else {
             cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                                  by=c(unitvar, cuniqueid, prednames), .SDcols=estvard.name]
+                                  by=c(unitvar, cuniqueid), .SDcols=estvard.name]
             tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(unitvar, cuniqueid))
           }
         }
@@ -790,7 +789,6 @@ modMAratio <- function(MApopdat,
                               by=c(unitvar, cuniqueid, grpvar, prednames), .SDcols=c(estvarn.name, estvard.name)]
       }
       tdomdatsum[, grpvar := do.call(paste, c(.SD, sep="#")), .SDcols=grpvar]
-      
       unit_grpestlst <- lapply(estunits, MAest.unit, 
                                dat=tdomdatsum, cuniqueid=cuniqueid, 
                                unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
@@ -833,7 +831,7 @@ modMAratio <- function(MApopdat,
     
     setkeyv(unit_rowest, c(unitvar, rowvar))
   }
-  
+
   if (!is.null(unit_colest)) {
     unit_colest <- add0unit(x=unit_colest, xvar=colvar, 
                             uniquex=uniquecol, unitvar=unitvar, 
@@ -841,7 +839,7 @@ modMAratio <- function(MApopdat,
     tabs <- check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
-    
+  
     if (!is.null(col.orderby) && col.orderby != "NONE") {
       setorderv(unit_colest, c(col.orderby))
     }
@@ -852,10 +850,10 @@ modMAratio <- function(MApopdat,
       unit_colest[, rhat.se := sqrt(rhat.var)][,
                                                rhat.cv := rhat.se/rhat][,
                                                                         pse := rhat.cv*100]
-    )
-    
+    )   
     setkeyv(unit_colest, c(unitvar, colvar))
   }
+
   if (!is.null(unit_grpest)) {
     unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, 
                             uniquex=uniquerow, unitvar=unitvar, 
@@ -895,7 +893,7 @@ modMAratio <- function(MApopdat,
   tabs <- est.outtabs(esttype="TREE", sumunits=sumunits, areavar=areavar, 
                       unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
                       unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest, 
-                      rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol, 
+                      rowvar=rowvarnm, colvar=colvarnm, uniquerow=uniquerow, uniquecol=uniquecol, 
                       rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
                       allin1=allin1, savedata=savedata, addtitle=addtitle, 
                       title.ref=title.ref, title.colvar=title.colvar, 
