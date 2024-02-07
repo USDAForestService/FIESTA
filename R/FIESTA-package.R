@@ -43,7 +43,7 @@
 #' 
 #' @name FIESTA-package
 #' @aliases FIESTA-package FIESTA
-#' @docType _PACKAGE
+#' @docType package
 #' @author Tracey S. Frescino Maintainer: Tracey S. Frescino
 #' @references
 #' 
