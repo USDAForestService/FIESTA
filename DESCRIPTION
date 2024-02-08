@@ -1,7 +1,7 @@
 Package: FIESTA
 Type: Package
 Title: Forest Inventory Estimation and Analysis
-Version: 3.6.2
+Version: 3.6.2.9000
 Date: 2024-02-07
 Authors@R:
     c(person(given = "Tracey",
@@ -36,7 +36,7 @@ Depends:
 Imports:
     data.table,
     DBI,
-    FIESTAutils (>= 1.2.2),
+    FIESTAutils (>= 1.2.2.9000),
     gdalraster,
     grDevices,
     graphics,
@@ -51,6 +51,8 @@ Suggests:
     sp,
     terra,
     rmarkdown
+Remotes:
+    USDAForestService/FIESTAutils
 VignetteBuilder: knitr
 License: GPL-3
 Copyright: See file COPYRIGHTS for details. 
