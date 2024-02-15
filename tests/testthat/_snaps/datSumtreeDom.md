@@ -4,11 +4,11 @@
       datBA_varlut
     Output
          SPCD                 COMMON_NAME     SPCDNM       BA_TPA NBRPLOTS
-      1    19               subalpine fir BA_LIVE 19 7.418824e+03      217
-      2    65                Utah juniper BA_LIVE 65 2.209716e+03       20
-      3    66      Rocky Mountain juniper BA_LIVE 66 1.355606e+03       65
-      4    93            Engelmann spruce BA_LIVE 93 6.306562e+03      185
-      5    96                 blue spruce BA_LIVE 96 7.334475e+01        3
+      1    19               subalpine fir  BA_LIVE19 7.418824e+03      217
+      2    65                Utah juniper  BA_LIVE65 2.209716e+03       20
+      3    66      Rocky Mountain juniper  BA_LIVE66 1.355606e+03       65
+      4    93            Engelmann spruce  BA_LIVE93 6.306562e+03      185
+      5    96                 blue spruce  BA_LIVE96 7.334475e+01        3
       6   101              whitebark pine BA_LIVE101 1.616618e+03       90
       7   106 common or two-needle pinyon BA_LIVE106 4.570194e+00        1
       8   108              lodgepole pine BA_LIVE108 1.104169e+04      232
@@ -30,11 +30,11 @@
       datVOL_varlut
     Output
          SPCD                 COMMON_NAME           SPCDNM VOLCFNET_TPA NBRPLOTS
-      1    19               subalpine fir VOLCFNET_LIVE 19  121517.1619      217
-      2    65                Utah juniper VOLCFNET_LIVE 65       0.0000       20
-      3    66      Rocky Mountain juniper VOLCFNET_LIVE 66       0.0000       65
-      4    93            Engelmann spruce VOLCFNET_LIVE 93  140401.8019      185
-      5    96                 blue spruce VOLCFNET_LIVE 96    2012.4413        3
+      1    19               subalpine fir  VOLCFNET_LIVE19  121517.1619      217
+      2    65                Utah juniper  VOLCFNET_LIVE65       0.0000       20
+      3    66      Rocky Mountain juniper  VOLCFNET_LIVE66       0.0000       65
+      4    93            Engelmann spruce  VOLCFNET_LIVE93  140401.8019      185
+      5    96                 blue spruce  VOLCFNET_LIVE96    2012.4413        3
       6   101              whitebark pine VOLCFNET_LIVE101   19228.5413       90
       7   106 common or two-needle pinyon VOLCFNET_LIVE106       0.0000        1
       8   108              lodgepole pine VOLCFNET_LIVE108  203784.5227      232
