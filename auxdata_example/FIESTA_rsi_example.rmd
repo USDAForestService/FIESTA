@@ -19,7 +19,7 @@
 
 ## Set up R packages
 ```{r setup, include = F}
-library(rsi)
+library("rsi")
 library("FIESTA")
 ```
 
@@ -29,9 +29,9 @@ spectral_indices()
 
 aoi <- sf::st_point(c(-107.34041007184679, 44.48965583058798))
 aoi <- sf::st_set_crs(sf::st_sfc(aoi), 4326)
-aoi <- sf::st_buffer(sf::st_transform(aoi, 5070), 10)
+aoi <- sf::st_buffer(sf::st_transform(aoi, 5070), 1000)
 
-landsat_image_red <- get_stac_data(
+landsat_image <- get_stac_data(
   aoi,
   start_date = "2022-06-01",
   end_date = "2022-06-30",
@@ -46,41 +46,6 @@ landsat_image_red <- get_stac_data(
   item_filter_function = landsat_platform_filter,
   platforms = c("landsat-9", "landsat-8")
 )
-
-landsat_image_green <- get_stac_data(
-  aoi,
-  start_date = "2022-06-01",
-  end_date = "2022-06-30",
-  pixel_x_size = 30,
-  pixel_y_size = 30,
-  asset_names = c("green"),
-  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-  collection = "landsat-c2-l2",
-  mask_band = "qa_pixel",
-  mask_function = landsat_mask_function,
-  output_filename = tempfile(fileext = ".tif"),
-  item_filter_function = landsat_platform_filter,
-  platforms = c("landsat-9", "landsat-8")
-)
-
-landsat_image_blue <- get_stac_data(
-  aoi,
-  start_date = "2022-06-01",
-  end_date = "2022-06-30",
-  pixel_x_size = 30,
-  pixel_y_size = 30,
-  asset_names = c("blue"),
-  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-  collection = "landsat-c2-l2",
-  mask_band = "qa_pixel",
-  mask_function = landsat_mask_function,
-  output_filename = tempfile(fileext = ".tif"),
-  item_filter_function = landsat_platform_filter,
-  platforms = c("landsat-9", "landsat-8")
-)
-
-terra::plot(terra::rast(landsat_image))
-
 ```
 
 
@@ -100,9 +65,7 @@ WYbhfn <- system.file("extdata",
 
 # Import downloaded data as raster file
 library(terra)
-data_red <- rast(landsat_image_red)
-data_green <- rast(landsat_image_green)
-data_blue <- rast(landsat_image_blue)
+data <- rast(landsat_image)
 
 # Get Wyoming Plots
 WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
@@ -112,8 +75,8 @@ WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
                                xy.crs = 4269)
 
 # Run sp Get Auxiliary
-rastlst.cont <- c(data_red, data_green, data_blue)
-rastlst.cont.name <- c("red", "green", "blue")
+rastlst.cont <- data
+rastlst.cont.name <- "red"
 
 auxiliaryData <- spGetAuxiliary(xyplt = WYspplt,
                                 uniqueid = "CN",
