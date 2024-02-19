@@ -2,6 +2,8 @@ test_that("Get Auxiliary creates consistent output", {
 
   skip_on_cran()
 
+  skip_if(gdalraster::proj_version()$major < 9, "gdalraster proj version out of date")
+
   # Set Up Data for spGetAuxiliary
   outfolder <- tempdir()
 
