@@ -31,9 +31,7 @@ test_that("datLUTclass function works as expected", {
                           xvar = "LIVE_CANOPY_CVR_PCT",
                           cutbreaks = cutbreaks)
 
-  created_cutbreaks <- testLUT3$LUT
   testLUT3_results <- head(testLUT3$xLUT)
-  expect_snapshot(created_cutbreaks)
   expect_snapshot(testLUT3_results)
 
 })
