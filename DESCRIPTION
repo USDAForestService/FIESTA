@@ -50,7 +50,8 @@ Suggests:
     geodata,
     sp,
     terra,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 Remotes:
     USDAForestService/FIESTAutils
 VignetteBuilder: knitr
@@ -62,3 +63,4 @@ BugReports: https://github.com/USDAForestService/FIESTA/issues
 LazyData: true
 Encoding: UTF-8
 RoxygenNote: 7.3.1
+Config/testthat/edition: 3
