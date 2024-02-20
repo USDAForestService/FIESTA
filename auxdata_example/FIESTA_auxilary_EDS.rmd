@@ -50,7 +50,7 @@ cookie_path <- "./auxdata_example/.urs_cookies"
 ```{r setup, include = F}
 
 # Choose a folder where you would like the data to download
-download_folder <- "C:/Users/AndrewWeis/Downloads"
+download_folder <- tempdir()
 
 # Paste in the download link of the data (This is the download link from EarthData Search *Right click download and save url*)
 data_url <- "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/HLSS30.020/HLS.S30.T13TCK.2023364T180741.v2.0/HLS.S30.T13TCK.2023364T180741.v2.0.B03.tif" # Harmonized Landsat Sentinel Product Band 3
