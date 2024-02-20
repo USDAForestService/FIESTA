@@ -378,9 +378,12 @@ modGBchng <- function(GBpopdat,
   estvar.name <- GBpopdat$estvar.area
   stratcombinelut <- GBpopdat$stratcombinelut
   strwtvar <- GBpopdat$strwtvar
-  strunitvars <- c(unitvar, strvar)
+  strunitvars <- c(unitvars, strvar)
   strata <- GBpopdat$strata
-
+  pop_fmt <- GBpopdat$pop_fmt
+  pop_dsn <- GBpopdat$pop_dsn
+  pltassgnx <- GBpopdat$pltassgnx
+  pltassgnid <- GBpopdat$pltassgnid
 
   ## Check chngtype
   ########################################################
@@ -404,9 +407,10 @@ modGBchng <- function(GBpopdat,
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
-                cuniqueid=cuniqueid, condid=condid, sumunits=sumunits, 
-                landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
+  estdat <- check.estdata(esttype=esttype, pop_fmt=pop_fmt, pop_dsn=pop_dsn,
+                pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid,  
+                sumunits=sumunits, totals=totals, landarea=landarea, 
+				ACI.filter=ACI.filter, pcfilter=pcfilter, 
                 allin1=allin1, estround=estround, pseround=pseround,
                 divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
                 rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
@@ -453,15 +457,18 @@ modGBchng <- function(GBpopdat,
                   title.rowvar=title.rowvar, title.colvar=title.colvar, 
                   rowlut=rowlut, collut=collut, 
                   rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-                  landarea=landarea, 
-                  cvars2keep=c("PREV_PLT_CN", "REMPER", "PROP_BASIS"))
+                  landarea=landarea, states=states, 
+                  cvars2keep=c("PREV_PLT_CN","REMPER","PROP_BASIS",
+				               "COND_STATUS_CD","CONDPROP_UNADJ", 
+							   "COND_NONSAMPLE_REASN_CD"))
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
-  domain <- rowcolinfo$grpvar
+  rowvarnm <- rowcolinfo$rowvarnm
+  colvarnm <- rowcolinfo$colvarnm
   row.orderby <- rowcolinfo$row.orderby
   col.orderby <- rowcolinfo$col.orderby
   row.add0 <- rowcolinfo$row.add0
@@ -496,17 +503,21 @@ modGBchng <- function(GBpopdat,
 #    stop("must include a rowvar and a colvar for area change estimates")
 #  }
   
-  groupby.qry <- paste0("c.", cuniqueid, ", c.", condid)
+#  groupby.qry <- paste0("c.", cuniqueid, ", c.", condid)
+
+  groupby.qry <- paste0(toString(paste0("sccm.", strunitvars)), ", c.", cuniqueid, ", c.", condid)
+#  groupby.qry <- paste0(toString(strunitvars), ", "c.", cuniqueid)
   prev_rowvar <- paste0("PREV_", rowvar)
 
   if (rowvar != "TOTAL") {
     select.qry <- paste0(groupby.qry, ", pcond.", rowvar, " AS ", prev_rowvar)
     if (colvar != "NONE") {
-      select.qry <- paste0(groupby.qry, ", c.", colvar, " AS ", colvar)
+      select.qry <- paste0(select.qry, ", c.", colvar, " AS ", colvar)
     } else {
 
       ## Copy rowvar information to colvar
       colvar <- rowvar
+	  colvarnm <- rowvarnm
       uniquecol <- copy(uniquerow)
       title.colvar <- title.rowvar
       if (!is.null(row.orderby)) {
@@ -517,6 +528,7 @@ modGBchng <- function(GBpopdat,
       ## Add prefix to rowvar
       names(uniquerow) <- paste0("PREV_", names(uniquerow))
       rowvar <- prev_rowvar 
+      rowvarnm <- paste0("PREV_", rowvarnm)
       if (!is.null(row.orderby)) {
         row.orderby <- paste0("PREV_", row.orderby)
       }
@@ -524,40 +536,60 @@ modGBchng <- function(GBpopdat,
       ## Get group variable for cell values
       grpvar <- c(rowvar, colvar)
     }
-  } else {
-    select.qry <- groupby.qry
+#  } else {
+#    select.qry <- groupby.qry
   }
  
-  if (chngtype == "ANNUAL") {
-    condf_chng.qry <- paste0("SELECT ", select.qry, ", 
-                              SUM(", estvar.name, " / 4 / c.REMPER) AS ysum")
+  if (chngtype == "annual") {
+    condf_chng.qry <- paste0("SELECT ", select.qry, ",", 
+                              "\n       SUM(", estvar.name, " / 4 / c.REMPER) AS ysum")
   } else {
-    condf_chng.qry <- paste0("SELECT ", select.qry, ", 
-                              SUM(", estvar.name, " / 4) AS ysum")
+    condf_chng.qry <- paste0("SELECT ", select.qry, ",", 
+                              "\n       SUM(", estvar.name, " / 4) AS ysum")
   }
  
-  condf_chng.qry <- paste0(condf_chng.qry, 
-                      "\n FROM condf c
-                      JOIN condf pcond ON (pcond.PLT_CN = c.PREV_PLT_CN) 
-                      LEFT JOIN sccmx sccm ON (sccm.plt_cn = c.plt_cn 
-                                          AND sccm.prev_plt_cn = pcond.plt_cn 
-                                          AND sccm.condid = c.condid 
-                                          AND sccm.prevcond = pcond.condid)
-                      WHERE ((sccm.SUBPTYP = 3 AND c.PROP_BASIS = 'MACR') OR 
+  condf_chng.qry <- paste0(condf_chng.qry,
+               "\nFROM condf c",
+               "\nJOIN condf pcond ON (pcond.PLT_CN = c.PREV_PLT_CN)",
+			   "\nJOIN sccmx sccm ON (sccm.plt_cn = c.plt_cn 
+                          AND sccm.prev_plt_cn = pcond.plt_cn 
+                          AND sccm.condid = c.condid 
+                          AND sccm.prevcond = pcond.condid)",
+               "\nWHERE c.CONDPROP_UNADJ IS NOT NULL 
+			            AND ((sccm.SUBPTYP = 3 AND c.PROP_BASIS = 'MACR') OR 
 	                              (sccm.SUBPTYP = 1 AND c.PROP_BASIS = 'SUBP'))
-                      GROUP BY ", groupby.qry)
+						AND COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0 
+                        AND COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0",
+               "\nGROUP BY ", groupby.qry)
+			   
+  # condf_chng.qry <- paste0(condf_chng.qry,
+               # "\nFROM condf c",
+               # "\nJOIN condf pcond ON (pcond.PLT_CN = c.PREV_PLT_CN)",
+			   # "\nJOIN condx sccm ON (sccm.plt_cn = c.plt_cn 
+                          # AND sccm.prev_plt_cn = pcond.plt_cn 
+                          # AND sccm.condid = c.condid 
+                          # AND sccm.prevcond = pcond.condid)",
+               # "\nGROUP BY ", groupby.qry)
+
 
   if (rowvar != "TOTAL") {
     condf_chng.qry <- paste0(condf_chng.qry, ", ", rowvar, ", c.", colvar)
   }
-  #message(condf_chng.qry)
+  message(condf_chng.qry)
 
   condf_chng <- data.table(sqldf::sqldf(condf_chng.qry))
   setkeyv(condf_chng, c(cuniqueid, condid))  
 
-  cdomdat <- condx[condf_chng]
+  #cdomdat <- condx[condf_chng]
+  cdomdat <- condf_chng
   cdomdat$TOTAL <- 1
 
+  if (length(unitvars) == 2) {
+    cdomdat[, (unitvar) := paste(cdomdat[[unitvars[1]]], cdomdat[[unitvars[2]]], sep="-")]
+	strunitvars <- c(unitvar, strvar)
+  }
+	
+	
   ###################################################################################
   ### Get titles for output tables
   ###################################################################################
@@ -595,9 +627,13 @@ modGBchng <- function(GBpopdat,
     ## Get total estimate and merge area
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
-    unit_totest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdattot, 
-                        uniqueid=cuniqueid, stratalut=stratalut, 
-                        unitvar=unitvar, strvar=strvar, domain="TOTAL")
+    unit_totest <- GBest.pbar(sumyn = estvar.name, 
+	                          ysum = cdomdattot,
+							  uniqueid = cuniqueid, 
+							  stratalut = stratalut,
+							  unitvar = unitvar, 
+							  strvar = strvar, 
+							  domain = "TOTAL")
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -615,24 +651,36 @@ modGBchng <- function(GBpopdat,
   if (rowvar != "TOTAL") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
-    unit_rowest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-                        uniqueid=cuniqueid, stratalut=stratalut, 
-                        unitvar=unitvar, strvar=strvar, domain=rowvar)
+    unit_rowest <- GBest.pbar(sumyn = estvar.name, 
+	                          ysum = cdomdatsum,
+							  uniqueid = cuniqueid, 
+							  stratalut = stratalut, 
+							  unitvar = unitvar, 
+							  strvar = strvar, 
+							  domain = rowvar)
   }
 
   ## Get column (and cell) estimate  
   if (colvar != "NONE") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
-    unit_colest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-                        uniqueid=cuniqueid, stratalut=stratalut, 
-                        unitvar=unitvar, strvar=strvar, domain=colvar)
+    unit_colest <- GBest.pbar(sumyn = estvar.name, 
+	                          ysum = cdomdatsum,
+							  uniqueid = cuniqueid, 
+							  stratalut = stratalut,
+							  unitvar = unitvar, 
+							  strvar = strvar, 
+							  domain = colvar)
 
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
-    unit_grpest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-                        uniqueid=cuniqueid, stratalut=stratalut, 
-                        unitvar=unitvar, strvar=strvar, domain=grpvar)
+    unit_grpest <- GBest.pbar(sumyn = estvar.name, 
+	                          ysum = cdomdatsum,
+							  uniqueid = cuniqueid, 
+							  stratalut = stratalut,
+							  unitvar = unitvar, 
+							  strvar = strvar, 
+							  domain = grpvar)
   }
 
   ###################################################################################
@@ -777,11 +825,10 @@ modGBchng <- function(GBpopdat,
   ###################################################################################
   message("getting output...")
   estnm <- "est" 
- 
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
 	      unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
 	      unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
- 	      rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol,
+ 	      rowvar=rowvarnm, colvar=colvarnm, uniquerow=uniquerow, uniquecol=uniquecol,
  	      rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
 	      allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref,
  	      title.rowvar=title.rowvar, title.colvar=title.colvar, title.rowgrp=title.rowgrp,

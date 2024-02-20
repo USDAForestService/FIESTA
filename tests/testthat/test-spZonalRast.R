@@ -1,5 +1,9 @@
 test_that("spZonalRast works and has expected output", {
   
+  skip_on_cran()
+
+  skip_if(gdalraster::proj_version()$major < 9, "gdalraster proj version out of date")
+
   # Set up data
   WYbhdistfn <- system.file("extdata",
                             "sp_data/WYbighorn_districtbnd.shp",

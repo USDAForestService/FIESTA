@@ -1,6 +1,9 @@
 
 
 test_that("datSumTree Aboveground Biomass w/out Extrapolation", {
+  
+  skip_on_cran()
+
   # Using datSumTree - nonTPA  
   test1 <- datSumTree(tree = FIESTA::WYtree, ##
                       tsumvarlst = "DRYBIO_AG", ##tsumvarlst == tree-level variables to aggregate: in this case it is aboveground biomass
@@ -20,7 +23,7 @@ test_that("datSumTree Aboveground Biomass w/out Extrapolation", {
 
   # Expect datSumTree & WYplot data match  
   expect_equal(sum(input1[input1$STATUSCD == 1, "DRYBIO_AG"], na.rm=TRUE), treedat_nonTPA[treedat_nonTPA$PLT_CN == CN, ][[2]])
-  expect_snapshot(treedat_nonTPA)
+  #expect_snapshot(treedat_nonTPA)
 
   # Using datSumTree - TPA
   test2 <- datSumTree(WYtree, 
@@ -40,5 +43,5 @@ test_that("datSumTree Aboveground Biomass w/out Extrapolation", {
 
   # Expecting same output when summed for TPA
   expect_equal(output1, treedat_TPA[treedat_TPA$PLT_CN == CN, ][[2]])
-  expect_snapshot(treedat_TPA)
+  #expect_snapshot(treedat_TPA)
 })

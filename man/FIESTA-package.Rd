@@ -62,6 +62,15 @@ Analysis Database [WWW Document].  St Paul MN US Dep. Agric. For. Serv.
 North. Res. Stn.  URL http://apps.fs.fed.us/fiadb-downloads/datamart.html
 (accessed 3.6.21).
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://usdaforestservice.github.io/FIESTA/}
+  \item \url{https://github.com/USDAForestService/FIESTA}
+  \item Report bugs at \url{https://github.com/USDAForestService/FIESTA/issues}
+}
+
+}
 \author{
 Tracey S. Frescino Maintainer: Tracey S. Frescino
 }

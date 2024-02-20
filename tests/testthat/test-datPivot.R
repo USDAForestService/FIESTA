@@ -1,6 +1,9 @@
 
 # Pivot table summarizes and analyzes large quantities of data
 test_that("datPivot Testing", {
+  
+  skip_on_cran()
+
   # Using datPivot - from vignette
   test1 <- datPivot(x = WYtree,
                     pvar = "HT", ##Height

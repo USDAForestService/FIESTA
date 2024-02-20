@@ -308,7 +308,7 @@ modGBpop <- function(popType = "VOL",
     	treef=seedf=grmf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=
 	sccmx=cond_pcondx=lulcx=popevalid <- NULL
   condid <- "CONDID"
-  pvars2keep <- NULL
+  pvars2keep=unitlevels <- NULL
 
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -520,7 +520,7 @@ modGBpop <- function(popType = "VOL",
   if (popType %in% c("GROW", "MORT", "REMV")) {
     popType <- "GRM"
   }
- 
+
   ###################################################################################
   ## Load data
   ###################################################################################
@@ -648,13 +648,26 @@ modGBpop <- function(popType = "VOL",
     list.items <- c(list.items, "tree")
   }
   if (popType == "P2VEG") {
-    list.items <- c(list.items, "vsubpstr", "subplot", "subp_cond")
+    list.items <- c(list.items, "subplot", "subp_cond")
+    if (all(is.null(findnm("vsubpstr", names(popTabs), returnNULL=TRUE)), 
+	       is.null(findnm("p2veg_subp_structure", names(popTabs), returnNULL=TRUE)))) {
+	  message("need subp_cond_chng_mtrx table")
+	  stop()
+	}	 
   }
   if (popType == "DWM") {
-    list.items <- c(list.items, "cond_dwm_calc")
+    if (all(is.null(findnm("dwm", names(popTabs), returnNULL=TRUE)), 
+	       is.null(findnm("cond_dwm_calc", names(popTabs), returnNULL=TRUE)))) {
+	  message("need cond_dwm_calc table")
+	  stop()
+	}	 
   }
   if (popType == "CHNG") {
-    list.items <- c(list.items, "sccm")
+    if (all(is.null(findnm("sccm", names(popTabs), returnNULL=TRUE)), 
+	       is.null(findnm("subp_cond_chng_mtrx", names(popTabs), returnNULL=TRUE)))) {
+	  message("need subp_cond_chng_mtrx table")
+	  stop()
+	}	 
   }
   
   ## Check popTabs
@@ -689,10 +702,11 @@ modGBpop <- function(popType = "VOL",
       unitarea=unitarea, areavar=areavar, unitvar=unitvar, 
       unitvar2=unitvar2, areaunits=areaunits, unit.action=unit.action, 
       strata=strata, stratalut=stratalut, strvar=strvar, pivot=pivot,
-	  pvars2keep=pvars2keep, defaultVars=defaultVars)
+	  pvars2keep=pvars2keep, defaultVars=defaultVars, unitlevels=unitlevels)
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
+  pltvars <- pltcheck$pvars
   pfromqry <- pltcheck$pfromqry
   palias <- pltcheck$palias
   pjoinid <- pltcheck$pjoinid
@@ -706,6 +720,7 @@ modGBpop <- function(popType = "VOL",
   areavar <- pltcheck$areavar
   areaunits <- pltcheck$areaunits
   unit.action <- pltcheck$unit.action
+  unitlevels <- unitlevels
   stratcombine <- pltcheck$stratcombine
   strata <- pltcheck$strata
   stratalut <- pltcheck$stratalut
@@ -757,7 +772,8 @@ modGBpop <- function(popType = "VOL",
           whereqry=whereqry, adj=adj, ACI=ACI, 
           pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
           condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
-          cvars2keep="REMPER", pvars2keep=pvars2keep)
+          cvars2keep="REMPER", pvars2keep=pvars2keep,
+		  defaultVars = defaultVars, pltvars = pltvars)
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$sccm_condx
     sccmx <- popcheck$sccmx
@@ -845,6 +861,7 @@ modGBpop <- function(popType = "VOL",
 							areavar = areavar,
 							minplotnum.unit = minplotnum.unit, 
 							unit.action = unit.action,
+							unitlevels = unitlevels,
 							strata = strata, 
 							auxlut = stratalut, 
 							strvar = strvar,
@@ -856,7 +873,7 @@ modGBpop <- function(popType = "VOL",
 							strwtvar = strwtvar, 
 							P2POINTCNT = P2POINTCNT,
 							auxtext = "stratalut",
-							AOI = popFilter$AOIonly)
+							AOI = popFilter2$AOIonly)
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
@@ -865,9 +882,9 @@ modGBpop <- function(popType = "VOL",
   strvar <- auxdat$strvar
   strwtvar <- auxdat$strwtvar
   stratcombinelut <- auxdat$stratcombinelut
+  stratwarnlut <- auxdat$stratwarnlut
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvar, strvar)
-
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
@@ -888,7 +905,7 @@ modGBpop <- function(popType = "VOL",
 
   ## If more than one unitvar, 
   ## split the concatenated unitvar variable to keep original columns
-  if (!is.null(unitvar2)) {
+  if (unitvar != "unitnew" && !is.null(unitvar2)) {
     condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
   }
  
@@ -953,6 +970,12 @@ modGBpop <- function(popType = "VOL",
       sccmx <- sccmx[stratalut[,c(strunitvars, areaadj), with=FALSE]]
       sccmx$SUBPTYP_PROP_ADJ <- sccmx$SUBPTYP_PROP_CHNG * sccmx[[areaadj]]
       areawtnm <- "SUBPTYP_PROP_ADJ"
+	  
+      ## If more than one unitvar, 
+      ## split the concatenated unitvar variable to keep original columns
+      if (!is.null(unitvar2)) {
+        sccmx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+      }
     }
 
     if (popType == "DWM") {
@@ -1041,6 +1064,52 @@ modGBpop <- function(popType = "VOL",
   }
   setorderv(stratalut, c(unitvars, strvar))
 
+
+  ###################################################################################
+  ## Add new variables to pltcondx for estimation
+  ###################################################################################
+  ## Get order of pltcondx columns
+  pltcondxcols <- names(pltcondx)
+  newcols <- {}
+  
+  if (!"LANDSTATUSCD" %in% names(pltcondx)) {
+    ## Add LANDSTATUSCD based on the following lookup table
+    LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
+                    LANDSTATUSCD = c(rep(1, 6), rep(2, 2), rep(3, 6), 4),
+                    LANDSTATUSNM = c(rep("Timberland", 6), 
+                                     rep("Other forestland", 2), 
+                                     rep("Reserved productive forestland", 6),
+                                         "Reserved other forestland"))
+    pltcondx$LANDSTATUS <- with(pltcondx, COND_STATUS_CD * 100 + RESERVCD * 10 + SITECLCD)
+    pltcondx <- merge(pltcondx, LANDSTATUSlut, by="LANDSTATUS", all.x=TRUE)
+    pltcondx$LANDSTATUS <- NULL
+    newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
+  }
+
+  if (!"FORTYPGRPCD" %in% names(pltcondx) && "FORTYPCD" %in% names(pltcondx)) {
+    ## Add FORTYPGRPCD to pltcondx if not already in dataset
+    #pltcondx <- addFORTYPGRPCD(pltcondx)
+    ref_fortyp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
+    names(ref_fortyp) <- c("FORTYPCD", "FORTYPGRPCD")
+    pltcondx <- merge(pltcondx, ref_fortyp, by="FORTYPCD", all.x=TRUE)
+    newcols <- c(newcols, "FORTYPGRPCD")
+  }
+
+  if (!"DSTRBGRP" %in% names(pltcondx) && "DSTRBCD1" %in% names(pltcondx)) {
+    ## Add FORTYPGRPCD to pltcondx if not already in dataset
+    #pltcondx <- addFORTYPGRPCD(pltcondx)
+    ref_dstrbcd <- ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")]
+    names(ref_dstrbcd) <- c("DSTRBCD1", "DSTRBGRP")
+    pltcondx <- merge(pltcondx, ref_dstrbcd, by="DSTRBCD1", all.x=TRUE)
+    newcols <- c(newcols, "DSTRBGRP")
+  }
+
+  ## Move new columns to end of table
+  setcolorder(pltcondx, c(pltcondxcols, newcols))
+
+
+  ## Build list of data to return
+  ###################################################################################
   if (returndata) {
     returnlst$popType <- popType
     if (!is.null(bndx)) {
@@ -1049,6 +1118,7 @@ modGBpop <- function(popType = "VOL",
  
     returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
             cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
+			pltassgnx=pltassgnx, pltassgnid=pltassgnid,
             unitarea=unitarea, areavar=areavar, 
             areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, 
             strata=strata, stratalut=data.table(stratalut), 
@@ -1071,7 +1141,9 @@ modGBpop <- function(popType = "VOL",
     if (strata) {
       if (!is.null(stratcombinelut)) {
         returnlst$stratcombinelut <- stratcombinelut
-      }
+      } else if (!is.null(stratwarnlut)) {
+	    returnlst$stratwarnlut <- stratwarnlut
+	  }
     }
     if (!is.null(evalid)) {
       returnlst$evalid <- evalid

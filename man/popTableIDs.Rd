@@ -9,18 +9,27 @@ popTableIDs(
   plt = "CN",
   tree = "PLT_CN",
   seed = "PLT_CN",
+  seedling = "PLT_CN",
   vsubpspp = "PLT_CN",
+  p2veg_subplot_spp = "PLT_CN",
   vsubpstr = "PLT_CN",
+  p2veg_subp_structure = "PLT_CN",
   invsubp = "PLT_CN",
+  invasive_subplot_spp = "PLT_CN",
   subplot = "PLT_CN",
   subp_cond = "PLT_CN",
+  dwm = "PLT_CN",
   cond_dwm_calc = "PLT_CN",
   sccm = "PLT_CN",
+  subp_cond_chng_mtrx = "PLT_CN",
   grm = "PLT_CN",
+  tree_grm_component = "PLT_CN",
+  begin = "PLT_CN",
+  tree_grm_begin = "PLT_CN",
+  midpt = "PLT_CN",
+  tree_grm_midpt = "PLT_CN",
   pltu = "PLT_CN",
   condu = "PLT_CN",
-  begin = "PLT_CN",
-  midpt = "PLT_CN",
   ...
 )
 }
@@ -33,29 +42,47 @@ popTableIDs(
 
 \item{seed}{String.}
 
+\item{seedling}{String.}
+
 \item{vsubpspp}{String.}
+
+\item{p2veg_subplot_spp}{String.}
 
 \item{vsubpstr}{String.}
 
+\item{p2veg_subp_structure}{String.}
+
 \item{invsubp}{String.}
+
+\item{invasive_subplot_spp}{String.}
 
 \item{subplot}{String.}
 
 \item{subp_cond}{String.}
 
+\item{dwm}{String.}
+
 \item{cond_dwm_calc}{String.}
 
 \item{sccm}{String.}
 
+\item{subp_cond_chng_mtrx}{String.}
+
 \item{grm}{String.}
+
+\item{tree_grm_component}{String.}
+
+\item{begin}{String.}
+
+\item{tree_grm_begin}{String.}
+
+\item{midpt}{String.}
+
+\item{tree_grm_midpt}{String.}
 
 \item{pltu}{String.}
 
 \item{condu}{String.}
-
-\item{begin}{String.}
-
-\item{midpt}{String.}
 
 \item{...}{For extendibility.}
 }

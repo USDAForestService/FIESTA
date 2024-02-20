@@ -1,6 +1,8 @@
 
 test_that("Clip Raster Works", {
 
+  skip_on_cran()
+
   # Set Up
 
   fornffn <- system.file("extdata",

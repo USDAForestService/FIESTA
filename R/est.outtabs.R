@@ -12,6 +12,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
   ## Set global variables
   estn=pse=keepvars=TOTAL=totest=rowest=colest=grpest <- NULL
+  rowvar <- ifelse(is.null(rowvar), "NONE", rowvar)
+  colvar <- ifelse(is.null(colvar), "NONE", colvar)
+  
 
   #####  TITLE INFO FOR TABLE COLUMNS
   ########################################################
@@ -137,14 +140,39 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       char.width <- max(char.width,
 		max(nchar(na.omit(round(unit_grpest[[psenm]], pseround)))))
     }
+	
+	# ## Check for matching levels in x and xunique
+    # if (!is.null(uniquerow)) {
+      # chklevels <- checklevels(x = unit_grpest, 
+	                         # uniquex = uniquerow,
+							 # xvar = rowvar) 
+	  # unit_grpest <- chklevels$x
+      # uniquerow <- chklevels$uniquex	
+    # }
+    # if (!is.null(uniquecol)) {
+      # chklevels <- checklevels(x = unit_grpest, 
+	                         # uniquex = uniquecol,
+							 # xvar = colvar) 
+	  # unit_grpest <- chklevels$x
+      # uniquecol <- chklevels$uniquex	
+    # }
+ 
+    # chklevels <- checklevels(x = unit_colest, 
+	                         # uniquex = uniquecol,
+							 # xvar = colvar) 
+	# unit_colest <- chklevels$x
+  # }
+
+	
   }
 
   if (sumunits) {
     ## Group estimates
-    if (!is.null(uniquerow))
-      keepvars.row <- names(uniquerow)[names(uniquerow) != rowvar]
-    if (!is.null(uniquecol))
-      keepvars.col <- names(uniquecol)[names(uniquecol) != colvar]
+    #if (!is.null(uniquerow))
+    #  keepvars.row <- names(uniquerow)[names(uniquerow) != rowvar]
+    #if (!is.null(uniquecol))
+    #  keepvars.col <- names(uniquecol)[names(uniquecol) != colvar]
+	keepvars.row=keepvars.col <- NULL
 
     ## GROUP TOTAL TABLE
     if (!is.null(unit_totest)) {
@@ -200,7 +228,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         char.width <- max(char.width,
 		max(nchar(na.omit(round(colest[[psenm]], pseround)))))
       }
-    }
+    }	
     if (!is.null(unit_grpest)) {
       grpest <- groupUnits(tabest=unit_grpest, domain=rowvar, estncol=estnm,
 			estncol.var=estnm.var, domvar2=colvar, esttype=esttype,
@@ -227,7 +255,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   ###################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################
-  if (colvar == "NONE") {
+  if (is.null(colvar) || colvar == "NONE") {
     if (sumunits) {
       if (rowvar == "TOTAL") {
         if (allin1) {

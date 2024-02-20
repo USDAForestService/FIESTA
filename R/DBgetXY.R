@@ -257,6 +257,10 @@ DBgetXY <- function (states = NULL,
   ####################################################################
   intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
 		title="Single intensity?", first="YES", gui=gui)
+  intensity <- NULL
+  if (intensity1) {
+	intensity <- 1
+  }
 
   ###########################################################################
   ## Check XY database 
@@ -312,17 +316,22 @@ DBgetXY <- function (states = NULL,
 
   if (datsource == "sqlite" && !is.null(data_dsn)) {
     if (!is.null(xy_dsn) && data_dsn == xy_dsn) {
-      dbconn <- suppressMessages(DBtestSQLite(data_dsn, 
-				dbconnopen=TRUE, showlist=FALSE))
+      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
     } else {
       dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
     }
     dbtablst <- DBI::dbListTables(dbconn)
     if (length(dbtablst) == 0) {
-      stop("no data in ", datsource)
+      message("no data in ", datsource)
+	  return(NULL)
     }
   }
- 
+  
+  if (datsource == "sqlite" && is.null(data_dsn)) {
+    message("datsource=", datsource, " but data_dsn=NULL... returning NULL")
+	return(NULL)
+  }
+
   ## Check eval
   ####################################################################
   evallst <- c('FIA', 'custom')
@@ -374,7 +383,6 @@ DBgetXY <- function (states = NULL,
       out_layer <- "spxy"
     }
   } 
-
 
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
@@ -437,15 +445,12 @@ DBgetXY <- function (states = NULL,
 
   ####################################################################
   ## Get states, Evalid and/or invyrs info
-  ####################################################################
-  ## Get states, Evalid and/or invyrs info
   ##########################################################
   if (!is.null(evalInfo)) {
     list.items <- c("states", "invtype")
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {
-
     evalInfo <- tryCatch(
 				DBgetEvalid(states = states, 
                           RS = RS, 
@@ -459,7 +464,7 @@ DBgetXY <- function (states = NULL,
                           evalCur = evalCur, 
                           evalEndyr = evalEndyr, 
                           evalAll = evalAll,
-                          evalType = evalType,
+                          evalType = Type,
                           gui = gui),
 			error = function(e) {
                   message(e,"\n")
@@ -488,7 +493,7 @@ DBgetXY <- function (states = NULL,
     surveynm <- "SURVEY"
 	setkey(SURVEY, "CN")
   }
-  
+ 
   if (is.null(POP_PLOT_STRATUM_ASSGN)) {
     POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
   }
@@ -584,9 +589,10 @@ DBgetXY <- function (states = NULL,
       rm(xy)	  
     }
   } else if (xy_datsource == "sqlite") {
-  
+
     if (!is.character(xy)) {
-      stop("invalid xy")
+      message("invalid xy")
+	  return(NULL)
     }
     ## Check pop_plot_stratum_assgn
   	if (iseval) {
@@ -927,12 +933,12 @@ DBgetXY <- function (states = NULL,
 				"\n ORDER BY ", invarsA) 
     }
   } 
-  
 
   ###########################################################################
   ## Build filter
   ###########################################################################
   if (xyisplot || is.null(plotnm)) {
+
     pnm <- xynm
     pid <- xy.uniqueid
     pflds <- xyflds
@@ -944,7 +950,7 @@ DBgetXY <- function (states = NULL,
 	pltvars <- pvars
   }
   popSURVEY <- FALSE
-  if (!is.null(SURVEY) && "SRV_CN" %in% names(get(pnm))) {
+  if (!is.null(SURVEY) && "SRV_CN" %in% pltflds) {
     popSURVEY <- TRUE
   }
 
@@ -999,9 +1005,9 @@ DBgetXY <- function (states = NULL,
       setkeyv(get(pnm), pid)
 	} 
   
-    withqry <- getwithqry(evalid = unlist(evalidlist), 
+    withqry <- getpwithqry(evalid = unlist(evalidlist), 
            pjoinid = pid,
-           intensity1 = intensity1,
+           intensity = intensity,
            plotnm = pnm,
 		   pltflds = pflds,
            ppsanm = ppsanm,
@@ -1021,9 +1027,9 @@ DBgetXY <- function (states = NULL,
 		setkeyv(get(pnm), pid)
 	  } 
 
-	  withqry <- getwithqry(states = stcds, 
+	  withqry <- getpwithqry(states = stcds, 
            pjoinid = pid,
-           intensity1 = intensity1,
+           intensity = intensity,
            plotnm = pnm,
 		   pltflds = pflds,
            invyrs = unlist(invyrs),
@@ -1038,9 +1044,9 @@ DBgetXY <- function (states = NULL,
 		setkeyv(get(pnm), pid)
 	  } 
 	
-      withqry <- getwithqry(states = stcds, 
+      withqry <- getpwithqry(states = stcds, 
            pjoinid = pid,
-           intensity1 = intensity1,
+           intensity = intensity,
            plotnm = pnm,
 		   pltflds = pflds,
            measyears = unlist(measyrs),
@@ -1058,12 +1064,12 @@ DBgetXY <- function (states = NULL,
 		setkeyv(get(pnm), keyvars)
 	  } 
 	  	  		
-      withqry <- getwithqry(states = stcds, 
+      withqry <- getpwithqry(states = stcds, 
 	                        plotCur = TRUE,
 	                        Endyr = measEndyr,	                        
                             varCur = varCur, 
                             SCHEMA. = SCHEMA., 
-                            intensity1 = intensity1, 
+                            intensity = intensity, 
                             plotnm = pnm,
                             pjoinid = pid,
                             surveynm = surveynm,
@@ -1078,9 +1084,9 @@ DBgetXY <- function (states = NULL,
 		setkeyv(get(pnm), pid)
 	  } 
 	
-      withqry <- getwithqry(states = stcds, 
+      withqry <- getpwithqry(states = stcds, 
            pjoinid = pid,
-           intensity1 = intensity1,
+           intensity = intensity,
            plotnm = pnm,
 		   pltflds = pflds,
            allyrs = TRUE,
@@ -1179,6 +1185,10 @@ DBgetXY <- function (states = NULL,
     if (issp) {
       outsp_layer <- paste0("sp", xyoutnm)
     }
+  } else {
+    if (issp) {
+	  outsp_layer <- paste0("sp", out_layer)
+	}
   }
 
   if (issp) {

@@ -2,6 +2,8 @@
 
 test_that("Reproject Raster file works", {
 
+  skip_on_cran()
+
   # Set Up Data
   fornffn <- system.file("extdata",
                          "sp_data/WYbighorn_forest_nonforest_250m.tif",

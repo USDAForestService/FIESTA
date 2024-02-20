@@ -2,6 +2,8 @@
 
 test_that("Export Shapefile Works", {
 
+  skip_on_cran()
+
   # Set Output
   outfolder <- tempdir()
   

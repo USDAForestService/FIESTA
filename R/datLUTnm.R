@@ -294,28 +294,37 @@ datLUTnm <- function(xvar,
   ## Check add0 
   add0 <- pcheck.logical(add0, varnm="add0", title="Add 0 values to missing codes?", 
                              first="NO", gui=gui)
-
-  
+ 
   ## Get unique values
   if (isdb && !dbreturn) {
-    uniqueval.qry <- paste("select distinct", xvar, "from", datnm,
-                           "order by", xvar)
+    uniqueval.qry <- paste("SELECT DISTINCT", xvar, "FROM", datnm,
+                           "ORDER BY", xvar)
     uniqueval <- na.omit(DBI::dbGetQuery(dbconn, uniqueval.qry))[[1]]
+	
   } else if (!is.null(datx)) {
     if (!is.numeric(datx[[xvar]])) {
-	  #message("xvar must be a numeric vector in x")
-	  uniqueval <- sort(unique(as.numeric(as.character(datx[[xvar]]))))
+	  if (is.factor(datx[[xvar]])) {
+	    #message("xvar must be a numeric vector in x")
+	    uniqueval <- sort(unique(as.numeric(as.character(datx[[xvar]]))))
+	  } else {
+	    uniqueval <- sort(unique(datx[[xvar]]))
+	  }
     } else {
       #uniquex <- sort(unique(na.omit(datx[[xvar]])))
       uniqueval <- sort(unique(datx[[xvar]]))
     }
   }
+
   if (!is.null(uniquex)) {
     if (!is.null(uniqueval)) {
 	  if (!all(uniquex %in% uniqueval)) {
 	    missval <- uniquex[!uniquex %in% uniqueval]
 		if (length(missval) > 0) {
-		  message("uniquex values missing: ", toString(missval)) 
+		  if (!all(is.na(missval))) {
+		    message("uniquex values missing: ", toString(missval)) 
+          } else {
+            uniqueval <- c(uniqueval, NA)
+          }			
 		} else {
 		  message("no uniquex in x... returning NULL")
 		  return(NULL)
@@ -449,6 +458,7 @@ datLUTnm <- function(xvar,
     ref <- setDT(FIESTAutils::ref_codes[FIESTAutils::ref_codes[["VARIABLE"]] == xvar.ref,
  		c(lutvars, grpvars)])
  
+ 
     ## Check LUTx - xvar in LUTx
     #################################################
     if (!is.null(LUTx)) {
@@ -503,7 +513,7 @@ datLUTnm <- function(xvar,
         stop("LUTvar not in LUTx")
       }
 
-      if (!is.null(datx) && !is.null(uniquex)) {
+      if (all(!is.null(datx), !is.null(uniquex), nrow(uniquex) > 0)) {
         ## Subset LUT values to only those in datx
         if (sum(LUTx[[LUTvar]] %in% uniquex, na.rm=TRUE) == 0) {
           message(paste("no rows exist for", LUTvar))
@@ -613,30 +623,34 @@ datLUTnm <- function(xvar,
   }
 
   ## Add records if no other values exist in xLUT
-  if (!is.null(uniquex) && !all(uniquex %in% LUTx[[xvar]])) {
-    xvals <- unique(na.omit(uniquex))
-    missvals <- xvals[which(!xvals %in% unique(LUTx[[LUTvar]]))]
+  if (!is.null(uniquex)) {
+    if (!all(uniquex %in% LUTx[[xvar]])) {
+      xvals <- unique(na.omit(uniquex))
+      missvals <- xvals[which(!xvals %in% unique(LUTx[[LUTvar]]))]
 
-    if (length(missvals) > 0) {
-      otherx <- checknm("Other", LUTnewvar.vals) 
-      #otherx <- "Other"
-      message("adding unclassified values to class ", otherx)
+      if (length(missvals) > 0) {
+        otherx <- checknm("Other", LUTnewvar.vals) 
+        #otherx <- "Other"
+        message("adding unclassified values to class ", otherx)
 
-      LUTxrow <- data.table(matrix(data=NA, nrow=length(missvals), ncol=ncol(LUTx)))
-      names(LUTxrow) <- names(LUTx)
-      LUTxrow[[LUTvar]] <- missvals
+        LUTxrow <- data.table(matrix(data=NA, nrow=length(missvals), ncol=ncol(LUTx)))
+        names(LUTxrow) <- names(LUTx)
+        LUTxrow[[LUTvar]] <- missvals
 
-      for (v in names(LUTx)[which(names(LUTx) != LUTvar)]) {
-        if (!is.numeric(LUTx[[v]])) {
-          if (is.factor(LUTx[[v]]))
-             levels(LUTx[[v]]) <- c(levels(LUTx[[v]]), otherx)
-          LUTxrow[[v]] <- rep(otherx, nrow(LUTxrow))
-        } else {
-          LUTxrow[[v]] <- rep(9999, nrow(LUTxrow))
-        }        
-      }
-      LUTx <- rbind(LUTx, as.list(LUTxrow))
-    } 
+        for (v in names(LUTx)[which(names(LUTx) != LUTvar)]) {
+          if (!is.numeric(LUTx[[v]])) {
+            if (is.factor(LUTx[[v]]))
+               levels(LUTx[[v]]) <- c(levels(LUTx[[v]]), otherx)
+            LUTxrow[[v]] <- rep(otherx, nrow(LUTxrow))
+          } else {
+            LUTxrow[[v]] <- rep(9999, nrow(LUTxrow))
+          }        
+        }
+        LUTx <- rbind(LUTx, as.list(LUTxrow))
+	  }
+    } else if (!add0) {
+	  LUTx <- LUTx[LUTx[[LUTvar]] %in% uniquex, ]
+	}
   }  
           
   ## Return list

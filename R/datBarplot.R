@@ -173,7 +173,7 @@ datBarplot <- function(x,
 
   ## Make sure xvar is a character
   if (!is.character(x[[xvar]])) x[[xvar]] <- as.character(x[[xvar]])
- 
+
   ## Check xvar
   yvar <- pcheck.varchar(var2check=yvar, varnm="yvar", checklst=yvarlst, 
 	caption="Y variable", warn="xvar not in data table", multiple=TRUE) 

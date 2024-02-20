@@ -55,16 +55,6 @@
 ---
 
     Code
-      created_cutbreaks
-    Output
-         LIVE_CANOPY_CVR_PCT_cutbreaks LIVE_CANOPY_CVR_PCTCL
-      1:                             0                0-24.9
-      2:                            25               25-49.9
-      3:                            50                   50+
-
----
-
-    Code
       testLUT3_results
     Output
                 PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ

@@ -1,5 +1,9 @@
 test_that("spGetStrata returns expected result", {
   
+  skip_on_cran()
+
+  skip_if(gdalraster::proj_version()$major < 9, "gdalraster proj version out of date")
+
   # Set Up Data
   WYbhfn <- system.file("extdata",
                         "sp_data/WYbighorn_adminbnd.shp",

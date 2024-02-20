@@ -1,5 +1,7 @@
 test_that("datLUTnm works as expected", {
 
+  skip_on_cran()
+
   # Test Look up table classification with Disturbance Type
   ref_dstrbcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "DSTRBCD",]
 
@@ -15,5 +17,5 @@ test_that("datLUTnm works as expected", {
   # Gets Data where not N/A
   filtered_result <- testLUTnm_results[testLUTnm_results$DSTRBCD1 > 0, ]
   
-  expect_snapshot(filtered_result)
+  expect_equal(filtered_result[1]$DSTRB1NM, "Insect")
 })

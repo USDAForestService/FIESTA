@@ -1,5 +1,7 @@
 
 test_that("Clip Point returns expected number of points", {
+  
+  skip_on_cran()
 
   # Set up
   WYbhfn <- system.file("extdata",

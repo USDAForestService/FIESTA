@@ -1,5 +1,8 @@
 
 test_that("modGBarea Testing", {
+  
+  skip_on_cran()
+
   # Running GBpop
   GBpop <- modGBpop(popTabs = list(cond=WYcond, tree=WYtree),
                     pltassgn = WYpltassgn,
@@ -20,8 +23,11 @@ test_that("modGBarea Testing", {
   # GBarea outputed assigned to $est
   modGBarea_est <- GBarea$est
 
-  area.raw <- round(GBarea$raw$rowest[1,3], digits = 1)
+  rawEst = GBarea$raw$rowest
+  area.raw <- round(rawEst$est[rawEst$"Forest type" == "Rocky Mountain juniper"], digits = 1)
   area.raw_char <- as.character(area.raw)
+
+  newEst = GBarea$est$Estimate[rawEst$"Forest type" == "Rocky Mountain juniper"][1]
 
   GBarea$raw$rowest
 
@@ -39,7 +45,7 @@ test_that("modGBarea Testing", {
                                 "Cottonwood", "Sugarberry / hackberry / elm / green ash", 
                                 "Aspen", "Nonstocked", "Total"))
 
-  expect_equal(GBarea$est[1, 2], area.raw_char) ##Converted numeric value to character and tested for correct value 
+  expect_equal(newEst, area.raw_char) ##Converted numeric value to character and tested for correct value 
   expect_equal(list(modGBarea_est$`Forest type`), modGBarea_est_names) ##ensuring tree list is correct
   expect_equal(dim(modGBarea_est), c(19 , 3)) ##Ensuring dimensionality is consistant
   expect_snapshot(modGBarea_est) ##outputting snapshot

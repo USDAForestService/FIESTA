@@ -447,7 +447,7 @@ spGetXY <- function(bnd,
 #                                  xy.crs=xy.crs)
 #    }
 
-  } else { 
+  } else {
     xydat <- DBgetXY(states = stcds,
                      xy_datsource = xy_datsource,
                      xy_dsn = xy_dsn,
@@ -463,6 +463,7 @@ spGetXY <- function(bnd,
                      intensity1 = intensity1,
 					 pvars2keep = pvars2keep,
                      issp = TRUE)
+
     if (is.null(xydat)) {
       return(NULL)
     }

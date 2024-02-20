@@ -11,6 +11,8 @@ spClassifyRast(
   bnd_dsn = NULL,
   bnd.filter = NULL,
   buffdist = NULL,
+  nodataclass = NULL,
+  gethist = FALSE,
   savedata_opts = NULL
 )
 }
@@ -32,6 +34,10 @@ database.}
 
 \item{buffdist}{Number. The distance to buffer the polygon before clipping
 raster, in units of raster.}
+
+\item{nodataclass}{Integer. Class number to assign NODATA values to.}
+
+\item{gethist}{Logical. If TRUE, returns a histogram of pixel values by class.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
