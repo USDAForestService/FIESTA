@@ -1,8 +1,8 @@
 
 
-# Using auxiliary data in FIESTA can help enhance your result. One resource for auxiliary data is EarthData Search: a NASA repository for Earth Science data.
+# Using auxiliary data in FIESTA can help enhance your result. One resource for auxiliary data is the R rsi package
 
-## Follow this tutorial and learn how to implement auxiliary data from EarthData Search (https://search.earthdata.nasa.gov/search)
+## Learn more about the R rsi package here (https://github.com/Permian-Global-Research/rsi/tree/main)
 
 # ############################################################
 
