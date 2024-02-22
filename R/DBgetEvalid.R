@@ -297,7 +297,13 @@ DBgetEvalid <- function(states = NULL,
   if (datsource == "sqlite") {
     ## Check states in database
     ###############################################
-    plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=TRUE)
+    if (is.null(plotnm)) {	
+      plotnm <- findnm(plot_layer, dbtablst, returnNULL=TRUE)
+    }	  
+	if (is.null(plotnm)) {
+	  message(plot_layer, " does not exist in database")
+	  return(NULL)
+	}
     pltflds <- names(DBI::dbGetQuery(dbconn, 
 				paste("select * from", plotnm, "where 1=2")))
     stcdlstdb <- DBI::dbGetQuery(dbconn, 
@@ -313,10 +319,10 @@ DBgetEvalid <- function(states = NULL,
       }
       message("states in database: ", toString(stcdlst))
     }
-	surveynm <- chkdbtab(dbtablst, survey_layer)
-    popevalnm <- chkdbtab(dbtablst, popeval_layer)
-    popevalgrpnm <- chkdbtab(dbtablst, popevalgrp_layer)
-    popevaltypnm <- chkdbtab(dbtablst, popevaltyp_layer)
+	surveynm <- findnm(survey_layer, dbtablst, returnNULL=TRUE)
+    popevalnm <- findnm(popeval_layer, dbtablst, returnNULL=TRUE)
+    popevalgrpnm <- findnm(popevalgrp_layer, dbtablst, returnNULL=TRUE)
+    popevaltypnm <- findnm(popevaltyp_layer, dbtablst, returnNULL=TRUE)
 
   } else if (datsource == "datamart") {
     SURVEY <- DBgetCSV("SURVEY", stcdlst, 
@@ -517,7 +523,7 @@ DBgetEvalid <- function(states = NULL,
 
     ## Check for pop_plot_stratum_assgn
     if (datsource == "sqlite") {
-      ppsanm <- chkdbtab(dbtablst, ppsa_layer)
+      ppsanm <- findnm(ppsa_layer, dbtablst, returnNULL=TRUE)
       if (!is.null(ppsanm)) {
         ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
       } 
@@ -541,17 +547,17 @@ DBgetEvalid <- function(states = NULL,
         ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
       } 
     }
-
     if (!is.null(ppsanm)) {
       invyrnm <- findnm("INVYR", ppsaflds, returnNULL=TRUE) 
   
       ## Check evalids 
-      evalid.qry <- paste("select distinct evalid from ", ppsanm) 
+      evalid.qry <- paste("select distinct evalid from", ppsanm) 
       if (datsource == "sqlite") {
-        evalidindb <- DBI::dbGetQuery(dbconn, evalid.qry)
+        evalidindb <- DBI::dbGetQuery(dbconn, evalid.qry)[[1]]
       } else {
-        evalidindb <- sqldf::sqldf(evalid.qry)
+        evalidindb <- sqldf::sqldf(evalid.qry, connection=NULL)[[1]]
       }
+
 	  if (is.null(evalid)) {
 	  		
 	    ## Get invyrtab
@@ -662,6 +668,7 @@ DBgetEvalid <- function(states = NULL,
         }
       }
     } else {
+
       if (!"INVYR" %in% names(invyrtab)) {
         stop("INVYR must be in invyrtab")
       }
@@ -672,16 +679,17 @@ DBgetEvalid <- function(states = NULL,
         names(invEndyr) <- pcheck.states(as.numeric(names(invEndyr)), 
 		  statereturn="MEANING")
       }
-      if (!is.null(evalid)) {
-        ## Check evalid
-        if (length(evalid) != length(states)) {
-          warning("invalid evalid... does not match states in data")
-        } else if (length(evalid) > 1 && !all(names(evalid) %in% states)) {
-          warning("invalid evalid... does not match states in data")
-        } else if (sum(evalid == invEndyr[names(evalid)]) < length(evalid)) {
-          warning("invalid evalid... using end year in data")
-        } 
-      }  
+
+      #if (!is.null(evalid)) {
+      #  ## Check evalid
+      #  if (length(evalid) != length(states)) {
+      #    warning("invalid evalid... does not match states in data")
+      #  } else if (length(evalid) > 1 && !all(names(evalid) %in% states)) {
+      #    warning("invalid evalid... does not match states in data")
+      #  } else if (sum(evalid == invEndyr[names(evalid)]) < length(evalid)) {
+      #    warning("invalid evalid... using end year in data")
+      #  } 
+      #}  
     }
  
     if (!is.null(invyrtab)) {
@@ -1049,7 +1057,11 @@ DBgetEvalid <- function(states = NULL,
                     invtype=invtype, invyrtab=invyrtab, 
                     evalTypelist=evalTypelist, 
                     evalEndyrlist=evalEndyrlist)
-  if (!is.null(invyrs)) returnlst$invyrs <- invyrs
+  if (!is.null(invyrs)) {
+    returnlst$invyrs <- invyrs
+  } else {
+    returnlst$invyrs <- sort(unique(invyrtab$INVYR))
+  }
 
   ## Return population information
   returnlst$SURVEY <- SURVEY
