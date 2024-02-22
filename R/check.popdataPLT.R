@@ -369,7 +369,6 @@ check.popdataPLT <- function(dsn,
                             tabnm="pltassgn", caption="plot assignments?", 
                             nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE)
   
-
   ##############################################################################
   ## Check and merge plt, pltassgn, cond
   ##############################################################################
@@ -461,7 +460,7 @@ check.popdataPLT <- function(dsn,
                     pltx[, unique(c(pjoinid, pltxvars)), with=FALSE], 
                     by.x=pltassgnid, by.y=pjoinid)
       #pltx <- merge(pltx, pltassgnx, by.x=pjoinid, by.y=pltassgnid)
-      puniqueid <- pltassgnid
+      puniqueid=pjoinid <- pltassgnid
       
     } else if (is.null(pltx)) {
       pltx <- pltassgnx
@@ -469,7 +468,7 @@ check.popdataPLT <- function(dsn,
       if (is.null(pjoinid)) pjoinid <- pltassgnid
     }
   }
-  
+
   ## Check for duplicate plots
   locvars <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
   if (all(locvars %in% names(pltx)) && any(pltx[, duplicated(.SD), .SDcols=locvars]) && (!popType %in% c("GRM", "CHNG"))) {
@@ -637,7 +636,7 @@ check.popdataPLT <- function(dsn,
     message("PLOT_STATUS_CD not in dataset.. assuming all plots are at least partially sampled")
     plotsampcnt <- pltx[, list(NBRPLOT=uniqueN(get(puniqueid)))]
   }
-  
+ 
   if (ACI) {
     if (any(c("NF_PLOT_STATUS_CD", "PSTATUSNF") %in% pltnmlst)) {
       if ("PSTATUSNF" %in% names(pltx))
