@@ -62,19 +62,7 @@ checktabs <- function(tabs, names) {
   ##########################################################  
   condnm=vsubpstrnm=vsubpsppnm=subplotnm=subp_condnm <- NULL
 
-  ## Check name of PLOT table
-  pltnmchk <- checktabs(tabs, c("plt", "plot"))
-  if (is.null(pltnmchk)) {
-    message("plot data needed for estimates")
-	return(NULL)
-  }
-  if (is.character(tabs[[pltnmchk]])) {  
-    pltnm <- tabs[[pltnmchk]]
-  } else {
-    pltnm <- "pltx"
-  }
-  assign(pltnm, tabs[[pltnmchk]])
- 
+
   ## Check name of COND table
   condnmchk <- checktabs(tabs, "cond")
   if (is.null(condnmchk)) {
@@ -84,7 +72,7 @@ checktabs <- function(tabs, names) {
   if (is.character(tabs[[condnmchk]])) {  
     condnm <- tabs[[condnmchk]]
   } else {
-    condnm <- "condu"
+    condnm <- "cond"
   }
   assign(condnm, tabs[[condnmchk]])
   cuniqueid <- tabIDs[[condnmchk]]
@@ -204,11 +192,9 @@ checktabs <- function(tabs, names) {
 	}
 
     ## Get remeasured plot data
-    if (!is.null(pltnm)) {
-      assign(pltnm, pcheck.table(get(pltnm), tab_dsn=dsn, 
-           tabnm="plt", caption="Remeasured plot data?", 
-           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
-	  pltflds <- names(get(pltnm))
+    if (!is.null(pltx)) {
+	  pltnm <- "pltx"
+	  pltflds <- names(pltx)
     } 
 
     ## Get subplot data for generating estimates
@@ -291,27 +277,26 @@ checktabs <- function(tabs, names) {
   ###################################################################################
   ## Import tables
   ###################################################################################
-  condx <- suppressMessages(pcheck.table(condnm, tab_dsn=dsn, 
-           tabnm="cond", caption="cond table?",
-		   tabqry=condqry, stopifnull=TRUE))
-
-  subplotx <- suppressMessages(pcheck.table(subplotnm, tab_dsn=dsn, 
-           tabnm="subplot", caption="subplot table?", 
-           tabqry=subplotqry, stopifnull=TRUE))
-		   
-  subp_condx <- suppressMessages(pcheck.table(subp_condnm, tab_dsn=dsn, 
-           tabnm="subp_cond", caption="subp_cond table?", 
-           tabqry=subp_condqry, stopifnull=TRUE))
-
-  if (!is.null(vsubpsppnm)) {
-    vsubpsppx <- suppressMessages(pcheck.table(vsubpsppnm, tab_dsn=dsn, 
-           tabnm="vsubpspp", caption="Veg Species table?", 
-           tabqry=vsubpsppqry, stopifnull=FALSE))
+  if (is.null(dbconn)) {
+    condx <- data.table(sqldf::sqldf(condqry, connection = NULL))
+    subplotx <- data.table(sqldf::sqldf(subplotqry, connection = NULL))
+    subp_condx <- data.table(sqldf::sqldf(subp_condqry, connection = NULL))
+    if (!is.null(vsubpsppnm)) {
+      vsubpsppx <- data.table(sqldf::sqldf(vsubpsppqry, connection = NULL))
+    }
+    vsubpstrx <- data.table(sqldf::sqldf(vsubpstrqry, connection = NULL))
+  } else {
+    ###################################################################################
+    ## Import tables
+    ###################################################################################
+    condx <- data.table(DBI::dbGetQuery(dbconn, condqry))
+    subplotx <- data.table(DBI::dbGetQuery(dbconn, subplotqry))
+    subp_condx <- data.table(DBI::dbGetQuery(dbconn, subp_condqry))
+    if (!is.null(vsubpsppnm)) {
+      vsubpsppx <- data.table(DBI::dbGetQuery(dbconn, vsubpsppqry))
+    }
+    vsubpstrx <- data.table(DBI::dbGetQuery(dbconn, vsubpstrqry))
   }
-  
-  vsubpstrx <- suppressMessages(pcheck.table(vsubpstrnm, tab_dsn=dsn, 
-           tabnm="vsubpstr", caption="Veg Structure table?", 
-           tabqry=vsubpstrqry, stopifnull=TRUE))
 
   ## Define cdoms2keep
   cdoms2keep <- names(condx)
