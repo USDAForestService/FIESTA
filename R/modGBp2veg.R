@@ -466,11 +466,11 @@ modGBp2veg <- function(GBpopdat = NULL,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  if (!is.null(vfilter)) {
-    if (!is.null(whereqry)) {
-	  whereqry <- paste(whereqry, "AND", vfilter)
-	}
-  }  
+  #if (!is.null(vfilter)) {
+  #  if (!is.null(whereqry)) {
+	#  whereqry <- paste(whereqry, "AND", vfilter)
+	#}
+  #}  
   rowcolinfo <- check.rowcol(gui=gui, esttype="TREE", treef=vcondf, condf=pltcondf, 
                   cuniqueid=cuniqueid, rowvar=rowvar, colvar=colvar, 
                   row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
@@ -478,8 +478,7 @@ modGBp2veg <- function(GBpopdat = NULL,
                   row.add0=row.add0, col.add0=col.add0, 
                   title.rowvar=title.rowvar, title.colvar=title.colvar, 
                   rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-                  rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea,
-				  whereqry=whereqry)
+                  rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea)
   vcondf <- rowcolinfo$treef
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
