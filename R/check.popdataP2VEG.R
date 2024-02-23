@@ -62,6 +62,17 @@ checktabs <- function(tabs, names) {
   ##########################################################  
   condnm=vsubpstrnm=vsubpsppnm=subplotnm=subp_condnm <- NULL
 
+  ## Check name of COND table
+  pltnmchk <- checktabs(tabs, c("plt", "plot"))
+  if (is.null(pltnmchk)) {
+    message("plot data needed for estimates")
+	return(NULL)
+  }
+  if (is.character(tabs[[pltnmchk]])) {  
+    pltnm <- tabs[[pltnmchk]]
+  } else {
+    pltnm <- "plt"
+  }
 
   ## Check name of COND table
   condnmchk <- checktabs(tabs, "cond")
