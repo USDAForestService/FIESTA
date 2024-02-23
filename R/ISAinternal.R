@@ -52,7 +52,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 #      maxbndxd.int <- maxbndxd[unique(unlist(sf::st_intersects(smallbndx, maxbndxd))), ]
 #      maxbndxlst <- maxbndxd.int[[maxbnd.unique]]
 #    }
-    message("smallbnd intersected ", length(maxbndxlst), " ", maxbnd.unique, " polygons...)")
+    message("smallbnd intersected ", length(maxbndxlst), " ", maxbnd.unique, " polygons...")
  
     if (length(maxbndxlst) < length(unique(maxbndxd[[maxbnd.unique]]))) {
       if (length(unique(smallbndx[[smallbnd.unique]])) > nrow(smallbndx)) {

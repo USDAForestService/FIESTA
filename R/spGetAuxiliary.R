@@ -553,7 +553,7 @@ spGetAuxiliary <- function(xyplt = NULL,
   ## 1) Extract values from unit_layer
   #############################################################################
   unitarea <- NULL
-  polyvarlst <- unique(c(unitvar, vars2keep))[!unique(c(unitvar, vars2keep)) %in% names(sppltx)]
+  polyvarlst <- unique(c(vars2keep, unitvar))[!unique(c(vars2keep, unitvar)) %in% names(sppltx)]
 
   if (extract) {
     if (!unitvar %in% names(sppltx)) { 
@@ -584,7 +584,7 @@ spGetAuxiliary <- function(xyplt = NULL,
   #############################################################################
   ## 2) Set up outputs - unitzonal, prednames, inputdf, zonalnames
   #############################################################################
-  unitzonal <- data.table(unique(sf::st_drop_geometry(unit_layerx[, c(unitvar, vars2keep),
+  unitzonal <- data.table(unique(sf::st_drop_geometry(unit_layerx[, c(vars2keep, unitvar),
  		drop=FALSE])))
   setkeyv(unitzonal, unitvar)
   prednames <- {}
@@ -950,9 +950,9 @@ spGetAuxiliary <- function(xyplt = NULL,
   if (areacalc) {
     unit_layerx <- areacalc.poly(unit_layerx, unit=areaunits)
     areavar <- paste0(areaunits, "_GIS")
-    unitarea <- sf::st_drop_geometry(unit_layerx[, c(unitvar, vars2keep, areavar)])
-    unitarea <- aggregate(unitarea[[areavar]], unitarea[, c(unitvar, vars2keep), drop=FALSE], sum)
-    names(unitarea) <- c(unitvar, vars2keep, areavar)
+    unitarea <- sf::st_drop_geometry(unit_layerx[, c(vars2keep, unitvar, areavar)])
+    unitarea <- aggregate(unitarea[[areavar]], unitarea[, c(vars2keep, unitvar), drop=FALSE], sum)
+    names(unitarea) <- c(vars2keep, unitvar, areavar)
   }
 
   if (extract) {

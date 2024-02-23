@@ -195,6 +195,12 @@ checktabs <- function(tabs, names) {
     if (!is.null(pltx)) {
 	  pltnm <- "pltx"
 	  pltflds <- names(pltx)
+	  
+      if (!pjoinid %in% pltflds) {
+	    if (puniqueid %in% pltflds) {
+		  pjoinid <- puniqueid
+		}
+	  }  
     } 
 
     ## Get subplot data for generating estimates

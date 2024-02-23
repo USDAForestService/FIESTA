@@ -460,8 +460,8 @@ check.popdataPLT <- function(dsn,
                     pltx[, unique(c(pjoinid, pltxvars)), with=FALSE], 
                     by.x=pltassgnid, by.y=pjoinid)
       #pltx <- merge(pltx, pltassgnx, by.x=pjoinid, by.y=pltassgnid)
-      puniqueid=pjoinid <- pltassgnid
-      
+      puniqueid <- pltassgnid
+     
     } else if (is.null(pltx)) {
       pltx <- pltassgnx
       puniqueid <- pltassgnid

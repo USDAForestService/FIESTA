@@ -737,7 +737,7 @@ DBgetXY <- function (states = NULL,
         if (is.null(statenm)) {
           stop("must include STATECD in xy dataset")
         } else {
-          xy.qry <- paste("select", toString(xyvars), "from", xy, 
+          xy.qry <- paste("select distinct", toString(xyvars), "from", xy, 
 				"where STATECD in(", toString(stcdlst), ")")
           XY <- DBI::dbGetQuery(xyconn, xy.qry)
           xynm <- "XY"
@@ -783,7 +783,7 @@ DBgetXY <- function (states = NULL,
 	    ## If XY and plot data are from different databases, 
 		## extract both first by state before querying
 		if (!is.null(plotnm)) {
-          plot.qry <- paste("select", toString(pvars2keep), "from", plotnm, 
+          plot.qry <- paste("select distinct", toString(pvars2keep), "from", plotnm, 
 				"where STATECD in(", toString(stcdlst), ")")
           PLOT <- DBI::dbGetQuery(dbconn, plot.qry)
           plotnm <- "PLOTdf"
@@ -1004,7 +1004,6 @@ DBgetXY <- function (states = NULL,
 	if (exists(pnm) && !is.function(get(pnm)) &&!is.null(get(pnm))) {
       setkeyv(get(pnm), pid)
 	} 
-  
     withqry <- getpwithqry(evalid = unlist(evalidlist), 
            pjoinid = pid,
            intensity = intensity,
@@ -1139,6 +1138,10 @@ DBgetXY <- function (states = NULL,
     warning("invalid xy query\n")
     message(xycoords.qry)
     stop()
+  }
+  
+  if (nrow(xyx) > length(unique(xyx[[xy.uniqueid]]))) {
+    xyx <- unique(xyx)
   }
 
   ## Change CN to PLT_CN if exists

@@ -793,7 +793,7 @@ modGBpop <- function(popType = "VOL",
 
   if (popType == "P2VEG") {
     popcheck <- check.popdataP2VEG(gui=gui, 
-          tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx,
+          tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
           pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
           whereqry=whereqry, adj=adj, ACI=ACI, 
           pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn, 

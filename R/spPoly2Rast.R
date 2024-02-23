@@ -169,6 +169,7 @@ spPoly2Rast <- function(polyv,
     rast <- gdalraster::rasterFromRaster(rastclip, fmt=rast.fmt, dstfile=outfilenm)
 
     ## Rasterize polygons
+	message("rasterize polyogns...")
     polyrast <- rasterizePolygons(src=polyvx, burn_value=polyv.att, rasterfile=rast)
 
   } else {
@@ -180,6 +181,7 @@ spPoly2Rast <- function(polyv,
     rast <- rasterFromVectorExtent(polyvx, res=30, dstfile=outfilenm, fmt="HFA")
 
     ## Rasterize polygons
+	message("rasterize polyogns...")
     polyrast <- rasterizePolygons(src=polyvx, burn_value=polyv.att, rasterfile=rast)
 
   }
