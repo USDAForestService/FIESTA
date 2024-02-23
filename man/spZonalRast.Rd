@@ -35,8 +35,8 @@ object.}
 \item{polyv.att}{String. Name of attribute in polyv to identify zones for
 summarizing raster statistics.}
 
-\item{rastfn}{String or Raster. File name(s) with extensions, or raster
-object(s).  Note: raster objects must be written to file.}
+\item{rastfn}{String or Raster. File name with extension, or raster
+object.  Note: raster objects must be written to file.}
 
 \item{rastfolder}{String. Name of the folder with raster layers. Optional.
 Useful if all raster layers are in same folder.}

@@ -18,8 +18,8 @@
 #' object.
 #' @param polyv.att String. Name of attribute in polyv to identify zones for
 #' summarizing raster statistics.
-#' @param rastfn String or Raster. File name(s) with extensions, or raster
-#' object(s).  Note: raster objects must be written to file.
+#' @param rastfn String or Raster. File name with extension, or raster
+#' object.  Note: raster objects must be written to file.
 #' @param rastfolder String. Name of the folder with raster layers. Optional.
 #' Useful if all raster layers are in same folder.
 #' @param bands Numeric vector. If rast is a multi-layer raster and only 1 or
@@ -157,7 +157,10 @@ spZonalRast <- function(polyv,
     
   ## Get raster info 
   ########################################################  
-
+  if (length(rastfn) > 1) {
+    stop("only one raster is allowed... use spGetAuxiliary for bulk zonal means with extract=FALSE")
+  }
+  
   ## Verify rasters 
   rastfn <- suppressWarnings(getrastlst(rastfn, rastfolder, 
 		stopifLonLat=TRUE, gui=gui))
