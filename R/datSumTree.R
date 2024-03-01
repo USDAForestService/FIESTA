@@ -1017,7 +1017,7 @@ datSumTree <- function(tree = NULL,
     }
     out_conn <- outlst$out_conn
   }
- 
+
   ################################################################################  
   ################################################################################  
   ### DO WORK
@@ -1141,7 +1141,7 @@ datSumTree <- function(tree = NULL,
       seedx[, COUNT := 1]
     }
   }   
- 
+  
   ## ADDS '_TPA' TO VARIABLE NAME, MULTIPLIES BY TPA_UNADJ, AND DIVIDES BY adjfac
   tunitlst <- list()
   for (tvar in tsumvarlst) {
@@ -1153,7 +1153,6 @@ datSumTree <- function(tree = NULL,
         if (fname == "standing-dead") fname <- "dead"
       }
     }
-	
     if (tvar %in% c(tuniqueid, tpavars)) {
       tvar <- "COUNT"
 	  tunits <- "trees"
@@ -1199,7 +1198,7 @@ datSumTree <- function(tree = NULL,
         }
       }
     } 
- 
+
     ## MULTIPLY tvar BY TPA VARIABLE IF DESIRED
     if (TPA) {
       if (tvar %in% mortvars) {
@@ -1250,11 +1249,11 @@ datSumTree <- function(tree = NULL,
       }
       if (addseed && tvar=="COUNT") {
         #seedx[, COUNT := TREECOUNT_CALC]
-        seedx[, (newname) := get(eval(tvarnew)) * TREECOUNT_CALC]
+        seedx[, (newname) := get(eval(tvarnew))]
         seedcountvar=treecountvar <- newname
       }
     }
-
+	
     ## ADJUSTMENT FACTORS
     if (adjtree) {
       ## Create new name for adjusted variable
@@ -1288,7 +1287,7 @@ datSumTree <- function(tree = NULL,
     } 
 	tunitlst[[newname2]] <- tunits
   }
- 
+
   ######################################################################## 
   ## Aggregate tree variables
   ######################################################################## 
