@@ -5,7 +5,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 	domvarlst=NULL, domlut=NULL, title.rowvar=NULL, title.colvar=NULL, 
  	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
 	title.rowgrp=NULL, landarea=NULL, states=NULL, cvars2keep=NULL,
-	whereqry=NULL){
+	whereqry=NULL, tfilter=NULL){
 
   ####################################################################################
   ## CHECKS ROW AND COLUMN INFO
@@ -208,6 +208,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 		warn=paste(rowvar, "not found"))
   if (is.null(rowvar)) rowvar <- "NONE"
 
+
   ## If rowvar == "NONE", set rowvar = "TOTAL" and exit, returning short list
   if (rowvar == "NONE") {
     rowvar <- "TOTAL"
@@ -283,6 +284,18 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       }
     }
 
+    ## Add tfilter to whereqry
+    twhereqry <- whereqry
+	if (!is.null(treef)) {
+	  if (!is.null(tfilter)) {
+	    if (!is.null(whereqry)) {
+		  twhereqry <- paste0(whereqry, " AND ", tfilter)
+		} else {
+		  twhereqry <- paste0("\n", tfilter)
+		}
+      } 
+	}
+
     ##################################################################################
     ## Check for lookup tables
     ##################################################################################
@@ -310,7 +323,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
         }
       }
     } else if (rowvar %in% cnames) {
-
+		  
       ## add rowvar to cvars2keep
       cvars2keep <- c(cvars2keep, rowvar)
 	  
@@ -328,33 +341,57 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 		  
           ## add rowvar to cvars2keep
           cvars2keep <- c(cvars2keep, row.orderby)	
-		  
-          uniquerow.qry <- 
-		     paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)),
+
+       	  if (!is.null(treef)) {
+            uniquerow.qry <- 
+               paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
+                  "\nFROM ", condfnm, " c ",
+                  "\nLEFT OUTER JOIN ", treefnm, " t ON(c.", cuniqueid, " = t.", tuniqueid, 
+                  " AND c.", condid, " = t.", condid, ")", 
+                  twhereqry, 					
+                  "\nORDER BY ", toString(c(row.orderby, rowvar)))
+		  } else {				  
+            uniquerow.qry <- 
+		       paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
 		            "\nFROM ", condfnm,
-                    whereqry,					
+					whereqry,
 					"\nORDER BY ", toString(c(row.orderby, rowvar)))
+		  }	  
 		  rowvartmp <- row.orderby
 		  row.orderby <- rowvar
 		  rowvar <- rowvartmp
-		
-	      if (isdb) {
-            uniquerow <- DBI::dbGetQuery(dbconn, uniquerow.qry)[[1]]
+		  
+		  #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
+ 	      if (isdb) {
+            uniquerow <- DBI::dbGetQuery(dbconn, uniquerow.qry)
 		  } else {
-            uniquerow <- sqldf::sqldf(uniquerow.qry)[[1]]
+            uniquerow <- sqldf::sqldf(uniquerow.qry, connection = NULL)
           }	
+
 		}
       } else {
-        cuniquex.qry <- 
+
+	  	#if (!is.null(treef)) {
+		if (!is.null(colvar) && colvar %in% tnames) {
+          cuniquex.qry <- 
+             paste0("SELECT DISTINCT ", rowvar, 
+                "\nFROM ", treefnm, " t ",
+                "\nLEFT OUTER JOIN ", condfnm, " c ON(c.", cuniqueid, " = t.", tuniqueid, 
+                " AND c.", condid, " = t.", condid, ")", 
+                twhereqry, 					
+                "\nORDER BY ", rowvar)
+		} else {				  
+          cuniquex.qry <- 
 		     paste0("SELECT DISTINCT ", rowvar, 
-		            "\nFROM ", condfnm,
-                    whereqry,					
-					"\nORDER BY ", rowvar)
-	  
+		          "\nFROM ", condfnm,
+			      whereqry,
+				  "\nORDER BY ", rowvar)
+		}	  	  
+		#message("getting unique values for ", rowvar, ":\n", cuniquex.qry, "\n")
 	    if (isdb) {
           cuniquex <- DBI::dbGetQuery(dbconn, cuniquex.qry)[[1]]
 		} else {
-          cuniquex <- sqldf::sqldf(cuniquex.qry)[[1]]
+          cuniquex <- sqldf::sqldf(cuniquex.qry, connection = NULL)[[1]]
         }
         if (any(is.na(cuniquex)) && !keepNA) {
           cuniquex <- cuniquex[!is.na(cuniquex)]		
@@ -450,7 +487,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       #}
 
     } else if (rowvar %in% tnames) {
-
+	
 	  ## Check row.orderby
       if (!is.null(row.orderby) && row.orderby != "NONE") {
         if (row.orderby == rowvar) {
@@ -470,18 +507,20 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                     "\nFROM ", condfnm, " c ",
                     "\nLEFT OUTER JOIN ", treefnm, " t ON(c.", cuniqueid, " = t.", tuniqueid, 
                     " AND c.", condid, " = t.", condid, ")", 
-                    whereqry, 					
+                    twhereqry, 					
                     "\nORDER BY ", toString(c(row.orderby, rowvar)))
 		  } else {				  
             uniquerow.qry <- 
 		     paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
 		            "\nFROM ", treefnm,
+					twhereqry,
 					"\nORDER BY ", toString(c(row.orderby, rowvar)))
 		  }
+		  #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
 		  if (isdb) {
-            uniquerow <- DBI::dbGetQuery(dbconn, uniquerow.qry)[[1]]
+            uniquerow <- DBI::dbGetQuery(dbconn, uniquerow.qry)
 		  } else {
-            uniquerow <- sqldf::sqldf(uniquerow.qry)[[1]]
+            uniquerow <- sqldf::sqldf(uniquerow.qry, connection = NULL)
           }		  
 		  rowvartmp <- row.orderby
 		  row.orderby <- rowvar
@@ -517,6 +556,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 		            "\nFROM ", seedfnm,
 					"\nORDER BY ", toString(c(row.orderby, rowvar)))
 		    }	
+		    #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
 		    if (isdb) {
               uniquerow <- DBI::dbGetQuery(dbconn, uniquerow.qry)[[1]]
 		    } else {
@@ -543,19 +583,23 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                     "\nFROM ", condfnm, " c ",
                     "\nLEFT OUTER JOIN ", treefnm, " t ON(c.", cuniqueid, " = t.", tuniqueid, 
                     " AND c.", condid, " = t.", condid, ")", 
-                    whereqry, 					
+                    twhereqry, 					
                     "\nORDER BY ", rowvar)
 		  } else {				  
             tuniquex.qry <- 
 		       paste0("SELECT DISTINCT ", rowvar, 
 		            "\nFROM ", treefnm,
+					whereqry,
 					"\nORDER BY ", rowvar)
 		  }
+
+		  #message("getting unique values for ", rowvar, ":\n", tuniquex.qry, "\n")
 		  if (isdb) {
             tuniquex <- DBI::dbGetQuery(dbconn, tuniquex.qry)[[1]]
 		  } else {
-            tuniquex <- sqldf::sqldf(tuniquex.qry)[[1]]
-          } 		  
+            tuniquex <- sqldf::sqldf(tuniquex.qry, connection = NULL)[[1]]
+          } 
+		  
         } else {
 	      tuniquex <- NULL
 	    }
@@ -589,11 +633,13 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 		            "\nFROM ", seedfnm,
 					"\nORDER BY ", rowvar)
 		      }
-			
+			  if (estseed == "only") {
+		        #message("getting unique values for ", rowvar, ":\n", suniquex.qry, "\n")
+			  }
 		      if (isdb) {
                 suniquex <- DBI::dbGetQuery(dbconn, suniquex.qry)[[1]]
 		      } else {
-                suniquex <- sqldf::sqldf(suniquex.qry)[[1]]
+                suniquex <- sqldf::sqldf(suniquex.qry, connection = NULL)[[1]]
               }  
               if (any(is.na(suniquex)) && !keepNA) {
                 suniquex <- suniquex[!is.na(suniquex)]		
@@ -829,7 +875,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       }
 
     } else if (colvar %in% cnames) {
-   	  
+	
       ## add colvar to cvars2keep
       cvars2keep <- c(cvars2keep, colvar)
 
@@ -857,23 +903,34 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 		  col.orderby <- colvar
 		  colvar <- colvartmp
 		
+		  message("getting unique values for ", colvar, ":\n", uniquecol.qry)
 	      if (isdb) {
-            uniquecol <- DBI::dbGetQuery(dbconn, uniquecol.qry)[[1]]
+            uniquecol <- DBI::dbGetQuery(dbconn, uniquecol.qry)
 		  } else {
-            uniquecol <- sqldf::sqldf(uniquecol.qry)[[1]]
+            uniquecol <- sqldf::sqldf(uniquecol.qry, connection = NULL)
           }	
 		}
       } else {
-        cuniquex.qry <- 
-		     paste0("SELECT DISTINCT ", colvar, 
+       	if (!is.null(treef)) {
+          cuniquex.qry <- 
+             paste0("SELECT DISTINCT ", colvar, 
+                  "\nFROM ", condfnm, " c ",
+                  "\nLEFT OUTER JOIN ", treefnm, " t ON(c.", cuniqueid, " = t.", tuniqueid, 
+                  " AND c.", condid, " = t.", condid, ")", 
+                  whereqry, 					
+                  "\nORDER BY ", colvar)
+		} else {				  
+          cuniquex.qry <- 
+		   paste0("SELECT DISTINCT ", colvar, 
 		            "\nFROM ", condfnm,
-                    whereqry,					
+					whereqry,
 					"\nORDER BY ", colvar)
-	  
+		}	  
+		#message("getting unique values for ", colvar, ":\n", cuniquex.qry, "\n")
 	    if (isdb) {
           cuniquex <- DBI::dbGetQuery(dbconn, cuniquex.qry)[[1]]
 		} else {
-          cuniquex <- sqldf::sqldf(cuniquex.qry)[[1]]
+          cuniquex <- sqldf::sqldf(cuniquex.qry, connection = NULL)[[1]]
         }		  
         if (any(is.na(cuniquex)) && !keepNA) {
           cuniquex <- cuniquex[!is.na(cuniquex)]		
@@ -955,12 +1012,14 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
             uniquecol.qry <- 
 		     paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
 		            "\nFROM ", treefnm,
+					whereqry,
 					"\nORDER BY ", toString(c(col.orderby, colvar)))
 		  }
+		  #message("getting unique values for ", colvar, ":\n", uniquecol.qry, "\n")
 		  if (isdb) {
-            uniquecol <- DBI::dbGetQuery(dbconn, uniquecol.qry)[[1]]
+            uniquecol <- DBI::dbGetQuery(dbconn, uniquecol.qry)
 		  } else {
-            uniquecol <- sqldf::sqldf(uniquecol.qry)[[1]]
+            uniquecol <- sqldf::sqldf(uniquecol.qry, connection = NULL)
           }		  
 		  colvartmp <- col.orderby
 		  col.orderby <- colvar
@@ -996,10 +1055,11 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 		            "\nFROM ", seedfnm,
 					"\nORDER BY ", toString(c(col.orderby, colvar)))
 		    }	
+		    #message("getting unique values for ", colvar, ":\n", uniquecol.qry, "\n")
 		    if (isdb) {
-              uniquecol <- DBI::dbGetQuery(dbconn, uniquecol.qry)[[1]]
+              uniquecol <- DBI::dbGetQuery(dbconn, uniquecol.qry)
 		    } else {
-              uniquecol <- sqldf::sqldf(uniquecol.qry)[[1]]
+              uniquecol <- sqldf::sqldf(uniquecol.qry, connection = NULL)
             }
 			
             if (estseed == "add" && colvar == "DIACL" && is.data.frame(treef)) {
@@ -1031,10 +1091,11 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 		            "\nFROM ", treefnm,
 					"\nORDER BY ", colvar)
 		  }
+		  message("getting unique values for ", colvar, ":\n", tuniquex.qry)
 		  if (isdb) {
             tuniquex <- DBI::dbGetQuery(dbconn, tuniquex.qry)[[1]]
 		  } else {
-            tuniquex <- sqldf::sqldf(tuniquex.qry)[[1]]
+            tuniquex <- sqldf::sqldf(tuniquex.qry, connection = NULL)[[1]]
           } 		  
           if (any(is.na(tuniquex)) && !keepNA) {
             tuniquex <- tuniquex[!is.na(tuniquex)]		
@@ -1069,12 +1130,14 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 		           paste0("SELECT DISTINCT ", colvar, 
 		            "\nFROM ", seedfnm,
 					"\nORDER BY ", colvar)
-		      }		     	
-			
+		      }	
+              if (estseed == "only") {			  
+		        message("getting unique values for ", colvar, ":\n", suniquex.qry)
+              }				
 		      if (isdb) {
                 suniquex <- DBI::dbGetQuery(dbconn, suniquex.qry)[[1]]
 		      } else {
-                suniquex <- sqldf::sqldf(suniquex.qry)[[1]]
+                suniquex <- sqldf::sqldf(suniquex.qry, connection = NULL)[[1]]
               }		  
               if (any(is.na(suniquex)) && !keepNA) {
                 suniquex <- suniquex[!is.na(suniquex)]		

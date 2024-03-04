@@ -422,7 +422,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
-                cuniqueid=cuniqueid, condid=condid, vcondx=vcondx, 
+                cuniqueid=cuniqueid, condid=condid, vcondx=vcondx, tfilter=vfilter,
                 vuniqueid=vuniqueid, sumunits=sumunits, landarea=landarea, 
                 ACI.filter=ACI.filter, pcfilter=pcfilter, allin1=allin1, 
                 estround=estround, pseround=pseround, divideby=divideby, 
@@ -454,6 +454,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   raw_dsn <- estdat$raw_dsn
   rawfolder <- estdat$rawfolder
   whereqry <- estdat$whereqry
+  vfilter <- estdat$tfilter
   conn <- estdat$conn
 
   if ("STATECD" %in% names(pltcondf)) {
@@ -466,11 +467,6 @@ modGBp2veg <- function(GBpopdat = NULL,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  #if (!is.null(vfilter)) {
-  #  if (!is.null(whereqry)) {
-	#  whereqry <- paste(whereqry, "AND", vfilter)
-	#}
-  #}  
   rowcolinfo <- check.rowcol(gui=gui, esttype="TREE", treef=vcondf, condf=pltcondf, 
                   cuniqueid=cuniqueid, rowvar=rowvar, colvar=colvar, 
                   row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
@@ -478,7 +474,8 @@ modGBp2veg <- function(GBpopdat = NULL,
                   row.add0=row.add0, col.add0=col.add0, 
                   title.rowvar=title.rowvar, title.colvar=title.colvar, 
                   rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-                  rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea)
+                  rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea,
+				  whereqry = whereqry, tfilter = vfilter)
   vcondf <- rowcolinfo$treef
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
@@ -513,7 +510,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   #####################################################################################
   ### Get estimation data from vcond table
   #####################################################################################
-  p2vegdat <- check.tree(gui=gui, treef=vcondf, bycond=TRUE, condf=condf, 
+  p2vegdat <- check.tree(gui=gui, treef=vcondf, bycond=TRUE, condf=pltcondf,
                   bytdom=bytdom, tuniqueid=vuniqueid, cuniqueid=cuniqueid, 
                   esttype=esttype, estvarn=estvar, estvarn.TPA=FALSE, 
                   estvarn.filter=vfilter, esttotn=TRUE, 
@@ -521,6 +518,7 @@ modGBp2veg <- function(GBpopdat = NULL,
                   adjvar=varadjP2VEG, metric=metric)
   if (is.null(p2vegdat)) return(NULL) 
   vdomdat <- p2vegdat$tdomdat
+
 
   if (rowvar != "TOTAL") {
     if (!row.add0) {
@@ -573,7 +571,7 @@ modGBp2veg <- function(GBpopdat = NULL,
     estvar <- p2vegdat$estvar
     estvarn.name <- p2vegdat$estvar.name
     estvarn.filter <- p2vegdat$estvar.filter
-    tdomvarlst <- p2vegdat$tdomvarlst
+    tdomvarlstn <- p2vegdat$tdomvarlst
     estunits <- p2vegdat$estunits
 
     #estvar.filter <- p2vegdat$estvar.filter
@@ -616,6 +614,7 @@ modGBp2veg <- function(GBpopdat = NULL,
 
   message("getting estimates using GB...")
   if (addtotal) {
+	vdomdat$TOTAL = 1
     ## Get total estimate and merge area
     if (peracre) {
       if (!is.null(tdomvar)) {
@@ -639,10 +638,10 @@ modGBp2veg <- function(GBpopdat = NULL,
                                 domain = "TOTAL")
     } else {
       vdomdattot <- vdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		    by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
-      unit_totest <- GBest.pbar(sumyn = estvar.name, 
-                                ysum = vdomdattot, 
-		                     esttype = esttype, 
+		    by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvarn.name]
+      unit_totest <- GBest.pbar(sumyn = estvarn.name, 
+                                ysum = vdomdattot,
+								esttype = esttype, 
                                 uniqueid = cuniqueid, 
                                 stratalut = stratalut,
                                 unitvar = unitvar, 
@@ -803,7 +802,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   if (!is.null(unit_rowest)) {
     unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, 
                             uniquex=uniquerow, unitvar=unitvar, 
-                            xvar.add0=row.add0)
+                            xvar.add0=row.add0)							
     tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2

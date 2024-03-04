@@ -2,7 +2,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
     pltcondf=NULL, cuniqueid="PLT_CN", condid="CONDID", treex=NULL, seedx=NULL, 
 	vcondx=NULL, tuniqueid="PLT_CN", vuniqueid="PLT_CN", sumunits=FALSE, 
 	estseed="none", woodland="Y", landarea=NULL, ACI.filter=NULL, pcfilter=NULL, 
-	TPA=TRUE, tpavar="TPA_UNADJ", allin1=FALSE, estround=6, pseround=3, 
+	tfilter=NULL, TPA=TRUE, tpavar="TPA_UNADJ", allin1=FALSE, estround=6, pseround=3, 
 	divideby=NULL, addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
 	savedata=FALSE, outfolder=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
 	outfn.pre=NULL, outfn.date=TRUE, append_layer=FALSE, raw_fmt="csv", 
@@ -309,7 +309,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
     if (estseed != "only") {
       treex <- pcheck.table(treex, conn = conn, stopifnull = TRUE, 
                        stopifinvalid = TRUE, checkonly = TRUE)				
-       if (is.data.frame(treex)) {
+      if (is.data.frame(treex)) {
         ## Check the values of tuniqueid in treex are all in cuniqueid in pltcondf
         treef <- check.matchval(treex, pltcondf, tuniqueid, cuniqueid, 
                       tab1txt="tree", tab2txt="cond", subsetrows=TRUE)
@@ -324,8 +324,19 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
       tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui,
 	                   checklst=treenames, caption="tuniqueid")
 	  ## set key 			   
-      setkeyv(treef, c(tuniqueid, condid))
-     }
+      setkeyv(treef, c(tuniqueid, condid))	  
+
+	  ## Check tfilter
+	  if (!is.null(tfilter)) {
+		tfilter <- RtoSQL(tfilter, x = treenames)
+#	    if (is.null(whereqry)) {
+#          whereqry <- paste0(whereqry, " AND ", tfilter)
+#		} else {
+#          whereqry <- paste0("\nWHERE ", tfilter)
+#        }
+        returnlst$tfilter <- tfilter		
+      }
+    }
 	
     if (estseed %in% c("add", "only")) {
       seedx <- pcheck.table(seedx, conn = conn, stopifnull = TRUE, 
@@ -352,6 +363,17 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
 	    message(tuniqueid, " not in seed table")
 	    return(NULL)
 	  }
+	  
+	  ## Check tfilter
+	  if (seedonly && !is.null(tfilter)) {
+#		tfilter <- RtoSQL(tfilter, x = seednames)
+#	    if (is.null(whereqry)) {
+#          whereqry <- paste0(whereqry, " AND ", tfilter)
+#		} else {
+#          whereqry <- paste0("\nWHERE ", tfilter)
+#        }		  
+        returnlst$tfilter <- tfilter		
+      }
 	}
 	
     returnlst$tuniqueid <- tuniqueid
@@ -373,10 +395,23 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
 				c(cuniqueid, condid), tab1txt="vcondx", tab2txt="cond", 
 				subsetrows=TRUE)
 	  returnlst$vcondf <- vcondf
+	  vnames <- names(vcondf)
 	} else {
       returnlst$vcondf <- vcondx
+      vnames <- DBI::dbListFields(conn, vcondx)
 	}
     returnlst$vuniqueid <- vuniqueid
+	
+    ## Check tfilter
+	if (!is.null(tfilter)) {
+	  tfilter <- RtoSQL(tfilter, x = vnames)
+#	  if (is.null(whereqry)) {
+#        whereqry <- paste0(whereqry, " AND ", tfilter)
+#      } else {
+#        whereqry <- paste0("\nWHERE ", tfilter)
+#      }
+      returnlst$tfilter <- tfilter		
+    }
   }
 
   if (esttype %in% c("AREA", "TREE")) {

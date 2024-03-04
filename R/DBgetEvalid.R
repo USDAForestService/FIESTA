@@ -145,9 +145,9 @@ DBgetEvalid <- function(states = NULL,
   #evalresp <- TRUE
   evalresp <- FALSE
   isgrm=issccm <- FALSE 
-  returnevalid <- FALSE
+  returnevalid=ppsaindb <- FALSE
   nopoptables <- TRUE
-  
+   
 
   ## Define variables
   SCHEMA. <- ""
@@ -539,6 +539,7 @@ DBgetEvalid <- function(states = NULL,
       ## Check for pop_plot_stratum_assgn
 	  ppsanm <- findnm(ppsa_layer, dbtablst, returnNULL=TRUE)
       if (!is.null(ppsanm)) {
+	    ppsaindb <- TRUE
         ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
       } 
 
@@ -1115,6 +1116,7 @@ DBgetEvalid <- function(states = NULL,
 	}
 	returnlst$ppsanm <- ppsanm
 	returnlst$ppsaflds <- ppsaflds
+	returnlst$ppsaindb <- ppsaindb
   }
   #returnlst$POP_EVAL <- POP_EVAL[EVALID %in% unlist(evalidlist),]
 
