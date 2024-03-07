@@ -600,6 +600,10 @@ modGBp2veg <- function(GBpopdat = NULL,
 		(!is.null(tdomvarlstn) && length(tdomvarlstn) > 1)), TRUE, FALSE)
   stratalut <- setDT(stratalut)
   vdomdat$TOTAL = 1
+  
+  if (peracre) {
+    addtotal <- FALSE
+  }
 
 
   ## Transpose rows if tdomvar2 is not NULL
