@@ -125,6 +125,8 @@
 #' FIESTA::spGetStrata().
 #' @param auxdat R List object. Output data list components from
 #' FIESTA::spGetAuxiliary().
+#' @param keepadjvars Logical. If TRUE, keep adjustment factors from 
+#' pop_stratum table in FIA database.
 #' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ... For extendibility.
 #' @return A list with population data for Green-Book estimates.
@@ -271,6 +273,7 @@ modGBpop <- function(popType = "VOL",
                      pltdat = NULL, 
                      stratdat = NULL, 
                      auxdat = NULL, 
+					 keepadjvars = FALSE,
                      gui = FALSE, 
                      ...){
 
@@ -734,7 +737,8 @@ modGBpop <- function(popType = "VOL",
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
-
+print("TEST")
+print(stratalut)
   if (popType %in% c("ALL", "CURR", "VOL")) {
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
@@ -760,6 +764,8 @@ modGBpop <- function(popType = "VOL",
     areawt <- popcheck$areawt
     areawt2 <- popcheck$areawt2
     tpropvars <- popcheck$tpropvars
+	
+	adjvars <- c("ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
   }
 
   if (popType %in% c("CHNG", "GRM")) {
@@ -789,11 +795,14 @@ modGBpop <- function(popType = "VOL",
     condsampcnt <- popcheck$condsampcnt
     areawt <- popcheck$areawt
     tpropvars <- popcheck$tpropvars
-  }
+	
+	adjvars <- c("ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
+   }
 
   if (popType == "P2VEG") {
     popcheck <- check.popdataP2VEG(gui=gui, 
-          tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
+          tabs=popTabs, tabIDs=popTabIDs, 
+		  pltassgnx=pltassgnx, pltassgnid=pltassgnid,
           pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
           whereqry=whereqry, adj=adj, ACI=ACI, 
           pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn, 
@@ -811,7 +820,9 @@ modGBpop <- function(popType = "VOL",
     areawt <- popcheck$areawt
     vareawt <- popcheck$vareawt
     vuniqueid <- popcheck$vcondstrid
-  }
+
+	adjvars <- c("ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR", "ADJ_FACTOR_P2VEG_SUBP")
+   }
 
   if (popType == "DWM") {
     popcheck <- check.popdataDWM(gui=gui, 
@@ -873,7 +884,9 @@ modGBpop <- function(popType = "VOL",
 							strwtvar = strwtvar, 
 							P2POINTCNT = P2POINTCNT,
 							auxtext = "stratalut",
-							AOI = popFilter2$AOIonly)
+							AOI = popFilter2$AOIonly,
+							keepadjvars = keepadjvars,
+							adjvars = adjvars)
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
@@ -917,7 +930,7 @@ modGBpop <- function(popType = "VOL",
     if (adj == "samp") {
       message("calculating adjustment factors...")
     }      
-	
+
     if (popType %in% c("ALL", "VOL", "CURR")) {
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 
@@ -930,7 +943,9 @@ modGBpop <- function(popType = "VOL",
                         strvars = strvar,
                         unitarea = unitarea,
                         areavar = areavar, 
-                        areawt = areawt
+                        areawt = areawt,
+						keepadjvars = keepadjvars,
+						adjvars = adjvars
                         )
       condx <- adjfacdata$condx
       treef <- adjfacdata$treex
@@ -1117,7 +1132,8 @@ modGBpop <- function(popType = "VOL",
     }
  
     returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
-            cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
+            cuniqueid=cuniqueid, condid=condid, ACI=ACI, 
+			ACI.filter=ACI.filter, 
 			pltassgnx=pltassgnx, pltassgnid=pltassgnid,
             unitarea=unitarea, areavar=areavar, 
             areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, 

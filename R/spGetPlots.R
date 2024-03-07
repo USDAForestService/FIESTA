@@ -458,7 +458,7 @@ spGetPlots <- function(bnd = NULL,
     pltids <- pcheck.table(pltids)
 
     if (!is.null(pltids)) {
-      Endyr.filter <- check.logic(pltids, Endyr.filter)
+      Endyr.filter <- check.logic(pltids, Endyr.filter, stopifnull=FALSE)
 
       ## Check xyjoinid
       xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
@@ -502,7 +502,7 @@ spGetPlots <- function(bnd = NULL,
       states <- pcheck.states(as.numeric(stcds))
 
       if (!is.null(Endyr.filter)) {
-        Endyr.filter <- check.logic(pltids, Endyr.filter)
+        Endyr.filter <- check.logic(pltids, Endyr.filter, stopifnull=FALSE)
 
         ## Split pltids
         pltids1 <- datFilter(pltids, xfilter = Endyr.filter)$xf
@@ -531,14 +531,14 @@ spGetPlots <- function(bnd = NULL,
           }
         }
       } 
- 
+
       ## Import boundary
       bndx <- pcheck.spatial(layer=bnd, dsn=bnd_dsn, caption="boundary")
       if (!is.null(bndx)) {
         bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
       } 
       if (!is.null(Endyr.filter)) {
-        Endyr.filter <- check.logic(bndx, Endyr.filter)
+        Endyr.filter <- check.logic(bndx, Endyr.filter, stopifnull=FALSE)
 
         ## split boundaries
         bndx1 <- datFilter(bndx, xfilter = Endyr.filter)$xf
@@ -550,7 +550,7 @@ spGetPlots <- function(bnd = NULL,
           stop("invalid Endyr.filter: ", Endyr.filter) 
         }
       }
- 
+
       ## Check states
       if (!is.null(states)) {
         states <- pcheck.states(states)

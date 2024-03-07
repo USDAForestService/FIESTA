@@ -20,7 +20,6 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     tnames <- names(treef)
   }
   
-
   ## SET ESTIMATION VARIABLE LIST
   estvarlst.not <- c("TREE", "CONDID", "PREV_TRE_CN", "SUBP")
   estvarlst <- tnames[!tnames %in% estvarlst.not] 	## Estimation variables
@@ -75,7 +74,6 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
   ###############################################################################
   if (bytdom) {
     pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
-
     suppressWarnings(
     tdomdata <- datSumTreeDom(tree=treef, seed=seedf, cond=condf, plt=plt, 
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
@@ -86,6 +84,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
            addseed=addseed, seedonly=seedonly, woodland=woodland))
     if (is.null(tdomdata)) return(NULL)
     tdomdat <- tdomdata$tdomdat
+
 
     #if (!pivot) {
     #  tdomdat <- tdomdat[!is.na(tdomdat[[tdomvar]]),]
@@ -100,7 +99,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
            bycond=bycond, condid=condid,
            tsumvarlst=estvarn, tsumvarnmlst=estvarn.name, TPA=estvarn.TPA,
            tfilter=estvarn.filter, adjtree=adjtree, 
-           adjvar=adjvar, adjTPA=adjTPA,
+           adjvar=adjvar, adjTPA=adjTPA, ACI=ACI,
            metric=metric, addseed=addseed, seedonly=seedonly, woodland=woodland)
     if (is.null(treedata)) return(NULL)
     tdomdat <- treedata$treedat

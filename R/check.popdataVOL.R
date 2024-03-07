@@ -60,6 +60,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   }
   cuniqueid <- tabIDs[["cond"]]
 
+
   ###################################################################################
   ## Database queries
   ###################################################################################
@@ -137,7 +138,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
       dbqueries$seed <- seedqry
     }
   }
- 
+
   ###################################################################################
   ## Import tables
   ###################################################################################
@@ -344,7 +345,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
       return(NULL)
     }
   }
-
 
   ###################################################################################
   ## Check area weight 

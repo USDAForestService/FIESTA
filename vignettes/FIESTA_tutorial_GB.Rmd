@@ -250,7 +250,6 @@ In this example, we use the sample Wyoming data (2013 Evaluation) stored in `FIE
 
 
 ```{r, results = FALSE, message = F}
-
 GBpopdat <- modGBpop(
   popTabs = list(cond = FIESTA::WYcond,          # FIA plot/condition data
                  tree = FIESTA::WYtree,          # FIA tree data

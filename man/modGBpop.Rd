@@ -34,6 +34,7 @@ modGBpop(
   pltdat = NULL,
   stratdat = NULL,
   auxdat = NULL,
+  keepadjvars = FALSE,
   gui = FALSE,
   ...
 )
@@ -132,6 +133,9 @@ FIESTA::spGetStrata().}
 
 \item{auxdat}{R List object. Output data list components from
 FIESTA::spGetAuxiliary().}
+
+\item{keepadjvars}{Logical. If TRUE, keep adjustment factors from 
+pop_stratum table in FIA database.}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 

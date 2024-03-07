@@ -903,7 +903,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 		  col.orderby <- colvar
 		  colvar <- colvartmp
 		
-		  message("getting unique values for ", colvar, ":\n", uniquecol.qry)
+		  #message("getting unique values for ", colvar, ":\n", uniquecol.qry)
 	      if (isdb) {
             uniquecol <- DBI::dbGetQuery(dbconn, uniquecol.qry)
 		  } else {
@@ -914,8 +914,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
        	if (!is.null(treef)) {
           cuniquex.qry <- 
              paste0("SELECT DISTINCT ", colvar, 
-                  "\nFROM ", condfnm, " c ",
-                  "\nLEFT OUTER JOIN ", treefnm, " t ON(c.", cuniqueid, " = t.", tuniqueid, 
+                  "\nFROM ", treefnm, " t ",
+                  "\nLEFT OUTER JOIN ", condfnm, " c ON(c.", cuniqueid, " = t.", tuniqueid, 
                   " AND c.", condid, " = t.", condid, ")", 
                   whereqry, 					
                   "\nORDER BY ", colvar)
@@ -1091,7 +1091,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 		            "\nFROM ", treefnm,
 					"\nORDER BY ", colvar)
 		  }
-		  message("getting unique values for ", colvar, ":\n", tuniquex.qry)
+		  #message("getting unique values for ", colvar, ":\n", tuniquex.qry)
 		  if (isdb) {
             tuniquex <- DBI::dbGetQuery(dbconn, tuniquex.qry)[[1]]
 		  } else {
@@ -1132,7 +1132,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 					"\nORDER BY ", colvar)
 		      }	
               if (estseed == "only") {			  
-		        message("getting unique values for ", colvar, ":\n", suniquex.qry)
+		        #message("getting unique values for ", colvar, ":\n", suniquex.qry)
               }				
 		      if (isdb) {
                 suniquex <- DBI::dbGetQuery(dbconn, suniquex.qry)[[1]]

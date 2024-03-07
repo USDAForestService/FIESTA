@@ -88,7 +88,6 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
     whereqry <- paste0("\nWHERE ", RtoSQL(pcfilter))
   }
   pltcondnmlst <- names(pltcondf)
-  
   pltcondf <- datFilter(x = pltcondf, 
                         xfilter = pcfilter, 
 						title.filter = "plt filter?",
@@ -149,13 +148,13 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
 	  whereqry <- paste0("\nWHERE ", RtoSQL(landarea.filter))
     }	  
   }
-  
+
   ###################################################################################
   ## Apply landarea filters
   ###################################################################################
 
   ## Apply landarea.filter to pltcondf
-  pltcondf <- FIESTA::datFilter(x=pltcondf, xfilter=landarea.filter,
+  pltcondf <- datFilter(x=pltcondf, xfilter=landarea.filter,
 		title.filter="landarea filter", gui=gui, stopifnull=FALSE)$xf
   if (is.null(pltcondf)) {
     message(paste(landarea.filter, "removed all records"))
@@ -164,14 +163,13 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
 
   ## Apply ACI.filter to condf
   if (landarea != "ALL") {
-    pltcondf <- FIESTA::datFilter(x=pltcondf, xfilter=ACI.filter,
+    pltcondf <- datFilter(x=pltcondf, xfilter=ACI.filter,
 			title.filter="ACI.filter", gui=gui, stopifnull=FALSE)$xf
     if (is.null(pltcondf)) {
       message(paste(ACI.filter, "removed all records"))
       return(NULL)
     }
   }
-
 
   ## Check sumunits
   ########################################################
@@ -365,7 +363,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
 	  }
 	  
 	  ## Check tfilter
-	  if (seedonly && !is.null(tfilter)) {
+	  if (estseed == "only" && !is.null(tfilter)) {
 #		tfilter <- RtoSQL(tfilter, x = seednames)
 #	    if (is.null(whereqry)) {
 #          whereqry <- paste0(whereqry, " AND ", tfilter)
@@ -401,7 +399,7 @@ check.estdata <- function(esttype, pop_dsn=NULL, pop_fmt=NULL, totals=TRUE,
       vnames <- DBI::dbListFields(conn, vcondx)
 	}
     returnlst$vuniqueid <- vuniqueid
-	
+
     ## Check tfilter
 	if (!is.null(tfilter)) {
 	  tfilter <- RtoSQL(tfilter, x = vnames)

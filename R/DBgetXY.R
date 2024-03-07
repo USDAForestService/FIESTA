@@ -857,12 +857,13 @@ DBgetXY <- function (states = NULL,
     ## Define xyfromqry
 	xyfromqry <- paste0("\nFROM ", SCHEMA., xynm, " xy")
 	xyfromqry <- paste0(xyfromqry, "\nINNER JOIN ", plotnm, " p ON(xy.", xyjoinid, " = p.", pjoinid, ")")
-		
+	
 	## Define xyfromqry2
 	if (measCur) {
 	  inxy <- TRUE
 	  groupvars <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
 	  groupvars <- sapply(groupvars, findnm, xyvars, returnNULL = TRUE)
+
 	  if (any(is.null(groupvars))) {
 	    missvars <- groupvars[is.null(groupvars)]
         if (length(missvars) > 1 || missvars != "unitcd") {
@@ -889,13 +890,12 @@ DBgetXY <- function (states = NULL,
 	      xyfromqry2 <- paste0(xyfromqry2, " and ")
 	    }
 	  }
-	  xyfromqry2 <- paste0(xyfromqry2, " and ", alias., varCur, " = maxyear.maxyr)")
+	  valias. <- ifelse (varCur %in% xyvars, "xy.", "p.")
+	  xyfromqry2 <- paste0(xyfromqry2, " and ", valias., varCur, " = maxyear.maxyr)")
       xyfromqry <- paste0(xyfromqry, xyfromqry2)	  
 	} 
-   			 
 	xyqry <- paste0("SELECT ", toString(c(paste0("xy.", xyvars), paste0("p.", pvars))), 
              xyfromqry)	
-
 
     ## Inventory year table query
     yrvar <- ifelse(!is.null(invyrs), "INVYR", "MEASYEAR")
@@ -1019,7 +1019,6 @@ DBgetXY <- function (states = NULL,
     statecdnm <- findnm("STATECD", xyvars, returnNULL=TRUE)
     stabbr <- pcheck.states(states, "ABBR")
  
-  
     if (length(unlist(invyrs)) > 1) {
 	
 	  if (exists(pnm) && !is.function(get(pnm)) &&!is.null(get(pnm))) {
@@ -1075,8 +1074,7 @@ DBgetXY <- function (states = NULL,
                             popSURVEY = popSURVEY,
 							pltflds = pflds,
 							pvars = pltvars,
-                            Type = Type)							        
-							
+                            Type = Type)							        						
     } else if (allyrs) {
 
 	  if (exists(pnm) && !is.function(get(pnm)) &&!is.null(get(pnm))) {

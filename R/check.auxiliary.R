@@ -6,7 +6,8 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 	minplotnum.unit=10, unit.action="keep", unitlevels=NULL, 
 	minplotnum.strat=2, na.rm=TRUE, removeifnostrata=FALSE, 
  	auxtext="auxlut", removetext="unitarea",
-	pvars2keep=NULL, standardize=TRUE, AOI=FALSE){
+	pvars2keep=NULL, standardize=TRUE, AOI=FALSE, 
+	keepadjvars=FALSE, adjvars=NULL){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -97,6 +98,15 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       }
     }
 
+    if (keepadjvars && !is.null(adjvars)) {
+	  adjvars <- adjvars[adjvars %in% names(auxlut)]
+	  if (length(adjvars) > 0) {
+	    auxlutadj <- auxlut[, c(unitvars, strvars, adjvars), with=FALSE]
+	  } else {
+	    keepadjvars <- FALSE
+	  }
+	}
+
     ## Define sumvars to aggregate
     sumvars <- c(getwtvar, strwtvar, npixelvar)
 
@@ -112,8 +122,14 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 				by=c(unitvars, strvars), .SDcols=sumvars]
       setnames(auxlut, c(unitvars, strvars, sumvars))
     }
+	
     #setkeyv(auxlut, unitvars)
     strunitvars <- c(unitvars, strvars)
+
+	if (keepadjvars && nrow(auxlut) == nrow(auxlutadj)) {
+	  auxlut <- merge(auxlut, auxlutadj, by=strunitvars)
+	}  
+	
 
     ## Check if class of unitvar in auxlut matches class of unitvar in pltx
     tabs <- check.matchclass(pltx, auxlut, c(unitvars, strvars),

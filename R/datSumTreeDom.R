@@ -550,7 +550,6 @@ datSumTreeDom <- function(tree = NULL,
     }
   }
 
-
   ## Build query parts for tree table
   ##################################################
   tfromqry <- paste("FROM", treenm)
@@ -565,19 +564,25 @@ datSumTreeDom <- function(tree = NULL,
   selectvars <- tsumuniqueid
   if (!is.null(tfilter)) {
     if (!seedonly) {
-      message("check filter for trees: ", tfilter)
-      tfilter <- check.logic(treenames, statement=tfilter, stopifinvalid=FALSE)
+      #message("check filter for trees: ", tfilter)
+	  tfiltersql <- RtoSQL(tfilter, x=treenames)
+
 	  if (is.null(twhereqry)) {
-        twhereqry <- paste("WHERE", RtoSQL(tfilter, x=treenames))
+        twhereqry <- paste("WHERE", tfiltersql)
 	  } else {
-        twhereqry <- paste(twhereqry, "AND", RtoSQL(tfilter, x=treenames))
+        twhereqry <- paste(twhereqry, "AND", tfiltersql)
       }	  
     }
+
     if (addseed || seedonly) {
-      message("check filter for seeds: ", tfilter)
-      sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
+      #message("check filter for seeds: ", tfilter)
+      sfilter <- suppressMessages(check.logic(seednames, statement=tfilter, 
+	                       returnpart = TRUE, stopifinvalid=FALSE))
+	  if (!is.null(sfilter)) {
+	    sfilter <- RtoSQL(sfilter)
+	  }
       if (!is.null(sfilter)) {
-        swhereqry <- paste("WHERE", RtoSQL(tfilter))
+        swhereqry <- paste("WHERE", sfilter)
       }
     }
 	if (woodland %in% c("N", "only")) {
@@ -670,7 +675,6 @@ datSumTreeDom <- function(tree = NULL,
     }
     sselectvars <- unique(c(selectvars, tsumvar, tdomvar, tdomvar2))
   }
-
 
   ## CHECK TPA and tsumvars
   ###########################################################  
@@ -1692,10 +1696,9 @@ datSumTreeDom <- function(tree = NULL,
     tabs <- check.matchclass(condx, tdoms, c(cuniqueid, condid))
     condx <- tabs$tab1
     tdoms <- tabs$tab2
-     
+    
     ## Merge summed data to cond table
     sumtreef <- merge(condx, tdoms, all.x=TRUE, by=c(cuniqueid, condid))
-
     if (NAto0) {
       for (col in tdomscolstot) set(sumtreef, which(is.na(sumtreef[[col]])), col, 0)
       #sumtreef[is.na(sumtreef)] <- 0

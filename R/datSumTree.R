@@ -484,18 +484,19 @@ datSumTree <- function(tree = NULL,
  
   if (!is.null(tfilter) && tfilter != "") {
     if (!seedonly) {
-      tfilter <- check.logic(treenames, statement=tfilter, stopifinvalid=FALSE)
-      tfilter <- RtoSQL(tfilter, x=treenames)
+	  tfiltersql <- RtoSQL(tfilter, x=treenames)
       if (is.null(twhereqry)) {
-        twhereqry <- paste("WHERE", tfilter)
+        twhereqry <- paste("WHERE", tfiltersql)
 	  } else {
-        twhereqry <- paste(twhereqry, "AND", tfilter)
+        twhereqry <- paste(twhereqry, "AND", tfiltersql)
       }	 
     }	  
     if (addseed || seedonly) {
-      sfilter <- check.logic(seednames, statement=tfilter, stopifinvalid=FALSE)
-      sfilter <- RtoSQL(sfilter, x=seednames)
-      if (!is.null(sfilter)) {
+      #message("check filter for seeds: ", tfilter)
+      sfilter <- suppressMessages(check.logic(seednames, statement=tfilter, 
+	                   returnpart = TRUE, stopifinvalid=FALSE))
+	  if (!is.null(sfilter)) {
+	    sfilter <- RtoSQL(sfilter)
         swhereqry <- paste("WHERE", sfilter)
       }
     }

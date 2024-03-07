@@ -21,6 +21,7 @@ DBgetEvalid(
   dbTabs = dbTables(),
   dbconn = NULL,
   dbconnopen = FALSE,
+  returnPOP = FALSE,
   gui = FALSE
 )
 }
@@ -72,6 +73,9 @@ See help(dbTables) for a list of options.}
 \item{dbconn}{Open database connection.}
 
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
+
+\item{returnPOP}{Logical. If TRUE, returns pop tables (SURVEY, 
+POP_PLOT_STRATUM_ASSGN) as R objects instead of table names, if in db.}
 
 \item{gui}{Logical. If TRUE, gui windows pop up for parameter selection.}
 }

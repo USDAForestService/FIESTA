@@ -418,6 +418,7 @@ modGBtree <- function(GBpopdat,
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
   tuniqueid <- GBpopdat$tuniqueid
+  ACI <- GBpopdat$ACI
   ACI.filter <- GBpopdat$ACI.filter
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
@@ -549,7 +550,7 @@ modGBtree <- function(GBpopdat,
   ###############################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed,
-                  bycond=TRUE, condf=condf, bytdom=bytdom, 
+                  bycond=TRUE, ACI=ACI, condf=condf, bytdom=bytdom, 
                   tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
                   esttype=esttype, estvarn=estvar, estvarn.filter=estvar.filter, 
                   esttotn=TRUE, tdomvar=tdomvar, tdomvar2=tdomvar2, 

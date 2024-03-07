@@ -476,7 +476,7 @@ modGBratio <- function(GBpopdat,
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
-  
+ 
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -516,6 +516,8 @@ modGBratio <- function(GBpopdat,
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
   rawfolder <- estdat$rawfolder
+  whereqry <- estdat$whereqry
+  tfilter <- estdat$tfilter
 
   if ("STATECD" %in% names(pltcondf)) {
     states <- pcheck.states(sort(unique(pltcondf$STATECD)))
@@ -539,6 +541,7 @@ modGBratio <- function(GBpopdat,
 	                rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
 					rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
                     landarea=landarea, states=states, 
+					whereqry = whereqry, tfilter = tfilter, 
 					cvars2keep="COND_STATUS_CD")
   treef <- rowcolinfo$treef
   seedf <- rowcolinfo$seedf

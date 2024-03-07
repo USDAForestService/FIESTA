@@ -230,9 +230,11 @@ checktabs <- function(tabs, names) {
            nullcheck=nullcheck, gui=gui, returnsf=FALSE))
 
     ## Get vsubpspp data for generating estimates
-    assign(vsubpsppnm, pcheck.table(get(vsubpsppnm), tab_dsn=dsn, 
+	if (!is.null(vsubpsppnm)) {
+      assign(vsubpsppnm, pcheck.table(get(vsubpsppnm), tab_dsn=dsn, 
            tabnm="vsubpspp", caption="vsubpspp table?", 
            nullcheck=nullcheck, gui=gui, returnsf=FALSE))
+    }
   }  
 
   ## Build pfromqry
@@ -455,7 +457,7 @@ checktabs <- function(tabs, names) {
       message("NF_COND_STATUS_CD not in dataset.. assuming all sampled nonforest conditions")
     }
   }
- 
+
   #############################################################################
   ## Generate and apply nonsamp.cfilter
   #############################################################################
@@ -487,7 +489,6 @@ checktabs <- function(tabs, names) {
       return(NULL)
     }
   }
-
 
   ###################################################################################
   ## Check area weight 
@@ -652,7 +653,6 @@ checktabs <- function(tabs, names) {
 
   ## Merge summed subplot condition proportions to condx
   vcondx <- merge(condx, SUBP_CONDPROP_UNADJ)
-
 
   #############################################################################
   ## Check veg profile data (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE)

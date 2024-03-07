@@ -167,9 +167,10 @@ datFilter <- function(x,
   ### DO WORK
   ################################################################################
   xfilters <- {}
-
+ 
   if (!is.null(xfilter)) {
     if (!is.character(xfilter)) stop("xfilter must be a character string")
+
     ## Check logical statement
     xfilter <- check.logic(datx, xfilter, filternm=filternm)
 
