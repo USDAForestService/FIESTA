@@ -469,15 +469,13 @@ modGBp2veg <- function(GBpopdat = NULL,
     invyr <- sort(unique(pltcondf$INVYR))
   }
 
-  if (peracre) {
-    esttype <- "RATIO"
-  }
-  
+  esttype <- ifelse(peracre, "RATIO", "TREE")
+
   ###################################################################################
   ### Check row and column data
   ###################################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
-                   treef=vcondf, condf=pltcondf, 
+                    treef=vcondf, condf=pltcondf, 
                     cuniqueid=cuniqueid, rowvar=rowvar, colvar=colvar, 
                     row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
                     row.orderby=row.orderby, col.orderby=col.orderby, 
@@ -536,7 +534,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   condx <- xchk$tab1
   vdomdat <- xchk$tab2
   vdomdat <- merge(condx, vdomdat, by=c(cuniqueid, condid))
- 
+
   if (peracre) {
     if (!is.null(tdomvar)) {
       ## Merge condf with condx
