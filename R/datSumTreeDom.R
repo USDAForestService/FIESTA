@@ -232,7 +232,7 @@ datSumTreeDom <- function(tree = NULL,
                           tsumvar = NULL, 
                           addseed = FALSE, 
                           seedonly = FALSE,
-						  woodland = 'Y',
+                          woodland = 'Y',
                           TPA = TRUE, 
                           tfun = sum, 
                           ACI = FALSE, 
@@ -1559,20 +1559,26 @@ datSumTreeDom <- function(tree = NULL,
   byvars <- unique(c(tsumuniqueid, tdomvar, tdomvarnm))
 
   if (seedonly) {
-    tdomtreef <- treex[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=newname]
-    setnames(tdomtreef, "V1", newname)
+#    tdomtreef <- treex[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=newname]
+#    setnames(tdomtreef, "V1", newname)
+#    setkeyv(tdomtreef, byvars)
+    tdomtreef <- treex[, lapply(.SD, tfun, na.rm=TRUE), by=byvars, .SDcols=newname]
     setkeyv(tdomtreef, byvars)
   } else {
-    tdomtreef <- treex[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=newname]
-    setnames(tdomtreef, "V1", newname)
+#    tdomtreef <- treex[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=newname]
+#    setnames(tdomtreef, "V1", newname)
+#    setkeyv(tdomtreef, byvars)
+    tdomtreef <- treex[, lapply(.SD, tfun, na.rm=TRUE), by=byvars, .SDcols=newname]
     setkeyv(tdomtreef, byvars)
 
     if (addseed) { 
       seedname <- ifelse(TPA, seed_newname, "TREECOUNT_CALC")
-      tdomseedf <- seedx[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seed_newname]
-
-      setnames(tdomseedf, "V1", seedname)
+#      tdomseedf <- seedx[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seed_newname]
+#      setnames(tdomseedf, "V1", seedname)
+#      setkeyv(tdomseedf, byvars)
+      tdomseedf <- seedx[, lapply(.SD, tfun, na.rm=TRUE), by=byvars, .SDcols=seed_newname]
       setkeyv(tdomseedf, byvars)
+	  
       tdomtreef <- merge(tdomtreef, tdomseedf, by=byvars, all.x=TRUE, all.y=TRUE)
       tdomtreef[, (paste0("TREE_", newname)) := get(newname)]
       tdomtreef[, (newname) := rowSums(.SD, na.rm=TRUE), .SDcols=c(newname, seedname)]
