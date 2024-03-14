@@ -686,7 +686,12 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       SAdoms <- suppressWarnings(spUnionPoly(sf::st_make_valid(helperbndx.tmp[, helperbnd.unique]),
 				polyv2=sf::st_make_valid(sbnd)))
     } else {
-      SAdoms <- sbnd
+	  if (nrow(helperbndx.tmp) > nrow(sbnd)) {
+	    SAdoms <- helperbndx.tmp
+		SAdoms[SAdoms[[helperbnd.unique]] %in% sbnd[[smallbnd.unique]], "AOI"] <- 1
+	  } else {
+        SAdoms <- sbnd
+	  }
     }
 
     ## Add 0 to non-AOI
