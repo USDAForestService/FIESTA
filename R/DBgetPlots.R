@@ -254,7 +254,6 @@
 #' database (SUBPLOT, SUBP_COND).
 #' @param istree Logical. If TRUE, include tree data.
 #' @param isseed Logical. If TRUE, include seedling data.
-#' @param biojenk Logical. If TRUE, Jenkins biomass is calculated.
 #' @param greenwt Logical. If TRUE, green weight biomass is calculated.
 #' @param addplotgeom Logical. If TRUE, variables from the PLOTGEOM table are
 #' appended to the plot table.
@@ -468,9 +467,8 @@ DBgetPlots <- function (states = NULL,
                         invtype = "ANNUAL", 
                         intensity1 = FALSE, 
                         issubp = FALSE, 
-                        istree = FALSE,
+                        istree = TRUE,
                         isseed = FALSE,                      
-                        biojenk = FALSE,
                         greenwt = FALSE,
                         addplotgeom = FALSE, 
                         othertables = NULL, 
@@ -506,7 +504,7 @@ DBgetPlots <- function (states = NULL,
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-  saveSURVEY=isveg=ischng=isdwm=isgrm=islulc=isinv <- FALSE
+  saveSURVEY=isveg=ischng=isdwm=isgrm=islulc=isinv=issccm=subcycle99=biojenk <- FALSE
 
   other_tables <- c("BOUNDARY", "COND_DWM_CALC", "COUNTY", "DWM_COARSE_WOODY_DEBRIS", 
 	"DWM_DUFF_LITTER_FUEL", "DWM_FINE_WOODY_DEBRIS", "DWM_MICROPLOT_FUEL", 
@@ -691,7 +689,6 @@ DBgetPlots <- function (states = NULL,
   xycoords = c("LON_PUBLIC", "LAT_PUBLIC")
   #coordType <- "PUBLIC"
   parameters <- FALSE
-  islulc=isgrm=subcycle99 <- FALSE
   datamartType = "CSV" 
 
   ########################################################################
@@ -768,9 +765,9 @@ DBgetPlots <- function (states = NULL,
     isveg <- FALSE
   }
  
-  biojenk <- pcheck.logical(biojenk, varnm="biojenk", 
-		title="Jenkins biomass?", first="NO", gui=gui)
-
+#  biojenk <- pcheck.logical(biojenk, varnm="biojenk", 
+#		title="Jenkins biomass?", first="NO", gui=gui)
+  
   greenwt <- pcheck.logical(greenwt, varnm="greenwt", 
 		title="Green weight?", first="NO", gui=gui)
 
@@ -1182,9 +1179,9 @@ DBgetPlots <- function (states = NULL,
           assign(paste0("xy_", coordType), {})
         }
       } 
-      if (issp) {
-        assign(paste0("spxyCur_", coordType), {})
-      }
+#      if (issp) {
+#        assign(paste0("spxyCur_", coordType), {})
+#      }
     }
   }
 
@@ -3097,7 +3094,7 @@ DBgetPlots <- function (states = NULL,
         } else {
           dbTabs$plot_layer <- plotnm
         }
-	
+
         if (xymeasCur) {
           xydat <- DBgetXY(states = state,
                            xy_datsource = xysource,
@@ -3107,12 +3104,11 @@ DBgetPlots <- function (states = NULL,
                            datsource = datsource,
                            data_dsn = data_dsn,
                            dbTabs = dbTabs,
-                           eval = eval,
+                           eval = "custom",
                            eval_opts = eval_options(Cur = TRUE, varCur=varCur),
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
                            pvars2keep = c("INVYR", "PLOT_STATUS_CD"),
-						   evalInfo = evalInfo,						   
                            SURVEY = SURVEY,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
           assign(paste0("xyCurx_", coordType), 
@@ -4044,7 +4040,6 @@ DBgetPlots <- function (states = NULL,
         isref <- FALSE
         othertable <- othertables[j]
         othertablexnm <- paste0("otherx", j)
-
         if (!is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
           xfromqryx <- paste0(SCHEMA., othertable, " x")
           if (!iseval) {
@@ -4132,7 +4127,6 @@ DBgetPlots <- function (states = NULL,
             assign(othertablexnm, 
 			 get(othertablexnm)[get(othertablexnm)[[joinid]] %in% unique(pltx$CN),])
           }
-          
           if (returndata) {
 		  	if (tolower(othertable) %in% names(tabs)) {
               tabs[[tolower(othertable)]] <- 
@@ -4144,7 +4138,6 @@ DBgetPlots <- function (states = NULL,
               tabIDs[[tolower(othertable)]] <- "PLT_CN"
 	        }
           }
-
           if (savedata) {
             message("saving ", tolower(othertable), " table...")
             index.unique.other <- NULL
@@ -4161,7 +4154,7 @@ DBgetPlots <- function (states = NULL,
                                     add_layer = TRUE))
           }
         }
-      }
+      }  ## end j loop
     }
 
     ##############################################################
@@ -4193,8 +4186,7 @@ DBgetPlots <- function (states = NULL,
         ppsax <- tryCatch( sqldf::sqldf(ppsaqry, stringsAsFactors=FALSE), 
 			error=function(e) return(NULL))
       }
-
-      if(!is.null(ppsax) && nrow(ppsax) != 0){
+      if (!is.null(ppsax) && nrow(ppsax) != 0) {
         ppsax <- setDT(ppsax)
         ppsax[, PLT_CN := as.character(PLT_CN)]
         setkey(ppsax, PLT_CN)
@@ -4412,7 +4404,7 @@ DBgetPlots <- function (states = NULL,
         rm(ppsax)
         # gc()
       }
-    }
+    } ## end - savedata
     rm(pltcondx)
     gc()
 
@@ -4479,27 +4471,22 @@ DBgetPlots <- function (states = NULL,
     if (getxy) {
       if (xymeasCur) {
         xynm <- paste0("xyCur_", coordType)
-        #xynm <- paste0("xyCur_", coordType)
-        #assign(xynm, get(paste0("xyCur_", coordType))) 
-        returnlst[[paste0("xy_", coordType)]] <- get(xynm)
       } else {
         xynm <- paste0("xy_", coordType)
-        #assign(xynm, get(paste0("xy_", coordType))) 
-        returnlst[[paste0("xy_", coordType)]] <- get(xynm)
       } 
- 
       if (issp) {
 	    addxy <- TRUE
 	    if (all(c(xvar, yvar) %in% names(get(xynm)))) {
 		  addxy <- FALSE
 		}
-	    spxynm <- paste0("xy_", coordType)
         assign(spxynm, 
 		     spMakeSpatialPoints(xyplt=get(xynm), 
 		              xvar=xvarnm, yvar=yvarnm, 
 		              xy.uniqueid="PLT_CN", xy.crs=4269, addxy=addxy))
-        returnlst[[spxynm]] <- get(spxynm)
-      }
+        returnlst[[xynm]] <- get(xynm)
+      } else {
+        returnlst[[xynm]] <- get(xynm)
+      }	  
     }
     if (!is.null(spconddat)) {
       returnlst$spconddat <- data.frame(spconddatx)
@@ -4526,11 +4513,11 @@ DBgetPlots <- function (states = NULL,
   }
 
   if (returndata && !is.null(evalidlist)) {
-    evaliddf <- data.frame(do.call(rbind, evalidlist))
-    stcds <- pcheck.states(row.names(evaliddf), "VALUE")
-    evaliddf <- data.frame(stcds, row.names(evaliddf), evaliddf, row.names=NULL)
-    names(evaliddf) <- c("STATECD", "STATE", "EVALID")
-    evaliddf <- evaliddf[order(evaliddf$STATECD), ]
+    #evaliddf <- data.frame(do.call(rbind, evalidlist))
+    #stcds <- pcheck.states(row.names(evaliddf), "VALUE")
+    #evaliddf <- data.frame(stcds, row.names(evaliddf), evaliddf, row.names=NULL)
+    #names(evaliddf) <- c("STATECD", "STATE", "EVALID")
+    #evaliddf <- evaliddf[order(evaliddf$STATECD), ]
     returnlst$evalid <- evalidlist
 	returnlst$ref_species <- ref_species
 

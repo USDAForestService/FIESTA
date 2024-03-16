@@ -335,7 +335,6 @@ spGetPlots <- function(bnd = NULL,
                             title="Clip xy?", first="NO", gui=gui)  
 
 
-
   ## Check xy_datsource and datsource
   ########################################################
   datsourcelst <- c("sqlite", "datamart", "csv", "obj")
@@ -356,7 +355,7 @@ spGetPlots <- function(bnd = NULL,
     datsource <- xy_datsource
     data_dsn <- xy_dsn
   }
- 
+
   ## Check xy_dsn
   if (xy_datsource %in% c("sqlite", "gdb")) {
     if (is.null(xy_dsn)) {
@@ -397,7 +396,7 @@ spGetPlots <- function(bnd = NULL,
     #dbtablst <- DBI::dbListTables(conn)
     #DBI::dbDisconnect(conn)
   }
-  
+
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
   if (gui) {
@@ -512,7 +511,6 @@ spGetPlots <- function(bnd = NULL,
       }
 
     } else { 	## is.null(pltids)
-
       if (!is.null(Endyr.filter)) {
         if (!is.null(Endyr.filter)) {
           if (is.null(measEndyr) && is.null(evalEndyr)) {
@@ -537,6 +535,7 @@ spGetPlots <- function(bnd = NULL,
       if (!is.null(bndx)) {
         bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
       } 
+
       if (!is.null(Endyr.filter)) {
         Endyr.filter <- check.logic(bndx, Endyr.filter, stopifnull=FALSE)
 

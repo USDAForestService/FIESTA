@@ -54,7 +54,6 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 			             "Forbs", "Shrubs", "Trees", "Large trees", "Trees", "Non-tally"))
 			                  
 
-
   ## Check dbconn
   ###############################################
   if (!is.null(dbconn)) {
@@ -152,7 +151,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 
   ## DEFINE other variables
   varlst <- sort(domvarlst)
-  
+ 
   if (esttype %in% c("TREE", "RATIO")){
     ## DEFINE TREE VARIABLE LISTS
     tpavars <- c("TPA_UNADJ", "TPAMORT_UNADJ", "TPAGROW_UNADJ", "TPAREMV_UNADJ")
@@ -183,6 +182,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       tdomvarlst <- unique(c(tdomvarlst, snames[!snames %in% tdomvarlst.not])) 	## Seed domain variables
     }
     varlst <- c(varlst, sort(tdomvarlst))
+  } else {
+    varlst <- c(varlst, tnames)
   }
 
   ## Check row.add0 and col.add0
@@ -486,8 +487,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       #  condf <- subset(condf, eval(parse(text = rowvar.na.filter)))
       #}
 
-    } else if (rowvar %in% tnames) {
-	
+    } else if (rowvar %in% tnames) {	
 	  ## Check row.orderby
       if (!is.null(row.orderby) && row.orderby != "NONE") {
         if (row.orderby == rowvar) {

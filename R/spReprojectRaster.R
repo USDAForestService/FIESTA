@@ -198,7 +198,7 @@ spReprojectRaster <- function(rastfn,
       stop(rastfn, " does not have defined projection.. specify with crs parameter")
     } else {
       s_srs <- sf::st_crs(crs)
-      s_srs <- crs
+      #s_srs <- crs
     }
   }
 
@@ -233,7 +233,11 @@ spReprojectRaster <- function(rastfn,
       message("changing NODATA value from ", NODATA, " to ", NODATA.new)
     dstnodata <- NODATA.new
   } else {
-    dstnodata <- NODATA
+    if (is.null(NODATA) || NODATA == "NaN") {
+	  dstnodata <- getDefaultNodata(dtype)
+	} else {
+      dstnodata <- NODATA
+	}
   }
  
   ## Check resamp.method

@@ -677,7 +677,6 @@ spGetAuxiliary <- function(xyplt = NULL,
     inputdf <- rbind(inputdf, inputdf.cont)
     zonalnames <- c(zonalnames, prednames)
 
- 
     ## Extract zonal means from continuous raster layers
     #############################################################################
     zonalDT.cont <- data.table(DOMAIN = unique(unit_layerx[[unitvar]]))
@@ -738,7 +737,7 @@ spGetAuxiliary <- function(xyplt = NULL,
 			return(NULL) })
         if (is.null(zonaldat.rast.cont)) {
           badrast <- c(badrast, i)
-          message("\nerror when calculating zonal statistics for ", rastnm, "\n")
+          message("\nerror when calculating zonal statistics for: ", toString(rastnm), "\n")
           break
         }
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
@@ -767,7 +766,7 @@ spGetAuxiliary <- function(xyplt = NULL,
      	 	error=function(e) {
 			return(NULL) })
         if (is.null(zonaldat.rast.cont)) {
-          message("\nerror when calculating zonal statistics for ", rastnm, "\n")
+          message("\nerror when calculating zonal statistics for: ", toString(rastnm), "\n")
           badrast <- c(badrast, i)
           break
         }
@@ -935,10 +934,11 @@ spGetAuxiliary <- function(xyplt = NULL,
     zonalDT.cat <- tabs$tab2
 
     unitzonal <- unitzonal[zonalDT.cat]  
-  }
-  if (length(badrast) > 0) {
-    preds <- c(preds, inputdf.cat[badrast, "var.name"][[1]])
-    inputdf.cat <- inputdf.cat[-badrast,]
+  
+    if (length(badrast) > 0) {
+      preds <- c(preds, inputdf.cat[badrast, "var.name"][[1]])
+      inputdf.cat <- inputdf.cat[-badrast,]
+    }
   }
 
   ## Check if any auxiliary data included. If no return estimation unit info only

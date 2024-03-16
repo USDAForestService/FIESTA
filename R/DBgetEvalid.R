@@ -294,12 +294,11 @@ DBgetEvalid <- function(states = NULL,
   rslst <- unique(rslst)
   
 
-  #########################################################################
-  ## Get database tables - POP_EVAL, POP_EVAL_TYPE, SURVEY
-  #########################################################################
+  ######################################################################################
+  ## Get database tables - SURVEY, POP_EVAL, POP_EVAL_GRP, POP_EVAL_TYP
+  ######################################################################################
+  ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
   if (datsource == "sqlite") {
-    ## Check states in database
-    ###############################################
     if (is.null(plotnm)) {	
       plotnm <- findnm(plot_layer, dbtablst, returnNULL=TRUE)
     }	  
@@ -327,6 +326,12 @@ DBgetEvalid <- function(states = NULL,
     popevalgrpnm <- findnm(popevalgrp_layer, dbtablst, returnNULL=TRUE)
     popevaltypnm <- findnm(popevaltyp_layer, dbtablst, returnNULL=TRUE)
 
+    ppsanm <- findnm(ppsa_layer, dbtablst, returnNULL=TRUE)
+    if (!is.null(ppsanm)) {
+	  ppsaindb <- TRUE
+      ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
+ 	}
+	
   } else if (datsource == "datamart") {
     SURVEY <- DBgetCSV("SURVEY", stcdlst, 
                        returnDT=TRUE, stopifnull=FALSE)
@@ -353,7 +358,14 @@ DBgetEvalid <- function(states = NULL,
     if (!is.null(PLOT)) {
       plotnm <- "PLOT"
       pltflds <- names(PLOT)
-    } 
+    } 	
+    POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stcdlst, 
+                              returnDT=TRUE, stopifnull=FALSE)
+    if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
+      ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+	  ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
+    }
+
   } else {
     SURVEY <- pcheck.table(survey_layer, stopifnull=FALSE, stopifinvalid=FALSE)
     if (!is.null(SURVEY)) {
@@ -376,13 +388,25 @@ DBgetEvalid <- function(states = NULL,
       plotnm <- "PLOT"     
       pltflds <- names(PLOT)
     }
+    POP_PLOT_STRATUM_ASSGN <- pcheck.table(ppsa_layer, stopifnull=FALSE, stopifinvalid=FALSE)
+    if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
+      ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+	  ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
+    }
   }
 
-  ## Get SURVEY table
+  ######################################################################################
+  ## Query tables - SURVEY, POP_EVAL, POP_EVAL_GRP, POP_EVAL_TYP
+  ######################################################################################
   if (!is.null(surveynm)) {
-    survey.qry <- paste0("select * from ", surveynm, 
-      	" where ann_inventory in(", addcommas(ann_inv, quotes=TRUE), 
-		") and statecd in(", toString(stcdlst), ")")
+    surveywhere.qry <- 
+	    paste0("\nWHERE ann_inventory IN(", addcommas(ann_inv, quotes=TRUE), ")",
+		          "\n   AND ", surveynm, ".statecd IN(", toString(stcdlst), ")",
+				  "\n   AND ", surveynm, ".invyr <> 9999 AND p3_ozone_ind = 'N'")
+
+    survey.qry <- paste0("SELECT * ",
+	                "\nFROM ", SCHEMA., surveynm, " ", surveynm,
+      	             surveywhere.qry)
     if (datsource == "sqlite") {
       SURVEY <- setDT(DBI::dbGetQuery(dbconn, survey.qry)) 
     } else {
@@ -442,6 +466,10 @@ DBgetEvalid <- function(states = NULL,
 		nchar(POP_EVAL_GRP[[eval_grpnm]]) - 3, nchar(POP_EVAL_GRP[[eval_grpnm]])))]
   }
  
+ 
+  ######################################################################################
+  ## Check if no pop tables in input data
+  ######################################################################################
   if (all(is.null(popevalnm) && is.null(popevaltypnm) && is.null(popevalgrpnm))) {
 	nopoptables <- TRUE
 		
@@ -462,7 +490,7 @@ DBgetEvalid <- function(states = NULL,
         stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
         warning("statecds missing in database: ", toString(stcdmiss))
       } 
-    }
+    }		
   } else {
     nopoptables <- FALSE
   }
@@ -470,9 +498,13 @@ DBgetEvalid <- function(states = NULL,
   ## Create state filter
   stfilter <- getfilter("STATECD", stcdlst, syntax='sql')
 
-  ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
 
-  ## Check if evalid is valid. If valid, get invyrtab invyrs, evalidlist, and invtype
+  ######################################################################################
+  ## Generate invyrtab
+  ######################################################################################
+  
+  ## Check evalid. If valid, create invyrtab invyrs, evalidlist, and invtype
+  #############################################################################
   if (!is.null(evalid) && !nopoptables) {
     evalidnm <- findnm("EVALID", names(POP_EVAL))
 
@@ -526,48 +558,21 @@ DBgetEvalid <- function(states = NULL,
       }
 	}  
   } else { 
-    ## Create invyrtab (if pop tables do not exist but pop_plot_stratum_assgn table does)
 
-    if (datsource == "sqlite") {
+    ## If no evalid and survey and ppsa_layer are in data
+    #############################################################################
 	
-      surveynm <- findnm(survey_layer, dbtablst, returnNULL=TRUE)
-	  if (is.null(surveynm)) {
-        message("SURVEY table does not exist in database... assuming ANNUAL inventory plots")
-        #invtype <- "ANNUAL"
-	  }
+	if (is.null(surveynm)) {
+      message("SURVEY table does not exist in database... assuming ANNUAL inventory plots")
+      #invtype <- "ANNUAL"
+	}
 	
-      ## Check for pop_plot_stratum_assgn
-	  ppsanm <- findnm(ppsa_layer, dbtablst, returnNULL=TRUE)
-      if (!is.null(ppsanm)) {
-	    ppsaindb <- TRUE
-        ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
-      } 
-
-    } else if (datsource == "datamart") {
-      POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stcdlst, 
-                            returnDT=TRUE, stopifnull=FALSE)
-      if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
-        ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-        ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
-      } else {
-        message("pop_plot_stratum_assgn is not in datamart\n")
-      }
-
-    } else {  
-	  ## Check for pop_plot_stratum_assgn 
-      POP_PLOT_STRATUM_ASSGN <- pcheck.table(ppsa_layer, 
-						stopifnull=FALSE, stopifinvalid=FALSE)
-	  if (!is.null(POP_PLOT_STRATUM_ASSGN) && is.data.frame(POP_PLOT_STRATUM_ASSGN)) {
-        ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-        ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
-      } 
-    }
-
     if (!is.null(ppsanm)) {
       invyrnm <- findnm("INVYR", ppsaflds, returnNULL=TRUE) 
   
       ## Check evalids 
-      evalid.qry <- paste0("SELECT DISTINCT evalid FROM ", SCHEMA., ppsanm) 
+      evalid.qry <- paste0("SELECT DISTINCT evalid", 
+	                        "\nFROM ", SCHEMA., ppsanm) 
       if (datsource == "sqlite") {
         evalidindb <- DBI::dbGetQuery(dbconn, evalid.qry)[[1]]
       } else {
@@ -575,12 +580,21 @@ DBgetEvalid <- function(states = NULL,
       }
 
 	  if (is.null(evalid)) {
-	  	  		
-	    ## Get invyrtab
-		if (!is.null(invyrnm)) {
-          invqry <- paste("SELECT statecd, invyr, COUNT(*) NBRPLOTS",
-               		      "\nFROM ", SCHEMA., ppsanm, 
-						  "\nGROUP BY statecd, invyr") 
+	  
+	    ## Create invyrtab wiht no evalid
+	  	if (!is.null(invyrnm)) {
+          invqry <- paste0("SELECT ", ppsanm, ".statecd, ", ppsanm, ".invyr, COUNT(*) NBRPLOTS",
+               		      "\nFROM ", SCHEMA., ppsanm, " ", ppsanm)
+	      if (!is.null(surveynm)) {
+	        invqry <- paste0(invqry,
+		        "\nJOIN ", SCHEMA., surveynm, " ON(", surveynm, ".statecd = ", ppsanm, ".statecd",
+			    "\n  AND ", surveynm, ".invyr = ", ppsanm, ".invyr)",
+			    surveywhere.qry)	        
+          }
+	      invqry <- paste0(invqry,
+				"\nGROUP BY ", ppsanm, ".statecd, ", ppsanm, ".invyr",
+				"\nORDER BY ", ppsanm, ".statecd, ", ppsanm, ".invyr") 
+		  
           if (datsource == "sqlite") {
             invyrtab <- DBI::dbGetQuery(dbconn, invqry)
           } else {
@@ -602,11 +616,15 @@ DBgetEvalid <- function(states = NULL,
           }
         }	  
       } else if (!all(evalid %in% evalidindb)) {
+	  
+	    ## Check evalid
         missevalid <- sort(!evalid[evalid %in% evalidindb])
         warning(ppsa_layer, " is missing evalids: ", toString(missevalid))
         ppsanm <- NULL
 		
       } else {
+	  
+	    ## Create invyrtab with evalid
         if (!is.null(invyrnm)) {
           invqry <- paste("SELECT statecd, invyr, COUNT(*) NBRPLOTS", 
 		                  "\nFROM ", SCHEMA., ppsanm, 
@@ -637,6 +655,7 @@ DBgetEvalid <- function(states = NULL,
         }
 	  }	  
     } else {
+	
       ## Create invyrtab (if no pop tables or pop_plot_stratum_assgn)
       if (!is.null(plotnm)) {
         invyrnm <- findnm("INVYR", pltflds)  
@@ -655,17 +674,20 @@ DBgetEvalid <- function(states = NULL,
     }
   } ## End check evalid
 
+
+  ######################################################################################
+  ## If evalid was not input
+  ###################################################################################### 
   if (!returnevalid) {
 
-    ## Check invyrtab. Data frame with inventory years by state
+    ## Create invyrtab. Data frame with inventory years by state
     if (is.null(invyrtab)) {
 
       if (!is.null(surveynm)) {
         ## Create table of state, inventory year
         invyrqry <- paste0("SELECT DISTINCT statecd, statenm, stateab, ann_inventory, invyr",
 		                   "\nFROM ", SCHEMA., surveynm, 
-						   "\nWHERE statenm IN(", toString(paste0("'", states, "'")), ")",
-		                        " AND invyr <> 9999 AND p3_ozone_ind = 'N'",
+						   surveywhere.qry,
 						   "\nORDER BY statecd, invyr")
         invyrtab <- sqldf::sqldf(invyrqry, connection = NULL)
         cat("Inventory years by state...", "\n" )
@@ -744,7 +766,7 @@ DBgetEvalid <- function(states = NULL,
       ## Check evalAll
       ###########################################################
       evalAll <- pcheck.logical(evalAll, varnm="evalAll", 
-		title="All evaluations?", first="YES", gui=gui)
+		         title="All evaluations?", first="YES", gui=gui)
 
       if (is.null(evalAll) || !evalAll) {
         ## Check evalCur

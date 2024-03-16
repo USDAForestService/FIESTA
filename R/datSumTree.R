@@ -1,13 +1,10 @@
- #' Data - Aggregates numeric tree data to the plot or condition-level.
+#' Data - Aggregates tree and/or seedling data to the plot, condition,
+#' or subplot level.
 #' 
-#' Aggregates numeric tree-level data (e.g., VOLCFNET) to plot or condition,
-#' including options for filtering tree data or extrapolating to plot aseedonlycre by
-#' multiplying by TPA.
-#' 
-#' If variable = NULL, then it will prompt user for input.
-#' 
-#' Dependent external functions: datFilter Dependent internal functions:
-#' addcommas, fileexistsnm, getadjfactor
+#' Aggregates tree data (e.g., VOLCFNET) and/or seedling data (e.g., TPA_UNADJ) 
+#' to plot, condition, or subplot. Includes options for filtering tree data, 
+#' expanding to plot by multiplying by trees per acre (TPA_UNADJ), or adjusting 
+#' for nonresponse at the plot level (getadjplot).
 #' 
 #' For adjcond (bycond=FALSE): \cr If you want to summarize trees-per-acre
 #' information aggregated to plot or condition level, you need to include a TPA
@@ -154,7 +151,7 @@ datSumTree <- function(tree = NULL,
                        tsumvarnmlst = NULL, 
                        addseed = FALSE, 
                        seedonly = FALSE,
-					   woodland = "Y",
+                       woodland = "Y",
                        TPA = TRUE, 
                        tfun = sum, 
                        ACI = FALSE, 

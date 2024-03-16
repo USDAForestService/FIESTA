@@ -666,6 +666,7 @@ spGetSAdoms <- function(smallbnd,
 		      maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold, 
 		      maxbnd.addtext=maxbnd.addtext, largebnd.addtext=largebnd.addtext, 
 		      overwrite=overwrite_layer)
+			  
     SAdomslst <- autoselectlst$SAdomslst
     helperbndxlst <- autoselectlst$helperbndxlst
     smallbndxlst <- autoselectlst$smallbndxlst
