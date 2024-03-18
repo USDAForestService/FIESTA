@@ -113,7 +113,7 @@ DBgetEvalid <- function(states = NULL,
                         dbTabs = dbTables(),
                         dbconn = NULL,
                         dbconnopen = FALSE,
-						returnPOP = FALSE,
+						            returnPOP = FALSE,
                         gui = FALSE) {
   ###############################################################################
   ## DESCRIPTION: Get or check evalid from FIA database.
@@ -183,7 +183,6 @@ DBgetEvalid <- function(states = NULL,
       }
     }
   }
-
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -271,7 +270,7 @@ DBgetEvalid <- function(states = NULL,
       RSstatelst <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$RS %in% RS,"MEANING"]
       if (!all(states %in% RSstatelst)) {
         msg <- paste("RS and states are invalid...", 
-			toString(states[!states %in% RSstatelst]))
+			            toString(states[!states %in% RSstatelst]))
         warning(msg)
         states <- toString(states[states %in% RSstatelst])
         if (is.null(states) || states == "") {
@@ -299,13 +298,18 @@ DBgetEvalid <- function(states = NULL,
   ######################################################################################
   ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
   if (datsource == "sqlite") {
-    if (is.null(plotnm)) {	
-      plotnm <- findnm(plot_layer, dbtablst, returnNULL=TRUE)
+    if (is.null(plotnm)) {
+      if (!is.null(plot_layer) && is.data.frame(plot_layer)) {
+        PLOT <- plot_layer
+        plotnm <- "PLOT"
+      } else {
+        plotnm <- findnm(plot_layer, dbtablst, returnNULL=TRUE)
+      }
     }	  
-	if (is.null(plotnm)) {
-	  message(plot_layer, " does not exist in database")
-	  return(NULL)
-	}
+	  if (is.null(plotnm)) {
+	    message(plot_layer, " does not exist in database")
+	    return(NULL)
+	  }
     pltflds <- names(DBI::dbGetQuery(dbconn, 
 				paste("select * from", plotnm, "where 1=2")))
     stcdlstdb <- DBI::dbGetQuery(dbconn, 
@@ -321,20 +325,33 @@ DBgetEvalid <- function(states = NULL,
       }
       message("states in database: ", toString(stcdlst))
     }
-	surveynm <- findnm(survey_layer, dbtablst, returnNULL=TRUE)
+    if (!is.null(survey_layer) && is.data.frame(survey_layer)) {
+      SURVEY <- survey_layer
+      surveynm <- "SURVEY"
+    } else {
+	    surveynm <- findnm(survey_layer, dbtablst, returnNULL=TRUE)
+    }
     popevalnm <- findnm(popeval_layer, dbtablst, returnNULL=TRUE)
     popevalgrpnm <- findnm(popevalgrp_layer, dbtablst, returnNULL=TRUE)
     popevaltypnm <- findnm(popevaltyp_layer, dbtablst, returnNULL=TRUE)
 
-    ppsanm <- findnm(ppsa_layer, dbtablst, returnNULL=TRUE)
+    if (!is.null(ppsa_layer) && is.data.frame(ppsa_layer)) {
+      POP_PLOT_STRATUM_ASSGN <- ppsa_layer
+      ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+    } else {
+      ppsanm <- findnm(ppsa_layer, dbtablst, returnNULL=TRUE)
+    }
     if (!is.null(ppsanm)) {
-	  ppsaindb <- TRUE
+	    ppsaindb <- TRUE
       ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
- 	}
-	
+ 	  }
   } else if (datsource == "datamart") {
-    SURVEY <- DBgetCSV("SURVEY", stcdlst, 
+	  if (!is.null(survey_layer) && is.data.frame(survey_layer)) {
+	    SURVEY <- survey_layer
+	  } else {
+      SURVEY <- DBgetCSV("SURVEY", stcdlst, 
                        returnDT=TRUE, stopifnull=FALSE)
+	  }
     if (!is.null(SURVEY)) {
       surveynm <- "SURVEY"
     }
@@ -353,21 +370,33 @@ DBgetEvalid <- function(states = NULL,
     if (!is.null(POP_EVAL_TYP)) {
       popevaltypnm <- "POP_EVAL_TYP"
     }
-    PLOT <- DBgetCSV("PLOT", stcdlst, 
+	  if (!is.null(plot_layer) && is.data.frame(plot_layer)) {
+	    PLOT <- plot_layer
+	  } else {
+      PLOT <- DBgetCSV("PLOT", stcdlst, 
                               returnDT=TRUE, stopifnull=FALSE)
+    }
     if (!is.null(PLOT)) {
       plotnm <- "PLOT"
       pltflds <- names(PLOT)
     } 	
-    POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stcdlst, 
+	  if (!is.null(ppsa_layer) && is.data.frame(ppsa_layer)) {
+	    POP_PLOT_STRATUM_ASSGN <- ppsa_layer
+	  } else {
+      POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stcdlst, 
                               returnDT=TRUE, stopifnull=FALSE)
+	  }
     if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
       ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-	  ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
+	    ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
     }
 
   } else {
-    SURVEY <- pcheck.table(survey_layer, stopifnull=FALSE, stopifinvalid=FALSE)
+	  if (!is.null(survey_layer) && is.data.frame(survey_layer)) {
+	    SURVEY <- survey_layer
+	  } else {
+      SURVEY <- pcheck.table(survey_layer, stopifnull=FALSE, stopifinvalid=FALSE)
+	  }
     if (!is.null(SURVEY)) {
       surveynm <- "SURVEY"
     }
@@ -391,7 +420,7 @@ DBgetEvalid <- function(states = NULL,
     POP_PLOT_STRATUM_ASSGN <- pcheck.table(ppsa_layer, stopifnull=FALSE, stopifinvalid=FALSE)
     if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
       ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-	  ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
+	    ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
     }
   }
 

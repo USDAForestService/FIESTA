@@ -275,7 +275,7 @@ DBgetXY <- function (states = NULL,
     if (length(xytablst) == 0) {
       stop("no data in ", xy_datsource)
     }
-	xyindb=plotindb=ppsaindb <- FALSE
+	  xyindb=plotindb=ppsaindb <- FALSE
   }
 
   ## Check xy database
@@ -306,7 +306,7 @@ DBgetXY <- function (states = NULL,
       ########################################################
       datsourcelst <- c("datamart", "sqlite", "csv", "obj", "shp")
       datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
-		gui=gui, checklst=datsourcelst, caption="Plot data source?",
+		       gui=gui, checklst=datsourcelst, caption="Plot data source?",
            stopifnull=TRUE, stopifinvalid=TRUE)
     } else {
       datsource <- xy_datsource
@@ -329,7 +329,7 @@ DBgetXY <- function (states = NULL,
   
   if (datsource == "sqlite" && is.null(data_dsn)) {
     message("datsource=", datsource, " but data_dsn=NULL... returning NULL")
-	return(NULL)
+	  return(NULL)
   }
 
   ## Check eval
@@ -453,19 +453,20 @@ DBgetXY <- function (states = NULL,
   } else {
     evalInfo <- tryCatch(
 				DBgetEvalid(states = states, 
-                          RS = RS, 
-                          datsource = datsource,
-                          data_dsn = data_dsn,
-                          dbTabs = list(plot_layer=plot_layer),
-                          dbconn = dbconn,
-                          dbconnopen = TRUE,
-                          invtype = invtype, 
-                          evalid = evalid, 
-                          evalCur = evalCur, 
-                          evalEndyr = evalEndyr, 
-                          evalAll = evalAll,
-                          evalType = Type,
-                          gui = gui),
+                    RS = RS, 
+                    datsource = datsource,
+                    data_dsn = data_dsn,
+                    dbTabs = dbTabs,
+                    dbconn = dbconn,
+                    dbconnopen = TRUE,
+                    invtype = invtype, 
+                    evalid = evalid, 
+                    evalCur = evalCur, 
+                    evalEndyr = evalEndyr, 
+                    evalAll = evalAll,
+                    evalType = Type,
+						        returnPOP = TRUE,
+                    gui = gui),
 			error = function(e) {
                   message(e,"\n")
                   return(NULL) })
@@ -493,13 +494,8 @@ DBgetXY <- function (states = NULL,
     surveynm <- "SURVEY"
 	setkey(SURVEY, "CN")
   }
- 
-  if (is.null(POP_PLOT_STRATUM_ASSGN)) {
-    POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
-  }
-  if (is.null(PLOT)) {
-    PLOT <- evalInfo$PLOT
-  }
+  POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
+  PLOT <- evalInfo$PLOT
 
   ####################################################################
   ## Check custom Evaluation data
@@ -555,14 +551,16 @@ DBgetXY <- function (states = NULL,
   if (xy_datsource == "datamart") {
   
     ## Check pop_plot_stratum_assgn
-    if (iseval && (is.null(POP_PLOT_STRATUM_ASSGN) || !is.data.frame(POP_PLOT_STRATUM_ASSGN))) {
-      POP_PLOT_STRATUM_ASSGN <- tryCatch( DBgetCSV("POP_PLOT_STRATUM_ASSGN", 
+    if (iseval) {
+      if (is.null(POP_PLOT_STRATUM_ASSGN) || !is.data.frame(POP_PLOT_STRATUM_ASSGN)) {
+        POP_PLOT_STRATUM_ASSGN <- tryCatch( DBgetCSV("POP_PLOT_STRATUM_ASSGN", 
                              stabbrlst,
                              returnDT = TRUE, 
                              stopifnull = FALSE),
 			error = function(e) {
                   message(e, "\n")
-                  return(NULL) })     
+                  return(NULL) }) 
+      }				  
     }
 	if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
 	  ppsanm <- "POP_PLOT_STRATUM_ASSGN"
@@ -596,7 +594,9 @@ DBgetXY <- function (states = NULL,
     }
     ## Check pop_plot_stratum_assgn
   	if (iseval) {
-	  if (is.null(POP_PLOT_STRATUM_ASSGN) || !is.character(POP_PLOT_STRATUM_ASSGN)) {
+	  if (!is.null(POP_PLOT_STRATUM_ASSGN) && is.data.frame(POP_PLOT_STRATUM_ASSGN)) {
+	    ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+	  } else if (is.null(POP_PLOT_STRATUM_ASSGN) || !is.character(POP_PLOT_STRATUM_ASSGN)) {
 	    ppsanm <- chkdbtab(xytablst, "POP_PLOT_STRATUM_ASSGN", stopifnull=FALSE)
 		if (!is.null(ppsanm)) {
 		  ppsaindb <- TRUE
@@ -617,7 +617,7 @@ DBgetXY <- function (states = NULL,
   } else {
     if (iseval && is.null(POP_PLOT_STRATUM_ASSGN)) {
 	  ppsanm <- dbTables$ppsa_layer
-      ppsaqry <- paste0("select * from ", ppsanm, " where evalid IN(",
+      ppsaqry <- paste0("SELECT * FROM ", ppsanm, " WHERE evalid IN(",
                toString(unlist(evalidlist)), ")")
 			
       POP_PLOT_STRATUM_ASSGN <- tryCatch( DBI::dbGetQuery(dbconn, ppsaqry),
@@ -625,7 +625,7 @@ DBgetXY <- function (states = NULL,
                   message(e, "\n")
                   return(NULL) })
       ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-    }
+	}
 
     XY <- pcheck.table(xy, stopifnull=TRUE, stopifinvalid=TRUE)
     xynm <- "XY"
@@ -783,8 +783,9 @@ DBgetXY <- function (states = NULL,
 	    ## If XY and plot data are from different databases, 
 		## extract both first by state before querying
 		if (!is.null(plotnm)) {
-          plot.qry <- paste("select distinct", toString(pvars2keep), "from", plotnm, 
-				"where STATECD in(", toString(stcdlst), ")")
+          plot.qry <- paste0("SELECT DISTINCT", toString(pvars2keep), 
+		                     "\nFROM ", plotnm, 
+				             "\nWHERE statecd IN (", toString(stcdlst), ")")
           PLOT <- DBI::dbGetQuery(dbconn, plot.qry)
           plotnm <- "PLOTdf"
 		  pltflds <- names(PLOT)
@@ -792,8 +793,9 @@ DBgetXY <- function (states = NULL,
 		  plotindb <- FALSE
         }
 
-        xy.qry <- paste("select", toString(xyvars), "from", xy, 
-				"where STATECD in(", toString(stcdlst), ")")
+        xy.qry <- paste0("SELECT", toString(xyvars), 
+		                 "\nFROM ", xy, 
+				         "\nWHERE statecd IN (", toString(stcdlst), ")")
         XY <- DBI::dbGetQuery(xyconn, xy.qry)
         xynm <- "XY"
         xy_datsource <- "datamart"		
@@ -1265,7 +1267,8 @@ DBgetXY <- function (states = NULL,
     return(returnlst)
   } 
 
-  if (datsource == "sqlite" && !dbconnopen) {
+  ## Disconnect database
+  if (!is.null(dbconn) && !dbconnopen && DBI::dbIsValid(dbconn)) {
     DBI::dbDisconnect(dbconn)
   } 
 

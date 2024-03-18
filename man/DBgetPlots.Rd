@@ -16,9 +16,8 @@ DBgetPlots(
   invtype = "ANNUAL",
   intensity1 = FALSE,
   issubp = FALSE,
-  istree = FALSE,
+  istree = TRUE,
   isseed = FALSE,
-  biojenk = FALSE,
   greenwt = FALSE,
   addplotgeom = FALSE,
   othertables = NULL,
@@ -43,6 +42,7 @@ DBgetPlots(
   alltFilter = NULL,
   returndata = TRUE,
   savedata = FALSE,
+  exportsp = FALSE,
   saveqry = FALSE,
   savePOP = FALSE,
   savedata_opts = NULL,
@@ -94,8 +94,6 @@ database (SUBPLOT, SUBP_COND).}
 \item{istree}{Logical. If TRUE, include tree data.}
 
 \item{isseed}{Logical. If TRUE, include seedling data.}
-
-\item{biojenk}{Logical. If TRUE, Jenkins biomass is calculated.}
 
 \item{greenwt}{Logical. If TRUE, green weight biomass is calculated.}
 
@@ -174,6 +172,8 @@ only plots with trees included in filter.}
 \item{savedata}{Logical. If TRUE, saves data to outfolder as comma-delimited
 file (*.csv).  No objects are returned. If FALSE, the data are saved as R
 objects and returned to user.  See details for caveats.}
+
+\item{exportsp}{Logical. If TRUE, and issp=TRUE, exports spatial plots.}
 
 \item{saveqry}{Logical. If TRUE, saves queries to outfolder (by state).}
 
