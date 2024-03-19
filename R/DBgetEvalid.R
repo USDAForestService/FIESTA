@@ -1150,7 +1150,8 @@ DBgetEvalid <- function(states = NULL,
   if (!is.null(ppsanm)) {
     ## Get POP_PLOT_STRATUM_ASSGN 
 	if (returnPOP) {
-      ppsa.qry <- paste0("SELECT plt_cn, statecd, unitcd, countycd, plot, evalid",
+      ppsa.qry <- paste0("SELECT plt_cn, statecd, unitcd, countycd, plot, 
+	                        estn_unit, stratumcd, evalid",
 	                     "\nFROM ", SCHEMA., ppsanm)
       if (!is.null(evalidlist)) {
         ppsa.qry <- paste0(ppsa.qry, 
