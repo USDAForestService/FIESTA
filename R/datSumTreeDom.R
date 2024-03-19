@@ -552,9 +552,9 @@ datSumTreeDom <- function(tree = NULL,
 
   ## Build query parts for tree table
   ##################################################
-  tfromqry <- paste("FROM", treenm)
+  tfromqry <- paste("\nFROM", treenm)
   if (addseed || seedonly) {
-    sfromqry <- paste("FROM", seednm)
+    sfromqry <- paste("\nFROM", seednm)
   }
   if (woodland %in% c("N", "only") && woodlandref) {
     tfromqry <- paste0(tfromqry, 
@@ -568,12 +568,17 @@ datSumTreeDom <- function(tree = NULL,
 	  tfiltersql <- RtoSQL(tfilter, x=treenames)
 
 	  if (is.null(twhereqry)) {
-        twhereqry <- paste("WHERE", tfiltersql)
+        twhereqry <- paste("\nWHERE", tfiltersql)
 	  } else {
         twhereqry <- paste(twhereqry, "AND", tfiltersql)
       }	  
     }
-
+    ## Add alias path to SPCD if ref_species is used for woodland
+    if (!is.null(twhereqry) && woodland != "Y") {
+	  if (grepl("SPCD", twhereqry)) {
+	    twhereqry <- sub("SPCD", paste0(treenm, ".SPCD"), twhereqry)
+	  }
+	}
     if (addseed || seedonly) {
       #message("check filter for seeds: ", tfilter)
       sfilter <- suppressMessages(check.logic(seednames, statement=tfilter, 
@@ -582,15 +587,21 @@ datSumTreeDom <- function(tree = NULL,
 	    sfilter <- RtoSQL(sfilter)
 	  }
       if (!is.null(sfilter)) {
-        swhereqry <- paste("WHERE", sfilter)
+        swhereqry <- paste("\nWHERE", sfilter)
       }
     }
+    ## Add alias path to SPCD if ref_species is used for woodland
+    if (!is.null(swhereqry) && woodland != "Y") {
+	  if (grepl("SPCD", swhereqry)) {
+	    swhereqry <- sub("SPCD", paste0(seednm, ".SPCD"), swhereqry)
+	  }
+	}
 	if (woodland %in% c("N", "only")) {
 	  if (is.null(twhereqry)) {
 	    if (woodland == "N") {
-          twhereqry <- paste("WHERE", woodlandnm, "== 'N'")
+          twhereqry <- paste("\nWHERE", woodlandnm, "== 'N'")
 		} else {
-          twhereqry <- paste("WHERE", woodlandnm, "== 'Y'")
+          twhereqry <- paste("\nWHERE", woodlandnm, "== 'Y'")
         }		  
 	  } else {
 	    if (woodland == "N") {
@@ -746,17 +757,18 @@ datSumTreeDom <- function(tree = NULL,
   #####################################################################
   ## Get tree data
   #####################################################################
-  tree.qry <- paste("SELECT", toString(tselectvars), 
+  tree.qry <- paste("SELECT", toString(paste0(treenm, ".", tselectvars)), 
                    tfromqry)
   if (!is.null(twhereqry)) {
     tree.qry <- paste(tree.qry, twhereqry)
   }
+
   #message(tree.qry)
   treex <- setDT(sqldf::sqldf(tree.qry, dbname=dbname))
   setkeyv(treex, tsumuniqueid)
 
   if (addseed) {
-    seed.qry <- paste("SELECT", toString(sselectvars), 
+    seed.qry <- paste("SELECT", toString(paste0(seednm, ".", sselectvars)), 
                    sfromqry)
     if (!is.null(swhereqry)) {
       seed.qry <- paste(seed.qry, swhereqry)
