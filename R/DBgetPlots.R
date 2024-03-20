@@ -792,6 +792,31 @@ DBgetPlots <- function (states = NULL,
 	  }
   }
 
+  ## Check savePOP
+  savePOP <- pcheck.logical(savePOP, varnm="savePOP", 
+		title="Return POP table", first="NO", gui=gui)
+
+  if (savePOP) {
+    savePOPall <- TRUE
+  }
+  
+  ## Check othertables
+  if (!is.null(othertables)) {
+    if ("POP_PLOT_STRATUM_ASSGN" %in% othertables) {
+      savePOP <- TRUE
+      othertables <- othertables[othertables != "POP_PLOT_STRATUM_ASSGN"]
+    }
+#    if (savePOPall) {
+#      othertables <- othertables[othertables %in% c("POP_STRATUM", "POP_ESTN_UNIT")]
+#    } 
+  }
+
+  ## Check eval_opts - Endyr.filter
+  if (!is.null(Endyr.filter)) {
+    message("use spGetPlots with Endyr.filter")
+	stop()
+  }
+  
   ########################################################################
   ### DBgetEvalid()
   ########################################################################
@@ -1113,24 +1138,7 @@ DBgetPlots <- function (states = NULL,
   saveqry <- pcheck.logical(saveqry, varnm="saveqry", 
 		title="Save queries to outfolder?", first="YES", gui=gui)
 
-  ## Check savePOP
-  savePOP <- pcheck.logical(savePOP, varnm="savePOP", 
-		title="Return POP table", first="NO", gui=gui)
-
-  if (savePOP) {
-    savePOPall <- TRUE
-  }
-  ## Check othertables
-  if (!is.null(othertables)) {
-    if ("POP_PLOT_STRATUM_ASSGN" %in% othertables) {
-      savePOP <- TRUE
-      othertables <- othertables[othertables != "POP_PLOT_STRATUM_ASSGN"]
-    }
-#    if (savePOPall) {
-#      othertables <- othertables[othertables %in% c("POP_STRATUM", "POP_ESTN_UNIT")]
-#    } 
-  }
-  
+ 
   ##  Check whether to return tree data
   ###########################################################
   treeReturn <- TRUE
@@ -1245,18 +1253,24 @@ DBgetPlots <- function (states = NULL,
       pltcondflds <- unique(c(pltflds, condflds))
     }
     if (savePOP || iseval) {
-	    if (!is.null(POP_PLOT_STRATUM_ASSGNe) && is.character(POP_PLOT_STRATUM_ASSGNe)) {
-	      ppsanm <- POP_PLOT_STRATUM_ASSGNe
-	    } else { 
+	  if (!is.null(POP_PLOT_STRATUM_ASSGNe) && is.character(POP_PLOT_STRATUM_ASSGNe)) {
+	    ppsanm <- POP_PLOT_STRATUM_ASSGNe
+	  } else { 
         ppsanm <- chkdbtab(dbtablst, ppsa_layer)	  
         if (is.null(ppsanm)) {
           ppsanm <- chkdbtab(dbtablst, "ppsa", stopifnull=TRUE)
-		    }
+		}
       } 
-	    if (!is.null(ppsanm)) {
+	  if (!is.null(ppsanm)) {
         ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
       }
     } 
+	
+	if (savePOPall) {
+      popstratumnm <- chkdbtab(dbtablst, popstratum_layer)	  
+      popestnunitnm <- chkdbtab(dbtablst, "pop_estn_unit", stopifnull=TRUE)
+    } 
+
     #if ((iseval || measCur) && is.null(surveynm)) {
     #  surveynm <- chkdbtab(dbtablst, survey_layer)
     #}
@@ -1489,7 +1503,6 @@ DBgetPlots <- function (states = NULL,
         }
       }	  
     } 
-	
 	
     ###########################################################################
     ## From query
@@ -4248,7 +4261,8 @@ DBgetPlots <- function (states = NULL,
 
         if (datsource == "sqlite") {
           dbtabs <- DBI::dbListTables(dbconn)
-          if (!othertable %in% dbtabs) {
+          othertable <- chkdbtab(dbtabs, othertable, stopifnull=FALSE)
+          if (is.null(othertable)) {
             stop(othertable, " not in database")
           } 
           otab <- tryCatch( DBI::dbGetQuery(dbconn, xqry),
@@ -4260,8 +4274,8 @@ DBgetPlots <- function (states = NULL,
         }
         if (is.null(otab)) {
           xqry <- paste0("SELECT *",
-                        "\nFROM ", othertable, 
-		                    "\nWHERE ", stFilter)
+                         "\nFROM ", othertable, 
+		                 "\nWHERE ", stFilter)
 
           if (datsource == "sqlite") {
             otab <- tryCatch( DBI::dbGetQuery(dbconn, xqry),
@@ -4376,6 +4390,7 @@ DBgetPlots <- function (states = NULL,
         ppsa <- rbind(ppsa, ppsax)
       }
     }
+
     if (savePOPall) {
       message(paste("\n",
       "## STATUS: GETTING POP_STRATUM DATA (", stabbr, ")...", "\n"))
