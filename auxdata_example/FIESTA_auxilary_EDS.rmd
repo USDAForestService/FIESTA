@@ -1,0 +1,156 @@
+
+
+# Using auxiliary data in FIESTA can help enhance your result. One resource for auxiliary data is EarthData Search: a NASA repository for Earth Science data.
+
+## Follow this tutorial and learn how to implement auxiliary data from EarthData Search (https://search.earthdata.nasa.gov/search)
+
+# ############################################################
+
+# SET UP
+
+# ############################################################
+
+
+## This section will include the following
+
+* Set up R packages
+* Set up user settings and files
+* Set up download file
+
+## Set up R packages
+```{r setup, include = F}
+library(httr)
+library("FIESTA")
+```
+
+
+## Set up user settings and files
+
+### To use EarthData Search, one must have an account. Go to EarthData Search and create an account and note your username and password
+
+```{r setup, include = F}
+# Create a '.netrc' file at the below location (This file is untracked in git repositories)
+# The contents of the .netrc file should follow this template:
+# machine urs.earthdata.nasa.gov login YOUR_USER_NAME password YOUR_PASSWORD
+
+netrc_path <- "./auxdata_example/.netrc"
+
+# Next create a .urs_cookies file at the below location and leave it blank (This file is untracked in git repositories)
+cookie_path <- "./auxdata_example/.urs_cookies"
+
+
+# For more information on setting up an .netrc file go to: https://wiki.earthdata.nasa.gov/display/EL/How+To+Access+Data+With+cURL+And+Wget
+# For more information on using EarthData Search with R go to: https://urs.earthdata.nasa.gov/documentation/for_users/data_access/r
+```
+
+
+## Set up download file
+
+### This is where you can change the url of the data you are downloading as well as the downloaded filename
+```{r setup, include = F}
+
+# Choose a folder where you would like the data to download
+download_folder <- tempdir()
+
+# Paste in the download link of the data (This is the download link from EarthData Search *Right click download and save url*)
+data_url <- "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/HLSS30.020/HLS.S30.T13TCK.2023364T180741.v2.0/HLS.S30.T13TCK.2023364T180741.v2.0.B03.tif" # Harmonized Landsat Sentinel Product Band 3
+
+# Create a filename for the downloaded data
+filename <- "HLS_B3.tif"
+```
+
+
+# ############################################################
+
+# DOWNLOAD THE DATA
+
+# ############################################################
+
+```{r setup, include = F}
+# Set Configuration for authentication
+set_config(config(followlocation = 1,
+                  netrc = 1,
+                  netrc_file = netrc_path,
+                  cookie = cookie_path,
+                  cookiefile = cookie_path,
+                  cookiejar = cookie_path))
+
+# Create Full File Path
+downloaded_file_path <- paste(download_folder, "/", filename, sep = "")
+
+# Download File (May take time)
+httr::GET(url = data_url, write_disk(downloaded_file_path, overwrite = TRUE))
+```
+
+
+# ############################################################
+
+# USE DATA IN FIESTA
+
+# ############################################################
+
+## Translate downloaded data to Auxiliary data
+```{r setup, include = F}
+
+# Set up data necessary for spGetAuxiliary function
+WYbhfn <- system.file("extdata",
+                      "sp_data/WYbighorn_adminbnd.shp",
+                      package = "FIESTA")
+
+# Import downloaded data as raster file
+library(terra)
+data <- rast(downloaded_file_path)
+data_name <- "Input_Data"
+
+# Get Wyoming Plots
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
+                                xy.uniqueid = "CN",
+                                xvar = "LON_PUBLIC",
+                                yvar = "LAT_PUBLIC",
+                                xy.crs = 4269)
+
+# Run sp Get Auxiliary
+rastlst.cont <- c(data)
+rastlst.cont.name <- c(data_name)
+
+auxiliaryData <- spGetAuxiliary(xyplt = WYspplt,
+                              uniqueid = "CN",
+                              unit_layer = WYbhfn,
+                              unitvar = NULL,
+                              rastlst.cont = rastlst.cont,
+                              rastlst.cont.name = rastlst.cont.name,
+                              rastlst.cont.stat = "mean",
+                              keepNA = FALSE,
+                              showext = FALSE,
+                              savedata = FALSE)
+
+```
+
+
+## Use auxiliary data in Small Area population
+```{r setup, include = F}
+# Setting up necessary data for modSApop function
+WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+
+smallbnd <- WYbhdistfn
+smallbnd.domain <- "DISTRICTNA"
+
+SApltdat <- spGetPlots(bnd = WYbhdistfn,
+                       xy_datsource = "obj",
+                       xy = WYplt,
+                       xy_opts = list(xy.uniqueid = "CN", xvar = "LON_PUBLIC", 
+                                    yvar = "LAT_PUBLIC", xy.crs = 4269),
+                       datsource = "obj",
+                       istree = TRUE,
+                       isseed = TRUE,
+                       dbTabs = list(plot_layer = WYplt, cond_layer = WYcond,
+                                   tree_layer = WYtree, seed_layer = WYseed),
+                       eval = "custom",
+                       eval_opts = list(invyrs = 2011:2013),
+                       showsteps = TRUE,
+                       returnxy = TRUE)
+
+# Use Auxiliary Data in modSApop
+SApopdat <- modSApop(pltdat = SApltdat, auxdat = auxiliaryData,
+                     smallbnd = WYbhdistfn, smallbnd.domain = smallbnd.domain)
+```
