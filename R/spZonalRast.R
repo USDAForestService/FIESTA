@@ -163,7 +163,7 @@ spZonalRast <- function(polyv,
   
   ## Verify rasters 
   rastfn <- suppressWarnings(getrastlst(rastfn, rastfolder, 
-		stopifLonLat=FALSE, gui=gui))
+		stopifLonLat=TRUE, gui=gui))
 
   ## Get names of raster 
   rastnm <- basename.NoExt(rastfn) 
@@ -257,7 +257,7 @@ spZonalRast <- function(polyv,
 
   ## check if bbox2 is within bbox1
   check.extents(bbox1, bbox2, showext, layer1nm=rastnm, layer2nm="polv",
-			stopifnotin=FALSE)
+			stopifnotin=TRUE)
   dtype <- rasterInfo(rastfn)$datatype
   NODATAval <- rasterInfo(rastfn)$nodata_value
   if (is.null(rast.NODATA) || is.na(rast.NODATA)) {

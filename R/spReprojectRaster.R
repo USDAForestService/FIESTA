@@ -233,7 +233,7 @@ spReprojectRaster <- function(rastfn,
       message("changing NODATA value from ", NODATA, " to ", NODATA.new)
     dstnodata <- NODATA.new
   } else {
-    if (is.null(NODATA) || NODATA == "NaN") {
+    if (is.null(NODATA) || is.nan(NODATA)) {
 	  dstnodata <- getDefaultNodata(dtype)
 	} else {
       dstnodata <- NODATA
