@@ -18,3 +18,4 @@ _pkgdown.yml
 ^doc$
 ^CRAN-SUBMISSION$
 ^\.github$
+^auxdata_example$
