@@ -113,7 +113,7 @@ DBgetEvalid <- function(states = NULL,
                         dbTabs = dbTables(),
                         dbconn = NULL,
                         dbconnopen = FALSE,
-						            returnPOP = FALSE,
+						returnPOP = FALSE,
                         gui = FALSE) {
   ###############################################################################
   ## DESCRIPTION: Get or check evalid from FIA database.

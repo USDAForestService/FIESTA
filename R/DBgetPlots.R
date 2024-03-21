@@ -473,7 +473,7 @@ DBgetPlots <- function (states = NULL,
                         greenwt = FALSE,
                         addplotgeom = FALSE, 
                         othertables = NULL, 
-                        getxy = TRUE,
+                        getxy = FALSE,
                         xy_datsource = NULL, 
                         xy_dsn = NULL, 
                         xy = "PLOT",
@@ -850,6 +850,7 @@ DBgetPlots <- function (states = NULL,
 
   ## Get states, Evalid and/or invyrs info
   ##########################################################
+  returnPOP <- ifelse (datsource == "datamart", TRUE, FALSE)
   if (!is.null(evalInfo)) {
     list.items <- c("states", "invtype")
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
@@ -870,6 +871,7 @@ DBgetPlots <- function (states = NULL,
                           evalAll = evalAll, 
                           evalType = Type, 
                           dbTabs = dbTabs,
+                          returnPOP = returnPOP,
                           gui = gui),
 			error = function(e) {
                   message(e,"\n")
@@ -892,6 +894,7 @@ DBgetPlots <- function (states = NULL,
                           evalAll = evalAll, 
                           evalType = Type, 
                           dbTabs = dbTabs,
+                          returnPOP = returnPOP,
                           gui = gui),
 			error = function(e) {
                   message(e,"\n")
@@ -925,7 +928,7 @@ DBgetPlots <- function (states = NULL,
                           evalAll = evalAll, 
                           evalType = Type, 
                           dbTabs = dbTabs,
-                          returnPOP = TRUE,
+                          returnPOP = returnPOP,
                           gui = gui),
 			error = function(e) {
                   message(e,"\n")
@@ -981,7 +984,6 @@ DBgetPlots <- function (states = NULL,
       }
     }
   }
-  
 
   ## Get state abbreviations and codes 
   ###########################################################
@@ -1248,10 +1250,7 @@ DBgetPlots <- function (states = NULL,
   ##########################################################
   if (datsource == "sqlite" && !is.null(dbconn)) {
   
-    ## Check plot database
-    if (is.null(plotnm) && is.character(PLOTe)) {
-      plotnm <- chkdbtab(dbtablst, PLOTe, stopifnull=FALSE)
-    }
+    ## Check if plot table is in database
     if (is.null(plotnm)) {
       plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
     }
@@ -1272,7 +1271,7 @@ DBgetPlots <- function (states = NULL,
       }
     } 
 
-    ## Check cond in database
+    ## Check if cond is in database
     condnm <- chkdbtab(dbtablst, cond_layer, stopifnull=TRUE)
     condflds <- DBI::dbListFields(dbconn, condnm)
     if (is.null(condnm)) {
@@ -1280,18 +1279,18 @@ DBgetPlots <- function (states = NULL,
     } else {
       pltcondflds <- unique(c(pltflds, condflds))
     }
-    
-    ## Check pop_plot_stratum_assgn in database
+
+    ## Check if pop_plot_stratum_assgn is in database
     if (savePOP) {
-	    if (is.null(ppsanm) && is.character(POP_PLOT_STRATUM_ASSGNe)) {
-	      ppsanm <- chkdbtab(dbtablst, POP_PLOT_STRATUM_ASSGNe)
-		  }
 	    if (is.null(ppsanm)) { 
         ppsanm <- chkdbtab(dbtablst, ppsa_layer)	  
         if (is.null(ppsanm)) {
           ppsanm <- chkdbtab(dbtablst, "ppsa", stopifnull=TRUE)
 		    }
-      } 
+	    } 
+      if (is.null(ppsanm)) {
+        stop("POP_PLOT_STRATUM_ASSGN not in database")
+      }
 	    if (!is.null(ppsanm)) {
         ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
       }
@@ -1377,18 +1376,16 @@ DBgetPlots <- function (states = NULL,
 	  }
     
     ## If POP_PLOT_STRATUM_ASSGNe from DBgetEvalid is a data.frame, subset to state
-    if (savePOP && is.null(ppsanm) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
+    if (savePOP && !is.null(ppsanm) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
       statenm <- findnm("STATECD", ppsaflds)
       POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGNe[POP_PLOT_STRATUM_ASSGNe[[statenm]] == stcd, ]
-      ppsanm <- "POP_PLOT_STRATUM_ASSGN"
     }
     ## If PLOTe from DBgetEvalid is a data.frame, subset to state
-    if (!is.null(PLOTe) && is.data.frame(PLOTe)) {
+    if (!is.null(plotnm) && is.data.frame(PLOTe)) {
       statenm <- findnm("STATECD", pltflds)
       PLOT <- PLOTe[PLOTe[[statenm]] == stcd, ]
-      plotnm <- "PLOT"
     }
-    
+  
     ## Get PLOT/COND data 
     ###################################################
     if (datsource == "datamart") {
@@ -4393,11 +4390,12 @@ DBgetPlots <- function (states = NULL,
       message(paste("\n",
       "## STATUS: GETTING POP_PLOT_STRATUM_ASSGN DATA (", stabbr, ")...", "\n"))
     
-      ppsavars <- toString(c("PLT_CN", "STRATUM_CN", "EVALID", 
-                             "STATECD", "ESTN_UNIT", "STRATUMCD"))
-      ppsaqry <- paste0("SELECT ", ppsavars, 
+      ppsavars <- c("PLT_CN", "STRATUM_CN", "EVALID", 
+                             "STATECD", "ESTN_UNIT", "STRATUMCD")
+      ppsavars <- ppsavars[ppsavars %in% ppsaflds]
+      ppsaqry <- paste0("SELECT * ", 
 	                     "\nFROM ", ppsafromqry, 
-					             "\nWHERE statecd =", stcd)
+					             "\nWHERE statecd = ", stcd)
       if (iseval) {
         if (subsetPOP) {
           ppsaqry <- paste(ppsaqry, "AND evalid IN (", toString(evalid), ")")
@@ -4406,24 +4404,18 @@ DBgetPlots <- function (states = NULL,
           ppsaqry <- paste(ppsaqry, "AND evalid LIKE", paste0("'", evalstyr, "%'"))
         }
       }
-
-      if (!is.null(POP_PLOT_STRATUM_ASSGNe) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
+      if (datsource == "sqlite") {
+        ppsax <- tryCatch( DBI::dbGetQuery(dbconn, ppsaqry),
+                             error=function(e) return(NULL))
+      } else {
         ppsax <- tryCatch( sqldf::sqldf(ppsaqry, 
                              stringsAsFactors=FALSE, connection = NULL), 
                              error=function(e) return(NULL))
-      } else {
-        if (datsource == "sqlite") {
-          ppsax <- tryCatch( DBI::dbGetQuery(dbconn, ppsaqry),
-                             error=function(e) return(NULL))
-        } else {
-          ppsax <- tryCatch( sqldf::sqldf(ppsaqry, 
-                             stringsAsFactors=FALSE, connection = NULL), 
-                             error=function(e) return(NULL))
-        }
       }
       if (is.null(ppsax)) {
-        stop("invalid query for POP_PLOT_STRATUM_ASSGN:")
+        message("invalid query for POP_PLOT_STRATUM_ASSGN:")
         message(ppsaqry)
+        stop()
       }
       if (!is.null(ppsax) && nrow(ppsax) != 0) {
         ppsax <- setDT(ppsax)
@@ -4698,7 +4690,7 @@ DBgetPlots <- function (states = NULL,
     }
  
     if (length(evalidlist) > 0) {
-      returnlst$evalid <- evalidlist
+      returnlst$evalid <- evalInfo$evalidlist
     }
     returnlst$pltcnt <- pltcnt
     returnlst$invyrs <- invyrs
