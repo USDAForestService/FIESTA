@@ -960,7 +960,7 @@ DBgetPlots <- function (states = NULL,
   if (savePOP) {
     if (!is.null(POP_PLOT_STRATUM_ASSGNe) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
       ppsaflds <- names(POP_PLOT_STRATUM_ASSGNe)
-      statenm <- findnm(statenm, ppsaflds)
+      statenm <- findnm("STATECD", ppsaflds)
       if (is.null(statenm)) {
         stop("POP_PLOT_STRATUM_ASSGN must include STATECD")
       }
