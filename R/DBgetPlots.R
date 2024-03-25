@@ -959,7 +959,7 @@ DBgetPlots <- function (states = NULL,
   }
   POP_PLOT_STRATUM_ASSGNe <- evalInfo$POP_PLOT_STRATUM_ASSGN
   PLOTe <- evalInfo$PLOT
-  
+
   if (savePOP) {
     if (!is.null(POP_PLOT_STRATUM_ASSGNe) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
       ppsaflds <- names(POP_PLOT_STRATUM_ASSGNe)
@@ -967,9 +967,9 @@ DBgetPlots <- function (states = NULL,
       if (is.null(statenm)) {
         stop("POP_PLOT_STRATUM_ASSGN must include STATECD")
       }
-      if (length(unique(POP_PLOT_STRATUM_ASSGNe[[statenm]])) != length(states)) {
-        stop("invalid POP_PLOT_STRATUM_ASSGN from DBgetEvalid")
-      }
+#      if (length(unique(POP_PLOT_STRATUM_ASSGNe[[statenm]])) != length(states)) {
+#        stop("invalid POP_PLOT_STRATUM_ASSGN from DBgetEvalid")
+#      }
     }
   }
   if (!is.null(PLOTe) && is.data.frame(PLOTe)) {
@@ -1374,7 +1374,7 @@ DBgetPlots <- function (states = NULL,
 	  if (returndata) {
 	    dbqueries[[state]] <- list()
 	  }
-    
+
     ## If POP_PLOT_STRATUM_ASSGNe from DBgetEvalid is a data.frame, subset to state
     if (savePOP && !is.null(ppsanm) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
       statenm <- findnm("STATECD", ppsaflds)
@@ -1385,7 +1385,7 @@ DBgetPlots <- function (states = NULL,
       statenm <- findnm("STATECD", pltflds)
       PLOT <- PLOTe[PLOTe[[statenm]] == stcd, ]
     }
-  
+
     ## Get PLOT/COND data 
     ###################################################
     if (datsource == "datamart") {
