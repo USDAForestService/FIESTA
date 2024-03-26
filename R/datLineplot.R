@@ -77,14 +77,38 @@
 #' # Lineplot of cubic foot volume by above-ground biomass, Wyoming tree data
 #' # datLineplot(x = WYtree, xvar = "VOLCFNET", yvar = "DRYBIO_AG") # needs work
 #' @export datLineplot
-datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL, 
-	CIlst=c(68,95), CIcolorlst=c("dark grey", "black"), addshade=FALSE, 
-	device.type="dev.new", jpeg.res=300, device.height=5, device.width=8, 
-	ylim=NULL, divideby=NULL, ylabel=NULL, xlabel=NULL, xticks=NULL, 
-	mar=NULL, addlegend=FALSE, main=NULL, cex.main=1, cex.label=1, 
-	cex.names=0.9, las.xnames=0, las.ynames=1, savedata=FALSE, 
-	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, 
-	overwrite=FALSE, ...){ 
+datLineplot <- function(x,
+                        xvar,
+                        yvar, 
+                        plotCI=FALSE,
+                        sevar=NULL, 
+                        CIlst=c(68,95),
+                        CIcolorlst=c("dark grey", "black"), 
+                        addshade=FALSE, 
+                        device.type="dev.new",
+                        jpeg.res=300, 
+                        device.height=5,
+                        device.width=8, 
+                        ylim=NULL,
+                        divideby=NULL, 
+                        ylabel=NULL,
+                        xlabel=NULL,
+                        xticks=NULL, 
+                        mar=NULL,
+                        addlegend=FALSE,
+                        main=NULL,
+                        cex.main=1,
+                        cex.label=1, 
+                        cex.names=0.9,
+                        las.xnames=0,
+                        las.ynames=1,
+                        savedata=FALSE, 
+                        outfolder=NULL,
+                        outfn=NULL,
+                        outfn.pre=NULL,
+                        outfn.date=TRUE, 
+                        overwrite=FALSE,
+                        ...){ 
   ####################################################################################
   ## DESCRIPTION: Function to generate a barplot of frequencies ordered from most
   ##        to least.
@@ -93,21 +117,21 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
-  if (gui) x=xvar=yvar=x.order=savedata <- NULL
+  if (gui) x <- xvar <- yvar <- x.order <- savedata <- NULL
 
   ## Adds to file filters to Cran R Filters table.
-  if (.Platform$OS.type=="windows")
-    Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv"))
+  if (.Platform$OS.type=="windows") {
+    Filters <- rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv"))
+  }
 
   ## Set global variables
   xlim <- NULL
 
   ## Set par 
-  mar <-  graphics::par("mar")
+  tempmar <-  graphics::par("mar")
   xpd <-  graphics::par("xpd")
-  on.exit(graphics::par(mar=mar, xpd=xpd))
+  on.exit(graphics::par(mar=tempmar, xpd=xpd))
   
-
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
@@ -120,26 +144,28 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
 
   ## Check xvar
   xvar <- pcheck.varchar(var2check=xvar, varnm="xvar", checklst=datvarlst, 
-	stopifnull=TRUE, caption="X variable", warn="xvar not in data table") 
+                         stopifnull=TRUE, caption="X variable", warn="xvar not in data table") 
  
   ## Check yvar
   datvarlst <- datvarlst[datvarlst != xvar] 
   yvar <- pcheck.varchar(var2check=yvar, varnm="yvar", checklst=datvarlst, 
-	caption="Y variable", warn="yvar not in data table", 
-	stopifnull=TRUE, multiple=FALSE) 
+                         caption="Y variable", warn="yvar not in data table", 
+                         stopifnull=TRUE, multiple=FALSE) 
 
 
   ## Check divideby
   ########################################################
   dividebylst <- c("hundred", "thousand", "million")
-  divideby <- pcheck.varchar(var2check=divideby, varnm="divideby", 
-		gui=gui, checklst=dividebylst, caption="Divide estimates?")
+  divideby <- pcheck.varchar(var2check=divideby, varnm="divideby", gui=gui,
+                             checklst=dividebylst, caption="Divide estimates?")
 
 
   if (!is.null(divideby)) {
-    dividebynum <- ifelse(divideby == "hundred", 100, 
-				ifelse(divideby == "thousand", 1000, 
-					ifelse(divideby == "million", 1000000, 1)))
+    dividebynum <- switch(divideby,
+                          "hundred" = 100,
+                          "thousand" = 1000,
+                          "million" = 1000000,
+                          1)
     datx[[yvar]] <- datx[[yvar]] / dividebynum
   }
   
@@ -163,9 +189,9 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
 
     ## Check sevar
     datvarlst <- datvarlst[datvarlst != yvar] 
-    sevar <- pcheck.varchar(var2check=sevar, varnm="sevar", 
-		checklst=datvarlst, caption="SE variable", 
-		warn="sevar not in data table", stopifnull=TRUE, multiple=FALSE) 
+    sevar <- pcheck.varchar(var2check=sevar, varnm="sevar", checklst=datvarlst,
+                            caption="SE variable", warn="sevar not in data table",
+                            stopifnull=TRUE, multiple=FALSE) 
  
     if (!is.null(divideby)) {
       datx[[sevar]] <- datx[[sevar]] / dividebynum
@@ -216,7 +242,7 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   device.type[device.type == "windows"] <- "dev.new"
   if (any(!device.type %in% c("dev.new", device.typelst))) {
     stop("illegal 'device.type' device types must be one or more: ",
-		"of 'dev.new' 'jpg' 'pdf' or 'ps'")
+         "of 'dev.new' 'jpg' 'pdf' or 'ps'")
   }
   
   ## Check savedata 
@@ -243,7 +269,6 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   ## Change NULL values to 0
   datx <- DT_NAto0(datx, yvar)
  
-
   ## SET UP MAR and TEXT PLACEMENT AND ADD TEXT
   ######################################################
   maxattnum <- 15
@@ -260,7 +285,6 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
     }
   }
   srt <- ifelse(las.xnames == 1, 0, ifelse(las.xnames == 3, 90, 60))
-
 
   ## ylabel
   ######################
@@ -290,15 +314,13 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   } else {
     xlabel <- xvar
     xlinenum <- ifelse(las.xnames==0, xmaxnum/3, xmaxnum/4)
-    #xlinenum = 8
   }
-
   ## Set mar (number of lines for margins - bottom, left, top, right)
   if (is.null(mar)) {
     mar <-  par("mar")
     mar[3] <- ifelse(!is.null(main), 3, 2)		## top mar
     mar[1] <- xlinenum * cex.names + 3			## bottom mar
-    mar[2] <- ylinenum + 1.6				## left mar
+    mar[2] <- ylinenum + 2				## left mar
     mar[4] <- 0.5						## right mar
   }
 
@@ -316,15 +338,14 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
         ext <- device.type[i]
  
         OUTPUTfn <- getoutfn(outfn, outfolder=outfolder, outfn.pre=outfn.pre, 
-		outfn.date=outfn.date, overwrite=overwrite, ext=ext)
+                             outfn.date=outfn.date, overwrite=overwrite, ext=ext)
  
         switch(device.type[i], 
-          jpg = {jpeg(filename=OUTPUTfn, width=device.width, height=device.height, 
-			res=jpeg.res, units="in")},
-          ps = {postscript(file=OUTPUTfn, width=device.width, height=device.height)},
-          pdf = {pdf(file=OUTPUTfn, width=device.width, height=device.height)},
-          stop("invalid device.type") 
-        )
+               jpg = {jpeg(filename=OUTPUTfn, width=device.width, height=device.height, res=jpeg.res, units="in")},
+               ps = {postscript(file=OUTPUTfn, width=device.width, height=device.height)},
+               pdf = {pdf(file=OUTPUTfn, width=device.width, height=device.height)},
+              stop("invalid device.type"))
+        
       } else {
         device.type[-i] <- device.type[-i]
       }
@@ -335,7 +356,7 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
     op <- par(xpd=NA, cex=par("cex"), mar=mar, las=las.xnames, mgp=c(3,0.5,0))
 
     plot(datx[[xvar]], y=datx[[yvar]], type="b", ylim=ylim, ylab='', 
-		xlim=xlim, xlab='', cex.axis=cex.names, las=las.ynames, xaxt="n")
+         xlim=xlim, xlab='', cex.axis=cex.names, las=las.ynames, xaxt="n")
     axis(side=1, at=xticks, labels=FALSE)
     #text(x=xticks, par("usr")[3], labels=datx[[xvar]], adj = c(1, 2),
 	#		cex=cex.names, srt=srt, xpd=TRUE)
@@ -343,20 +364,21 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
 	#		cex=cex.names, srt=srt, xpd=TRUE)
  
     offset <- ifelse(srt==60, 1.5, 1)
-    text(x=xticks, par("usr")[3], labels=datx[[xvar]], pos=1,
-			cex=cex.names, srt=srt, xpd=TRUE, offset=offset)
+    text(x=xticks, par("usr")[3], labels=datx[[xvar]], pos=1, cex=cex.names,
+         srt=srt, xpd=TRUE, offset=offset)
 
     if (plotCI && addshade) {
+      
       graphics::polygon(c(datx[[xvar]], rev(datx[[xvar]])), 
-			c(datx[[maxCIleft]], rev(datx[[maxCIright]])),
-          col="light gray", border = NA)
+                        c(datx[[maxCIleft]], rev(datx[[maxCIright]])),
+                        col="light gray", border = NA)
       graphics::lines(x=datx[[xvar]], y=datx[[yvar]], lwd=2)
       graphics::points(x=datx[[xvar]], y=datx[[yvar]])
 
       graphics::lines(x=datx[[xvar]], y=datx[[maxCIleft]], lwd=2, lty="dashed",
- 		col=CIcolorlst[length(CIcolorlst)])
+                      col=CIcolorlst[length(CIcolorlst)])
       graphics::lines(x=datx[[xvar]], y=datx[[maxCIright]], lwd=2, lty="dashed", 
-		col=CIcolorlst[length(CIcolorlst)])
+                      col=CIcolorlst[length(CIcolorlst)])
 
       if (length(CIlst) > 1) {
         for (i in 1:length(CIlst[-length(CIlst)])) {
@@ -376,20 +398,24 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
 
     ## SET UP TEXT PLACEMENT AND ADD TEXT
     ######################################################
-    if (!is.null(ylabel))  
+    if (!is.null(ylabel)) {
       mtext(ylabel, side=yside, line=cex.names*ylinenum, cex.lab=cex.label, las=ylasnum) 
-    if (!is.null(xlabel)) 
+    }
+    if (!is.null(xlabel)) {
       mtext(xlabel, side=xside, line=cex.names*xlinenum, cex.lab=cex.label, las=xlasnum) 
-    if (!is.null(main))
+    }
+    if (!is.null(main)) {
       title(main=main, cex.main=cex.main)
- 
+    }
+      
     if (savedata && !device.type[i] %in% c("default", "dev.new")) {
 
       message("###################################\n", 
-			"Plot written to: ", OUTPUTfn, 
-		"\n###################################")
+			        "Plot written to: ", OUTPUTfn, 
+		          "\n###################################")
 
       dev.off()
     }
   }
 }
+
