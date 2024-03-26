@@ -737,8 +737,6 @@ modGBpop <- function(popType = "VOL",
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
-print("TEST")
-print(stratalut)
   if (popType %in% c("ALL", "CURR", "VOL")) {
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
