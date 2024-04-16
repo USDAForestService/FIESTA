@@ -2306,7 +2306,7 @@ DBgetPlots <- function (states = NULL,
       ## Unioned condition table
       pltcondu.qrya <- paste0("SELECT DISTINCT ", pcvars,
 							"\nFROM ", chgfromqry,
-							"\nWHERE e", paste0(evalFilter.grm, stateFilters))
+							"\nWHERE ", paste0(evalFilter.grm, stateFilters))
       pltcondu.qryb <- paste0("SELECT DISTINCT ", pcvarsb,
 	            "\nFROM ", chgfromqry, 
 							"\nWHERE ", paste0(evalFilter.grm, stateFilters))
