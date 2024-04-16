@@ -56,79 +56,72 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   datindb <- FALSE
  
   sccm=lulc=grm=treex=seedx=condnm <- NULL
-
-
-  ## Check name of PLOT table
-  pltnmchk <- findnm("plotu", names(tabs), returnNULL = TRUE)
-  if (is.null(pltnmchk)) {
-    pltnmchk <- findnm("pltu", names(tabs), returnNULL = TRUE)
+  SCHEMA. <- NULL
+  dbqueries <- list()
+  
+  
+  checktabs <- function(tabs, names) {
+    ## DESCRIPTION: check name in tabs list
+    
+    for (name in names) {
+      chk <- findnm(name, names(tabs), returnNULL = TRUE)
+      if (!is.null(chk)) {
+        return(chk)
+      }
+    }
+    return(NULL)
   }
-  if (is.null(pltnmchk)) {
-    pltnmchk <- findnm("plot", names(tabs), returnNULL = TRUE)
-  }
-  if (is.null(pltnmchk)) {
-    pltnmchk <- findnm("plt", names(tabs), returnNULL = TRUE)
-  } 
- 
-  if (is.null(pltnmchk)) {
-    message("plot data needed for CHNG estimates")
-	return(NULL)
-  }
+  
+  ## Get tables from tabs
+  ##########################################################  
 
+  ## Check name of COND table
+  pltnmchk <- checktabs(tabs, c("plt", "plot"))
+  if (is.null(pltnmchk)) {
+    message("plot data needed for estimates")
+    return(NULL)
+  }
   if (is.character(tabs[[pltnmchk]])) {  
     pltnm <- tabs[[pltnmchk]]
   } else {
-    pltnm <- "pltu"
+    pltnm <- "plt"
   }
   assign(pltnm, tabs[[pltnmchk]])
   puniqueid <- tabIDs[[pltnmchk]]
- 
+  
   ## Check name of COND table
-  condnmchk <- findnm("condu", names(tabs), returnNULL = TRUE)
+  condnmchk <- checktabs(tabs, "cond")
   if (is.null(condnmchk)) {
-    condnmchk <- findnm("cond", names(tabs), returnNULL = TRUE)
+    message("cond data needed for estimates")
+    return(NULL)
   }
-  if (is.null(condnmchk)) {
-    condnmchk <- findnm("cond", names(tabs), returnNULL = TRUE)
-  } 
   if (is.character(tabs[[condnmchk]])) {  
     condnm <- tabs[[condnmchk]]
   } else {
-    condnm <- "condu"
+    condnm <- "cond"
   }
   assign(condnm, tabs[[condnmchk]])
   cuniqueid <- tabIDs[[condnmchk]]
-
-
+  
   ## Check name of SUBP_COND_CHNG_MTRX table
-  sccmnmchk <- findnm("subp_cond_chng_mtrx", names(tabs), returnNULL = TRUE)
-  if (is.null(sccmnmchk)) {
-    sccmnmchk <- findnm("sccm", names(tabs), returnNULL = TRUE)
-  } 
-  if (is.character(tabs[[sccmnmchk]])) {  
-    sccmnm <- tabs[[sccmnmchk]]
+  sccmchk <- checktabs(tabs, c("subp_cond_chng_mtrx", "sccm"))
+  if (is.character(tabs[[sccmchk]])) {  
+    sccmnm <- tabs[[sccmchk]]
   } else {
     sccmnm <- "sccm"
   }
-  assign(sccmnm, tabs[[sccmnmchk]])
-  sccmid <- tabIDs[[sccmnmchk]]
-  lulcid <- "PLT_CN"
-
-
-  SCHEMA. <- NULL
-  dbqueries <- list()
-
-  ## Check palias
-  if (is.null(palias)) {
-    palias <- "p"
-  }
+  assign(sccmnm, tabs[[sccmchk]])
+  sccmid <- tabIDs[[sccmchk]]
+ 
 
   ###################################################################################
   ## Database queries
   ###################################################################################
+  sccm=grmx <- NULL
+ 
   if (!is.null(dbconn) || 
-	(!is.null(dsn) && getext(dsn) %in% c("sqlite", "db", "db3", "sqlite3", "gpkg"))) {
-
+      (!is.null(dsn) && getext(dsn) %in% c("sqlite", "db", "db3", "sqlite3", "gpkg"))) {
+    
     datindb <- TRUE
     if (is.null(dbconn)) {
       dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
@@ -136,50 +129,42 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
     dbname <- dsn
-
+    
     ## Check plt in database
-    if (!all(!is.null(pltnm), is.character(pltnm), pltnm %in% tablst)) {    
-      message("need PLOT table in database")
-	  return(NULL)
-    } else {
-	  pltflds <- DBI::dbListFields(dbconn, pltnm)
+    if (!is.null(pltnm) && is.character(pltnm)) {    
+      pltnm <- findnm(pltnm, tablst, returnNULL = TRUE)
+      if (is.null(pltnm)) {
+        message("need PLOT table in database")
+        return(NULL)
+      } else {
+        pltflds <- DBI::dbListFields(dbconn, pltnm)
+      }
     }
     ## Check cond in database
-    if (!all(!is.null(condnm), is.character(condnm), condnm %in% tablst)) { 
+    condnm <- findnm(condnm, tablst, returnNULL = TRUE)
+    if (is.null(condnm)) {
       message("need COND table in database")
-	  return(NULL)
+      return(NULL)
     } else {
-	  condflds <- DBI::dbListFields(dbconn, condnm)
-    } 
-    ## Check sccm in database
-    if (!all(!is.null(sccmnm), is.character(sccmnm), sccmnm %in% tablst)) {
-      message("need SUBP_COND_CHNG_MTRX table in database")
-	  return(NULL)
+      condflds <- DBI::dbListFields(dbconn, condnm)
     }
-  } else {
+    
+    ## Check sccm in database
+    sccmnm <- findnm(sccmnm, tablst, returnNULL = TRUE)
+    if (is.null(sccmnm)) {
+      message("need SUBP_COND_CHNG_MTRX table in database")
+      return(NULL)
+    } else {
+      sccmflds <- DBI::dbListFields(dbconn, sccmnm)
+    }
+  } 
 
-    ## Get remeasured plot/condition data
-	if (!is.null(condnm)) {
-      assign(condnm, pcheck.table(get(condnm), tab_dsn=dsn, 
-           tabnm="cond", caption="Remeasured condition data?", 
-           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
-	  condflds <- names(get(condnm))
-	}
 
-    ## Get remeasured plot data
-    if (!is.null(pltnm)) {
-      assign(pltnm, pcheck.table(get(pltnm), tab_dsn=dsn, 
-           tabnm="plt", caption="Remeasured plot data?", 
-           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
-	  pltflds <- names(get(pltnm))
-    } 
-
-    ## Get subplot matrix data for generating estimates
-    assign(sccmnm, pcheck.table(get(sccmnm), tab_dsn=dsn, 
-           tabnm="sccm", caption="sccm table?", 
-           nullcheck=nullcheck, gui=gui, returnsf=FALSE))
-  }  
-
+  ## Check palias
+  if (is.null(palias)) {
+    palias <- "p"
+  }
+  
   ## Build pfromqry
   if (is.null(pfromqry)) {
     pfromqry <- paste0(SCHEMA., pltnm, " ", palias)
