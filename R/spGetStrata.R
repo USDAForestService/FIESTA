@@ -295,7 +295,8 @@ spGetStrata <- function(xyplt,
   ## Check strattype
   ###################################################################
   strattype <- pcheck.varchar(var2check=strattype, varnm="strattype", 
-	gui=gui, checklst=typelst, caption="Strata type?", stopifnull=TRUE)
+	                gui=gui, checklst=typelst, caption="Strata type?", 
+	                stopifnull=TRUE)
 
 
   ## Check strat_lut
@@ -350,13 +351,7 @@ spGetStrata <- function(xyplt,
             out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
             overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
             add_layer=add_layer, append_layer=append_layer, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
+    outlst$add_layer <- TRUE
   }
 
   
@@ -411,8 +406,16 @@ spGetStrata <- function(xyplt,
     ## if strattype == "RASTER"
     ##################################################################
     ## Check strat_layer
-    stratlayerfn <- suppressMessages(getrastlst(strat_layer, rastfolder=strat_dsn,
- 		stopifLonLat=TRUE))
+    stratlayerfn <- tryCatch(
+            getrastlst(strat_layer, 
+                       rastfolder = strat_dsn, 
+                       stopifLonLat = TRUE),
+                    error=function(e) {
+                      message(e, "\n")
+                      return("stop") })
+    if (is.null(stratlayerfn)) {
+      stop("strat_layer is NULL")
+    }
 
     ## Get raster info
     rast_info <- rasterInfo(stratlayerfn)
@@ -439,12 +442,8 @@ spGetStrata <- function(xyplt,
         unitlayerx$ONEUNIT <- 1
         unitvar <- "ONEUNIT"
       } 
+      unitvars <- c(unitvar2, unitvar)
 	  
-	  if (!is.null(unitvar2)) {
-		unitvar_old <- unitvar
-	    unitlayerx$UNITVAR <- paste0(unitlayerx[[unitvar2]], "#", unitlayerx[[unitvar]]) 
-        unitvar <- "UNITVAR"		
-      }
 	  
       ## Check projection and reproject spobj if different than rast
       unitlayerprj <- crsCompare(unitlayerx, rast.prj)$x
@@ -455,7 +454,7 @@ spGetStrata <- function(xyplt,
       bbox2 <- sf::st_bbox(unitlayerprj)
       if (showext) {
         check.extents(bbox1, bbox2, showext=showext, 
-			layer1nm="rast", layer2nm="unit_layer", stopifnotin=TRUE)
+			  layer1nm="rast", layer2nm="unit_layer", stopifnotin=TRUE)
       }
 
       ## Check vars2keep
@@ -466,17 +465,53 @@ spGetStrata <- function(xyplt,
 
       ## Extract values of polygon unitlayer to points
       ## Note: removing all NA values
-      extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerprj, 
-		        xy.uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
-		        keepNA=FALSE, exportNA=exportNA)
-      sppltx <- extpoly$spxyext
-      unitNA <- extpoly$NAlst[[1]]
-      outname <- extpoly$outname
-      if (outname != unitvar) {
-        message("unitvar changed from ", unitvar, " to ", outname, 
-				" because of duplicate names in xyplt")
-        names(unitlayerprj)[names(unitlayerprj) == unitvar] <- outname
-        unitvar <- outname
+      polyvarlst <- unique(c(unitvar2, unitvar, vars2keep))
+      polyvarlstchk <- polyvarlst[!polyvarlst %in% names(sppltx)]
+      
+      if (length(polyvarlstchk) == length(polyvarlst)) { 
+        extpoly <- tryCatch(
+            spExtractPoly(sppltx, 
+                          polyvlst = unitlayerprj, 
+		                      xy.uniqueid = uniqueid, 
+		                      polyvarlst = polyvarlst,
+                          keepNA = FALSE, 
+                          exportNA = exportNA),
+            error=function(e) {
+              message(e, "\n")
+              return(NULL) })
+        sppltx <- extpoly$spxyext
+        unitNA <- extpoly$NAlst[[1]]
+        outname <- extpoly$outname
+      
+        ## Check if the name of unitvar and/or unitvar changed (duplicated)
+        if (!is.null(unitvar2)) {
+          if (outname[1] != unitvar2) {
+            message("name changed from ", unitvar2, " to ", outname[1], 
+                  " because of duplicate names in xyplt")
+            names(unitlayerprj)[names(unitlayerprj) == unitvar2] <- outname[1]
+            unitvar2 <- outname[1]
+          }
+          if (outname[2] != unitvar) {
+            message("name changed from ", unitvar, " to ", outname[2], 
+                  " because of duplicate names in xyplt")
+            names(unitlayerprj)[names(unitlayerprj) == unitvar] <- outname[2]
+            unitvar <- outname[2]
+          }
+        } else {
+          if (outname[1] != unitvar) {
+            message("name changed from ", unitvar, " to ", outname[1], 
+                  " because of duplicate names in xyplt")
+            names(unitlayerprj)[names(unitlayerprj) == unitvar] <- outname[1]
+            unitvar <- outname[1]
+          }
+        }
+      } 
+      
+      ## If unitvar2 is not null, make one variable for zonal and area calculations
+      if (!is.null(unitvar2)) {
+        unitvar_old <- unitvar
+        unitlayerprj$UNITVAR <- paste0(unitlayerprj[[unitvar2]], "#", unitlayerprj[[unitvar]]) 
+        unitvar <- "UNITVAR"		
       }
 
       ## Get pixel counts by estimation unit
@@ -505,14 +540,14 @@ spGetStrata <- function(xyplt,
 
     ## Extract values of raster layer to points
     extrast <- spExtractRast(sppltx, 
-	                         rastlst = stratlayerfn,
-							 var.name = strvar, 
-							 xy.uniqueid = uniqueid,
-							 keepNA = keepNA, 
-							 exportNA = exportNA, 
-							 rast.NODATA = rast.NODATA,
-							 ncores = ncores, 
-							 savedata_opts=savedata_opts)
+	                           rastlst = stratlayerfn,
+							               var.name = strvar, 
+							               xy.uniqueid = uniqueid,
+							               keepNA = keepNA, 
+							               exportNA = exportNA, 
+							               rast.NODATA = rast.NODATA,
+							               ncores = ncores, 
+							               savedata_opts=savedata_opts)
     sppltx <- extrast$spplt
     pltdat <- extrast$sppltext
     rastfnlst <- extrast$rastfnlst
@@ -571,17 +606,18 @@ spGetStrata <- function(xyplt,
   ## Saving data
   ##################################################################
   pltassgn <- sf::st_drop_geometry(sppltx)
+  
+  ## If unitvar2 is not null, split back into 2 columns
   if (!is.null(unitvar2)) {
-    pltassgn$UNITVAR <- NULL
-	unitvar <- unitvar_old
+	  unitvar <- unitvar_old
 	
-	unitarea <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",unitarea$UNITVAR), "#") )) ), unitarea)
-	setnames(unitarea, c("X1", "X2"), c(unitvar2, unitvar))
-	unitarea$UNITVAR <- NULL
+	  unitarea <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",unitarea$UNITVAR), "#") )) ), unitarea)
+	  setnames(unitarea, c("X1", "X2"), c(unitvar2, unitvar))
+	  unitarea$UNITVAR <- NULL
 
-	stratalut <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",stratalut$UNITVAR), "#") )) ), stratalut)
-	setnames(stratalut, c("X1", "X2"), c(unitvar2, unitvar))
-	stratalut$UNITVAR <- NULL
+	  stratalut <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",stratalut$UNITVAR), "#") )) ), stratalut)
+	  setnames(stratalut, c("X1", "X2"), c(unitvar2, unitvar))
+	  stratalut$UNITVAR <- NULL
   }	   
   spxy <- sppltx[, sppltx.names]
   
@@ -590,50 +626,23 @@ spGetStrata <- function(xyplt,
     ## Export to shapefile
     if (exportsp && returnxy) {
       spExportSpatial(spxy, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-                              out_dsn=out_dsn, 
-                              out_layer=out_layer,
-                              outfn.pre=outfn.pre, 
-                              outfn.date=outfn.date, 
-                              overwrite_layer=overwrite_layer,
-                              append_layer=append_layer, 
-                              add_layer=TRUE)
-      )
+                      savedata_opts = outlst)
     }    
     
+    message("saving pltassgn...")
+    outlst$out_layer <- "pltassgn"
     datExportData(pltassgn, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-		                          out_dsn=out_dsn, 
-		                          out_layer="pltassgn",
-		                          outfn.pre=outfn.pre, 
-		                          outfn.date=outfn.date, 
-		                          overwrite_layer=overwrite_layer,
-		                          append_layer=append_layer,
-		                          add_layer=TRUE))
+                  savedata_opts = outlst)
 
+    message("saving unitarea...")
+    outlst$out_layer <- "unitarea"
     datExportData(unitarea,           
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-                              out_dsn=out_dsn, 
-                              out_layer="unitarea",
-                              outfn.pre=outfn.pre, 
-                              outfn.date=outfn.date, 
-                              overwrite_layer=overwrite_layer,
-                              append_layer=append_layer,
-                              add_layer=TRUE))
+                  savedata_opts = outlst)
 
+    message("saving stratalut...")
+    outlst$out_layer <- "stratalut"
     datExportData(stratalut,                   
-            savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="stratalut", 
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            add_layer=TRUE))
+                  savedata_opts = outlst)
   }
   
   returnlst <- list(bnd=unitlayerx, pltassgn=setDF(pltassgn), 
