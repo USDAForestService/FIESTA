@@ -173,6 +173,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                            unit_layer = NULL, 
                            unit_dsn = NULL, 
                            unitvar = NULL, 
+                           unitvar2 = NULL,
                            rastlst.cont = NULL, 
                            rastlst.cont.name = NULL, 
                            rastlst.cont.stat = "mean", 
@@ -311,8 +312,8 @@ spGetAuxiliary <- function(xyplt = NULL,
 
   ## Spatial points for data extraction.. 
   ##################################################################################
-  sppltx <- pcheck.table(tab=xyplt, tab_dsn=xyplt_dsn, tabnm="xyplt", 
-			caption="XY coordinates?", stopifnull=FALSE)
+  sppltx <- pcheck.table(tab = xyplt, tab_dsn = xyplt_dsn, tabnm = "xyplt",
+                         caption = "XY coordinates?", stopifnull = FALSE)
   if (is.null(sppltx) && extract) {
     stop("xyplt is null and extract = TRUE")
   }
@@ -322,53 +323,65 @@ spGetAuxiliary <- function(xyplt = NULL,
 
     if (!"sf" %in% class(sppltx)) { 
       ## Create spatial object from xyplt coordinates
-      sppltx <- spMakeSpatialPoints(xyplt=sppltx, 
-                                  xy.uniqueid=uniqueid, 
-                                  xvar=xvar, 
-                                  yvar=yvar,
-                                  xy.crs=xy.crs)
+      sppltx <- spMakeSpatialPoints(xyplt = sppltx, 
+                                    xy.uniqueid = uniqueid, 
+                                    xvar = xvar, 
+                                    yvar = yvar,
+                                    xy.crs = xy.crs)
     } else {
       ## GET uniqueid
       sppltnames <- names(sppltx)
-      uniqueid <- pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
-		checklst=sppltnames, caption="UniqueID of spplt", 
-		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
+      uniqueid <- pcheck.varchar(var2check = uniqueid, varnm = "uniqueid", gui=gui,
+                                 checklst = sppltnames, 
+                                 caption = "UniqueID of spplt",
+                                 warn = paste(uniqueid, "not in spplt"), 
+                                 stopifnull = TRUE)
     }
   }
 
   ## Check unittype
   ###################################################################
   unittypelst <- c("POLY", "RASTER") 
-  unittype <- pcheck.varchar(var2check=unittype, varnm="unittype", gui=gui,
-	checklst=unittypelst, caption="Estimation unit type?", stopifnull=TRUE)
+  unittype <- pcheck.varchar(var2check = unittype, varnm = "unittype", gui=gui,
+                             checklst = unittypelst, 
+                             caption = "Unit type?", 
+                             stopifnull = TRUE)
 
   ## Check unit_layer and unitvar
   ###################################################################
   if (unittype == "POLY") {
     ## Check unit_layer
-    unit_layerx <- pcheck.spatial(layer=unit_layer, dsn=unit_dsn, gui=gui, 
-		caption="Domain spatial polygons?", stopifnull=TRUE)
+    unitlayerx <- pcheck.spatial(layer = unit_layer, dsn = unit_dsn, gui=gui,
+                                  caption = "Unit domain spatial polygons?", 
+                                  stopifnull = TRUE)
 		
     ## Remove empty geometries
- 	if (sum(sf::st_is_empty(unit_layerx)) > 0) {
-	  unit_layerx <- unit_layerx[!sf::st_is_empty(unit_layerx),]
-	}
+ 	  if (sum(sf::st_is_empty(unitlayerx)) > 0) {
+ 	    unitlayerx <- unitlayerx[!sf::st_is_empty(unitlayerx),]
+	  }
 
     ## Check unitvar
-    unitvar <- pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
-		checklst=names(unit_layerx), caption="Domain variable", 
-		warn=paste(unitvar, "not in unit_layer"))
-      
+    unitvar <- pcheck.varchar(var2check = unitvar, varnm = "unitvar", gui=gui,
+                              checklst = names(unitlayerx), 
+                              caption = "Unit variable",
+                              warn = paste(unitvar, "not in unit_layer"))
+    unitvar2 <- pcheck.varchar(var2check = unitvar2, varnm = "unitvar2", gui=gui, 
+                               checklst = names(unitlayerx), 
+                               caption = "Unit2 variable", 
+                               warn = paste(unitvar2, "not in unit_layer"), 
+                               multiple = FALSE)
+    unitvars <- c(unitvar2, unitvar)
+    
     if (is.null(unitvar)) {
-      if ("DOMAIN" %in% names(unit_layerx)) {
+      if ("DOMAIN" %in% names(unitlayerx)) {
         unitvar <- "DOMAIN"
       } else {
         unitvar <- "ONEUNIT"
-        unit_layerx[[unitvar]] <- 1
+        unitlayerx[[unitvar]] <- 1
       }
     }
  
-    varsmiss <- vars2keep[which(!vars2keep %in% names(unit_layerx))]
+    varsmiss <- vars2keep[which(!vars2keep %in% names(unitlayerx))]
     if (length(varsmiss) > 0) {
       stop("missing variables: ", paste(varsmiss, collapse=", "))
     }
@@ -378,11 +391,11 @@ spGetAuxiliary <- function(xyplt = NULL,
 
   ## Check continuous rasters
   ###################################################################
-  rastlst.contfn <- tryCatch(suppressWarnings(getrastlst(rastlst.cont, 
-	rastfolder, quiet=TRUE, gui=gui)),
-     	 	error=function(e) {
-			      message(e, "\n")
-			      return("stop") })
+  rastlst.contfn <- tryCatch(
+              getrastlst(rastlst.cont, rastfolder, quiet=TRUE, gui=gui),
+     	 	            error=function(e) {
+			              message(e, "\n")
+			              return("stop") })
   if (!is.null(rastlst.contfn)) {
     if (length(rastlst.contfn) == 1) {
       if (rastlst.contfn == "stop") {
@@ -396,16 +409,17 @@ spGetAuxiliary <- function(xyplt = NULL,
 
     ## Check rastlst.cont.stat
     rastlst.cont.statlst <- c("mean", "sum") 
-    rastlst.cont.stat <- pcheck.varchar(var2check=rastlst.cont.stat, 
-		varnm="rastlst.cont.stat", gui=gui, checklst=rastlst.cont.statlst, 
-		caption="Raster zonal stat?")
+    rastlst.cont.stat <- pcheck.varchar(var2check = rastlst.cont.stat,
+                                        varnm = "rastlst.cont.stat", gui=gui, 
+                                        checklst = rastlst.cont.statlst,
+                                        caption = "Raster zonal stat?")
     if (is.null(rastlst.cont.stat)) rastlst.cont.stat <- "mean"
 
     ## Check if length of names equals either length of bands or length of rasters
     if (!is.null(rastlst.cont.name) && (!length(rastlst.cont.name) %in% 
 			c(length(rastlst.cont), nlayers.cont))) {
       stop(paste0("number of rastlst.cont.name (", length(rastlst.cont.name), ") does not ", 
-		"match number of rastlst.cont layers (", nlayers.cont, ")"))
+		             "match number of rastlst.cont layers (", nlayers.cont, ")"))
     }
 
     ## Check rastlst.cont.NODATA
@@ -415,15 +429,15 @@ spGetAuxiliary <- function(xyplt = NULL,
       }
       if (length(rastlst.cont.NODATA) == 1 && nlayers.cont > 1) {
         message("using same rastlst.cont.NODATA value for each raster in rastlst.cont")
-        rastlst.cont.NODATA <- rep(rastlst.cont.NODATA, nlayers.cont)
+                     rastlst.cont.NODATA <- rep(rastlst.cont.NODATA, nlayers.cont)
       } else if (length(rastlst.cont.NODATA) > 1 && length(rastlst.cont.NODATA) != nlayers.cont) {
         stop("rastlst.cont.NODATA must be same length as rastlst.cont: ", nlayers.cont)
       }
     }
 
     ## Check asptransform    
-    asptransform <- pcheck.logical(asptransform, varnm="asptransform", 
-		title="Transform aspect layer?", first="YES", gui=gui)
+    asptransform <- pcheck.logical(asptransform, varnm = "asptransform", 
+		                    title="Transform aspect layer?", first="YES", gui=gui)
 
     ## Transform aspect 
     if (asptransform) {
@@ -444,11 +458,11 @@ spGetAuxiliary <- function(xyplt = NULL,
  
   ## Check categorical rasters
   ###################################################################
-  rastlst.catfn <- tryCatch(suppressWarnings(getrastlst(rastlst.cat, 
-	rastfolder, quiet=TRUE, gui=gui)),
-     	 	error=function(e) {
-			      message(e, "\n")
-			      return("stop") })
+  rastlst.catfn <- tryCatch(
+             getrastlst(rastlst.cat, rastfolder, quiet=TRUE, gui=gui),
+     	 	           error=function(e) {
+			               message(e, "\n")
+			             return("stop") })
   if (is.null(rastlst.contfn) && is.null(rastlst.catfn)) {
     message("both rastlst.cont and rastlst.cat are NULL")
   }
@@ -488,8 +502,7 @@ spGetAuxiliary <- function(xyplt = NULL,
         stop("rast.lut must be included in rastlst.catfn")
 
       ## Check rastlut
-      rastlutx <- pcheck.table(rastlut, gui=gui, caption="Data table?", 
-		returnDT=TRUE)
+      rastlutx <- pcheck.table(rastlut, gui=gui, caption="Data table?", returnDT=TRUE)
       if (is.null(rast.lut)) 
         stop("invalid lookup table for", rast.lut)
     } 
@@ -536,13 +549,7 @@ spGetAuxiliary <- function(xyplt = NULL,
             out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
             overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
             add_layer=add_layer, append_layer=append_layer, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
+    outlst$add_layer <- TRUE
   }
 
   ##################################################################
@@ -553,44 +560,77 @@ spGetAuxiliary <- function(xyplt = NULL,
   ## 1) Extract values from unit_layer
   #############################################################################
   unitarea <- NULL
-  polyvarlst <- unique(c(vars2keep, unitvar))[!unique(c(vars2keep, unitvar)) %in% names(sppltx)]
+  polyvarlst <- unique(c(unitvar2, unitvar, vars2keep))
+  polyvarlstchk <- polyvarlst[!polyvarlst %in% names(sppltx)]
 
   if (extract) {
-    if (!unitvar %in% names(sppltx)) { 
+    if (length(polyvarlstchk) == length(polyvarlst)) { 
       ## Extract values of polygon layer to points
-      extpoly <- tryCatch(spExtractPoly(xyplt=sppltx,
-                                      polyvlst=unit_layerx, 
-                                      xy.uniqueid=uniqueid, 
-                                      polyvarlst=polyvarlst, 
-                                      keepNA=keepNA, 
-                                      exportNA=exportNA),
-     	   error=function(e) {
-			message(e, "\n")
-			return(NULL) })
+      extpoly <- tryCatch(
+            spExtractPoly(xyplt = sppltx,
+                          polyvlst = unitlayerx, 
+                          xy.uniqueid = uniqueid, 
+                          polyvarlst = polyvarlst, 
+                          keepNA = keepNA, 
+                          exportNA = exportNA),
+     	            error=function(e) {
+			              message(e, "\n")
+			              return(NULL) })
       if (is.null(extpoly)) {
-        return(NULL)
         stop()
       }
       sppltx <- unique(extpoly$spxyext)
-
+      unitNA <- extpoly$NAlst[[1]]
+      outname <- extpoly$outname
       rm(extpoly)
       # gc()
     } else {
       message(unitvar, " already in spplt... not extracting from unit_layer")
     }
+  
+    ## Check if the name of unitvar and/or unitvar changed (duplicated)
+    if (!is.null(unitvar2)) {
+      if (outname[1] != unitvar2) {
+        message("name changed from ", unitvar2, " to ", outname[1], 
+              " because of duplicate names in xyplt")
+        names(unitlayerx)[names(unitlayerx) == unitvar2] <- outname[1]
+        unitvar2 <- outname[1]
+      }
+      if (outname[2] != unitvar) {
+        message("name changed from ", unitvar, " to ", outname[2], 
+              " because of duplicate names in xyplt")
+        names(unitlayerx)[names(unitlayerx) == unitvar] <- outname[2]
+        unitvar <- outname[2]
+      }
+    } else {
+      if (outname[1] != unitvar) {
+        message("name changed from ", unitvar, " to ", outname[1], 
+              " because of duplicate names in xyplt")
+        names(unitlayerx)[names(unitlayerx) == unitvar] <- outname[1]
+        unitvar <- outname[1]
+      }
+    }
+  } 
+
+  ## If unitvar2 is not null, make one variable for zonal and area calculations
+  if (!is.null(unitvar2)) {
+    unitvar_old <- unitvar
+    unitlayerx$UNITVAR <- paste0(unitlayerx[[unitvar2]], "#", unitlayerx[[unitvar]]) 
+    unitvar <- "UNITVAR"
+    polyvarlst <- c("UNITVAR", vars2keep)
   }
 
 
   #############################################################################
   ## 2) Set up outputs - unitzonal, prednames, inputdf, zonalnames
   #############################################################################
-  unitzonal <- data.table(unique(sf::st_drop_geometry(unit_layerx[, c(vars2keep, unitvar),
- 		drop=FALSE])))
+  unitzonal <- data.table(unique(sf::st_drop_geometry(unitlayerx[, polyvarlst,
+ 		                             drop=FALSE])))
   setkeyv(unitzonal, unitvar)
   prednames <- {}
   inputdf <- {}
   zonalnames <- {}
-
+  
   if (extract && addN) {
     ## Get plot counts by domain unit
     ##########################################################################
@@ -629,7 +669,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                               exportNA = exportNA, 
                               ncores = ncores,
                               savedata_opts = list(outfolder=outfolder, 
-                                      overwrite_layer=overwrite_layer)
+                              overwrite_layer=overwrite_layer)
                               )
       sppltx <- unique(extdat.rast.cont$spplt)
       prednames.cont <- extdat.rast.cont$outnames
@@ -679,8 +719,8 @@ spGetAuxiliary <- function(xyplt = NULL,
 
     ## Extract zonal means from continuous raster layers
     #############################################################################
-    zonalDT.cont <- data.table(DOMAIN = unique(unit_layerx[[unitvar]]))
-    setnames(zonalDT.cont, "DOMAIN", unitvar)
+    #zonalDT.cont <- data.table(DOMAIN = unique(unit_layerx[[unitvar]]))
+    zonalDT.cont <- data.table(unique(sf::st_drop_geometry(unitlayerx[,unitvar])))
     setkeyv(zonalDT.cont, unitvar)
     #zonalDT.cont.names <- {}
     message(paste("extracting zonal statistics...")) 
@@ -701,15 +741,17 @@ spGetAuxiliary <- function(xyplt = NULL,
           zonalstat <- c("npixels", rastlst.cont.stat) 
           rastnm2 <- c("npixels", rastnm2)
         }  
-        zonaldat.rast.cont <- tryCatch(spZonalRast(unit_layerx, 
-                                    rastfn = rastfn, 
-                                    polyv.att = unitvar, 
-                                    zonalstat = zonalstat, 
-                                    pixelfun = northness, 
-                                    rast.NODATA = rast.cont.NODATA, 
-                                    na.rm = TRUE),
-     	 	error=function(e) {
-			return(NULL) })
+        zonaldat.rast.cont <- tryCatch(
+                 spZonalRast(unitlayerx, 
+                        rastfn = rastfn, 
+                        polyv.att = unitvar, 
+                        zonalstat = zonalstat, 
+                        pixelfun = northness, 
+                        rast.NODATA = rast.cont.NODATA, 
+                        na.rm = TRUE),
+                             error=function(e) {
+                               message(e, "\n")
+                               return(NULL)})
         if (is.null(zonaldat.rast.cont)) {
           badrast <- c(badrast, i)
           break
@@ -726,15 +768,17 @@ spGetAuxiliary <- function(xyplt = NULL,
   
         rastnm2 <- ifelse(is.null(rastnm), "asp_sin", paste0(rastnm, "_sin"))
         zonalstat <- c(rastlst.cont.stat) 
-        zonaldat.rast.cont <- tryCatch(spZonalRast(unit_layerx, 
-                                    rastfn = rastfn, 
-                                    rast.NODATA = rast.cont.NODATA, 
-                                    polyv.att = unitvar, 
-                                    zonalstat = rastlst.cont.stat,
-                                    pixelfun = eastness, 
-                                    na.rm = TRUE),
-     	 	error=function(e) {
-			return(NULL) })
+        zonaldat.rast.cont <- tryCatch(
+                spZonalRast(unitlayerx, 
+                       rastfn = rastfn, 
+                       rast.NODATA = rast.cont.NODATA, 
+                       polyv.att = unitvar, 
+                       zonalstat = rastlst.cont.stat,
+                       pixelfun = eastness, 
+                       na.rm = TRUE),
+     	 	                      error=function(e) {
+     	 	                        message(e, "\n")
+			                          return(NULL) })
         if (is.null(zonaldat.rast.cont)) {
           badrast <- c(badrast, i)
           message("\nerror when calculating zonal statistics for: ", toString(rastnm), "\n")
@@ -756,15 +800,17 @@ spGetAuxiliary <- function(xyplt = NULL,
             rastnm <- c("npixels", rastnm)
           }
         } 
-        zonaldat.rast.cont <- tryCatch(spZonalRast(unit_layerx, 
-                                      rastfn = rastfn, 
-                                      rast.NODATA = rast.cont.NODATA, 
-                                      polyv.att = unitvar, 
-                                      zonalstat = zonalstat, 
-                                      showext = showext, 
-                                      na.rm = TRUE),
-     	 	error=function(e) {
-			return(NULL) })
+        zonaldat.rast.cont <- tryCatch(
+                spZonalRast(unitlayerx, 
+                       rastfn = rastfn, 
+                       rast.NODATA = rast.cont.NODATA, 
+                       polyv.att = unitvar, 
+                       zonalstat = zonalstat, 
+                       showext = showext, 
+                       na.rm = TRUE),
+     	 	                      error=function(e) {
+     	 	                        message(e, "\n")
+     	 	                        return(NULL) })
         if (is.null(zonaldat.rast.cont)) {
           message("\nerror when calculating zonal statistics for: ", toString(rastnm), "\n")
           badrast <- c(badrast, i)
@@ -802,16 +848,16 @@ spGetAuxiliary <- function(xyplt = NULL,
       ## Extract values from categorical raster layers
       ######################################################
       extdat.rast.cat <- spExtractRast(sppltx, 
-                                     xy.uniqueid = uniqueid, 
-                                     rastlst = rastlst.catfn, 
-                                     interpolate = FALSE, 
-                                     var.name = rastlst.cat.name, 
-                                     rast.NODATA = rastlst.cat.NODATA, 
-                                     keepNA = keepNA, 
-                                     ncores = ncores,
-                                     exportNA = exportNA, 
-                                     savedata_opts = list(outfolder=outfolder,
-		                                 overwrite_layer=overwrite_layer)
+                              xy.uniqueid = uniqueid, 
+                              rastlst = rastlst.catfn, 
+                              interpolate = FALSE, 
+                              var.name = rastlst.cat.name, 
+                              rast.NODATA = rastlst.cat.NODATA, 
+                              keepNA = keepNA, 
+                              ncores = ncores,
+                              exportNA = exportNA, 
+                              savedata_opts = list(outfolder=outfolder,
+		                          overwrite_layer=overwrite_layer)
 		               )
       sppltx <- extdat.rast.cat$sppltext
       prednames.cat <- extdat.rast.cat$outnames
@@ -855,12 +901,12 @@ spGetAuxiliary <- function(xyplt = NULL,
         rastlst.cat.NODATA <- as.numeric(NA)
       }
       inputdf.cat <- data.frame(rasterfile = rastlst.catfn,
-                                 band = band.cat,
-                                 var.name = prednames.cat,
-                                 interpolate = FALSE,
-                                 windowsize = 1,
-                                 statistic = "none",
-                                 rast.NODATA = rastlst.cat.NODATA)                               
+                                band = band.cat,
+                                var.name = prednames.cat,
+                                interpolate = FALSE,
+                                windowsize = 1,
+                                statistic = "none",
+                                rast.NODATA = rastlst.cat.NODATA)                               
     }
     prednames <- c(prednames, prednames.cat)
     predfac <- c(predfac, prednames.cat)
@@ -869,8 +915,7 @@ spGetAuxiliary <- function(xyplt = NULL,
 
     ## Extract zonal proportions from categorical raster layers
     #############################################################################
-    zonalDT.cat <- data.table(DOMAIN = unique(unit_layerx[[unitvar]]))
-    setnames(zonalDT.cat, "DOMAIN", unitvar)
+    zonalDT.cat <- data.table(unique(sf::st_drop_geometry(unitlayerx[,unitvar])))
     setkeyv(zonalDT.cat, unitvar)
     for (i in 1:length(rastlst.catfn)) {
       rastfn <- rastlst.catfn[i]
@@ -883,31 +928,35 @@ spGetAuxiliary <- function(xyplt = NULL,
         zonalstat <- c("npixels", zonalstat) 
       }       
       if (identical(rast.lutfn, rastfn)) {
-        zonaldat.rast.cat <- tryCatch(spZonalRast(unit_layerx, 
-                                    rastfn = rastfn, 
-                                    rast.NODATA = rast.cat.NODATA, 
-                                    polyv.att = unitvar, 
-                                    zonalstat = zonalstat, 
-                                    rastlut = rastlut, 
-                                    outname = names(rastlut)[2], 
-                                    na.rm = TRUE),
-     	 	error=function(e) {
-			return(NULL) })
+        zonaldat.rast.cat <- tryCatch(
+              spZonalRast(unitlayerx, 
+                          rastfn = rastfn, 
+                          rast.NODATA = rast.cat.NODATA, 
+                          polyv.att = unitvar, 
+                          zonalstat = zonalstat, 
+                          rastlut = rastlut, 
+                          outname = names(rastlut)[2], 
+                          na.rm = TRUE),
+     	 	                     error=function(e) {
+     	 	                       message(e, "\n")
+     	 	                       return(NULL) })
         if (is.null(zonaldat.rast.cat)) {
           message("\nerror when calculating zonal statistics for ", rastnm)
           badrast <- c(badrast, i)
           break
         }
       } else {
-        zonaldat.rast.cat <- tryCatch(spZonalRast(unit_layerx, 
-                                    rastfn = rastfn, 
-                                    rast.NODATA = rast.cat.NODATA, 
-                                    polyv.att = unitvar, 
-                                    outname = rastnm, 
-                                    zonalstat = zonalstat,
-                                    na.rm = TRUE),
-     	 	error=function(e) {
-			return(NULL) })
+        zonaldat.rast.cat <- tryCatch(
+              spZonalRast(unitlayerx, 
+                          rastfn = rastfn, 
+                          rast.NODATA = rast.cat.NODATA, 
+                          polyv.att = unitvar, 
+                          outname = rastnm, 
+                          zonalstat = zonalstat,
+                          na.rm = TRUE),
+     	 	                     error=function(e) {
+     	 	                       message(e, "\n")
+     	 	                       return(NULL) })
         if (is.null(zonaldat.rast.cat)) {
           message("\nerror when calculating zonal statistics for ", rastnm)
           badrast <- c(badrast, i)
@@ -944,21 +993,37 @@ spGetAuxiliary <- function(xyplt = NULL,
   ## Check if any auxiliary data included. If no return estimation unit info only
   noaux <- ifelse (is.null(rastlst.contfn) && is.null(rastlst.catfn), TRUE, FALSE) 
 
+  
   ###################################################################################
   ## Get totacres from domain polygons (if areacalc = TRUE)
   ###################################################################################
   if (areacalc) {
-    unit_layerx <- areacalc.poly(unit_layerx, unit=areaunits)
+    unitlayerx <- areacalc.poly(unitlayerx, unit=areaunits)
     areavar <- paste0(areaunits, "_GIS")
-    unitarea <- sf::st_drop_geometry(unit_layerx[, c(vars2keep, unitvar, areavar)])
-    unitarea <- aggregate(unitarea[[areavar]], unitarea[, c(vars2keep, unitvar), drop=FALSE], sum)
-    names(unitarea) <- c(vars2keep, unitvar, areavar)
+    unitarea <- sf::st_drop_geometry(unitlayerx[, c(unitvar, vars2keep, areavar)])
+    unitarea <- aggregate(unitarea[[areavar]], unitarea[, c(unitvar, vars2keep), drop=FALSE], sum)
+    names(unitarea) <- c(unitvar, vars2keep, areavar)
   }
 
   if (extract) {
     pltassgn <- sf::st_drop_geometry(sppltx)
     spxy <- sppltx
   }
+
+  ## If unitvar2 is not null, split back into 2 columns
+  if (!is.null(unitvar2)) {
+    unitvar <- unitvar_old
+    
+    unitarea <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",unitarea$UNITVAR), "#") )) ), unitarea)
+    setnames(unitarea, c("X1", "X2"), c(unitvar2, unitvar))
+
+    #unitarea$UNITVAR <- NULL
+    
+    unitzonal <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",unitzonal$UNITVAR), "#") )) ), unitzonal)
+    setnames(unitzonal, c("X1", "X2"), c(unitvar2, unitvar))
+    unitzonal$UNITVAR <- NULL
+  }	   
+
  
   ## Write data frames to CSV files
   #######################################
@@ -968,52 +1033,25 @@ spGetAuxiliary <- function(xyplt = NULL,
       ## Export to shapefile
       if (exportsp && returnxy) {
         spExportSpatial(spxy, 
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer=out_layer,
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer, 
-                                add_layer=TRUE)
-        )
+                        savedata_opts = outlst)
       }    
+      message("saving pltassgn...")
+      outlst$out_layer <- "pltassgn"
       datExportData(pltassgn, 
-        savedata_opts=list(outfolder=outfolder, 
-                          out_fmt=out_fmt, 
-                          out_dsn=out_dsn, 
-                          out_layer="pltassgn",
-                          outfn.pre=outfn.pre, 
-                          outfn.date=outfn.date, 
-                          overwrite_layer=overwrite_layer,
-                          append_layer=append_layer,
-                          add_layer=TRUE))
+                    savedata_opts = outlst)
     }
  
     if (!noaux) {
-      datExportData(unitzonal, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="unitzonal",
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            add_layer=TRUE)) 
+      message("saving unitzonal...")
+      outlst$out_layer <- "unitzonal"
+      datExportData(stratalut,                   
+                    savedata_opts = outlst)
     }
     if (areacalc) {
-      datExportData(unitarea, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="unitarea",
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            add_layer=TRUE)) 
+      message("saving unitarea...")
+      outlst$out_layer <- "unitarea"
+      datExportData(unitarea,           
+                    savedata_opts = outlst)
     }
   }
 
