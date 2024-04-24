@@ -85,10 +85,10 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     pltnm <- tabs[[pltnmchk]]
   } else {
     pltnm <- pltnmchk
-    pltflds <- names(plt)
   }
   assign(pltnm, tabs[[pltnmchk]])
   puniqueid <- tabIDs[[pltnmchk]]
+  pltflds <- names(get(pltnm))
   
   ## Check name of COND table
   condnmchk <- checktabs(tabs, "condu")
@@ -100,10 +100,10 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     condnm <- tabs[[condnmchk]]
   } else {
     condnm <- condnmchk
-    condflds <- names(cond)
   }
   assign(condnm, tabs[[condnmchk]])
   cuniqueid <- tabIDs[[condnmchk]]
+  condflds <- names(get(condnm))
   
   ## Check name of SUBP_COND_CHNG_MTRX table
   sccmchk <- checktabs(tabs, c("subp_cond_chng_mtrx", "sccm"))
