@@ -76,7 +76,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   ##########################################################  
 
   ## Check name of COND table
-  pltnmchk <- checktabs(tabs, c("plt", "plot"))
+  pltnmchk <- checktabs(tabs, c("pltu", "plot"))
   if (is.null(pltnmchk)) {
     message("plot data needed for estimates")
     return(NULL)
@@ -84,13 +84,14 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   if (is.character(tabs[[pltnmchk]])) {  
     pltnm <- tabs[[pltnmchk]]
   } else {
-    pltnm <- "plt"
+    pltnm <- pltnmchk
+    pltflds <- names(plt)
   }
   assign(pltnm, tabs[[pltnmchk]])
   puniqueid <- tabIDs[[pltnmchk]]
   
   ## Check name of COND table
-  condnmchk <- checktabs(tabs, "cond")
+  condnmchk <- checktabs(tabs, "condu")
   if (is.null(condnmchk)) {
     message("cond data needed for estimates")
     return(NULL)
@@ -98,7 +99,8 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   if (is.character(tabs[[condnmchk]])) {  
     condnm <- tabs[[condnmchk]]
   } else {
-    condnm <- "cond"
+    condnm <- condnmchk
+    condflds <- names(cond)
   }
   assign(condnm, tabs[[condnmchk]])
   cuniqueid <- tabIDs[[condnmchk]]
@@ -108,7 +110,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   if (is.character(tabs[[sccmchk]])) {  
     sccmnm <- tabs[[sccmchk]]
   } else {
-    sccmnm <- "sccm"
+    sccmnm <- sccmchk
   }
   assign(sccmnm, tabs[[sccmchk]])
   sccmid <- tabIDs[[sccmchk]]

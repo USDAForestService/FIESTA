@@ -42,7 +42,7 @@ for state(s).}
 \item{measEndyr}{Number. The most current sampled plots measured before or
 during end given..}
 
-\item{invyrs}{Integer vector. Measurement year(s) (e.g., c(2000, 2001, 2002)).}
+\item{invyrs}{Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).}
 
 \item{intensity}{Integer code. Code(s) indicating intensity to use for
 population.}
@@ -53,6 +53,8 @@ population.}
 population data, only AOI=1 are used for estimation.}
 
 \item{...}{For extendibility.}
+
+\item{measvyrs}{Integer vector. Measurement year(s) (e.g., c(2000, 2001, 2002)).}
 }
 \value{
 A list of user-supplied parameters and parameter values for population
