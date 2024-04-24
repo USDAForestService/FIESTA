@@ -13,6 +13,7 @@ spGetAuxiliary(
   unit_layer = NULL,
   unit_dsn = NULL,
   unitvar = NULL,
+  unitvar2 = NULL,
   rastlst.cont = NULL,
   rastlst.cont.name = NULL,
   rastlst.cont.stat = "mean",
@@ -68,6 +69,9 @@ name) of unit_layer. The dsn varies by driver. See gdal OGR vector formats
 \item{unitvar}{String. Name of domain variable in domlayer. If NULL,
 assuming one domain. An attribute names ONEUNIT is added to layer with
 value=1.}
+
+\item{unitvar2}{String. If unittype="POLY", name of attribute in unit_layer
+defining a second, hierarchical larger, estimation unit (e.g., Statecd).}
 
 \item{rastlst.cont}{String vector or list. A list of raster(s) with
 continuous data values (e.g., DEM). The list may include file name of

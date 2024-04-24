@@ -17,7 +17,6 @@ spZonalRast(
   showext = FALSE,
   rastlut = NULL,
   rast.NODATA = NULL,
-  na.rm = TRUE,
   savedata = FALSE,
   savedata_opts = NULL
 )
@@ -62,11 +61,10 @@ outname as a prefix to summary statistics (i.e., 'outname'.mean,
 \item{rastlut}{Data frame. A look up table to recode raster values. Must be
 2 columns: Column 1 with raster values and column 2 with recode values.}
 
-\item{rast.NODATA}{Numeric. NODATA value or other values to ignore. These
-values will be removed from output zonal table. See notes below.}
-
-\item{na.rm}{Logical. If TRUE, Null values are removed before zonal
-statistic calculations.}
+\item{rast.NODATA}{Numeric. NODATA value (if not already defined) or other 
+values to ignore. These values will be removed from output zonal table. 
+NODATA values defined in raster are removed before zonal statistic 
+calculations.}
 
 \item{savedata}{Logical. If TRUE, the zonal data are saved to outfolder.}
 

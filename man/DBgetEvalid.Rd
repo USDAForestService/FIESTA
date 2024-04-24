@@ -42,11 +42,11 @@ the sqlite database (*.sqlite).}
 \item{invtype}{String. The type of FIA data to extract ('PERIODIC',
 'ANNUAL').  Only 1 allowed at a time. See further details below.}
 
-\item{evalCur}{Logical. If TRUE, the most current evalidation is extracted
+\item{evalCur}{Logical. If TRUE, the most current FIA Evaluation is extracted
 for state(s).}
 
-\item{evalEndyr}{Number. The end year of the evaluation period of interest.
-Selects only sampled plots and conditions for the evalidation period. If
+\item{evalEndyr}{Number. The end year of the FIA Evaluation period of interest.
+Selects only sampled plots and conditions for the evaluation period. If
 more than one state, create a named list object with evalEndyr labeled for
 each state (e.g., list(Utah=2014, Colorado=2013).}
 

@@ -31,6 +31,8 @@
 #' @param unitvar String. Name of domain variable in domlayer. If NULL,
 #' assuming one domain. An attribute names ONEUNIT is added to layer with
 #' value=1.
+#' @param unitvar2 String. If unittype="POLY", name of attribute in unit_layer
+#' defining a second, hierarchical larger, estimation unit (e.g., Statecd).
 #' @param rastlst.cont String vector or list. A list of raster(s) with
 #' continuous data values (e.g., DEM). The list may include file name of
 #' raster(s) or raster objects that are not InMemory.
@@ -747,8 +749,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                         polyv.att = unitvar, 
                         zonalstat = zonalstat, 
                         pixelfun = northness, 
-                        rast.NODATA = rast.cont.NODATA, 
-                        na.rm = TRUE),
+                        rast.NODATA = rast.cont.NODATA),
                              error=function(e) {
                                message(e, "\n")
                                return(NULL)})
@@ -774,8 +775,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                        rast.NODATA = rast.cont.NODATA, 
                        polyv.att = unitvar, 
                        zonalstat = rastlst.cont.stat,
-                       pixelfun = eastness, 
-                       na.rm = TRUE),
+                       pixelfun = eastness),
      	 	                      error=function(e) {
      	 	                        message(e, "\n")
 			                          return(NULL) })
@@ -806,8 +806,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                        rast.NODATA = rast.cont.NODATA, 
                        polyv.att = unitvar, 
                        zonalstat = zonalstat, 
-                       showext = showext, 
-                       na.rm = TRUE),
+                       showext = showext),
      	 	                      error=function(e) {
      	 	                        message(e, "\n")
      	 	                        return(NULL) })
@@ -935,8 +934,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                           polyv.att = unitvar, 
                           zonalstat = zonalstat, 
                           rastlut = rastlut, 
-                          outname = names(rastlut)[2], 
-                          na.rm = TRUE),
+                          outname = names(rastlut)[2]),
      	 	                     error=function(e) {
      	 	                       message(e, "\n")
      	 	                       return(NULL) })
@@ -952,8 +950,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                           rast.NODATA = rast.cat.NODATA, 
                           polyv.att = unitvar, 
                           outname = rastnm, 
-                          zonalstat = zonalstat,
-                          na.rm = TRUE),
+                          zonalstat = zonalstat),
      	 	                     error=function(e) {
      	 	                       message(e, "\n")
      	 	                       return(NULL) })
@@ -1044,7 +1041,7 @@ spGetAuxiliary <- function(xyplt = NULL,
     if (!noaux) {
       message("saving unitzonal...")
       outlst$out_layer <- "unitzonal"
-      datExportData(stratalut,                   
+      datExportData(unitzonal,                   
                     savedata_opts = outlst)
     }
     if (areacalc) {

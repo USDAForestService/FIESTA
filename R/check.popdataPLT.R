@@ -323,7 +323,7 @@ check.popdataPLT <- function(dsn,
       }
       #dbqueries$plot <- plotqry
     }
-    
+  
     if (is.character(unitarea) && !is.null(chkdbtab(tablst, unitarea))) {
       unitindb <- TRUE
       unitarea_layer <- chkdbtab(tablst, unitarea)
@@ -338,7 +338,7 @@ check.popdataPLT <- function(dsn,
                                nullcheck=nullcheck, tabqry=unitareaqry,
                                returnsf=FALSE)
     } 
-    
+
     if (strata && is.character(stratalut) && !is.null(chkdbtab(tablst, stratalut))) {
       stratindb <- TRUE
       stratalut_layer <- chkdbtab(tablst, stratalut)
@@ -664,7 +664,6 @@ check.popdataPLT <- function(dsn,
     #pltx <- pltx[!is.na(pltx$REMPER), ]
   }
   
-  
   ##############################################################################
   ## Check estimation unit and strata
   ##############################################################################
@@ -689,7 +688,7 @@ check.popdataPLT <- function(dsn,
   if (module == "SA" && "AOI" %in% names(unitarea)) {
     vars2keep <- "AOI"
   }
-  
+
   removeunits <- ifelse(unit.action == "remove", TRUE, FALSE)
   unitdat <- check.unitarea(unitarea=unitarea, pltx=pltx,
                             unitvars=c(unitvar, unitvar2), areavar=areavar, areaunits=areaunits,
@@ -698,7 +697,7 @@ check.popdataPLT <- function(dsn,
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
   areaunits <- unitdat$areaunits
-  
+
   if (!unitindb && !is.null(evalid)) {
     ecol <- pcheck.varchar("EVALID", checklst=names(unitarea), stopifinvalid=FALSE)
     if (!is.null(ecol)) {

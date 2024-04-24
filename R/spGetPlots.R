@@ -1142,7 +1142,7 @@ spGetPlots <- function(bnd = NULL,
         message("no data for ", stcd)
         break
       }
-	  
+
       ## Check pjoinid
       ##############################################
       pltfields <- names(PLOT)

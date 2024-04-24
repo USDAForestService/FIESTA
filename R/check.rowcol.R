@@ -1,11 +1,11 @@
 check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, condf,
 	cuniqueid="PLT_CN", tuniqueid="PLT_CN", condid="CONDID", estseed="none",
-	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
-    row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
+	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE,
+	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
 	domvarlst=NULL, domlut=NULL, title.rowvar=NULL, title.colvar=NULL, 
  	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
 	title.rowgrp=NULL, landarea=NULL, states=NULL, cvars2keep=NULL,
-	whereqry=NULL, tfilter=NULL){
+	withqry=NULL, whereqry=NULL, tfilter=NULL){
 
   ####################################################################################
   ## CHECKS ROW AND COLUMN INFO
@@ -42,9 +42,9 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
   ## define function to make factors
   makefactor <- function(x) {
     if (!is.factor(x)) {
-	  uniquevals <- unique(x)
+	    uniquevals <- unique(x)
       x <- factor(x, levels = ifelse(is.na(uniquevals), "NA", uniquevals))
-	}
+	  }
     return(x)
   }
   
@@ -59,21 +59,21 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
   if (!is.null(dbconn)) {
     if (!DBI::dbIsValid(dbconn)) {
       message("invalid database dbconnection") 
-	  return(NULL)
+	    return(NULL)
     }
     isdb <- TRUE
     tablst <- DBI::dbListTables(dbconn)
-	if (length(tablst) == 0) {
+	  if (length(tablst) == 0) {
       message("invalid database dbconnection") 
-	  return(NULL)
+	    return(NULL)
     }	  
   }
 
-  ## Get column names
+  ## Get columdbconnn names
   if (!is.null(condf)) {
     condfnm <- "condf"
     if (is.character(condf) && isdb) {
-	  condfnm <- chkdbtab(tablst, condf)
+	    condfnm <- chkdbtab(tablst, condf)
       cnames <- DBI::dbListFields(dbconn, condfnm)
     } else {
       cnames <- names(condf)
@@ -82,17 +82,17 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
   if (!is.null(treef)) {
     treefnm <- "treef"
     if (is.character(treef) && isdb) {
-	  treefnm <- chkdbtab(tablst, treef)
+	    treefnm <- chkdbtab(tablst, treef)
       tnames <- DBI::dbListFields(dbconn, treefnm)
     } else {
       tnames <- names(treef)
-	  if (!is.null(condf)) {
+	    if (!is.null(condf)) {
         if (!is.null(key(condf)) && identical(key(condf), key(treef))) {
           treef <- merge(condf[, key(condf), with=FALSE], treef, all.x=TRUE)
-		  if (nrow(treef) == 0) {
-		    message("invalid dataset... condf and treef uniqueids do not match")
-		    return(NULL)
-		  }
+		      if (nrow(treef) == 0) {
+		        message("invalid dataset... condf and treef uniqueids do not match")
+		        return(NULL)
+		      }
         } 
       }		
     }
@@ -102,14 +102,14 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     if (is.character(seedf) && isdb) {
       snames <- DBI::dbListFields(dbconn, seedfnm)
     } else {
-	  if (estseed == "only") {
-	    if (!is.null(condf)) {
+	    if (estseed == "only") {
+	      if (!is.null(condf)) {
           if (identical(key(condf), key(seedf))) {
             seedf <- merge(condf[, key(condf), with=FALSE], seedf, all.x=TRUE)
-		    if (nrow(seedf) == 0) {
-		      message("invalid dataset... condf and seedf uniqueids do not match")
-		      return(NULL)
-		    }
+		        if (nrow(seedf) == 0) {
+		          message("invalid dataset... condf and seedf uniqueids do not match")
+		          return(NULL)
+		        }
           } 
         }
         tnames <- names(seedf)	
@@ -178,7 +178,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     ## DEFINE TREE DOMAIN VARIABLE LISTS (VARIABLES TO KEEP)
     tdomvarlst <- tnames[!tnames %in% tdomvarlst.not] 	## Tree domain variables
 	
-	if (!is.null(snames)) {
+	  if (!is.null(snames)) {
       tdomvarlst <- unique(c(tdomvarlst, snames[!snames %in% tdomvarlst.not])) 	## Seed domain variables
     }
     varlst <- c(varlst, sort(tdomvarlst))
@@ -197,7 +197,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
   row.FIAname <- pcheck.logical(row.FIAname, varnm="row.FIAname",
 		title="Row names?", first="NO", gui=gui)
   if (rowgrp && is.null(rowgrpnm) && !row.FIAname) {
-     stop("either row.FIAname must be TRUE or rowgrpnm != NULL to add row groups")
+    stop("either row.FIAname must be TRUE or rowgrpnm != NULL to add row groups")
   }
 
   ##############################################################
@@ -235,7 +235,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
           condf=condf[,unique(c(cuniqueid, condid, cvars2keep, "TOTAL")), with=FALSE],
           uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, bytdom=bytdom,
           rowvar=rowvar, rowvarnm=rowvar, colvar=colvar, 
-		  row.orderby=row.orderby, col.orderby=col.orderby,
+		      row.orderby=row.orderby, col.orderby=col.orderby,
           row.add0=row.add0, col.add0=col.add0,
           title.rowvar=title.rowvar, title.colvar=title.colvar,
           tdomvar=tdomvar, concat=concat)
@@ -258,17 +258,17 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     ## GET row titles defined in FIESTA
     ###################################################
     if (is.null(title.rowvar)) {
-     title.rowvar <- ifelse (rowvar %in% ref_titles[["DOMVARNM"]],
-		ref_titles[ref_titles[["DOMVARNM"]] == rowvar, "DOMTITLE"],
-		ifelse (sub("PREV_", "", rowvar) %in% ref_titles[["DOMVARNM"]],
-		paste0("Previous ", tolower(ref_titles[ref_titles[["DOMVARNM"]] ==
-			sub("PREV_", "", rowvar), "DOMTITLE"])), rowvar))
+      title.rowvar <- ifelse (rowvar %in% ref_titles[["DOMVARNM"]],
+		  ref_titles[ref_titles[["DOMVARNM"]] == rowvar, "DOMTITLE"],
+		  ifelse (sub("PREV_", "", rowvar) %in% ref_titles[["DOMVARNM"]],
+		  paste0("Previous ", tolower(ref_titles[ref_titles[["DOMVARNM"]] ==
+			           sub("PREV_", "", rowvar), "DOMTITLE"])), rowvar))
     }
 
     ## Check row groups
     if (rowgrp && is.null(rowgrpnm)) {
       vargrp <- unique(FIESTAutils::ref_codes[!is.na(FIESTAutils::ref_codes[["GROUPNM"]]) &
-		FIESTAutils::ref_codes[["GROUPNM"]] != "", "VARIABLE"])
+		                   FIESTAutils::ref_codes[["GROUPNM"]] != "", "VARIABLE"])
       if (!rowvar %in% vargrp) {
         message("row group not available for rowvar")
         rowgrp <- FALSE
@@ -287,15 +287,15 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
 
     ## Add tfilter to whereqry
     twhereqry <- whereqry
-	if (!is.null(treef)) {
-	  if (!is.null(tfilter)) {
-	    if (!is.null(whereqry)) {
-		  twhereqry <- paste0(whereqry, " AND ", tfilter)
-		} else {
-		  twhereqry <- paste0("\n", tfilter)
-		}
+	  if (!is.null(treef)) {
+	    if (!is.null(tfilter)) {
+	      if (!is.null(whereqry)) {
+		      twhereqry <- paste0(whereqry, " AND ", tfilter)
+		    } else {
+		      twhereqry <- paste0("\n", tfilter)
+		    }
       } 
-	}
+	  }
 
     ##################################################################################
     ## Check for lookup tables
@@ -328,17 +328,17 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       ## add rowvar to cvars2keep
       cvars2keep <- c(cvars2keep, rowvar)
 	  
-	  ## Check row.orderby
+	    ## Check row.orderby
       if (!is.null(row.orderby) && row.orderby != "NONE") {
         if (row.orderby == rowvar) {
-		  message("row.orderby must be different than rowvar")
-		  row.orderby <- "NONE"
-		}	  
+		      message("row.orderby must be different than rowvar")
+		      row.orderby <- "NONE"
+		    }	  
         if (row.orderby != "NONE") {
           if (!row.orderby %in% cnames) {
-		    message("row.orderby must be in cond")
-		    return(NULL)
-		  }
+		        message("row.orderby must be in cond")
+		        return(NULL)
+		      }
 		  
           ## add rowvar to cvars2keep
           cvars2keep <- c(cvars2keep, row.orderby)	
@@ -351,29 +351,28 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                   " AND c.", condid, " = t.", condid, ")", 
                   twhereqry, 					
                   "\nORDER BY ", toString(c(row.orderby, rowvar)))
-		  } else {				  
+		      } else {				  
             uniquerow.qry <- 
-		       paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
-		            "\nFROM ", condfnm,
-					whereqry,
-					"\nORDER BY ", toString(c(row.orderby, rowvar)))
-		  }	  
-		  rowvartmp <- row.orderby
-		  row.orderby <- rowvar
-		  rowvar <- rowvartmp
+		            paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
+		                 "\nFROM ", condfnm,
+					     whereqry,
+					    "\nORDER BY ", toString(c(row.orderby, rowvar)))
+		      }	  
+		      rowvartmp <- row.orderby
+		      row.orderby <- rowvar
+		      rowvar <- rowvartmp
 		  
-		  #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
- 	      if (isdb) {
+		      #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
+ 	        if (isdb) {
             uniquerow <- DBI::dbGetQuery(dbconn, uniquerow.qry)
-		  } else {
+		      } else {
             uniquerow <- sqldf::sqldf(uniquerow.qry, connection = NULL)
           }	
-
-		}
+		    }
       } else {
 
-	  	#if (!is.null(treef)) {
-		if (!is.null(colvar) && colvar %in% tnames) {
+	  	  #if (!is.null(treef)) {
+		    if (!is.null(colvar) && colvar %in% tnames) {
           cuniquex.qry <- 
              paste0("SELECT DISTINCT ", rowvar, 
                 "\nFROM ", treefnm, " t ",
@@ -381,37 +380,37 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                 " AND c.", condid, " = t.", condid, ")", 
                 twhereqry, 					
                 "\nORDER BY ", rowvar)
-		} else {				  
+		    } else {				  
           cuniquex.qry <- 
-		     paste0("SELECT DISTINCT ", rowvar, 
-		          "\nFROM ", condfnm,
-			      whereqry,
-				  "\nORDER BY ", rowvar)
-		}	  	  
-		#message("getting unique values for ", rowvar, ":\n", cuniquex.qry, "\n")
-	    if (isdb) {
+		        paste0("SELECT DISTINCT ", rowvar, 
+		            "\nFROM ", condfnm,
+			          whereqry,
+				       "\nORDER BY ", rowvar)
+		    }	  	  
+		    #message("getting unique values for ", rowvar, ":\n", cuniquex.qry, "\n")
+	      if (isdb) {
           cuniquex <- DBI::dbGetQuery(dbconn, cuniquex.qry)[[1]]
-		} else {
+		    } else {
           cuniquex <- sqldf::sqldf(cuniquex.qry, connection = NULL)[[1]]
         }
         if (any(is.na(cuniquex)) && !keepNA) {
           cuniquex <- cuniquex[!is.na(cuniquex)]		
-		}
+		    }
         rowuniquex <- cuniquex		
 		
-	    if (row.FIAname || !is.null(rowlut)) {
+	      if (row.FIAname || !is.null(rowlut)) {
 
           if (!is.null(rowlut) && ncol(rowlut) > 1 && all(names(rowlut) %in% cnames)) {
             if (is.null(row.orderby) || row.orderby == "NONE") {
               message("row.orderby is not defined... ordering by rowvar")
-			  return(NULL)
+			        return(NULL)
             } else {
 
               if (row.orderby == rowvar) {
                 row.name <- names(rowlut)[names(rowlut) != rowvar]
                 if (length(row.name) > 1) {
-				  message("invalid rowlut... only 2 columns allowed")
-				}
+				          message("invalid rowlut... only 2 columns allowed")
+			         	}
                 rowvarnm <- row.name
               }
             }
@@ -421,30 +420,30 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
             if (rowgrp) {
               if (!is.null(rowgrpnm)) {
                 if (!rowgrpnm %in% cnames) {
-				  message(rowgrpnm, "not in cond")
-				  return(NULL)
-				}  
+				          message(rowgrpnm, "not in cond")
+				          return(NULL)
+				        }  
                 if (is.null(title.rowgrp)) {
-				  title.rowgrp <- rowgrpnm
+				          title.rowgrp <- rowgrpnm
                 }
                 if (!is.null(rowgrpord)) {
                   if (!rowgrpord %in% cnames) {
-				    message(rowgrpord, "not in cond")
-				  }
-				}
+				            message(rowgrpord, "not in cond")
+				          }
+				        }
               } else {
                 rowLUTgrp <- TRUE
               }
             }
 
             if (!is.null(rowlut)) row.add0 <- TRUE
-		    rowLUT <- datLUTnm(x = cnames, 
+		        rowLUT <- datLUTnm(x = cnames, 
 		                     xvar = rowvar, 
-							 uniquex = cuniquex,
-							 LUT = rowlut, 
-							 FIAname = row.FIAname,
-							 group = rowLUTgrp,
-							 add0 = row.add0)
+						uniquex = cuniquex,
+						LUT = rowlut, 
+						FIAname = row.FIAname,
+						group = rowLUTgrp,
+						add0 = row.add0)
             rowlut <- setDT(rowLUT$LUT)
             rowLUTnm <- rowLUT$xLUTnm
 
@@ -467,17 +466,17 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
               if (row.orderby == rowvar) {
                 row.name <- names(rowlut)[names(rowlut) != rowvar]
                 if (length(row.name) > 1) {
-				  message("invalid rowlut... only 2 columns allowed")
-				  return(NULL)
-				}
+				          message("invalid rowlut... only 2 columns allowed")
+				          return(NULL)
+				        }
                 rowvarnm <- row.name
               }
             } else {
               if (!row.orderby %in% names(rowlut)) {
                 message("row.orderby not in rowlut")
-				return(NULL)
-			  }
-			}
+				        return(NULL)
+			        }
+			      }
           }
         }
       }
@@ -488,20 +487,20 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       #}
 
     } else if (rowvar %in% tnames) {	
-	  ## Check row.orderby
+	    ## Check row.orderby
       if (!is.null(row.orderby) && row.orderby != "NONE") {
         if (row.orderby == rowvar) {
-		  message("row.orderby must be different than rowvar")
-		  row.orderby <- "NONE"
-		}	  
+		      message("row.orderby must be different than rowvar")
+		      row.orderby <- "NONE"
+		    }	  
         if (row.orderby != "NONE") {
           if (!row.orderby %in% tnames) {
-		    message(row.orderby, " not in tree")
-		    return(NULL)
-		  }
+		        message(row.orderby, " not in tree")
+		        return(NULL)
+		      }
         }
         if (!is.null(treef)) {		
-	      if (!is.null(condf)) {
+	        if (!is.null(condf)) {
             uniquerow.qry <- 
                paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
                     "\nFROM ", condfnm, " c ",
@@ -509,34 +508,34 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                     " AND c.", condid, " = t.", condid, ")", 
                     twhereqry, 					
                     "\nORDER BY ", toString(c(row.orderby, rowvar)))
-		  } else {				  
+		      } else {				  
             uniquerow.qry <- 
-		     paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
-		            "\nFROM ", treefnm,
-					twhereqry,
-					"\nORDER BY ", toString(c(row.orderby, rowvar)))
-		  }
-		  #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
-		  if (isdb) {
+		          paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
+		               "\nFROM ", treefnm,
+					         twhereqry,
+					         "\nORDER BY ", toString(c(row.orderby, rowvar)))
+		      }
+		      #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
+		      if (isdb) {
             uniquerow <- DBI::dbGetQuery(dbconn, uniquerow.qry)
-		  } else {
+		      } else {
             uniquerow <- sqldf::sqldf(uniquerow.qry, connection = NULL)
           }		  
-		  rowvartmp <- row.orderby
-		  row.orderby <- rowvar
-		  rowvar <- rowvartmp
+		      rowvartmp <- row.orderby
+		      row.orderby <- rowvar
+		      rowvar <- rowvartmp
         }
 		
         if (estseed %in% c("add", "only")) {
-	      if (!is.null(seedf)) {
+	        if (!is.null(seedf)) {
 		  
             if (!row.orderby %in% snames) {
-		      message(row.orderby, " not in seed")
-		      return(NULL)
-		    }	  
+		          message(row.orderby, " not in seed")
+		          return(NULL)
+		        }	  
 		  
-		    if (estseed == "only") {
-	          if (!is.null(condf)) {
+		        if (estseed == "only") {
+	            if (!is.null(condf)) {
                 uniquerow.qry <- 
                    paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
                     "\nFROM ", condfnm, " c ",
@@ -544,22 +543,22 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                     " AND c.", condid, " = t.", condid, ")", 
                     whereqry,					
                     "\nORDER BY ", toString(c(row.orderby, rowvar)))
-		      } else {			
+		          } else {			
                 uniquerow.qry <- 
-		         paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
-		            "\nFROM ", seedfnm,
-					"\nORDER BY ", toString(c(row.orderby, rowvar)))
-		      }
-		    } else {
+		              paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
+		                "\nFROM ", seedfnm,
+					          "\nORDER BY ", toString(c(row.orderby, rowvar)))
+		          }
+		        } else {
               uniquerow.qry <- 
-		         paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
-		            "\nFROM ", seedfnm,
-					"\nORDER BY ", toString(c(row.orderby, rowvar)))
-		    }	
-		    #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
-		    if (isdb) {
+		              paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
+		                 "\nFROM ", seedfnm,
+					           "\nORDER BY ", toString(c(row.orderby, rowvar)))
+		        }	
+		        #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
+		        if (isdb) {
               uniquerow <- DBI::dbGetQuery(dbconn, uniquerow.qry)[[1]]
-		    } else {
+		        } else {
               uniquerow <- sqldf::sqldf(uniquerow.qry)[[1]]
             }
 			
@@ -572,12 +571,12 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
               }
             }			
           } else {
-		    uniquerow <- NULL
-		  }
-        }
+		        uniquerow <- NULL
+		      }
+        }  ## ene estseed
       } else {	  
         if (!is.null(treef)) {	  
-	      if (!is.null(condf)) {
+	        if (!is.null(condf)) {
             tuniquex.qry <- 
                paste0("SELECT DISTINCT ", rowvar, 
                     "\nFROM ", condfnm, " c ",
@@ -585,141 +584,141 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                     " AND c.", condid, " = t.", condid, ")", 
                     twhereqry, 					
                     "\nORDER BY ", rowvar)
-		  } else {				  
-            tuniquex.qry <- 
-		       paste0("SELECT DISTINCT ", rowvar, 
-		            "\nFROM ", treefnm,
-					whereqry,
-					"\nORDER BY ", rowvar)
-		  }
+		    } else {				  
+          tuniquex.qry <- 
+		           paste0("SELECT DISTINCT ", rowvar, 
+		                "\nFROM ", treefnm,
+					          whereqry,
+					          "\nORDER BY ", rowvar)
+		    }
 
-		  #message("getting unique values for ", rowvar, ":\n", tuniquex.qry, "\n")
-		  if (isdb) {
-            tuniquex <- DBI::dbGetQuery(dbconn, tuniquex.qry)[[1]]
-		  } else {
-            tuniquex <- sqldf::sqldf(tuniquex.qry, connection = NULL)[[1]]
-          } 
+		    #message("getting unique values for ", rowvar, ":\n", tuniquex.qry, "\n")
+		    if (isdb) {
+          tuniquex <- DBI::dbGetQuery(dbconn, tuniquex.qry)[[1]]
+		    } else {
+          tuniquex <- sqldf::sqldf(tuniquex.qry, connection = NULL)[[1]]
+        } 
 		  
-        } else {
+      } else {
 	      tuniquex <- NULL
 	    }
-        if (any(is.na(tuniquex)) && !keepNA) {
-          tuniquex <- tuniquex[!is.na(tuniquex)]		
-		}
+      if (any(is.na(tuniquex)) && !keepNA) {
+        tuniquex <- tuniquex[!is.na(tuniquex)]		
+		  }
 	
-        if (estseed %in% c("add", "only")) {
+      if (estseed %in% c("add", "only")) {
 	      if (!is.null(seedf)) {
 		  		    
-		    if (estseed == "add" && rowvar == "DIACL") {
-			  suniquex <- "<1"
-			  snames <- c(snames, "DIACL")
-		    } else {  
-		      if (!rowvar %in% snames) {
-		        message(rowvar, " not in seed")
-		        return(NULL)
-		      }	  
+		      if (estseed == "add" && rowvar == "DIACL") {
+			      suniquex <- "<1"
+			      snames <- c(snames, "DIACL")
+		      } else {  
+		        if (!rowvar %in% snames) {
+		          message(rowvar, " not in seed")
+		          return(NULL)
+		        }	  
 		  
 	          if (!is.null(condf)) {
-                suniquex.qry <- 
-                     paste0("SELECT DISTINCT ", rowvar, 
+              suniquex.qry <- 
+                paste0("SELECT DISTINCT ", rowvar, 
                        "\nFROM ", condfnm, " c ",
                        "\nLEFT OUTER JOIN ", seedfnm, " t ON(c.", cuniqueid, " = t.", tuniqueid, 
                        " AND c.", condid, " = t.", condid, ")", 
                        whereqry,					
                        "\nORDER BY ", rowvar)
-		      } else {			
-                suniquex.qry <- 
-		           paste0("SELECT DISTINCT ", rowvar, 
-		            "\nFROM ", seedfnm,
-					"\nORDER BY ", rowvar)
-		      }
-			  if (estseed == "only") {
-		        #message("getting unique values for ", rowvar, ":\n", suniquex.qry, "\n")
-			  }
-		      if (isdb) {
-                suniquex <- DBI::dbGetQuery(dbconn, suniquex.qry)[[1]]
-		      } else {
-                suniquex <- sqldf::sqldf(suniquex.qry, connection = NULL)[[1]]
-              }  
-              if (any(is.na(suniquex)) && !keepNA) {
-                suniquex <- suniquex[!is.na(suniquex)]		
-		      }
-           }			
-          } else {
-		    suniquex <- NULL
-		  }
-        }
-		rowuniquex <- sort(unique(c(tuniquex, suniquex)))
+		        } else {			
+              suniquex.qry <- 
+		             paste0("SELECT DISTINCT ", rowvar, 
+		                   "\nFROM ", seedfnm,
+					             "\nORDER BY ", rowvar)
+		        }
+			      if (estseed == "only") {
+		          #message("getting unique values for ", rowvar, ":\n", suniquex.qry, "\n")
+			      }
+		        if (isdb) {
+              suniquex <- DBI::dbGetQuery(dbconn, suniquex.qry)[[1]]
+		        } else {
+              suniquex <- sqldf::sqldf(suniquex.qry, connection = NULL)[[1]]
+            }  
+            if (any(is.na(suniquex)) && !keepNA) {
+              suniquex <- suniquex[!is.na(suniquex)]		
+		        }
+          }			
+        } else {
+		      suniquex <- NULL
+		    }
+      }
+		  rowuniquex <- sort(unique(c(tuniquex, suniquex)))
 		
-        bytdom <- TRUE
-        if (row.FIAname || !is.null(rowlut)) {
-          if (!is.null(rowlut) && ncol(rowlut) > 1) {
-            if (is.null(row.orderby) || row.orderby == "NONE") {
-              message("row.orderby is not defined... ordering by rowvar")
-            } else {
-              if (row.orderby == rowvar) {
-                row.name <- names(rowlut)[names(rowlut) != rowvar]
-                if (length(row.name) > 1) stop("invalid rowlut... only 2 columns allowed")
-                rowvarnm <- row.name
-              }
-            }
+      bytdom <- TRUE
+      if (row.FIAname || !is.null(rowlut)) {
+        if (!is.null(rowlut) && ncol(rowlut) > 1) {
+          if (is.null(row.orderby) || row.orderby == "NONE") {
+            message("row.orderby is not defined... ordering by rowvar")
           } else {
-            rowLUTgrp <- FALSE
-            if (rowgrp) {
-              if (!is.null(rowgrpnm)) {
-                if (!rowgrpnm %in% tnames) {
-				  message(paste(rowgrpnm, "not in tree"))
-				  return(NULL)
-				}
-                if (is.null(title.rowgrp)) title.rowgrp <- rowgrpnm
+            if (row.orderby == rowvar) {
+              row.name <- names(rowlut)[names(rowlut) != rowvar]
+              if (length(row.name) > 1) stop("invalid rowlut... only 2 columns allowed")
+                rowvarnm <- row.name
+            }
+          }
+        } else {
+          rowLUTgrp <- FALSE
+          if (rowgrp) {
+            if (!is.null(rowgrpnm)) {
+              if (!rowgrpnm %in% tnames) {
+				        message(paste(rowgrpnm, "not in tree"))
+				        return(NULL)
+				      }
+              if (is.null(title.rowgrp)) title.rowgrp <- rowgrpnm
 
-                if (!is.null(rowgrpord))
-                  if (!rowgrpord %in% tnames) {
-				    message(paste(rowgrpord, "not in tree"))
-					return(NULL)
-				  }
+              if (!is.null(rowgrpord))
+                if (!rowgrpord %in% tnames) {
+				          message(paste(rowgrpord, "not in tree"))
+					        return(NULL)
+				        }
               } else {
                 rowLUTgrp <- TRUE
               }
-			}
+			      }
           }
 
           if (!is.null(rowlut)) row.add0 <- TRUE
 
           if (estseed != "only") {
-			if (rowvar == "GROWTH_HABIT_CD") {
-			  rowlut <- ref_growth_habit
-		      treef <- merge(treef, ref_growth_habit, by=rowvar, all.x=TRUE)
-			  rowLUTnm <- "GROWTH_HABIT_NM"
-			  rowlut <- data.table(rowlut[rowlut[[rowvar]] %in% treef[[rowvar]], ])
-			  rowlut <- rowlut[, lapply(.SD, makefactor)]
+			      if (rowvar == "GROWTH_HABIT_CD") {
+			        rowlut <- ref_growth_habit
+		          treef <- merge(treef, ref_growth_habit, by=rowvar, all.x=TRUE)
+			        rowLUTnm <- "GROWTH_HABIT_NM"
+			        rowlut <- data.table(rowlut[rowlut[[rowvar]] %in% treef[[rowvar]], ])
+			        rowlut <- rowlut[, lapply(.SD, makefactor)]
 	  
-			} else {
+			      } else {
               if (rowvar == "SPCD") {
                 rowLUT <- datLUTspp(x = treef, 
 			                      add0 = row.add0, xtxt="tree", 
-								  uniquex = tuniquex)
-			  } else {
-			    if (!is.data.frame(treef)) { 
-			      x <- tnames 
-			    } else { 
-			      x <- treef 
-			    } 
+								uniquex = tuniquex)
+			        } else {
+			          if (!is.data.frame(treef)) { 
+			            x <- tnames 
+			          } else { 
+			            x <- treef 
+			          } 
                 rowLUT <- datLUTnm(x = x, 
 			                     xvar = rowvar, 
-								 LUT = rowlut, 
-								 FIAname = row.FIAname,
-								 group = rowLUTgrp, 
-								 add0 = row.add0, 
-								 xtxt = "tree", 
-								 uniquex = tuniquex)
-			  }
+								           LUT = rowlut, 
+								           FIAname = row.FIAname,
+								           group = rowLUTgrp, 
+								           add0 = row.add0, 
+								           xtxt = "tree", 
+								           uniquex = tuniquex)
+			        }
               if (!isdb) {
                 treef <- setDT(rowLUT$xLUT)
               }
               rowlut <- setDT(rowLUT$LUT)
               rowLUTnm <- rowLUT$xLUTnm
-			}
+			      }
           }
 		  
           if (estseed %in% c("add", "only") && !is.null(seedf)) {
@@ -727,17 +726,17 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
               if (rowvar == "SPCD") {
                 rowLUT <- datLUTspp(x = seedf, 
 				                     add0 = row.add0, 
-									 xtxt = "seed", 
-									 uniquex = suniquex)
+								xtxt = "seed", 
+								uniquex = suniquex)
               } else {            
                 rowLUT <- datLUTnm(x = seedf, 
 				                    xvar = rowvar, 
-									LUT = NULL, 
-									FIAname = row.FIAname,
-									group = rowLUTgrp, 
-									add0 = row.add0, 
-									xtxt = "seed", 
-									uniquex = suniquex)
+								LUT = NULL, 
+								FIAname = row.FIAname,
+								group = rowLUTgrp, 
+								add0 = row.add0, 
+								xtxt = "seed", 
+								uniquex = suniquex)
               }  
               rowluts <- setDT(rowLUT$LUT)
               rowluts <- rowluts[!rowluts[[rowvar]] %in% rowlut[[rowvar]],]
@@ -759,9 +758,9 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
             rowgrpord <- rowLUT$grpcode
             rowgrpnm <- rowLUT$grpname
             if (all(sapply(rowlut[[rowgrpnm]], function(x) x == "")) ||
-			            all(is.na(rowlut[[rowgrpnm]]))) {
-               stop("no groups for ", rowvar)
-			}
+			                 all(is.na(rowlut[[rowgrpnm]]))) {
+              stop("no groups for ", rowvar)
+			      }
 
             title.rowgrp <- ifelse (rowgrpord %in% ref_titles[["DOMVARNM"]],
 		  	             ref_titles[ref_titles[["DOMVARNM"]] == rowgrpord, "DOMTITLE"], rowgrpnm)
@@ -836,10 +835,10 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     ###################################################
     if (is.null(title.colvar)) {
       title.colvar <- ifelse (colvar %in% ref_titles[["DOMVARNM"]],
-		ref_titles[ref_titles[["DOMVARNM"]] == colvar, "DOMTITLE"],
-		ifelse (sub("PREV_", "", colvar) %in% ref_titles[["DOMVARNM"]],
-		paste0("Previous ", tolower(ref_titles[ref_titles[["DOMVARNM"]] ==
-			sub("PREV_", "", colvar), "DOMTITLE"])), colvar))
+		                      ref_titles[ref_titles[["DOMVARNM"]] == colvar, "DOMTITLE"],
+		                  ifelse (sub("PREV_", "", colvar) %in% ref_titles[["DOMVARNM"]],
+		                         paste0("Previous ", tolower(ref_titles[ref_titles[["DOMVARNM"]] ==
+			                           sub("PREV_", "", colvar), "DOMTITLE"])), colvar))
     }
 
     ## Check collut
@@ -879,37 +878,37 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       ## add colvar to cvars2keep
       cvars2keep <- c(cvars2keep, colvar)
 
-	  ## Check col.orderby
+	    ## Check col.orderby
       if (!is.null(col.orderby) && col.orderby != "NONE") {
         if (col.orderby == rowvar) {
-		  message("col.orderby must be different than rowvar")
-		  col.orderby <- "NONE"
-		}	  
+		      message("col.orderby must be different than rowvar")
+		      col.orderby <- "NONE"
+		    }	  
         if (col.orderby != "NONE") {
           if (!col.orderby %in% cnames) {
-		    message("col.orderby must be in cond")
-		    return(NULL)
-		  }
+		        message("col.orderby must be in cond")
+		        return(NULL)
+		      }
 		  
           ## add colvar to cvars2keep
           cvars2keep <- c(cvars2keep, col.orderby)	
 		  
           uniquecol.qry <- 
-		     paste0("SELECT DISTINCT ", col.orderby, colvar,
+		            paste0("SELECT DISTINCT ", col.orderby, colvar,
 		            "\nFROM ", condfnm,
-                    whereqry,					
-					"\nORDER BY ", colvar, col.orderby, colvar)
-		  colvartmp <- col.orderby
-		  col.orderby <- colvar
-		  colvar <- colvartmp
+                whereqry,					
+					      "\nORDER BY ", colvar, col.orderby, colvar)
+		      colvartmp <- col.orderby
+		      col.orderby <- colvar
+		      colvar <- colvartmp
 		
-		  #message("getting unique values for ", colvar, ":\n", uniquecol.qry)
-	      if (isdb) {
+		      #message("getting unique values for ", colvar, ":\n", uniquecol.qry)
+	        if (isdb) {
             uniquecol <- DBI::dbGetQuery(dbconn, uniquecol.qry)
-		  } else {
+		      } else {
             uniquecol <- sqldf::sqldf(uniquecol.qry, connection = NULL)
           }	
-		}
+		    }
       } else {
        	if (!is.null(treef)) {
           cuniquex.qry <- 
@@ -919,22 +918,22 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                   " AND c.", condid, " = t.", condid, ")", 
                   whereqry, 					
                   "\nORDER BY ", colvar)
-		} else {				  
+		    } else {				  
           cuniquex.qry <- 
-		   paste0("SELECT DISTINCT ", colvar, 
-		            "\nFROM ", condfnm,
-					whereqry,
-					"\nORDER BY ", colvar)
-		}	  
-		#message("getting unique values for ", colvar, ":\n", cuniquex.qry, "\n")
-	    if (isdb) {
+		        paste0("SELECT DISTINCT ", colvar, 
+		             "\nFROM ", condfnm,
+					       whereqry,
+					       "\nORDER BY ", colvar)
+		    }	  
+		    #message("getting unique values for ", colvar, ":\n", cuniquex.qry, "\n")
+	      if (isdb) {
           cuniquex <- DBI::dbGetQuery(dbconn, cuniquex.qry)[[1]]
-		} else {
+		    } else {
           cuniquex <- sqldf::sqldf(cuniquex.qry, connection = NULL)[[1]]
         }		  
         if (any(is.na(cuniquex)) && !keepNA) {
           cuniquex <- cuniquex[!is.na(cuniquex)]		
-		}
+		    }
         coluniquex <- cuniquex
 		
         if (col.FIAname || !is.null(collut)) {
@@ -945,20 +944,20 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
               if (col.orderby == colvar) {
                 col.name <- names(collut)[names(collut) != colvar]
                 if (length(col.name) > 1) {
-				  message("invalid collut... only 2 columns allowed")
-				  return(NULL)
-				}
+				          message("invalid collut... only 2 columns allowed")
+				          return(NULL)
+				        }
                 colvarnm <- col.name
               }
             }
           } else {
             if (!is.null(collut)) col.add0 <- TRUE
             colLUT <- datLUTnm(x = cnames, 
-			                   xvar = colvar, 
-							   uniquex = cuniquex,
-							   LUT = collut, 
-							   FIAname = col.FIAname,
-			                   add0 = col.add0)
+			                         xvar = colvar, 
+							                 uniquex = cuniquex,
+							                 LUT = collut, 
+							                 FIAname = col.FIAname,
+			                         add0 = col.add0)
             collut <- setDT(colLUT$LUT)
             colLUTnm <- colLUT$xLUTnm
 
@@ -970,37 +969,37 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
               if (col.orderby == colvar) {
                 col.name <- names(collut)[names(collut) != colvar]
                 if (length(col.name) > 1) {
-				  message("invalid collut... only 2 columns allowed")
-				  return(NULL)
-				}
+				          message("invalid collut... only 2 columns allowed")
+				          return(NULL)
+				        }
                 colvarnm <- col.name
               }
             } else {
               if (!col.orderby %in% names(collut)) {
                 message("col.orderby not in collut")
-		        return(NULL)
-			  }
-			}
-		  }
-		} 
+		            return(NULL)
+			        }
+			      }
+		      }
+		    } 
       }
 	  
     } else if (colvar %in% tnames) {	
 
-	  ## Check col.orderby
+	    ## Check col.orderby
       if (!is.null(col.orderby) && col.orderby != "NONE") {
         if (col.orderby == colvar) {
-		  message("col.orderby must be different than colvar")
-		  col.orderby <- "NONE"
-		}	  
+		      message("col.orderby must be different than colvar")
+		      col.orderby <- "NONE"
+		    }	  
         if (col.orderby != "NONE") {
           if (!col.orderby %in% tnames) {
-		    message(col.orderby, " not in tree")
-		    return(NULL)
-		  }
+		        message(col.orderby, " not in tree")
+		        return(NULL)
+		      }
         }
         if (!is.null(treef)) {	  
-	      if (!is.null(condf)) {
+	        if (!is.null(condf)) {
             uniquecol.qry <- 
                paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
                     "\nFROM ", condfnm, " c ",
@@ -1008,34 +1007,34 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                     " AND c.", condid, " = t.", condid, ")", 
                     whereqry, 					
                     "\nORDER BY ", toString(c(col.orderby, colvar)))
-		  } else {				  
+		      } else {				  
             uniquecol.qry <- 
-		     paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
-		            "\nFROM ", treefnm,
-					whereqry,
-					"\nORDER BY ", toString(c(col.orderby, colvar)))
-		  }
-		  #message("getting unique values for ", colvar, ":\n", uniquecol.qry, "\n")
-		  if (isdb) {
+		           paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
+		                "\nFROM ", treefnm,
+					          whereqry,
+					          "\nORDER BY ", toString(c(col.orderby, colvar)))
+		      }
+		      #message("getting unique values for ", colvar, ":\n", uniquecol.qry, "\n")
+		      if (isdb) {
             uniquecol <- DBI::dbGetQuery(dbconn, uniquecol.qry)
-		  } else {
+		      } else {
             uniquecol <- sqldf::sqldf(uniquecol.qry, connection = NULL)
           }		  
-		  colvartmp <- col.orderby
-		  col.orderby <- colvar
-		  colvar <- colvartmp
+		      colvartmp <- col.orderby
+		      col.orderby <- colvar
+		      colvar <- colvartmp
         }
 		
         if (estseed %in% c("add", "only")) {
-	      if (!is.null(seedf)) {
+	        if (!is.null(seedf)) {
 		  
             if (!col.orderby %in% snames) {
-		      message(col.orderby, " not in seed")
-		      return(NULL)
-		    }	  
+		          message(col.orderby, " not in seed")
+		          return(NULL)
+		        }	  
 		  
-		    if (estseed == "only") {
-	          if (!is.null(condf)) {
+		        if (estseed == "only") {
+	            if (!is.null(condf)) {
                 uniquecol.qry <- 
                    paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
                     "\nFROM ", condfnm, " c ",
@@ -1043,22 +1042,22 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                     " AND c.", condid, " = t.", condid, ")", 
                     whereqry,					
                     "\nORDER BY ", toString(c(col.orderby, colvar)))
-		      } else {			
+		          } else {			
                 uniquecol.qry <- 
-		         paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
-		            "\nFROM ", seedfnm,
-					"\nORDER BY ", toString(c(col.orderby, colvar)))
-		      }
-		    } else {
+		               paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
+		               "\nFROM ", seedfnm,
+					         "\nORDER BY ", toString(c(col.orderby, colvar)))
+		          }
+		        } else {
               uniquecol.qry <- 
-		         paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
-		            "\nFROM ", seedfnm,
-					"\nORDER BY ", toString(c(col.orderby, colvar)))
-		    }	
-		    #message("getting unique values for ", colvar, ":\n", uniquecol.qry, "\n")
-		    if (isdb) {
+		              paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
+		               "\nFROM ", seedfnm,
+					         "\nORDER BY ", toString(c(col.orderby, colvar)))
+		        }	
+		        #message("getting unique values for ", colvar, ":\n", uniquecol.qry, "\n")
+		        if (isdb) {
               uniquecol <- DBI::dbGetQuery(dbconn, uniquecol.qry)
-		    } else {
+		        } else {
               uniquecol <- sqldf::sqldf(uniquecol.qry, connection = NULL)
             }
 			
@@ -1071,13 +1070,13 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
               }
             }			
           } else {
-		    uniquecol <- NULL
-		  }
+		        uniquecol <- NULL
+		      }
         }
       } else {
 	  
         if (!is.null(treef)) {	  
-	      if (!is.null(condf)) {
+	        if (!is.null(condf)) {
             tuniquex.qry <- 
                paste0("SELECT DISTINCT ", colvar, 
                     "\nFROM ", condfnm, " c ",
@@ -1085,39 +1084,38 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                     " AND c.", condid, " = t.", condid, ")", 
                     whereqry, 					
                     "\nORDER BY ", colvar)
-		  } else {				  
+		      } else {				  
             tuniquex.qry <- 
-		       paste0("SELECT DISTINCT ", colvar, 
-		            "\nFROM ", treefnm,
-					"\nORDER BY ", colvar)
-		  }
-		  #message("getting unique values for ", colvar, ":\n", tuniquex.qry)
-		  if (isdb) {
+		           paste0("SELECT DISTINCT ", colvar, 
+		                "\nFROM ", treefnm,
+					          "\nORDER BY ", colvar)
+		      }
+		      #message("getting unique values for ", colvar, ":\n", tuniquex.qry)
+		      if (isdb) {
             tuniquex <- DBI::dbGetQuery(dbconn, tuniquex.qry)[[1]]
-		  } else {
+		      } else {
             tuniquex <- sqldf::sqldf(tuniquex.qry, connection = NULL)[[1]]
           } 		  
           if (any(is.na(tuniquex)) && !keepNA) {
             tuniquex <- tuniquex[!is.na(tuniquex)]		
-		  }
+		      }
         } else {
-	      tuniquex <- NULL
-	    }
+	        tuniquex <- NULL
+	      }
 		
         if (estseed %in% c("add", "only")) {
-	      if (!is.null(seedf)) {
-		  
-		    if (estseed == "add" && colvar == "DIACL") {
-			  suniquex <- "<1"
-			  tuniquex <- c(suniquex, tuniquex)
-			  snames <- c(snames, "DIACL")
-		    } else {  
-		      if (!colvar %in% snames) {
-		        message(colvar, " not in seed")
-		        return(NULL)
-		      }	
+	        if (!is.null(seedf)) {
+		        if (estseed == "add" && colvar == "DIACL") {
+			        suniquex <- "<1"
+			        tuniquex <- c(suniquex, tuniquex)
+			        snames <- c(snames, "DIACL")
+		        } else {  
+		          if (!colvar %in% snames) {
+		            message(colvar, " not in seed")
+		            return(NULL)
+		          }	
 			  
-		  	  if (!is.null(condf)) {
+		  	      if (!is.null(condf)) {
                 suniquex.qry <- 
                    paste0("SELECT DISTINCT ", colvar, 
                     "\nFROM ", condfnm, " c ",
@@ -1125,27 +1123,27 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
                     " AND c.", condid, " = t.", condid, ")", 
                     whereqry,					
                     "\nORDER BY ", colvar)
-		      } else {			
+		          } else {			
                 suniquex.qry <- 
-		           paste0("SELECT DISTINCT ", colvar, 
-		            "\nFROM ", seedfnm,
-					"\nORDER BY ", colvar)
-		      }	
+		               paste0("SELECT DISTINCT ", colvar, 
+		                "\nFROM ", seedfnm,
+					          "\nORDER BY ", colvar)
+		          }	
               if (estseed == "only") {			  
-		        #message("getting unique values for ", colvar, ":\n", suniquex.qry)
+		            #message("getting unique values for ", colvar, ":\n", suniquex.qry)
               }				
-		      if (isdb) {
+		          if (isdb) {
                 suniquex <- DBI::dbGetQuery(dbconn, suniquex.qry)[[1]]
-		      } else {
+		          } else {
                 suniquex <- sqldf::sqldf(suniquex.qry, connection = NULL)[[1]]
               }		  
               if (any(is.na(suniquex)) && !keepNA) {
                 suniquex <- suniquex[!is.na(suniquex)]		
-		      }
-			}
+		          }
+			      }
           } else {
-		    suniquex <- NULL
-		  }
+		        suniquex <- NULL
+		      }
         }
         coluniquex <- sort(unique(c(tuniquex, suniquex)))
 		
@@ -1158,7 +1156,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
               if (col.orderby == colvar) {
                 col.name <- names(collut)[names(collut) != colvar]
                 if (length(col.name) > 1) stop("invalid collut... only 2 columns allowed")
-                colvarnm <- col.name
+                  colvarnm <- col.name
               }
             }
           } 
@@ -1166,55 +1164,55 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
           if (!is.null(collut)) col.add0 <- TRUE
 
           if (estseed != "only") {
-			if (colvar == "GROWTH_HABIT_CD") {
-			  collut <- ref_growth_habit
-		      treef <- merge(treef, ref_growth_habit, by=colvar, all.x=TRUE)
-			  colLUTnm <- "GROWTH_HABIT_NM"
-			  collut <- data.table(collut[collut[[colvar]] %in% treef[[colvar]], ])
-			  collut <- collut[, lapply(.SD, makefactor)]
+			      if (colvar == "GROWTH_HABIT_CD") {
+			         collut <- ref_growth_habit
+		           treef <- merge(treef, ref_growth_habit, by=colvar, all.x=TRUE)
+			         colLUTnm <- "GROWTH_HABIT_NM"
+			         collut <- data.table(collut[collut[[colvar]] %in% treef[[colvar]], ])
+			         collut <- collut[, lapply(.SD, makefactor)]
 	  
-			} else {
+			      } else {
 			
-            if (colvar == "SPCD") {
-              colLUT <- datLUTspp(x = treef, 
+              if (colvar == "SPCD") {
+                colLUT <- datLUTspp(x = treef, 
 			                      add0 = col.add0, xtxt="tree", 
-								  uniquex = tuniquex)
-            } else { 
-              if (!is.data.frame(treef)) { 
-			    x <- tnames 
-			  } else { 
-			    x <- treef 
-			  } 
-              colLUT <- datLUTnm(x = x, 
+								            uniquex = tuniquex)
+              } else { 
+                if (!is.data.frame(treef)) { 
+			            x <- tnames 
+			          } else { 
+			            x <- treef 
+			          } 
+                colLUT <- datLUTnm(x = x, 
 			                     xvar = colvar, 
-								 LUT = collut, 
-								 FIAname = col.FIAname,
-								 add0 = col.add0, 
-								 xtxt = "tree", 
-								 uniquex = tuniquex) 
+								           LUT = collut, 
+								           FIAname = col.FIAname,
+								           add0 = col.add0, 
+								           xtxt = "tree", 
+								           uniquex = tuniquex) 
               }								 
               if (!isdb) {
                 treef <- setDT(colLUT$xLUT)
               }
               collut <- setDT(colLUT$LUT)
               colLUTnm <- colLUT$xLUTnm
-			}
+			      }
           }
           if (estseed %in% c("add", "only") && !is.null(seedf)) {
             if (colvar %in% snames) {
               if (colvar == "SPCD") {
                 colLUT <- datLUTspp(x = seedf, 
 				                     add0 = col.add0, 
-									 xtxt = "seed", 
-									 uniquex = suniquex)
+									           xtxt = "seed", 
+									           uniquex = suniquex)
               } else {            
                 colLUT <- datLUTnm(x = seedf, 
 				                    xvar = colvar, 
-									LUT = NULL, 
-									FIAname = col.FIAname,
-									add0 = col.add0, 
-									xtxt = "seed", 
-									uniquex = suniquex)
+									          LUT = NULL, 
+									          FIAname = col.FIAname,
+									          add0 = col.add0, 
+									          xtxt = "seed", 
+									          uniquex = suniquex)
               }  
               colluts <- setDT(colLUT$LUT)
               colluts <- colluts[!colluts[[colvar]] %in% collut[[colvar]],]
@@ -1314,14 +1312,14 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     uniquerow <- rowlut
     if (all(!is.factor(uniquerow[[rowvar]]), row.orderby != "NONE", 
 	         row.orderby %in% names(uniquerow))) {
-	  setorderv(uniquerow, row.orderby, na.last=TRUE)
-	}
+	    setorderv(uniquerow, row.orderby, na.last=TRUE)
+	  }
   } else if (!is.null(uniquerow)) {
     uniquerow <- setDT(uniquerow)
     if (!is.null(row.orderby) && row.orderby != "NONE" && 
 	             row.orderby %in% names(uniquerow)) {
       setkeyv(uniquerow, c(rowgrpnm, row.orderby))
-	}
+	  }
   } else if (rowvar %in% cnames) {
     if (!is.null(row.orderby) && row.orderby != "NONE") {
       uniquerow <- unique(condf[,c(rowgrpord, rowgrpnm, row.orderby, rowvar), with=FALSE])
@@ -1334,7 +1332,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       } else {
         #rowvals <- na.omit(unique(condf[, rowvar, with=FALSE]))
         rowvals <- unique(condf[, rowvar, with=FALSE])
-		setorderv(rowvals, rowvar, na.last=TRUE)
+		    setorderv(rowvals, rowvar, na.last=TRUE)
         uniquerow <- as.data.table(rowvals)
         names(uniquerow) <- rowvar
         setkeyv(uniquerow, rowvar)
@@ -1342,10 +1340,10 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     }
   } else if (rowvar %in% tnames) {
     if (!is.null(row.orderby) && row.orderby != "NONE") {
-	  if (estseed == "only") {
+	    if (estseed == "only") {
         uniquerow <- unique(seedf[,c(rowgrpord, rowgrpnm, row.orderby, rowvar), with=FALSE])
         setkeyv(uniquerow, c(rowgrpord, rowgrpnm, row.orderby))
-	  } else {
+	    } else {
         uniquerow <- unique(treef[,c(rowgrpord, rowgrpnm, row.orderby, rowvar), with=FALSE])
         setkeyv(uniquerow, c(rowgrpord, rowgrpnm, row.orderby))
 		
@@ -1361,11 +1359,11 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
             setnames(uniqueseed, c(col.orderby, colvar))
             uniquerow <- rbindlist(list(uniqueseed, uniquerow))
           }
-		}
+		    }
       }
     } else if (!is.null(uniquerow)) {
 	  
-	  if (is.factor(treef[[rowvar]])) {
+	    if (is.factor(treef[[rowvar]])) {
         if (estseed == "add" && rowvar == "DIACL") {
           rowlevels <- c(seedclnm, levels(treef[[rowvar]]))
         } else {
@@ -1391,17 +1389,17 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       uniquerow <- as.data.table(rowuniquex)
       names(uniquerow) <- rowvar
 
-	  if (rowvar == "GROWTH_HABIT_CD") {
-	    ghcodes <- ref_growth_habit[[rowvar]]
-	    ghord <- ghcodes[ghcodes %in% rowuniquex]
-	    if (length(ghord) < length(rowuniquex)) {
-	      missgh <- rowuniquex[!rowuniquex %in% ghord]
+	    if (rowvar == "GROWTH_HABIT_CD") {
+	      ghcodes <- ref_growth_habit[[rowvar]]
+	      ghord <- ghcodes[ghcodes %in% rowuniquex]
+	      if (length(ghord) < length(rowuniquex)) {
+	        missgh <- rowuniquex[!rowuniquex %in% ghord]
           message("growth_habit_cd not in ref: ", toString(missgh)) 
         } else {		  
 	      rowuniquex <- rowuniquex[match(ghord, rowuniquex)]
 	    }
-      }
-      uniquerow[[rowvar]] <- factor(uniquerow[[rowvar]], levels=rowuniquex)
+    }
+    uniquerow[[rowvar]] <- factor(uniquerow[[rowvar]], levels=rowuniquex)
 	  setkeyv(uniquerow, rowvar)
 	
 	} else {
@@ -1483,8 +1481,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     uniquecol <- collut
     if (all(!is.factor(uniquecol[[colvar]]), col.orderby != "NONE", 
 	         col.orderby %in% names(uniquecol))) {
-	  setorderv(uniquecol, col.orderby, na.last=TRUE)
-	}
+	    setorderv(uniquecol, col.orderby, na.last=TRUE)
+	  }
   } else if (!is.null(uniquecol)) {
     uniquecol <- setDT(uniquecol)
     if (col.orderby != "NONE" && col.orderby %in% names(uniquecol))
@@ -1501,7 +1499,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       } else {
         #colvals <- na.omit(unique(condf[, colvar, with=FALSE]))
         colvals <- unique(condf[, colvar, with=FALSE])
-		setorderv(colvals, colvar, na.last=TRUE)
+		    setorderv(colvals, colvar, na.last=TRUE)
         uniquecol <- as.data.table(colvals)
         names(uniquecol) <- colvar
         setkeyv(uniquecol, colvar)
@@ -1527,7 +1525,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       }
     } else if (!is.null(uniquecol)) {
 	  
-	  if (is.factor(treef[[colvar]])) {
+	    if (is.factor(treef[[colvar]])) {
         if (estseed == "add" && colvar == "DIACL") {
           collevels <- c(seedclnm, levels(treef[[colvar]]))
         } else {
@@ -1562,8 +1560,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
         } else {		  
 	      coluniquex <- coluniquex[match(ghord, coluniquex)]
 	    }
-      }
-      uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=coluniquex)
+    }
+    uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=coluniquex)
 	  setkeyv(uniquecol, colvar)
 	  
 	} else {
@@ -1653,8 +1651,8 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       uniquerow <- setorder(uniquerow, -GSSTKCD)
 
     ## Create factors for ordering
-	uniquerow <- uniquerow[, lapply(.SD, makefactor)]
-	setkeyv(uniquerow, rowvar)
+	  uniquerow <- uniquerow[, lapply(.SD, makefactor)]
+	  setkeyv(uniquerow, rowvar)
   }
 
   if (!is.null(uniquecol)) {
@@ -1666,7 +1664,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
       uniquecol <- setorder(uniquecol, -GSSTKCD)
 
     ## Create factors for ordering
-	uniquecol <- uniquecol[, lapply(.SD, makefactor)]
+	  uniquecol <- uniquecol[, lapply(.SD, makefactor)]
   }
 
   ## Add a column for totals
@@ -1684,15 +1682,15 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     ## Filter tree data for any cond filters
     if (!is.null(treef) && is.data.frame(treef)) {
       treef <- treef[paste(get(tuniqueid), get(condid), sep="_") %in%
-		condf[,paste(get(cuniqueid), get(condid), sep="_")]]
-	  setkeyv(treef, c(tuniqueid, condid))
+		               condf[,paste(get(cuniqueid), get(condid), sep="_")]]
+	    setkeyv(treef, c(tuniqueid, condid))
       returnlst <- append(list(treef=treef), returnlst)
     }
 	
     if (!is.null(seedf) && is.data.frame(seedf)) {
       seedf <- seedf[paste(get(tuniqueid), get(condid), sep="_") %in%
-		condf[,paste(get(cuniqueid), get(condid), sep="_")]]
- 	  setkeyv(seedf, c(tuniqueid, condid))
+		               condf[,paste(get(cuniqueid), get(condid), sep="_")]]
+ 	    setkeyv(seedf, c(tuniqueid, condid))
       returnlst <- append(list(seedf=seedf), returnlst)
     }
   }

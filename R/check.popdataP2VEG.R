@@ -667,7 +667,7 @@ checktabs <- function(tabs, names) {
 		warn=paste(vsubpsppid, "not in vegspspp"), stopifnull=TRUE)
     cvars2keep <- c(cvars2keep, "SUBPCOND_PROP")
 
-    ## Check for NA values in necessary variables in tree table
+    ## Check for NA values in necessary variables in tree table;
     vsubpsppx.na <- sum(is.na(vsubpsppx[[vsubpsppid]]))
     if (vsubpsppx.na > 0) stop("NA values in ", vsubpsppid)
 

@@ -272,8 +272,8 @@ modGBpop <- function(popType = "VOL",
                      GBdata = NULL, 
                      pltdat = NULL, 
                      stratdat = NULL, 
-                     auxdat = NULL, 
-					 keepadjvars = FALSE,
+                     auxdat = NULL,
+                     keepadjvars = FALSE,
                      gui = FALSE, 
                      ...){
 
@@ -700,8 +700,8 @@ modGBpop <- function(popType = "VOL",
   ###################################################################################
   pltcheck <- check.popdataPLT(dsn=dsn, tabs=popTabs, tabIDs=popTabIDs, 
       pltassgn=pltassgn, pltassgnid=pltassgnid, pjoinid=pjoinid, 
-      module="GB", popType=popType, popevalid=popevalid, adj=adj, 
-	  popFilter=popFilter2, nonsamp.pfilter=nonsamp.pfilter, 
+      module="GB", popType=popType, popevalid=popevalid, adj=adj,
+      popFilter=popFilter2, nonsamp.pfilter=nonsamp.pfilter, 
       unitarea=unitarea, areavar=areavar, unitvar=unitvar, 
       unitvar2=unitvar2, areaunits=areaunits, unit.action=unit.action, 
       strata=strata, stratalut=stratalut, strvar=strvar, pivot=pivot,
@@ -737,6 +737,7 @@ modGBpop <- function(popType = "VOL",
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
+
   if (popType %in% c("ALL", "CURR", "VOL")) {
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL

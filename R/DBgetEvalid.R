@@ -39,10 +39,10 @@
 #' the sqlite database (*.sqlite).
 #' @param invtype String. The type of FIA data to extract ('PERIODIC',
 #' 'ANNUAL').  Only 1 allowed at a time. See further details below.
-#' @param evalCur Logical. If TRUE, the most current evalidation is extracted
+#' @param evalCur Logical. If TRUE, the most current FIA Evaluation is extracted
 #' for state(s).
-#' @param evalEndyr Number. The end year of the evaluation period of interest.
-#' Selects only sampled plots and conditions for the evalidation period. If
+#' @param evalEndyr Number. The end year of the FIA Evaluation period of interest.
+#' Selects only sampled plots and conditions for the evaluation period. If
 #' more than one state, create a named list object with evalEndyr labeled for
 #' each state (e.g., list(Utah=2014, Colorado=2013).
 #' @param evalid Integer. One or more EVALID to check if exists.
