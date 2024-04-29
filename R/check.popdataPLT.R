@@ -94,7 +94,6 @@ check.popdataPLT <- function(dsn,
   }
   puniqueid <- tabIDs[["plt"]]
   
-  
   ##############################################################################
   ## Check parameters
   ##############################################################################
@@ -195,7 +194,7 @@ check.popdataPLT <- function(dsn,
     dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
     tablst <- DBI::dbListTables(dbconn)
     ppsanm <- pltassgnqry <- NULL
-    
+
     ## Check name of plt
     if (!is.null(plt)) {
       if (plt == "plot" && "plt" %in% tablst) {
@@ -204,6 +203,9 @@ check.popdataPLT <- function(dsn,
         plt <- "plot"
       }
       pltflds <- DBI::dbListFields(dbconn, plt)
+    } else if (popType == "CHNG" && !is.null(pltu)) {
+      plt <- pltu
+      puniqueid <- "CN"
     }
     
     ## Check name of pltassgn
@@ -232,7 +234,7 @@ check.popdataPLT <- function(dsn,
       #whereqry <- paste0("\nWHERE ", evalidnm, " IN(", toString(evalid), ")")
       whereqry <- paste0("\nWHERE ", evalidnm, " IN(", toString(popevalid), ")")
       pltassgnqry <- paste0("SELECT * FROM ", ppsanm, whereqry)
-      
+
       if (is.null(plt)) {
         palias <- "ppsa"
         pfromqry <- paste(ppsanm, "ppsa")
@@ -426,7 +428,7 @@ check.popdataPLT <- function(dsn,
       ## Set key
       setkeyv(pltassgnx, pltassgnid)
     }
-    
+
     ## Merge plot and pltassgn tables
     ############################################################################
     if (!is.null(pltx) && !is.null(pltassgnx)) {
@@ -456,12 +458,14 @@ check.popdataPLT <- function(dsn,
       pltxvars <- names(pltx)[!names(pltx) %in% names(pltassgnx)]
       
       ## Merge pltx and pltassgnx (Note: inner join)
-      pltx <- merge(pltassgnx,
-                    pltx[, unique(c(pjoinid, pltxvars)), with=FALSE], 
-                    by.x=pltassgnid, by.y=pjoinid)
+#      pltx <- merge(pltassgnx,
+#                    pltx[, unique(c(pjoinid, pltxvars)), with=FALSE], 
+#                    by.x=pltassgnid, by.y=pjoinid)
+      pltx <- merge(pltx[, unique(c(pjoinid, pltxvars)), with=FALSE],
+                    pltassgnx,
+                    by.x=pjoinid, by.y=pltassgnid)
+
       #pltx <- merge(pltx, pltassgnx, by.x=pjoinid, by.y=pltassgnid)
-      puniqueid <- pltassgnid
-     
     } else if (is.null(pltx)) {
       pltx <- pltassgnx
       puniqueid <- pltassgnid
@@ -636,7 +640,7 @@ check.popdataPLT <- function(dsn,
     message("PLOT_STATUS_CD not in dataset.. assuming all plots are at least partially sampled")
     plotsampcnt <- pltx[, list(NBRPLOT=uniqueN(get(puniqueid)))]
   }
- 
+
   if (ACI) {
     if (any(c("NF_PLOT_STATUS_CD", "PSTATUSNF") %in% pltnmlst)) {
       if ("PSTATUSNF" %in% names(pltx))
@@ -793,12 +797,16 @@ check.popdataPLT <- function(dsn,
       return(NULL)
     }
   }
- 
+
   ##############################################################################
   ## Split tables
   ##############################################################################
   ## Subset columns for pltassgn table
-  pltassgnx <- data.table(pltx[, pltassgnvars, with=FALSE])
+  pltassgnvars2 <- unique(c(puniqueid, pltassgnvars))[unique(c(puniqueid, pltassgnvars)) %in% names(pltx)]
+  pltassgnx <- data.table(pltx[, pltassgnvars2, with=FALSE])
+  if (puniqueid != pltassgnid) {
+    setnames(pltassgnx, puniqueid, pltassgnid)
+  }
   setkeyv(pltassgnx, pltassgnid)
   
   ## Subset columns for pltassgn table
@@ -806,7 +814,7 @@ check.popdataPLT <- function(dsn,
   pvars2keep <- pvars2keep[pvars2keep %in% names(pltx)]
   pltx <- data.table(pltx[, pvars2keep, with=FALSE])
   setkeyv(pltx, puniqueid)
-  
+
   if (is.null(pvars)) {
     pvars <- c(puniqueid, pdoms2keep, pvars2keep)
   } else {

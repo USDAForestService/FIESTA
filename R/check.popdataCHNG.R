@@ -71,7 +71,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     }
     return(NULL)
   }
-  
+
   ## Get tables from tabs
   ##########################################################  
 
@@ -87,9 +87,8 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     pltnm <- pltnmchk
   }
   assign(pltnm, tabs[[pltnmchk]])
-  puniqueid <- tabIDs[[pltnmchk]]
   pltflds <- names(get(pltnm))
-  
+
   ## Check name of COND table
   condnmchk <- checktabs(tabs, "condu")
   if (is.null(condnmchk)) {
@@ -114,8 +113,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   }
   assign(sccmnm, tabs[[sccmchk]])
   sccmid <- tabIDs[[sccmchk]]
- 
-
+  
   ###################################################################################
   ## Database queries
   ###################################################################################
@@ -161,12 +159,11 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
     }
   } 
 
-
   ## Check palias
   if (is.null(palias)) {
     palias <- "p"
   }
-  
+
   ## Build pfromqry
   if (is.null(pfromqry)) {
     pfromqry <- paste0(SCHEMA., pltnm, " ", palias)

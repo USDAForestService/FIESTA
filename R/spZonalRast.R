@@ -259,8 +259,8 @@ spZonalRast <- function(polyv,
 			stopifnotin=TRUE)
 			
   ## Get datatype and NODATA value from raster
-  dtype <- rasterInfo(rastfn)$datatype
-  NODATAval <- rasterInfo(rastfn)$nodata_value
+  dtype <- rasterInfo(rastfn)$datatype[1]
+  NODATAval <- rasterInfo(rastfn)$nodata_value[1]
   
   ## Check rast.NODATA... add rast.NODATA values to ignoreValues if not already defined in rast
   if (!is.null(rast.NODATA) && all(!is.na(rast.NODATA))) {

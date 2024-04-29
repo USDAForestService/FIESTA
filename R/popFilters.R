@@ -22,7 +22,7 @@
 #' @param measEndyr Number. The most current sampled plots measured before or
 #' during end given..
 #' @param invyrs Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).
-#' @param measvyrs Integer vector. Measurement year(s) (e.g., c(2000, 2001, 2002)).
+#' @param measyrs Integer vector. Measurement year(s) (e.g., c(2000, 2001, 2002)).
 #' @param intensity Integer code. Code(s) indicating intensity to use for
 #' population.
 #' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.

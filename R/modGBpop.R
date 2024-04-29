@@ -646,12 +646,12 @@ modGBpop <- function(popType = "VOL",
   } else {
     stop("need to include popTabs")
   }
-  list.items <- c("cond")
+  list.items <- {}
   if (popType == "VOL") {
-    list.items <- c(list.items, "tree")
+    list.items <- c(list.items, "cond", "tree")
   }
   if (popType == "P2VEG") {
-    list.items <- c(list.items, "subplot", "subp_cond")
+    list.items <- c(list.items, "cond", "subplot", "subp_cond")
     if (all(is.null(findnm("vsubpstr", names(popTabs), returnNULL=TRUE)), 
 	       is.null(findnm("p2veg_subp_structure", names(popTabs), returnNULL=TRUE)))) {
 	  message("need subp_cond_chng_mtrx table")
@@ -672,7 +672,7 @@ modGBpop <- function(popType = "VOL",
 	  stop()
 	}	 
   }
-  
+ 
   ## Check popTabs
   popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items, stopifnull=TRUE)
 
