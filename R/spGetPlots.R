@@ -664,7 +664,7 @@ spGetPlots <- function(bnd = NULL,
           evalInfo <- xydat$evalInfo  
           #pop_plot_stratum_assgn <- xydat$pop_plot_stratum_assgn   
         }
- 
+
         ## Check xyjoinid
         xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 	            checklst=names(pltids), gui=gui, caption="JoinID in pltids?", 
