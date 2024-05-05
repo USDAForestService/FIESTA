@@ -194,7 +194,7 @@ DBgetEvalid <- function(states = NULL,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  surveynm=popevalnm=popevalgrpnm=popevaltypnm=ppsanm <- NULL
+  plotnm=surveynm=popevalnm=popevalgrpnm=popevaltypnm=ppsanm <- NULL
   returnevalid=ppsaindb <- FALSE
   
   ## Check invtype
@@ -486,7 +486,12 @@ DBgetEvalid <- function(states = NULL,
     ## Add a parsed EVAL_GRP endyr to POP_EVAL_GRP
     eval_grpnm <- findnm("EVAL_GRP", names(POP_EVAL_GRP))
     POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP[[eval_grpnm]], 
-		nchar(POP_EVAL_GRP[[eval_grpnm]]) - 3, nchar(POP_EVAL_GRP[[eval_grpnm]])))]
+		         nchar(POP_EVAL_GRP[[eval_grpnm]]) - 3, nchar(POP_EVAL_GRP[[eval_grpnm]])))]
+#    if (any(stcdlst == 64)) {
+#      x <- POP_EVAL_GRP[startsWith(as.character(POP_EVAL_GRP$EVAL_GRP_Endyr), "64"), "EVAL_GRP_Endyr"]
+#      POP_EVAL_GRP[startsWith(as.character(POP_EVAL_GRP$EVAL_GRP_Endyr), "64"), "EVAL_GRP_Endyr"] <-
+#        as.numeric(paste0("20", substr(x, nchar(x)-1, nchar(x))))
+#    }
   }
 
   ######################################################################################
@@ -592,8 +597,9 @@ DBgetEvalid <- function(states = NULL,
 	  }
 	
     if (!is.null(ppsanm)) {
-      invyrnm <- findnm("INVYR", ppsaflds, returnNULL=TRUE) 
-  
+      #invyrnm <- findnm("INVYR", ppsaflds, returnNULL=TRUE) 
+      invyrnm <- findnm("INVYR", pltflds, returnNULL=TRUE) 
+      
       ## Check evalids 
       evalid.qry <- paste0(
            "SELECT DISTINCT evalid", 
@@ -605,43 +611,43 @@ DBgetEvalid <- function(states = NULL,
       }
 
 	    if (is.null(evalid)) {
-	  
-	      ## Create invyrtab wiht no evalid
-	  	  if (!is.null(invyrnm)) {
-          invqry <- paste0(
-               "SELECT ", ppsanm, ".statecd, ", ppsanm, ".invyr, COUNT(*) NBRPLOTS",
-               "\nFROM ", SCHEMA., ppsanm, " ", ppsanm)
-	        if (!is.null(surveynm)) {
+	      ## Getin invyrtab from plot table
+	      if (!is.null(plotnm)) {
+	        idxchk <- checkidx(dbconn, plotnm)
+	        if (nrow(idxchk) == 0) {
+	          message("no indices for ", plotnm, "...  could be very slow")
+	          message("use FIESTAutils::createidx to create in index")
+	          message("createidx(conn, tbl = '", plotnm, "', 
+	          index_cols = c('EVALID','STATECD','COUNTYCD','PLOT','INVYR'), unique=TRUE)")
+	        }
+	        
+	        pinvyrnm <- findnm("INVYR", pltflds)  
+	        if (!is.null(pinvyrnm)) {     
+	          invqry <- paste0("SELECT p.statecd, p.invyr, COUNT(*) NBRPLOTS", 
+	                          "\nFROM ", SCHEMA., plotnm, " p")
+	          if (!is.null(surveynm)) {
+	            invqry <- paste0(invqry,
+	                 "\nJOIN ", SCHEMA., surveynm, " ON(", surveynm, ".statecd = p.statecd",
+	                 "\n  AND ", surveynm, ".invyr = p.invyr)",
+	                 surveywhere.qry)	        
+	          } else {
+	            invqry <- paste0(invqry,
+	                 "\nWHERE p.statecd IN (", toString(stcdlst), ")")
+	          }
 	          invqry <- paste0(invqry,
-		           "\nJOIN ", SCHEMA., surveynm, " ON(", surveynm, ".statecd = ", ppsanm, ".statecd",
-			         "\n  AND ", surveynm, ".invyr = ", ppsanm, ".invyr)",
-			        surveywhere.qry)	        
-          }
-	        invqry <- paste0(invqry,
-				        "\nGROUP BY ", ppsanm, ".statecd, ", ppsanm, ".invyr",
-				        "\nORDER BY ", ppsanm, ".statecd, ", ppsanm, ".invyr") 
-		  
-          if (datsource == "sqlite") {
-            invyrtab <- DBI::dbGetQuery(dbconn, invqry)
-          } else {
-            invyrtab <- sqldf::sqldf(invqry, connection = NULL)
-          } 
-        } else {
-          if (!is.null(plotnm)) {
-            invyrnm <- findnm("INVYR", pltflds)  
-            if (!is.null(invyrnm)) {     
-              invqry <- paste("SELECT p.statecd, p.invyr, COUNT(*) NBRPLOTS", 
-			                  "\nFROM ", SCHEMA., plotnm, "p",
-							  "\nGROUP BY p.statecd, p.invyr")								
-             if (datsource == "sqlite") {
-                invyrtab <- DBI::dbGetQuery(dbconn, invqry)
-              } else {
-                invyrtab <- sqldf::sqldf(invqry, connection = NULL)
-              }
-            }
-          }
-        }	  
-      } else if (!all(evalid %in% evalidindb)) {
+	                 "\nGROUP BY p.statecd, p.invyr",
+	                 "\nORDER BY p.statecd, p.invyr") 
+	     
+	          if (datsource == "sqlite") {
+	            invyrtab <- DBI::dbGetQuery(dbconn, invqry)
+	          } else {
+	            invyrtab <- sqldf::sqldf(invqry, connection = NULL)
+	          } 
+	        }
+	      } else {
+	        message("INVYR not in data")
+	      }
+	    } else if (!all(evalid %in% evalidindb)) {
 	  
 	      ## Check evalid
         missevalid <- sort(!evalid[evalid %in% evalidindb])
@@ -702,7 +708,6 @@ DBgetEvalid <- function(states = NULL,
       } ## End create invyrtab
     }
   } ## End check evalid
-
 
   ######################################################################################
   ## If evalid was not input
@@ -865,7 +870,7 @@ DBgetEvalid <- function(states = NULL,
         }
       } 
     }
- 
+    
     ## Get last year of evaluation period and the evaluation type
     if (evalresp) {
       ## Get the evalidation type
@@ -1026,6 +1031,9 @@ DBgetEvalid <- function(states = NULL,
           stabbr <- pcheck.states(stcd, "ABBR")
           stinvyrs <- unique(stinvyr.vals[[state]])
           invtype.invyrs <- setDT(invyrtab)[invyrtab$STATECD == stcd][["INVYR"]]
+          if (stcd == 64) {
+            invtype.invyrs[invtype.invyrs == 2016] <- 6416
+          }
 
           ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
           ## Remove East and West in LOCATION_NM and EVAL_DESCR
@@ -1149,7 +1157,7 @@ DBgetEvalid <- function(states = NULL,
       }
     }  ## END evalresp
   }  ## returnevalid
- 
+
   returnlst <- list(states=states, rslst=rslst, 
                     evalidlist=evalidlist, 
                     invtype=invtype, invyrtab=invyrtab, 
@@ -1163,18 +1171,30 @@ DBgetEvalid <- function(states = NULL,
   }
 
   ## Return population information
-  returnlst$SURVEY <- SURVEY
-  returnlst$PLOT <- PLOT
+  if (!is.null(surveynm)) {
+    if (datsource == "sqlite") {
+      returnlst$SURVEY <- surveynm
+    } else {
+      returnlst$SURVEY <- SURVEY
+    }
+  }
+  if (!is.null(plotnm)) {
+    if (datsource == "sqlite") {
+      returnlst$PLOT <- plotnm
+    } else {
+      returnlst$PLOT <- PLOT
+    }
+  }
   
   if (!is.null(ppsanm)) {
     ## Get POP_PLOT_STRATUM_ASSGN 
-	if (returnPOP) {
+	  if (returnPOP) {
 #      ppsa.qry <- paste0("SELECT plt_cn, statecd, unitcd, countycd, plot, 
 #	                        estn_unit, stratumcd, evalid",
 #	                     "\nFROM ", SCHEMA., ppsanm)
       ppsa.qry <- paste0("SELECT *",
 	                     "\nFROM ", SCHEMA., ppsanm)      
-	  if (!is.null(evalidlist)) {
+	    if (!is.null(evalidlist)) {
         ppsa.qry <- paste0(ppsa.qry, 
                          "\nWHERE evalid IN(", toString(unlist(evalidlist)), ")")	
       }	
@@ -1186,10 +1206,10 @@ DBgetEvalid <- function(states = NULL,
       returnlst$POP_PLOT_STRATUM_ASSGN <- get(ppsanm)
     } else {
       returnlst$POP_PLOT_STRATUM_ASSGN <- ppsanm
-	}
-	returnlst$ppsanm <- ppsanm
-	returnlst$ppsaflds <- ppsaflds
-	returnlst$ppsaindb <- ppsaindb
+	  }
+	  returnlst$ppsanm <- ppsanm
+	  returnlst$ppsaflds <- ppsaflds
+	  returnlst$ppsaindb <- ppsaindb
   }
   #returnlst$POP_EVAL <- POP_EVAL[EVALID %in% unlist(evalidlist),]
 
