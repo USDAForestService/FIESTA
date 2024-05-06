@@ -163,11 +163,11 @@ spGetPlots <- function(bnd = NULL,
                        intensity1 = FALSE,  
                        clipxy = TRUE, 
                        pjoinid = NULL, 
-                       showsteps = FALSE, 
-					   returnxy = TRUE,
+                       showsteps = FALSE,
+                       returnxy = TRUE,
                        returndata = TRUE,
                        savedata = FALSE,
-					   savexy = FALSE,
+                       savexy = FALSE,
                        savebnd = FALSE, 
                        exportsp = FALSE, 
                        savedata_opts = NULL,
@@ -444,8 +444,8 @@ spGetPlots <- function(bnd = NULL,
 
     ## Check xyjoinid
     xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-	      checklst=names(pltids), gui=gui, caption="JoinID in pltids?", 
-		stopifnull=FALSE) 
+	         checklst=names(pltids), gui=gui, caption="JoinID in pltids?", 
+		       stopifnull=FALSE) 
     if (is.null(xyjoinid)) {
       message("no xyjoinid defined... using xy.uniqueid: ", xy.uniqueid)
       xyjoinid <- xy.uniqueid
@@ -461,21 +461,21 @@ spGetPlots <- function(bnd = NULL,
 
       ## Check xyjoinid
       xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-		checklst=names(pltids), gui=gui, caption="JoinID in pltids?",
- 		stopifnull=FALSE)  
-	  if (is.null(xyjoinid)) {
-	    message("xyjoinid is NULL... using xy.uniqueid: ", xy.uniqueid)
-	    xyjoinid <- xy.uniqueid
+		         checklst=names(pltids), gui=gui, caption="JoinID in pltids?",
+ 		         stopifnull=FALSE)  
+	    if (is.null(xyjoinid)) {
+	      message("xyjoinid is NULL... using xy.uniqueid: ", xy.uniqueid)
+	      xyjoinid <- xy.uniqueid
 
         ## Check xyjoinid
         xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-		  checklst=names(pltids), gui=gui, caption="JoinID in pltids?",
- 		  stopifnull=TRUE)
+		         checklst=names(pltids), gui=gui, caption="JoinID in pltids?",
+ 		         stopifnull=TRUE)
       }		  
  
       ## Check stbnd.att
       stbnd.att <- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
-		checklst=names(pltids), gui=gui, caption="State attribute?") 
+		        checklst=names(pltids), gui=gui, caption="State attribute?") 
       
       ## Get state codes
       if (is.null(stbnd.att)) {
@@ -703,10 +703,10 @@ spGetPlots <- function(bnd = NULL,
 
         ## Get intersecting states
         statedat <- spGetStates(bndx,
-			        	stbnd.att = "COUNTYFIPS", 
-					RS = RS, 
-                           states = states, 
-                           showsteps = showsteps)
+			        	                stbnd.att = "COUNTYFIPS", 
+					                      RS = RS, 
+                                states = states, 
+                                showsteps = showsteps)
         bndx <- statedat$bndx
         stbnd.att <- statedat$stbnd.att
         statenames <- statedat$statenames
@@ -714,7 +714,7 @@ spGetPlots <- function(bnd = NULL,
           countyfips <- statedat$states
           countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
           stcds <- sort(unique(as.numeric(sapply(countyfips, 
-				substr, nchar(countyfips)-5, nchar(countyfips)-3))))
+				                substr, nchar(countyfips)-5, nchar(countyfips)-3))))
         } else {
           stcds <- FIESTAutils::ref_statecd$VALUE[FIESTAutils::ref_statecd$MEANING %in% statedat$states]
         }
@@ -732,33 +732,33 @@ spGetPlots <- function(bnd = NULL,
   ## Check showsteps
   #############################################################################
   showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
-                             title="Show steps?", first="NO", gui=gui) 
+                  title="Show steps?", first="NO", gui=gui) 
  
   ## Check returnxy
   #############################################################################
   returnxy <- pcheck.logical(returnxy, varnm="returnxy", 
-		title="Return XY?", first="NO", gui=gui)  
+		               title="Return XY?", first="NO", gui=gui)  
 
   ## Check returndata
   #############################################################################
   returndata <- pcheck.logical(returndata, varnm="returndata", 
-                      title="Return data?", first="YES", gui=gui)  
+                   title="Return data?", first="YES", gui=gui)  
 
   ## Check savexy
   #############################################################################
   savexy <- pcheck.logical(savexy, varnm="savexy", 
-                           title="Save XY data?", first="NO", gui=gui)
+                 title="Save XY data?", first="NO", gui=gui)
 
   ## Check savedata
   #############################################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 
-		title="Save data?", first="NO", gui=gui)  
+		              title="Save data?", first="NO", gui=gui)  
 
   ## Check savebnd
   #############################################################################
   if (!is.null(bndx)) {
     savebnd <- pcheck.logical(savebnd, varnm="savebnd",
-		    title="Save spatial bnd?", first="NO", gui=gui)
+		               title="Save spatial bnd?", first="NO", gui=gui)
   } else {
     savebnd <- FALSE
   }
@@ -977,17 +977,17 @@ spGetPlots <- function(bnd = NULL,
           message("plots where ", Endyr.filter, " do not match pltids")
         }
         pids1 <- plt1[[puniqueid]]
-		ppltidnm1 <- findnm("PREV_PLT_CN", names(plt1), returnNULL = TRUE)
-		if (any(Type %in% c("CHNG", "GRM"))) { 
-	      ppltids1 <- plt1[plt1[[puniqueid]] %in% pids1, ppltidnm1] 
-		  pids1 <- c(pids1, ppltids1)
-		}
+		    ppltidnm1 <- findnm("PREV_PLT_CN", names(plt1), returnNULL = TRUE)
+		    if (any(Type %in% c("CHNG", "GRM"))) { 
+	        ppltids1 <- plt1[plt1[[puniqueid]] %in% pids1, ppltidnm1] 
+		      pids1 <- c(pids1, ppltids1)
+		    }
 
         ## Subset other tables in list
         stcliptabs$plt <- plt1
-		for (tabnm in names(tabs2)[names(tabs2) != "plt"]) {
+		    for (tabnm in names(tabs2)[names(tabs2) != "plt"]) {
           if (tabIDs[[tabnm]] %in% names(tabs[[tabnm]])) {
-		    # if (tabnm %in% c("plotu", "pltu")) {
+		        # if (tabnm %in% c("plotu", "pltu")) {
               # pltu1 <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids1,ppltids1), ]
               # stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], pltu1)
             # } else if (tabnm %in% ("condu")) {
@@ -995,10 +995,10 @@ spGetPlots <- function(bnd = NULL,
               # stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], condu1)
             # }   						  
             stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids1, ]			
-		  } else {
+		      } else {
             stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], 
-				tabs2[[tabnm]][tabs2[[tabnm]][[tabIDs[[tabnm]]]] %in% pids1, ])
-		  }
+				    tabs2[[tabnm]][tabs2[[tabnm]][[tabIDs[[tabnm]]]] %in% pids1, ])
+		      }
         }
       }
       ## Get plots outside filter
@@ -1033,7 +1033,7 @@ spGetPlots <- function(bnd = NULL,
       pop_plot_stratum_assgn2 <- dat2$pop_plot_stratum_assgn
       evalid2 <- dat2$evalid
       PLOT2 <- tabs2$plt
-	  PLOT2u <- tabs2$pltu
+	    PLOT2u <- tabs2$pltu
 
       if (nrow(PLOT2) > length(unique(PLOT2[[puniqueid]]))) {
         if ("INVYR" %in% names(PLOT2)) {
@@ -1051,11 +1051,11 @@ spGetPlots <- function(bnd = NULL,
           message("plots outside filter do not match pltids")
         }
         pids2 <- plt2[[puniqueid]]
-		ppltidnm2 <- findnm("PREV_PLT_CN", names(plt2), returnNULL = TRUE)
-		if (any(Type %in% c("CHNG", "GRM"))) { 
-	      ppltids2 <- plt2[plt2[[puniqueid]] %in% pids2, ppltidnm2] 
-		  pids2 <- c(pids2, ppltids2)
-		}
+		    ppltidnm2 <- findnm("PREV_PLT_CN", names(plt2), returnNULL = TRUE)
+		    if (any(Type %in% c("CHNG", "GRM"))) { 
+	        ppltids2 <- plt2[plt2[[puniqueid]] %in% pids2, ppltidnm2] 
+		      pids2 <- c(pids2, ppltids2)
+		    }
 
         ## Subset other tables in list
         stcliptabs$plt <- rbind(stcliptabs$plt, plt2)
@@ -1063,7 +1063,7 @@ spGetPlots <- function(bnd = NULL,
 
         for (tabnm in names(tabs2)[names(tabs2) != "plt"]) {
           if (tabIDs[[tabnm]] %in% names(tabs[[tabnm]])) {
-		    # if (tabnm %in% c("plotu", "pltu")) {
+		        # if (tabnm %in% c("plotu", "pltu")) {
               # pltu2 <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids2,ppltids2), ]
               # stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], pltu2)
             # } else if (tabnm %in% ("condu")) {
@@ -1071,10 +1071,10 @@ spGetPlots <- function(bnd = NULL,
               # stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], condu2)
             # }   						  
             stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids2, ]			
-		  } else {
+		      } else {
             stcliptabs[[tabnm]] <- rbind(stcliptabs[[tabnm]], 
-				tabs2[[tabnm]][tabs2[[tabnm]][[tabIDs[[tabnm]]]] %in% pids2, ])
-		  }
+				    tabs2[[tabnm]][tabs2[[tabnm]][[tabIDs[[tabnm]]]] %in% pids2, ])
+		      }
         }
       }          
     } else {   ## Endyr.filter is null
@@ -1114,7 +1114,6 @@ spGetPlots <- function(bnd = NULL,
         stateFilterDB <- paste(stateFilterDB, "&", stateFilter) 
         rm(stateFilter)
       }
-
       dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 
@@ -1127,14 +1126,15 @@ spGetPlots <- function(bnd = NULL,
                          stateFilter = stateFilterDB, 
                          returndata = TRUE,
                          evalInfo = evalInfost,
+                         dbconnopen = TRUE,
                          ...
-                         )					 
+                         )
       tabs <- dat$tabs
       tabIDs <- dat$tabIDs
       pop_plot_stratum_assgn <- dat$pop_plot_stratum_assgn
       evalid <- dat$evalid
       PLOT <- tabs$plt
-	  PLOTu <- tabs$pltu
+	    PLOTu <- tabs$pltu
       puniqueid <- dat$puniqueid
       dbqueries <- dat$dbqueries
 
@@ -1177,23 +1177,23 @@ spGetPlots <- function(bnd = NULL,
         plt <- PLOT[PLOT[[pjoinid]] %in% stpltids[[xyjoinid]],]						
         if (nrow(plt) != nrow(stpltids)) {
           message("there are ", abs(nrow(plt) - nrow(stpltids)), 
-			" plots in ", state, " that do not match pltids")
+		             	" plots in ", state, " that do not match pltids")
           #spxy[!spxy[[xyjoinid]] %in% plt[[pjoinid]],] 
           messagedf(stpltids[[xyjoinid]][!stpltids[[xyjoinid]] %in% PLOT[[pjoinid]]])
         }
         pids <- plt[[puniqueid]]
-		ppltidnm <- findnm("PREV_PLT_CN", names(plt), returnNULL = TRUE)	     
-		if (any(Type %in% c("CHNG", "GRM"))) { 
-	      ppltids <- plt[plt[[puniqueid]] %in% pids, ppltidnm] 
-		  pids <- c(pids, ppltids)
-		}
+		    ppltidnm <- findnm("PREV_PLT_CN", names(plt), returnNULL = TRUE)	     
+		    if (any(Type %in% c("CHNG", "GRM"))) { 
+	        ppltids <- plt[plt[[puniqueid]] %in% pids, ppltidnm] 
+		      pids <- c(pids, ppltids)
+		    }
 		
 #print(pids)	
         ## Subset other tables in list
         stcliptabs$plt <- plt
         for (tabnm in names(tabs)[names(tabs) != "plt"]) {
           if (tabIDs[[tabnm]] %in% names(tabs[[tabnm]])) {
-		    # if (tabnm %in% c("plotu", "pltu")) {
+		        # if (tabnm %in% c("plotu", "pltu")) {
               # pltu <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% c(pids,ppltids), ]
               # stcliptabs[[tabnm]] <- pltu
             # } else if (tabnm %in% ("condu")) {
@@ -1201,9 +1201,9 @@ spGetPlots <- function(bnd = NULL,
               # stcliptabs[[tabnm]] <- condu
             # }  
             stcliptabs[[tabnm]] <- tabs[[tabnm]][tabs[[tabnm]][[tabIDs[[tabnm]]]] %in% pids, ]			
-		  } else {
-		    stcliptabs[[tabnm]] <- tabs[[tabnm]]
-		  }
+		      } else {
+		        stcliptabs[[tabnm]] <- tabs[[tabnm]]
+		      }
         }
       }
 
@@ -1232,11 +1232,11 @@ spGetPlots <- function(bnd = NULL,
           if (tabnm == "plt") tabnm <- "plot"
 
           indx <- ifelse(tabnm == "plt", "CN", 
-		  ifelse(tabnm %in% c("cond", "vsubpspp", "vsubpstr", 
-						"invsubp", "dwm"), c("PLT_CN", "CONDID"),
-		    ifelse(tabnm %in% c("tree", "grm"), c("PLT_CN", "CONDID", "TREE"), 
-			 ifelse(tabnm == "subplot", c("PLT_CN", "SUBP"), 
-			   ifelse(tabnm == "subpcond", c("PLT_CN", "SUBP", "CONDID"), "PLT_CN")))))
+		      ifelse(tabnm %in% c("cond", "vsubpspp", "vsubpstr", 
+						         "invsubp", "dwm"), c("PLT_CN", "CONDID"),
+		      ifelse(tabnm %in% c("tree", "grm"), c("PLT_CN", "CONDID", "TREE"), 
+			    ifelse(tabnm == "subplot", c("PLT_CN", "SUBP"), 
+			    ifelse(tabnm == "subpcond", c("PLT_CN", "SUBP", "CONDID"), "PLT_CN")))))
           if (!all(indx %in% names(tab))) {
             indx <- indx[indx %in% names(tab)]
           }
@@ -1278,6 +1278,7 @@ spGetPlots <- function(bnd = NULL,
           # gc()
         } 
       }
+
       if (showsteps && !is.null(spxy) && !is.null(bndx)) {
         ## Set plotting margins
         mar <-  graphics::par("mar")
@@ -1295,7 +1296,6 @@ spGetPlots <- function(bnd = NULL,
     }  ## End of looping thru states
   }  ## datsource
      
- 
   #############################################################################
   ## Save tables
   #############################################################################

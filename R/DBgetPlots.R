@@ -4699,7 +4699,6 @@ DBgetPlots <- function (states = NULL,
       returnlst$evalInfo <- evalInfo
     }
   }
-  
   ## Disconnect database
   if (!is.null(dbconn) && !dbconnopen && DBI::dbIsValid(dbconn)) {
     DBI::dbDisconnect(dbconn)

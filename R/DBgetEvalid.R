@@ -587,7 +587,6 @@ DBgetEvalid <- function(states = NULL,
       }
 	  }  
   } else { 
-
     ## If no evalid and survey and ppsa_layer are in data
     #############################################################################
 	
@@ -595,7 +594,6 @@ DBgetEvalid <- function(states = NULL,
       message("SURVEY table does not exist in database... assuming ANNUAL inventory plots")
       #invtype <- "ANNUAL"
 	  }
-	
     if (!is.null(ppsanm)) {
       #invyrnm <- findnm("INVYR", ppsaflds, returnNULL=TRUE) 
       invyrnm <- findnm("INVYR", pltflds, returnNULL=TRUE) 
@@ -613,12 +611,14 @@ DBgetEvalid <- function(states = NULL,
 	    if (is.null(evalid)) {
 	      ## Getin invyrtab from plot table
 	      if (!is.null(plotnm)) {
-	        idxchk <- checkidx(dbconn, plotnm)
-	        if (nrow(idxchk) == 0) {
-	          message("no indices for ", plotnm, "...  could be very slow")
-	          message("use FIESTAutils::createidx to create in index")
-	          message("createidx(conn, tbl = '", plotnm, "', 
-	          index_cols = c('EVALID','STATECD','COUNTYCD','PLOT','INVYR'), unique=TRUE)")
+	        if (!is.null(dbconn)) {
+	          idxchk <- checkidx(dbconn, plotnm)
+	          if (nrow(idxchk) == 0) {
+	            message("no indices for ", plotnm, "...  could be very slow")
+	            message("use FIESTAutils::createidx to create in index")
+	            message("createidx(conn, tbl = '", plotnm, "', 
+	            index_cols = c('EVALID','STATECD','COUNTYCD','PLOT','INVYR'), unique=TRUE)")
+	          }
 	        }
 	        
 	        pinvyrnm <- findnm("INVYR", pltflds)  
@@ -637,7 +637,6 @@ DBgetEvalid <- function(states = NULL,
 	          invqry <- paste0(invqry,
 	                 "\nGROUP BY p.statecd, p.invyr",
 	                 "\nORDER BY p.statecd, p.invyr") 
-	     
 	          if (datsource == "sqlite") {
 	            invyrtab <- DBI::dbGetQuery(dbconn, invqry)
 	          } else {
@@ -648,7 +647,7 @@ DBgetEvalid <- function(states = NULL,
 	        message("INVYR not in data")
 	      }
 	    } else if (!all(evalid %in% evalidindb)) {
-	  
+ 
 	      ## Check evalid
         missevalid <- sort(!evalid[evalid %in% evalidindb])
         warning(ppsa_layer, " is missing evalids: ", toString(missevalid))
@@ -689,7 +688,6 @@ DBgetEvalid <- function(states = NULL,
         }
 	    }	  
     } else {
-	
       ## Create invyrtab (if no pop tables or pop_plot_stratum_assgn)
       if (!is.null(plotnm)) {
         invyrnm <- findnm("INVYR", pltflds)  
@@ -821,18 +819,30 @@ DBgetEvalid <- function(states = NULL,
           evalresp <- select.list(c("NO", "YES"), title="Use an Evaluation?", 
 		  	                multiple=FALSE)
           if (evalresp == "") stop("")
-            evalresp <- ifelse(evalresp == "YES", TRUE, FALSE)
-          } else {
-            #return(list(states=states, rslst=rslst, evalidlist=NULL, 
-	           #		invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
+          evalresp <- ifelse(evalresp == "YES", TRUE, FALSE)
+        } else {
+          #return(list(states=states, rslst=rslst, evalidlist=NULL, 
+	         #		invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
 
-            returnlst <- list(states=states, rslst=rslst, 
+          returnlst <- list(states=states, rslst=rslst, 
                                  evalidlist=NULL, 
                                  invtype=invtype, 
                                  invyrtab=invyrtab, 
-                                 evalType=evalTypelist, 
-                                 SURVEY=SURVEY,
-                                 PLOT=PLOT)
+                                 evalType=evalTypelist)
+          if (!is.null(surveynm)) {
+            if (datsource == "sqlite") {
+              returnlst$SURVEY <- surveynm
+            } else {
+              returnlst$SURVEY <- SURVEY
+            }
+          }
+          if (!is.null(plotnm)) {
+            if (datsource == "sqlite") {
+              returnlst$PLOT <- plotnm
+            } else {
+              returnlst$PLOT <- PLOT
+            }
+          }
           if (datsource == "sqlite" && !dbconnopen) {
             DBI::dbDisconnect(dbconn)
           } else {
@@ -842,7 +852,7 @@ DBgetEvalid <- function(states = NULL,
         }
       }
     }
-
+   
     ## Check evalEndyr
     if (!is.null(evalEndyr)) {
       evalresp <- TRUE
@@ -1169,7 +1179,6 @@ DBgetEvalid <- function(states = NULL,
   } else {
     returnlst$invyrs <- sort(unique(invyrtab$INVYR))
   }
-
   ## Return population information
   if (!is.null(surveynm)) {
     if (datsource == "sqlite") {
@@ -1212,7 +1221,6 @@ DBgetEvalid <- function(states = NULL,
 	  returnlst$ppsaindb <- ppsaindb
   }
   #returnlst$POP_EVAL <- POP_EVAL[EVALID %in% unlist(evalidlist),]
-
   if (datsource == "sqlite" && !dbconnopen) {
     DBI::dbDisconnect(dbconn)
   } else {
