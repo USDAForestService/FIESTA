@@ -829,17 +829,17 @@ DBgetEvalid <- function(states = NULL,
                                  invtype=invtype, 
                                  invyrtab=invyrtab, 
                                  evalType=evalTypelist)
+          
+          ## Return population information
           if (!is.null(surveynm)) {
-            if (datsource == "sqlite") {
-              returnlst$SURVEY <- surveynm
-            } else {
+            returnlst$surveynm <- surveynm
+            if (exists("SURVEY") && is.data.frame(SURVEY)) {
               returnlst$SURVEY <- SURVEY
             }
           }
           if (!is.null(plotnm)) {
-            if (datsource == "sqlite") {
-              returnlst$PLOT <- plotnm
-            } else {
+            returnlst$plotnm <- plotnm
+            if (exists("PLOT") && is.data.frame(PLOT)) {
               returnlst$PLOT <- PLOT
             }
           }
@@ -1181,16 +1181,14 @@ DBgetEvalid <- function(states = NULL,
   }
   ## Return population information
   if (!is.null(surveynm)) {
-    if (datsource == "sqlite") {
-      returnlst$SURVEY <- surveynm
-    } else {
+    returnlst$surveynm <- surveynm
+    if (exists("SURVEY") && is.data.frame(SURVEY)) {
       returnlst$SURVEY <- SURVEY
     }
   }
   if (!is.null(plotnm)) {
-    if (datsource == "sqlite") {
-      returnlst$PLOT <- plotnm
-    } else {
+    returnlst$plotnm <- plotnm
+    if (exists("PLOT") && is.data.frame(PLOT)) {
       returnlst$PLOT <- PLOT
     }
   }

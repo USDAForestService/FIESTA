@@ -460,9 +460,8 @@ spGetXY <- function(bnd,
                      pjoinid = pjoinid,
                      invtype = invtype,
                      intensity1 = intensity1,
-					 pvars2keep = pvars2keep,
+                     pvars2keep = pvars2keep,
                      issp = TRUE)
-
     if (is.null(xydat)) {
       return(NULL)
     }

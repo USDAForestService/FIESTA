@@ -873,9 +873,9 @@ DBgetPlots <- function (states = NULL,
                           dbTabs = dbTabs,
                           returnPOP = returnPOP,
                           gui = gui),
-			error = function(e) {
-                  message(e,"\n")
-                  return(NULL) })
+			              error = function(e) {
+                      message(e,"\n")
+                      return(NULL) })
       if (is.null(evalInfoA)) {
         iseval <- FALSE
       } else {
@@ -896,23 +896,23 @@ DBgetPlots <- function (states = NULL,
                           dbTabs = dbTabs,
                           returnPOP = returnPOP,
                           gui = gui),
-			error = function(e) {
-                  message(e,"\n")
-                  return(NULL) })
+			                error = function(e) {
+                        message(e,"\n")
+                        return(NULL) })
        
-       evalInfo <- evalInfoA
-       if (!is.null(evalInfoP)) {
-         for (st in names(evalInfo$evalidlist)) {
-           evalInfo$evalidlist[[st]] <- 
+        evalInfo <- evalInfoA
+        if (!is.null(evalInfoP)) {
+          for (st in names(evalInfo$evalidlist)) {
+            evalInfo$evalidlist[[st]] <- 
 			          c(evalInfo$evalidlist[[st]], evalInfoP$evalidlist[[st]])
-         }
-         evalInfo$invtype <- "BOTH"
-         evalInfo$invyrtab <- rbind(evalInfoP$invyrtab, evalInfo$invyrtab)
-         if (!is.null(evalInfoP$SURVEY)) {
-           evalInfo$SURVEY <- rbind(evalInfoP$SURVEY, evalInfo$SURVEY)
-         }         
-       }  
-     }    
+          }
+          evalInfo$invtype <- "BOTH"
+          evalInfo$invyrtab <- rbind(evalInfoP$invyrtab, evalInfo$invyrtab)
+          if (!is.null(evalInfoP$SURVEY)) {
+            evalInfo$SURVEY <- rbind(evalInfoP$SURVEY, evalInfo$SURVEY)
+          }         
+        }  
+      }    
 
     } else {
       evalInfo <- tryCatch( DBgetEvalid(states = states, 
@@ -953,10 +953,8 @@ DBgetPlots <- function (states = NULL,
   }
 
   dbconn <- evalInfo$dbconn
+  surveynm <- evalInfo$surveynm
   SURVEY <- evalInfo$SURVEY
-  if (!is.null(SURVEY)) {
-    surveynm <- "SURVEY"
-  }
   POP_PLOT_STRATUM_ASSGNe <- evalInfo$POP_PLOT_STRATUM_ASSGN
   PLOTe <- evalInfo$PLOT
 
