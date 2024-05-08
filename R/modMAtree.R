@@ -279,7 +279,7 @@ modMAtree <- function(MApopdat,
                       estvar, 
                       estvar.filter = NULL, 
                       estseed = "none",
-					  woodland = "Y",
+                      woodland = "Y",
                       landarea = "FOREST", 
                       pcfilter = NULL, 
                       rowvar = NULL, 
@@ -493,17 +493,17 @@ modMAtree <- function(MApopdat,
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pop_fmt=pop_fmt, pop_dsn=pop_dsn,
-                pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid, 
-				treex=treex, seedx=seedx, estseed=estseed, woodland=woodland, 
-				sumunits=sumunits, totals=totals, landarea=landarea, 
+        pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid,
+        treex=treex, seedx=seedx, estseed=estseed, woodland=woodland,
+        sumunits=sumunits, totals=totals, landarea=landarea, 
 				ACI.filter=ACI.filter, pcfilter=pcfilter, 
 				allin1=allin1, estround=estround, pseround=pseround, 
 				divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-                rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
-                outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-                overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
-                outfn.date=outfn.date, append_layer=append_layer, 
-                raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+        rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
+        outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+        overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
+        outfn.date=outfn.date, append_layer=append_layer, 
+        raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -541,16 +541,16 @@ modMAtree <- function(MApopdat,
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
-                    treef=treef, seedf=seedf, 
-                    condf=pltcondf, cuniqueid=cuniqueid, 
-                    tuniqueid=tuniqueid, estseed=estseed,
-                    rowvar=rowvar, colvar=colvar, 
-                    row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
-                    row.orderby=row.orderby, col.orderby=col.orderby, 
-                    row.add0=row.add0, col.add0=col.add0, 
-                    title.rowvar=title.rowvar, title.colvar=title.colvar, 
-                    rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-                    rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+          treef=treef, seedf=seedf, 
+          condf=pltcondf, cuniqueid=cuniqueid, 
+          tuniqueid=tuniqueid, estseed=estseed,
+          rowvar=rowvar, colvar=colvar, 
+          row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+          row.orderby=row.orderby, col.orderby=col.orderby, 
+          row.add0=row.add0, col.add0=col.add0, 
+          title.rowvar=title.rowvar, title.colvar=title.colvar, 
+          rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
+          rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
 					landarea=landarea, states=states, 
 					cvars2keep="COND_STATUS_CD") 
   treef <- rowcolinfo$treef
@@ -582,11 +582,11 @@ modMAtree <- function(MApopdat,
   #################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed, 
-                  bycond=TRUE, condf=condf, bytdom=bytdom, 
-                  tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
-                  esttype=esttype, estvarn=estvar, estvarn.filter=estvar.filter, 
-                  esttotn=TRUE, tdomvar=tdomvar, tdomvar2=tdomvar2, 
-                  adjtree=adjtree, metric=metric, woodland=woodland)
+        bycond=TRUE, condf=condf, bytdom=bytdom, 
+        tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
+        esttype=esttype, estvarn=estvar, estvarn.filter=estvar.filter, 
+        esttotn=TRUE, tdomvar=tdomvar, tdomvar2=tdomvar2, 
+        adjtree=adjtree, metric=metric, woodland=woodland)
   if (is.null(treedat)) return(NULL)
   tdomdat <- treedat$tdomdat
   
@@ -605,16 +605,16 @@ modMAtree <- function(MApopdat,
   ## Check for matching levels in x and xunique
   if (!is.null(uniquerow)) {
     chklevels <- checklevels(x = tdomdat, 
-	                         uniquex = uniquerow,
-							 xvar = rowvar) 
-	tdomdat <- chklevels$x
+	                           uniquex = uniquerow,
+						                 xvar = rowvar) 
+	  tdomdat <- chklevels$x
     uniquerow <- chklevels$uniquex	
   }
   if (!is.null(uniquecol)) {
     chklevels <- checklevels(x = tdomdat, 
-	                         uniquex = uniquecol,
-							 xvar = colvar) 
-	tdomdat <- chklevels$x
+	                          uniquex = uniquecol,
+							             xvar = colvar) 
+	  tdomdat <- chklevels$x
     uniquecol <- chklevels$uniquex	
   }
  
@@ -629,12 +629,12 @@ modMAtree <- function(MApopdat,
   ### GET TITLES FOR OUTPUT TABLES
   #################################################################################
   alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, 
-                    estseed=estseed, woodland=woodland,
-                    sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
-                    title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
-                    title.colvar=title.colvar, title.unitvar=title.unitvar, 
-                    title.filter=title.filter, title.unitsn=estunits, 
-                    title.estvarn=title.estvar, 
+          estseed=estseed, woodland=woodland,
+          sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
+          title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+          title.colvar=title.colvar, title.unitvar=title.unitvar, 
+          title.filter=title.filter, title.unitsn=estunits, 
+          title.estvarn=title.estvar, 
 					unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
 					estvarn=estvar, estvarn.filter=estvar.filter, 
 					addtitle=addtitle, returntitle=returntitle, 
