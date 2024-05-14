@@ -235,6 +235,7 @@ modGBchng <- function(GBpopdat,
                       table_opts = NULL, 
                       title_opts = NULL, 
                       savedata_opts = NULL, 
+                      cdomdat = NULL,
                       gui = FALSE, 
                       ...){
 
@@ -492,7 +493,8 @@ modGBchng <- function(GBpopdat,
 #  if (addtotal) {
 #    condf$TOTAL <- 1
 #  }
-
+  if (is.null(cdomdat)) {
+    
   ## Merge filtered condition data (condf) to all conditions (condx)
   ###################################################################################
   setkeyv(condx, c(cuniqueid, condid))
@@ -589,7 +591,11 @@ modGBchng <- function(GBpopdat,
 	strunitvars <- c(unitvar, strvar)
   }
 	
-	
+  } else {  ## cdomdat
+    cdomdat <- setDT(cdomdat)
+    cdomdat <- check.matchclass(stratalut, cdomdat, strunitvars)$tab2
+    
+  }
   ###################################################################################
   ### Get titles for output tables
   ###################################################################################
