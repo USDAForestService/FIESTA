@@ -427,16 +427,16 @@ modGBarea <- function(GBpopdat,
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pop_fmt=pop_fmt, pop_dsn=pop_dsn, 
-                pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid, 
+        pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid, 
 				sumunits=sumunits, totals=totals, landarea=landarea, 
 				ACI.filter=ACI.filter, pcfilter=pcfilter, 
 				allin1=allin1, estround=estround, pseround=pseround, 
 				divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-                rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
-                outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-                overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
-                outfn.date=outfn.date, append_layer=append_layer, 
-                raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+        rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
+        outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+        overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
+        outfn.date=outfn.date, append_layer=append_layer, 
+        raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -478,7 +478,7 @@ modGBarea <- function(GBpopdat,
                   rowlut=rowlut, collut=collut, 
                   rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
                   landarea=landarea, states=states,
-				  cvars2keep="COND_STATUS_CD")
+                  cvars2keep="COND_STATUS_CD")
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol

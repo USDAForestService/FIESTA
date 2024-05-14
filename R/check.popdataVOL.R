@@ -1,12 +1,12 @@
 check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid, 
     pfromqry, palias, pjoinid, whereqry, adj, ACI, 
-	pltx = NULL, puniqueid = "CN", dsn = NULL, dbconn = NULL, 
-	condid = "CONDID", areawt = "CONDPROP_UNADJ", areawt2 = NULL,
+	  pltx = NULL, puniqueid = "CN", dsn = NULL, dbconn = NULL, 
+	  condid = "CONDID", areawt = "CONDPROP_UNADJ", areawt2 = NULL,
     MICRO_BREAKPOINT_DIA = 5, MACRO_BREAKPOINT_DIA = NULL, diavar = "DIA",
     areawt_micr = "MICRPROP_UNADJ", areawt_subp = "SUBPPROP_UNADJ",   
     areawt_macr = "MACRPROP_UNADJ", defaultVars = FALSE,
     nonsamp.cfilter = NULL, nullcheck = FALSE, pvars2keep = NULL, 
-	cvars2keep = NULL, gui = FALSE){
+	  cvars2keep = NULL, gui = FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs for AREA/VOL estimation

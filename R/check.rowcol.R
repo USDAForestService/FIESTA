@@ -326,7 +326,7 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
     } else if (rowvar %in% cnames) {
 		  
       ## add rowvar to cvars2keep
-      cvars2keep <- c(cvars2keep, rowvar)
+      cvars2keep <- unique(c(cvars2keep, rowvar))
 	  
 	    ## Check row.orderby
       if (!is.null(row.orderby) && row.orderby != "NONE") {
@@ -457,13 +457,12 @@ check.rowcol <- function(gui, esttype, dbconn=NULL, treef=NULL, seedf=NULL, cond
               title.rowgrp <- ifelse (rowgrpord %in% ref_titles[["DOMVARNM"]], 
                 ref_titles[ref_titles[["DOMVARNM"]] == rowgrpord, "DOMTITLE"], rowgrpnm)
             }
-
             if (is.null(row.orderby) || row.orderby == "NONE") {
               if (!is.null(rowLUTnm)) {
                 row.orderby <- rowvar
                 rowvarnm <- rowLUTnm
               }
-              if (row.orderby == rowvar) {
+              if (row.orderby == rowvarnm) {
                 row.name <- names(rowlut)[names(rowlut) != rowvar]
                 if (length(row.name) > 1) {
 				          message("invalid rowlut... only 2 columns allowed")

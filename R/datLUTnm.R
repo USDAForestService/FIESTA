@@ -81,17 +81,17 @@ datLUTnm <- function(xvar,
                      LUTnewvar = NULL, 
                      LUTnewvarnm = NULL, 
                      FIAname = FALSE,
-					 group = FALSE, 
+                     group = FALSE, 
                      NAclass = "Other", 
-                     add0 = FALSE, 
-					 spcdname = "COMMON_SCIENTIFIC",
+                     add0 = FALSE,
+                     spcdname = "COMMON_SCIENTIFIC",
                      stopifmiss = FALSE, 
                      xtxt = NULL,
-					 dsn = NULL,
+                     dsn = NULL,
                      dbconn = NULL,
                      dbconnopen = FALSE,
-					 dbwrite = FALSE,
-				     dbreturn = TRUE, 
+                     dbwrite = FALSE,
+                     dbreturn = TRUE, 
                      overwrite = TRUE,
                      savedata = FALSE, 
                      savedata_opts = NULL, 
@@ -175,20 +175,20 @@ datLUTnm <- function(xvar,
   } 
   if (isdb) {
     tablst <- DBI::dbListTables(dbconn)
-	if (length(tablst) == 0) {
-	  message("no tables in database")
-	  return(NULL)
-	}
-	
-  	datnm <- chkdbtab(tablst, x)
-	if (is.null(datnm)) { 
-	  if ("data.frame" %in% class(x)) {
-	    isdb <- FALSE
-		datx <- x
-	  } else {
+	  if (length(tablst) == 0) {
+	    message("no tables in database")
 	    return(NULL)
 	  }
-	}
+	
+  	datnm <- chkdbtab(tablst, x)
+	  if (is.null(datnm)) { 
+	    if ("data.frame" %in% class(x)) {
+	      isdb <- FALSE
+		    datx <- x
+	    } else {
+	      return(NULL)
+	    }
+	  }
   }
   
   ##################################################################
@@ -212,39 +212,39 @@ datLUTnm <- function(xvar,
 	                           title = "Return data from database?", 
                                first="NO", gui=gui)
 	
-	if (dbreturn) {
+	  if (dbreturn) {
       datx <- pcheck.table(datnm, conn=dbconn, gui=gui, 
                        caption="Data table?", returnDT=TRUE)
-	  if (is.null(datx)) {
+	    if (is.null(datx)) {
         message("invalid x")
-	    return(NULL)
+	      return(NULL)
       }
 
-	  datidx <- checkidx(dbconn, datnm)
-	  if (!is.null(datidx) && any(!is.na(datidx$cols))) {
-	    datx.idx <- strsplit(datidx$cols, "\\,")[[1]]
-		if (all(datx.idx %in% datnmlst)) {
-		  datkey <- datx.idx
-		} else {
-		  datkey <- datx.idx[datx.idx %in% datnmlst]
-		}
+	    datidx <- checkidx(dbconn, datnm)
+	    if (!is.null(datidx) && any(!is.na(datidx$cols))) {
+	      datx.idx <- strsplit(datidx$cols, "\\,")[[1]]
+		    if (all(datx.idx %in% datnmlst)) {
+		      datkey <- datx.idx
+		    } else {
+		      datkey <- datx.idx[datx.idx %in% datnmlst]
+		    }
+	    }
 	  }
-	}
 
   } else {
     datx <- pcheck.table(x, gui=gui, 
                        caption="Data table?", returnDT=TRUE)
-	if (is.null(datx)) {
+	  if (is.null(datx)) {
       if (is.character(x) && length(x) > 1) {
         datnmlst <- x
-	  }
+	    }
     } else {  
 	  
       issf <- ifelse ("sf" %in% class(datx), TRUE, FALSE)
       if (issf) datx <- data.table(datx) 
       datnmlst <- names(datx) 
-	  datkey <- key(datx)
-	}
+	     datkey <- key(datx)
+	  }
   }
 
   ## Check LUT
@@ -259,29 +259,29 @@ datLUTnm <- function(xvar,
   ## Check FIAname
   ########################################################
   FIAname <- pcheck.logical(FIAname, varnm="FIAname", 
-		title="FIA reference table?", first="YES", gui=gui)
+	     	          title="FIA reference table?", first="YES", gui=gui)
   if (is.null(LUTx) && !FIAname) {
     message("LUT is null and FIAname=FALSE")
     return(NULL)
   }
 
- ## Check group
+  ## Check group
   if (FIAname) {
     group <- pcheck.logical(group, varnm="group", title="Variable group?", 
-		  first="NO", gui=gui)
+		            first="NO", gui=gui)
   } else {
-     group <- FALSE
+    group <- FALSE
   }
 
   ## Check uniquex
   #############################################################
   if (is.null(uniquex) && is.null(x)) {
     message("both uniquex and x are NULL")
-	return(NULL)
+	  return(NULL)
   } else if (!is.null(uniquex) && is.null(x)) {
-	if (FIAname) {
-	  datnmlst <- sort(unique(ref_codes$VARIABLE))
-	} else if (!is.null(LUTx)) {
+	  if (FIAname) {
+	    datnmlst <- sort(unique(ref_codes$VARIABLE))
+	  } else if (!is.null(LUTx)) {
       datnmlst <- names(LUTx)
     }		
   } 
@@ -303,12 +303,12 @@ datLUTnm <- function(xvar,
 	
   } else if (!is.null(datx)) {
     if (!is.numeric(datx[[xvar]])) {
-	  if (is.factor(datx[[xvar]])) {
-	    #message("xvar must be a numeric vector in x")
-	    uniqueval <- sort(unique(as.numeric(as.character(datx[[xvar]]))))
-	  } else {
-	    uniqueval <- sort(unique(datx[[xvar]]))
-	  }
+	    if (is.factor(datx[[xvar]])) {
+	      #message("xvar must be a numeric vector in x")
+	      uniqueval <- sort(unique(as.numeric(as.character(datx[[xvar]]))))
+	    } else {
+	      uniqueval <- sort(unique(datx[[xvar]]))
+	    }
     } else {
       #uniquex <- sort(unique(na.omit(datx[[xvar]])))
       uniqueval <- sort(unique(datx[[xvar]]))
@@ -317,40 +317,40 @@ datLUTnm <- function(xvar,
 
   if (!is.null(uniquex)) {
     if (!is.null(uniqueval)) {
-	  if (!all(uniquex %in% uniqueval)) {
-	    missval <- uniquex[!uniquex %in% uniqueval]
-		if (length(missval) > 0) {
-		  if (!all(is.na(missval))) {
-		    message("uniquex values missing: ", toString(missval)) 
+	    if (!all(uniquex %in% uniqueval)) {
+	      missval <- uniquex[!uniquex %in% uniqueval]
+		    if (length(missval) > 0) {
+		      if (!all(is.na(missval))) {
+		        message("uniquex values missing: ", toString(missval)) 
           } else {
             uniqueval <- c(uniqueval, NA)
           }			
-		} else {
-		  message("no uniquex in x... returning NULL")
-		  return(NULL)
-		}
-	  } 
-	  uniquex <- uniquex[uniquex %in% uniqueval]
+		    } else {
+		      message("no uniquex in x... returning NULL")
+		      return(NULL)
+		    }
+	    } 
+	    uniquex <- uniquex[uniquex %in% uniqueval]
 	  
-	  if (add0 && length(uniquex) < length(uniqueval)) {
+	    if (add0 && length(uniquex) < length(uniqueval)) {
         message("add0 = TRUE and uniquex less than uniqueval... using all values")
-	  }
-	} 
+	    }
+	  } 
   }
   	   
   if (xvar == "SPCD") {
-	return(datLUTspp(x = datx, 
-		             uniquex = uniquex, 
-				     spcdname = spcdname,
+	  return(datLUTspp(x = datx, 
+		                 uniquex = uniquex, 
+				             spcdname = spcdname,
                      add0 = add0, 
-				     stopifmiss = stopifmiss, 
+				             stopifmiss = stopifmiss, 
                      xtxt = xtxt, 
-				     dbconn = dbconn,
-					 dbconnopen = dbconnopen,
-					 dbwrite = dbwrite,
-					 dbreturn = dbreturn,
-					 overwrite = overwrite,
-					 savedata = savedata,
+				             dbconn = dbconn,
+					           dbconnopen = dbconnopen,
+					           dbwrite = dbwrite,
+					           dbreturn = dbreturn,
+					           overwrite = overwrite,
+					           savedata = savedata,
                      savedata_opts = savedata_opts))
   }
 
@@ -369,21 +369,21 @@ datLUTnm <- function(xvar,
         stop("invalid LUTvar")
       }
     } else if (LUTvar != xvar && checknm(xvar, LUTnmlst) == xvar) {
-	  setnames(LUTx, LUTvar, xvar)
-	  LUTvar <- xvar
-	}
+	    setnames(LUTx, LUTvar, xvar)
+	    LUTvar <- xvar
+	  }
 	
-	## Check LUTnewvar
+	  ## Check LUTnewvar
     LUTnmlst <- LUTnmlst[!LUTnmlst %in% LUTvar]
     if (length(LUTnmlst) == 0) {
       LUTnewvar <- NULL
     } else {
       LUTnewvar <- pcheck.varchar(LUTnewvar, "LUTnewvar", LUTnmlst, gui=gui,
-		caption="New variable(s)", multiple=TRUE)
+		                  caption="New variable(s)", multiple=TRUE)
       if (length(LUTnewvar) == 0) {
-	    if (gui) {
+	      if (gui) {
           LUTnewvar <- select.list(LUTnewvarlst, title=paste("LUT", xvar, "NEW"), 
-							multiple=TRUE)
+							              multiple=TRUE)
           if (length(LUTnewvar) == 0) stop("")
         } else {
           if (length(LUTnmlst) == 1) {
@@ -393,48 +393,48 @@ datLUTnm <- function(xvar,
           }
         }
       }
-	}
-	if (!is.null(LUTnewvar)) {
-	  if (!all(LUTnewvar %in% LUTnmlst)) { 
+	  }
+	  if (!is.null(LUTnewvar)) {
+	    if (!all(LUTnewvar %in% LUTnmlst)) { 
         notin <- LUTnewvar[which(!LUTnewvar %in% LUTnmlst)]
         warning("check LUTnewvar. Invalid name: ", toString(notin))
         LUTnewvar <- select.list(LUTnmlst, title=paste("LUT", xvar, "NEW"), 
-			multiple=TRUE)
+			                    multiple=TRUE)
         if (length(LUTnewvar) == 0) stop("")
-	  }
-	}  
+	    }
+	  }  
   
     if (!is.null(LUTnewvarnm)) {
       if (length(LUTnewvarnm) != length(LUTnewvar)) {
         message("LUTnewvarnm must be same number as LUTnewvar")
-		LUTnewvarnm <- LUTnewvar
-	  }
-	  for (i in 1:length(LUTnewvar)) {
-	    newvar <- LUTnewvar[i]
-		newvarnm <- LUTnewvarnm[i]
-	    if (checknm(newvarnm, LUTnmlst) == newvarnm) {
-	      setnames(LUTx, newvar, newvarnm)
-		  LUTnewvar[LUTnewvar %in% newvar] <- newvarnm
+		    LUTnewvarnm <- LUTnewvar
 	    }
-	  }
+	    for (i in 1:length(LUTnewvar)) {
+	      newvar <- LUTnewvar[i]
+		    newvarnm <- LUTnewvarnm[i]
+	      if (checknm(newvarnm, LUTnmlst) == newvarnm) {
+	        setnames(LUTx, newvar, newvarnm)
+		      LUTnewvar[LUTnewvar %in% newvar] <- newvarnm
+	      }
+	    }
     } else {
       LUTnewvarnm <- LUTnewvar
     }
 		
-	#LUTnewvars <- LUTnewvar
+	  #LUTnewvars <- LUTnewvar
     if (group) {
       if ("GROUPCD" %in% LUTnmlst) LUTnewvar <- unique(c(LUTnewvar, "GROUPCD"))
       if ("GROUPNM" %in% LUTnmlst) LUTnewvar <- unique(c(LUTnewvar, "GROUPNM"))
-	  LUTnewvarnm <- c(LUTnewvarnm, "GROUPCD", "GROUPNM")
+	    LUTnewvarnm <- c(LUTnewvarnm, "GROUPCD", "GROUPNM")
     }
 	
-	## Subset columns of LUTx
-	LUTx <- LUTx[, c(LUTvar, LUTnewvar), with=FALSE]
+	  ## Subset columns of LUTx
+	  LUTx <- LUTx[, c(LUTvar, LUTnewvar), with=FALSE]
  
- ## Subset rows of LUTx
-	if (!add0 && !is.null(uniquex)) {
-	  LUTx <- LUTx[LUTx[[LUTvar]] %in% uniquex, ]
-	}
+   ## Subset rows of LUTx
+	  if (!add0 && !is.null(uniquex)) {
+	    LUTx <- LUTx[LUTx[[LUTvar]] %in% uniquex, ]
+	  }
 
   } else if (FIAname) {
     xvar.ref <- getRefobject(toupper(xvar))
@@ -444,27 +444,26 @@ datLUTnm <- function(xvar,
     LUTvar <- ifelse (FIAname && length(grep("DSTRBCD", xvar)) == 1, "DSTRBCD", xvar)
     if (FIAname && group) {
       if (!LUTvar %in% unique(FIESTAutils::ref_codes[!is.na(FIESTAutils::ref_codes[["GROUPNM"]]) & 
-		FIESTAutils::ref_codes[["GROUPNM"]] != "", "VARIABLE"])) {
+		                      FIESTAutils::ref_codes[["GROUPNM"]] != "", "VARIABLE"])) {
         message (paste("row group not available for", xvar))   
         group <- FALSE
       }
     }
      
-	## Get FIA reference table for xvar
+	  ## Get FIA reference table for xvar
     #################################################
     lutvars <- c("VALUE", "MEANING")
     grpvars <- {}
-    if (group) grpvars <- c("GROUPCD", "GROUPNM")  
+    if (group) grpvars <- c("GROUPCD", "GROUPNM") 
     ref <- setDT(FIESTAutils::ref_codes[FIESTAutils::ref_codes[["VARIABLE"]] == xvar.ref,
- 		c(lutvars, grpvars)])
- 
- 
+ 		                  c(lutvars, grpvars)])
+    
     ## Check LUTx - xvar in LUTx
     #################################################
     if (!is.null(LUTx)) {
       if (!xvar %in% names(LUTx)) stop(paste(xvar, "not in LUT"))
-
       if (is.factor(LUTx[[xvar]])) LUTx[[xvar]] <- as.character(LUTx[[xvar]])
+      
       #LUTx <- ref[is.na(VALUE) | VALUE %in% LUTx[[xvar]],]
       LUTx <- ref[VALUE %in% LUTx[[xvar]],]
       LUTnewvarlst <- names(LUTx)
@@ -523,7 +522,7 @@ datLUTnm <- function(xvar,
     }
   } 
 
-  ### Check NAclass
+    ### Check NAclass
   if (!is.character(NAclass) && length(NAclass) != 1) {
     stop("NAclass must be a character string of length 1")
   }
@@ -549,7 +548,7 @@ datLUTnm <- function(xvar,
       out_layer <- "datlut"
     }
   }
- 
+  
   ############################################################################
   ## DO THE WORK 
   ############################################################################
@@ -557,39 +556,42 @@ datLUTnm <- function(xvar,
   if ((!isdb || dbreturn) && !is.null(datx)) {
     if (!is.null(LUTnewvar) && length(LUTnewvar) != 0) {
       if (is.null(xtxt)) xtxt <- xvar
+      
       ## Check that the all values of LUTvar in datx are all in xvar in LUTx
       check.matchval(datx, LUTx, xvar, LUTvar, tab1txt=xtxt, 
-			tab2txt=paste(xtxt, "lut"), stopifmiss=stopifmiss)
+			                 tab2txt=paste(xtxt, "lut"), stopifmiss=stopifmiss)
 
       ## Check if class of xvar in datx matches class of xvar in LUTx
       tabs <- check.matchclass(datx, LUTx, xvar, LUTvar, 
-		tab1txt=xtxt, tab2txt=LUTvar)
+		                  tab1txt=xtxt, tab2txt=LUTvar)
       datx <- tabs$tab1
       LUTx <- tabs$tab2
 
-      LUTnewvar2 <- sapply(LUTnewvar, checknm, names(datx))	  
-      if (all(LUTnewvar2 == LUTnewvar)) {
+      LUTnewvar2 <- sapply(LUTnewvar, checknm, names(datx))	 
+      if (!all(LUTnewvar2 == LUTnewvar)) {
         setnames(LUTx, LUTnewvar, LUTnewvar2)
         LUTnewvar <- LUTnewvar2
       }
+
+      #LUTnewvar <- LUTnewvar[LUTnewvar %in% names(datx)]
       datx.names <- names(datx)
       xLUT <- merge(datx, LUTx[,c(LUTvar, LUTnewvar), with=FALSE], 
-			by.x=xvar, by.y=LUTvar, all.x=TRUE)
-
+			                   by.x=xvar, by.y=LUTvar, all.x=TRUE)
       xLUTvals <- unique(as.character(xLUT[[LUTnewvar[1]]][!is.na(xLUT[[xvar]])]))
       if (any(is.na(xLUTvals))) {
         xLUTmiss <- unique(xLUT[!is.na(get(xvar)) & is.na(get(LUTnewvar[1])), xvar, 
-		with=FALSE])
+                                  with=FALSE])
         warning("missing codes: ", paste(xLUTmiss, collapse=", "))
       }
-
       setcolorder(xLUT, c(datx.names, LUTnewvar))
-      if (!is.null(LUTnewvarnm)) 
-        setnames(xLUT, LUTnewvar, LUTnewvarnm)    
+        
+      if (!is.null(LUTnewvarnm)) {
+        setnames(xLUT, LUTnewvar, LUTnewvarnm)  
+      }
     } else {
       xLUT <- datx
     }
-     
+  
     ## Only include xvar values that exist in x
     if (!add0) {
       LUTx <-LUTx[LUTx[[LUTvar]] %in% unique(xLUT[[xvar]]), ]
@@ -598,7 +600,6 @@ datLUTnm <- function(xvar,
   
   ## Get all values of LUTx newvars
   LUTnewvar.vals <- unique(unlist(lapply(LUTx[,LUTvar, with=FALSE], as.character)))
-
 
   ## Add records if no values exist in xLUT
   if (!is.null(datx)) {
@@ -647,16 +648,16 @@ datLUTnm <- function(xvar,
           }        
         }
         LUTx <- rbind(LUTx, as.list(LUTxrow))
-	  }
+	    }
     } else if (!add0) {
-	  LUTx <- LUTx[LUTx[[LUTvar]] %in% uniquex, ]
-	}
+	    LUTx <- LUTx[LUTx[[LUTvar]] %in% uniquex, ]
+	  }
   }  
           
   ## Return list
   ########################################################
   if ((!isdb || dbreturn) && !is.null(datx)) {
-	returnlst$xLUT <- xLUT
+	  returnlst$xLUT <- xLUT
   } else {
     returnlst$xLUT <- datnm
   }

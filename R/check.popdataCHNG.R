@@ -6,7 +6,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
      areawt_micr = "MICRPROP_UNADJ", areawt_subp = "SUBPPROP_UNADJ", 
      areawt_macr = "MACRPROP_UNADJ",
      nonsamp.cfilter = NULL, nullcheck = FALSE, pvars2keep = NULL, 
-	 cvars2keep = NULL, defaultVars = TRUE, gui = FALSE){
+	   cvars2keep = NULL, defaultVars = TRUE, gui = FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs for CHNG popType
@@ -76,7 +76,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   ##########################################################  
 
   ## Check name of COND table
-  pltnmchk <- checktabs(tabs, c("pltu", "plot"))
+  pltnmchk <- checktabs(tabs, c("pltu", "plt"))
   if (is.null(pltnmchk)) {
     message("plot data needed for estimates")
     return(NULL)
@@ -90,7 +90,7 @@ check.popdataCHNG <- function(tabs, tabIDs, popType = popType,
   pltflds <- names(get(pltnm))
 
   ## Check name of COND table
-  condnmchk <- checktabs(tabs, "condu")
+  condnmchk <- checktabs(tabs, c("condu", "cond"))
   if (is.null(condnmchk)) {
     message("cond data needed for estimates")
     return(NULL)

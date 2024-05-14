@@ -660,7 +660,7 @@ check.popdataPLT <- function(dsn,
       plotsampcnt <- nfplotsampcnt
     }
   }
-  
+ 
   ## Remove plots that have no remeasurement data
   ##############################################################################
   if (popType %in% c("GRM", "CHNG", "LULC") && "REMPER" %in% names(pltx)) {
