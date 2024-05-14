@@ -48,7 +48,6 @@ Imports:
 Suggests: 
     knitr,
     geodata,
-    sp,
     terra,
     rmarkdown,
     testthat (>= 3.0.0)
