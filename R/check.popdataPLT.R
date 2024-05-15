@@ -712,7 +712,7 @@ check.popdataPLT <- function(dsn,
       }
     }
   }
-  
+
   ##############################################################################
   ## Strata - Generate table of plots by strata,
   ##          including nonsampled plots (P2POINTCNT)
@@ -776,7 +776,7 @@ check.popdataPLT <- function(dsn,
     strvar <- NULL
     pltassgnvars <- unique(c(pltassgnvars, prednames))
   }
-  
+ 
   ##############################################################################
   ## Generate and apply nonsamp.pfilter
   ##############################################################################
@@ -820,7 +820,7 @@ check.popdataPLT <- function(dsn,
   } else {
     pvars <- c(pvars, pdoms2keep, pvars2keep)
   }
-  
+ 
   returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid, pltx=pltx,
                     pfromqry=pfromqry, whereqry=whereqry, popwhereqry=popwhereqry, 
                     puniqueid=puniqueid, pvars=pvars, pjoinid=pjoinid, popevalid=popevalid,

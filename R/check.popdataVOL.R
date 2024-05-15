@@ -193,7 +193,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   }
   setkeyv(condx, c(cuniqueid, condid))
 
-
   ## Merge pltx with condx
   ###########################################################
   if (!is.null(pltx)) {
@@ -534,7 +533,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   condx <- unique(pltcondx[, c(cuniqueid, condid, cvars2keep), with=FALSE])
   pltcondx[, (cvars2keep) := NULL]
  
- 
+
   ## Set up list of variables to return
   ######################################################################################
   returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
