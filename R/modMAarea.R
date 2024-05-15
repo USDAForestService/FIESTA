@@ -598,7 +598,13 @@ modMAarea <- function(MApopdat,
     
     # need to go means -> totals -> summed totals
     xpop <- unitlut[ , c(unitvar, prednames), with = F, drop = F]
-    xpop_npix <- merge(xpop, npixels, by = unitvar, all.x = TRUE)
+    if (is.factor(xpop[[unitvar]])) {
+      npix_temp <- npixels[ ,(unitvar) := as.factor(get(unitvar))]
+    } else {
+      npix_temp <- npixels
+    }
+    
+    xpop_npix <- merge(xpop, npix_temp, by = unitvar, all.x = TRUE)
     # multiply unitvar level population means by corresponding npixel values to get population level totals
     xpop_npix[ ,2:ncol(xpop)] <- lapply(xpop_npix[ ,2:ncol(xpop)], function(x) xpop_npix[["npixels"]] * x)
     # sum those values
