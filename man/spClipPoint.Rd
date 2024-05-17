@@ -11,6 +11,8 @@ spClipPoint(
   clippolyv,
   clippolyv_dsn = NULL,
   clippolyv.filter = NULL,
+  buffdist = NULL,
+  validate = FALSE,
   showext = FALSE,
   keepNA = FALSE,
   returnsp = TRUE,
@@ -42,6 +44,13 @@ shapefile pathname) of clipping polygon. The dsn varies by driver. See gdal
 OGR vector formats (https://www.gdal.org/ogr_formats.html).}
 
 \item{clippolyv.filter}{String. Filter to subset clippolyv spatial layer.}
+
+\item{buffdist}{Number. The distance to buffer the polygon before clipping.
+Uses sf::st_buffer. The distance is based on units of polygon, st_crs(x)$units.}
+
+\item{validate}{Logical. If TRUE, validates polyv and clippolyv before 
+clipping. Uses sf::st_make_valid with default parameters 
+(geos_method='valid_structure', geos_keep_collapsed=FALSE).}
 
 \item{showext}{Logical. If TRUE, layer extents are displayed in plot window.}
 

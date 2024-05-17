@@ -30,7 +30,10 @@
 #' defined NODATA value, else it is defined based on its datatype (see 
 #' DEFAULT_NODATA for default data values).
 #' @param buffdist Number. The distance to buffer the polygon before clipping
-#' raster, in units of raster.
+#' raster. Uses sf::st_buffer. The distance is based on units of the raster.
+#' @param validate Logical. If TRUE, validates polyv and clippolyv before 
+#' clipping. Uses sf::st_make_valid with default parameters 
+#' (geos_method='valid_structure', geos_keep_collapsed=FALSE).
 #' @param maskByPolygons Logical. If TRUE, rast is clipped to boundary of
 #' polygon.  If FALSE, rast is clipped to extent of polygon.
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
@@ -110,6 +113,7 @@ spClipRast <- function(rast,
                        bands = NULL, 
                        NODATA = NULL, 
                        buffdist = NULL,
+                       validate = FALSE,
                        maskByPolygons = TRUE, 
                        showext = FALSE, 
                        fmt = "GTiff", 
@@ -150,14 +154,13 @@ spClipRast <- function(rast,
   ## CHECK INPUT PARAMETERS
   ##################################################################
   
-  
   ## Get poly and clippoly layers
   clippolyvx <- pcheck.spatial(layer=clippolyv, dsn=clippolyv_dsn, gui=gui, 
                                caption="Poly to clip?")
   
   ## clippolyv.filter
   clippolyvx <- datFilter(clippolyvx, xfilter=clippolyv.filter)$xf
-  
+
   ## Verify raster
   rastfn <- getrastlst(rast, rastfolder, gui=gui)
   
@@ -198,21 +201,24 @@ spClipRast <- function(rast,
   
   ## Check NODATA
   if (is.null(NODATA)) {
-	if (is.na(nodata)) {
-	  nodata <- getDefaultNodata(rast.dtyp)
-	} 
+	  if (is.na(nodata)) {
+	    nodata <- getDefaultNodata(rast.dtyp)
+	  } 
   } else {
     if (!is.numeric(NODATA) || length(NODATA) > 1) {
       stop("NODATA must be numeric")
-	} else {
-	  nodata <- NODATA
-	}
+	  } else {
+	    nodata <- NODATA
+	  }
   }
   
   ## Check buffdist
   if (!is.null(buffdist)) {
     if (!is.numeric(buffdist)) stop("invalid buffdist... must be numeric")
   }
+  
+  ## Check validate
+  validate <- pcheck.logical(validate, "Validate polys?", "NO")
   
   ## Check maskByPolygons
   maskByPolygons <- pcheck.logical(maskByPolygons, varnm="maskByPolygons", 
@@ -268,30 +274,38 @@ spClipRast <- function(rast,
   ##################################################################
   
   ## Check projections of polygons 
-  clippolyvprj <- crsCompare(clippolyvx, rast.prj, crs.default=rast.crs, nolonglat=TRUE)$x
+  clippolyvx <- crsCompare(clippolyvx, rast.prj, crs.default=rast.crs, nolonglat=TRUE)$x
   
   if (!is.null(buffdist)) {
     ## This will buffer the polygon 1 pixel to include all pixels inside boundary
-    clippolyvprj <- sf::st_buffer(clippolyvprj, dist=buffdist)
+    clippolyvx <- sf::st_buffer(clippolyvx, dist=buffdist)
+  }
+  
+  ## Validate polygon
+  if (validate) {
+    clippolyvx <- sf::st_make_valid(clippolyvx, 
+                                    geos_method = 'valid_structure', 
+                                    geos_keep_collapsed = FALSE)
+    clippolyvx <- sf::st_cast(clippolyvx)
   }
   
   ## Check extents
   names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
-  bbox1 <- sf::st_bbox(clippolyvprj)
+  bbox1 <- sf::st_bbox(clippolyvx)
   bbox2 <- sf::st_bbox(rast.bbox, crs=rast.prj)
   check.extents(bbox1, bbox2, showext, layer1nm="clippolyv", layer2nm="rast",
                 stopifnotin=TRUE)
   
   
   ## Clip raster
-  clipRaster(src = clippolyvprj, 
+  clipRaster(src = clippolyvx, 
              srcfile = rastfn, 
-			 src_band = bands, 
-			 dstfile = outfilenm, 
+			       src_band = bands, 
+			       dstfile = outfilenm, 
              fmt = fmt, 
-			 maskByPolygons = maskByPolygons, 
-			 init = nodata, 
-			 dstnodata = nodata, 
+			       maskByPolygons = maskByPolygons, 
+			       init = nodata, 
+			       dstnodata = nodata, 
              options = co)
    
   return(outfilenm)    

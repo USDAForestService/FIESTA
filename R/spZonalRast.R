@@ -31,6 +31,9 @@
 #' @param pixelfun Function. A function to apply to the individual pixel values
 #' before calculating sum and mean. The function should accept a single numeric
 #' argument (pixel value) and return a single numeric argument.
+#' @param validate Logical. If TRUE, validates polyv and clippolyv before 
+#' clipping. Uses sf::st_make_valid with default parameters 
+#' (geos_method='valid_structure', geos_keep_collapsed=FALSE).
 #' @param outname String. Variable name for output. The output names will use
 #' outname as a prefix to summary statistics (i.e., 'outname'.mean,
 #' 'outname'.sum).
@@ -102,6 +105,7 @@ spZonalRast <- function(polyv,
                         bands = NULL, 
                         zonalstat, 
                         pixelfun = NULL, 
+                        validate = FALSE,
                         outname = NULL, 
                         showext = FALSE, 
                         rastlut = NULL, 
@@ -147,12 +151,20 @@ spZonalRast <- function(polyv,
   ################################################################## 
   ## Check dsn, layer 
   spobj <- pcheck.spatial(layer=polyv, dsn=polyv_dsn, gui=gui, 
-		caption="Polygon zones?") 
+		                      caption="Polygon zones?") 
+  
+  ## Validate polygon
+  if (validate) {
+    spobj <- sf::st_make_valid(spobj, 
+                               geos_method = 'valid_structure', 
+                               geos_keep_collapsed = FALSE)
+    spobj <- sf::st_cast(spobj)
+  }
  
   ## Check polyv.att 
   polyv.att <- pcheck.varchar(var2check=polyv.att, varnm="polyv.att", 
-		gui=gui, checklst=names(spobj), caption="Zonal attribute",  
-		warn=paste(polyv.att, "not in polyv"), stopifnull=TRUE) 
+		             gui=gui, checklst=names(spobj), caption="Zonal attribute",  
+		             warn=paste(polyv.att, "not in polyv"), stopifnull=TRUE) 
     
   ## Get raster info 
   ########################################################  
@@ -162,7 +174,7 @@ spZonalRast <- function(polyv,
   
   ## Verify rasters 
   rastfn <- suppressWarnings(getrastlst(rastfn, rastfolder, 
-		stopifLonLat=TRUE, gui=gui))
+		                         stopifLonLat=TRUE, gui=gui))
 
   ## Get names of raster 
   rastnm <- basename.NoExt(rastfn) 
@@ -175,10 +187,10 @@ spZonalRast <- function(polyv,
 
   ## Check zonalstat     
   zonalstatlst <- c("mean", "sum", "majority", "minority", "variety", 
-	"npixels", "count", "proportion") 
+	                  "npixels", "count", "proportion") 
   zonalstat <- pcheck.varchar(var2check=zonalstat, varnm="zonalstat", 
-	gui=gui, checklst=zonalstatlst, caption="Zonal statistic(s)", 
-	stopifnull=TRUE, multiple=TRUE) 
+	         gui=gui, checklst=zonalstatlst, caption="Zonal statistic(s)", 
+	         stopifnull=TRUE, multiple=TRUE) 
     
   ## Check bands 
   if (!is.null(bands)) { 
@@ -210,6 +222,9 @@ spZonalRast <- function(polyv,
     outname <- rastnm 
   } 
 
+  ## Check validate
+  validate <- pcheck.logical(validate, "Validate polys?", "NO")
+  
   ## Check showext     
   showext <- pcheck.logical(showext, varnm="showext",  
 		title="Plot extents?", first="YES", gui=gui) 
@@ -265,12 +280,12 @@ spZonalRast <- function(polyv,
   ## Check rast.NODATA... add rast.NODATA values to ignoreValues if not already defined in rast
   if (!is.null(rast.NODATA) && all(!is.na(rast.NODATA))) {
     if (NODATAval %in% rast.NODATA) {
-	  message("the NODATA value of ", rastnm, " is ", NODATAval, " and will be removed from the zonal calculations")
+	    message("the NODATA value of ", rastnm, " is ", NODATAval, " and will be removed from the zonal calculations")
       rast.NODATA <- rast.NODATA[!rast.NODATA %in% NODATAval]  
     }
-	if (length(rast.NODATA) > 0) {
-	  ignoreValue <- c(ignoreValue, rast.NODATA)
-	}
+	  if (length(rast.NODATA) > 0) {
+	    ignoreValue <- c(ignoreValue, rast.NODATA)
+	  }
   }
   if (length(ignoreValue) > 0) {
     message("values ignored in zonal calculations: ", toString(ignoreValue))
@@ -314,7 +329,7 @@ spZonalRast <- function(polyv,
 
     if (any(zonalstat == "majority")) { 
       zstats <- setDT(zonalMajority(src=spobjprj, attribute=polyv.att, rasterfile=rastfn,
-		band=b, na.rm=TRUE, ignoreValue=ignoreValue)) 
+		                        band=b, na.rm=TRUE, ignoreValue=ignoreValue)) 
       zstats <- zstats[, c("zoneid", "value")] 
       var.name <- paste(prename, "majority", sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 

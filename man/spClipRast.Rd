@@ -14,6 +14,7 @@ spClipRast(
   bands = NULL,
   NODATA = NULL,
   buffdist = NULL,
+  validate = FALSE,
   maskByPolygons = TRUE,
   showext = FALSE,
   fmt = "GTiff",
@@ -55,7 +56,11 @@ defined NODATA value, else it is defined based on its datatype (see
 DEFAULT_NODATA for default data values).}
 
 \item{buffdist}{Number. The distance to buffer the polygon before clipping
-raster, in units of raster.}
+raster. Uses sf::st_buffer. The distance is based on units of the raster.}
+
+\item{validate}{Logical. If TRUE, validates polyv and clippolyv before 
+clipping. Uses sf::st_make_valid with default parameters 
+(geos_method='valid_structure', geos_keep_collapsed=FALSE).}
 
 \item{maskByPolygons}{Logical. If TRUE, rast is clipped to boundary of
 polygon.  If FALSE, rast is clipped to extent of polygon.}

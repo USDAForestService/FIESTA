@@ -13,6 +13,7 @@ spZonalRast(
   bands = NULL,
   zonalstat,
   pixelfun = NULL,
+  validate = FALSE,
   outname = NULL,
   showext = FALSE,
   rastlut = NULL,
@@ -51,6 +52,10 @@ with continuous data ("mean", "sum", "majority", "minority", "variety",
 \item{pixelfun}{Function. A function to apply to the individual pixel values
 before calculating sum and mean. The function should accept a single numeric
 argument (pixel value) and return a single numeric argument.}
+
+\item{validate}{Logical. If TRUE, validates polyv and clippolyv before 
+clipping. Uses sf::st_make_valid with default parameters 
+(geos_method='valid_structure', geos_keep_collapsed=FALSE).}
 
 \item{outname}{String. Variable name for output. The output names will use
 outname as a prefix to summary statistics (i.e., 'outname'.mean,

@@ -15,6 +15,9 @@
 #' character or want to group codes.
 #' @param rastfn.template String. Full path name of raster to use as template
 #' for new raster.
+#' @param validate Logical. If TRUE, validates polyv and clippolyv before 
+#' clipping. Uses sf::st_make_valid with default parameters 
+#' (geos_method='valid_structure', geos_keep_collapsed=FALSE).
 #' @param NODATA Number. The NODATA value for background values. If NODATA is
 #' NULL, and a NODATA value is defined on the rastfn.template raster, the 
 #' default is the defined NODATA value, else it is defined based on its datatype 
@@ -68,12 +71,13 @@ spPoly2Rast <- function(polyv,
                         polyv.att, 
                         polyv.lut = NULL, 
                         rastfn.template = NULL, 
+                        validate = FALSE,
                         NODATA = NULL, 
                         outfolder = NULL, 
                         outfn = "polyrast", 
                         outext = "img", 
                         outfn.pre = NULL, 
-                        outfn.date = TRUE, 
+                        outfn.date = FALSE, 
                         overwrite = FALSE){
 
   #####################################################################################
@@ -102,6 +106,14 @@ spPoly2Rast <- function(polyv,
 
   ## Get poly and clippoly layers
   polyvx <- pcheck.spatial(layer=polyv, dsn=polyv_dsn, gui=gui, caption="Poly to clip?")
+  
+  ## Check validate
+  if (validate) {
+    clippolyvx <- sf::st_make_valid(clippolyvx, 
+                                    geos_method = 'valid_structure', 
+                                    geos_keep_collapsed = FALSE)
+    clippolyvx <- sf::st_cast(clippolyvx)
+  }
 
   ## Check polyv.att
   polyv.att <- pcheck.varchar(var2check=polyv.att, varnm="polyv.att", gui=gui, 
@@ -160,16 +172,20 @@ spPoly2Rast <- function(polyv,
 
 
     ## Create virtual raster by clipping raster template to extent of polyvx
-    rastclip <- spClipRast(rast=rastfn, clippolyv=polyvx, 
-                           maskByPolygons=FALSE, NODATA=NODATA, 
-                           outfolder=outfolder, outfn="tmp", fmt="VRT")
+    rastclip <- spClipRast(rast = rastfn, 
+                           clippolyv = polyvx, 
+                           maskByPolygons = FALSE, 
+                           NODATA = NODATA, 
+                           outfolder = outfolder, 
+                           outfn = "tmp", 
+                           fmt = "VRT")
 
     ## Create blank raster from clipped virtual raster
     rast.fmt <- drivers[drivers$DefaultExt == outext, "fmt"]
     rast <- gdalraster::rasterFromRaster(rastclip, fmt=rast.fmt, dstfile=outfilenm)
 
     ## Rasterize polygons
-	message("rasterize polyogns...")
+	  message("rasterize polygons...")
     polyrast <- rasterizePolygons(src=polyvx, burn_value=polyv.att, rasterfile=rast)
 
   } else {
@@ -181,7 +197,7 @@ spPoly2Rast <- function(polyv,
     rast <- rasterFromVectorExtent(polyvx, res=30, dstfile=outfilenm, fmt="HFA")
 
     ## Rasterize polygons
-	message("rasterize polyogns...")
+	  message("rasterize polyogns...")
     polyrast <- rasterizePolygons(src=polyvx, burn_value=polyv.att, rasterfile=rast)
 
   }

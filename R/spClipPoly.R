@@ -23,6 +23,11 @@
 #' vector formats (https://www.gdal.org/ogr_formats.html). Optional if
 #' clippolyv_layer is an R object.
 #' @param clippolyv.filter String. Filter to subset clippolyv spatial layer.
+#' @param buffdist Number. The distance to buffer the polygon before clipping.
+#' Uses sf::st_buffer. The distance is based on units of polygon, st_crs(x)$units.
+#' @param validate Logical. If TRUE, validates polyv and clippolyv before 
+#' clipping. Uses sf::st_make_valid with default parameters 
+#' (geos_method='valid_structure', geos_keep_collapsed=FALSE).
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
 #' @param areacalc Logical. If TRUE, calculate area of clipped polygons and
 #' append to attribute table (See details).
@@ -80,6 +85,8 @@ spClipPoly <- function(polyv,
                        clippolyv, 
                        clippolyv_dsn = NULL, 
                        clippolyv.filter = NULL, 
+                       buffdist = NULL,
+                       validate = FALSE,
                        showext = FALSE, 
                        areacalc = FALSE, 
                        areaunits = "ACRES", 
@@ -100,7 +107,7 @@ spClipPoly <- function(polyv,
   ## If gui.. set variables to NULL
   if(gui){polyv=clippolyv=exportsp=areacalc <- NULL}
 
-  
+
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -138,18 +145,29 @@ spClipPoly <- function(polyv,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################  
-  
+
   ## Get poly and clippoly layers
-  polyvx <- pcheck.spatial(layer=polyv, dsn=polyv_dsn, gui=gui, 
-	caption="Poly to clip?")
-
-  clippolyvx <- pcheck.spatial(layer=clippolyv, dsn=clippolyv_dsn, 
-	gui=gui, caption="Clipping poly?")
-
+  polyvx <- pcheck.spatial(layer = polyv, dsn = polyv_dsn, gui=gui, 
+	                caption = "Poly to clip?")
+  if (validate) {
+    polyvx <- sf::st_make_valid(polyvx, 
+                                geos_method = 'valid_structure', 
+                                geos_keep_collapsed = FALSE)
+  }
+  clippolyvx <- pcheck.spatial(layer = clippolyv, dsn = clippolyv_dsn, 
+	                 gui=gui, caption="Clipping poly?")
+ 
   ## clippolyv.filter
-  clippolyvx <- datFilter(clippolyvx, xfilter=clippolyv.filter)$xf
+  clippolyvx <- datFilter(clippolyvx, xfilter = clippolyv.filter)$xf
 
-
+  ## Check buffdist
+  if (!is.null(buffdist)) {
+    if (!is.numeric(buffdist)) stop("invalid buffdist... must be numeric")
+  }
+  
+  ## Check validate
+  validate <- pcheck.logical(validate, "Validate polys?", "NO")
+  
   ## Check areacalc
   areacalc <- pcheck.logical(areacalc, "Calculate area?", "YES")
 
@@ -163,16 +181,10 @@ spClipPoly <- function(polyv,
                             out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
                             overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
                             add_layer=add_layer, append_layer=append_layer, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
     if (is.null(out_layer)) {
       out_layer <- "polyclip"
     }
+    outlst$out_layer <- out_layer
   }
 
   ##################################################################
@@ -184,7 +196,18 @@ spClipPoly <- function(polyv,
   clippolyvx <- prjdat$x
   polyvx <- prjdat$ycrs
 
+  if (!is.null(buffdist)) {
+    ## This will buffer the polygon 1 pixel to include all pixels inside boundary
+    clippolyvx <- sf::st_buffer(clippolyvx, dist=buffdist)
+  }
 
+  if (validate) {
+    clippolyvx <- sf::st_make_valid(clippolyvx, 
+                                    geos_method = 'valid_structure', 
+                                    geos_keep_collapsed = FALSE)
+    clippolyvx <- sf::st_cast(clippolyvx)
+  }
+  
   ## Check extents
   bbox1 <- sf::st_bbox(clippolyvx)
   bbox2 <- sf::st_bbox(polyvx)
@@ -192,7 +215,7 @@ spClipPoly <- function(polyv,
 			stopifnotin=TRUE)
 
   ## Clip poly
-  ipoly <- suppressWarnings(sf::st_intersection(polyvx, sf::st_union(clippolyvx)))
+  ipoly <- sf::st_intersection(polyvx, sf::st_union(clippolyvx))
 
 
   ## Calculate area
@@ -202,16 +225,8 @@ spClipPoly <- function(polyv,
  
   ## Export clipped poly
   if (exportsp) {
-    spExportSpatial(ipoly, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-                              out_dsn=out_dsn, 
-                              out_layer="bnd",
-                              outfn.pre=outfn.pre, 
-                              outfn.date=outfn.date, 
-                              overwrite_layer=overwrite_layer,
-                              append_layer=append_layer, 
-                              add_layer=TRUE))
+    outlst$add_layer <- TRUE
+    spExportSpatial(ipoly, savedata_opts = outlst)
   }
 
   return(ipoly)    

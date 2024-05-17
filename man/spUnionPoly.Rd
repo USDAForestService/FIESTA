@@ -10,6 +10,7 @@ spUnionPoly(
   polyv1_dsn = NULL,
   polyv2,
   polyv2_dsn = NULL,
+  validate = FALSE,
   showext = FALSE,
   areacalc = FALSE,
   areavar = "ACRES_GIS",
@@ -36,6 +37,10 @@ database.}
 pathname) of layer to union. The dsn varies by driver. See gdal OGR vector
 formats (https://www.gdal.org/ogr_formats.html). Optional if polyv2 is sf
 object.}
+
+\item{validate}{Logical. If TRUE, validates polyv and clippolyv before 
+clipping. Uses sf::st_make_valid with default parameters 
+(geos_method='valid_structure', geos_keep_collapsed=FALSE).}
 
 \item{showext}{Logical. If TRUE, layer extents are displayed in plot window.}
 

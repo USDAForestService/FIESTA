@@ -116,7 +116,7 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
   
   ## Write sf layer
   ########################################################
-  if (out_fmt %in% c("sqlite", "gpkg")) {
+  if (outsp_fmt %in% c("sqlite", "gpkg")) {
     if (append_layer) overwrite_dsn <- FALSE
     gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
 
@@ -126,13 +126,20 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
 
     ## Test and get filename of SQLite database
     out_dsn <- DBtestSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, showlist=FALSE,
-		createnew=FALSE)
+		                        createnew=FALSE)
 
     ## Write to SQLite database
     if (!file.exists(out_dsn)) {
-      sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=TRUE,
-		dataset_options="SPATIALITE=YES", layer_options="GEOMETRY_NAME = geometry",
-		delete_dsn=overwrite_dsn, delete_layer=overwrite_layer, quiet=FALSE) 
+      sf::st_write(sfobj, 
+                   dsn = out_dsn, 
+                   layer = out_layer, 
+                   driver = "SQLite", 
+                   append = TRUE,
+                   dataset_options = "SPATIALITE=YES", 
+                   layer_options = "GEOMETRY_NAME = geometry",
+                   delete_dsn = overwrite_dsn, 
+                   delete_layer = overwrite_layer, 
+                   quiet = FALSE) 
     } else {
    
       ## If file exists, check if spatiaLite database
@@ -151,12 +158,18 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
           stop(out_layer, " exists in ", basename(out_dsn), " and overwrite_layer = FALSE")
         }
       }
-      sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=FALSE,
-		layer_options="GEOMETRY_NAME = geometry",
-		delete_dsn=overwrite_dsn, delete_layer=TRUE, quiet=FALSE) 
+      sf::st_write(sfobj, 
+                   dsn = out_dsn, 
+                   layer = out_layer, 
+                   driver = "SQLite", 
+                   append = FALSE,
+                   layer_options = "GEOMETRY_NAME = geometry",
+                   delete_dsn = overwrite_dsn, 
+                   delete_layer = TRUE, 
+                   quiet = FALSE) 
     }
 
-  } else if (out_fmt == "gdb") {
+  } else if (outsp_fmt == "gdb") {
     message("cannot write to geodatabases")
 #    if (append_layer) {
 #      stop("can't append data to ", out_layer, " with out_fmt='gdb'")
@@ -175,8 +188,9 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
 #				grepl(geofld, names(sfobj))]], geofld)]
 #    arcgisbinding::arc.write(file.path(out_dsn, out_layer), sfobj, overwrite=overwrite_layer)
 
-  } else if (out_fmt == "shp") {
-
+  } else if (outsp_fmt == "shp") {
+    message("writing to shapefile")
+    
 ## Note: for a new shapefile, overwrite_dsn=FALSE, delete_layer=TRUE
 #delete_dsn=FALSE; delete_layer=TRUE; append_layer=TRUE	## overwrites layer
 #delete_dsn=FALSE; delete_layer=TRUE; append_layer=FALSE	## overwrites layer
@@ -197,8 +211,8 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
     ########################################################
     if (is.null(out_dsn) || !file.exists(out_dsn)) {
       out_dsn <- getoutfn(outfn=out_layer, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, ext=outsp_fmt,
-		overwrite=FALSE, append=append_layer)
+		           outfn.pre=outfn.pre, outfn.date=outfn.date, ext=outsp_fmt,
+		           overwrite=FALSE, append=append_layer)
       if (!file.exists(out_dsn)) {
         overwrite_layer <- FALSE
       }
@@ -214,21 +228,27 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
 
     #delete_layer <- ifelse(append_layer, FALSE, TRUE)
 
-    writechk <- tryCatch(suppressWarnings(sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, 
-		driver="ESRI Shapefile", append=append_layer, delete_dsn=overwrite_layer,
- 		quiet=FALSE)),
-     	 	error=function(e) {
+    writechk <- tryCatch(
+         sf::st_write(sfobj, dsn = out_dsn, 
+                      layer = out_layer, 
+		                  driver = "ESRI Shapefile", 
+		                  append = append_layer, 
+		                  delete_dsn = overwrite_layer,
+ 		                  quiet = FALSE),
+     	 	        error=function(e) {
                   message(e)
-			return(NULL) })
+			            return(NULL) })
     if (is.null(writechk)) {
       stop()
     }
 
     ## Write new names to *.csv file
     if (!is.null(newnms)) {    
-      suppressWarnings(write2csv(newnms, outfolder=normalizePath(dirname(out_dsn)), 
-		outfilenm=paste0(basename.NoExt(out_dsn), "_newnames"),
-		outfn.date=outfn.date, overwrite=overwrite_layer)) 
+       write2csv(newnms, 
+                 outfolder = normalizePath(dirname(out_dsn)),
+                 outfilenm = paste0(basename.NoExt(out_dsn), "_newnames"),
+                 outfn.date = outfn.date, 
+                 overwrite = overwrite_layer) 
     }
 
   } else {

@@ -23,6 +23,11 @@
 #' shapefile pathname) of clipping polygon. The dsn varies by driver. See gdal
 #' OGR vector formats (https://www.gdal.org/ogr_formats.html).
 #' @param clippolyv.filter String. Filter to subset clippolyv spatial layer.
+#' @param buffdist Number. The distance to buffer the polygon before clipping.
+#' Uses sf::st_buffer. The distance is based on units of polygon, st_crs(x)$units.
+#' @param validate Logical. If TRUE, validates polyv and clippolyv before 
+#' clipping. Uses sf::st_make_valid with default parameters 
+#' (geos_method='valid_structure', geos_keep_collapsed=FALSE).
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
 #' @param keepNA Logical. If TRUE, keep NA values after data intersection.
 #' @param returnsp Logical. If TRUE, returns sf object of points. If FALSE,
@@ -98,6 +103,8 @@ spClipPoint <- function(xyplt,
                         clippolyv, 
                         clippolyv_dsn = NULL, 
                         clippolyv.filter = NULL, 
+                        buffdist = NULL,
+                        validate = FALSE,
                         showext = FALSE, 
                         keepNA = FALSE, 
                         returnsp = TRUE, 
@@ -202,7 +209,7 @@ spClipPoint <- function(xyplt,
   ###################################################################################
   ##  STEP #2: GET INLAYER BY CLIPPING TO BOUNDARY IF NECESSARY   
   ###################################################################################
-
+  
   ## Check polyvx
   clippolyvx <- pcheck.spatial(clippolyv, dsn=clippolyv_dsn, gui=gui, 
 				tabnm="clippoly", caption="Clipping polygon?", stopifnull=TRUE)
@@ -210,9 +217,18 @@ spClipPoint <- function(xyplt,
   ## clippolyv.filter
   clippolyvx <- datFilter(clippolyvx, xfilter=clippolyv.filter, stopifnull=TRUE)$xf
 
+  
+  ## Check buffdist
+  if (!is.null(buffdist)) {
+    if (!is.numeric(buffdist)) stop("invalid buffdist... must be numeric")
+  }
+  
+  ## Check validate
+  validate <- pcheck.logical(validate, "Validate polys?", "NO")
+
    ## Check showext    
   showext <- pcheck.logical(showext, varnm="showext", 
-		title="Plot extents?", first="YES", gui=gui)
+		                         title="Plot extents?", first="YES", gui=gui)
   ## Check returnsp
   returnsp <- pcheck.logical(returnsp, "Return spatial object?", "YES", gui=gui)
 
@@ -253,6 +269,20 @@ spClipPoint <- function(xyplt,
   prjdat <- crsCompare(sppntx, clippolyvx, nolonglat=TRUE)
   sppntx <- prjdat$x
   clippolyvx <- prjdat$ycrs
+  
+  if (!is.null(buffdist)) {
+    ## This will buffer the polygon 1 pixel to include all pixels inside boundary
+    clippolyvx <- sf::st_buffer(clippolyvx, dist=buffdist)
+  }
+  
+  ## Validate polygon
+  if (validate) {
+    clippolyvx <- sf::st_make_valid(clippolyvx,  
+                                    geos_method = 'valid_structure', 
+                                    geos_keep_collapsed = FALSE)
+    clippolyvx <- sf::st_cast(clippolyvx)
+  }
+  
 
   ## Check extents
   bbox1 <- sf::st_bbox(clippolyvx)
