@@ -130,7 +130,7 @@ DBgetEvalid <- function(states = NULL,
   }
   
   ## Set global variables
-  EVAL_GRP_Endyr=evalTypelist=STATECD=EVALID=evaltyp <- NULL
+  EVAL_GRP_Endyr=evalTypelist=STATECD=EVALID=evaltyp=invyrs <- NULL
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0) gui <- TRUE
@@ -189,7 +189,6 @@ DBgetEvalid <- function(states = NULL,
      }    
      return(dtlst)
   }
-
   
   ##################################################################
   ## CHECK PARAMETER INPUTS
