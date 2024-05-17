@@ -32,8 +32,9 @@ object.}
 
 \item{polyv.att}{String. Name of attribute in polyv to rasterize.}
 
-\item{polyv.lut}{Data frame. Look up table of codes, if polyv.att is
-character or want to group codes.}
+\item{polyv.lut}{Data frame. Lookup table of codes, if polyv.att is
+character or want to group codes. The lookup table must be data.frame  
+including polyv.att and another column with classes.}
 
 \item{rastfn.template}{String. Full path name of raster to use as template
 for new raster.}

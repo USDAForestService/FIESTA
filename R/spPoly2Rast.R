@@ -11,8 +11,9 @@
 #' formats (https://www.gdal.org/ogr_formats.html). Optional if polyv is sf
 #' object.
 #' @param polyv.att String. Name of attribute in polyv to rasterize.
-#' @param polyv.lut Data frame. Look up table of codes, if polyv.att is
-#' character or want to group codes.
+#' @param polyv.lut Data frame. Lookup table of codes, if polyv.att is
+#' character or want to group codes. The lookup table must be data.frame  
+#' including polyv.att and another column with classes.
 #' @param rastfn.template String. Full path name of raster to use as template
 #' for new raster.
 #' @param validate Logical. If TRUE, validates polyv and clippolyv before 
