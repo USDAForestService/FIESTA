@@ -232,6 +232,9 @@
     <loc>/reference/modMApop.html</loc>
   </url>
   <url>
+    <loc>/reference/modMAratio.html</loc>
+  </url>
+  <url>
     <loc>/reference/modMAtree.html</loc>
   </url>
   <url>
@@ -343,7 +346,13 @@
     <loc>/reference/ref_tree.html</loc>
   </url>
   <url>
+    <loc>/reference/ref_units.html</loc>
+  </url>
+  <url>
     <loc>/reference/savedata_options.html</loc>
+  </url>
+  <url>
+    <loc>/reference/spClassifyRast.html</loc>
   </url>
   <url>
     <loc>/reference/spClipPoint.html</loc>

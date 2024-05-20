@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FIESTA - Spatial Tools • FIESTA</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3</span>
       </span>
     </div>
 
@@ -56,6 +56,9 @@
       <a href="../articles/FIESTA_manual_mod_pop.html">`FIESTA` Manual - Population Data</a>
     </li>
     <li>
+      <a href="../articles/FIESTA_tutorial_dat.html">FIESTA - Data Tools</a>
+    </li>
+    <li>
       <a href="../articles/FIESTA_tutorial_DB.html">FIESTA - Database Tools</a>
     </li>
     <li>
@@ -71,9 +74,6 @@
       <a href="../articles/FIESTA_tutorial_SA.html">FIESTA - Small Area Estimators</a>
     </li>
     <li>
-      <a href="../articles/FIESTA_tutorial_dat.html">FIESTA - Data Tools</a>
-    </li>
-    <li>
       <a href="../articles/FIESTA_tutorial_sp.html">FIESTA - Spatial Tools</a>
     </li>
   </ul>
@@ -82,7 +82,14 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/USDAForestService/FIESTA/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -98,7 +105,7 @@
       <h1 data-toc-skip>FIESTA - Spatial Tools</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/USDAForestService/FIESTA/blob/HEAD/vignettes/FIESTA_tutorial_sp.Rmd" class="external-link"><code>vignettes/FIESTA_tutorial_sp.Rmd</code></a></small>
       <div class="hidden name"><code>FIESTA_tutorial_sp.Rmd</code></div>
 
     </div>
@@ -329,7 +336,7 @@ WYbighorn_adminbnd.shp.</p>
 </h3>
 <p>First, you’ll need to load the <code>FIESTA</code> library:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://usdaforestservice.github.io/FIESTA/" class="external-link">FIESTA</a></span><span class="op">)</span></span></code></pre></div>
 <p>Next, you’ll have to load some external data from the
 <code>FIESTA</code> package and set up objects in your <code>R</code>
 global environment:</p>
@@ -380,8 +387,8 @@ View Example
 <span><span class="va">WYbhdist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhdistfn</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## Display boundary</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbh</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbh</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -422,8 +429,8 @@ View Example
 <p>To view our output we can run the following code.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Display output</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## NOTE: To display multiple layers, all layers must be in the same coordinate system.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">WYbh</span>, <span class="va">WYbhdist</span>, <span class="va">WYspplt</span><span class="op">)</span>, <span class="fu">sf</span><span class="fu">::</span><span class="va"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">)</span></span></code></pre></div>
@@ -495,14 +502,14 @@ View Example
 <span>                                               out_layer <span class="op">=</span> <span class="st">"WYbh"</span><span class="op">)</span></span>
 <span>                          <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></span>
 <span><span class="va">WYbhspplt</span> <span class="op">&lt;-</span> <span class="va">WYbhptslst</span><span class="op">$</span><span class="va">clip_xyplt</span></span>
 <span><span class="va">WYbhprj</span> <span class="op">&lt;-</span> <span class="va">WYbhptslst</span><span class="op">$</span><span class="va">clip_polyv</span></span></code></pre></div>
 <p>Next we check and display the output:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYbhspplt</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhprj</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"red"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhspplt</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhprj</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"red"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhspplt</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Note: If the projection of spplt is not the same as the points layer,
 the points layer will be reprojected to the same projection as
 <code>clippolyv</code> (See notes in help file for more info).</p>
@@ -524,7 +531,7 @@ with the <code>spClipPoint</code> function:</p>
 <span>                          clippolyv <span class="op">=</span> <span class="va">WYbh</span>, </span>
 <span>                          othertabnms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WYcond"</span>, <span class="st">"WYtree"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></span></code></pre></div>
 <p>Next, we can export clipped points.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Export clipped points</span></span>
@@ -549,7 +556,7 @@ with the <code>spClipPoint</code> function:</p>
 <span>                                        overwrite_layer <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                        outfn.pre <span class="op">=</span> <span class="st">"clip"</span><span class="op">)</span></span>
 <span>                          <span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhptslst</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -560,19 +567,20 @@ The <code>spClipPoly</code> function clips (intersects) a polygon vector
 layer with another polygon vector layer.
 <details><summary>
 View Example
-</summary><p>We first subsect the USAco <code>SpatialPolygons</code> layer with
+</summary><p>We first subsect the WYco <code>SpatialPolygons</code> layer with
 <code>WYbighorn</code>. Note: you must download USAco from the
-<code>geodata</code> package. See the “Set Up” section above.</p>
+<code>geodata</code> package and subset to Wyoming. See the “Set Up”
+section above.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoly.html">spClipPoly</a></span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">USAco</span>,</span>
+<code class="sourceCode R"><span><span class="va">WYbhco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spClipPoly.html">spClipPoly</a></span><span class="op">(</span>polyv <span class="op">=</span> <span class="va">WYco</span>,</span>
 <span>                             clippolyv <span class="op">=</span> <span class="va">WYbh</span><span class="op">)</span></span></code></pre></div>
 <p>We can now check and display <code>WYbighorn_co</code> with
 labels.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">[</span><span class="st">'NAME_2'</span><span class="op">]</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu">sf.colors</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">coords</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html" class="external-link">st_coordinates</a></span><span class="op">(</span><span class="fu">st_centroid</span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/text.html" class="external-link">text</a></span><span class="op">(</span><span class="va">coords</span><span class="op">[</span>,<span class="st">"X"</span><span class="op">]</span>, <span class="va">coords</span><span class="op">[</span>,<span class="st">"Y"</span><span class="op">]</span>, <span class="va">WYbhco</span><span class="op">[[</span><span class="st">"NAME_2"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">[</span><span class="st">'NAME_2'</span><span class="op">]</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/plot.html" class="external-link">sf.colors</a></span><span class="op">(</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">coords</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html" class="external-link">st_coordinates</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html" class="external-link">st_centroid</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhco</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/text.html" class="external-link">text</a></span><span class="op">(</span><span class="va">coords</span><span class="op">[</span>,<span class="st">"X"</span><span class="op">]</span>, <span class="va">coords</span><span class="op">[</span>,<span class="st">"Y"</span><span class="op">]</span>, <span class="va">WYbhco</span><span class="op">[[</span><span class="st">"NAME_2"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -589,8 +597,8 @@ boundary</p>
 <code class="sourceCode R"><span><span class="va">WYbhdist</span></span>
 <span><span class="va">WYbhMW</span> <span class="op">&lt;-</span> <span class="va">WYbhdist</span><span class="op">[</span><span class="va">WYbhdist</span><span class="op">$</span><span class="va">DISTRICTNA</span> <span class="op">==</span> <span class="st">"Medicine Wheel Ranger District"</span>,<span class="op">]</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhMW</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"red"</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhdist</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhMW</span><span class="op">)</span>, border<span class="op">=</span><span class="st">"red"</span>, add<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Next, we can clip the raster. Note: If the projection of
 <code>polyv</code> is not the same as <code>rast</code>,
 <code>polyv</code> will by reprojected to the same projection as
@@ -602,10 +610,10 @@ details).</p>
 <span>                           outfolder <span class="op">=</span> <span class="va">outfolder</span><span class="op">)</span></span></code></pre></div>
 <p>Finally, we display the results:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYbhMWprj</span> <span class="op">&lt;-</span> <span class="fu">crsCompare</span><span class="op">(</span><span class="va">WYbhMW</span>, </span>
-<span>                        <span class="fu">rasterInfo</span><span class="op">(</span><span class="va">WYbhMW.fornf</span><span class="op">)</span><span class="op">$</span><span class="va">crs</span><span class="op">)</span><span class="op">$</span><span class="va">x</span></span>
-<span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">WYbhMW.fornf</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">WYbhMWprj</span><span class="op">)</span>, </span>
+<code class="sourceCode R"><span><span class="va">WYbhMWprj</span> <span class="op">&lt;-</span> <span class="fu">FIESTAutils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/spatial_desc.html" class="external-link">crsCompare</a></span><span class="op">(</span><span class="va">WYbhMW</span>, </span>
+<span>                        <span class="fu">FIESTAutils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/raster_desc.html" class="external-link">rasterInfo</a></span><span class="op">(</span><span class="va">WYbhMW.fornf</span><span class="op">)</span><span class="op">$</span><span class="va">crs</span><span class="op">)</span><span class="op">$</span><span class="va">x</span></span>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">WYbhMW.fornf</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">WYbhMWprj</span><span class="op">)</span>, </span>
 <span>     border <span class="op">=</span> <span class="st">"red"</span>, </span>
 <span>     add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </details>
@@ -634,8 +642,8 @@ evaluation points (See the note in help file for more details).</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">[</span><span class="st">"DISTRICTNA"</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">WYspplt_bh</span><span class="op">[</span><span class="st">"DISTRICTNA"</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
 <p>Next we can extract a subset of polygon attributes from
 <code>WYbighorn</code> to <code>WYpts</code>, not keeping
 <code>NULL</code> values.</p>
@@ -650,7 +658,7 @@ evaluation points (See the note in help file for more details).</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt_bh2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_bh2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_bh2</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -674,7 +682,7 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYspplt_dem</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_dem</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYspplt_dem</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -716,19 +724,21 @@ projection information is: <code>prj = "longlat"</code>,
 <p>Next, we derive new layers from <code>dem</code>.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/" class="external-link">terra</a></span><span class="op">)</span></span>
-<span><span class="va">dem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">demfn</span><span class="op">)</span></span>
+<span><span class="va">dem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">demfn</span><span class="op">)</span></span>
 <span><span class="va">slpfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outfolder</span>, <span class="st">"/WYbh_slp.img"</span><span class="op">)</span></span>
-<span><span class="va">slp</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>,</span>
+<span><span class="va">slp</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>,</span>
 <span>                      v <span class="op">=</span> <span class="st">"slope"</span>,</span>
 <span>                      unit <span class="op">=</span> <span class="st">"degrees"</span>,</span>
 <span>                      filename <span class="op">=</span> <span class="va">slpfn</span>, </span>
-<span>                      overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>                      overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                      NAflag <span class="op">=</span> <span class="op">-</span><span class="fl">99999.0</span><span class="op">)</span></span>
 <span><span class="va">aspfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outfolder</span>, <span class="st">"/WYbh_asp.img"</span><span class="op">)</span></span>
-<span><span class="va">asp</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>,</span>
+<span><span class="va">asp</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/terrain.html" class="external-link">terrain</a></span><span class="op">(</span><span class="va">dem</span>,</span>
 <span>                      v <span class="op">=</span> <span class="st">"aspect"</span>,</span>
 <span>                      unit <span class="op">=</span> <span class="st">"degrees"</span>, </span>
 <span>                      filename <span class="op">=</span> <span class="va">aspfn</span>,</span>
-<span>                      overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span>                      overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                      NAflag <span class="op">=</span> <span class="op">-</span><span class="fl">99999.0</span><span class="op">)</span></span></code></pre></div>
 <p>Finally, we extract estimation unit and zonal raster statistics
 (i.e., mean).</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
@@ -751,7 +761,7 @@ projection information is: <code>prj = "longlat"</code>,
 <span>                           keepNA <span class="op">=</span> <span class="cn">FALSE</span>, </span>
 <span>                           showext <span class="op">=</span> <span class="cn">FALSE</span>, </span>
 <span>                           savedata <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">modeldat</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">modeldat</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pltassgn</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">pltassgn</span></span>
 <span><span class="va">unitzonal</span> <span class="op">&lt;-</span> <span class="va">modeldat</span><span class="op">$</span><span class="va">unitzonal</span></span>
@@ -767,7 +777,7 @@ projection information is: <code>prj = "longlat"</code>,
 <span><span class="va">areavar</span></span>
 <span><span class="va">unitzonal</span></span>
 <span><span class="va">unitarea</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltassgn</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltassgn</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">prednames</span></span>
 <span><span class="va">zonalnames</span></span></code></pre></div>
@@ -789,13 +799,13 @@ returning spatial (spxy) and nonspatial plot identifiers (pltids).</p>
 <span>                  eval <span class="op">=</span> <span class="st">"FIA"</span>,</span>
 <span>                  eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>                  returnxy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhxy</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhxy</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pltids</span> <span class="op">&lt;-</span> <span class="va">WYbhxy</span><span class="op">$</span><span class="va">pltids</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltids</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltids</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">spxy</span> <span class="op">&lt;-</span> <span class="va">WYbhxy</span><span class="op">$</span><span class="va">spxy</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">spxy</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">spxy</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Or, returning only nonspatial plot identifiers (pltids).</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYbhxyids</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spGetXY.html">spGetXY</a></span><span class="op">(</span>bnd <span class="op">=</span> <span class="va">WYbhfn</span>,</span>
@@ -803,10 +813,10 @@ returning spatial (spxy) and nonspatial plot identifiers (pltids).</p>
 <span>                     eval <span class="op">=</span> <span class="st">"FIA"</span>,</span>
 <span>                     eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>                     returnxy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhxyids</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhxyids</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pltids</span> <span class="op">&lt;-</span> <span class="va">WYbhxyids</span><span class="op">$</span><span class="va">pltids</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltids</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pltids</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -825,7 +835,7 @@ View Example
 <span>                      eval <span class="op">=</span> <span class="st">"FIA"</span>,</span>
 <span>                      eval_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/eval_options.html" class="external-link">eval_options</a></span><span class="op">(</span>Cur <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>                      istree <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhdat</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYbhdat</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -858,7 +868,7 @@ View Example
 <span>                                                   xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></span>
 <span>                           <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">unitdat.bh</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">unitdat.bh</span><span class="op">)</span></span>
 <span><span class="va">unitarea.bh</span> <span class="op">&lt;-</span> <span class="va">unitdat.bh</span><span class="op">$</span><span class="va">unitarea</span></span>
 <span><span class="va">unitvar.bh</span> <span class="op">&lt;-</span> <span class="va">unitdat.bh</span><span class="op">$</span><span class="va">unitvar</span></span>
 <span><span class="va">areavar.bh</span> <span class="op">&lt;-</span> <span class="va">unitdat.bh</span><span class="op">$</span><span class="va">areavar</span></span>
@@ -882,7 +892,7 @@ National Forest.</p>
 <span>                                                       xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></span>
 <span>                               <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">unitdat.bhdist</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">unitdat.bhdist</span><span class="op">)</span></span>
 <span><span class="va">unitarea.bhdist</span> <span class="op">&lt;-</span> <span class="va">unitdat.bhdist</span><span class="op">$</span><span class="va">unitarea</span></span>
 <span><span class="va">unitvar.bhdist</span> <span class="op">&lt;-</span> <span class="va">unitdat.bhdist</span><span class="op">$</span><span class="va">unitvar</span></span>
 <span><span class="va">areavar.bhdist</span> <span class="op">&lt;-</span> <span class="va">unitdat.bhdist</span><span class="op">$</span><span class="va">areavar</span></span>
@@ -922,7 +932,7 @@ projection information is: <code>prj = "longlat"</code>,
 <span>                        unit_layer <span class="op">=</span> <span class="va">WYbhfn</span>, </span>
 <span>                        strattype <span class="op">=</span> <span class="st">"RASTER"</span>, </span>
 <span>                        strat_layer <span class="op">=</span> <span class="va">fornffn</span><span class="op">)</span> </span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">stratlst</span><span class="op">)</span> </span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">stratlst</span><span class="op">)</span> </span>
 <span><span class="va">stratlst</span><span class="op">$</span><span class="va">stratalut</span></span></code></pre></div>
 </details>
 </div>
@@ -945,8 +955,8 @@ then extract polygon attributes from <code>WYbighorn</code> to
 <span>                         polyv2 <span class="op">=</span> <span class="va">WYbh</span>, </span>
 <span>                         areacalc <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">st_geometry</span><span class="op">(</span><span class="va">polyUnion</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">polyUnion</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">polyUnion</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">polyUnion</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
@@ -967,13 +977,13 @@ then extract polygon attributes from <code>WYbighorn</code> to
 <span>                        polyv.att <span class="op">=</span> <span class="st">"DISTRICTNA"</span>, </span>
 <span>                        rastfn <span class="op">=</span> <span class="va">demfn</span>, </span>
 <span>                        zonalstat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"sum"</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">zonallst</span><span class="op">)</span> </span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">zonallst</span><span class="op">)</span> </span>
 <span></span>
 <span><span class="va">zonalext</span> <span class="op">&lt;-</span> <span class="va">zonallst</span><span class="op">$</span><span class="va">zonalext</span></span>
 <span><span class="va">outname</span> <span class="op">&lt;-</span> <span class="va">zonallst</span><span class="op">$</span><span class="va">outname</span></span>
 <span><span class="va">rasterfile</span> <span class="op">&lt;-</span> <span class="va">zonallst</span><span class="op">$</span><span class="va">rasterfile</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">zonalext</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">zonalext</span><span class="op">)</span></span>
 <span><span class="va">outname</span></span>
 <span><span class="va">rasterfile</span></span></code></pre></div>
 </details>
@@ -993,12 +1003,12 @@ then extract polygon attributes from <code>WYbighorn</code> to
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Tracey Frescino, Gretchen Moisen, Paul Patterson, Chris Toney, Grayson White.</p>
+<p>Developed by Tracey Frescino, Gretchen Moisen, Paul Patterson, Chris Toney, Grayson White, Joshua Yamamoto.</p>
 </div>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
       </footer>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FIESTA - Photo-Based Module • FIESTA</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3</span>
       </span>
     </div>
 
@@ -56,6 +56,9 @@
       <a href="../articles/FIESTA_manual_mod_pop.html">`FIESTA` Manual - Population Data</a>
     </li>
     <li>
+      <a href="../articles/FIESTA_tutorial_dat.html">FIESTA - Data Tools</a>
+    </li>
+    <li>
       <a href="../articles/FIESTA_tutorial_DB.html">FIESTA - Database Tools</a>
     </li>
     <li>
@@ -71,9 +74,6 @@
       <a href="../articles/FIESTA_tutorial_SA.html">FIESTA - Small Area Estimators</a>
     </li>
     <li>
-      <a href="../articles/FIESTA_tutorial_dat.html">FIESTA - Data Tools</a>
-    </li>
-    <li>
       <a href="../articles/FIESTA_tutorial_sp.html">FIESTA - Spatial Tools</a>
     </li>
   </ul>
@@ -82,7 +82,14 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/USDAForestService/FIESTA/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -98,7 +105,7 @@
       <h1 data-toc-skip>FIESTA - Photo-Based Module</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/USDAForestService/FIESTA/blob/HEAD/vignettes/FIESTA_tutorial_PB.Rmd" class="external-link"><code>vignettes/FIESTA_tutorial_PB.Rmd</code></a></small>
       <div class="hidden name"><code>FIESTA_tutorial_PB.Rmd</code></div>
 
     </div>
@@ -531,7 +538,7 @@ strata variables</td>
 </h3>
 <p>First, you’ll need to load the <code>FIESTA</code> library:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://usdaforestservice.github.io/FIESTA/" class="external-link">FIESTA</a></span><span class="op">)</span></span></code></pre></div>
 <p>Next, you’ll need to set up an “outfolder”. This is just a file path
 to a folder where you’d like <code>FIESTA</code> to send your data
 output. For our purposes in this vignette, we have saved our outfolder
@@ -617,10 +624,10 @@ the spatial distribution by county (ESTN_UNIT) with the
 <span>                                xvar <span class="op">=</span> <span class="st">"LON_PUBLIC"</span>,</span>
 <span>                                yvar <span class="op">=</span> <span class="st">"LAT_PUBLIC"</span>, </span>
 <span>                                xy.crs <span class="op">=</span> <span class="fl">4269</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">icepltsp</span><span class="op">[</span><span class="st">"ESTN_UNIT"</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">icepltsp</span><span class="op">[</span><span class="st">"ESTN_UNIT"</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
 </details><p>Now, let’s look at the look up tables stored in <code>FIESTA</code>
 for land use cover codes and change agent codes and create new lookup
 tables for Time 1 and Time 2 land use cover.</p>
@@ -655,9 +662,9 @@ output
 </details><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create look-up tables for Time 1 (cover_11) and Time 2 (cover_14) classes</span></span>
 <span><span class="va">icecover_1</span> <span class="op">&lt;-</span> <span class="va">icecover</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover_1</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"cover"</span>, <span class="st">"cover_1"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover_1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover_1</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"cover"</span>, <span class="st">"cover_1"</span>, <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover_1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">icecover_2</span> <span class="op">&lt;-</span> <span class="va">icecover</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover_2</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"cover"</span>, <span class="st">"cover_2"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover_2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover_2</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"cover"</span>, <span class="st">"cover_2"</span>, <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icecover_2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">icecover_1</span></span></code></pre></div>
 <details><summary>
 output
@@ -743,7 +750,7 @@ population data:</p>
 <span>                     pltassgn <span class="op">=</span> <span class="va">iceplt</span>,</span>
 <span>                     pltassgnid <span class="op">=</span> <span class="st">"plot_id"</span>,</span>
 <span>                     pntid <span class="op">=</span> <span class="st">"dot_cnt"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">PBpopdat</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">PBpopdat</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##  [1] "PBx"         "pltassgnx"   "plotid"      "pntid"       "pltassgnid" </span></span>
@@ -864,7 +871,7 @@ each estimation unit (i.e, County).</p>
 <span>                      pntid <span class="op">=</span> <span class="st">"dot_cnt"</span>,</span>
 <span>                      unitarea <span class="op">=</span> <span class="va">unitarea</span>, </span>
 <span>                      unitvar <span class="op">=</span> <span class="st">"ESTN_UNIT"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">PBpopunit</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">PBpopunit</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##  [1] "PBx"         "pltassgnx"   "plotid"      "pntid"       "pltassgnid" </span></span>
@@ -918,7 +925,7 @@ for transitions.</p>
 <p>Let’s first take a look at the first six rows of the example dataset,
 including 133 plot records.</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##        plot_id Change Tree11 Shrub11 OtherVegetation11 Barren11 Impervious11</span></span>
@@ -950,8 +957,8 @@ output
 </details><p>Then, rename columns for Time 1 cover (names11) and Time 2 cover
 (names14)</p>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">names11</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/startsWith.html" class="external-link">endsWith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span>, <span class="st">"11"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">names14</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/startsWith.html" class="external-link">endsWith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span>, <span class="st">"14"</span><span class="op">)</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">names11</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/startsWith.html" class="external-link">endsWith</a></span><span class="op">(</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span>, <span class="st">"11"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">names14</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/startsWith.html" class="external-link">endsWith</a></span><span class="op">(</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span>, <span class="st">"14"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">names11</span></span></code></pre></div>
 <details><summary>
 output
@@ -1042,7 +1049,7 @@ plot-level strata assignments. This information is provided with
 FIESTA’s external data.</p>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Plot-level assignments</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">iceplt</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">iceplt</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##        plot_id ESTN_UNIT STRATUMCD LON_PUBLIC LAT_PUBLIC</span></span>
@@ -1054,7 +1061,7 @@ output
 <span><span class="co">## 6 5.540744e+12        11         2  -112.2082   40.85725</span></span></code></pre>
 </details><div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Strata weights by estimation unit</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">strlutfn</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">strlutfn</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ESTN_UNIT STRATUMCD P1POINTCNT</span></span>
@@ -1112,7 +1119,9 @@ output
 <code class="sourceCode R"><span><span class="va">PBpopareaPS</span><span class="op">$</span><span class="va">stratalut</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##    ONEUNIT STRATUMCD P1POINTCNT n.total n.strata     strwt</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;ONEUNIT, STRATUMCD&gt;</span></span>
+<span><span class="co">##    ONEUNIT STRATUMCD P1POINTCNT n.total n.strata     strwt</span></span>
+<span><span class="co">##     &lt;fctr&gt;    &lt;char&gt;      &lt;num&gt;   &lt;int&gt;    &lt;int&gt;     &lt;num&gt;</span></span>
 <span><span class="co">## 1:       1         1       9050     133       18 0.1514695</span></span>
 <span><span class="co">## 2:       1         2      50698     133      115 0.8485305</span></span></code></pre>
 </details><p>Now, of course we can make the same population dataset without
@@ -1216,10 +1225,12 @@ output
 </details><p>We can also look at the domain-level data used for generating the
 estimates, with proportion of points by category.</p>
 <div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover1</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">pltdom.row</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover1</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">pltdom.row</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##    ONEUNIT ONESTRAT        plot_id      cover_1_nm nbrpts.pltdom PtsPerPlot</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;plot_id&gt;</span></span>
+<span><span class="co">##    ONEUNIT ONESTRAT        plot_id      cover_1_nm nbrpts.pltdom PtsPerPlot</span></span>
+<span><span class="co">##     &lt;fctr&gt;    &lt;num&gt;         &lt;char&gt;          &lt;char&gt;         &lt;int&gt;      &lt;int&gt;</span></span>
 <span><span class="co">## 1:       1        1 11940039010690           Water             5          5</span></span>
 <span><span class="co">## 2:       1        1 11940051010690 OtherVegetation             3          5</span></span>
 <span><span class="co">## 3:       1        1 11940051010690           Shrub             1          5</span></span>
@@ -1227,6 +1238,7 @@ output
 <span><span class="co">## 5:       1        1 11940063010690           Water             5          5</span></span>
 <span><span class="co">## 6:       1        1 11940075010690 OtherVegetation             2          5</span></span>
 <span><span class="co">##    p.pltdom</span></span>
+<span><span class="co">##       &lt;num&gt;</span></span>
 <span><span class="co">## 1:      1.0</span></span>
 <span><span class="co">## 2:      0.6</span></span>
 <span><span class="co">## 3:      0.2</span></span>
@@ -1254,7 +1266,7 @@ output
 <span><span class="co">## 4            Barren     11.8                  19.53</span></span>
 <span><span class="co">## 5        Impervious     10.8                  19.38</span></span>
 <span><span class="co">## 6             Water     23.1                  15.47</span></span>
-<span><span class="co">## 7             Total      100                      0</span></span></code></pre>
+<span><span class="co">## 7             Total    Total                  Total</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -1296,7 +1308,7 @@ output
 <span><span class="co">## 4            Barren 108670.5                  19.53</span></span>
 <span><span class="co">## 5        Impervious  99267.8                  19.38</span></span>
 <span><span class="co">## 6             Water 213333.3                  15.47</span></span>
-<span><span class="co">## 7             Total   922543                      0</span></span></code></pre>
+<span><span class="co">## 7             Total    Total                  Total</span></span></code></pre>
 </details><p>We can now use the <code>PBpoparea</code> set of population data to
 run percent estimates as well. Let’s save the data to the outfolder and
 return titles as well. Note: Saving data adds a new folder in outfolder
@@ -1334,7 +1346,7 @@ output
 <span><span class="co">## 4            Barren     11.8                  19.53</span></span>
 <span><span class="co">## 5        Impervious     10.8                  19.38</span></span>
 <span><span class="co">## 6             Water     23.1                  15.47</span></span>
-<span><span class="co">## 7             Total      100                      0</span></span></code></pre>
+<span><span class="co">## 7             Total    Total                  Total</span></span></code></pre>
 </details><p>And titles:</p>
 <div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Estimate and percent sampling error of estimate</span></span>
@@ -1409,7 +1421,7 @@ output
 <span><span class="co">## 4            Barren     16.9                  16.36</span></span>
 <span><span class="co">## 5        Impervious     11.5                  18.44</span></span>
 <span><span class="co">## 6             Water     17.2                  18.71</span></span>
-<span><span class="co">## 7             Total      100                      0</span></span></code></pre>
+<span><span class="co">## 7             Total    Total                  Total</span></span></code></pre>
 </details><p>Now we can compare the estimates from Time 2 with estimates from Time
 1 and look at net change. We will use the raw data with numeric
 values.</p>
@@ -1432,12 +1444,12 @@ set up a data frame with estimates and standard errors.</p>
 <div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tabvars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"est"</span>, <span class="st">"est.se"</span><span class="op">)</span></span>
 <span><span class="va">tab1</span> <span class="op">&lt;-</span> <span class="va">cover1</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">unit_rowest</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cover_1"</span>, <span class="va">cover1</span><span class="op">$</span><span class="va">titlelst</span><span class="op">$</span><span class="va">title.rowvar</span>, <span class="va">tabvars</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">tab1</span>, <span class="va">tabvars</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">tabvars</span>, <span class="st">".1"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">tab1</span>, <span class="va">tabvars</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">tabvars</span>, <span class="st">".1"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">tab2</span> <span class="op">&lt;-</span> <span class="va">cover2</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">unit_rowest</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cover_2"</span>, <span class="va">cover2</span><span class="op">$</span><span class="va">titlelst</span><span class="op">$</span><span class="va">title.rowvar</span>, <span class="va">tabvars</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">tab2</span>, <span class="va">tabvars</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">tabvars</span>, <span class="st">".2"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">tab2</span>, <span class="va">tabvars</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">tabvars</span>, <span class="st">".2"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">tabx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">tab1</span>, <span class="va">tab2</span>, by.x<span class="op">=</span><span class="st">"cover_1"</span>, by.y<span class="op">=</span><span class="st">"cover_2"</span><span class="op">)</span></span>
+<span><span class="va">tabx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">tab1</span>, <span class="va">tab2</span>, by.x<span class="op">=</span><span class="st">"cover_1"</span>, by.y<span class="op">=</span><span class="st">"cover_2"</span><span class="op">)</span></span>
 <span><span class="va">tabx</span></span></code></pre></div>
 <details><summary>
 output
@@ -1457,8 +1469,8 @@ output
 <span><span class="co">## 6 3.225573</span></span></code></pre>
 </details><p>Next, the barplot.</p>
 <div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sevar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tabx</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"est.se"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tabx</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">yvar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tabx</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"est."</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tabx</span><span class="op">)</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tabx</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/terra/man/match.html" class="external-link">%in%</a></span> <span class="va">sevar</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">sevar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tabx</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"est.se"</span>, <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tabx</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">yvar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tabx</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"est."</span>, <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tabx</span><span class="op">)</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tabx</span><span class="op">)</span> <span class="op"><a href="https://rspatial.github.io/terra/reference/match.html" class="external-link">%in%</a></span> <span class="va">sevar</span><span class="op">]</span></span>
 <span><span class="va">xvar</span> <span class="op">&lt;-</span> <span class="va">cover1</span><span class="op">$</span><span class="va">titlelst</span><span class="op">$</span><span class="va">title.rowvar</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/datBarplot.html">datBarplot</a></span><span class="op">(</span><span class="va">tabx</span>, </span>
@@ -1477,7 +1489,7 @@ output
 <span>                         <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">cover1</span><span class="op">$</span><span class="va">titlelst</span><span class="op">$</span><span class="va">title.row</span><span class="op">)</span><span class="op">-</span><span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-53-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-54-1.png" width="700"></p>
 </details></details>
 </div>
 <div class="section level4">
@@ -1517,7 +1529,7 @@ output
 <span><span class="co">## 3 Removal or Loss of Vegetation      0.1                  68.17</span></span>
 <span><span class="co">## 4           Stress or Mortality      0.1                    100</span></span>
 <span><span class="co">## 5               Expected Change        5                  34.25</span></span>
-<span><span class="co">## 6                         Total      100                      0</span></span></code></pre>
+<span><span class="co">## 6                         Total    Total                  Total</span></span></code></pre>
 </details><p>Now, let’s get area estimates. Notice, we can change the resulting
 area units to metric units (i.e., hectares).</p>
 <div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
@@ -1548,7 +1560,7 @@ output
 <span><span class="co">## 3 Removal or Loss of Vegetation      499                  68.17</span></span>
 <span><span class="co">## 4           Stress or Mortality    187.1                    100</span></span>
 <span><span class="co">## 5               Expected Change  18651.4                  34.25</span></span>
-<span><span class="co">## 6                         Total 373340.2                      0</span></span></code></pre>
+<span><span class="co">## 6                         Total    Total                  Total</span></span></code></pre>
 </details><p>The resulting area units are identified in the raw data.</p>
 <div class="sourceCode" id="cb103"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chg_ag.area</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">areaunits</span></span></code></pre></div>
@@ -1593,7 +1605,7 @@ output
 <span><span class="co">## 3 Removal or Loss of Vegetation      0.1                  68.17</span></span>
 <span><span class="co">## 4           Stress or Mortality      0.1                    100</span></span>
 <span><span class="co">## 5               Expected Change      1.7                  50.46</span></span>
-<span><span class="co">## 6                         Total       12                  23.54</span></span></code></pre>
+<span><span class="co">## 6                         Total    Total                  Total</span></span></code></pre>
 </details><p>Notice, the estimate titles reflect this filter.</p>
 <div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Estimate and percent sampling error of estimate</span></span>
@@ -1654,7 +1666,7 @@ output
 <span><span class="co">## 3 Removal or Loss of Vegetation      0.1                  68.17</span></span>
 <span><span class="co">## 4           Stress or Mortality      0.1                    100</span></span>
 <span><span class="co">## 5               Expected Change        5                  34.25</span></span>
-<span><span class="co">## 6                         Total      100                      0</span></span></code></pre>
+<span><span class="co">## 6                         Total    Total                  Total</span></span></code></pre>
 </details><div class="sourceCode" id="cb115"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Land with observed change</span></span>
 <span><span class="va">chg_ag.plts</span><span class="op">$</span><span class="va">titlelst</span><span class="op">$</span><span class="va">title.estpse</span></span></code></pre></div>
@@ -1671,7 +1683,7 @@ output
 <span><span class="co">## 3 Removal or Loss of Vegetation      0.1                  68.17</span></span>
 <span><span class="co">## 4           Stress or Mortality      0.1                    100</span></span>
 <span><span class="co">## 5               Expected Change      1.7                  50.46</span></span>
-<span><span class="co">## 6                         Total       12                  23.54</span></span></code></pre>
+<span><span class="co">## 6                         Total    Total                  Total</span></span></code></pre>
 </details><div class="sourceCode" id="cb119"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Estimated change</span></span>
 <span><span class="va">chg_ag.pnts</span><span class="op">$</span><span class="va">titlelst</span><span class="op">$</span><span class="va">title.estpse</span></span></code></pre></div>
@@ -1687,7 +1699,7 @@ output
 <span><span class="co">## 2 Removal or Loss of Vegetation      1.5                  68.82</span></span>
 <span><span class="co">## 3           Stress or Mortality      0.8                    100</span></span>
 <span><span class="co">## 4               Expected Change      7.5                  30.53</span></span>
-<span><span class="co">## 5                         Total       15                  20.69</span></span></code></pre>
+<span><span class="co">## 5                         Total    Total                  Total</span></span></code></pre>
 </details><p>Let’s create a barplot of estimated change by agent with the
 <code><a href="../reference/datBarplot.html">datBarplot()</a></code> function from <code>FIESTA</code>.</p>
 <div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
@@ -1700,7 +1712,7 @@ output
 <span>           main <span class="op">=</span> <span class="va">chg_ag.pnts</span><span class="op">$</span><span class="va">titlelst</span><span class="op">$</span><span class="va">title.row</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-66-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-67-1.png" width="700"></p>
 </details><p>Now, let’s look at at percent of land changed by agent of change and
 land cover (2011) in Davis and Salt Lake Counties, Utah.</p>
 <div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
@@ -1832,7 +1844,7 @@ output
 <span><span class="co">##  $ unit_totest:'data.frame': 2 obs. of  17 variables:</span></span>
 <span><span class="co">##  $ totest     :'data.frame': 1 obs. of  13 variables:</span></span>
 <span><span class="co">##  $ unit_rowest:'data.frame': 12 obs. of  19 variables:</span></span>
-<span><span class="co">##  $ rowest     :'data.frame': 6 obs. of  14 variables:</span></span>
+<span><span class="co">##  $ rowest     :'data.frame': 6 obs. of  13 variables:</span></span>
 <span><span class="co">##  $ module     : chr "PB"</span></span>
 <span><span class="co">##  $ esttype    : chr "AREA"</span></span>
 <span><span class="co">##  $ PBmethod   : chr "HT"</span></span>
@@ -1894,20 +1906,20 @@ output
 <span><span class="va">cover1.unitsum</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">rowest</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##   Land Cover (2011) cover_1       est   est.var AREAUSED   est.se    est.cv</span></span>
-<span><span class="co">## 1              Tree     110 162301.67 512450534   922543 22637.37 0.1394771</span></span>
-<span><span class="co">## 2             Shrub     130 103828.24 381548054   922543 19533.26 0.1881305</span></span>
-<span><span class="co">## 3   OtherVegetation     140 229374.55 739879386   922543 27200.72 0.1185865</span></span>
-<span><span class="co">## 4            Barren     210 109212.33 466372774   922543 21595.67 0.1977402</span></span>
-<span><span class="co">## 5        Impervious     220  97070.71 330119275   922543 18169.18 0.1871747</span></span>
-<span><span class="co">## 6             Water     310 220755.50 856446781   922543 29265.11 0.1325680</span></span>
-<span><span class="co">##        pse  CI99left CI99right  CI95left CI95right  CI68left CI68right</span></span>
-<span><span class="co">## 1 13.94771 103991.66  220611.7 117933.23  206670.1 139789.75  184813.6</span></span>
-<span><span class="co">## 2 18.81305  53513.91  154142.6  65543.76  142112.7  84403.24  123253.2</span></span>
-<span><span class="co">## 3 11.85865 159310.13  299439.0 176062.12  282687.0 202324.58  256424.5</span></span>
-<span><span class="co">## 4 19.77402  53585.59  164839.1  66885.61  151539.1  87736.35  130688.3</span></span>
-<span><span class="co">## 5 18.71747  50269.99  143871.4  61459.76  132681.7  79002.22  115139.2</span></span>
-<span><span class="co">## 6 13.25680 145373.57  296137.4 163396.94  278114.1 191652.58  249858.4</span></span></code></pre>
+</summary><pre><code><span><span class="co">##   Land Cover (2011)       est   est.var AREAUSED   est.se    est.cv      pse</span></span>
+<span><span class="co">## 1              Tree 162301.67 512450534   922543 22637.37 0.1394771 13.94771</span></span>
+<span><span class="co">## 2             Shrub 103828.24 381548054   922543 19533.26 0.1881305 18.81305</span></span>
+<span><span class="co">## 3   OtherVegetation 229374.55 739879386   922543 27200.72 0.1185865 11.85865</span></span>
+<span><span class="co">## 4            Barren 109212.33 466372774   922543 21595.67 0.1977402 19.77402</span></span>
+<span><span class="co">## 5        Impervious  97070.71 330119275   922543 18169.18 0.1871747 18.71747</span></span>
+<span><span class="co">## 6             Water 220755.50 856446781   922543 29265.11 0.1325680 13.25680</span></span>
+<span><span class="co">##    CI99left CI99right  CI95left CI95right  CI68left CI68right</span></span>
+<span><span class="co">## 1 103991.66  220611.7 117933.23  206670.1 139789.75  184813.6</span></span>
+<span><span class="co">## 2  53513.91  154142.6  65543.76  142112.7  84403.24  123253.2</span></span>
+<span><span class="co">## 3 159310.13  299439.0 176062.12  282687.0 202324.58  256424.5</span></span>
+<span><span class="co">## 4  53585.59  164839.1  66885.61  151539.1  87736.35  130688.3</span></span>
+<span><span class="co">## 5  50269.99  143871.4  61459.76  132681.7  79002.22  115139.2</span></span>
+<span><span class="co">## 6 145373.57  296137.4 163396.94  278114.1 191652.58  249858.4</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -1959,10 +1971,12 @@ output
 </details><p>We can also look at the summed proportions for each transition (i.e,
 row and column).</p>
 <div class="sourceCode" id="cb148"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover12</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">pltdom.grp</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover12</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">pltdom.grp</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##    ONEUNIT ONESTRAT        plot_id      cover_1_nm      cover_2_nm</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;plot_id&gt;</span></span>
+<span><span class="co">##    ONEUNIT ONESTRAT        plot_id      cover_1_nm      cover_2_nm</span></span>
+<span><span class="co">##     &lt;fctr&gt;    &lt;num&gt;         &lt;char&gt;          &lt;char&gt;          &lt;char&gt;</span></span>
 <span><span class="co">## 1:       1        1 11940039010690           Water           Water</span></span>
 <span><span class="co">## 2:       1        1 11940051010690 OtherVegetation OtherVegetation</span></span>
 <span><span class="co">## 3:       1        1 11940051010690           Shrub           Shrub</span></span>
@@ -1970,6 +1984,7 @@ output
 <span><span class="co">## 5:       1        1 11940063010690           Water           Water</span></span>
 <span><span class="co">## 6:       1        1 11940075010690 OtherVegetation OtherVegetation</span></span>
 <span><span class="co">##    nbrpts.pltdom PtsPerPlot p.pltdom</span></span>
+<span><span class="co">##            &lt;int&gt;      &lt;int&gt;    &lt;num&gt;</span></span>
 <span><span class="co">## 1:             5          5      1.0</span></span>
 <span><span class="co">## 2:             3          5      0.6</span></span>
 <span><span class="co">## 3:             1          5      0.2</span></span>
@@ -1978,7 +1993,7 @@ output
 <span><span class="co">## 6:             2          5      0.4</span></span></code></pre>
 </details><p>… and the raw data estimates for each transition.</p>
 <div class="sourceCode" id="cb150"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover12</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">unit_grpest</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover12</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">unit_grpest</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT Land Cover (2011) Land Cover (2014)         phat     phat.var cover_2</span></span>
@@ -2025,7 +2040,7 @@ Salt Lake Counties, Utah.</p>
 <span>                     returntitle <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Let’s check to make sure the percent standard errors (pse) match.</p>
 <div class="sourceCode" id="cb155"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover12</span><span class="op">$</span><span class="va">pse</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover12</span><span class="op">$</span><span class="va">pse</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   Land Cover (2011)  Tree Shrub OtherVegetation Barren Impervious Water Total</span></span>
@@ -2036,7 +2051,7 @@ output
 <span><span class="co">## 5        Impervious    --    --              --    100      19.41    -- 19.38</span></span>
 <span><span class="co">## 6             Water    --    --           53.25  39.46         -- 19.16 15.47</span></span></code></pre>
 </details><div class="sourceCode" id="cb157"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover12.area</span><span class="op">$</span><span class="va">pse</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover12.area</span><span class="op">$</span><span class="va">pse</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   Land Cover (2011)  Tree Shrub OtherVegetation Barren Impervious Water Total</span></span>
@@ -2058,15 +2073,17 @@ PBx data frame (<code>PBpoparea$PBx</code>) so we don’t have to recreate
 the population data.</p>
 <div class="sourceCode" id="cb159"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">PBpoparea2</span> <span class="op">&lt;-</span> <span class="va">PBpoparea</span></span>
-<span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span>, <span class="va">icecover_1</span>, by <span class="op">=</span> <span class="st">"cover_1"</span><span class="op">)</span></span>
-<span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span>, <span class="va">icecover_2</span>, by <span class="op">=</span> <span class="st">"cover_2"</span><span class="op">)</span></span>
+<span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span>, <span class="va">icecover_1</span>, by <span class="op">=</span> <span class="st">"cover_1"</span><span class="op">)</span></span>
+<span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span>, <span class="va">icecover_2</span>, by <span class="op">=</span> <span class="st">"cover_2"</span><span class="op">)</span></span>
 <span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span><span class="op">$</span><span class="va">cover_12_nm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span><span class="op">$</span><span class="va">cover_1_nm</span>, </span>
 <span>                                    <span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span><span class="op">$</span><span class="va">cover_2_nm</span>,</span>
 <span>                                    sep <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##    cover_2 cover_1      plot_id dot_cnt change_1_2 use_1 use_2 chg_ag_2</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;cover_2&gt;</span></span>
+<span><span class="co">##    cover_2 cover_1      plot_id dot_cnt change_1_2 use_1 use_2 chg_ag_2</span></span>
+<span><span class="co">##      &lt;int&gt;   &lt;int&gt;        &lt;num&gt;   &lt;int&gt;      &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;</span></span>
 <span><span class="co">## 1:     110     110 5.540756e+12       1          0   400   400        0</span></span>
 <span><span class="co">## 2:     110     110 5.540756e+12      26          0   110   110        0</span></span>
 <span><span class="co">## 3:     110     110 5.549764e+12      36          0   110   110        0</span></span>
@@ -2074,6 +2091,7 @@ output
 <span><span class="co">## 5:     110     110 5.549836e+12      26          0   110   110        0</span></span>
 <span><span class="co">## 6:     110     110 5.549836e+12      31          0   110   110        0</span></span>
 <span><span class="co">##    ESTN_UNIT STRATUMCD LON_PUBLIC LAT_PUBLIC cover_1_nm cover_2_nm cover_12_nm</span></span>
+<span><span class="co">##        &lt;int&gt;     &lt;int&gt;      &lt;num&gt;      &lt;num&gt;     &lt;char&gt;     &lt;char&gt;      &lt;char&gt;</span></span>
 <span><span class="co">## 1:        11         2  -111.8918   40.82525       Tree       Tree   Tree-Tree</span></span>
 <span><span class="co">## 2:        11         2  -111.8918   40.82525       Tree       Tree   Tree-Tree</span></span>
 <span><span class="co">## 3:        35         2  -112.1810   40.69342       Tree       Tree   Tree-Tree</span></span>
@@ -2116,7 +2134,7 @@ output
 <span><span class="co">## 18                    Water-Barren      4.6                  39.46</span></span>
 <span><span class="co">## 19           Water-OtherVegetation      1.7                  53.25</span></span>
 <span><span class="co">## 20                     Water-Water     16.9                  19.16</span></span>
-<span><span class="co">## 21                           Total      100                      0</span></span></code></pre>
+<span><span class="co">## 21                           Total    Total                  Total</span></span></code></pre>
 </details><div class="sourceCode" id="cb164"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cover12</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
 <details><summary>
@@ -2304,7 +2322,7 @@ percent loss by each category, with confidence intervals.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/datPBplotchg.html">datPBplotchg</a></span><span class="op">(</span><span class="va">cover12b</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">est.gainloss</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-95-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-96-1.png" width="700"></p>
 </details><p>Let’s look more closely at gain and loss of the OtherVegetation
 category.</p>
 <div class="sourceCode" id="cb177"><pre class="downlit sourceCode r">
@@ -2551,7 +2569,7 @@ is where Land cover in 2011 is not equal to Land cover in 2014.</p>
 <span>              response <span class="op">=</span> <span class="st">"est"</span>, </span>
 <span>              xlabel <span class="op">=</span> <span class="st">"Land Cover (2011)"</span>, </span>
 <span>              legend.title <span class="op">=</span> <span class="st">"Land Cover (2014)"</span>,</span>
-<span>              main.order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/flip.html" class="external-link">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Tree"</span>, <span class="st">"Shrub"</span>, <span class="st">"OtherVegetation"</span>,</span>
+<span>              main.order <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/flip.html" class="external-link">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Tree"</span>, <span class="st">"Shrub"</span>, <span class="st">"OtherVegetation"</span>,</span>
 <span>                                 <span class="st">"Impervious"</span>, <span class="st">"Barren"</span>, <span class="st">"Water"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
@@ -2591,7 +2609,7 @@ Percent Sampling Error column.</p>
 <span>           psevar <span class="op">=</span> <span class="st">"Percent Sampling Error"</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-115-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-116-1.png" width="700"></p>
 </details><p>Note that we have many options to choose from when creating the
 barplot. This time use data from the raw data with the standard error
 (est.se) column and add labels and a title.</p>
@@ -2606,7 +2624,7 @@ barplot. This time use data from the raw data with the standard error
 <span>           main <span class="op">=</span> <span class="st">"Percent cover at Time 1 (2011)"</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-116-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_PB_files/figure-html/unnamed-chunk-117-1.png" width="700"></p>
 </details><p>Now, let’s get area estimates of land cover at Time 1 (2011) for all
 land in Davis and Salt Lake Counties, Utah by adding
 <code>tabtype = "AREA"</code> to the <code><a href="../reference/modPB.html">modPB()</a></code> call.</p>
@@ -2793,12 +2811,12 @@ Forest Service, Rocky Mountain Research Station. 63 p.</p>
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Tracey Frescino, Gretchen Moisen, Paul Patterson, Chris Toney, Grayson White.</p>
+<p>Developed by Tracey Frescino, Gretchen Moisen, Paul Patterson, Chris Toney, Grayson White, Joshua Yamamoto.</p>
 </div>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
       </footer>
