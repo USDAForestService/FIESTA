@@ -15,8 +15,9 @@
 #' included.
 #' @param states String. States to subset boundary to.
 #' @param overlap Number. Percent overlap to include.
-#' @param showsteps Logical. If yes, display intersecting boundaries.
-#' @param savebnd Logical. If yes, save boundary to outfolder.
+#' @param clipbnd Logical. If TRUE, clips boundary to state/RS restrictions.
+#' @param showsteps Logical. If TRUE, display intersecting boundaries.
+#' @param savebnd Logical. If TRUE, save boundary to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savebnd = TRUE. 
 #' @return A list containing states and state names that the boundary crosses,
@@ -43,6 +44,7 @@ spGetStates <- function(bnd_layer,
                         RS = NULL, 
                         states = NULL, 
                         overlap = 1, 
+                        clipbnd = FALSE,
                         showsteps = FALSE, 
                         savebnd = FALSE, 
                         savedata_opts = NULL) {
@@ -117,7 +119,6 @@ spGetStates <- function(bnd_layer,
   ## CHECK INPUT PARAMETERS
   ##################################################################
   gui <- FALSE
-  clipbnd <- FALSE
 
   #############################################################################
   ## Import boundary
@@ -234,19 +235,19 @@ spGetStates <- function(bnd_layer,
   ## IF RS is not null, check if states are outside RS
   if (!is.null(RS)) {
     RSstatelst <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$RS == RS, "VALUE"]
-    if (!all(stcds %in% RSstatelst)) {
-      statesout <- stcds[which(!stcds %in% RSstatelst)]
-      stcds <- stcds[which(stcds %in% RSstatelst)]
+    if (!all(stcdchk %in% RSstatelst)) {
+      statesout <- stcdchk[which(!stcdchk %in% RSstatelst)]
+      stcdchk <- stcdchk[which(stcdchk %in% RSstatelst)]
 
       statesoutnames <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$VALUE %in%
 			statesout, "MEANING"]
       message(paste0("states are outside ", RS, " region: ", toString(statesoutnames)))
 
-      if (length(stcds) == 0) {
+      if (length(stcdchk) == 0) {
         stop("no states in RMRS")
       }
       statenames <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$VALUE %in%
-			stcds, "MEANING"]
+                                               stcdchk, "MEANING"]
       message("clipping boundary to ", RS, " states: ", toString(statenames))
       clipbbnd <- TRUE
     }
