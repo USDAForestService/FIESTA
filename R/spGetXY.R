@@ -146,7 +146,7 @@ spGetXY <- function(bnd,
                     invtype = "ANNUAL", 
                     intensity1 = FALSE, 
                     pvars2keep = NULL, 
-					bndvars2keep = NULL,
+					          bndvars2keep = NULL,
                     clipxy = TRUE, 
                     showsteps = FALSE, 
                     returnxy = TRUE, 
@@ -323,14 +323,14 @@ spGetXY <- function(bnd,
   ## Check bndvars2keep
   if (!is.null(bndvars2keep)) {
     bndvars.miss <- bndvars2keep[!bndvars2keep %in% names(bndx)]
-	if (length(bndvars.miss) > 0) {
-	  message("bndvars2keep not in bnd: ", toString(bndvars.miss))
-	  if (length(bndvars.miss) == length(bndvars2keep)) {
-	    bndvars2keep <- NULL
-	  } else {
-	    bndvars2keep <- bndvars2keep[!bndvars2keep %in% bndvars.miss]
+	  if (length(bndvars.miss) > 0) {
+	    message("bndvars2keep not in bnd: ", toString(bndvars.miss))
+	    if (length(bndvars.miss) == length(bndvars2keep)) {
+	      bndvars2keep <- NULL
+	    } else {
+	      bndvars2keep <- bndvars2keep[!bndvars2keep %in% bndvars.miss]
+	    }
 	  }
-	}
   }
 
   ## Check Endyr.filter
@@ -393,12 +393,12 @@ spGetXY <- function(bnd,
     stcds <- pcheck.states(states, "VALUE")
 
   } else if (!is.null(bndx)) {
- 
     ## Get intersecting states
     statedat <- spGetStates(bnd_layer = bndx, 
                             stbnd.att = "COUNTYFIPS", 
                             RS = RS, 
                             states = states, 
+                            clipbnd = TRUE,
                             showsteps = showsteps)
     bndx <- statedat$bndx
     stbnd.att <- statedat$stbnd.att

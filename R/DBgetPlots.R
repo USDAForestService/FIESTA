@@ -1780,19 +1780,19 @@ DBgetPlots <- function (states = NULL,
       ## Check variables in database
 	    if (!"LON" %in% pltcondflds) {
 	      lonfld <- findnm("LON_PUBLIC", pltcondflds, returnNULL=TRUE)
-		    if (!is.null(lonfld) && !"LON_PUBLIC" %in% pltvarlst && "LON" %in% names(pltvarlst)) { 
+		    if (!is.null(lonfld) && !"LON_PUBLIC" %in% pltvarlst && "LON" %in% pltvarlst) { 
 		      pltvarlst <- sub("LON", "LON_PUBLIC", pltvarlst)
 		    }
 	    }
 	    if (!"LAT" %in% pltcondflds) {
 	      latfld <- findnm("LAT_PUBLIC", pltcondflds, returnNULL=TRUE)
-		    if (!is.null(latfld) && !"LAT_PUBLIC" %in% pltvarlst && "LAT" %in% names(pltvarlst)) { 
-		      pltvarlst <- sub("LATN", "LAT_PUBLIC", pltvarlst)
+		    if (!is.null(latfld) && !"LAT_PUBLIC" %in% pltvarlst && "LAT" %in% pltvarlst) { 
+		      pltvarlst <- sub("LAT", "LAT_PUBLIC", pltvarlst)
 		    }
 	    }
       pltvarlst <- pltvarlst[pltvarlst %in% pltcondflds]
       condvarlst <- condvarlst[condvarlst %in% pltcondflds]
-
+      
       ## Add commas
       pcvars <- NULL
       if (length(pltvarlst) > 0) {
@@ -1895,7 +1895,7 @@ DBgetPlots <- function (states = NULL,
         condx[, PLT_CN := as.character(PLT_CN)]        
         setkey(condx, PLT_CN, CONDID)
       }
-       
+
 	    ## Change names of LON and LAT to LON_PUBLIC and LAT_PUBLIC
       ###########################################################
       if ("LON" %in% names(pltx)) {

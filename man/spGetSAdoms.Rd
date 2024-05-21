@@ -29,6 +29,7 @@ spGetSAdoms(
   maxbnd.threshold = 10,
   largebnd.threshold = 5,
   multiSAdoms = FALSE,
+  bayesian = FALSE,
   showsteps = TRUE,
   savedata = FALSE,
   savesteps = FALSE,
@@ -128,6 +129,10 @@ largebnds for selecting helperbnds.}
 \item{multiSAdoms}{Logical. If TRUE, and the percent intersect of smallbnd
 with maxbnd is greater than maxbnd.threshold, more than 1 SAdoms will be
 output in list.}
+
+\item{bayesian}{Logical. If TRUE, does not union smallbnd with largebnd.
+If multiSAdoms = TRUE, returns intersecting maxbnd where larger than 
+maxbnd threshold.}
 
 \item{showsteps}{Logical. If TRUE, intermediate steps of selection process
 are displayed.}
