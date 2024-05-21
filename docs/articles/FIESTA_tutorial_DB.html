@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FIESTA - Database Tools • FIESTA</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3</span>
       </span>
     </div>
 
@@ -56,6 +56,9 @@
       <a href="../articles/FIESTA_manual_mod_pop.html">`FIESTA` Manual - Population Data</a>
     </li>
     <li>
+      <a href="../articles/FIESTA_tutorial_dat.html">FIESTA - Data Tools</a>
+    </li>
+    <li>
       <a href="../articles/FIESTA_tutorial_DB.html">FIESTA - Database Tools</a>
     </li>
     <li>
@@ -71,9 +74,6 @@
       <a href="../articles/FIESTA_tutorial_SA.html">FIESTA - Small Area Estimators</a>
     </li>
     <li>
-      <a href="../articles/FIESTA_tutorial_dat.html">FIESTA - Data Tools</a>
-    </li>
-    <li>
       <a href="../articles/FIESTA_tutorial_sp.html">FIESTA - Spatial Tools</a>
     </li>
   </ul>
@@ -82,7 +82,14 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/USDAForestService/FIESTA/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -98,7 +105,7 @@
       <h1 data-toc-skip>FIESTA - Database Tools</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/USDAForestService/FIESTA/blob/HEAD/vignettes/FIESTA_tutorial_DB.Rmd" class="external-link"><code>vignettes/FIESTA_tutorial_DB.Rmd</code></a></small>
       <div class="hidden name"><code>FIESTA_tutorial_DB.Rmd</code></div>
 
     </div>
@@ -129,12 +136,12 @@ Thank you for your patience.</p>
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Tracey Frescino, Gretchen Moisen, Paul Patterson, Chris Toney, Grayson White.</p>
+<p>Developed by Tracey Frescino, Gretchen Moisen, Paul Patterson, Chris Toney, Grayson White, Joshua Yamamoto.</p>
 </div>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
       </footer>

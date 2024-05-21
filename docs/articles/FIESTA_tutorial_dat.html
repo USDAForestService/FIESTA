@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FIESTA - Data Tools • FIESTA</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.4.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3</span>
       </span>
     </div>
 
@@ -56,6 +56,9 @@
       <a href="../articles/FIESTA_manual_mod_pop.html">`FIESTA` Manual - Population Data</a>
     </li>
     <li>
+      <a href="../articles/FIESTA_tutorial_dat.html">FIESTA - Data Tools</a>
+    </li>
+    <li>
       <a href="../articles/FIESTA_tutorial_DB.html">FIESTA - Database Tools</a>
     </li>
     <li>
@@ -71,9 +74,6 @@
       <a href="../articles/FIESTA_tutorial_SA.html">FIESTA - Small Area Estimators</a>
     </li>
     <li>
-      <a href="../articles/FIESTA_tutorial_dat.html">FIESTA - Data Tools</a>
-    </li>
-    <li>
       <a href="../articles/FIESTA_tutorial_sp.html">FIESTA - Spatial Tools</a>
     </li>
   </ul>
@@ -82,7 +82,14 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/USDAForestService/FIESTA/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -98,7 +105,7 @@
       <h1 data-toc-skip>FIESTA - Data Tools</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/USDAForestService/FIESTA/blob/HEAD/vignettes/FIESTA_tutorial_dat.Rmd" class="external-link"><code>vignettes/FIESTA_tutorial_dat.Rmd</code></a></small>
       <div class="hidden name"><code>FIESTA_tutorial_dat.Rmd</code></div>
 
     </div>
@@ -239,7 +246,7 @@ level.</td>
 examples.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load library</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://usdaforestservice.github.io/FIESTA/" class="external-link">FIESTA</a></span><span class="op">)</span></span></code></pre></div>
 <p>The following examples use FIA data from Wyoming for inventory years
 2011-2013.</p>
 </div>
@@ -326,30 +333,33 @@ output
 </summary><pre><code><span><span class="co">## [1] "xf"       "xfilter"  "cliptabs"</span></span></code></pre>
 </details><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYtree.deadasp2</span> <span class="op">&lt;-</span> <span class="va">WYtreedat.dead2</span><span class="op">$</span><span class="va">xf</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYtree.deadasp2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYtree.deadasp2</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##            PLT_CN CONDID SUBP TREE STATUSCD SPCD SPGRPCD  DIA HT TREECLCD</span></span>
-<span><span class="co">## 1: 40404831010690      1    4    1        2  746      44  5.6 14        3</span></span>
-<span><span class="co">## 2: 40404843010690      1    4    2        2  746      44  7.9 29        3</span></span>
-<span><span class="co">## 3: 40404920010690      1    1    2        2  746      44  7.4 44        3</span></span>
-<span><span class="co">## 4: 40404920010690      1    1   16        2  746      44  8.5 38        3</span></span>
-<span><span class="co">## 5: 40404920010690      1    2    1        2  746      44  8.9 42        3</span></span>
-<span><span class="co">## 6: 40404920010690      1    2   11        2  746      44 10.3 40        4</span></span>
-<span><span class="co">##    AGENTCD STANDING_DEAD_CD VOLCFNET VOLCFGRS VOLBFNET TPA_UNADJ  DRYBIO_AG</span></span>
-<span><span class="co">## 1:      20                1 0.042070 0.056093       NA  6.018046   0.679523</span></span>
-<span><span class="co">## 2:      70                1 2.329483 3.065109       NA  6.018046  35.836056</span></span>
-<span><span class="co">## 3:      20                1 4.074443 4.381121       NA  6.018046  98.156004</span></span>
-<span><span class="co">## 4:      NA                1 4.811647 5.118773       NA  6.018046 113.345699</span></span>
-<span><span class="co">## 5:      20                1 6.138979 6.394770       NA  6.018046 143.636088</span></span>
-<span><span class="co">## 6:      NA                1 0.000000 8.407102       NA  6.018046 119.261221</span></span>
-<span><span class="co">##    CARBON_AG        BA</span></span>
-<span><span class="co">## 1:  0.339762 0.1710374</span></span>
-<span><span class="co">## 2: 17.918028 0.3403841</span></span>
-<span><span class="co">## 3: 49.078002 0.2986610</span></span>
-<span><span class="co">## 4: 56.672850 0.3940515</span></span>
-<span><span class="co">## 5: 71.818044 0.4320113</span></span>
-<span><span class="co">## 6: 59.630611 0.5786149</span></span></code></pre>
+</summary><pre><code><span><span class="co">##            PLT_CN CONDID  SUBP  TREE STATUSCD  SPCD SPGRPCD   DIA    HT</span></span>
+<span><span class="co">##            &lt;char&gt;  &lt;num&gt; &lt;num&gt; &lt;num&gt;    &lt;num&gt; &lt;num&gt;   &lt;num&gt; &lt;num&gt; &lt;num&gt;</span></span>
+<span><span class="co">## 1: 40404831010690      1     4     1        2   746      44   5.6    14</span></span>
+<span><span class="co">## 2: 40404843010690      1     4     2        2   746      44   7.9    29</span></span>
+<span><span class="co">## 3: 40404920010690      1     1     2        2   746      44   7.4    44</span></span>
+<span><span class="co">## 4: 40404920010690      1     1    16        2   746      44   8.5    38</span></span>
+<span><span class="co">## 5: 40404920010690      1     2     1        2   746      44   8.9    42</span></span>
+<span><span class="co">## 6: 40404920010690      1     2    11        2   746      44  10.3    40</span></span>
+<span><span class="co">##    TREECLCD AGENTCD STANDING_DEAD_CD VOLCFNET VOLCFGRS VOLBFNET TPA_UNADJ</span></span>
+<span><span class="co">##       &lt;num&gt;   &lt;num&gt;            &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;     &lt;num&gt;</span></span>
+<span><span class="co">## 1:        3      20                1 0.475875 0.634500       NA  6.018046</span></span>
+<span><span class="co">## 2:        3      70                1 2.635591 3.467883       NA  6.018046</span></span>
+<span><span class="co">## 3:        3      20                1 4.286433 4.609068       NA  6.018046</span></span>
+<span><span class="co">## 4:        3      NA                1 5.063574 5.386781       NA  6.018046</span></span>
+<span><span class="co">## 5:        3      20                1 6.318505 6.581776       NA  6.018046</span></span>
+<span><span class="co">## 6:        4      NA                1 2.960642 8.483146       NA  6.018046</span></span>
+<span><span class="co">##    DRYBIO_AG CARBON_AG        BA</span></span>
+<span><span class="co">##        &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
+<span><span class="co">## 1:  10.04138  4.829904 0.1710374</span></span>
+<span><span class="co">## 2:  52.51776 25.261040 0.3403841</span></span>
+<span><span class="co">## 3: 140.95722 66.672764 0.2986610</span></span>
+<span><span class="co">## 4: 157.54214 74.517431 0.3940515</span></span>
+<span><span class="co">## 5: 177.64053 84.023971 0.4320113</span></span>
+<span><span class="co">## 6:  32.12402 15.162538 0.5786149</span></span></code></pre>
 </details><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYtree.deadasp2</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
@@ -637,25 +647,25 @@ View Example
 <span>      <span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##     FORTYPCD     1     2     3     5</span></span>
-<span><span class="co">##  1:      182 23.23  3.00  4.50  0.00</span></span>
-<span><span class="co">##  2:      184 15.50  0.00  1.00  0.00</span></span>
-<span><span class="co">##  3:      185  0.75  0.00  0.00  0.00</span></span>
-<span><span class="co">##  4:      201 27.85  5.50  8.50  0.00</span></span>
-<span><span class="co">##  5:      221 39.97  2.25  2.75  0.00</span></span>
-<span><span class="co">##  6:      265 16.25  3.25  3.25  0.00</span></span>
-<span><span class="co">##  7:      266 48.25 12.51 10.50  0.00</span></span>
-<span><span class="co">##  8:      268 28.38  7.50  9.49  0.00</span></span>
-<span><span class="co">##  9:      269  1.00  0.00  0.00  0.00</span></span>
-<span><span class="co">## 10:      281 43.95 39.43 34.68  0.00</span></span>
-<span><span class="co">## 11:      366  3.50  0.00  7.59  0.00</span></span>
-<span><span class="co">## 12:      367  4.37  5.75  7.50  0.00</span></span>
-<span><span class="co">## 13:      509  1.00  1.75  2.00  0.00</span></span>
-<span><span class="co">## 14:      517  0.00  0.00  1.00  0.00</span></span>
-<span><span class="co">## 15:      703  3.03  0.25  1.00  0.00</span></span>
-<span><span class="co">## 16:      706  0.00  0.50  0.00  0.00</span></span>
-<span><span class="co">## 17:      901  2.00  8.12 19.25  0.00</span></span>
-<span><span class="co">## 18:      999  0.00  0.00  0.00 40.75</span></span></code></pre>
+</summary><pre><code><span><span class="co">##    FORTYPCD        X1       X2        X3    X5</span></span>
+<span><span class="co">## 1       182 23.232457  3.00000  4.500000  0.00</span></span>
+<span><span class="co">## 2       184 15.500000  0.00000  1.000000  0.00</span></span>
+<span><span class="co">## 3       185  0.750000  0.00000  0.000000  0.00</span></span>
+<span><span class="co">## 4       201 27.850205  5.50000  8.500000  0.00</span></span>
+<span><span class="co">## 5       221 39.967833  2.25000  2.750000  0.00</span></span>
+<span><span class="co">## 6       265 16.250000  3.25000  3.250000  0.00</span></span>
+<span><span class="co">## 7       266 48.250000 12.51122 10.500000  0.00</span></span>
+<span><span class="co">## 8       268 28.378370  7.50000  9.488778  0.00</span></span>
+<span><span class="co">## 9       269  1.000000  0.00000  0.000000  0.00</span></span>
+<span><span class="co">## 10      281 43.948767 39.42715 34.680757  0.00</span></span>
+<span><span class="co">## 11      366  3.500000  0.00000  7.593481  0.00</span></span>
+<span><span class="co">## 12      367  4.371145  5.75000  7.500000  0.00</span></span>
+<span><span class="co">## 13      509  1.000000  1.75000  2.000000  0.00</span></span>
+<span><span class="co">## 14      517  0.000000  0.00000  1.000000  0.00</span></span>
+<span><span class="co">## 15      703  3.027328  0.25000  1.000000  0.00</span></span>
+<span><span class="co">## 16      706  0.000000  0.50000  0.000000  0.00</span></span>
+<span><span class="co">## 17      901  2.000000  8.11529 19.250000  0.00</span></span>
+<span><span class="co">## 18      999  0.000000  0.00000  0.000000 40.75</span></span></code></pre>
 </details><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Get average height by species group code and status code</span></span>
 <span><span class="fu"><a href="../reference/datPivot.html">datPivot</a></span><span class="op">(</span></span>
@@ -667,17 +677,17 @@ output
 <span>      <span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##     SPGRPCD     2     3     4</span></span>
-<span><span class="co">##  1:      10 46.28 50.86 68.00</span></span>
-<span><span class="co">##  2:      11 39.71 32.64 54.54</span></span>
-<span><span class="co">##  3:      12 41.68 45.98 57.22</span></span>
-<span><span class="co">##  4:      18 47.15 59.76 66.70</span></span>
-<span><span class="co">##  5:      21 44.84 52.95 56.60</span></span>
-<span><span class="co">##  6:      23  0.00 11.67 10.00</span></span>
-<span><span class="co">##  7:      24 29.78 35.39 35.38</span></span>
-<span><span class="co">##  8:      44 37.61 35.57 41.47</span></span>
-<span><span class="co">##  9:      47 26.82 28.13 39.50</span></span>
-<span><span class="co">## 10:      48  0.00 12.20  0.00</span></span></code></pre>
+</summary><pre><code><span><span class="co">##    SPGRPCD       X2       X3       X4</span></span>
+<span><span class="co">## 1       10 46.27784 50.86269 68.00000</span></span>
+<span><span class="co">## 2       11 39.70889 32.64162 54.54167</span></span>
+<span><span class="co">## 3       12 41.67867 45.97692 57.22353</span></span>
+<span><span class="co">## 4       18 47.14504 59.76214 66.69697</span></span>
+<span><span class="co">## 5       21 44.83819 52.94982 56.60000</span></span>
+<span><span class="co">## 6       23  0.00000 11.67076 10.00000</span></span>
+<span><span class="co">## 7       24 29.78014 35.39169 35.37500</span></span>
+<span><span class="co">## 8       44 37.60734 35.56682 41.46667</span></span>
+<span><span class="co">## 9       47 26.81707 28.13333 39.50000</span></span>
+<span><span class="co">## 10      48  0.00000 12.20000  0.00000</span></span></code></pre>
 </details></details>
 </div>
 </div>
@@ -755,30 +765,30 @@ output
 </summary><pre><code><span><span class="co">## [1] "xLUT"       "LUTclassnm" "LUT"</span></span></code></pre>
 </details><div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYtree2</span> <span class="op">&lt;-</span> <span class="va">WYtreelut</span><span class="op">$</span><span class="va">xLUT</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYtree2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYtree2</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##           PLT_CN CONDID SUBP TREE STATUSCD SPCD SPGRPCD DIA HT TREECLCD AGENTCD</span></span>
-<span><span class="co">## 1 40404738010690      1    2    3        2   19      12  NA NA       NA      70</span></span>
-<span><span class="co">## 2 40404738010690      1    2    4        2   19      12  NA NA       NA      70</span></span>
-<span><span class="co">## 3 40404738010690      1    2    7        1   19      12 5.3 26        2      NA</span></span>
-<span><span class="co">## 4 40404821010690      1    1    7        1   19      12 5.9 48        2      NA</span></span>
-<span><span class="co">## 5 40404821010690      1    1    8        1   19      12 8.1 45        2      NA</span></span>
-<span><span class="co">## 6 40404821010690      1    1   11        2   19      12  NA NA       NA      70</span></span>
-<span><span class="co">##   STANDING_DEAD_CD VOLCFNET VOLCFGRS VOLBFNET TPA_UNADJ DRYBIO_AG CARBON_AG</span></span>
-<span><span class="co">## 1                0       NA       NA       NA        NA   0.00000        NA</span></span>
-<span><span class="co">## 2                0       NA       NA       NA        NA   0.00000        NA</span></span>
-<span><span class="co">## 3               NA 0.864289 0.864289       NA  6.018046  25.48605  12.74303</span></span>
-<span><span class="co">## 4               NA 3.046342 3.046342       NA  6.018046  88.91319  44.45660</span></span>
-<span><span class="co">## 5               NA 6.019584 6.019584       NA  6.018046 171.35480  85.67740</span></span>
-<span><span class="co">## 6                0       NA       NA       NA        NA   0.00000        NA</span></span>
-<span><span class="co">##          BA DIACL2IN</span></span>
-<span><span class="co">## 1        NA     &lt;NA&gt;</span></span>
-<span><span class="co">## 2        NA     &lt;NA&gt;</span></span>
-<span><span class="co">## 3 0.1532029  5.0-6.9</span></span>
-<span><span class="co">## 4 0.1898537  5.0-6.9</span></span>
-<span><span class="co">## 5 0.3578369  7.0-8.9</span></span>
-<span><span class="co">## 6        NA     &lt;NA&gt;</span></span></code></pre>
+</summary><pre><code><span><span class="co">##           PLT_CN CONDID SUBP TREE STATUSCD SPCD SPGRPCD  DIA HT TREECLCD</span></span>
+<span><span class="co">## 1 40404729010690      1    1    1        2  113      24  7.7 18        3</span></span>
+<span><span class="co">## 2 40404729010690      1    1    2        1   66      23 10.8 14        3</span></span>
+<span><span class="co">## 3 40404729010690      1    1    3        2  113      24  5.2 23        3</span></span>
+<span><span class="co">## 4 40404729010690      1    1    4        1  113      24  5.2 18        2</span></span>
+<span><span class="co">## 5 40404729010690      1    3    1        1  113      24  8.8 21        3</span></span>
+<span><span class="co">## 6 40404729010690      1    4    1        1  113      24  8.9 28        3</span></span>
+<span><span class="co">##   AGENTCD STANDING_DEAD_CD VOLCFNET VOLCFGRS VOLBFNET TPA_UNADJ DRYBIO_AG</span></span>
+<span><span class="co">## 1      10                1 1.001201 1.820365       NA  6.018046  68.32740</span></span>
+<span><span class="co">## 2      NA               NA       NA       NA       NA  6.018046 128.28703</span></span>
+<span><span class="co">## 3      10                1 0.466414 0.848025       NA  6.018046  40.24585</span></span>
+<span><span class="co">## 4      NA               NA 0.630180 0.630180       NA  6.018046  40.61207</span></span>
+<span><span class="co">## 5      NA               NA 2.491559 2.931246       NA  6.018046 144.25115</span></span>
+<span><span class="co">## 6      NA               NA 3.824139 4.202350       NA  6.018046 182.53588</span></span>
+<span><span class="co">##   CARBON_AG        BA DIACL2IN</span></span>
+<span><span class="co">## 1  34.43701 0.3233677  7.0-8.9</span></span>
+<span><span class="co">## 2  61.19291 0.6361546 9.0-10.9</span></span>
+<span><span class="co">## 3  20.28391 0.1474762  5.0-6.9</span></span>
+<span><span class="co">## 4  19.49379 0.1474762  5.0-6.9</span></span>
+<span><span class="co">## 5  69.24055 0.4223578  7.0-8.9</span></span>
+<span><span class="co">## 6  87.61722 0.4320113  7.0-8.9</span></span></code></pre>
 </details><div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYtree</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
@@ -822,30 +832,30 @@ output
 </summary><pre><code><span><span class="co">## [1] "xLUT"       "LUTclassnm" "LUT"</span></span></code></pre>
 </details><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYtree2</span> <span class="op">&lt;-</span> <span class="va">WYtreelut2</span><span class="op">$</span><span class="va">xLUT</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYtree2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYtree2</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##           PLT_CN CONDID SUBP TREE STATUSCD SPCD SPGRPCD DIA HT TREECLCD AGENTCD</span></span>
-<span><span class="co">## 1 40404738010690      1    2    3        2   19      12  NA NA       NA      70</span></span>
-<span><span class="co">## 2 40404738010690      1    2    4        2   19      12  NA NA       NA      70</span></span>
-<span><span class="co">## 3 40404738010690      1    2    7        1   19      12 5.3 26        2      NA</span></span>
-<span><span class="co">## 4 40404821010690      1    1    7        1   19      12 5.9 48        2      NA</span></span>
-<span><span class="co">## 5 40404821010690      1    1    8        1   19      12 8.1 45        2      NA</span></span>
-<span><span class="co">## 6 40404821010690      1    1   11        2   19      12  NA NA       NA      70</span></span>
-<span><span class="co">##   STANDING_DEAD_CD VOLCFNET VOLCFGRS VOLBFNET TPA_UNADJ DRYBIO_AG CARBON_AG</span></span>
-<span><span class="co">## 1                0       NA       NA       NA        NA   0.00000        NA</span></span>
-<span><span class="co">## 2                0       NA       NA       NA        NA   0.00000        NA</span></span>
-<span><span class="co">## 3               NA 0.864289 0.864289       NA  6.018046  25.48605  12.74303</span></span>
-<span><span class="co">## 4               NA 3.046342 3.046342       NA  6.018046  88.91319  44.45660</span></span>
-<span><span class="co">## 5               NA 6.019584 6.019584       NA  6.018046 171.35480  85.67740</span></span>
-<span><span class="co">## 6                0       NA       NA       NA        NA   0.00000        NA</span></span>
-<span><span class="co">##          BA  DIACL25</span></span>
-<span><span class="co">## 1        NA     &lt;NA&gt;</span></span>
-<span><span class="co">## 2        NA     &lt;NA&gt;</span></span>
-<span><span class="co">## 3 0.1532029 5.0-24.9</span></span>
-<span><span class="co">## 4 0.1898537 5.0-24.9</span></span>
-<span><span class="co">## 5 0.3578369 5.0-24.9</span></span>
-<span><span class="co">## 6        NA     &lt;NA&gt;</span></span></code></pre>
+</summary><pre><code><span><span class="co">##           PLT_CN CONDID SUBP TREE STATUSCD SPCD SPGRPCD  DIA HT TREECLCD</span></span>
+<span><span class="co">## 1 40404729010690      1    1    1        2  113      24  7.7 18        3</span></span>
+<span><span class="co">## 2 40404729010690      1    1    2        1   66      23 10.8 14        3</span></span>
+<span><span class="co">## 3 40404729010690      1    1    3        2  113      24  5.2 23        3</span></span>
+<span><span class="co">## 4 40404729010690      1    1    4        1  113      24  5.2 18        2</span></span>
+<span><span class="co">## 5 40404729010690      1    3    1        1  113      24  8.8 21        3</span></span>
+<span><span class="co">## 6 40404729010690      1    4    1        1  113      24  8.9 28        3</span></span>
+<span><span class="co">##   AGENTCD STANDING_DEAD_CD VOLCFNET VOLCFGRS VOLBFNET TPA_UNADJ DRYBIO_AG</span></span>
+<span><span class="co">## 1      10                1 1.001201 1.820365       NA  6.018046  68.32740</span></span>
+<span><span class="co">## 2      NA               NA       NA       NA       NA  6.018046 128.28703</span></span>
+<span><span class="co">## 3      10                1 0.466414 0.848025       NA  6.018046  40.24585</span></span>
+<span><span class="co">## 4      NA               NA 0.630180 0.630180       NA  6.018046  40.61207</span></span>
+<span><span class="co">## 5      NA               NA 2.491559 2.931246       NA  6.018046 144.25115</span></span>
+<span><span class="co">## 6      NA               NA 3.824139 4.202350       NA  6.018046 182.53588</span></span>
+<span><span class="co">##   CARBON_AG        BA  DIACL25</span></span>
+<span><span class="co">## 1  34.43701 0.3233677 5.0-24.9</span></span>
+<span><span class="co">## 2  61.19291 0.6361546 5.0-24.9</span></span>
+<span><span class="co">## 3  20.28391 0.1474762 5.0-24.9</span></span>
+<span><span class="co">## 4  19.49379 0.1474762 5.0-24.9</span></span>
+<span><span class="co">## 5  69.24055 0.4223578 5.0-24.9</span></span>
+<span><span class="co">## 6  87.61722 0.4320113 5.0-24.9</span></span></code></pre>
 </details><div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">WYtree</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
@@ -878,7 +888,7 @@ View Example
 output
 </summary><pre><code><span><span class="co">## [1] "xLUT"       "LUTclassnm" "LUT"</span></span></code></pre>
 </details><div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcondlut</span><span class="op">$</span><span class="va">xLUT</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcondlut</span><span class="op">$</span><span class="va">xLUT</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##           PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ</span></span>
@@ -921,6 +931,7 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##    LIVE_CANOPY_CVR_PCT_cutbreaks LIVE_CANOPY_CVR_PCTCL</span></span>
+<span><span class="co">##                            &lt;num&gt;                &lt;char&gt;</span></span>
 <span><span class="co">## 1:                             0                0-24.9</span></span>
 <span><span class="co">## 2:                            25               25-49.9</span></span>
 <span><span class="co">## 3:                            50                   50+</span></span></code></pre>
@@ -941,7 +952,7 @@ View Example
 </summary><p>First, we can look at a reference table stored in <code>FIESTA</code>
 with code descriptions of common FIA attributes.</p>
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">FIESTAutils</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/FIESTAutils/man/ref_codes.html" class="external-link">ref_codes</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">FIESTAutils</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/FIESTAutils/man/ref_codes.html" class="external-link">ref_codes</a></span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   VARIABLE VALUE              MEANING COLORHEX GROUPCD GROUPNM GROUPHEX</span></span>
@@ -952,7 +963,7 @@ output
 <span><span class="co">## 5  ADFORCD   108               Custer       NA    &lt;NA&gt;                 </span></span>
 <span><span class="co">## 6  ADFORCD   109            Deerlodge       NA    &lt;NA&gt;</span></span></code></pre>
 </details><div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu">FIESTAutils</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/FIESTAutils/man/ref_codes.html" class="external-link">ref_codes</a></span><span class="op">$</span><span class="va">VARIABLE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu">FIESTAutils</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/FIESTAutils/man/ref_codes.html" class="external-link">ref_codes</a></span><span class="op">$</span><span class="va">VARIABLE</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##  [1] "ADFORCD"                 "AGENTCD"                </span></span>
@@ -962,38 +973,38 @@ output
 <span><span class="co">##  [9] "FORINDCD"                "FORTYPCD"               </span></span>
 <span><span class="co">## [11] "FORTYPGRPCD"             "GSSTKCD"                </span></span>
 <span><span class="co">## [13] "KINDCD"                  "LAND_COVER_CLASS_CD"    </span></span>
-<span><span class="co">## [15] "LANDCLCD"                "LANDUSECD"              </span></span>
-<span><span class="co">## [17] "MIST_CL_CD"              "NF_COND_STATUS_CD"      </span></span>
-<span><span class="co">## [19] "NF_PLOT_STATUS_CD"       "OWNCD"                  </span></span>
-<span><span class="co">## [21] "OWNGRPCD"                "PHYSCLCD"               </span></span>
-<span><span class="co">## [23] "PLOT_STATUS_CD"          "PRESNFCD"               </span></span>
-<span><span class="co">## [25] "RDDISTCD"                "RESERVCD"               </span></span>
-<span><span class="co">## [27] "SITECLCD"                "SPGRPCD"                </span></span>
-<span><span class="co">## [29] "STATIONCD"               "STATUSCD"               </span></span>
-<span><span class="co">## [31] "STDORGCD"                "STDSZCD"                </span></span>
-<span><span class="co">## [33] "SURVEY"                  "TIMBERCD"               </span></span>
-<span><span class="co">## [35] "TIMBERCD.PROD"           "TREECLCD"               </span></span>
-<span><span class="co">## [37] "TRTCD"</span></span></code></pre>
+<span><span class="co">## [15] "LANDCLCD"                "LANDSTATUSCD"           </span></span>
+<span><span class="co">## [17] "LANDUSECD"               "MIST_CL_CD"             </span></span>
+<span><span class="co">## [19] "NF_COND_STATUS_CD"       "NF_PLOT_STATUS_CD"      </span></span>
+<span><span class="co">## [21] "OWNCD"                   "OWNGRPCD"               </span></span>
+<span><span class="co">## [23] "PHYSCLCD"                "PLOT_STATUS_CD"         </span></span>
+<span><span class="co">## [25] "PRESNFCD"                "RDDISTCD"               </span></span>
+<span><span class="co">## [27] "RESERVCD"                "SITECLCD"               </span></span>
+<span><span class="co">## [29] "SPGRPCD"                 "STATIONCD"              </span></span>
+<span><span class="co">## [31] "STATUSCD"                "STDORGCD"               </span></span>
+<span><span class="co">## [33] "STDSZCD"                 "SURVEY"                 </span></span>
+<span><span class="co">## [35] "TIMBERCD"                "TIMBERCD.PROD"          </span></span>
+<span><span class="co">## [37] "TREECLCD"                "TRTCD"</span></span></code></pre>
 </details><p>Next, we set the code descriptions for FIA disturbance variable.</p>
 <div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ref_dstrbcd</span> <span class="op">&lt;-</span> <span class="fu">FIESTAutils</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/FIESTAutils/man/ref_codes.html" class="external-link">ref_codes</a></span><span class="op">[</span><span class="fu">FIESTAutils</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/FIESTAutils/man/ref_codes.html" class="external-link">ref_codes</a></span><span class="op">$</span><span class="va">VARIABLE</span> <span class="op">==</span> <span class="st">"DSTRBCD"</span>,<span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ref_dstrbcd</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ref_dstrbcd</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##     VARIABLE VALUE                          MEANING COLORHEX GROUPCD</span></span>
-<span><span class="co">## 224  DSTRBCD     0           No visible disturbance       NA       0</span></span>
-<span><span class="co">## 225  DSTRBCD    10                           Insect       NA      10</span></span>
-<span><span class="co">## 226  DSTRBCD    11  Insect to understory vegetation       NA      10</span></span>
-<span><span class="co">## 227  DSTRBCD    12                  Insect to trees       NA      10</span></span>
-<span><span class="co">## 228  DSTRBCD    20                          Disease       NA      20</span></span>
-<span><span class="co">## 229  DSTRBCD    21 Disease to understory vegetation       NA      20</span></span>
+<span><span class="co">## 223  DSTRBCD     0           No visible disturbance       NA       0</span></span>
+<span><span class="co">## 224  DSTRBCD    10                           Insect       NA      10</span></span>
+<span><span class="co">## 225  DSTRBCD    11  Insect to understory vegetation       NA      10</span></span>
+<span><span class="co">## 226  DSTRBCD    12                  Insect to trees       NA      10</span></span>
+<span><span class="co">## 227  DSTRBCD    20                          Disease       NA      20</span></span>
+<span><span class="co">## 228  DSTRBCD    21 Disease to understory vegetation       NA      20</span></span>
 <span><span class="co">##                    GROUPNM GROUPHEX</span></span>
-<span><span class="co">## 224 No visible disturbance         </span></span>
+<span><span class="co">## 223 No visible disturbance         </span></span>
+<span><span class="co">## 224                 Insect         </span></span>
 <span><span class="co">## 225                 Insect         </span></span>
 <span><span class="co">## 226                 Insect         </span></span>
-<span><span class="co">## 227                 Insect         </span></span>
-<span><span class="co">## 228                Disease         </span></span>
-<span><span class="co">## 229                Disease</span></span></code></pre>
+<span><span class="co">## 227                Disease         </span></span>
+<span><span class="co">## 228                Disease</span></span></code></pre>
 </details><p>Next, we can append forest type names using the reference table
 above.</p>
 <div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
@@ -1012,10 +1023,12 @@ output
 </summary><pre><code><span><span class="co">## [1] "xLUT"   "xLUTnm" "LUT"</span></span></code></pre>
 </details><div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYcond2</span> <span class="op">&lt;-</span> <span class="va">WYcondlut</span><span class="op">$</span><span class="va">xLUT</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcond2</span><span class="op">[</span><span class="va">WYcond2</span><span class="op">$</span><span class="va">DSTRBCD1</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcond2</span><span class="op">[</span><span class="va">WYcond2</span><span class="op">$</span><span class="va">DSTRBCD1</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##            PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;DSTRBCD1&gt;</span></span>
+<span><span class="co">##            PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ</span></span>
+<span><span class="co">##            &lt;char&gt;  &lt;int&gt;                   &lt;int&gt;          &lt;num&gt;          &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404738010690      1                      NA              1              1</span></span>
 <span><span class="co">## 2: 40404821010690      1                      NA              1              1</span></span>
 <span><span class="co">## 3: 40404838010690      1                      NA              1              1</span></span>
@@ -1023,6 +1036,7 @@ output
 <span><span class="co">## 5: 40404845010690      1                      NA              1              1</span></span>
 <span><span class="co">## 6: 40404864010690      1                      NA              1              1</span></span>
 <span><span class="co">##    MICRPROP_UNADJ MACRPROP_UNADJ OWNCD OWNGRPCD RESERVCD SITECLCD STDORGCD</span></span>
+<span><span class="co">##             &lt;num&gt;         &lt;lgcl&gt; &lt;int&gt;    &lt;int&gt;    &lt;int&gt;    &lt;int&gt;    &lt;int&gt;</span></span>
 <span><span class="co">## 1:              1             NA    31       30        0        7        0</span></span>
 <span><span class="co">## 2:              1             NA    11       10        0        5        0</span></span>
 <span><span class="co">## 3:              1             NA    11       10        0        6        0</span></span>
@@ -1030,6 +1044,7 @@ output
 <span><span class="co">## 5:              1             NA    11       10        0        6        0</span></span>
 <span><span class="co">## 6:              1             NA    11       10        0        6        0</span></span>
 <span><span class="co">##    ADFORCD LIVE_CANOPY_CVR_PCT COND_STATUS_CD NF_COND_STATUS_CD FORTYPCD</span></span>
+<span><span class="co">##      &lt;int&gt;               &lt;int&gt;          &lt;int&gt;             &lt;int&gt;    &lt;int&gt;</span></span>
 <span><span class="co">## 1:      NA                  17              1                NA      366</span></span>
 <span><span class="co">## 2:     206                  24              1                NA      266</span></span>
 <span><span class="co">## 3:     206                  30              1                NA      901</span></span>
@@ -1037,6 +1052,7 @@ output
 <span><span class="co">## 5:     206                  22              1                NA      281</span></span>
 <span><span class="co">## 6:     206                  49              1                NA      268</span></span>
 <span><span class="co">##    STDSZCD STDAGE GSSTKCD DSTRBCD1 DSTRBYR1 DSTRBCD2 DSTRBYR2 FORTYPGRPCD</span></span>
+<span><span class="co">##      &lt;int&gt;  &lt;int&gt;   &lt;int&gt;    &lt;int&gt;    &lt;int&gt;    &lt;int&gt;    &lt;int&gt;       &lt;num&gt;</span></span>
 <span><span class="co">## 1:       3      5       4       10     9999        0       NA         360</span></span>
 <span><span class="co">## 2:       1    121       3       10     9999        0       NA         260</span></span>
 <span><span class="co">## 3:       3     20       3       10     2009        0       NA         900</span></span>
@@ -1044,6 +1060,7 @@ output
 <span><span class="co">## 5:       2    129       4       10     2011        0       NA         280</span></span>
 <span><span class="co">## 6:       2    115       3       10     2008        0       NA         260</span></span>
 <span><span class="co">##    TIMBERCD DSTRB1NM</span></span>
+<span><span class="co">##       &lt;num&gt;   &lt;char&gt;</span></span>
 <span><span class="co">## 1:        2   Insect</span></span>
 <span><span class="co">## 2:        1   Insect</span></span>
 <span><span class="co">## 3:        1   Insect</span></span>
@@ -1066,10 +1083,12 @@ output
 </summary><pre><code><span><span class="co">## [1] "xLUT"   "xLUTnm" "LUT"</span></span></code></pre>
 </details><div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYcond3</span> <span class="op">&lt;-</span> <span class="va">WYcondlut2</span><span class="op">$</span><span class="va">xLUT</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcond3</span><span class="op">[</span><span class="va">WYcond3</span><span class="op">$</span><span class="va">DSTRBCD1</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">WYcond3</span><span class="op">[</span><span class="va">WYcond3</span><span class="op">$</span><span class="va">DSTRBCD1</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##            PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;DSTRBCD1&gt;</span></span>
+<span><span class="co">##            PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ SUBPPROP_UNADJ</span></span>
+<span><span class="co">##            &lt;char&gt;  &lt;int&gt;                   &lt;int&gt;          &lt;num&gt;          &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404738010690      1                      NA              1              1</span></span>
 <span><span class="co">## 2: 40404821010690      1                      NA              1              1</span></span>
 <span><span class="co">## 3: 40404838010690      1                      NA              1              1</span></span>
@@ -1077,6 +1096,7 @@ output
 <span><span class="co">## 5: 40404845010690      1                      NA              1              1</span></span>
 <span><span class="co">## 6: 40404864010690      1                      NA              1              1</span></span>
 <span><span class="co">##    MICRPROP_UNADJ MACRPROP_UNADJ OWNCD OWNGRPCD RESERVCD SITECLCD STDORGCD</span></span>
+<span><span class="co">##             &lt;num&gt;         &lt;lgcl&gt; &lt;int&gt;    &lt;int&gt;    &lt;int&gt;    &lt;int&gt;    &lt;int&gt;</span></span>
 <span><span class="co">## 1:              1             NA    31       30        0        7        0</span></span>
 <span><span class="co">## 2:              1             NA    11       10        0        5        0</span></span>
 <span><span class="co">## 3:              1             NA    11       10        0        6        0</span></span>
@@ -1084,6 +1104,7 @@ output
 <span><span class="co">## 5:              1             NA    11       10        0        6        0</span></span>
 <span><span class="co">## 6:              1             NA    11       10        0        6        0</span></span>
 <span><span class="co">##    ADFORCD LIVE_CANOPY_CVR_PCT COND_STATUS_CD NF_COND_STATUS_CD FORTYPCD</span></span>
+<span><span class="co">##      &lt;int&gt;               &lt;int&gt;          &lt;int&gt;             &lt;int&gt;    &lt;int&gt;</span></span>
 <span><span class="co">## 1:      NA                  17              1                NA      366</span></span>
 <span><span class="co">## 2:     206                  24              1                NA      266</span></span>
 <span><span class="co">## 3:     206                  30              1                NA      901</span></span>
@@ -1091,6 +1112,7 @@ output
 <span><span class="co">## 5:     206                  22              1                NA      281</span></span>
 <span><span class="co">## 6:     206                  49              1                NA      268</span></span>
 <span><span class="co">##    STDSZCD STDAGE GSSTKCD DSTRBCD1 DSTRBYR1 DSTRBCD2 DSTRBYR2 FORTYPGRPCD</span></span>
+<span><span class="co">##      &lt;int&gt;  &lt;int&gt;   &lt;int&gt;    &lt;int&gt;    &lt;int&gt;    &lt;int&gt;    &lt;int&gt;       &lt;num&gt;</span></span>
 <span><span class="co">## 1:       3      5       4       10     9999        0       NA         360</span></span>
 <span><span class="co">## 2:       1    121       3       10     9999        0       NA         260</span></span>
 <span><span class="co">## 3:       3     20       3       10     2009        0       NA         900</span></span>
@@ -1098,6 +1120,7 @@ output
 <span><span class="co">## 5:       2    129       4       10     2011        0       NA         280</span></span>
 <span><span class="co">## 6:       2    115       3       10     2008        0       NA         260</span></span>
 <span><span class="co">##    TIMBERCD DSTRBNM</span></span>
+<span><span class="co">##       &lt;num&gt;  &lt;char&gt;</span></span>
 <span><span class="co">## 1:        2  Insect</span></span>
 <span><span class="co">## 2:        1  Insect</span></span>
 <span><span class="co">## 3:        1  Insect</span></span>
@@ -1137,10 +1160,11 @@ output
 </summary><pre><code><span><span class="co">## [1] "condsum"   "csumvarnm"</span></span></code></pre>
 </details><div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">condsum</span> <span class="op">&lt;-</span> <span class="va">condsumdat</span><span class="op">$</span><span class="va">condsum</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">condsum</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">condsum</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##            PLT_CN LIVE_CANOPY_CVR_PCT_PLT</span></span>
+<span><span class="co">##            &lt;char&gt;                   &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690                       0</span></span>
 <span><span class="co">## 2: 40404729010690                      17</span></span>
 <span><span class="co">## 3: 40404730010690                      41</span></span>
@@ -1153,6 +1177,7 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##            PLT_CN LIVE_CANOPY_CVR_PCT_PLT</span></span>
+<span><span class="co">##            &lt;char&gt;                   &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40405596010690                      42</span></span></code></pre>
 </details><div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYcond</span><span class="op">[</span><span class="va">WYcond</span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op">==</span> <span class="fl">40405596010690</span>,<span class="op">]</span></span></code></pre></div>
@@ -1180,10 +1205,12 @@ output
 <span>              plt <span class="op">=</span> <span class="va">WYplt</span>, </span>
 <span>              csumvar <span class="op">=</span> <span class="st">"LIVE_CANOPY_CVR_PCT"</span></span>
 <span>              <span class="op">)</span><span class="op">$</span><span class="va">condsum</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">condsum</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">condsum</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690  2013      56     3      2        1 86688  -105.9625</span></span>
 <span><span class="co">## 2: 40404729010690  2011      56     3      2        1 84596  -105.7277</span></span>
 <span><span class="co">## 3: 40404730010690  2013      56     3      2        1 88993  -105.6679</span></span>
@@ -1191,6 +1218,7 @@ output
 <span><span class="co">## 5: 40404733010690  2012      56     3      2        1 82869  -105.8509</span></span>
 <span><span class="co">## 6: 40404734010690  2013      56     3      2        1 83304  -106.0363</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.41013     2013       NA                     0              2</span></span>
 <span><span class="co">## 2:   42.40928     2011        1                     0              1</span></span>
 <span><span class="co">## 3:   42.40953     2013        6                     0              1</span></span>
@@ -1198,6 +1226,7 @@ output
 <span><span class="co">## 5:   42.31655     2012       NA                     0              2</span></span>
 <span><span class="co">## 6:   42.26546     2013       NA                     0              2</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT        FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;            &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 2:                NA      1          1         1        17    Sampled-Forest</span></span>
 <span><span class="co">## 3:                NA      1          1         1        41    Sampled-Forest</span></span>
@@ -1205,6 +1234,7 @@ output
 <span><span class="co">## 5:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">##           PLOT_ID LIVE_CANOPY_CVR_PCT_PLT</span></span>
+<span><span class="co">##            &lt;char&gt;                   &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200186688                       0</span></span>
 <span><span class="co">## 2: ID560200184596                      17</span></span>
 <span><span class="co">## 3: ID560200188993                      41</span></span>
@@ -1219,10 +1249,12 @@ output
 <span>              csumvar <span class="op">=</span> <span class="st">"LIVE_CANOPY_CVR_PCT"</span>,</span>
 <span>              cfilter <span class="op">=</span> <span class="st">"STDSZCD == 1"</span> </span>
 <span>              <span class="op">)</span><span class="op">$</span><span class="va">condsum</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">condsum</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">condsum</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690  2013      56     3      2        1 86688  -105.9625</span></span>
 <span><span class="co">## 2: 40404729010690  2011      56     3      2        1 84596  -105.7277</span></span>
 <span><span class="co">## 3: 40404730010690  2013      56     3      2        1 88993  -105.6679</span></span>
@@ -1230,6 +1262,7 @@ output
 <span><span class="co">## 5: 40404733010690  2012      56     3      2        1 82869  -105.8509</span></span>
 <span><span class="co">## 6: 40404734010690  2013      56     3      2        1 83304  -106.0363</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.41013     2013       NA                     0              2</span></span>
 <span><span class="co">## 2:   42.40928     2011        1                     0              1</span></span>
 <span><span class="co">## 3:   42.40953     2013        6                     0              1</span></span>
@@ -1237,6 +1270,7 @@ output
 <span><span class="co">## 5:   42.31655     2012       NA                     0              2</span></span>
 <span><span class="co">## 6:   42.26546     2013       NA                     0              2</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT        FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;            &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 2:                NA      1          1         1        17    Sampled-Forest</span></span>
 <span><span class="co">## 3:                NA      1          1         1        41    Sampled-Forest</span></span>
@@ -1244,6 +1278,7 @@ output
 <span><span class="co">## 5:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">##           PLOT_ID LIVE_CANOPY_CVR_PCT_PLT</span></span>
+<span><span class="co">##            &lt;char&gt;                   &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200186688                      NA</span></span>
 <span><span class="co">## 2: ID560200184596                      17</span></span>
 <span><span class="co">## 3: ID560200188993                      41</span></span>
@@ -1255,13 +1290,18 @@ output
 <span><span class="va">condsum</span><span class="op">[</span><span class="va">condsum</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="fl">40405596010690</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40405596010690  2012      56     3      3       11 88759  -104.1922</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   44.25247     2012        5                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      2          2         2        27 Sampled-Forest</span></span>
 <span><span class="co">##           PLOT_ID LIVE_CANOPY_CVR_PCT_PLT</span></span>
+<span><span class="co">##            &lt;char&gt;                   &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560301188759                      33</span></span></code></pre>
 </details><div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYcond</span><span class="op">[</span><span class="va">WYcond</span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op">==</span> <span class="fl">40405596010690</span>,<span class="op">]</span></span></code></pre></div>
@@ -1295,13 +1335,18 @@ output
 <span><span class="va">condnf</span><span class="op">[</span><span class="va">condnf</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="fl">40404737010690</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404737010690  2011      56     3      2        1 81546  -105.6062</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.27355     2011        3                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      2          2         1         7 Sampled-Forest</span></span>
 <span><span class="co">##           PLOT_ID cond_nf</span></span>
+<span><span class="co">##            &lt;char&gt;   &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200181546    0.75</span></span></code></pre>
 </details><div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYcond</span><span class="op">[</span><span class="va">WYcond</span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op">==</span> <span class="fl">40404737010690</span>,<span class="op">]</span></span></code></pre></div>
@@ -1381,13 +1426,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat1</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat"  "sumvars"  "estunits" "tfilter"  "meta"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"  "sumvars"  "tunitlst" "tfilter"  "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum1</span> <span class="op">&lt;-</span> <span class="va">treesumdat1</span><span class="op">$</span><span class="va">treedat</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum1</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum1</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690  2013      56     3      2        1 86688  -105.9625</span></span>
 <span><span class="co">## 2: 40404729010690  2011      56     3      2        1 84596  -105.7277</span></span>
 <span><span class="co">## 3: 40404730010690  2013      56     3      2        1 88993  -105.6679</span></span>
@@ -1395,6 +1442,7 @@ output
 <span><span class="co">## 5: 40404733010690  2012      56     3      2        1 82869  -105.8509</span></span>
 <span><span class="co">## 6: 40404734010690  2013      56     3      2        1 83304  -106.0363</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.41013     2013       NA                     0              2</span></span>
 <span><span class="co">## 2:   42.40928     2011        1                     0              1</span></span>
 <span><span class="co">## 3:   42.40953     2013        6                     0              1</span></span>
@@ -1402,6 +1450,7 @@ output
 <span><span class="co">## 5:   42.31655     2012       NA                     0              2</span></span>
 <span><span class="co">## 6:   42.26546     2013       NA                     0              2</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT        FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;            &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 2:                NA      1          1         1        17    Sampled-Forest</span></span>
 <span><span class="co">## 3:                NA      1          1         1        41    Sampled-Forest</span></span>
@@ -1409,9 +1458,10 @@ output
 <span><span class="co">## 5:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">##           PLOT_ID BA_live VOLCFNET_live</span></span>
+<span><span class="co">##            &lt;char&gt;   &lt;num&gt;         &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200186688      NA            NA</span></span>
-<span><span class="co">## 2: ID560200184596    2.37         17.03</span></span>
-<span><span class="co">## 3: ID560200188993   19.33        284.46</span></span>
+<span><span class="co">## 2: ID560200184596    2.37          6.95</span></span>
+<span><span class="co">## 3: ID560200188993   19.33        259.72</span></span>
 <span><span class="co">## 4: ID560200182340      NA            NA</span></span>
 <span><span class="co">## 5: ID560200182869      NA            NA</span></span>
 <span><span class="co">## 6: ID560200183304      NA            NA</span></span></code></pre>
@@ -1442,13 +1492,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat2</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat"  "sumvars"  "estunits" "tfilter"  "meta"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"  "sumvars"  "tunitlst" "tfilter"  "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum2</span> <span class="op">&lt;-</span> <span class="va">treesumdat2</span><span class="op">$</span><span class="va">treedat</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum2</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690  2013      56     3      2        1 86688  -105.9625</span></span>
 <span><span class="co">## 2: 40404729010690  2011      56     3      2        1 84596  -105.7277</span></span>
 <span><span class="co">## 3: 40404730010690  2013      56     3      2        1 88993  -105.6679</span></span>
@@ -1456,6 +1508,7 @@ output
 <span><span class="co">## 5: 40404733010690  2012      56     3      2        1 82869  -105.8509</span></span>
 <span><span class="co">## 6: 40404734010690  2013      56     3      2        1 83304  -106.0363</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.41013     2013       NA                     0              2</span></span>
 <span><span class="co">## 2:   42.40928     2011        1                     0              1</span></span>
 <span><span class="co">## 3:   42.40953     2013        6                     0              1</span></span>
@@ -1463,6 +1516,7 @@ output
 <span><span class="co">## 5:   42.31655     2012       NA                     0              2</span></span>
 <span><span class="co">## 6:   42.26546     2013       NA                     0              2</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT        FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;            &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 2:                NA      1          1         1        17    Sampled-Forest</span></span>
 <span><span class="co">## 3:                NA      1          1         1        41    Sampled-Forest</span></span>
@@ -1470,9 +1524,10 @@ output
 <span><span class="co">## 5:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">##           PLOT_ID BA_TPA_live VOLCFNET_TPA_live</span></span>
+<span><span class="co">##            &lt;char&gt;       &lt;num&gt;             &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200186688          NA                NA</span></span>
-<span><span class="co">## 2: ID560200184596       14.27            102.46</span></span>
-<span><span class="co">## 3: ID560200188993      119.74           1711.92</span></span>
+<span><span class="co">## 2: ID560200184596       14.27             41.80</span></span>
+<span><span class="co">## 3: ID560200188993      119.74           1563.03</span></span>
 <span><span class="co">## 4: ID560200182340          NA                NA</span></span>
 <span><span class="co">## 5: ID560200182869          NA                NA</span></span>
 <span><span class="co">## 6: ID560200183304          NA                NA</span></span></code></pre>
@@ -1491,30 +1546,30 @@ View Check
 <span><span class="va">testplt</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##               PLT_CN CONDID SUBP TREE STATUSCD SPCD  DIA HT        BA VOLCFNET</span></span>
-<span><span class="co">## 14392 40404758010690      1    3    2        2  113   NA NA        NA       NA</span></span>
-<span><span class="co">## 14972 40404758010690      1    1    1        2  122 13.2 26 0.9503050  6.35026</span></span>
-<span><span class="co">## 14973 40404758010690      1    1    2        1  122  9.5 23 0.4922235  4.03692</span></span>
-<span><span class="co">## 14974 40404758010690      1    2    1        1  122  9.0 25 0.4417740  3.92730</span></span>
-<span><span class="co">## 14975 40404758010690      1    2    2        1  122  8.4 26 0.3848342  3.51595</span></span>
-<span><span class="co">## 14976 40404758010690      1    2    5        1  122  6.3 24 0.2164693  1.61083</span></span>
-<span><span class="co">## 14977 40404758010690      1    3    1        1  122  6.5 19 0.2304315  1.28724</span></span>
-<span><span class="co">## 14978 40404758010690      1    3    3        1  122  6.0 23 0.1963440  1.34178</span></span>
-<span><span class="co">## 14979 40404758010690      1    4    1        1  122 10.7 27 0.6244285  6.10575</span></span>
-<span><span class="co">## 14980 40404758010690      1    4    2        1  122  8.0 18 0.3490560  2.04162</span></span>
-<span><span class="co">## 14981 40404758010690      1    4    3        1  122 15.6 35 1.3272854 17.95132</span></span>
-<span><span class="co">##       TPA_UNADJ</span></span>
-<span><span class="co">## 14392        NA</span></span>
-<span><span class="co">## 14972  6.018046</span></span>
-<span><span class="co">## 14973  6.018046</span></span>
-<span><span class="co">## 14974  6.018046</span></span>
-<span><span class="co">## 14975  6.018046</span></span>
-<span><span class="co">## 14976  6.018046</span></span>
-<span><span class="co">## 14977  6.018046</span></span>
-<span><span class="co">## 14978  6.018046</span></span>
-<span><span class="co">## 14979  6.018046</span></span>
-<span><span class="co">## 14980  6.018046</span></span>
-<span><span class="co">## 14981  6.018046</span></span></code></pre>
+</summary><pre><code><span><span class="co">##            PLT_CN CONDID SUBP TREE STATUSCD SPCD  DIA HT        BA  VOLCFNET</span></span>
+<span><span class="co">## 43 40404758010690      1    1    1        2  122 13.2 26 0.9503050  5.733427</span></span>
+<span><span class="co">## 44 40404758010690      1    1    2        1  122  9.5 23 0.4922235  4.134828</span></span>
+<span><span class="co">## 45 40404758010690      1    2    1        1  122  9.0 25 0.4417740  3.965985</span></span>
+<span><span class="co">## 46 40404758010690      1    2    2        1  122  8.4 26 0.3848342  3.530898</span></span>
+<span><span class="co">## 47 40404758010690      1    2    5        1  122  6.3 24 0.2164693  1.614595</span></span>
+<span><span class="co">## 48 40404758010690      1    3    1        1  122  6.5 19 0.2304315  1.390712</span></span>
+<span><span class="co">## 49 40404758010690      1    3    2        2  113   NA NA        NA        NA</span></span>
+<span><span class="co">## 50 40404758010690      1    3    3        1  122  6.0 23 0.1963440  1.350625</span></span>
+<span><span class="co">## 51 40404758010690      1    4    1        1  122 10.7 27 0.6244285  6.183911</span></span>
+<span><span class="co">## 52 40404758010690      1    4    2        1  122  8.0 18 0.3490560  2.192309</span></span>
+<span><span class="co">## 53 40404758010690      1    4    3        1  122 15.6 35 1.3272854 18.357073</span></span>
+<span><span class="co">##    TPA_UNADJ</span></span>
+<span><span class="co">## 43  6.018046</span></span>
+<span><span class="co">## 44  6.018046</span></span>
+<span><span class="co">## 45  6.018046</span></span>
+<span><span class="co">## 46  6.018046</span></span>
+<span><span class="co">## 47  6.018046</span></span>
+<span><span class="co">## 48  6.018046</span></span>
+<span><span class="co">## 49        NA</span></span>
+<span><span class="co">## 50  6.018046</span></span>
+<span><span class="co">## 51  6.018046</span></span>
+<span><span class="co">## 52  6.018046</span></span>
+<span><span class="co">## 53  6.018046</span></span></code></pre>
 </details><div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">testplt</span><span class="op">[</span><span class="va">testplt</span><span class="op">$</span><span class="va">STATUSCD</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"BA"</span><span class="op">]</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
@@ -1529,26 +1584,36 @@ output
 <code class="sourceCode R"><span><span class="va">treesum1</span><span class="op">[</span><span class="va">treesum1</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="fl">40404758010690</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404758010690  2011      56     3      2        1 87404  -105.4328</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.05634     2011        2                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         1        18 Sampled-Forest</span></span>
 <span><span class="co">##           PLOT_ID BA_live VOLCFNET_live</span></span>
-<span><span class="co">## 1: ID560200187404    4.26         41.82</span></span></code></pre>
+<span><span class="co">##            &lt;char&gt;   &lt;num&gt;         &lt;num&gt;</span></span>
+<span><span class="co">## 1: ID560200187404    4.26         42.72</span></span></code></pre>
 </details><div class="sourceCode" id="cb118"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum2</span><span class="op">[</span><span class="va">treesum2</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="fl">40404758010690</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404758010690  2011      56     3      2        1 87404  -105.4328</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.05634     2011        2                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         1        18 Sampled-Forest</span></span>
 <span><span class="co">##           PLOT_ID BA_TPA_live VOLCFNET_TPA_live</span></span>
-<span><span class="co">## 1: ID560200187404       25.65            251.67</span></span></code></pre>
+<span><span class="co">##            &lt;char&gt;       &lt;num&gt;             &lt;num&gt;</span></span>
+<span><span class="co">## 1: ID560200187404       25.65             257.1</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level3">
@@ -1571,13 +1636,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat3</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat" "sumvars" "tfilter" "meta"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"  "sumvars"  "tunitlst" "tfilter"  "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum3</span> <span class="op">&lt;-</span> <span class="va">treesumdat3</span><span class="op">$</span><span class="va">treedat</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum3</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum3</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690  2013      56     3      2        1 86688  -105.9625</span></span>
 <span><span class="co">## 2: 40404729010690  2011      56     3      2        1 84596  -105.7277</span></span>
 <span><span class="co">## 3: 40404730010690  2013      56     3      2        1 88993  -105.6679</span></span>
@@ -1585,6 +1652,7 @@ output
 <span><span class="co">## 5: 40404733010690  2012      56     3      2        1 82869  -105.8509</span></span>
 <span><span class="co">## 6: 40404734010690  2013      56     3      2        1 83304  -106.0363</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.41013     2013       NA                     0              2</span></span>
 <span><span class="co">## 2:   42.40928     2011        1                     0              1</span></span>
 <span><span class="co">## 3:   42.40953     2013        6                     0              1</span></span>
@@ -1592,6 +1660,7 @@ output
 <span><span class="co">## 5:   42.31655     2012       NA                     0              2</span></span>
 <span><span class="co">## 6:   42.26546     2013       NA                     0              2</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT        FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;            &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 2:                NA      1          1         1        17    Sampled-Forest</span></span>
 <span><span class="co">## 3:                NA      1          1         1        41    Sampled-Forest</span></span>
@@ -1599,6 +1668,7 @@ output
 <span><span class="co">## 5:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">##           PLOT_ID DIA_MEAN HT_MEAN</span></span>
+<span><span class="co">##            &lt;char&gt;    &lt;num&gt;   &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200186688       NA      NA</span></span>
 <span><span class="co">## 2: ID560200184596     9.06   20.00</span></span>
 <span><span class="co">## 3: ID560200188993     8.68   33.07</span></span>
@@ -1610,37 +1680,37 @@ output
 <span><span class="va">testplt</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##               PLT_CN CONDID SUBP TREE STATUSCD SPCD  DIA HT        BA VOLCFNET</span></span>
-<span><span class="co">## 14392 40404758010690      1    3    2        2  113   NA NA        NA       NA</span></span>
-<span><span class="co">## 14972 40404758010690      1    1    1        2  122 13.2 26 0.9503050  6.35026</span></span>
-<span><span class="co">## 14973 40404758010690      1    1    2        1  122  9.5 23 0.4922235  4.03692</span></span>
-<span><span class="co">## 14974 40404758010690      1    2    1        1  122  9.0 25 0.4417740  3.92730</span></span>
-<span><span class="co">## 14975 40404758010690      1    2    2        1  122  8.4 26 0.3848342  3.51595</span></span>
-<span><span class="co">## 14976 40404758010690      1    2    5        1  122  6.3 24 0.2164693  1.61083</span></span>
-<span><span class="co">## 14977 40404758010690      1    3    1        1  122  6.5 19 0.2304315  1.28724</span></span>
-<span><span class="co">## 14978 40404758010690      1    3    3        1  122  6.0 23 0.1963440  1.34178</span></span>
-<span><span class="co">## 14979 40404758010690      1    4    1        1  122 10.7 27 0.6244285  6.10575</span></span>
-<span><span class="co">## 14980 40404758010690      1    4    2        1  122  8.0 18 0.3490560  2.04162</span></span>
-<span><span class="co">## 14981 40404758010690      1    4    3        1  122 15.6 35 1.3272854 17.95132</span></span>
-<span><span class="co">##       TPA_UNADJ</span></span>
-<span><span class="co">## 14392        NA</span></span>
-<span><span class="co">## 14972  6.018046</span></span>
-<span><span class="co">## 14973  6.018046</span></span>
-<span><span class="co">## 14974  6.018046</span></span>
-<span><span class="co">## 14975  6.018046</span></span>
-<span><span class="co">## 14976  6.018046</span></span>
-<span><span class="co">## 14977  6.018046</span></span>
-<span><span class="co">## 14978  6.018046</span></span>
-<span><span class="co">## 14979  6.018046</span></span>
-<span><span class="co">## 14980  6.018046</span></span>
-<span><span class="co">## 14981  6.018046</span></span></code></pre>
+</summary><pre><code><span><span class="co">##            PLT_CN CONDID SUBP TREE STATUSCD SPCD  DIA HT        BA  VOLCFNET</span></span>
+<span><span class="co">## 43 40404758010690      1    1    1        2  122 13.2 26 0.9503050  5.733427</span></span>
+<span><span class="co">## 44 40404758010690      1    1    2        1  122  9.5 23 0.4922235  4.134828</span></span>
+<span><span class="co">## 45 40404758010690      1    2    1        1  122  9.0 25 0.4417740  3.965985</span></span>
+<span><span class="co">## 46 40404758010690      1    2    2        1  122  8.4 26 0.3848342  3.530898</span></span>
+<span><span class="co">## 47 40404758010690      1    2    5        1  122  6.3 24 0.2164693  1.614595</span></span>
+<span><span class="co">## 48 40404758010690      1    3    1        1  122  6.5 19 0.2304315  1.390712</span></span>
+<span><span class="co">## 49 40404758010690      1    3    2        2  113   NA NA        NA        NA</span></span>
+<span><span class="co">## 50 40404758010690      1    3    3        1  122  6.0 23 0.1963440  1.350625</span></span>
+<span><span class="co">## 51 40404758010690      1    4    1        1  122 10.7 27 0.6244285  6.183911</span></span>
+<span><span class="co">## 52 40404758010690      1    4    2        1  122  8.0 18 0.3490560  2.192309</span></span>
+<span><span class="co">## 53 40404758010690      1    4    3        1  122 15.6 35 1.3272854 18.357073</span></span>
+<span><span class="co">##    TPA_UNADJ</span></span>
+<span><span class="co">## 43  6.018046</span></span>
+<span><span class="co">## 44  6.018046</span></span>
+<span><span class="co">## 45  6.018046</span></span>
+<span><span class="co">## 46  6.018046</span></span>
+<span><span class="co">## 47  6.018046</span></span>
+<span><span class="co">## 48  6.018046</span></span>
+<span><span class="co">## 49        NA</span></span>
+<span><span class="co">## 50  6.018046</span></span>
+<span><span class="co">## 51  6.018046</span></span>
+<span><span class="co">## 52  6.018046</span></span>
+<span><span class="co">## 53  6.018046</span></span></code></pre>
 </details><div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">testplt</span><span class="op">[</span><span class="va">testplt</span><span class="op">$</span><span class="va">STATUSCD</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"DIA"</span><span class="op">]</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">testplt</span><span class="op">[</span><span class="va">testplt</span><span class="op">$</span><span class="va">STATUSCD</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"DIA"</span><span class="op">]</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">## [1] 8.888889</span></span></code></pre>
 </details><div class="sourceCode" id="cb128"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">testplt</span><span class="op">[</span><span class="va">testplt</span><span class="op">$</span><span class="va">STATUSCD</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"HT"</span><span class="op">]</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">testplt</span><span class="op">[</span><span class="va">testplt</span><span class="op">$</span><span class="va">STATUSCD</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"HT"</span><span class="op">]</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">## [1] 24.44444</span></span></code></pre>
@@ -1648,13 +1718,18 @@ output
 <code class="sourceCode R"><span><span class="va">treesum3</span><span class="op">[</span><span class="va">treesum3</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="fl">40404758010690</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404758010690  2011      56     3      2        1 87404  -105.4328</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.05634     2011        2                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         1        18 Sampled-Forest</span></span>
 <span><span class="co">##           PLOT_ID DIA_MEAN HT_MEAN</span></span>
+<span><span class="co">##            &lt;char&gt;    &lt;num&gt;   &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200187404     8.89   24.44</span></span></code></pre>
 </details></details><div class="section level4">
 <h4 id="example-4a-number-of-live-trees-by-plot-tpatrue">Example 4a: Number of Live Trees by Plot
@@ -1676,13 +1751,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat4a</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat" "sumvars" "tfilter" "meta"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"  "sumvars"  "tunitlst" "tfilter"  "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb134"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum4a</span> <span class="op">&lt;-</span> <span class="va">treesumdat4a</span><span class="op">$</span><span class="va">treedat</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum4a</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum4a</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690  2013      56     3      2        1 86688  -105.9625</span></span>
 <span><span class="co">## 2: 40404729010690  2011      56     3      2        1 84596  -105.7277</span></span>
 <span><span class="co">## 3: 40404730010690  2013      56     3      2        1 88993  -105.6679</span></span>
@@ -1690,6 +1767,7 @@ output
 <span><span class="co">## 5: 40404733010690  2012      56     3      2        1 82869  -105.8509</span></span>
 <span><span class="co">## 6: 40404734010690  2013      56     3      2        1 83304  -106.0363</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.41013     2013       NA                     0              2</span></span>
 <span><span class="co">## 2:   42.40928     2011        1                     0              1</span></span>
 <span><span class="co">## 3:   42.40953     2013        6                     0              1</span></span>
@@ -1697,6 +1775,7 @@ output
 <span><span class="co">## 5:   42.31655     2012       NA                     0              2</span></span>
 <span><span class="co">## 6:   42.26546     2013       NA                     0              2</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT        FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;            &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 2:                NA      1          1         1        17    Sampled-Forest</span></span>
 <span><span class="co">## 3:                NA      1          1         1        41    Sampled-Forest</span></span>
@@ -1704,6 +1783,7 @@ output
 <span><span class="co">## 5:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">##           PLOT_ID COUNT_TPA_live</span></span>
+<span><span class="co">##            &lt;char&gt;          &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200186688             NA</span></span>
 <span><span class="co">## 2: ID560200184596          30.09</span></span>
 <span><span class="co">## 3: ID560200188993         315.69</span></span>
@@ -1734,13 +1814,15 @@ variables</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat4b</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat"  "sumvars"  "estunits" "tfilter"  "meta"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"  "sumvars"  "tunitlst" "tfilter"  "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb138"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum4b</span> <span class="op">&lt;-</span> <span class="va">treesumdat4b</span><span class="op">$</span><span class="va">treedat</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum4b</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum4b</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690  2013      56     3      2        1 86688  -105.9625</span></span>
 <span><span class="co">## 2: 40404729010690  2011      56     3      2        1 84596  -105.7277</span></span>
 <span><span class="co">## 3: 40404730010690  2013      56     3      2        1 88993  -105.6679</span></span>
@@ -1748,6 +1830,7 @@ output
 <span><span class="co">## 5: 40404733010690  2012      56     3      2        1 82869  -105.8509</span></span>
 <span><span class="co">## 6: 40404734010690  2013      56     3      2        1 83304  -106.0363</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.41013     2013       NA                     0              2</span></span>
 <span><span class="co">## 2:   42.40928     2011        1                     0              1</span></span>
 <span><span class="co">## 3:   42.40953     2013        6                     0              1</span></span>
@@ -1755,6 +1838,7 @@ output
 <span><span class="co">## 5:   42.31655     2012       NA                     0              2</span></span>
 <span><span class="co">## 6:   42.26546     2013       NA                     0              2</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT        FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;            &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 2:                NA      1          1         1        17    Sampled-Forest</span></span>
 <span><span class="co">## 3:                NA      1          1         1        41    Sampled-Forest</span></span>
@@ -1762,9 +1846,10 @@ output
 <span><span class="co">## 5:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">##           PLOT_ID VOLCFNET_TPA_live_ADJ</span></span>
+<span><span class="co">##            &lt;char&gt;                 &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200186688                    NA</span></span>
-<span><span class="co">## 2: ID560200184596              102.4599</span></span>
-<span><span class="co">## 3: ID560200188993             1711.9177</span></span>
+<span><span class="co">## 2: ID560200184596              41.80061</span></span>
+<span><span class="co">## 3: ID560200188993            1563.03478</span></span>
 <span><span class="co">## 4: ID560200182340                    NA</span></span>
 <span><span class="co">## 5: ID560200182869                    NA</span></span>
 <span><span class="co">## 6: ID560200183304                    NA</span></span></code></pre>
@@ -1813,26 +1898,36 @@ output
 <code class="sourceCode R"><span><span class="va">treesum4b</span><span class="op">[</span><span class="va">treesum4b</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="va">cn</span>, <span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40407815010690  2011      56     3      3       45 88008  -104.0586</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   43.97663     2011        2                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      2          1         1        38 Sampled-Forest</span></span>
 <span><span class="co">##           PLOT_ID VOLCFNET_TPA_live_ADJ</span></span>
-<span><span class="co">## 1: ID560304588008              465.2634</span></span></code></pre>
+<span><span class="co">##            &lt;char&gt;                 &lt;num&gt;</span></span>
+<span><span class="co">## 1: ID560304588008              420.6272</span></span></code></pre>
 </details><div class="sourceCode" id="cb144"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum4c</span><span class="op">[</span><span class="va">treesum4c</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="va">cn</span>, <span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40407815010690  2011      56     3      3       45 88008  -104.0586</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   43.97663     2011        2                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      2          1         1        38 Sampled-Forest</span></span>
 <span><span class="co">##           PLOT_ID VOLCFNET_TPA_live</span></span>
-<span><span class="co">## 1: ID560304588008          232.6317</span></span></code></pre>
+<span><span class="co">##            &lt;char&gt;             &lt;num&gt;</span></span>
+<span><span class="co">## 1: ID560304588008          210.3136</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -1857,13 +1952,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat5a</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat" "sumvars" "tfilter" "meta"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"  "sumvars"  "tunitlst" "tfilter"  "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb148"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum5a</span> <span class="op">&lt;-</span> <span class="va">treesumdat5a</span><span class="op">$</span><span class="va">treedat</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum5a</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum5a</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690  2013      56     3      2        1 86688  -105.9625</span></span>
 <span><span class="co">## 2: 40404729010690  2011      56     3      2        1 84596  -105.7277</span></span>
 <span><span class="co">## 3: 40404730010690  2013      56     3      2        1 88993  -105.6679</span></span>
@@ -1871,6 +1968,7 @@ output
 <span><span class="co">## 5: 40404733010690  2012      56     3      2        1 82869  -105.8509</span></span>
 <span><span class="co">## 6: 40404734010690  2013      56     3      2        1 83304  -106.0363</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.41013     2013       NA                     0              2</span></span>
 <span><span class="co">## 2:   42.40928     2011        1                     0              1</span></span>
 <span><span class="co">## 3:   42.40953     2013        6                     0              1</span></span>
@@ -1878,6 +1976,7 @@ output
 <span><span class="co">## 5:   42.31655     2012       NA                     0              2</span></span>
 <span><span class="co">## 6:   42.26546     2013       NA                     0              2</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT        FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;            &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 2:                NA      1          1         1        17    Sampled-Forest</span></span>
 <span><span class="co">## 3:                NA      1          1         1        41    Sampled-Forest</span></span>
@@ -1885,6 +1984,7 @@ output
 <span><span class="co">## 5:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">##           PLOT_ID COUNT_TPA_live SEED_COUNT_TPA_live TREE_COUNT_TPA_live</span></span>
+<span><span class="co">##            &lt;char&gt;          &lt;num&gt;               &lt;num&gt;               &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200186688             NA                  NA                  NA</span></span>
 <span><span class="co">## 2: ID560200184596         105.06               74.97               30.09</span></span>
 <span><span class="co">## 3: ID560200188993         540.59              224.90              315.69</span></span>
@@ -1892,16 +1992,21 @@ output
 <span><span class="co">## 5: ID560200182869             NA                  NA                  NA</span></span>
 <span><span class="co">## 6: ID560200183304             NA                  NA                  NA</span></span></code></pre>
 </details><div class="sourceCode" id="cb150"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">treesum5a</span><span class="op">[</span><span class="va">treesum5a</span><span class="op">$</span><span class="va">CN</span> <span class="op"><a href="https://rdrr.io/pkg/terra/man/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">treesum5a</span><span class="op">[</span><span class="va">treesum5a</span><span class="op">$</span><span class="va">CN</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40407815010690  2011      56     3      3       45 88008  -104.0586</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   43.97663     2011        2                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      2          1         1        38 Sampled-Forest</span></span>
 <span><span class="co">##           PLOT_ID COUNT_TPA_live SEED_COUNT_TPA_live TREE_COUNT_TPA_live</span></span>
+<span><span class="co">##            &lt;char&gt;          &lt;num&gt;               &lt;num&gt;               &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560304588008         273.04               224.9               48.14</span></span></code></pre>
 </details><div class="sourceCode" id="cb152"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYseed</span><span class="op">[</span><span class="va">WYseed</span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op">==</span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
@@ -1937,13 +2042,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat5b</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat" "sumvars" "tfilter" "meta"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"  "sumvars"  "tunitlst" "tfilter"  "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb156"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum5b</span> <span class="op">&lt;-</span> <span class="va">treesumdat5b</span><span class="op">$</span><span class="va">treedat</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum5b</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum5b</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690  2013      56     3      2        1 86688  -105.9625</span></span>
 <span><span class="co">## 2: 40404729010690  2011      56     3      2        1 84596  -105.7277</span></span>
 <span><span class="co">## 3: 40404730010690  2013      56     3      2        1 88993  -105.6679</span></span>
@@ -1951,6 +2058,7 @@ output
 <span><span class="co">## 5: 40404733010690  2012      56     3      2        1 82869  -105.8509</span></span>
 <span><span class="co">## 6: 40404734010690  2013      56     3      2        1 83304  -106.0363</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   42.41013     2013       NA                     0              2</span></span>
 <span><span class="co">## 2:   42.40928     2011        1                     0              1</span></span>
 <span><span class="co">## 3:   42.40953     2013        6                     0              1</span></span>
@@ -1958,6 +2066,7 @@ output
 <span><span class="co">## 5:   42.31655     2012       NA                     0              2</span></span>
 <span><span class="co">## 6:   42.26546     2013       NA                     0              2</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT        FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;            &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 2:                NA      1          1         1        17    Sampled-Forest</span></span>
 <span><span class="co">## 3:                NA      1          1         1        41    Sampled-Forest</span></span>
@@ -1965,6 +2074,7 @@ output
 <span><span class="co">## 5:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6:                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">##           PLOT_ID COUNT_TPA_live_ADJ SEED_COUNT_TPA_live_ADJ</span></span>
+<span><span class="co">##            &lt;char&gt;              &lt;num&gt;                   &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560200186688                 NA                      NA</span></span>
 <span><span class="co">## 2: ID560200184596             105.06                   74.97</span></span>
 <span><span class="co">## 3: ID560200188993             540.59                  224.90</span></span>
@@ -1972,6 +2082,7 @@ output
 <span><span class="co">## 5: ID560200182869                 NA                      NA</span></span>
 <span><span class="co">## 6: ID560200183304                 NA                      NA</span></span>
 <span><span class="co">##    TREE_COUNT_TPA_live_ADJ</span></span>
+<span><span class="co">##                      &lt;num&gt;</span></span>
 <span><span class="co">## 1:                      NA</span></span>
 <span><span class="co">## 2:                   30.09</span></span>
 <span><span class="co">## 3:                  315.69</span></span>
@@ -1979,33 +2090,44 @@ output
 <span><span class="co">## 5:                      NA</span></span>
 <span><span class="co">## 6:                      NA</span></span></code></pre>
 </details><div class="sourceCode" id="cb158"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">treesum5a</span><span class="op">[</span><span class="va">treesum5a</span><span class="op">$</span><span class="va">CN</span> <span class="op"><a href="https://rdrr.io/pkg/terra/man/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">treesum5a</span><span class="op">[</span><span class="va">treesum5a</span><span class="op">$</span><span class="va">CN</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40407815010690  2011      56     3      3       45 88008  -104.0586</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   43.97663     2011        2                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      2          1         1        38 Sampled-Forest</span></span>
 <span><span class="co">##           PLOT_ID COUNT_TPA_live SEED_COUNT_TPA_live TREE_COUNT_TPA_live</span></span>
+<span><span class="co">##            &lt;char&gt;          &lt;num&gt;               &lt;num&gt;               &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560304588008         273.04               224.9               48.14</span></span></code></pre>
 </details><div class="sourceCode" id="cb160"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">treesum5b</span><span class="op">[</span><span class="va">treesum5b</span><span class="op">$</span><span class="va">CN</span> <span class="op"><a href="https://rdrr.io/pkg/terra/man/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">treesum5b</span><span class="op">[</span><span class="va">treesum5b</span><span class="op">$</span><span class="va">CN</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
+<span><span class="co">##            &lt;char&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt;    &lt;int&gt; &lt;int&gt;      &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40407815010690  2011      56     3      3       45 88008  -104.0586</span></span>
 <span><span class="co">##    LAT_PUBLIC MEASYEAR RDDISTCD NF_SAMPLING_STATUS_CD PLOT_STATUS_CD</span></span>
+<span><span class="co">##         &lt;num&gt;    &lt;int&gt;    &lt;int&gt;                 &lt;int&gt;          &lt;int&gt;</span></span>
 <span><span class="co">## 1:   43.97663     2011        2                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
+<span><span class="co">##                &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
 <span><span class="co">## 1:                NA      2          1         1        38 Sampled-Forest</span></span>
 <span><span class="co">##           PLOT_ID COUNT_TPA_live_ADJ SEED_COUNT_TPA_live_ADJ</span></span>
+<span><span class="co">##            &lt;char&gt;              &lt;num&gt;                   &lt;num&gt;</span></span>
 <span><span class="co">## 1: ID560304588008             546.08                  449.79</span></span>
 <span><span class="co">##    TREE_COUNT_TPA_live_ADJ</span></span>
+<span><span class="co">##                      &lt;num&gt;</span></span>
 <span><span class="co">## 1:                   96.29</span></span></code></pre>
 </details><div class="sourceCode" id="cb162"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">WYcond</span><span class="op">[</span><span class="va">WYcond</span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op"><a href="https://rdrr.io/pkg/terra/man/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">WYcond</span><span class="op">[</span><span class="va">WYcond</span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##              PLT_CN CONDID COND_NONSAMPLE_REASN_CD CONDPROP_UNADJ</span></span>
@@ -2066,14 +2188,14 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treedomBA</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "tdomdat"    "estunits"   "tdomvarlut" "tdomlst"    "tdomtotnm"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "tdomdat"    "tunits"     "tdomvarlut" "tdomlst"    "tdomtotnm"</span></span></code></pre>
 </details><div class="sourceCode" id="cb166"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat</span> <span class="op">&lt;-</span> <span class="va">treedomBA</span><span class="op">$</span><span class="va">tdomdat</span></span>
 <span><span class="va">tdomvarlut</span> <span class="op">&lt;-</span> <span class="va">treedomBA</span><span class="op">$</span><span class="va">tdomvarlut</span></span>
 <span><span class="va">tdomlst</span> <span class="op">&lt;-</span> <span class="va">treedomBA</span><span class="op">$</span><span class="va">tdomlst</span></span>
 <span><span class="va">tdomtotnm</span> <span class="op">&lt;-</span> <span class="va">treedomBA</span><span class="op">$</span><span class="va">tdomtotnm</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##               CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
@@ -2097,27 +2219,27 @@ output
 <span><span class="co">## 4                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 5                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6                NA      1          1         0         0 Sampled-Nonforest</span></span>
-<span><span class="co">##          PLOT_ID BA_LIVE 19 BA_LIVE 65 BA_LIVE 66 BA_LIVE 93 BA_LIVE 96</span></span>
+<span><span class="co">##          PLOT_ID BA_LIVE101 BA_LIVE106 BA_LIVE108 BA_LIVE113 BA_LIVE122</span></span>
 <span><span class="co">## 1 ID560200186688         NA         NA         NA         NA         NA</span></span>
-<span><span class="co">## 2 ID560200184596          0          0       8.24          0          0</span></span>
-<span><span class="co">## 3 ID560200188993          0          0       0.00          0          0</span></span>
+<span><span class="co">## 2 ID560200184596          0          0       0.00       6.03       0.00</span></span>
+<span><span class="co">## 3 ID560200188993          0          0       1.61      12.56      41.04</span></span>
 <span><span class="co">## 4 ID560200182340         NA         NA         NA         NA         NA</span></span>
 <span><span class="co">## 5 ID560200182869         NA         NA         NA         NA         NA</span></span>
 <span><span class="co">## 6 ID560200183304         NA         NA         NA         NA         NA</span></span>
-<span><span class="co">##   BA_LIVE101 BA_LIVE106 BA_LIVE108 BA_LIVE113 BA_LIVE122 BA_LIVE202 BA_LIVE313</span></span>
-<span><span class="co">## 1         NA         NA         NA         NA         NA         NA         NA</span></span>
-<span><span class="co">## 2          0          0       0.00       6.03       0.00       0.00          0</span></span>
-<span><span class="co">## 3          0          0       1.61      12.56      41.04      64.53          0</span></span>
-<span><span class="co">## 4         NA         NA         NA         NA         NA         NA         NA</span></span>
-<span><span class="co">## 5         NA         NA         NA         NA         NA         NA         NA</span></span>
-<span><span class="co">## 6         NA         NA         NA         NA         NA         NA         NA</span></span>
-<span><span class="co">##   BA_LIVE375 BA_LIVE475 BA_LIVE544 BA_LIVE745 BA_LIVE746 BA_LIVE749 BA_LIVE823</span></span>
-<span><span class="co">## 1         NA         NA         NA         NA         NA         NA         NA</span></span>
-<span><span class="co">## 2          0          0          0          0          0          0          0</span></span>
-<span><span class="co">## 3          0          0          0          0          0          0          0</span></span>
-<span><span class="co">## 4         NA         NA         NA         NA         NA         NA         NA</span></span>
-<span><span class="co">## 5         NA         NA         NA         NA         NA         NA         NA</span></span>
-<span><span class="co">## 6         NA         NA         NA         NA         NA         NA         NA</span></span>
+<span><span class="co">##   BA_LIVE19 BA_LIVE202 BA_LIVE313 BA_LIVE375 BA_LIVE475 BA_LIVE544 BA_LIVE65</span></span>
+<span><span class="co">## 1        NA         NA         NA         NA         NA         NA        NA</span></span>
+<span><span class="co">## 2         0       0.00          0          0          0          0         0</span></span>
+<span><span class="co">## 3         0      64.53          0          0          0          0         0</span></span>
+<span><span class="co">## 4        NA         NA         NA         NA         NA         NA        NA</span></span>
+<span><span class="co">## 5        NA         NA         NA         NA         NA         NA        NA</span></span>
+<span><span class="co">## 6        NA         NA         NA         NA         NA         NA        NA</span></span>
+<span><span class="co">##   BA_LIVE66 BA_LIVE745 BA_LIVE746 BA_LIVE749 BA_LIVE823 BA_LIVE93 BA_LIVE96</span></span>
+<span><span class="co">## 1        NA         NA         NA         NA         NA        NA        NA</span></span>
+<span><span class="co">## 2      8.24          0          0          0          0         0         0</span></span>
+<span><span class="co">## 3      0.00          0          0          0          0         0         0</span></span>
+<span><span class="co">## 4        NA         NA         NA         NA         NA        NA        NA</span></span>
+<span><span class="co">## 5        NA         NA         NA         NA         NA        NA        NA</span></span>
+<span><span class="co">## 6        NA         NA         NA         NA         NA        NA        NA</span></span>
 <span><span class="co">##   BA_TPA</span></span>
 <span><span class="co">## 1     NA</span></span>
 <span><span class="co">## 2  14.27</span></span>
@@ -2130,11 +2252,11 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##    SPCD                 COMMON_NAME     SPCDNM       BA_TPA NBRPLOTS</span></span>
-<span><span class="co">## 1    19               subalpine fir BA_LIVE 19 7.418824e+03      217</span></span>
-<span><span class="co">## 2    65                Utah juniper BA_LIVE 65 2.209716e+03       20</span></span>
-<span><span class="co">## 3    66      Rocky Mountain juniper BA_LIVE 66 1.355606e+03       65</span></span>
-<span><span class="co">## 4    93            Engelmann spruce BA_LIVE 93 6.306562e+03      185</span></span>
-<span><span class="co">## 5    96                 blue spruce BA_LIVE 96 7.334475e+01        3</span></span>
+<span><span class="co">## 1    19               subalpine fir  BA_LIVE19 7.418824e+03      217</span></span>
+<span><span class="co">## 2    65                Utah juniper  BA_LIVE65 2.209716e+03       20</span></span>
+<span><span class="co">## 3    66      Rocky Mountain juniper  BA_LIVE66 1.355606e+03       65</span></span>
+<span><span class="co">## 4    93            Engelmann spruce  BA_LIVE93 6.306562e+03      185</span></span>
+<span><span class="co">## 5    96                 blue spruce  BA_LIVE96 7.334475e+01        3</span></span>
 <span><span class="co">## 6   101              whitebark pine BA_LIVE101 1.616618e+03       90</span></span>
 <span><span class="co">## 7   106 common or two-needle pinyon BA_LIVE106 4.570194e+00        1</span></span>
 <span><span class="co">## 8   108              lodgepole pine BA_LIVE108 1.104169e+04      232</span></span>
@@ -2153,10 +2275,10 @@ output
 <code class="sourceCode R"><span><span class="va">tdomlst</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##  [1] "BA_LIVE 19" "BA_LIVE 65" "BA_LIVE 66" "BA_LIVE 93" "BA_LIVE 96"</span></span>
-<span><span class="co">##  [6] "BA_LIVE101" "BA_LIVE106" "BA_LIVE108" "BA_LIVE113" "BA_LIVE122"</span></span>
-<span><span class="co">## [11] "BA_LIVE202" "BA_LIVE313" "BA_LIVE375" "BA_LIVE475" "BA_LIVE544"</span></span>
-<span><span class="co">## [16] "BA_LIVE745" "BA_LIVE746" "BA_LIVE749" "BA_LIVE823"</span></span></code></pre>
+</summary><pre><code><span><span class="co">##  [1] "BA_LIVE101" "BA_LIVE106" "BA_LIVE108" "BA_LIVE113" "BA_LIVE122"</span></span>
+<span><span class="co">##  [6] "BA_LIVE19"  "BA_LIVE202" "BA_LIVE313" "BA_LIVE375" "BA_LIVE475"</span></span>
+<span><span class="co">## [11] "BA_LIVE544" "BA_LIVE65"  "BA_LIVE66"  "BA_LIVE745" "BA_LIVE746"</span></span>
+<span><span class="co">## [16] "BA_LIVE749" "BA_LIVE823" "BA_LIVE93"  "BA_LIVE96"</span></span></code></pre>
 </details><div class="sourceCode" id="cb172"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomtotnm</span></span></code></pre></div>
 <details><summary>
@@ -2204,7 +2326,7 @@ output
 <span><span class="va">tdomlst</span> <span class="op">&lt;-</span> <span class="va">treedomCNT</span><span class="op">$</span><span class="va">tdomlst</span></span>
 <span><span class="va">tdomtotnm</span> <span class="op">&lt;-</span> <span class="va">treedomCNT</span><span class="op">$</span><span class="va">tdomtotnm</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.tree</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.tree</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##               CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
@@ -2228,27 +2350,20 @@ output
 <span><span class="co">## 4                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 5                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6                NA      1          1         0         0 Sampled-Nonforest</span></span>
-<span><span class="co">##          PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108 CNT113</span></span>
-<span><span class="co">## 1 ID560200186688     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 2 ID560200184596      0      0     12      0      0      0      0      0     18</span></span>
-<span><span class="co">## 3 ID560200188993      0      0      0      0      0      0      0      6     36</span></span>
-<span><span class="co">## 4 ID560200182340     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 5 ID560200182869     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 6 ID560200183304     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">##   CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
-<span><span class="co">## 1     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 2      0      0      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">## 3    135    138      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">## 4     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 5     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 6     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">##   COUNT_TPA</span></span>
-<span><span class="co">## 1        NA</span></span>
-<span><span class="co">## 2        30</span></span>
-<span><span class="co">## 3       315</span></span>
-<span><span class="co">## 4        NA</span></span>
-<span><span class="co">## 5        NA</span></span>
-<span><span class="co">## 6        NA</span></span></code></pre>
+<span><span class="co">##          PLOT_ID CNT101 CNT106 CNT108 CNT113 CNT122 CNT19 CNT202 CNT313 CNT375</span></span>
+<span><span class="co">## 1 ID560200186688     NA     NA     NA     NA     NA    NA     NA     NA     NA</span></span>
+<span><span class="co">## 2 ID560200184596      0      0      0     18      0     0      0      0      0</span></span>
+<span><span class="co">## 3 ID560200188993      0      0      6     36    135     0    138      0      0</span></span>
+<span><span class="co">## 4 ID560200182340     NA     NA     NA     NA     NA    NA     NA     NA     NA</span></span>
+<span><span class="co">## 5 ID560200182869     NA     NA     NA     NA     NA    NA     NA     NA     NA</span></span>
+<span><span class="co">## 6 ID560200183304     NA     NA     NA     NA     NA    NA     NA     NA     NA</span></span>
+<span><span class="co">##   CNT475 CNT544 CNT65 CNT66 CNT745 CNT746 CNT749 CNT823 CNT93 CNT96 COUNT_TPA</span></span>
+<span><span class="co">## 1     NA     NA    NA    NA     NA     NA     NA     NA    NA    NA        NA</span></span>
+<span><span class="co">## 2      0      0     0    12      0      0      0      0     0     0        30</span></span>
+<span><span class="co">## 3      0      0     0     0      0      0      0      0     0     0       315</span></span>
+<span><span class="co">## 4     NA     NA    NA    NA     NA     NA     NA     NA    NA    NA        NA</span></span>
+<span><span class="co">## 5     NA     NA    NA    NA     NA     NA     NA     NA    NA    NA        NA</span></span>
+<span><span class="co">## 6     NA     NA    NA    NA     NA     NA     NA     NA    NA    NA        NA</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -2280,7 +2395,7 @@ output
 <span><span class="va">tdomlst</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomlst</span></span>
 <span><span class="va">tdomtotnm</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomtotnm</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.seed</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.seed</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##               CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
@@ -2304,20 +2419,20 @@ output
 <span><span class="co">## 4                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 5                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6                NA      1          1         0         0 Sampled-Nonforest</span></span>
-<span><span class="co">##          PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT108 CNT113 CNT122</span></span>
-<span><span class="co">## 1 ID560200186688     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 2 ID560200184596      0      0      0      0      0      0      0     75      0</span></span>
-<span><span class="co">## 3 ID560200188993      0      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">## 4 ID560200182340     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 5 ID560200182869     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 6 ID560200183304     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">##   CNT202 CNT313 CNT375 CNT544 CNT746 CNT749 CNT823 COUNT_TPA</span></span>
-<span><span class="co">## 1     NA     NA     NA     NA     NA     NA     NA        NA</span></span>
-<span><span class="co">## 2      0      0      0      0      0      0      0        75</span></span>
-<span><span class="co">## 3    225      0      0      0      0      0      0       225</span></span>
-<span><span class="co">## 4     NA     NA     NA     NA     NA     NA     NA        NA</span></span>
-<span><span class="co">## 5     NA     NA     NA     NA     NA     NA     NA        NA</span></span>
-<span><span class="co">## 6     NA     NA     NA     NA     NA     NA     NA        NA</span></span></code></pre>
+<span><span class="co">##          PLOT_ID CNT101 CNT108 CNT113 CNT122 CNT19 CNT202 CNT313 CNT375 CNT544</span></span>
+<span><span class="co">## 1 ID560200186688     NA     NA     NA     NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 2 ID560200184596      0      0     75      0     0      0      0      0      0</span></span>
+<span><span class="co">## 3 ID560200188993      0      0      0      0     0    225      0      0      0</span></span>
+<span><span class="co">## 4 ID560200182340     NA     NA     NA     NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 5 ID560200182869     NA     NA     NA     NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 6 ID560200183304     NA     NA     NA     NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">##   CNT65 CNT66 CNT746 CNT749 CNT823 CNT93 CNT96 COUNT_TPA</span></span>
+<span><span class="co">## 1    NA    NA     NA     NA     NA    NA    NA        NA</span></span>
+<span><span class="co">## 2     0     0      0      0      0     0     0        75</span></span>
+<span><span class="co">## 3     0     0      0      0      0     0     0       225</span></span>
+<span><span class="co">## 4    NA    NA     NA     NA     NA    NA    NA        NA</span></span>
+<span><span class="co">## 5    NA    NA     NA     NA     NA    NA    NA        NA</span></span>
+<span><span class="co">## 6    NA    NA     NA     NA     NA    NA    NA        NA</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -2352,7 +2467,7 @@ output
 <span><span class="va">tdomlst</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomlst</span></span>
 <span><span class="va">tdomtotnm</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomtotnm</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.treeseed</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.treeseed</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##               CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
@@ -2376,27 +2491,20 @@ output
 <span><span class="co">## 4                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 5                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6                NA      1          1         0         0 Sampled-Nonforest</span></span>
-<span><span class="co">##          PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108 CNT113</span></span>
-<span><span class="co">## 1 ID560200186688     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 2 ID560200184596      0      0     12      0      0      0      0      0     93</span></span>
-<span><span class="co">## 3 ID560200188993      0      0      0      0      0      0      0      6     36</span></span>
-<span><span class="co">## 4 ID560200182340     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 5 ID560200182869     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 6 ID560200183304     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">##   CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
-<span><span class="co">## 1     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 2      0      0      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">## 3    135    363      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">## 4     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 5     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 6     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">##   COUNT_TPA</span></span>
-<span><span class="co">## 1        NA</span></span>
-<span><span class="co">## 2       105</span></span>
-<span><span class="co">## 3       540</span></span>
-<span><span class="co">## 4        NA</span></span>
-<span><span class="co">## 5        NA</span></span>
-<span><span class="co">## 6        NA</span></span></code></pre>
+<span><span class="co">##          PLOT_ID CNT101 CNT106 CNT108 CNT113 CNT122 CNT19 CNT202 CNT313 CNT375</span></span>
+<span><span class="co">## 1 ID560200186688     NA     NA     NA     NA     NA    NA     NA     NA     NA</span></span>
+<span><span class="co">## 2 ID560200184596      0      0      0     93      0     0      0      0      0</span></span>
+<span><span class="co">## 3 ID560200188993      0      0      6     36    135     0    363      0      0</span></span>
+<span><span class="co">## 4 ID560200182340     NA     NA     NA     NA     NA    NA     NA     NA     NA</span></span>
+<span><span class="co">## 5 ID560200182869     NA     NA     NA     NA     NA    NA     NA     NA     NA</span></span>
+<span><span class="co">## 6 ID560200183304     NA     NA     NA     NA     NA    NA     NA     NA     NA</span></span>
+<span><span class="co">##   CNT475 CNT544 CNT65 CNT66 CNT745 CNT746 CNT749 CNT823 CNT93 CNT96 COUNT_TPA</span></span>
+<span><span class="co">## 1     NA     NA    NA    NA     NA     NA     NA     NA    NA    NA        NA</span></span>
+<span><span class="co">## 2      0      0     0    12      0      0      0      0     0     0       105</span></span>
+<span><span class="co">## 3      0      0     0     0      0      0      0      0     0     0       540</span></span>
+<span><span class="co">## 4     NA     NA    NA    NA     NA     NA     NA     NA    NA    NA        NA</span></span>
+<span><span class="co">## 5     NA     NA    NA    NA     NA     NA     NA     NA    NA    NA        NA</span></span>
+<span><span class="co">## 6     NA     NA    NA    NA     NA     NA     NA     NA    NA    NA        NA</span></span></code></pre>
 </details><div class="sourceCode" id="cb190"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cn</span> <span class="op">&lt;-</span> <span class="fl">40404730010690</span></span>
 <span><span class="va">tdomdat.tree</span><span class="op">[</span><span class="va">tdomdat.tree</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
@@ -2408,12 +2516,10 @@ output
 <span><span class="co">## 3   42.40953     2013        6                     0              1</span></span>
 <span><span class="co">##   NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
 <span><span class="co">## 3                NA      1          1         1        41 Sampled-Forest</span></span>
-<span><span class="co">##          PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108 CNT113</span></span>
-<span><span class="co">## 3 ID560200188993      0      0      0      0      0      0      0      6     36</span></span>
-<span><span class="co">##   CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
-<span><span class="co">## 3    135    138      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">##   COUNT_TPA</span></span>
-<span><span class="co">## 3       315</span></span></code></pre>
+<span><span class="co">##          PLOT_ID CNT101 CNT106 CNT108 CNT113 CNT122 CNT19 CNT202 CNT313 CNT375</span></span>
+<span><span class="co">## 3 ID560200188993      0      0      6     36    135     0    138      0      0</span></span>
+<span><span class="co">##   CNT475 CNT544 CNT65 CNT66 CNT745 CNT746 CNT749 CNT823 CNT93 CNT96 COUNT_TPA</span></span>
+<span><span class="co">## 3      0      0     0     0      0      0      0      0     0     0       315</span></span></code></pre>
 </details><div class="sourceCode" id="cb192"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.seed</span><span class="op">[</span><span class="va">tdomdat.seed</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
@@ -2424,10 +2530,10 @@ output
 <span><span class="co">## 3   42.40953     2013        6                     0              1</span></span>
 <span><span class="co">##   NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
 <span><span class="co">## 3                NA      1          1         1        41 Sampled-Forest</span></span>
-<span><span class="co">##          PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT108 CNT113 CNT122</span></span>
-<span><span class="co">## 3 ID560200188993      0      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">##   CNT202 CNT313 CNT375 CNT544 CNT746 CNT749 CNT823 COUNT_TPA</span></span>
-<span><span class="co">## 3    225      0      0      0      0      0      0       225</span></span></code></pre>
+<span><span class="co">##          PLOT_ID CNT101 CNT108 CNT113 CNT122 CNT19 CNT202 CNT313 CNT375 CNT544</span></span>
+<span><span class="co">## 3 ID560200188993      0      0      0      0     0    225      0      0      0</span></span>
+<span><span class="co">##   CNT65 CNT66 CNT746 CNT749 CNT823 CNT93 CNT96 COUNT_TPA</span></span>
+<span><span class="co">## 3     0     0      0      0      0     0     0       225</span></span></code></pre>
 </details><div class="sourceCode" id="cb194"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.treeseed</span><span class="op">[</span><span class="va">tdomdat.treeseed</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
@@ -2438,12 +2544,10 @@ output
 <span><span class="co">## 3   42.40953     2013        6                     0              1</span></span>
 <span><span class="co">##   NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
 <span><span class="co">## 3                NA      1          1         1        41 Sampled-Forest</span></span>
-<span><span class="co">##          PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108 CNT113</span></span>
-<span><span class="co">## 3 ID560200188993      0      0      0      0      0      0      0      6     36</span></span>
-<span><span class="co">##   CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
-<span><span class="co">## 3    135    363      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">##   COUNT_TPA</span></span>
-<span><span class="co">## 3       540</span></span></code></pre>
+<span><span class="co">##          PLOT_ID CNT101 CNT106 CNT108 CNT113 CNT122 CNT19 CNT202 CNT313 CNT375</span></span>
+<span><span class="co">## 3 ID560200188993      0      0      6     36    135     0    363      0      0</span></span>
+<span><span class="co">##   CNT475 CNT544 CNT65 CNT66 CNT745 CNT746 CNT749 CNT823 CNT93 CNT96 COUNT_TPA</span></span>
+<span><span class="co">## 3      0      0     0     0      0      0      0      0     0     0       540</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -2477,7 +2581,7 @@ output
 </details><div class="sourceCode" id="cb198"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.pres</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat.pres</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.pres</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.pres</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##               CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
@@ -2501,13 +2605,13 @@ output
 <span><span class="co">## 4                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 5                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6                NA      1          1         0         0 Sampled-Nonforest</span></span>
-<span><span class="co">##          PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108 CNT113</span></span>
-<span><span class="co">## 1 ID560200186688     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 2 ID560200184596      0      0      1      0      0      0      0      0      1</span></span>
-<span><span class="co">## 3 ID560200188993      0      0      0      0      0      0      0      1      1</span></span>
-<span><span class="co">## 4 ID560200182340     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 5 ID560200182869     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 6 ID560200183304     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
+<span><span class="co">##          PLOT_ID CNT19 CNT65 CNT66 CNT93 CNT96 CNT101 CNT106 CNT108 CNT113</span></span>
+<span><span class="co">## 1 ID560200186688    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 2 ID560200184596     0     0     1     0     0      0      0      0      1</span></span>
+<span><span class="co">## 3 ID560200188993     0     0     0     0     0      0      0      1      1</span></span>
+<span><span class="co">## 4 ID560200182340    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 5 ID560200182869    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 6 ID560200183304    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
 <span><span class="co">##   CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
 <span><span class="co">## 1     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
 <span><span class="co">## 2      0      0      0      0      0      0      0      0      0      0</span></span>
@@ -2544,7 +2648,7 @@ output
 <code class="sourceCode R"><span><span class="va">tdomdat.pres</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat.pres</span></span>
 <span><span class="va">tdomdat.prop</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat.prop</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.pres</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.pres</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##               CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
@@ -2568,13 +2672,13 @@ output
 <span><span class="co">## 4                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 5                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6                NA      1          1         0         0 Sampled-Nonforest</span></span>
-<span><span class="co">##          PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108 CNT113</span></span>
-<span><span class="co">## 1 ID560200186688     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 2 ID560200184596      0      0      1      0      0      0      0      0      1</span></span>
-<span><span class="co">## 3 ID560200188993      0      0      0      0      0      0      0      1      1</span></span>
-<span><span class="co">## 4 ID560200182340     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 5 ID560200182869     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 6 ID560200183304     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
+<span><span class="co">##          PLOT_ID CNT19 CNT65 CNT66 CNT93 CNT96 CNT101 CNT106 CNT108 CNT113</span></span>
+<span><span class="co">## 1 ID560200186688    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 2 ID560200184596     0     0     1     0     0      0      0      0      1</span></span>
+<span><span class="co">## 3 ID560200188993     0     0     0     0     0      0      0      1      1</span></span>
+<span><span class="co">## 4 ID560200182340    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 5 ID560200182869    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 6 ID560200183304    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
 <span><span class="co">##   CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
 <span><span class="co">## 1     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
 <span><span class="co">## 2      0      0      0      0      0      0      0      0      0      0</span></span>
@@ -2619,10 +2723,10 @@ View Example
 <span>                <span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-36-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-37-1.png" width="700"></p>
 </details><details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-36-2.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-37-2.png" width="700"></p>
 </details><div class="sourceCode" id="cb205"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treedomCNTs</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
@@ -2644,12 +2748,10 @@ output
 <span><span class="co">## 13   42.22974     2011        6                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
 <span><span class="co">## 13                NA      1          1         1        24 Sampled-Forest</span></span>
-<span><span class="co">##           PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108</span></span>
-<span><span class="co">## 13 ID560200183075      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">##    CNT113 CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
-<span><span class="co">## 13      0     42      0      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">##    COUNT_TPA</span></span>
-<span><span class="co">## 13        42</span></span></code></pre>
+<span><span class="co">##           PLOT_ID CNT101 CNT106 CNT108 CNT113 CNT122 CNT19 CNT202 CNT313 CNT375</span></span>
+<span><span class="co">## 13 ID560200183075      0      0      0      0     42     0      0      0      0</span></span>
+<span><span class="co">##    CNT475 CNT544 CNT65 CNT66 CNT745 CNT746 CNT749 CNT823 CNT93 CNT96 COUNT_TPA</span></span>
+<span><span class="co">## 13      0      0     0     0      0      0      0      0     0     0        42</span></span></code></pre>
 </details><div class="sourceCode" id="cb209"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.seed</span><span class="op">[</span><span class="va">tdomdat.seed</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
@@ -2660,10 +2762,10 @@ output
 <span><span class="co">## 13   42.22974     2011        6                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
 <span><span class="co">## 13                NA      1          1         1        24 Sampled-Forest</span></span>
-<span><span class="co">##           PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT108 CNT113</span></span>
-<span><span class="co">## 13 ID560200183075      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">##    CNT122 CNT202 CNT313 CNT375 CNT544 CNT746 CNT749 CNT823 COUNT_TPA</span></span>
-<span><span class="co">## 13      0      0      0      0      0   1124      0      0      1124</span></span></code></pre>
+<span><span class="co">##           PLOT_ID CNT101 CNT108 CNT113 CNT122 CNT19 CNT202 CNT313 CNT375 CNT544</span></span>
+<span><span class="co">## 13 ID560200183075      0      0      0      0     0      0      0      0      0</span></span>
+<span><span class="co">##    CNT65 CNT66 CNT746 CNT749 CNT823 CNT93 CNT96 COUNT_TPA</span></span>
+<span><span class="co">## 13     0     0   1124      0      0     0     0      1124</span></span></code></pre>
 </details><div class="sourceCode" id="cb211"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.treeseed</span><span class="op">[</span><span class="va">tdomdat.treeseed</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
@@ -2674,12 +2776,10 @@ output
 <span><span class="co">## 13   42.22974     2011        6                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
 <span><span class="co">## 13                NA      1          1         1        24 Sampled-Forest</span></span>
-<span><span class="co">##           PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108</span></span>
-<span><span class="co">## 13 ID560200183075      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">##    CNT113 CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
-<span><span class="co">## 13      0     42      0      0      0      0      0      0   1124      0      0</span></span>
-<span><span class="co">##    COUNT_TPA</span></span>
-<span><span class="co">## 13      1166</span></span></code></pre>
+<span><span class="co">##           PLOT_ID CNT101 CNT106 CNT108 CNT113 CNT122 CNT19 CNT202 CNT313 CNT375</span></span>
+<span><span class="co">## 13 ID560200183075      0      0      0      0     42     0      0      0      0</span></span>
+<span><span class="co">##    CNT475 CNT544 CNT65 CNT66 CNT745 CNT746 CNT749 CNT823 CNT93 CNT96 COUNT_TPA</span></span>
+<span><span class="co">## 13      0      0     0     0      0   1124      0      0     0     0      1166</span></span></code></pre>
 </details><div class="sourceCode" id="cb213"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.pres</span><span class="op">[</span><span class="va">tdomdat.pres</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
@@ -2690,10 +2790,10 @@ output
 <span><span class="co">## 13   42.22974     2011        6                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
 <span><span class="co">## 13                NA      1          1         1        24 Sampled-Forest</span></span>
-<span><span class="co">##           PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108</span></span>
-<span><span class="co">## 13 ID560200183075      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">##    CNT113 CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
-<span><span class="co">## 13      0      1      0      0      0      0      0      0      1      0      0</span></span>
+<span><span class="co">##           PLOT_ID CNT19 CNT65 CNT66 CNT93 CNT96 CNT101 CNT106 CNT108 CNT113</span></span>
+<span><span class="co">## 13 ID560200183075     0     0     0     0     0      0      0      0      0</span></span>
+<span><span class="co">##    CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
+<span><span class="co">## 13      1      0      0      0      0      0      0      1      0      0</span></span>
 <span><span class="co">##    COUNT_TPA</span></span>
 <span><span class="co">## 13         1</span></span></code></pre>
 </details><div class="sourceCode" id="cb215"><pre class="downlit sourceCode r">
@@ -2706,10 +2806,10 @@ output
 <span><span class="co">## 13   42.22974     2011        6                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
 <span><span class="co">## 13                NA      1          1         1        24 Sampled-Forest</span></span>
-<span><span class="co">##           PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108</span></span>
-<span><span class="co">## 13 ID560200183075      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">##    CNT113 CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
-<span><span class="co">## 13      0      0      0      0      0      0      0      0      1      0      0</span></span>
+<span><span class="co">##           PLOT_ID CNT19 CNT65 CNT66 CNT93 CNT96 CNT101 CNT106 CNT108 CNT113</span></span>
+<span><span class="co">## 13 ID560200183075     0     0     0     0     0      0      0      0      0</span></span>
+<span><span class="co">##    CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
+<span><span class="co">## 13      0      0      0      0      0      0      0      1      0      0</span></span>
 <span><span class="co">##    COUNT_TPA</span></span>
 <span><span class="co">## 13         1</span></span></code></pre>
 </details><div class="sourceCode" id="cb217"><pre class="downlit sourceCode r">
@@ -2722,10 +2822,10 @@ output
 <span><span class="co">## 13   42.22974     2011        6                     0              1</span></span>
 <span><span class="co">##    NF_PLOT_STATUS_CD NBRCND NBRCNDSAMP NBRCNDFOR CCLIVEPLT     FORNONSAMP</span></span>
 <span><span class="co">## 13                NA      1          1         1        24 Sampled-Forest</span></span>
-<span><span class="co">##           PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108</span></span>
-<span><span class="co">## 13 ID560200183075      0      0      0      0      0      0      0      0</span></span>
-<span><span class="co">##    CNT113 CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
-<span><span class="co">## 13      0      0      0      0      0      0      0      0      1      0      0</span></span>
+<span><span class="co">##           PLOT_ID CNT19 CNT65 CNT66 CNT93 CNT96 CNT101 CNT106 CNT108 CNT113</span></span>
+<span><span class="co">## 13 ID560200183075     0     0     0     0     0      0      0      0      0</span></span>
+<span><span class="co">##    CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
+<span><span class="co">## 13      0      0      0      0      0      0      0      1      0      0</span></span>
 <span><span class="co">##    COUNT_TPA</span></span>
 <span><span class="co">## 13         1</span></span></code></pre>
 </details></details>
@@ -2757,10 +2857,10 @@ View Example
 <span>                <span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-37-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-38-1.png" width="700"></p>
 </details><details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-37-2.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-38-2.png" width="700"></p>
 </details><div class="sourceCode" id="cb220"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treedomCNTs</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
@@ -2771,7 +2871,7 @@ output
 <code class="sourceCode R"><span><span class="va">tdomdat.pres</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat.pres</span></span>
 <span><span class="va">tdomdat.prop</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat.prop</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.pres</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.pres</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##               CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
@@ -2795,13 +2895,13 @@ output
 <span><span class="co">## 4                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 5                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6                NA      1          1         0         0 Sampled-Nonforest</span></span>
-<span><span class="co">##          PLOT_ID CNT 19 CNT 65 CNT 66 CNT 93 CNT 96 CNT101 CNT106 CNT108 CNT113</span></span>
-<span><span class="co">## 1 ID560200186688     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 2 ID560200184596      0      0      1      0      0      0      0      0      1</span></span>
-<span><span class="co">## 3 ID560200188993      0      0      0      0      0      0      0      1      1</span></span>
-<span><span class="co">## 4 ID560200182340     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 5 ID560200182869     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
-<span><span class="co">## 6 ID560200183304     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
+<span><span class="co">##          PLOT_ID CNT19 CNT65 CNT66 CNT93 CNT96 CNT101 CNT106 CNT108 CNT113</span></span>
+<span><span class="co">## 1 ID560200186688    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 2 ID560200184596     0     0     1     0     0      0      0      0      1</span></span>
+<span><span class="co">## 3 ID560200188993     0     0     0     0     0      0      0      1      1</span></span>
+<span><span class="co">## 4 ID560200182340    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 5 ID560200182869    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
+<span><span class="co">## 6 ID560200183304    NA    NA    NA    NA    NA     NA     NA     NA     NA</span></span>
 <span><span class="co">##   CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
 <span><span class="co">## 1     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA</span></span>
 <span><span class="co">## 2      0      0      0      0      0      0      0      0      0      0</span></span>
@@ -2842,11 +2942,11 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treedomBA</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "tdomdat"    "estunits"   "tdomvarlut" "tdomlst"    "tdomtotnm"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "tdomdat"    "tunits"     "tdomvarlut" "tdomlst"    "tdomtotnm"</span></span></code></pre>
 </details><div class="sourceCode" id="cb226"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ba.limber</span> <span class="op">&lt;-</span> <span class="va">treedomBA</span><span class="op">$</span><span class="va">tdomdat</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ba.limber</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ba.limber</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##               CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
@@ -2918,10 +3018,10 @@ View Example
 <span>                    <span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-39-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-40-1.png" width="700"></p>
 </details><details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-39-2.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_dat_files/figure-html/unnamed-chunk-40-2.png" width="700"></p>
 </details><div class="sourceCode" id="cb229"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treedomDIACNTs</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
@@ -2932,7 +3032,7 @@ output
 <code class="sourceCode R"><span><span class="va">tdomdat.pres</span> <span class="op">&lt;-</span> <span class="va">treedomDIACNTs</span><span class="op">$</span><span class="va">tdomdat.pres</span></span>
 <span><span class="va">tdomdat.prop</span> <span class="op">&lt;-</span> <span class="va">treedomDIACNTs</span><span class="op">$</span><span class="va">tdomdat.prop</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.pres</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tdomdat.pres</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##               CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT LON_PUBLIC</span></span>
@@ -2956,27 +3056,27 @@ output
 <span><span class="co">## 4                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 5                NA      1          1         0         0 Sampled-Nonforest</span></span>
 <span><span class="co">## 6                NA      1          1         0         0 Sampled-Nonforest</span></span>
-<span><span class="co">##          PLOT_ID CNT 19#31.0-32.9 CNT 65#29.0-30.9 CNT 65#31.0-32.9</span></span>
-<span><span class="co">## 1 ID560200186688               NA               NA               NA</span></span>
-<span><span class="co">## 2 ID560200184596               NA               NA               NA</span></span>
-<span><span class="co">## 3 ID560200188993               NA               NA               NA</span></span>
-<span><span class="co">## 4 ID560200182340               NA               NA               NA</span></span>
-<span><span class="co">## 5 ID560200182869               NA               NA               NA</span></span>
-<span><span class="co">## 6 ID560200183304               NA               NA               NA</span></span>
-<span><span class="co">##   CNT 65#33.0-34.9 CNT 65#35.0-36.9 CNT 93#29.0-30.9 CNT 93#31.0-32.9</span></span>
-<span><span class="co">## 1               NA               NA               NA               NA</span></span>
-<span><span class="co">## 2               NA               NA               NA               NA</span></span>
-<span><span class="co">## 3               NA               NA               NA               NA</span></span>
-<span><span class="co">## 4               NA               NA               NA               NA</span></span>
-<span><span class="co">## 5               NA               NA               NA               NA</span></span>
-<span><span class="co">## 6               NA               NA               NA               NA</span></span>
-<span><span class="co">##   CNT 93#35.0-36.9 CNT 96#31.0-32.9 CNT202#33.0-34.9 COUNT_TPA</span></span>
-<span><span class="co">## 1               NA               NA               NA        NA</span></span>
-<span><span class="co">## 2               NA               NA               NA        NA</span></span>
-<span><span class="co">## 3               NA               NA               NA        NA</span></span>
-<span><span class="co">## 4               NA               NA               NA        NA</span></span>
-<span><span class="co">## 5               NA               NA               NA        NA</span></span>
-<span><span class="co">## 6               NA               NA               NA        NA</span></span></code></pre>
+<span><span class="co">##          PLOT_ID CNT19#31.0-32.9 CNT202#33.0-34.9 CNT65#29.0-30.9</span></span>
+<span><span class="co">## 1 ID560200186688              NA               NA              NA</span></span>
+<span><span class="co">## 2 ID560200184596              NA               NA              NA</span></span>
+<span><span class="co">## 3 ID560200188993              NA               NA              NA</span></span>
+<span><span class="co">## 4 ID560200182340              NA               NA              NA</span></span>
+<span><span class="co">## 5 ID560200182869              NA               NA              NA</span></span>
+<span><span class="co">## 6 ID560200183304              NA               NA              NA</span></span>
+<span><span class="co">##   CNT65#31.0-32.9 CNT65#33.0-34.9 CNT65#35.0-36.9 CNT93#29.0-30.9</span></span>
+<span><span class="co">## 1              NA              NA              NA              NA</span></span>
+<span><span class="co">## 2              NA              NA              NA              NA</span></span>
+<span><span class="co">## 3              NA              NA              NA              NA</span></span>
+<span><span class="co">## 4              NA              NA              NA              NA</span></span>
+<span><span class="co">## 5              NA              NA              NA              NA</span></span>
+<span><span class="co">## 6              NA              NA              NA              NA</span></span>
+<span><span class="co">##   CNT93#31.0-32.9 CNT93#35.0-36.9 CNT96#31.0-32.9 COUNT_TPA</span></span>
+<span><span class="co">## 1              NA              NA              NA        NA</span></span>
+<span><span class="co">## 2              NA              NA              NA        NA</span></span>
+<span><span class="co">## 3              NA              NA              NA        NA</span></span>
+<span><span class="co">## 4              NA              NA              NA        NA</span></span>
+<span><span class="co">## 5              NA              NA              NA        NA</span></span>
+<span><span class="co">## 6              NA              NA              NA        NA</span></span></code></pre>
 </details></details>
 </div>
 </div>
@@ -2995,12 +3095,12 @@ output
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Tracey Frescino, Gretchen Moisen, Paul Patterson, Chris Toney, Grayson White.</p>
+<p>Developed by Tracey Frescino, Gretchen Moisen, Paul Patterson, Chris Toney, Grayson White, Joshua Yamamoto.</p>
 </div>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
       </footer>
