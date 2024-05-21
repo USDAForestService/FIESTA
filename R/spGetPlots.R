@@ -673,7 +673,7 @@ spGetPlots <- function(bnd = NULL,
           message("no xyjoinid defined... using the xy.uniqueid: ", xy.uniqueid)
           xyjoinid <- xy.uniqueid         
         } 
-
+        
         stcds <- pcheck.states(states, statereturn="VALUE")
         if (is.null(spxy) || nrow(spxy) == 0) {
           stop("spxy is null")
@@ -1161,7 +1161,7 @@ spGetPlots <- function(bnd = NULL,
           }
         }
       }
-
+      
       ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
       if (nrow(PLOT) > length(unique(PLOT[[puniqueid]]))) {
         if ("INVYR" %in% names(PLOT)) {

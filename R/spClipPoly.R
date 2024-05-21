@@ -216,7 +216,8 @@ spClipPoly <- function(polyv,
 
   ## Clip poly
   ipoly <- sf::st_intersection(polyvx, sf::st_union(clippolyvx))
-
+  ipoly <- sf::st_cast(sf::st_make_valid(ipoly))
+  
 
   ## Calculate area
   if (areacalc) {

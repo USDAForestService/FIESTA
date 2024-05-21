@@ -100,6 +100,9 @@
 #' @param multiSAdoms Logical. If TRUE, and the percent intersect of smallbnd
 #' with maxbnd is greater than maxbnd.threshold, more than 1 SAdoms will be
 #' output in list.
+#' @param bayesian Logical. If TRUE, does not union smallbnd with largebnd.
+#' If multiSAdoms = TRUE, returns intersecting maxbnd where larger than 
+#' maxbnd threshold.
 #' @param showsteps Logical. If TRUE, intermediate steps of selection process
 #' are displayed.
 #' @param savedata Logical. If TRUE, save SAdoms spatial layer to outfolder.
@@ -166,7 +169,8 @@ spGetSAdoms <- function(smallbnd,
                         nbrdom.min = NULL, 
                         maxbnd.threshold = 10, 
                         largebnd.threshold = 5, 
-                        multiSAdoms = FALSE, 
+                        multiSAdoms = FALSE,
+                        bayesian = FALSE,
                         showsteps = TRUE, 
                         savedata = FALSE, 
                         savesteps = FALSE, 
@@ -291,6 +295,11 @@ spGetSAdoms <- function(smallbnd,
     multiSAdoms <- TRUE
   }
 
+  ## Check bayesian
+  #############################################################################
+  bayesian <- pcheck.logical(bayesian, varnm="bayesian", 
+                           title="Baysian?", first="NO", gui=gui) 
+  
   ## Check savedata
   #############################################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 
@@ -346,20 +355,20 @@ spGetSAdoms <- function(smallbnd,
   #############################################################################
   ## smallbnd
   #############################################################################
-  smallbndx <- pcheck.spatial(layer=smallbnd, dsn=smallbnd_dsn, caption="small boundary",
-		stopifnull=TRUE)
+  smallbndx <- pcheck.spatial(layer=smallbnd, dsn=smallbnd_dsn, 
+                        caption="small boundary", stopifnull=TRUE)
   smallbndx <- checksf.longlat(smallbndx)
   smallbndx.prj <- sf::st_crs(smallbndx)
   smallbndnmlst <- names(smallbndx)
   smallbnd.unique <- pcheck.varchar(var2check=smallbnd.unique, varnm="smallbnd.unique", 
-		gui=gui, checklst=smallbndnmlst, caption="Small area attribute", 
-		warn=paste(smallbnd.unique, "not in smallbnd"), stopifnull=FALSE)
+		          gui=gui, checklst=smallbndnmlst, caption="Small area attribute", 
+		          warn=paste(smallbnd.unique, "not in smallbnd"), stopifnull=FALSE)
   if (!is.null(smallbnd.unique)) {
     smallbndnmlst <- smallbndnmlst[smallbndnmlst != smallbnd.unique]
   }
   smallbnd.domain <- pcheck.varchar(var2check=smallbnd.domain, varnm="smallbnd.domain", 
-		gui=gui, checklst=smallbndnmlst, caption="Small area domain", 
-		stopifnull=FALSE, stopifinvalid=FALSE)
+		          gui=gui, checklst=smallbndnmlst, caption="Small area domain", 
+		          stopifnull=FALSE, stopifinvalid=FALSE)
   if (all(is.null(smallbnd.unique), is.null(smallbnd.domain))) {
     warning("both smallbnd.unique and smallbnd.domain is null...  adding DOMAIN=1")
     smallbndx$DOMAIN <- 1
@@ -407,7 +416,7 @@ spGetSAdoms <- function(smallbnd,
     if (!all(smallbnd.stfilter %in% sort(unique(stunitco$STATENM)))) 
       stop("smallbnd.stfilter is invalid")
     smallbnd.stfilter <- paste0("STATENM %in% c(", 
-			addcommas(smallbnd.stfilter , quotes=TRUE), ")")
+			          addcommas(smallbnd.stfilter , quotes=TRUE), ")")
     stunitcof <- datFilter(stunitco, smallbnd.stfilter, stopifnull=TRUE)$xf
 
     ## Need to dissolve because small area could be in multiple counties
@@ -644,6 +653,7 @@ spGetSAdoms <- function(smallbnd,
 #    }
 #    #plot(sf::st_geometry(smallbndx), add=TRUE) 
 #  } 
+  
 
   #############################################################################
   ### DO THE WORK
@@ -665,7 +675,7 @@ spGetSAdoms <- function(smallbnd,
 		      out_fmt=step_fmt, multiSAdoms=multiSAdoms, byeach=byeach,
 		      maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold, 
 		      maxbnd.addtext=maxbnd.addtext, largebnd.addtext=largebnd.addtext, 
-		      overwrite=overwrite_layer)
+		      overwrite=overwrite_layer, bayesian=bayesian)
 			  
     SAdomslst <- autoselectlst$SAdomslst
     helperbndxlst <- autoselectlst$helperbndxlst
@@ -707,8 +717,8 @@ spGetSAdoms <- function(smallbnd,
 		names(smallbndxlst[[i]])[!names(smallbndxlst[[i]]) %in% names(SAdomslst[[i]])]))
     if (length(smallbndvars) > 1) {
       SAdomslst[[i]] <- merge(SAdomslst[[i]], 
-		sf::st_drop_geometry(smallbndxlst[[i]][, smallbndvars]), 
-		by.x="DOMAIN", by.y=smallbnd.domain, all.x=TRUE)
+		         sf::st_drop_geometry(smallbndxlst[[i]][, smallbndvars]), 
+		         by.x="DOMAIN", by.y=smallbnd.domain, all.x=TRUE)
     }
 
 #    SAdomslst[[i]] <- merge(SAdomslst[[i]], 

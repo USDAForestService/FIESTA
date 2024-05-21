@@ -21,6 +21,7 @@ modSApop(
   dunitzonal = NULL,
   prednames = NULL,
   predfac = NULL,
+  addxy = FALSE,
   returndata = TRUE,
   savedata = FALSE,
   saveobj = FALSE,
@@ -88,6 +89,8 @@ model.}
 
 \item{predfac}{String vector. Name(s) of factor predictor variables to use
 in model. Names will change in output depending on number of categories.}
+
+\item{addxy}{Logical. If TRUE, adds X/Y attributes to pltassgn.}
 
 \item{returndata}{Logical. If TRUE, returns data objects.}
 

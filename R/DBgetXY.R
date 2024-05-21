@@ -146,7 +146,7 @@ DBgetXY <- function (states = NULL,
   SCHEMA.=invyrtab=evalEndyr=plotnm=ppsanm=ppsanm=pltflds=ppsaflds=pvars=
   dbconn=XY <- NULL
 
-  
+
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
@@ -256,10 +256,10 @@ DBgetXY <- function (states = NULL,
   ## Check intensity1
   ####################################################################
   intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
-		title="Single intensity?", first="YES", gui=gui)
-  intensity <- NULL
+		               title="Single intensity?", first="YES", gui=gui)
+                   intensity <- NULL
   if (intensity1) {
-	intensity <- 1
+	  intensity <- 1
   }
 
   ###########################################################################
@@ -556,14 +556,14 @@ DBgetXY <- function (states = NULL,
                              stabbrlst,
                              returnDT = TRUE, 
                              stopifnull = FALSE),
-			error = function(e) {
+			            error = function(e) {
                   message(e, "\n")
                   return(NULL) }) 
       }				  
     }
-	if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
-	  ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-	}
+	  if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
+	    ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+	  }
 	
     ## Check xy
     XY <- pcheck.table(xy, stopifnull=FALSE)
@@ -665,6 +665,65 @@ DBgetXY <- function (states = NULL,
   ## Check plot table
   ####################################################################
   if (xyisplot || is.null(pvars2keep)) {
+    
+    ## Check plot table
+    ########################################################
+    if (datsource == "datamart") {
+      if (is.null(PLOT)) {
+        PLOT <- tryCatch( DBgetCSV("PLOT", 
+                                   stabbrlst,
+                                   returnDT = TRUE, 
+                                   stopifnull = FALSE),
+                          error = function(e) {
+                            message(e, "\n")
+                            return(NULL) })
+      }
+      if (!is.null(PLOT)) {
+        plotnm <- "PLOT"
+        pltflds <- names(PLOT)
+      }
+      
+    } else if (datsource == "sqlite") {
+      ## If XY and plot data are from the same databases, 
+      ## we will query both
+      if (all.equal(dbconn, xyconn)) {
+        if (!plotindb) {
+          plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
+        }
+        if (!is.null(plotnm)) {
+          plotindb <- TRUE	  
+          pltflds <- DBI::dbListFields(dbconn, plotnm)     
+        }
+      } else {
+        if (!is.null(plotnm)) {
+          PLOT <- pcheck.table(plot_layer, stopifnull=TRUE, stopifinvalid=TRUE)
+          plotnm <- "PLOT"
+        }
+        names(PLOT) <- toupper(names(PLOT))
+        pltflds <- names(PLOT)
+      }
+    } else {
+      if (!is.null(plotnm)) {
+        PLOT <- pcheck.table(plot_layer, stopifnull=TRUE, stopifinvalid=TRUE)
+        plotnm <- "PLOT"
+      }
+      names(PLOT) <- toupper(names(PLOT))
+      pltflds <- names(PLOT)
+    }
+
+
+    ## check pjoinid
+    pjoinid <- findnm(pjoinid, pltflds, returnNULL=TRUE)
+    if (is.null(pjoinid)) {
+      pjoinid <- findnm(xyjoinid, pltflds, returnNULL=TRUE)
+      if (is.null(pjoinid)) {
+        if (xyjoinid == "PLT_CN" && "CN" %in% pltflds) {
+          pjoinid <- "CN"
+        } else {
+          stop("pjoinid is invalid")
+        }
+      }
+    }
 
     if (!is.null(pvars2keep)) {
       pmiss <- pvars2keep[!pvars2keep %in% xyflds]
@@ -714,7 +773,7 @@ DBgetXY <- function (states = NULL,
 	    xyfromqry2 <- paste0(xyfromqry2, " and xy.", varCur, " = maxyear.maxyr)")
 	  
 	  } else {
-	    xyfromqry2 <- paste0("\nINNER JOIN p ON(xy.", xyjoinid, " = p.", xyjoinid, ")")
+	    xyfromqry2 <- paste0("\nINNER JOIN p ON(xy.", xyjoinid, " = p.", pjoinid, ")")
 	  }
 	
 #	  xyfromqry <- paste0("\nFROM ", SCHEMA., xynm, " xy",
@@ -722,8 +781,8 @@ DBgetXY <- function (states = NULL,
 
     xyfromqry <- paste0(xyfromqry, xyfromqry2)
     xyqry <- paste0("SELECT ", toString(paste0("xy.", xyvars)), 
-                  xyfromqry)				  
-
+                  xyfromqry)	
+    
   } else if (!xyisplot && !is.null(pvars2keep)) {    
 
     ## Check plot table
@@ -934,7 +993,7 @@ DBgetXY <- function (states = NULL,
 				                    "\n GROUP BY ", invarsA, 
 				                    "\n ORDER BY ", invarsA) 
     }
-  } 
+  }
 
   ###########################################################################
   ## Build filter
