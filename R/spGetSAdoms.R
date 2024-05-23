@@ -526,9 +526,11 @@ spGetSAdoms <- function(smallbnd,
   #############################################################################
   largebndx <- pcheck.spatial(layer=largebnd, dsn=largebnd_dsn, 
 		caption="large boundary")
-  largebndx <- sf::st_make_valid(largebndx, 
+  if (!all(sf::st_is_valid(largebndx))) {
+    largebndx <- sf::st_make_valid(largebndx, 
                                  geos_method = 'valid_structure', 
                                  geos_keep_collapsed = FALSE)
+  }
   
   ## Check largebndx
   if (!is.null(largebndx)) {
