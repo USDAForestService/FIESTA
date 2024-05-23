@@ -690,7 +690,7 @@ check.popdataPLT <- function(dsn,
   ##############################################################################
   vars2keep <- NULL
   if (module == "SA" && "AOI" %in% names(unitarea)) {
-    vars2keep <- "AOI"
+    vars2keep <- unique(c(pvars2keep, "AOI"))
   }
 
   removeunits <- ifelse(unit.action == "remove", TRUE, FALSE)

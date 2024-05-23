@@ -204,6 +204,7 @@ modSApop <- function(popType = "VOL",
                      SAdoms = NULL, 
                      smallbnd = NULL, 
                      smallbnd.domain = NULL, 
+                     largebnd.unique = NULL,
                      SAdata = NULL, 
                      pltdat = NULL, 
                      auxdat = NULL, 
@@ -235,8 +236,7 @@ modSApop <- function(popType = "VOL",
   returnlst <- list(module = "SA")
   adj <- ifelse(adjplot, "plot", "none")
   areawt2 <- NULL
-  pvars2keep <- "AOI"
-   
+
   # dunitvar2=NULL
   # pvars2keep=NULL
   # cvars2keep=NULL
@@ -414,6 +414,7 @@ modSApop <- function(popType = "VOL",
     predfac <- SAdata$predfac
     spxy <- SAdata$spxy
     xy.uniqueid <- SAdata$xy.uniqueid
+    pvars2keep <- SAdata$vars2keep
 
     if (is.null(prednames)) {
       prednames <- SAdata$prednames
@@ -536,7 +537,9 @@ modSApop <- function(popType = "VOL",
   if (!is.null(SAdoms) && !"sf" %in% class(SAdoms)) {
     stop("invalid SAdoms")
   }
-
+  
+   
+  pvars2keep <- unique(c(largebnd.unique, "AOI", pvars2keep))
   ###################################################################################
   ## CHECK PLOT PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -572,6 +575,14 @@ modSApop <- function(popType = "VOL",
   states <- pltcheck$states
   invyrs <- pltcheck$invyrs
   dbconn <- pltcheck$dbconn
+
+  if (!is.null(pvars2keep)) {
+    pltassgnx <- merge(pltassgnx, pltx[, c(puniqueid, pvars2keep), with=FALSE], 
+                       by.x=pltassgnid, by.y=puniqueid)
+    pltx <- pltx[, names(pltx)[!names(pltx) %in% pvars2keep], with=FALSE]
+    setcolorder(pltassgnx, c(pltassgnid, pvars2keep, 
+                          names(pltassgnx)[!names(pltassgnx) %in% c(pltassgnid, pvars2keep)]))
+  }
 
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
@@ -735,14 +746,13 @@ modSApop <- function(popType = "VOL",
     }
     if (!is.null(xy.uniqueid) && xy.uniqueid %in% names(spxy)) {
       xy.coords <- data.frame(sf::st_drop_geometry(spxy[, xy.uniqueid]), sf::st_coordinates(spxy))
-      pltcondx <- merge(pltcondx, xy.coords, by.x=cuniqueid, by.y=xy.uniqueid)
+      pltassgnx <- merge(pltassgnx, xy.coords, by.x=pltassgnid, by.y=xy.uniqueid)
     } else {
       message(pltassgnid, " not in spxy names... cannot merge")
       stop()
     }
   }
-  
-   
+
   ###################################################################################
   ## Add new variables to pltcondx for estimation
   ###################################################################################
@@ -785,10 +795,13 @@ modSApop <- function(popType = "VOL",
   ## Move new columns to end of table
   setcolorder(pltcondx, c(pltcondxcols, newcols))
 
+  ## Subset condx
+  condx <- condx[, c("DOMAIN", cuniqueid, condid, "CONDPROP_ADJ"), with=FALSE]
   
   ## Build list of data to return
   ###################################################################################
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
+             pltassgnx = pltassgnx,
              cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
              dunitarea=dunitarea, areavar=areavar, areaunits=areaunits, 
              dunitvar=dunitvar, dunitlut=data.table(dunitlut), 
@@ -805,6 +818,7 @@ modSApop <- function(popType = "VOL",
   }
   returnlst$prednames <- prednames
   returnlst$predfac <- predfac
+  returnlst$largebnd.unique <- largebnd.unique
 
 
   ## Save list object

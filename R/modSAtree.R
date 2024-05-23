@@ -186,7 +186,7 @@ modSAtree <- function(SApopdatlst = NULL,
                       SApackage = "JoSAE", 
                       SAmethod = "area", 
                       estseed = "none",
-					  woodland = "Y",
+                      woodland = "Y",
                       largebnd.unique = NULL, 
                       landarea = "FOREST", 
                       pcfilter = NULL, 
@@ -553,6 +553,7 @@ modSAtree <- function(SApopdatlst = NULL,
     SAdomsdf <- SApopdat$SAdomsdf
     condx <- setDT(copy(SApopdat$condx))
     pltcondx <- copy(SApopdat$pltcondx)
+    pltassgnx <- SApopdat$pltassgnx
     treex <- copy(SApopdat$treex)
     seedx <- copy(SApopdat$seedx)
     if (is.null(treex) && is.null(seedx)) {
@@ -654,19 +655,20 @@ modSAtree <- function(SApopdatlst = NULL,
     ###################################################################################
     if (!sumunits) col.add0 <- TRUE
     if (!is.null(rowvar) && rowvar == "TOTAL") rowvar <- NULL
-    rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
-	                  treef=treef, seedf=seedf, 
-                      condf=pltcondf, cuniqueid=cuniqueid,                      
-					  tuniqueid=tuniqueid, estseed=estseed,
-					  rowvar=rowvar, colvar=colvar, 
-                      row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
-                      row.orderby=row.orderby, col.orderby=col.orderby, 
-                      row.add0=row.add0, col.add0=col.add0, 
-                      title.rowvar=title.rowvar, title.colvar=title.colvar, 
-                      rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-                      rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-                      landarea=landarea, states=states, 
-					  cvars2keep="COND_STATUS_CD") 
+    rowcolinfo <- 
+      check.rowcol(gui=gui, esttype=esttype, 
+	                 treef=treef, seedf=seedf, 
+                   condf=pltcondf, cuniqueid=cuniqueid,                      
+					         tuniqueid=tuniqueid, estseed=estseed,
+					         rowvar=rowvar, colvar=colvar, 
+                   row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+                   row.orderby=row.orderby, col.orderby=col.orderby, 
+                   row.add0=row.add0, col.add0=col.add0, 
+                   title.rowvar=title.rowvar, title.colvar=title.colvar, 
+                   rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
+                   rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+                   landarea=landarea, states=states, 
+					         cvars2keep="COND_STATUS_CD") 
     treef <- rowcolinfo$treef
     seedf <- rowcolinfo$seedf
     condf <- rowcolinfo$condf
@@ -719,16 +721,16 @@ modSAtree <- function(SApopdatlst = NULL,
       ## Check for matching levels in x and xunique
       if (!is.null(uniquerow)) {
         chklevels <- checklevels(x = tdomdat, 
-	                         uniquex = uniquerow,
-							 xvar = rowvar) 
-	    tdomdat <- chklevels$x
+	                               uniquex = uniquerow,
+							                   xvar = rowvar) 
+	      tdomdat <- chklevels$x
         uniquerow <- chklevels$uniquex	
       }
       if (!is.null(uniquecol)) {
         chklevels <- checklevels(x = tdomdat, 
-	                         uniquex = uniquecol,
-							 xvar = colvar) 
-	    tdomdat <- chklevels$x
+	                               uniquex = uniquecol,
+							                   xvar = colvar) 
+	      tdomdat <- chklevels$x
         uniquecol <- chklevels$uniquex	
       }
     }
@@ -760,52 +762,66 @@ modSAtree <- function(SApopdatlst = NULL,
 
     ## check largebnd.unique
     ########################################################
-    if (!is.null(largebnd.unique2) && !is.null(SAdomsdf)) {
-      tdomdat <- merge(tdomdat, 
+    vars2keep <- NULL
+    if (!is.null(largebnd.unique)) {
+      if (largebnd.unique %in% names(tdomdat) && largebnd.unique %in% names(pltassgnx)) {
+        tdomdat <- merge(pltassgnx, tdomdat, by=c(largebnd.unique, "PLT_CN", "DOMAIN"), all.x=TRUE)
+      } else if (largebnd.unique %in% names(pltassgnx)) {
+        tdomdat <- merge(pltassgnx, tdomdat, by=c("PLT_CN", "DOMAIN"), all.x=TRUE)
+      } else if (!is.null(SAdomsdf)) {
+        tdomdat <- merge(tdomdat, 
 		        unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
  		        by=smallbnd.dom)
+      } else {
+        tdomdat$LARGEBND <- 1
+        largebnd.unique <- "LARGEBND"
+      }
       #addSAdomsdf <- TRUE
       #SAdomvars <- unique(c(SAdomvars, largebnd.unique))
-      largebnd.unique <- largebnd.unique2
     } else {
       tdomdat$LARGEBND <- 1
       largebnd.unique <- "LARGEBND"
-      tdomdat$LARGEBND <- 1
+      tdomdat <- merge(pltassgnx, tdomdat, by=c("PLT_CN", "DOMAIN"), all.x=TRUE)
     }
 
-    ## get unique largebnd values
-    largebnd.vals <- sort(unique(tdomdat[[largebnd.unique]]))
-    largebnd.vals <- largebnd.vals[table(tdomdat[[largebnd.unique]]) > 30]
-
-    ## Add AOI if not in data
-    ######################################
-    if (!"AOI" %in% names(tdomdat)) {
-      tdomdat$AOI <- 1
-      dunitlut$AOI <- 1
+    if (bayes) {
+      vars2keep <- largebnd.unique
+      tdomdat$LARGEBND <- 1
+      largebnd.unique <- "LARGEBND"
+      largebnd.vals <- 1
     }
 
     ## Get estimate for total
     ######################################
+    byvars <- unique(c(vars2keep, largebnd.unique, dunitvar, "AOI", cuniqueid, "TOTAL", prednames))
+    if (all(c("X", "Y") %in% names(pltassgnx))) {
+      byvars <- c(byvars, "X","Y")
+    }
     ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
-    tdomdattot <- setDT(tdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
-		                by=c(largebnd.unique, dunitvar, "AOI", cuniqueid, "TOTAL", prednames), 
-		                .SDcols=estvar.name]
+    tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+                        by=byvars, 
+                        .SDcols=estvar.name]
+  
 
+    ## get unique largebnd values
+    largebnd.vals <- sort(unique(tdomdattot[[largebnd.unique]]))
+    largebnd.vals <- largebnd.vals[table(tdomdattot[[largebnd.unique]]) > 30]
+
+    ## Add AOI if not in data
+    ######################################
+#    if (!"AOI" %in% names(tdomdat)) {
+#      tdomdat$AOI <- 1
+#      dunitlut$AOI <- 1
+#    }
+   
     ## get estimate by domain, by largebnd value
     #message("generating JoSAE unit-level estimates for ", response, " using ", SApackage, "...")
 
-    if (!"DOMAIN" %in% names(tdomdattot)) {
-      tdomdattot$DOMAIN <- tdomdattot[[dunitvar]]
-      tdomdattot[[dunitvar]] <- NULL
-      dunitlut$DOMAIN <- dunitlut[[dunitvar]]
-      dunitlut[[dunitvar]] <- NULL
-      dunitareabind$DOMAIN <- dunitareabind[[dunitvar]]
-      dunitareabind[[dunitvar]] <- NULL
-    }
-    if (!"AOI" %in% names(tdomdattot)) {
-      tdomdattot$AOI <- 1
-      dunitlut$AOI <- 1
-    }
+#    if (!"AOI" %in% names(tdomdattot)) {
+#      tdomdattot$AOI <- 1
+#      dunitlut$AOI <- 1
+#    }
+    
 
 ## Testing
 #dunitlut <- data.table(SApopdat$dunitlut)
@@ -813,27 +829,28 @@ modSAtree <- function(SApopdatlst = NULL,
 #largebnd.val=largebnd.vals
 #domain="TOTAL"
 #largebnd.unique="LARGEBND"
-
+    #source("C:\\_tsf\\_GitHub\\FIESTAutils\\R\\SAest.pbar.R")
     dunit_totestlst <- 
-	tryCatch(
-		lapply(largebnd.vals, SAest.large, 
-			      dat=tdomdattot, 
-		       cuniqueid=cuniqueid, largebnd.unique=largebnd.unique, 
-		       dunitlut=dunitlut, dunitvar="DOMAIN", 
-		       prednames=prednames, domain="TOTAL", response=response, 
-		       showsteps=showsteps, savesteps=savesteps, 
-		       stepfolder=stepfolder, prior=prior, 
-		       modelselect=modelselect, multest=multest,
-			     SApackage=SApackage, SAmethod=SAmethod),
-     	        error=function(e) {
-			        message("error with estimates of ", response, "...")
-			        message(e, "\n")
-			      return(NULL) })
+      tryCatch(
+        lapply(largebnd.vals, SAest.large, 
+               dat=tdomdattot, 
+               cuniqueid=cuniqueid, largebnd.unique=largebnd.unique, 
+               dunitlut=dunitlut, dunitvar="DOMAIN", 
+               prednames=prednames, domain="TOTAL", response=response, 
+               showsteps=showsteps, savesteps=savesteps, 
+               stepfolder=stepfolder, prior=prior, 
+               modelselect=modelselect, multest=multest,
+               SApackage=SApackage, SAmethod=SAmethod, bayes=bayes, 
+               save4testing=TRUE, vars2keep=vars2keep),
+        error=function(e) {
+          message("error with estimates of ", response, "...")
+          message(e, "\n")
+          return(NULL) })
     
     if (is.null(dunit_totestlst)) {
       return(NULL)
     }
-    
+
     if (length(largebnd.vals) > 1) {
       dunit_est <- do.call(rbind, do.call(rbind, dunit_totestlst)[,"est.large"])
       if (multest || SAmethod == "unit") {

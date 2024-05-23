@@ -31,6 +31,7 @@ modSApop(
   SAdoms = NULL,
   smallbnd = NULL,
   smallbnd.domain = NULL,
+  largebnd.unique = NULL,
   SAdata = NULL,
   pltdat = NULL,
   auxdat = NULL,
