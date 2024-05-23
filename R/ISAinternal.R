@@ -8,7 +8,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 		stepfolder=NULL, out_fmt="shp", step_dsn=NULL, step.cex=0.8,
 		maxbnd.threshold=0, largebnd.threshold=30, multiSAdoms=TRUE,
 		byeach=FALSE, maxbnd.addtext=TRUE, largebnd.addtext=FALSE, 
-		bayesian=FALSE, overwrite=TRUE) {
+		bayes=FALSE, overwrite=TRUE) {
   ## DESCRIPTION:: Automate selection of helperbnd polygons for modeling.
   ## maxbnd - maximum constraint for modeling extent (e.g., Province)
   ## if maxbnd, maxbnd is intersected with smallbnd and dissolved by maxbnd.unique (*maxbnd_select)
@@ -166,7 +166,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     if (length(maxbnd.gtthres) > 1 || (nrow(maxbnd_max) > 1 && byeach)) {
       message("smallbnd intersects more than 1 maxbnd")
 
-      if (bayesian) {
+      if (bayes) {
         mbndlst <- maxbnd.gtthres
         sbndlst <- list(smallbndx)
         maxbndxlst <- maxbnd.gtthres
@@ -263,7 +263,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       if (nrow(smallbndx) < 1000) {
         plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
       }
-      if (multiSAdoms || bayesian) {
+      if (multiSAdoms || bayes) {
         plot(sf::st_geometry(maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% maxbndxlst,]),
 		      add=TRUE, border="cyan2", lwd=2)
       } else {
@@ -366,20 +366,19 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     sbnd.centroid <- suppressWarnings(sf::st_centroid(sbndd))
     largebnd_select <- NULL		## for selected largebnds to include more helperbnds
 
-
     largebndx <- largebndx[, largebnd.unique]
     helperbndx <- helperbndx[, helperbnd.unique]
 
     j <- 1
     ## Loop thru maxbndlst
     while (nbrdom < nbrdom.minx && j <= ifelse(length(maxbndxlst) > 0, length(mbnd), 1)) {
-      if (length(mbnd) > 0 && !bayesian) {
+      if (length(mbnd) > 0 && !bayes) {
         message("\nadding ", maxbnd.unique, ": ", mbnd[j])
 
         ## Subset maxbndx.intd
         maxbndx.tmpd <- maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% mbnd[j],]
 
-       ## Remove columns in maxbndx.tmpd with same names as in largebndx.int
+        ## Remove columns in maxbndx.tmpd with same names as in largebndx.int
         maxbndx.tmpd <- maxbndx.tmpd[,
 		          names(maxbndx.tmpd)[!names(maxbndx.tmpd) %in% names(largebndx)]]
 
@@ -515,9 +514,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
  
       while (!end) {
         ## Get intersecting helper polygons
-        helperbndx.tmp <- suppressWarnings(sf::st_join(helperbndx,
+        helperbndx.tmp <- sf::st_join(helperbndx,
 						sf_dissolve(largebnd_select, largebnd.unique),
-						join=sf::st_intersects, left=FALSE))
+						join=sf::st_intersects, left=FALSE, largest=TRUE)
 
         # get percent overlap of helperbndx.int and y largebndx.int
         ############################################################
@@ -674,7 +673,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       j <- j + 1
     } ## End while j - maxbnd
 
-    if (polyunion && !bayesian) {
+    if (polyunion && !bayes) {
       ## Remove columns in helperbndx.tmp with same names as in smallbnd attributes
       helperbndx.tmp <- helperbndx.tmp[, names(helperbndx.tmp)[!names(helperbndx.tmp) %in%
 			c(smallbnd.unique, "AOI", smallbnd.domain)]]
@@ -695,16 +694,28 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         SAdoms <- sbnd
 	    }
     }
+    
+    ## Add AOI to SAdoms
+    if (bayes) {
+      SAdoms$AOI <- 1
+      setnames(SAdoms, helperbnd.unique, "DOMAIN")
 
-    ## Add 0 to non-AOI
-    SAdoms[is.na(SAdoms$AOI), "AOI"] <- 0
-
-
-    ## Add a new column (DOMAIN) with helperbnd.unique where AOI = 0
-    SAdoms$DOMAIN <- SAdoms[[smallbnd.domain]]
-    SAdoms$DOMAIN[SAdoms$AOI == 0] <- SAdoms[[helperbnd.unique]][SAdoms$AOI == 0]
-    SAdoms$DOMAIN[SAdoms$AOI == 0] <- SAdoms[[helperbnd.unique]][SAdoms$AOI == 0]
-
+      helperbndx.test <- helperbndx.tmp[helperbndx.tmp$PROVINCE == 'M331',]
+      test <- sf::st_intersection(sbnd[, smallbnd.unique], 
+                                  helperbndx.test[, helperbnd.unique])
+      
+            
+      sbnd <- sf::st_cast(sf::st_intersection(sbnd[, smallbnd.unique], 
+                      helperbndx.tmp[, helperbnd.unique]))
+      setnames(sbnd, helperbnd.unique, "DOMAIN")
+    } else {
+      ## Add 0 to non-AOI
+      SAdoms[is.na(SAdoms$AOI), "AOI"] <- 0
+    
+      ## Add a new column (DOMAIN) with helperbnd.unique where AOI = 0
+      SAdoms$DOMAIN <- SAdoms[[smallbnd.domain]]
+      SAdoms$DOMAIN[SAdoms$AOI == 0] <- SAdoms[[helperbnd.unique]][SAdoms$AOI == 0]
+    }
 #    plot(sf::st_geometry(SAdoms["DOMAIN"]), main=NULL, border="grey",
 #		col=sf::sf.colors(nbrdom, categorical=TRUE, alpha=.2))
 #          coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(SAdoms)))
@@ -716,7 +727,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     helperbndxlst[[i]] <- helperbndx.tmp
     sbnd$AOI <- NULL
     smallbndxlst[[i]] <- sbnd
-
+    
   } ## End while i - sbnd
 
   names(SAdomslst) <- SAdomsnmlst

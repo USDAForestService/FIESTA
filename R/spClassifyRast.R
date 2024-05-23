@@ -28,9 +28,9 @@ spClassifyRast <- function(rastfn,
                            bnd = NULL, 
                            bnd_dsn = NULL, 
                            bnd.filter = NULL, 
-						   buffdist = NULL,
-						   nodataclass = NULL,
-						   gethist = FALSE,
+						               buffdist = NULL,
+						               nodataclass = NULL,
+						               gethist = FALSE,
                            savedata_opts = NULL) {
 
 
@@ -102,9 +102,9 @@ spClassifyRast <- function(rastfn,
   ## Get nodata value of ref raster.
   ## If the nodata values was not assigned (NA), then use a default value.
   if (is.na(rast.nodata)) {
-	nodata <- getDefaultNodata(rast.datatype)
+	  nodata <- getDefaultNodata(rast.datatype)
   } else {
-	nodata <- rast.nodata
+	  nodata <- rast.nodata
   }
 
 
@@ -112,8 +112,8 @@ spClassifyRast <- function(rastfn,
   if (!is.vector(cutbreaks) || !is.numeric(cutbreaks)) {
     stop("cutbreaks must be a numeric vector")
     if (!identical(sort(cutbreaks),cutbreaks)) {
-	  stop("cutbreaks must be in sequential order")
-	}
+	    stop("cutbreaks must be in sequential order")
+	  }
   }
  
   ####################################################################
@@ -140,12 +140,12 @@ spClassifyRast <- function(rastfn,
     }
  	
 					  
-	## Clip reference raster to polygon boundary 
+	  ## Clip reference raster to polygon boundary 
     ###########################################################################
-	if (savetmp) {
-	  cliprastfn <- file.path(outfolder, "clip_rast.tif")
-	} else {
-	  cliprastfn <- tempfile("clip_rast", fileext="tif")
+	  if (savetmp) {
+	    cliprastfn <- file.path(outfolder, "clip_rast.tif")
+	  } else {
+	    cliprastfn <- tempfile("clip_rast", fileext="tif")
     }
 	
 	  
@@ -153,16 +153,15 @@ spClassifyRast <- function(rastfn,
    ## Clip raster
    ####################################################################
    clipRaster(src = bndx, 
-             srcfile = rast, 
-			 src_band = 1, 
-			 dstfile = cliprastfn,			 
-             fmt = "GTiff", 
-			 init = nodata,
-			 dstnodata = nodata,
-			 maskByPolygons = TRUE, 
-             options = "COMPRESS=LZW")
+              srcfile = rast, 
+			        src_band = 1, 
+			        dstfile = cliprastfn,			 
+              fmt = "GTiff", 
+			        init = nodata,
+			        dstnodata = nodata,
+			        maskByPolygons = TRUE, 
+              options = "COMPRESS=LZW")
   } else {
-  
     cliprastfn <- rast
   }
 
@@ -171,11 +170,11 @@ spClassifyRast <- function(rastfn,
   expr <- ""
   for (i in 1:(length(cutbreaks))) {
     if (i == length(cutbreaks)) {
-	  expr <- paste0(expr, "ifelse (A >= ", cutbreaks[i], ", ", i, ", ")
-	} else {
+	    expr <- paste0(expr, "ifelse (A >= ", cutbreaks[i], ", ", i, ", ")
+	  } else {
       expr <- paste0(expr, "ifelse (A >= ", cutbreaks[i], 
 					" & A < ", cutbreaks[i + 1], ", ", i, ", ") 
-	}
+	  }
   }
   expr <- paste0(expr, nodata, paste(rep(")", length(cutbreaks)), collapse="")) 
 
@@ -187,13 +186,13 @@ spClassifyRast <- function(rastfn,
 
   if (!is.null(nodataclass)) { 
     classvalues <- lut$CLASS
-	if (!is.vector(nodataclass) || length(nodataclass) != 1) {
-	  message("invalid nodataclass... must be a vector of length 1")
-	  return(NULL)
-	} else if (!nodataclass %in% lut$CLASS) {
-	  message("invalid nodataclass... must be in: ", toString(lut$CLASS))
-	  return(NULL)
-	}
+	  if (!is.vector(nodataclass) || length(nodataclass) != 1) {
+	    message("invalid nodataclass... must be a vector of length 1")
+	    return(NULL)
+	  } else if (!nodataclass %in% lut$CLASS) {
+	    message("invalid nodataclass... must be in: ", toString(lut$CLASS))
+	    return(NULL)
+	  }
     expr <- paste0("ifelse (is.na(A), ", nodataclass, ", ", expr, ")")
   }             	
  
@@ -205,15 +204,15 @@ spClassifyRast <- function(rastfn,
   ####################################################################
   outfn <- paste0(file.path(outfolder, out_layer), ".tif")
   gdalraster::calc(expr, 
-	               rasterfiles = cliprastfn,
-				   var.names = "A",
-				   dstfile = outfn,
-				   dtName = "Byte", 
-				   fmt = "GTiff",
-				   options = c("COMPRESS=DEFLATE"),
+	                 rasterfiles = cliprastfn,
+				           var.names = "A",
+				           dstfile = outfn,
+				           dtName = "Byte", 
+				           fmt = "GTiff",
+				           options = c("COMPRESS=DEFLATE"),
                    nodata_value = nodata,
-				   setRasterNodataValue = TRUE,
-				   write_mode = "overwrite"
+				           setRasterNodataValue = TRUE,
+				           write_mode = "overwrite"
 				   )
  
 
@@ -222,8 +221,8 @@ spClassifyRast <- function(rastfn,
   ####################################################################
   datExportData(lut, 
           savedata_opts = list(outfolder = outfolder, 
-		                       out_fmt = "csv", 
-							   out_layer = paste0(out_layer, "_lut")))
+		                           out_fmt = "csv", 
+							                 out_layer = paste0(out_layer, "_lut")))
 
   returnlst <- list(outfn=outfn, lut=lut)
   
@@ -238,11 +237,11 @@ spClassifyRast <- function(rastfn,
 
 
     histdf <- data.frame(
-	             value = seq(1:length(cutbreaks)), 
+	               value = seq(1:length(cutbreaks)), 
                  pixels = ds$getHistogram(band=1, 
-				              min=rast.min, max=rast.max+1,
-							  num_buckets=length(cutbreaks),
-							  incl_out_of_range=FALSE, approx_ok=FALSE))
+				         min=rast.min, max=rast.max+1,
+							   num_buckets=length(cutbreaks),
+							   incl_out_of_range=FALSE, approx_ok=FALSE))
     returnlst$histdf <- histdf
   }
 
