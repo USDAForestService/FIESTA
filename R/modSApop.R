@@ -236,6 +236,7 @@ modSApop <- function(popType = "VOL",
   returnlst <- list(module = "SA")
   adj <- ifelse(adjplot, "plot", "none")
   areawt2 <- NULL
+  pvars2keep <- NULL
 
   # dunitvar2=NULL
   # pvars2keep=NULL
