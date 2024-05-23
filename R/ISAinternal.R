@@ -14,6 +14,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   ## if maxbnd, maxbnd is intersected with smallbnd and dissolved by maxbnd.unique (*maxbnd_select)
   ## if (smallbnd intersects more than 1 maxbnd by greater than the set threshold...
   ## 		if multiSAdoms=TRUE, more than 1 SAdoms is returned as a list.
+  ## if bayes, get largebnd with largest overlap and intersecting helpers outside of largebnd
 
   ## global parameters
   stepcnt <- 1
@@ -29,6 +30,10 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     mar <-  graphics::par("mar")
     on.exit(graphics::par(mar=mar))
     par(mar=c(1,1,1,1))
+  }
+  
+  if (bayes) {
+    multiSAdoms <- FALSE
   }
 
   ############################################################################
@@ -166,11 +171,12 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     if (length(maxbnd.gtthres) > 1 || (nrow(maxbnd_max) > 1 && byeach)) {
       message("smallbnd intersects more than 1 maxbnd")
 
-      if (bayes) {
-        mbndlst <- maxbnd.gtthres
-        sbndlst <- list(smallbndx)
-        maxbndxlst <- maxbnd.gtthres
-      } else if (multiSAdoms) {
+#      if (bayes) {
+#        mbndlst <- maxbnd.gtthres
+#        sbndlst <- list(smallbndx)
+#        maxbndxlst <- maxbnd.gtthres
+#      } else if (multiSAdoms) {
+      if (multiSAdoms) {
         if (byeach) {
           mbndlst <- maxbnd_max[[maxbnd.unique]]
           sbndlst <- lapply(maxbnd_max[[smallbnd.unique]], 
@@ -372,7 +378,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     j <- 1
     ## Loop thru maxbndlst
     while (nbrdom < nbrdom.minx && j <= ifelse(length(maxbndxlst) > 0, length(mbnd), 1)) {
-      if (length(mbnd) > 0 && !bayes) {
+      if (length(mbnd) > 0) {
         message("\nadding ", maxbnd.unique, ": ", mbnd[j])
 
         ## Subset maxbndx.intd
@@ -516,8 +522,18 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         ## Get intersecting helper polygons
         helperbndx.tmp <- sf::st_join(helperbndx,
 						sf_dissolve(largebnd_select, largebnd.unique),
-						join=sf::st_intersects, left=FALSE, largest=TRUE)
-
+						join=sf::st_intersects, left=FALSE, largest=TRUE, snap=s2_snap_identity())
+        helperbndx.tmp
+        
+        helperbndx.tmp2 <- sf::st_intersection(helperbndx,
+                                      sf_dissolve(largebnd_select, largebnd.unique),
+                                      join=sf::st_intersects, largest=TRUE)
+        
+        
+        helperbndx.tmp2 <- sf::st_join(sf_dissolve(largebnd_select, largebnd.unique),
+                                      helperbndx,
+                                      join=sf::st_intersects, left=FALSE, largest=TRUE)
+        
         # get percent overlap of helperbndx.int and y largebndx.int
         ############################################################
 #        helperbndx.tmp$FID <- seq(1:nrow(helperbndx.tmp))
