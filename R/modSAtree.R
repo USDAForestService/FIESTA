@@ -532,7 +532,7 @@ modSAtree <- function(SApopdatlst = NULL,
 
   ## Loop through SApopdatlst
   #############################################
-  largebnd.unique2 <- largebnd.unique
+  #largebnd.unique2 <- largebnd.unique
   
   for (i in 1:length(SApopdatlst)) {
     SApopdatnm <- names(SApopdatlst)[i]
@@ -554,6 +554,7 @@ modSAtree <- function(SApopdatlst = NULL,
     condx <- setDT(copy(SApopdat$condx))
     pltcondx <- copy(SApopdat$pltcondx)
     pltassgnx <- SApopdat$pltassgnx
+    pltassgnid <- SApopdat$pltassgnid
     treex <- copy(SApopdat$treex)
     seedx <- copy(SApopdat$seedx)
     if (is.null(treex) && is.null(seedx)) {
@@ -765,9 +766,13 @@ modSAtree <- function(SApopdatlst = NULL,
     vars2keep <- NULL
     if (!is.null(largebnd.unique)) {
       if (largebnd.unique %in% names(tdomdat) && largebnd.unique %in% names(pltassgnx)) {
-        tdomdat <- merge(pltassgnx, tdomdat, by=c(largebnd.unique, "PLT_CN", "DOMAIN"), all.x=TRUE)
+        tdomdat <- merge(pltassgnx, tdomdat, 
+                         by.x = c(largebnd.unique, pltassgnid, "DOMAIN"), 
+                         by.y = c(largebnd.unique, cuniqueid, "DOMAIN"), , all.x=TRUE)
       } else if (largebnd.unique %in% names(pltassgnx)) {
-        tdomdat <- merge(pltassgnx, tdomdat, by=c("PLT_CN", "DOMAIN"), all.x=TRUE)
+        tdomdat <- merge(pltassgnx, tdomdat, 
+                         by.x = c(pltassgnid, "DOMAIN"), 
+                         by.y = c(cuniqueid, "DOMAIN"), all.x=TRUE)
       } else if (!is.null(SAdomsdf)) {
         tdomdat <- merge(tdomdat, 
 		        unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
@@ -781,7 +786,12 @@ modSAtree <- function(SApopdatlst = NULL,
     } else {
       tdomdat$LARGEBND <- 1
       largebnd.unique <- "LARGEBND"
-      tdomdat <- merge(pltassgnx, tdomdat, by=c("PLT_CN", "DOMAIN"), all.x=TRUE)
+      tdomdat <- merge(pltassgnx, tdomdat, 
+                       by.x=c(pltassgnid, "DOMAIN"), 
+                       by.y=c(cuniqueid, "DOMAIN"), all.x=TRUE)
+    }
+    if (pltassgnid != cuniqueid) {
+      setnames(tdomdat, pltassgnid, cuniqueid)
     }
 
     if (bayes) {

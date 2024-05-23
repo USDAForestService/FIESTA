@@ -522,17 +522,12 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         ## Get intersecting helper polygons
         helperbndx.tmp <- sf::st_join(helperbndx,
 						sf_dissolve(largebnd_select, largebnd.unique),
-						join=sf::st_intersects, left=FALSE, largest=TRUE, snap=s2_snap_identity())
-        helperbndx.tmp
+						join=sf::st_intersects, left=FALSE, largest=TRUE)
         
-        helperbndx.tmp2 <- sf::st_intersection(helperbndx,
-                                      sf_dissolve(largebnd_select, largebnd.unique),
-                                      join=sf::st_intersects, largest=TRUE)
-        
-        
-        helperbndx.tmp2 <- sf::st_join(sf_dissolve(largebnd_select, largebnd.unique),
-                                      helperbndx,
-                                      join=sf::st_intersects, left=FALSE, largest=TRUE)
+        #sf_use_s2(TRUE)
+        #helperbndx.tmp2 <- s2::s2_intersects(helperbndx,
+        #                              sf_dissolve(largebnd_select, largebnd.unique))
+        #helperbndx.tmp2
         
         # get percent overlap of helperbndx.int and y largebndx.int
         ############################################################
