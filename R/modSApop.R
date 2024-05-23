@@ -539,7 +539,7 @@ modSApop <- function(popType = "VOL",
     stop("invalid SAdoms")
   }
   
-   
+  
   pvars2keep <- unique(c(largebnd.unique, "AOI", pvars2keep))
   ###################################################################################
   ## CHECK PLOT PARAMETERS AND DATA
@@ -576,8 +576,14 @@ modSApop <- function(popType = "VOL",
   states <- pltcheck$states
   invyrs <- pltcheck$invyrs
   dbconn <- pltcheck$dbconn
+  
+  # subset pvars2keep 
+  if (!"AOI" %in% names(pltx)) {
+    pltx$AOI <- 1
+  }
 
   if (!is.null(pvars2keep)) {
+    pvars2keep <- pvars2keep[!pvars2keep %in% names(pltx)]
     pltassgnx <- merge(pltassgnx, pltx[, c(puniqueid, pvars2keep), with=FALSE], 
                        by.x=pltassgnid, by.y=puniqueid)
     pltx <- pltx[, names(pltx)[!names(pltx) %in% pvars2keep], with=FALSE]
