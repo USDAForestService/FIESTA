@@ -100,7 +100,7 @@
 #' @param multiSAdoms Logical. If TRUE, and the percent intersect of smallbnd
 #' with maxbnd is greater than maxbnd.threshold, more than 1 SAdoms will be
 #' output in list.
-#' @param bayesian Logical. If TRUE, does not union smallbnd with largebnd.
+#' @param bayes Logical. If TRUE, does not union smallbnd with largebnd.
 #' If multiSAdoms = TRUE, returns intersecting maxbnd where larger than 
 #' maxbnd threshold.
 #' @param showsteps Logical. If TRUE, intermediate steps of selection process
@@ -170,7 +170,7 @@ spGetSAdoms <- function(smallbnd,
                         maxbnd.threshold = 10, 
                         largebnd.threshold = 5, 
                         multiSAdoms = FALSE,
-                        bayesian = FALSE,
+                        bayes = FALSE,
                         showsteps = TRUE, 
                         savedata = FALSE, 
                         savesteps = FALSE, 
@@ -295,9 +295,9 @@ spGetSAdoms <- function(smallbnd,
     multiSAdoms <- TRUE
   }
 
-  ## Check bayesian
+  ## Check bayes
   #############################################################################
-  bayesian <- pcheck.logical(bayesian, varnm="bayesian", 
+  bayes <- pcheck.logical(bayes, varnm="bayes", 
                            title="Baysian?", first="NO", gui=gui) 
   
   ## Check savedata
@@ -358,6 +358,11 @@ spGetSAdoms <- function(smallbnd,
   smallbndx <- pcheck.spatial(layer=smallbnd, dsn=smallbnd_dsn, 
                         caption="small boundary", stopifnull=TRUE)
   smallbndx <- checksf.longlat(smallbndx)
+  if (!all(sf::st_is_valid(smallbndx))) {
+    smallbndx <- sf::st_make_valid(smallbndx, 
+                                 geos_method = 'valid_structure', 
+                                 geos_keep_collapsed = FALSE)
+  }
   smallbndx.prj <- sf::st_crs(smallbndx)
   smallbndnmlst <- names(smallbndx)
   smallbnd.unique <- pcheck.varchar(var2check=smallbnd.unique, varnm="smallbnd.unique", 
@@ -521,7 +526,10 @@ spGetSAdoms <- function(smallbnd,
   #############################################################################
   largebndx <- pcheck.spatial(layer=largebnd, dsn=largebnd_dsn, 
 		caption="large boundary")
-
+  largebndx <- sf::st_make_valid(largebndx, 
+                                 geos_method = 'valid_structure', 
+                                 geos_keep_collapsed = FALSE)
+  
   ## Check largebndx
   if (!is.null(largebndx)) {
     largebnd.unique <- pcheck.varchar(var2check=largebnd.unique, 
@@ -563,7 +571,12 @@ spGetSAdoms <- function(smallbnd,
   #############################################################################
   helperbndx <- pcheck.spatial(layer=helperbnd, dsn=helperbnd_dsn, 
 		caption="helper boundary")
-
+  if (!all(sf::st_is_valid(smallbndx))) {
+    helperbndx <- sf::st_make_valid(helperbndx, 
+                                  geos_method = 'valid_structure', 
+                                  geos_keep_collapsed = FALSE)
+  }
+  
   if (is.null(largebndx)) {
     largebnd.unique <- suppressWarnings(pcheck.varchar(var2check=largebnd.unique, 
 		checklst=names(helperbndx), stopifinvalid=FALSE))
@@ -654,7 +667,6 @@ spGetSAdoms <- function(smallbnd,
 #    #plot(sf::st_geometry(smallbndx), add=TRUE) 
 #  } 
   
-
   #############################################################################
   ### DO THE WORK
   #############################################################################
@@ -675,8 +687,7 @@ spGetSAdoms <- function(smallbnd,
 		      out_fmt=step_fmt, multiSAdoms=multiSAdoms, byeach=byeach,
 		      maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold, 
 		      maxbnd.addtext=maxbnd.addtext, largebnd.addtext=largebnd.addtext, 
-		      overwrite=overwrite_layer, bayesian=bayesian)
-			  
+		      overwrite=overwrite_layer, bayes=bayes)
     SAdomslst <- autoselectlst$SAdomslst
     helperbndxlst <- autoselectlst$helperbndxlst
     smallbndxlst <- autoselectlst$smallbndxlst
@@ -691,8 +702,7 @@ spGetSAdoms <- function(smallbnd,
 
   ###########################################################################
   ## Aggregate (dissolve) polygons on DOMAIN and calculate area on dissolved polygons
-  ###########################################################################
-  SAcols <- unique(c("DOMAIN", "AOI"))
+  SAcols <- c("DOMAIN", "AOI")
   SAcols <- SAcols[SAcols %in% names(SAdomslst[[1]])]
   SAdomslst <- lapply(SAdomslst, sf_dissolve, SAcols)
 
@@ -724,7 +734,6 @@ spGetSAdoms <- function(smallbnd,
 #    SAdomslst[[i]] <- merge(SAdomslst[[i]], 
 #		sf::st_drop_geometry(smallbndx[, c(smallbnd.unique, smallbnd.domain)]), 
 #		by.x="DOMAIN", by.y=smallbnd.unique, all.x=TRUE)
-
     if (!is.null(largebndx)) {
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					largebndx[, largebnd.unique], largest=TRUE))
