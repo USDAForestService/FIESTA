@@ -581,7 +581,7 @@ modSApop <- function(popType = "VOL",
   if (!"AOI" %in% names(pltassgnx)) {
     pltassgnx$AOI <- 1
   }
-
+  
   if (!is.null(pvars2keep)) {
     pvars2keep <- pvars2keep[pvars2keep %in% names(pltx)]
     if (length(pvars2keep) > 0) {
@@ -650,7 +650,11 @@ modSApop <- function(popType = "VOL",
   predfac <- auxdat$predfac
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
   
-
+  # subset pvars2keep 
+  if (!"AOI" %in% names(dunitlut)) {
+    dunitlut$AOI <- 1
+  }
+  
   ## Change names based on data.frame names
   dunitlutcols <- which(names(dunitlut) %in% prednames)
   pltassgnxcols <- which(names(pltassgnx) %in% prednames)
