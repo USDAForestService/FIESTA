@@ -112,6 +112,10 @@ of options.}
 
 \item{smallbnd.domain}{String. Name of attribute defining domain attribute.}
 
+\item{largebnd.unique}{String. Name of the large boundary unique identifer
+to define plots within a model extent. If NULL, all plots are used for model
+extent.}
+
 \item{SAdata}{R List object. Output data list components from
 FIESTA::SAdata().}
 

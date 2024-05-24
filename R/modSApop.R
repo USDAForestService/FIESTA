@@ -55,6 +55,9 @@
 #' @param SAdoms sf object. SA domains with attributes for joining.
 #' @param smallbnd sf object. small bound.
 #' @param smallbnd.domain String. Name of attribute defining domain attribute.
+#' @param largebnd.unique String. Name of the large boundary unique identifer
+#' to define plots within a model extent. If NULL, all plots are used for model
+#' extent.
 #' @param pltassgn DF/DT, comma-separated values (CSV) file(*.csv), or layer in
 #' dsn, Can also be a shapefile(*.shp) with one record per plot, a spatial
 #' layer in dsn, or a sf R object. Plot-level assignment of estimation unit
