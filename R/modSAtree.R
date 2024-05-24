@@ -793,7 +793,7 @@ modSAtree <- function(SApopdatlst = NULL,
     if (pltassgnid != cuniqueid) {
       setnames(tdomdat, pltassgnid, cuniqueid)
     }
-
+    bayes <- FALSE
     if (bayes) {
       vars2keep <- largebnd.unique
       tdomdat$LARGEBND <- 1

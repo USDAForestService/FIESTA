@@ -512,7 +512,7 @@ modSAarea <- function(SApopdatlst = NULL,
   }
  
    
-  largebnd.unique2 <- largebnd.unique
+  #largebnd.unique2 <- largebnd.unique
  
   ## Loop through SApopdatlst
   for (i in 1:length(SApopdatlst)) {
@@ -544,6 +544,8 @@ modSAarea <- function(SApopdatlst = NULL,
     dunitvar2 <- SApopdat$dunitvar2
     dunitlut <- data.table(SApopdat$dunitlut)
     plotsampcnt <- SApopdat$plotsampcnt
+    pltassgnx <- SApopdat$pltassgnx
+    pltassgnid <- SApopdat$pltassgnid
     condsampcnt <- SApopdat$condsampcnt
     states <- SApopdat$states
     invyrs <- SApopdat$invyrs
@@ -553,7 +555,6 @@ modSAarea <- function(SApopdatlst = NULL,
     pop_fmt <- SApopdat$pop_fmt
     pop_dsn <- SApopdat$pop_dsn
 	
-
     ## check smallbnd.dom
     ########################################################
     smallbnd.dom <- dunitvar
@@ -700,22 +701,35 @@ modSAarea <- function(SApopdatlst = NULL,
  
     ## check largebnd.unique
     ########################################################
-    if (!is.null(largebnd.unique2) && !is.null(SAdomsdf)) {
-      cdomdat <- merge(cdomdat, 
-		        unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
- 		        by=smallbnd.dom)
-      #addSAdomsdf <- TRUE
-      #SAdomvars <- unique(c(SAdomvars, largebnd.unique))
-      largebnd.unique <- largebnd.unique2
+    
+    vars2keep <- NULL
+    if (!is.null(largebnd.unique)) {
+      if (largebnd.unique %in% names(cdomdat) && largebnd.unique %in% names(pltassgnx)) {
+        cdomdat <- merge(pltassgnx, cdomdat, 
+                         by.x = c(largebnd.unique, pltassgnid, "DOMAIN"), 
+                         by.y = c(largebnd.unique, cuniqueid, "DOMAIN"), , all.x=TRUE)
+      } else if (largebnd.unique %in% names(pltassgnx)) {
+        cdomdat <- merge(pltassgnx, cdomdat, 
+                         by.x = c(pltassgnid, "DOMAIN"), 
+                         by.y = c(cuniqueid, "DOMAIN"), all.x=TRUE)
+      } else if (!is.null(SAdomsdf)) {
+        cdomdat <- merge(cdomdat, 
+                         unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
+                         by=smallbnd.dom)
+      } else {
+        cdomdat$LARGEBND <- 1
+        largebnd.unique <- "LARGEBND"
+      }
     } else {
       cdomdat$LARGEBND <- 1
       largebnd.unique <- "LARGEBND"
-      cdomdat$LARGEBND <- 1
+      cdomdat <- merge(pltassgnx, cdomdat, 
+                       by.x=c(pltassgnid, "DOMAIN"), 
+                       by.y=c(cuniqueid, "DOMAIN"), all.x=TRUE)
     }
-
-    ## get unique largebnd values
-    largebnd.vals <- sort(unique(cdomdat[[largebnd.unique]]))
-    largebnd.vals <- largebnd.vals[table(cdomdat[[largebnd.unique]]) > 30]
+    if (pltassgnid != cuniqueid) {
+      setnames(cdomdat, pltassgnid, cuniqueid)
+    }
 
     ## Add AOI if not in data
     ######################################
@@ -723,18 +737,32 @@ modSAarea <- function(SApopdatlst = NULL,
       cdomdat$AOI <- 1
       dunitlut$AOI <- 1
     }
-
+    # hardcode for now
+    bayes <- FALSE
+    if (bayes) {
+      vars2keep <- largebnd.unique
+      tdomdat$LARGEBND <- 1
+      largebnd.unique <- "LARGEBND"
+      largebnd.vals <- 1
+    }
+    
+    byvars <- unique(c(vars2keep, largebnd.unique, dunitvar, "AOI", cuniqueid, "TOTAL", prednames))
+    if (all(c("X", "Y") %in% names(pltassgnx))) {
+      byvars <- c(byvars, "X","Y")
+    }
     ## Get estimate for total
     ######################################
     ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
-    tdomdattot <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
-                      by=c(largebnd.unique, dunitvar, "AOI", cuniqueid, "TOTAL", prednames), 
-                      .SDcols=estvar.name]
-
+    tdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), by=byvars, .SDcols=estvar.name]
+    
+    ## get unique largebnd values
+    largebnd.vals <- sort(unique(cdomdat[[largebnd.unique]]))
+    largebnd.vals <- largebnd.vals[table(cdomdat[[largebnd.unique]]) > 30]
+    
+   
     ## get estimate by domain, by largebnd value
     #message("generating JoSAE unit-level estimates for ", response, " using ", SApackage, "...")
-
-
+    
     if (!"DOMAIN" %in% names(tdomdattot)) {
       tdomdattot$DOMAIN <- tdomdattot[[dunitvar]]
       tdomdattot[[dunitvar]] <- NULL
@@ -749,7 +777,6 @@ modSAarea <- function(SApopdatlst = NULL,
 #largebnd.val=largebnd.vals
 #domain="TOTAL"
 #largebnd.unique=largebnd.unique
-
     dunit_totestlst <- 
 	tryCatch(
 		lapply(largebnd.vals, SAest.large, 
