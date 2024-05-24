@@ -360,7 +360,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ##################################################################
 
   ## Check SApackage 
-  SApackagelst <- c("JoSAE", "sae", "hbsae")
+  SApackagelst <- c("JoSAE", "sae", "hbsae", "spAbundance")
   SApackage <- pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
 		checklst=SApackagelst, caption="SApackage", multiple=FALSE, stopifnull=TRUE)
 
@@ -793,7 +793,11 @@ modSAtree <- function(SApopdatlst = NULL,
     if (pltassgnid != cuniqueid) {
       setnames(tdomdat, pltassgnid, cuniqueid)
     }
-
+    if (SApackage == "spAbundance") {
+      bayes <- TRUE
+    } else {
+      bayes <- FALSE
+    }
     if (bayes) {
       vars2keep <- largebnd.unique
       tdomdat$LARGEBND <- 1
@@ -1095,6 +1099,9 @@ modSAtree <- function(SApopdatlst = NULL,
     } else if (SApackage == "JoSAE") {
       nhat <- "JU.EBLUP"
       nhat.se <- "JU.EBLUP.se.1"
+    } else if (SApackage == "spAbundance") {
+      nhat <- "bayes"
+      nhat.se <- "bayes.se"
     }
   } else if (SAmethod == "area") {
     if (SApackage == "JoSAE") {
