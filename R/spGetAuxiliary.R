@@ -393,18 +393,22 @@ spGetAuxiliary <- function(xyplt = NULL,
 
   ## Check continuous rasters
   ###################################################################
-  rastlst.contfn <- tryCatch(
+  if (!is.null(rastlst.cont)) {
+    rastlst.contfn <- tryCatch(
               getrastlst(rastlst.cont, rastfolder, quiet=TRUE, gui=gui),
      	 	            error=function(e) {
 			              message(e, "\n")
 			              return("stop") })
+  }
   if (!is.null(rastlst.contfn)) {
     if (length(rastlst.contfn) == 1) {
       if (rastlst.contfn == "stop") {
-        stop()
+        stop("invalid rastlst.contfn: \n",
+             toString(sapply(rastlst.cont, normalizePath)))
       }
     }
   }
+
   if (!is.null(rastlst.contfn)) {
     band.cont <- sapply(rastlst.contfn, function(x) rasterInfo(x)$nbands)
     nlayers.cont <- sum(band.cont)
@@ -460,18 +464,21 @@ spGetAuxiliary <- function(xyplt = NULL,
  
   ## Check categorical rasters
   ###################################################################
-  rastlst.catfn <- tryCatch(
+  if (!is.null(rastlst.cat)) {
+    rastlst.catfn <- tryCatch(
              getrastlst(rastlst.cat, rastfolder, quiet=TRUE, gui=gui),
      	 	           error=function(e) {
 			               message(e, "\n")
 			             return("stop") })
+  }
   if (is.null(rastlst.contfn) && is.null(rastlst.catfn)) {
     message("both rastlst.cont and rastlst.cat are NULL")
   }
   if (!is.null(rastlst.catfn)) {
     if (length(rastlst.catfn) == 1) {
       if (rastlst.catfn == "stop") {
-        stop()
+        stop("invalid rastlst.catfn: \n",
+             toString(sapply(rastlst.cat, normalizePath)))
       }
     }
     band.cat <- sapply(rastlst.catfn, function(x) rasterInfo(x)$nbands)
@@ -621,7 +628,6 @@ spGetAuxiliary <- function(xyplt = NULL,
     unitvar <- "UNITVAR"
     polyvarlst <- c("UNITVAR", vars2keep)
   }
-
 
   #############################################################################
   ## 2) Set up outputs - unitzonal, prednames, inputdf, zonalnames

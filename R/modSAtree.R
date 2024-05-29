@@ -855,7 +855,7 @@ modSAtree <- function(SApopdatlst = NULL,
                stepfolder=stepfolder, prior=prior, 
                modelselect=modelselect, multest=multest,
                SApackage=SApackage, SAmethod=SAmethod, bayes=bayes, # TODO: pass bayes_opts
-               save4testing=TRUE, vars2keep=vars2keep),
+               save4testing=FALSE, vars2keep=vars2keep),
         error=function(e) {
           message("error with estimates of ", response, "...")
           message(e, "\n")
@@ -906,11 +906,11 @@ modSAtree <- function(SApopdatlst = NULL,
       ## Merge SAdom attributes to dunit_totest
       if (addSAdomsdf) {
         pdomdat <- merge(setDT(SAdomsdf)[, 
-			unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
-			pdomdat, by=c("DOMAIN", "AOI"))
+			       unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
+			       pdomdat, by=c("DOMAIN", "AOI"))
         dunitlut <- merge(setDT(SAdomsdf)[, 
-			unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
-			dunitlut, by=c("DOMAIN", "AOI"))
+			       unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
+			       dunitlut, by=c("DOMAIN", "AOI"))
       }
       pdomdatlst[[SApopdatnm]] <- pdomdat
       dunitlutlst[[SApopdatnm]] <- dunitlut
@@ -936,7 +936,7 @@ modSAtree <- function(SApopdatlst = NULL,
 #largebnd.val=largebnd.vals
 #domain=rowcolinfo$rowvar
 #largebnd.unique="LARGEBND"
- 
+
       dunit_rowestlst <- 
 		tryCatch(
 			lapply(largebnd.vals, SAest.large, 
@@ -948,7 +948,8 @@ modSAtree <- function(SApopdatlst = NULL,
 				showsteps=showsteps, savesteps=savesteps,
 				stepfolder=stepfolder, prior=prior, 
 				modelselect=modelselect, multest=multest, 
-				SApackage=SApackage, SAmethod=SAmethod),
+				SApackage=SApackage, SAmethod=SAmethod, bayes=bayes,
+				vars2keep=vars2keep),
      	 	error=function(e) {
 			message("error with estimates of ", response, " by ", rowvar, "...")
 			message(e, "\n")

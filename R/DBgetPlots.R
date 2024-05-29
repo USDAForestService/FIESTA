@@ -3464,10 +3464,14 @@ DBgetPlots <- function (states = NULL,
                     message(seed.qry)
                     return(NULL) })
         }
+        if (is.null(seedx)) {
+          message("no seedling data for ", stabbr)
+          message(seed.qry)
+        }
         if (!is.null(seedx) && nrow(seedx) != 0 && length(ssvars) > 0) {
-	      if (!"seed" %in% names(dbqueries[[state]])) {
+	        if (!"seed" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$seed <- seed.qry
-	      }
+	        }
 
           seedx <- setDT(seedx)
           seedx[, PLT_CN := as.character(PLT_CN)]

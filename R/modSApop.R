@@ -584,9 +584,9 @@ modSApop <- function(popType = "VOL",
   if (!"AOI" %in% names(pltassgnx)) {
     pltassgnx$AOI <- 1
   }
-  
+
   if (!is.null(pvars2keep)) {
-    pvars2keep <- pvars2keep[pvars2keep %in% names(pltx)]
+    pvars2keep <- pvars2keep[pvars2keep %in% names(pltx) & !pvars2keep %in% names(pltassgnx)]
     if (length(pvars2keep) > 0) {
       pltassgnx <- merge(pltassgnx, pltx[, c(puniqueid, pvars2keep), with=FALSE], 
                        by.x=pltassgnid, by.y=puniqueid)

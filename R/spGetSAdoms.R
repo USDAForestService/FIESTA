@@ -527,9 +527,7 @@ spGetSAdoms <- function(smallbnd,
   largebndx <- pcheck.spatial(layer=largebnd, dsn=largebnd_dsn, 
 		caption="large boundary")
   if (!all(sf::st_is_valid(largebndx))) {
-    largebndx <- sf::st_make_valid(largebndx, 
-                                 geos_method = 'valid_structure', 
-                                 geos_keep_collapsed = FALSE)
+    largebndx <- sf::st_make_valid(largebndx)
   }
   
   ## Check largebndx
@@ -573,10 +571,8 @@ spGetSAdoms <- function(smallbnd,
   #############################################################################
   helperbndx <- pcheck.spatial(layer=helperbnd, dsn=helperbnd_dsn, 
 		caption="helper boundary")
-  if (!all(sf::st_is_valid(smallbndx))) {
-    helperbndx <- sf::st_make_valid(helperbndx, 
-                                  geos_method = 'valid_structure', 
-                                  geos_keep_collapsed = FALSE)
+  if (!all(sf::st_is_valid(helperbndx))) {
+    helperbndx <- sf::st_make_valid(helperbndx)
   }
   
   if (is.null(largebndx)) {
@@ -693,6 +689,8 @@ spGetSAdoms <- function(smallbnd,
     SAdomslst <- autoselectlst$SAdomslst
     helperbndxlst <- autoselectlst$helperbndxlst
     smallbndxlst <- autoselectlst$smallbndxlst
+    largebndxlst <- autoselectlst$largebndxlst
+    maxbndxlst <- autoselectlst$maxbndxlst
 
   } else {
 

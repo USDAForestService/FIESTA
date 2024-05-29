@@ -787,7 +787,8 @@ modSAarea <- function(SApopdatlst = NULL,
 			    showsteps=showsteps, savesteps=savesteps,
 			    stepfolder=stepfolder, prior=prior, 
 			    modelselect=modelselect, multest=multest,
-			    SApackage=SApackage, SAmethod=SAmethod),
+			    SApackage=SApackage, SAmethod=SAmethod, bayes=bayes,
+			    save4testing=FALSE, vars2keep=vars2keep),
      	      error=function(e) {
 			      message("error with estimates of ", response, "...")
 			      message(e, "\n")
@@ -882,7 +883,8 @@ modSAarea <- function(SApopdatlst = NULL,
 				showsteps=showsteps, savesteps=savesteps, 
 				stepfolder=stepfolder, prior=prior, 
 				modelselect=modelselect, multest=multest,
-				SApackage=SApackage, SAmethod=SAmethod), 
+				SApackage=SApackage, SAmethod=SAmethod, bayes=bayes,
+				vars2keep=vars2keep), 
 			 error=function(e) {
 			 message("error with estimates of ", response, "...")
 			 message(e, "\n")
