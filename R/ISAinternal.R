@@ -752,10 +752,6 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   returnlst <- list(SAdomslst=SAdomslst, helperbndxlst=helperbndxlst,
 				smallbndxlst=smallbndxlst, largebndxlst=largebndxdlst, maxbndxlst=maxbndx_intdlst)
   
-  if (!is.null(maxbndx)) {
-    returnlst$maxbndx_intersect <- maxbndx_intersect[maxbndx.pct[[maxbnd.unique]] %in% maxbndxlst, ]
-  }
-
   return(returnlst)
 }
 
