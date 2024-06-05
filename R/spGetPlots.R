@@ -560,6 +560,10 @@ spGetPlots <- function(bnd = NULL,
         ## Get XY
         ###########################################################################
         message("getting xy data...")
+        
+        if (is.null(pjoinid)) {
+          pjoinid <- puniqueid
+        }
 
         if (!is.null(Endyr.filter)) {
           ## Get XY data inside filter
@@ -631,6 +635,7 @@ spGetPlots <- function(bnd = NULL,
           #pop_plot_stratum_assgn <- rbind(pop_plot_stratum_assgn1, pop_plot_stratum_assgn2)
 
         } else {
+
           xydat <- spGetXY(bnd = bndx, 
                          states = states, 
                          RS = RS, 
@@ -659,7 +664,7 @@ spGetPlots <- function(bnd = NULL,
           stbnd.att <- xydat$stbnd.att
           bndx <- xydat$bndx
           xy.uniqueid <- xydat$xy.uniqueid
-          pjoinid = xydat$pjoinid 
+          #pjoinid = xydat$pjoinid 
           xyjoinid = xydat$xyjoinid 
           evalInfo <- xydat$evalInfo  
           #pop_plot_stratum_assgn <- xydat$pop_plot_stratum_assgn   

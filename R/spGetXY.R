@@ -415,7 +415,7 @@ spGetXY <- function(bnd,
   } else {
     stop("must include bndx or states")
   }
- 
+
   #############################################################################
   ## If xy is separate file or database, and clipxy=TRUE, import first
   #############################################################################
