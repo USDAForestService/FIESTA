@@ -1246,7 +1246,7 @@ spGetPlots <- function(bnd = NULL,
             indx <- indx[indx %in% names(tab)]
           }
 
-          if (!is.null(tab)) {
+          if (!is.null(tab) && nrow(tab) > 0) {
             assign(paste0("index.unique.", tabnm), NULL)
             if (is.null(tabIDs[[tabnm]]) && i == 1 && length(indx) > 0) {
               assign(paste0("index.unique.", tabnm), indx)
