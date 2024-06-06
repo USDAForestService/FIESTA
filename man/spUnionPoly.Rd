@@ -105,11 +105,8 @@ WYbhfn <- system.file("extdata",
                       package = "FIESTA")
 WYbh <- spImportSpatial(WYbhfn)
 
-# Load in USAco data from geodata package
-USAco <- geodata::gadm(country="United States", level=2, path=tempdir())    
-
 # Generate unioned `sf` object
-polyUnion <- spUnionPoly(polyv1 = USAco[USAco$NAME_1 == "Wyoming",], 
+polyUnion <- spUnionPoly(polyv1 = stunitco[stunitco$STATENM == "Wyoming",], 
                          polyv2 = WYbh, 
                          areacalc = TRUE)
                          

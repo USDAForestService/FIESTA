@@ -47,7 +47,6 @@ Imports:
     utils
 Suggests: 
     knitr,
-    geodata,
     terra,
     rmarkdown,
     testthat (>= 3.0.0)
