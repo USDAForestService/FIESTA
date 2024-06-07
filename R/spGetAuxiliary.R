@@ -393,13 +393,11 @@ spGetAuxiliary <- function(xyplt = NULL,
 
   ## Check continuous rasters
   ###################################################################
-  if (!is.null(rastlst.cont)) {
-    rastlst.contfn <- tryCatch(
+  rastlst.contfn <- tryCatch(
               getrastlst(rastlst.cont, rastfolder, quiet=TRUE, gui=gui),
      	 	            error=function(e) {
 			              message(e, "\n")
 			              return("stop") })
-  }
   if (!is.null(rastlst.contfn)) {
     if (length(rastlst.contfn) == 1) {
       if (rastlst.contfn == "stop") {
@@ -461,16 +459,14 @@ spGetAuxiliary <- function(xyplt = NULL,
       }
     }
   }
- 
+
   ## Check categorical rasters
   ###################################################################
-  if (!is.null(rastlst.cat)) {
-    rastlst.catfn <- tryCatch(
+  rastlst.catfn <- tryCatch(
              getrastlst(rastlst.cat, rastfolder, quiet=TRUE, gui=gui),
      	 	           error=function(e) {
 			               message(e, "\n")
 			             return("stop") })
-  }
   if (is.null(rastlst.contfn) && is.null(rastlst.catfn)) {
     message("both rastlst.cont and rastlst.cat are NULL")
   }
