@@ -54,7 +54,7 @@
 #' where measured. If woodland = 'N', only include timber species. See 
 #' FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
 #' woodland species.
-#' @param largebnd.unique String. Name of the large boundary unique identifer
+#' @param largebnd.unique String. Name of the large boundary unique identifier
 #' to define plots within a model extent. If NULL, all plots are used for model
 #' extent.
 #' @param landarea String. The sample area filter for estimates ('ALL',

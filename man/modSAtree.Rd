@@ -55,7 +55,7 @@ where measured. If woodland = 'N', only include timber species. See
 FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
 woodland species.}
 
-\item{largebnd.unique}{String. Name of the large boundary unique identifer
+\item{largebnd.unique}{String. Name of the large boundary unique identifier
 to define plots within a model extent. If NULL, all plots are used for model
 extent.}
 
