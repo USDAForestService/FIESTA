@@ -280,6 +280,6 @@ kable(required.lut,
 
 ## References
 
-Burrill, E.A., Wilson, A.M., Turner, J.A., Pugh, S.A., Menlove, J., Christiansen, G., Conkling, B.L., Winnie, D., 2018. Forest Inventory and Analysis Database [WWW Document].  St Paul MN US Dep. Agric. For. Serv. North. Res. Stn.  URL https://apps.fs.usda.gov/fia/datamart/
+Burrill, E.A., Wilson, A.M., Turner, J.A., Pugh, S.A., Menlove, J., Christiansen, G., Conkling, B.L., Winnie, D., 2018. Forest Inventory and Analysis Database [WWW Document].  St Paul MN US Dep. Agric. For. Serv. North. Res. Stn.  URL https://apps.fs.usda.gov/fia/datamart/datamart.html
 (accessed 3.6.21).
 
