@@ -21,7 +21,7 @@ area polygons, resulting in a set of model domains that can be used for SAE."><!
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.4.9000</span>
       </span>
     </div>
 
@@ -119,6 +119,7 @@ area polygons, resulting in a set of model domains that can be used for SAE.</p>
 <span>  maxbnd.threshold <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  largebnd.threshold <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  multiSAdoms <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  bayes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showsteps <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  savesteps <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -265,6 +266,12 @@ largebnds for selecting helperbnds.</p></dd>
 <dd><p>Logical. If TRUE, and the percent intersect of smallbnd
 with maxbnd is greater than maxbnd.threshold, more than 1 SAdoms will be
 output in list.</p></dd>
+
+
+<dt>bayes</dt>
+<dd><p>Logical. If TRUE, does not union smallbnd with largebnd.
+If multiSAdoms = TRUE, returns intersecting maxbnd where larger than 
+maxbnd threshold.</p></dd>
 
 
 <dt>showsteps</dt>

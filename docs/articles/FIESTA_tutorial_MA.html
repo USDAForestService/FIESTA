@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.4.9000</span>
       </span>
     </div>
 
@@ -470,8 +470,8 @@ output
 </summary><pre><code><span><span class="co">## List of 4</span></span>
 <span><span class="co">##  $ est    :Classes 'data.table' and 'data.frame':    1 obs. of  3 variables:</span></span>
 <span><span class="co">##   ..$ ONEUNIT               : chr "1"</span></span>
-<span><span class="co">##   ..$ Estimate              : num 660395</span></span>
-<span><span class="co">##   ..$ Percent Sampling Error: num 9.42</span></span>
+<span><span class="co">##   ..$ Estimate              : num 652879</span></span>
+<span><span class="co">##   ..$ Percent Sampling Error: num 9.5</span></span>
 <span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
 <span><span class="co">##   ..- attr(*, "sorted")= chr "ONEUNIT"</span></span>
 <span><span class="co">##  $ raw    :List of 9</span></span>
@@ -493,7 +493,7 @@ output
 </summary><pre><code><span><span class="co">## Key: &lt;ONEUNIT&gt;</span></span>
 <span><span class="co">##    ONEUNIT Estimate Percent Sampling Error</span></span>
 <span><span class="co">##     &lt;char&gt;    &lt;num&gt;                  &lt;num&gt;</span></span>
-<span><span class="co">## 1:       1 660395.1                   9.42</span></span></code></pre>
+<span><span class="co">## 1:       1 652879.1                    9.5</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -522,8 +522,8 @@ output
 </summary><pre><code><span><span class="co">## List of 4</span></span>
 <span><span class="co">##  $ est    :Classes 'data.table' and 'data.frame':    1 obs. of  3 variables:</span></span>
 <span><span class="co">##   ..$ ONEUNIT               : chr "1"</span></span>
-<span><span class="co">##   ..$ Estimate              : num 666603</span></span>
-<span><span class="co">##   ..$ Percent Sampling Error: num 10.2</span></span>
+<span><span class="co">##   ..$ Estimate              : num 667495</span></span>
+<span><span class="co">##   ..$ Percent Sampling Error: num 9.54</span></span>
 <span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
 <span><span class="co">##   ..- attr(*, "sorted")= chr "ONEUNIT"</span></span>
 <span><span class="co">##  $ raw    :List of 9</span></span>
@@ -544,9 +544,9 @@ output
 <code class="sourceCode R"><span><span class="va">area2</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">predselectlst</span><span class="op">$</span><span class="va">totest</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##    ONEUNIT TOTAL           dem   slp asp_cos asp_sin fornf2</span></span>
-<span><span class="co">##     &lt;fctr&gt; &lt;num&gt;         &lt;num&gt; &lt;num&gt;   &lt;num&gt;   &lt;num&gt;  &lt;num&gt;</span></span>
-<span><span class="co">## 1:       1     1 -0.0002667734     0       0       0      0</span></span></code></pre>
+</summary><pre><code><span><span class="co">##    ONEUNIT TOTAL           dem         slp asp_cos asp_sin     fornf2</span></span>
+<span><span class="co">##     &lt;fctr&gt; &lt;num&gt;         &lt;num&gt;       &lt;num&gt;   &lt;num&gt;   &lt;num&gt;      &lt;num&gt;</span></span>
+<span><span class="co">## 1:       1     1 -0.0002003131 0.006865144       0       0 -0.2316885</span></span></code></pre>
 </details><p>Notably, we can see that <code>dem</code>, <code>slp</code>,
 <code>asp_cos</code>, and <code>asp_sin</code> were removed from the
 model.</p>
@@ -587,14 +587,14 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   Forest type Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1         201    44985                  83.63</span></span>
-<span><span class="co">## 2         265  93595.3                  49.48</span></span>
-<span><span class="co">## 3         266  99633.8                  41.46</span></span>
-<span><span class="co">## 4         268   112133                  34.37</span></span>
-<span><span class="co">## 5         281 614667.5                  13.63</span></span>
-<span><span class="co">## 6         901  38050.4                  76.65</span></span>
-<span><span class="co">## 7         999  37416.1                  63.68</span></span>
-<span><span class="co">## 8       Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 1         201  44286.4                   85.2</span></span>
+<span><span class="co">## 2         265  89101.3                  52.03</span></span>
+<span><span class="co">## 3         266  97017.3                   42.4</span></span>
+<span><span class="co">## 4         268 112697.6                  34.19</span></span>
+<span><span class="co">## 5         281 618425.6                  13.59</span></span>
+<span><span class="co">## 6         901  38648.7                  75.39</span></span>
+<span><span class="co">## 7         999    36765                  64.92</span></span>
+<span><span class="co">## 8       Total 652879.1                    9.5</span></span></code></pre>
 </details><p>Along with raw data and titles:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Raw data (list object) for estimate</span></span>
@@ -610,11 +610,11 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT      nhat    nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS AREAUSED      est</span></span>
-<span><span class="co">## 1       1 0.5936603 0.003129767     56         37   1112412  1112412 660395.1</span></span>
-<span><span class="co">##      est.var   est.se     est.cv      pse CI99left CI99right CI95left CI95right</span></span>
-<span><span class="co">## 1 3872964796 62233.15 0.09423624 9.423624 500093.1    820697 538420.4  782369.8</span></span>
+<span><span class="co">## 1       1 0.5869038 0.003106112     56         37   1112412  1112412 652879.1</span></span>
+<span><span class="co">##      est.var   est.se    est.cv     pse CI99left CI99right CI95left CI95right</span></span>
+<span><span class="co">## 1 3843693079 61997.52 0.0949602 9.49602   493184  812574.1 531366.2    774392</span></span>
 <span><span class="co">##   CI68left CI68right</span></span>
-<span><span class="co">## 1 598506.8  722283.3</span></span></code></pre>
+<span><span class="co">## 1 591225.1    714533</span></span></code></pre>
 </details><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">raw3</span><span class="op">$</span><span class="va">totest</span>            <span class="co"># estimates for population (i.e., WY)</span></span></code></pre></div>
 <details><summary>
@@ -625,26 +625,26 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT Forest type       nhat     nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS</span></span>
-<span><span class="co">## 1       1         201 0.04043912 0.0011438244     37          2   1112412</span></span>
-<span><span class="co">## 2       1         265 0.08413719 0.0017329394     37          4   1112412</span></span>
-<span><span class="co">## 3       1         266 0.08956549 0.0013788769     37          5   1112412</span></span>
-<span><span class="co">## 4       1         268 0.10080163 0.0012003607     37          3   1112412</span></span>
-<span><span class="co">## 5       1         281 0.55255368 0.0056756036     37         23   1112412</span></span>
-<span><span class="co">## 6       1         901 0.03420534 0.0006874656     37          1   1112412</span></span>
+<span><span class="co">## 1       1         201 0.03981113 0.0011505987     37          2   1112412</span></span>
+<span><span class="co">## 2       1         265 0.08009738 0.0017367503     37          4   1112412</span></span>
+<span><span class="co">## 3       1         266 0.08721348 0.0013673266     37          5   1112412</span></span>
+<span><span class="co">## 4       1         268 0.10130923 0.0012000844     37          3   1112412</span></span>
+<span><span class="co">## 5       1         281 0.55593198 0.0057107487     37         23   1112412</span></span>
+<span><span class="co">## 6       1         901 0.03474316 0.0006861348     37          1   1112412</span></span>
 <span><span class="co">##   AREAUSED       est    est.var   est.se    est.cv      pse  CI99left CI99right</span></span>
-<span><span class="co">## 1  1112412  44984.97 1415438352 37622.31 0.8363307 83.63307      0.00  141893.6</span></span>
-<span><span class="co">## 2  1112412  93595.25 2144445295 46308.16 0.4947703 49.47703      0.00  212877.2</span></span>
-<span><span class="co">## 3  1112412  99633.75 1706306752 41307.47 0.4145931 41.45931      0.00  206034.7</span></span>
-<span><span class="co">## 4  1112412 112132.98 1485399865 38540.89 0.3437070 34.37070  12858.23  211407.7</span></span>
-<span><span class="co">## 5  1112412 614667.54 7023339436 83805.37 0.1363426 13.63426 398799.22  830535.9</span></span>
-<span><span class="co">## 6  1112412  38050.44  850712058 29166.97 0.7665344 76.65344      0.00  113179.6</span></span>
-<span><span class="co">##     CI95left CI95right   CI68left CI68right</span></span>
-<span><span class="co">## 1      0.000 118723.35   7571.167  82398.78</span></span>
-<span><span class="co">## 2   2832.937 184357.57  47543.744 139646.77</span></span>
-<span><span class="co">## 3  18672.608 180594.90  58555.219 140712.29</span></span>
-<span><span class="co">## 4  36594.230 187671.73  73805.690 150460.27</span></span>
-<span><span class="co">## 5 450412.043 778923.04 531326.636 698008.45</span></span>
-<span><span class="co">## 6      0.000  95216.65   9045.116  67055.76</span></span></code></pre>
+<span><span class="co">## 1  1112412  44286.39 1423821285 37733.56 0.8520351 85.20351      0.00  141481.6</span></span>
+<span><span class="co">## 2  1112412  89101.31 2149161132 46359.05 0.5202959 52.02959      0.00  208514.3</span></span>
+<span><span class="co">## 3  1112412  97017.35 1692013618 41134.09 0.4239870 42.39870      0.00  202971.7</span></span>
+<span><span class="co">## 4  1112412 112697.64 1485057928 38536.45 0.3419455 34.19455  13434.33  211961.0</span></span>
+<span><span class="co">## 5  1112412 618425.60 7066830141 84064.44 0.1359330 13.59330 401889.95  834961.3</span></span>
+<span><span class="co">## 6  1112412  38648.72  849065242 29138.72 0.7539376 75.39376      0.00  113705.1</span></span>
+<span><span class="co">##    CI95left CI95right   CI68left CI68right</span></span>
+<span><span class="co">## 1      0.00 118242.80   6761.956  81810.82</span></span>
+<span><span class="co">## 2      0.00 179963.37  42999.193 135203.43</span></span>
+<span><span class="co">## 3  16396.01 177638.69  56111.224 137923.47</span></span>
+<span><span class="co">## 4  37167.59 188227.70  74374.767 151020.52</span></span>
+<span><span class="co">## 5 453662.33 783188.88 534827.056 702024.15</span></span>
+<span><span class="co">## 6      0.00  95759.57   9671.489  67625.96</span></span></code></pre>
 </details><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw3</span><span class="op">$</span><span class="va">rowest</span><span class="op">)</span>      <span class="co"># estimates by row for population (i.e., WY)</span></span></code></pre></div>
 <details><summary>
@@ -726,26 +726,26 @@ in the same cell with the <code>allin1</code> argument in
 <span><span class="va">area4</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                         Forest type     Large diameter    Medium diameter</span></span>
-<span><span class="co">##                              &lt;char&gt;             &lt;char&gt;             &lt;char&gt;</span></span>
-<span><span class="co">## 1:                      Douglas-fir  29,703.9 ( 90.29)        -- (    --)</span></span>
-<span><span class="co">## 2:                 Engelmann spruce 100,049.0 ( 39.09) -6,453.7 (-437.60)</span></span>
-<span><span class="co">## 3: Engelmann spruce / subalpine fir  45,291.2 ( 85.97)  28,719.3 ( 48.49)</span></span>
-<span><span class="co">## 4:                    Subalpine fir  36,023.6 ( 81.73)        -- (    --)</span></span>
-<span><span class="co">## 5:                   Lodgepole pine 217,609.7 ( 28.99) 288,643.6 ( 19.71)</span></span>
-<span><span class="co">## 6:                            Aspen        -- (    --)        -- (    --)</span></span>
-<span><span class="co">## 7:                       Nonstocked        -- (    --)        -- (    --)</span></span>
-<span><span class="co">## 8:                            Total 428,677.4 ( 15.10) 310,909.2 ( 19.32)</span></span>
-<span><span class="co">##        Small diameter        Nonstocked              Total</span></span>
-<span><span class="co">##                &lt;char&gt;            &lt;char&gt;             &lt;char&gt;</span></span>
-<span><span class="co">## 1:  15,281.0 (186.59)       -- (    --)  44,985.0 ( 83.63)</span></span>
-<span><span class="co">## 2:        -- (    --)       -- (    --)  93,595.3 ( 49.48)</span></span>
-<span><span class="co">## 3:  25,623.2 ( 66.48)       -- (    --)  99,633.8 ( 41.46)</span></span>
-<span><span class="co">## 4:  76,109.4 ( 33.46)       -- (    --) 112,133.0 ( 34.37)</span></span>
-<span><span class="co">## 5: 108,414.2 ( 35.78)       -- (    --) 614,667.5 ( 13.63)</span></span>
-<span><span class="co">## 6:  38,050.4 ( 76.65)       -- (    --)  38,050.4 ( 76.65)</span></span>
-<span><span class="co">## 7:        -- (    --) 37,416.1 ( 63.68)  37,416.1 ( 63.68)</span></span>
-<span><span class="co">## 8: 263,478.3 ( 20.69) 37,416.1 ( 63.68) 660,395.1 (  9.42)</span></span></code></pre>
+</summary><pre><code><span><span class="co">##                         Forest type      Large diameter     Medium diameter</span></span>
+<span><span class="co">##                              &lt;char&gt;              &lt;char&gt;              &lt;char&gt;</span></span>
+<span><span class="co">## 1:                      Douglas-fir  28,381.5 (  95.01)        -- (     --)</span></span>
+<span><span class="co">## 2:                 Engelmann spruce  97,387.6 (  40.28)  -8,286.3 (-339.39)</span></span>
+<span><span class="co">## 3: Engelmann spruce / subalpine fir  42,290.6 (  91.23)  28,627.2 (  48.64)</span></span>
+<span><span class="co">## 4:                    Subalpine fir  36,053.1 (  81.54)        -- (     --)</span></span>
+<span><span class="co">## 5:                   Lodgepole pine 221,069.2 (  28.62) 289,086.8 (  20.06)</span></span>
+<span><span class="co">## 6:                            Aspen        -- (     --)        -- (     --)</span></span>
+<span><span class="co">## 7:                       Nonstocked        -- (     --)        -- (     --)</span></span>
+<span><span class="co">## 8:                            Total 425,182.1 (  15.23) 309,427.6 (  19.74)</span></span>
+<span><span class="co">##         Small diameter         Nonstocked               Total</span></span>
+<span><span class="co">##                 &lt;char&gt;             &lt;char&gt;              &lt;char&gt;</span></span>
+<span><span class="co">## 1:  15,904.9 ( 179.36)       -- (     --)  44,286.4 (  85.20)</span></span>
+<span><span class="co">## 2:        -- (     --)       -- (     --)  89,101.3 (  52.03)</span></span>
+<span><span class="co">## 3:  26,099.5 (  65.28)       -- (     --)  97,017.3 (  42.40)</span></span>
+<span><span class="co">## 4:  76,644.6 (  33.27)       -- (     --) 112,697.6 (  34.19)</span></span>
+<span><span class="co">## 5: 108,269.6 (  35.83)       -- (     --) 618,425.6 (  13.59)</span></span>
+<span><span class="co">## 6:  38,648.7 (  75.39)       -- (     --)  38,648.7 (  75.39)</span></span>
+<span><span class="co">## 7:        -- (     --) 36,765.0 (  64.92)  36,765.0 (  64.92)</span></span>
+<span><span class="co">## 8: 265,567.3 (  20.58) 36,765.0 (  64.92) 652,879.1 (   9.50)</span></span></code></pre>
 </details><p>We can again look at the output list, estimates, raw data, and
 titles:</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
@@ -759,22 +759,22 @@ output
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">area4</span><span class="op">$</span><span class="va">est</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                         Forest type     Large diameter    Medium diameter</span></span>
-<span><span class="co">##                              &lt;char&gt;             &lt;char&gt;             &lt;char&gt;</span></span>
-<span><span class="co">## 1:                      Douglas-fir  29,703.9 ( 90.29)        -- (    --)</span></span>
-<span><span class="co">## 2:                 Engelmann spruce 100,049.0 ( 39.09) -6,453.7 (-437.60)</span></span>
-<span><span class="co">## 3: Engelmann spruce / subalpine fir  45,291.2 ( 85.97)  28,719.3 ( 48.49)</span></span>
-<span><span class="co">## 4:                    Subalpine fir  36,023.6 ( 81.73)        -- (    --)</span></span>
-<span><span class="co">## 5:                   Lodgepole pine 217,609.7 ( 28.99) 288,643.6 ( 19.71)</span></span>
-<span><span class="co">## 6:                            Aspen        -- (    --)        -- (    --)</span></span>
-<span><span class="co">##        Small diameter  Nonstocked              Total</span></span>
-<span><span class="co">##                &lt;char&gt;      &lt;char&gt;             &lt;char&gt;</span></span>
-<span><span class="co">## 1:  15,281.0 (186.59) -- (    --)  44,985.0 ( 83.63)</span></span>
-<span><span class="co">## 2:        -- (    --) -- (    --)  93,595.3 ( 49.48)</span></span>
-<span><span class="co">## 3:  25,623.2 ( 66.48) -- (    --)  99,633.8 ( 41.46)</span></span>
-<span><span class="co">## 4:  76,109.4 ( 33.46) -- (    --) 112,133.0 ( 34.37)</span></span>
-<span><span class="co">## 5: 108,414.2 ( 35.78) -- (    --) 614,667.5 ( 13.63)</span></span>
-<span><span class="co">## 6:  38,050.4 ( 76.65) -- (    --)  38,050.4 ( 76.65)</span></span></code></pre>
+</summary><pre><code><span><span class="co">##                         Forest type      Large diameter     Medium diameter</span></span>
+<span><span class="co">##                              &lt;char&gt;              &lt;char&gt;              &lt;char&gt;</span></span>
+<span><span class="co">## 1:                      Douglas-fir  28,381.5 (  95.01)        -- (     --)</span></span>
+<span><span class="co">## 2:                 Engelmann spruce  97,387.6 (  40.28)  -8,286.3 (-339.39)</span></span>
+<span><span class="co">## 3: Engelmann spruce / subalpine fir  42,290.6 (  91.23)  28,627.2 (  48.64)</span></span>
+<span><span class="co">## 4:                    Subalpine fir  36,053.1 (  81.54)        -- (     --)</span></span>
+<span><span class="co">## 5:                   Lodgepole pine 221,069.2 (  28.62) 289,086.8 (  20.06)</span></span>
+<span><span class="co">## 6:                            Aspen        -- (     --)        -- (     --)</span></span>
+<span><span class="co">##         Small diameter   Nonstocked               Total</span></span>
+<span><span class="co">##                 &lt;char&gt;       &lt;char&gt;              &lt;char&gt;</span></span>
+<span><span class="co">## 1:  15,904.9 ( 179.36) -- (     --)  44,286.4 (  85.20)</span></span>
+<span><span class="co">## 2:        -- (     --) -- (     --)  89,101.3 (  52.03)</span></span>
+<span><span class="co">## 3:  26,099.5 (  65.28) -- (     --)  97,017.3 (  42.40)</span></span>
+<span><span class="co">## 4:  76,644.6 (  33.27) -- (     --) 112,697.6 (  34.19)</span></span>
+<span><span class="co">## 5: 108,269.6 (  35.83) -- (     --) 618,425.6 (  13.59)</span></span>
+<span><span class="co">## 6:  38,648.7 (  75.39) -- (     --)  38,648.7 (  75.39)</span></span></code></pre>
 </details><div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Raw data (list object) for estimate</span></span>
 <span><span class="va">raw4</span> <span class="op">&lt;-</span> <span class="va">area4</span><span class="op">$</span><span class="va">raw</span>      <span class="co"># extract raw data list object from output</span></span>
@@ -789,11 +789,11 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT      nhat    nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS AREAUSED      est</span></span>
-<span><span class="co">## 1       1 0.5936603 0.003129767     56         37   1112412  1112412 660395.1</span></span>
-<span><span class="co">##      est.var   est.se     est.cv      pse CI99left CI99right CI95left CI95right</span></span>
-<span><span class="co">## 1 3872964796 62233.15 0.09423624 9.423624 500093.1    820697 538420.4  782369.8</span></span>
+<span><span class="co">## 1       1 0.5869038 0.003106112     56         37   1112412  1112412 652879.1</span></span>
+<span><span class="co">##      est.var   est.se    est.cv     pse CI99left CI99right CI95left CI95right</span></span>
+<span><span class="co">## 1 3843693079 61997.52 0.0949602 9.49602   493184  812574.1 531366.2    774392</span></span>
 <span><span class="co">##   CI68left CI68right</span></span>
-<span><span class="co">## 1 598506.8  722283.3</span></span></code></pre>
+<span><span class="co">## 1 591225.1    714533</span></span></code></pre>
 </details><div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>      <span class="co"># estimates for population (i.e., WY)</span></span></code></pre></div>
 <details><summary>
@@ -804,33 +804,33 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT FORTYPCD       nhat     nhat.var NBRPLT NBRPLT.gt0</span></span>
-<span><span class="co">## 1       1      201 0.04043912 0.0011438244     37          2</span></span>
-<span><span class="co">## 2       1      265 0.08413719 0.0017329394     37          4</span></span>
-<span><span class="co">## 3       1      266 0.08956549 0.0013788769     37          5</span></span>
-<span><span class="co">## 4       1      268 0.10080163 0.0012003607     37          3</span></span>
-<span><span class="co">## 5       1      281 0.55255368 0.0056756036     37         23</span></span>
-<span><span class="co">## 6       1      901 0.03420534 0.0006874656     37          1</span></span>
+<span><span class="co">## 1       1      201 0.03981113 0.0011505987     37          2</span></span>
+<span><span class="co">## 2       1      265 0.08009738 0.0017367503     37          4</span></span>
+<span><span class="co">## 3       1      266 0.08721348 0.0013673266     37          5</span></span>
+<span><span class="co">## 4       1      268 0.10130923 0.0012000844     37          3</span></span>
+<span><span class="co">## 5       1      281 0.55593198 0.0057107487     37         23</span></span>
+<span><span class="co">## 6       1      901 0.03474316 0.0006861348     37          1</span></span>
 <span><span class="co">##                        Forest type ACRES_GIS AREAUSED       est    est.var</span></span>
-<span><span class="co">## 1                      Douglas-fir   1112412  1112412  44984.97 1415438352</span></span>
-<span><span class="co">## 2                 Engelmann spruce   1112412  1112412  93595.25 2144445295</span></span>
-<span><span class="co">## 3 Engelmann spruce / subalpine fir   1112412  1112412  99633.75 1706306752</span></span>
-<span><span class="co">## 4                    Subalpine fir   1112412  1112412 112132.98 1485399865</span></span>
-<span><span class="co">## 5                   Lodgepole pine   1112412  1112412 614667.54 7023339436</span></span>
-<span><span class="co">## 6                            Aspen   1112412  1112412  38050.44  850712058</span></span>
-<span><span class="co">##     est.se    est.cv      pse  CI99left CI99right   CI95left CI95right</span></span>
-<span><span class="co">## 1 37622.31 0.8363307 83.63307      0.00  141893.6      0.000 118723.35</span></span>
-<span><span class="co">## 2 46308.16 0.4947703 49.47703      0.00  212877.2   2832.937 184357.57</span></span>
-<span><span class="co">## 3 41307.47 0.4145931 41.45931      0.00  206034.7  18672.608 180594.90</span></span>
-<span><span class="co">## 4 38540.89 0.3437070 34.37070  12858.23  211407.7  36594.230 187671.73</span></span>
-<span><span class="co">## 5 83805.37 0.1363426 13.63426 398799.22  830535.9 450412.043 778923.04</span></span>
-<span><span class="co">## 6 29166.97 0.7665344 76.65344      0.00  113179.6      0.000  95216.65</span></span>
+<span><span class="co">## 1                      Douglas-fir   1112412  1112412  44286.39 1423821285</span></span>
+<span><span class="co">## 2                 Engelmann spruce   1112412  1112412  89101.31 2149161132</span></span>
+<span><span class="co">## 3 Engelmann spruce / subalpine fir   1112412  1112412  97017.35 1692013618</span></span>
+<span><span class="co">## 4                    Subalpine fir   1112412  1112412 112697.64 1485057928</span></span>
+<span><span class="co">## 5                   Lodgepole pine   1112412  1112412 618425.60 7066830141</span></span>
+<span><span class="co">## 6                            Aspen   1112412  1112412  38648.72  849065242</span></span>
+<span><span class="co">##     est.se    est.cv      pse  CI99left CI99right  CI95left CI95right</span></span>
+<span><span class="co">## 1 37733.56 0.8520351 85.20351      0.00  141481.6      0.00 118242.80</span></span>
+<span><span class="co">## 2 46359.05 0.5202959 52.02959      0.00  208514.3      0.00 179963.37</span></span>
+<span><span class="co">## 3 41134.09 0.4239870 42.39870      0.00  202971.7  16396.01 177638.69</span></span>
+<span><span class="co">## 4 38536.45 0.3419455 34.19455  13434.33  211961.0  37167.59 188227.70</span></span>
+<span><span class="co">## 5 84064.44 0.1359330 13.59330 401889.95  834961.3 453662.33 783188.88</span></span>
+<span><span class="co">## 6 29138.72 0.7539376 75.39376      0.00  113705.1      0.00  95759.57</span></span>
 <span><span class="co">##     CI68left CI68right</span></span>
-<span><span class="co">## 1   7571.167  82398.78</span></span>
-<span><span class="co">## 2  47543.744 139646.77</span></span>
-<span><span class="co">## 3  58555.219 140712.29</span></span>
-<span><span class="co">## 4  73805.690 150460.27</span></span>
-<span><span class="co">## 5 531326.636 698008.45</span></span>
-<span><span class="co">## 6   9045.116  67055.76</span></span></code></pre>
+<span><span class="co">## 1   6761.956  81810.82</span></span>
+<span><span class="co">## 2  42999.193 135203.43</span></span>
+<span><span class="co">## 3  56111.224 137923.47</span></span>
+<span><span class="co">## 4  74374.767 151020.52</span></span>
+<span><span class="co">## 5 534827.056 702024.15</span></span>
+<span><span class="co">## 6   9671.489  67625.96</span></span></code></pre>
 </details><div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">rowest</span><span class="op">)</span>      <span class="co"># estimates by row for population (i.e., WY)</span></span></code></pre></div>
 <details><summary>
@@ -841,20 +841,20 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT STDSZCD       nhat     nhat.var NBRPLT NBRPLT.gt0 Stand-size class</span></span>
-<span><span class="co">## 1       1       1 0.38535840 0.0033876151     37         18   Large diameter</span></span>
-<span><span class="co">## 2       1       2 0.27949097 0.0029167086     37         14  Medium diameter</span></span>
-<span><span class="co">## 3       1       3 0.23685308 0.0024009097     37          6   Small diameter</span></span>
-<span><span class="co">## 4       1       5 0.03363507 0.0004587985     37          1       Nonstocked</span></span>
+<span><span class="co">## 1       1       1 0.38221627 0.0033901272     37         18   Large diameter</span></span>
+<span><span class="co">## 2       1       2 0.27815912 0.0030155927     37         14  Medium diameter</span></span>
+<span><span class="co">## 3       1       3 0.23873097 0.0024143561     37          6   Small diameter</span></span>
+<span><span class="co">## 4       1       5 0.03304982 0.0004603932     37          1       Nonstocked</span></span>
 <span><span class="co">##   ACRES_GIS AREAUSED       est    est.var   est.se    est.cv      pse CI99left</span></span>
-<span><span class="co">## 1   1112412  1112412 428677.44 4192042338 64745.98 0.1510366 15.10366 261902.8</span></span>
-<span><span class="co">## 2   1112412  1112412 310909.21 3609313905 60077.57 0.1932319 19.32319 156159.7</span></span>
-<span><span class="co">## 3   1112412  1112412 263478.29 2971032742 54507.18 0.2068754 20.68754 123077.1</span></span>
-<span><span class="co">## 4   1112412  1112412  37416.06  567745416 23827.41 0.6368230 63.68230      0.0</span></span>
+<span><span class="co">## 1   1112412  1112412 425182.10 4195150958 64769.99 0.1523347 15.23347 258345.7</span></span>
+<span><span class="co">## 2   1112412  1112412 309427.64 3731679124 61087.47 0.1974209 19.74209 152076.7</span></span>
+<span><span class="co">## 3   1112412  1112412 265567.28 2987672110 54659.60 0.2058220 20.58220 124773.5</span></span>
+<span><span class="co">## 4   1112412  1112412  36765.03  569718693 23868.78 0.6492251 64.92251      0.0</span></span>
 <span><span class="co">##   CI99right CI95left CI95right  CI68left CI68right</span></span>
-<span><span class="co">## 1  595452.0 301777.6 555577.23 364290.29 493064.59</span></span>
-<span><span class="co">## 2  465658.8 193159.3 428659.07 251164.60 370653.82</span></span>
-<span><span class="co">## 3  403879.5 156646.2 370310.40 209273.20 317683.39</span></span>
-<span><span class="co">## 4   98791.4      0.0  84116.93  13720.71  61111.42</span></span></code></pre>
+<span><span class="co">## 1 592018.52 298235.3 552128.93 360771.07 489593.12</span></span>
+<span><span class="co">## 2 466778.53 189698.4 429156.88 248678.72 370176.55</span></span>
+<span><span class="co">## 3 406361.09 158436.4 372698.13 211210.61 319923.96</span></span>
+<span><span class="co">## 4  98246.94      0.0  83546.98  13028.53  60501.53</span></span></code></pre>
 </details><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">colest</span><span class="op">)</span>      <span class="co"># estimates by column for population (i.e., WY)</span></span></code></pre></div>
 <details><summary>
@@ -865,12 +865,12 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT grpvar         nhat     nhat.var NBRPLT NBRPLT.gt0 FORTYPCD STDSZCD</span></span>
-<span><span class="co">## 1       1  201#1  0.026702269 0.0005812575     37          1      201       1</span></span>
-<span><span class="co">## 2       1  201#3  0.013736847 0.0006569843     37          1      201       3</span></span>
-<span><span class="co">## 3       1  265#1  0.089938760 0.0012359055     37          3      265       1</span></span>
-<span><span class="co">## 4       1  265#2 -0.005801565 0.0006445465     37          1      265       2</span></span>
-<span><span class="co">## 5       1  266#1  0.040714392 0.0012251407     37          3      266       1</span></span>
-<span><span class="co">## 6       1  266#2  0.025817154 0.0001567382     37          1      266       2</span></span>
+<span><span class="co">## 1       1  201#1  0.025513469 0.0005875578     37          1      201       1</span></span>
+<span><span class="co">## 2       1  201#3  0.014297657 0.0006576539     37          1      201       3</span></span>
+<span><span class="co">## 3       1  265#1  0.087546327 0.0012436962     37          3      265       1</span></span>
+<span><span class="co">## 4       1  265#2 -0.007448949 0.0006391340     37          1      265       2</span></span>
+<span><span class="co">## 5       1  266#1  0.038017056 0.0012029502     37          3      266       1</span></span>
+<span><span class="co">## 6       1  266#2  0.025734305 0.0001566975     37          1      266       2</span></span>
 <span><span class="co">##   Stand-size class                      Forest type ACRES_GIS AREAUSED</span></span>
 <span><span class="co">## 1   Large diameter                      Douglas-fir   1112412  1112412</span></span>
 <span><span class="co">## 2   Small diameter                      Douglas-fir   1112412  1112412</span></span>
@@ -878,20 +878,20 @@ output
 <span><span class="co">## 4  Medium diameter                 Engelmann spruce   1112412  1112412</span></span>
 <span><span class="co">## 5   Large diameter Engelmann spruce / subalpine fir   1112412  1112412</span></span>
 <span><span class="co">## 6  Medium diameter Engelmann spruce / subalpine fir   1112412  1112412</span></span>
-<span><span class="co">##          est    est.var   est.se     est.cv        pse CI99left CI99right</span></span>
-<span><span class="co">## 1  29703.934  719283639 26819.46  0.9028927   90.28927        0  98786.29</span></span>
-<span><span class="co">## 2  15281.038  812992622 28513.03  1.8659090  186.59090        0  88725.72</span></span>
-<span><span class="co">## 3 100048.988 1529385157 39107.35  0.3908821   39.08821        0 200782.86</span></span>
-<span><span class="co">## 4  -6453.733  797601259 28241.84 -4.3760465 -437.60465        0  66292.41</span></span>
-<span><span class="co">## 5  45291.192 1516064105 38936.67  0.8596962   85.96962        0 145585.40</span></span>
-<span><span class="co">## 6  28719.321  193957392 13926.86  0.4849299   48.49299        0  64592.53</span></span>
+<span><span class="co">##         est    est.var   est.se     est.cv        pse CI99left CI99right</span></span>
+<span><span class="co">## 1 28381.499  727079950 26964.42  0.9500703   95.00703        0  97837.24</span></span>
+<span><span class="co">## 2 15904.890  813821229 28527.55  1.7936340  179.36340        0  89386.99</span></span>
+<span><span class="co">## 3 97387.615 1539025822 39230.42  0.4028276   40.28276        0 198438.48</span></span>
+<span><span class="co">## 4 -8286.303  790903534 28123.01 -3.3939149 -339.39149        0  64153.76</span></span>
+<span><span class="co">## 5 42290.643 1488604221 38582.43  0.9123161   91.23161        0 141672.41</span></span>
+<span><span class="co">## 6 28627.159  193907140 13925.05  0.4864281   48.64281        0  64495.72</span></span>
 <span><span class="co">##    CI95left CI95right  CI68left CI68right</span></span>
-<span><span class="co">## 1     0.000  82269.12  3033.107  56374.76</span></span>
-<span><span class="co">## 2     0.000  71165.54     0.000  43636.04</span></span>
-<span><span class="co">## 3 23399.982 176697.99 61158.371 138939.60</span></span>
-<span><span class="co">## 4     0.000  48899.25     0.000  21631.58</span></span>
-<span><span class="co">## 5     0.000 121605.66  6570.316  84012.07</span></span>
-<span><span class="co">## 6  1423.179  56015.46 14869.646  42569.00</span></span></code></pre>
+<span><span class="co">## 1     0.000  81230.79  1566.518  55196.48</span></span>
+<span><span class="co">## 2     0.000  71817.86     0.000  44274.34</span></span>
+<span><span class="co">## 3 20497.406 174277.82 58374.615 136400.62</span></span>
+<span><span class="co">## 4     0.000  46833.78     0.000  19680.84</span></span>
+<span><span class="co">## 5     0.000 117910.82  3922.037  80659.25</span></span>
+<span><span class="co">## 6  1334.554  55919.76 14779.279  42475.04</span></span></code></pre>
 </details><div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">grpest</span><span class="op">)</span>      <span class="co"># estimates by row and column for population (i.e., WY)</span></span></code></pre></div>
 <details><summary>
@@ -1001,11 +1001,11 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT     nhat nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS AREAUSED        est</span></span>
-<span><span class="co">## 1       1 1026.215 23835.98     56         34   1112412  1112412 1141574550</span></span>
-<span><span class="co">##       est.var    est.se    est.cv      pse  CI99left  CI99right  CI95left</span></span>
-<span><span class="co">## 1 2.94961e+16 171744283 0.1504451 15.04451 699190593 1583958507 804961940</span></span>
+<span><span class="co">## 1       1 1029.962 22849.33     56         34   1112412  1112412 1145742756</span></span>
+<span><span class="co">##        est.var    est.se    est.cv      pse  CI99left  CI99right  CI95left</span></span>
+<span><span class="co">## 1 2.827516e+16 168152198 0.1467626 14.67626 712611397 1578874115 816170504</span></span>
 <span><span class="co">##    CI95right  CI68left  CI68right</span></span>
-<span><span class="co">## 1 1478187159 970782094 1312367006</span></span></code></pre>
+<span><span class="co">## 1 1475315008 978522477 1312963035</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -1040,7 +1040,7 @@ output
 <span><span class="co">##  $ est     :Classes 'data.table' and 'data.frame':   1 obs. of  3 variables:</span></span>
 <span><span class="co">##   ..$ ONEUNIT               : chr "1"</span></span>
 <span><span class="co">##   ..$ Estimate              : num 1.17e+09</span></span>
-<span><span class="co">##   ..$ Percent Sampling Error: num 14.8</span></span>
+<span><span class="co">##   ..$ Percent Sampling Error: num 14.4</span></span>
 <span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
 <span><span class="co">##   ..- attr(*, "sorted")= chr "ONEUNIT"</span></span>
 <span><span class="co">##  $ titlelst:List of 10</span></span>
@@ -1077,9 +1077,9 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">## $totest</span></span>
-<span><span class="co">##    ONEUNIT TOTAL       dem       slp  asp_cos   asp_sin    fornf2</span></span>
-<span><span class="co">##     &lt;fctr&gt; &lt;num&gt;     &lt;num&gt;     &lt;num&gt;    &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">## 1:       1     1 0.4731476 -53.06438 2.795334 -417.7283 -1078.844</span></span></code></pre>
+<span><span class="co">##    ONEUNIT TOTAL       dem       slp asp_cos   asp_sin    fornf2</span></span>
+<span><span class="co">##     &lt;fctr&gt; &lt;num&gt;     &lt;num&gt;     &lt;num&gt;   &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
+<span><span class="co">## 1:       1     1 0.5235516 -60.26874       0 -497.2782 -1106.439</span></span></code></pre>
 </details><p>Notably, we can see that [INSERT CORRECT PREDS] <code>dem</code>,
 <code>slp</code>, <code>asp_cos</code>, and <code>asp_sin</code> were
 removed from the model.</p>
@@ -1118,15 +1118,15 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   Forest type     Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1         201   17947432.7                  79.48</span></span>
-<span><span class="co">## 2         265  325424761.5                  52.82</span></span>
-<span><span class="co">## 3         266  133362123.8                   82.4</span></span>
-<span><span class="co">## 4         268     56770977                  82.28</span></span>
-<span><span class="co">## 5         281 1061585204.9                  19.67</span></span>
+<span><span class="co">## 1         201   17386950.9                  82.45</span></span>
+<span><span class="co">## 2         265  308069606.4                  55.88</span></span>
+<span><span class="co">## 3         266  124752652.1                  87.24</span></span>
+<span><span class="co">## 4         268   56756979.9                  82.14</span></span>
+<span><span class="co">## 5         281 1095829416.3                  19.18</span></span>
 <span><span class="co">## 6         901           --                     --</span></span>
 <span><span class="co">## 7         999           --                     --</span></span>
 <span><span class="co">## 8          NA           --                     --</span></span>
-<span><span class="co">## 9       Total        Total                  Total</span></span></code></pre>
+<span><span class="co">## 9       Total 1145742756.1                  14.68</span></span></code></pre>
 </details><div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Raw data (list object) for estimate</span></span>
 <span><span class="va">raw3</span> <span class="op">&lt;-</span> <span class="va">tree3</span><span class="op">$</span><span class="va">raw</span>      <span class="co"># extract raw data list object from output</span></span>
@@ -1142,11 +1142,11 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT     nhat nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS AREAUSED        est</span></span>
-<span><span class="co">## 1       1 1026.215 23835.98     56         34   1112412  1112412 1141574550</span></span>
-<span><span class="co">##       est.var    est.se    est.cv      pse  CI99left  CI99right  CI95left</span></span>
-<span><span class="co">## 1 2.94961e+16 171744283 0.1504451 15.04451 699190593 1583958507 804961940</span></span>
+<span><span class="co">## 1       1 1029.962 22849.33     56         34   1112412  1112412 1145742756</span></span>
+<span><span class="co">##        est.var    est.se    est.cv      pse  CI99left  CI99right  CI95left</span></span>
+<span><span class="co">## 1 2.827516e+16 168152198 0.1467626 14.67626 712611397 1578874115 816170504</span></span>
 <span><span class="co">##    CI95right  CI68left  CI68right</span></span>
-<span><span class="co">## 1 1478187159 970782094 1312367006</span></span></code></pre>
+<span><span class="co">## 1 1475315008 978522477 1312963035</span></span></code></pre>
 </details><div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw3</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>        <span class="co"># estimates for population (i.e., WY)</span></span></code></pre></div>
 <details><summary>
@@ -1157,25 +1157,25 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT Forest type      nhat   nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS AREAUSED</span></span>
-<span><span class="co">## 1       1         201  16.13379   164.4228     37          2   1112412  1112412</span></span>
-<span><span class="co">## 2       1         265 292.53969 23878.9681     37          4   1112412  1112412</span></span>
-<span><span class="co">## 3       1         266 119.88551  9759.2451     37          5   1112412  1112412</span></span>
-<span><span class="co">## 4       1         268  51.03411  1763.2297     37          2   1112412  1112412</span></span>
-<span><span class="co">## 5       1         281 954.30908 35252.4962     37         23   1112412  1112412</span></span>
+<span><span class="co">## 1       1         201  15.62995   166.0663     37          2   1112412  1112412</span></span>
+<span><span class="co">## 2       1         265 276.93832 23952.0386     37          4   1112412  1112412</span></span>
+<span><span class="co">## 3       1         266 112.14605  9572.0563     37          5   1112412  1112412</span></span>
+<span><span class="co">## 4       1         268  51.02153  1756.4496     37          2   1112412  1112412</span></span>
+<span><span class="co">## 5       1         281 985.09282 35687.1045     37         23   1112412  1112412</span></span>
 <span><span class="co">## 6       1         901   0.00000     0.0000     37          0   1112412  1112412</span></span>
 <span><span class="co">##          est      est.var    est.se    est.cv      pse  CI99left  CI99right</span></span>
-<span><span class="co">## 1   17947433 2.034668e+14  14264179 0.7947755 79.47755         0   54689523</span></span>
-<span><span class="co">## 2  325424762 2.954930e+16 171899091 0.5282299 52.82299         0  768207478</span></span>
-<span><span class="co">## 3  133362124 1.207669e+16 109893984 0.8240269 82.40269         0  416430267</span></span>
-<span><span class="co">## 4   56770977 2.181928e+15  46711117 0.8227992 82.27992         0  177090841</span></span>
-<span><span class="co">## 5 1061585205 4.362360e+16 208862629 0.1967460 19.67460 523590725 1599579685</span></span>
+<span><span class="co">## 1   17386951 2.055007e+14  14335294 0.8244858 82.44858         0   54312222</span></span>
+<span><span class="co">## 2  308069606 2.963972e+16 172161899 0.5588409 55.88409         0  751529271</span></span>
+<span><span class="co">## 3  124752652 1.184505e+16 108834961 0.8724060 87.24060         0  405092933</span></span>
+<span><span class="co">## 4   56756980 2.173538e+15  46621222 0.8214183 82.14183         0  176845290</span></span>
+<span><span class="co">## 5 1095829416 4.416141e+16 210146160 0.1917690 19.17690 554528778 1637130054</span></span>
 <span><span class="co">## 6          0 0.000000e+00         0       NaN      NaN         0          0</span></span>
 <span><span class="co">##    CI95left  CI95right  CI68left  CI68right</span></span>
-<span><span class="co">## 1         0   45904710   3762307   32132558</span></span>
-<span><span class="co">## 2         0  662340789 154478355  496371168</span></span>
-<span><span class="co">## 3         0  348750374  24077185  242647062</span></span>
-<span><span class="co">## 4         0  148323084  10318738  103223216</span></span>
-<span><span class="co">## 5 652221975 1470948435 853880117 1269290293</span></span>
+<span><span class="co">## 1         0   45483612   3131104   31642797</span></span>
+<span><span class="co">## 2         0  645500728 136861849  479277364</span></span>
+<span><span class="co">## 3         0  338065256  16520867  232984437</span></span>
+<span><span class="co">## 4         0  148132896  10394138  103119822</span></span>
+<span><span class="co">## 5 683950510 1507708322 886847910 1304810922</span></span>
 <span><span class="co">## 6         0          0         0          0</span></span></code></pre>
 </details><div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw3</span><span class="op">$</span><span class="va">rowest</span><span class="op">)</span>        <span class="co"># estimates by row for population (i.e., WY)</span></span></code></pre></div>
@@ -1302,36 +1302,36 @@ output
 <span><span class="va">tree4</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                         Forest type           Large diameter</span></span>
-<span><span class="co">##                              &lt;char&gt;                   &lt;char&gt;</span></span>
-<span><span class="co">## 1:                      Douglas-fir    15,152,360.2 ( 90.29)</span></span>
-<span><span class="co">## 2:                 Engelmann spruce   348,392,567.2 ( 42.82)</span></span>
-<span><span class="co">## 3: Engelmann spruce / subalpine fir    96,924,444.5 (114.19)</span></span>
-<span><span class="co">## 4:                    Subalpine fir    56,770,977.0 ( 82.28)</span></span>
-<span><span class="co">## 5:                   Lodgepole pine   553,433,725.7 ( 33.53)</span></span>
-<span><span class="co">## 6:                            Aspen              -- (    --)</span></span>
-<span><span class="co">## 7:                       Nonstocked              -- (    --)</span></span>
-<span><span class="co">## 8:                            Total 1,070,674,074.5 ( 17.32)</span></span>
-<span><span class="co">##            Medium diameter        Small diameter  Nonstocked</span></span>
-<span><span class="co">##                     &lt;char&gt;                &lt;char&gt;      &lt;char&gt;</span></span>
-<span><span class="co">## 1:             -- (    --)  2,795,072.5 (186.59) -- (    --)</span></span>
-<span><span class="co">## 2: -22,967,805.6 (-437.60)           -- (    --) -- (    --)</span></span>
-<span><span class="co">## 3:   28,620,265.6 ( 48.49)  7,817,413.7 ( 66.48) -- (    --)</span></span>
-<span><span class="co">## 4:             -- (    --)           -- (    --) -- (    --)</span></span>
-<span><span class="co">## 5:  489,324,558.4 ( 21.68) 18,826,920.8 ( 34.05) -- (    --)</span></span>
-<span><span class="co">## 6:             -- (    --)           -- (    --) -- (    --)</span></span>
-<span><span class="co">## 7:             -- (    --)           -- (    --) -- (    --)</span></span>
-<span><span class="co">## 8:  494,977,018.4 ( 27.06) 29,439,407.0 ( 29.48) -- (    --)</span></span>
-<span><span class="co">##                       Total</span></span>
-<span><span class="co">##                      &lt;char&gt;</span></span>
-<span><span class="co">## 1:    17,947,432.7 ( 79.48)</span></span>
-<span><span class="co">## 2:   325,424,761.5 ( 52.82)</span></span>
-<span><span class="co">## 3:   133,362,123.8 ( 82.40)</span></span>
-<span><span class="co">## 4:    56,770,977.0 ( 82.28)</span></span>
-<span><span class="co">## 5: 1,061,585,204.9 ( 19.67)</span></span>
-<span><span class="co">## 6:              -- (    --)</span></span>
-<span><span class="co">## 7:              -- (    --)</span></span>
-<span><span class="co">## 8: 1,141,574,549.9 ( 15.04)</span></span></code></pre>
+</summary><pre><code><span><span class="co">##                         Forest type            Large diameter</span></span>
+<span><span class="co">##                              &lt;char&gt;                    &lt;char&gt;</span></span>
+<span><span class="co">## 1:                      Douglas-fir    14,477,768.8 (  95.01)</span></span>
+<span><span class="co">## 2:                 Engelmann spruce   337,559,236.7 (  44.35)</span></span>
+<span><span class="co">## 3: Engelmann spruce / subalpine fir    88,261,500.4 ( 124.07)</span></span>
+<span><span class="co">## 4:                    Subalpine fir    56,756,979.9 (  82.14)</span></span>
+<span><span class="co">## 5:                   Lodgepole pine   590,014,944.8 (  31.92)</span></span>
+<span><span class="co">## 6:                            Aspen              -- (     --)</span></span>
+<span><span class="co">## 7:                       Nonstocked              -- (     --)</span></span>
+<span><span class="co">## 8:                            Total 1,087,070,430.7 (  17.29)</span></span>
+<span><span class="co">##            Medium diameter         Small diameter   Nonstocked</span></span>
+<span><span class="co">##                     &lt;char&gt;                 &lt;char&gt;       &lt;char&gt;</span></span>
+<span><span class="co">## 1:            -- (     --)  2,909,182.1 ( 179.36) -- (     --)</span></span>
+<span><span class="co">## 2: -29,489,630.3 (-339.39)           -- (     --) -- (     --)</span></span>
+<span><span class="co">## 3:  28,528,421.9 (  48.64)  7,962,729.8 (  65.28) -- (     --)</span></span>
+<span><span class="co">## 4:            -- (     --)           -- (     --) -- (     --)</span></span>
+<span><span class="co">## 5: 487,026,140.7 (  22.47) 18,788,330.8 (  34.12) -- (     --)</span></span>
+<span><span class="co">## 6:            -- (     --)           -- (     --) -- (     --)</span></span>
+<span><span class="co">## 7:            -- (     --)           -- (     --) -- (     --)</span></span>
+<span><span class="co">## 8: 486,064,932.3 (  28.02) 29,660,242.6 (  29.35) -- (     --)</span></span>
+<span><span class="co">##                        Total</span></span>
+<span><span class="co">##                       &lt;char&gt;</span></span>
+<span><span class="co">## 1:    17,386,950.9 (  82.45)</span></span>
+<span><span class="co">## 2:   308,069,606.4 (  55.88)</span></span>
+<span><span class="co">## 3:   124,752,652.1 (  87.24)</span></span>
+<span><span class="co">## 4:    56,756,979.9 (  82.14)</span></span>
+<span><span class="co">## 5: 1,095,829,416.3 (  19.18)</span></span>
+<span><span class="co">## 6:              -- (     --)</span></span>
+<span><span class="co">## 7:              -- (     --)</span></span>
+<span><span class="co">## 8: 1,145,742,756.1 (  14.68)</span></span></code></pre>
 </details><div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Raw data (list object) for estimate</span></span>
 <span><span class="va">raw4</span> <span class="op">&lt;-</span> <span class="va">tree4</span><span class="op">$</span><span class="va">raw</span>      <span class="co"># extract raw data list object from output</span></span>
@@ -1347,11 +1347,11 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT     nhat nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS AREAUSED        est</span></span>
-<span><span class="co">## 1       1 1026.215 23835.98     56         34   1112412  1112412 1141574550</span></span>
-<span><span class="co">##       est.var    est.se    est.cv      pse  CI99left  CI99right  CI95left</span></span>
-<span><span class="co">## 1 2.94961e+16 171744283 0.1504451 15.04451 699190593 1583958507 804961940</span></span>
+<span><span class="co">## 1       1 1029.962 22849.33     56         34   1112412  1112412 1145742756</span></span>
+<span><span class="co">##        est.var    est.se    est.cv      pse  CI99left  CI99right  CI95left</span></span>
+<span><span class="co">## 1 2.827516e+16 168152198 0.1467626 14.67626 712611397 1578874115 816170504</span></span>
 <span><span class="co">##    CI95right  CI68left  CI68right</span></span>
-<span><span class="co">## 1 1478187159 970782094 1312367006</span></span></code></pre>
+<span><span class="co">## 1 1475315008 978522477 1312963035</span></span></code></pre>
 </details><div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>        <span class="co"># estimates for population (i.e., WY)</span></span></code></pre></div>
 <details><summary>
@@ -1362,32 +1362,32 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT FORTYPCD      nhat   nhat.var NBRPLT NBRPLT.gt0</span></span>
-<span><span class="co">## 1       1      201  16.13379   164.4228     37          2</span></span>
-<span><span class="co">## 2       1      265 292.53969 23878.9681     37          4</span></span>
-<span><span class="co">## 3       1      266 119.88551  9759.2451     37          5</span></span>
-<span><span class="co">## 4       1      268  51.03411  1763.2297     37          2</span></span>
-<span><span class="co">## 5       1      281 954.30908 35252.4962     37         23</span></span>
+<span><span class="co">## 1       1      201  15.62995   166.0663     37          2</span></span>
+<span><span class="co">## 2       1      265 276.93832 23952.0386     37          4</span></span>
+<span><span class="co">## 3       1      266 112.14605  9572.0563     37          5</span></span>
+<span><span class="co">## 4       1      268  51.02153  1756.4496     37          2</span></span>
+<span><span class="co">## 5       1      281 985.09282 35687.1045     37         23</span></span>
 <span><span class="co">## 6       1      901   0.00000     0.0000     37          0</span></span>
 <span><span class="co">##                        Forest type ACRES_GIS AREAUSED        est      est.var</span></span>
-<span><span class="co">## 1                      Douglas-fir   1112412  1112412   17947433 2.034668e+14</span></span>
-<span><span class="co">## 2                 Engelmann spruce   1112412  1112412  325424762 2.954930e+16</span></span>
-<span><span class="co">## 3 Engelmann spruce / subalpine fir   1112412  1112412  133362124 1.207669e+16</span></span>
-<span><span class="co">## 4                    Subalpine fir   1112412  1112412   56770977 2.181928e+15</span></span>
-<span><span class="co">## 5                   Lodgepole pine   1112412  1112412 1061585205 4.362360e+16</span></span>
+<span><span class="co">## 1                      Douglas-fir   1112412  1112412   17386951 2.055007e+14</span></span>
+<span><span class="co">## 2                 Engelmann spruce   1112412  1112412  308069606 2.963972e+16</span></span>
+<span><span class="co">## 3 Engelmann spruce / subalpine fir   1112412  1112412  124752652 1.184505e+16</span></span>
+<span><span class="co">## 4                    Subalpine fir   1112412  1112412   56756980 2.173538e+15</span></span>
+<span><span class="co">## 5                   Lodgepole pine   1112412  1112412 1095829416 4.416141e+16</span></span>
 <span><span class="co">## 6                            Aspen   1112412  1112412          0 0.000000e+00</span></span>
 <span><span class="co">##      est.se    est.cv      pse  CI99left  CI99right  CI95left  CI95right</span></span>
-<span><span class="co">## 1  14264179 0.7947755 79.47755         0   54689523         0   45904710</span></span>
-<span><span class="co">## 2 171899091 0.5282299 52.82299         0  768207478         0  662340789</span></span>
-<span><span class="co">## 3 109893984 0.8240269 82.40269         0  416430267         0  348750374</span></span>
-<span><span class="co">## 4  46711117 0.8227992 82.27992         0  177090841         0  148323084</span></span>
-<span><span class="co">## 5 208862629 0.1967460 19.67460 523590725 1599579685 652221975 1470948435</span></span>
+<span><span class="co">## 1  14335294 0.8244858 82.44858         0   54312222         0   45483612</span></span>
+<span><span class="co">## 2 172161899 0.5588409 55.88409         0  751529271         0  645500728</span></span>
+<span><span class="co">## 3 108834961 0.8724060 87.24060         0  405092933         0  338065256</span></span>
+<span><span class="co">## 4  46621222 0.8214183 82.14183         0  176845290         0  148132896</span></span>
+<span><span class="co">## 5 210146160 0.1917690 19.17690 554528778 1637130054 683950510 1507708322</span></span>
 <span><span class="co">## 6         0       NaN      NaN         0          0         0          0</span></span>
 <span><span class="co">##    CI68left  CI68right</span></span>
-<span><span class="co">## 1   3762307   32132558</span></span>
-<span><span class="co">## 2 154478355  496371168</span></span>
-<span><span class="co">## 3  24077185  242647062</span></span>
-<span><span class="co">## 4  10318738  103223216</span></span>
-<span><span class="co">## 5 853880117 1269290293</span></span>
+<span><span class="co">## 1   3131104   31642797</span></span>
+<span><span class="co">## 2 136861849  479277364</span></span>
+<span><span class="co">## 3  16520867  232984437</span></span>
+<span><span class="co">## 4  10394138  103119822</span></span>
+<span><span class="co">## 5 886847910 1304810922</span></span>
 <span><span class="co">## 6         0          0</span></span></code></pre>
 </details><div class="sourceCode" id="cb116"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">rowest</span><span class="op">)</span>        <span class="co"># estimates by row for population (i.e., WY)</span></span></code></pre></div>
@@ -1399,19 +1399,19 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##   ONEUNIT STDSZCD      nhat    nhat.var NBRPLT NBRPLT.gt0 Stand-size class</span></span>
-<span><span class="co">## 1       1       1 962.47949 27803.36030     37         18   Large diameter</span></span>
-<span><span class="co">## 2       1       2 444.95822 14498.34050     37         14  Medium diameter</span></span>
-<span><span class="co">## 3       1       3  26.46447    60.88546     37          4   Small diameter</span></span>
+<span><span class="co">## 1       1       1 977.21895 28542.07717     37         18   Large diameter</span></span>
+<span><span class="co">## 2       1       2 436.94672 14991.78126     37         14  Medium diameter</span></span>
+<span><span class="co">## 3       1       3  26.66299    61.25535     37          4   Small diameter</span></span>
 <span><span class="co">## 4       1       5   0.00000     0.00000     37          0       Nonstocked</span></span>
 <span><span class="co">##   ACRES_GIS AREAUSED        est      est.var    est.se    est.cv      pse</span></span>
-<span><span class="co">## 1   1112412  1112412 1070674075 3.440558e+16 185487414 0.1732436 17.32436</span></span>
-<span><span class="co">## 2   1112412  1112412  494977018 1.794113e+16 133944520 0.2706076 27.06076</span></span>
-<span><span class="co">## 3   1112412  1112412   29439407 7.534340e+13   8680058 0.2948449 29.48449</span></span>
+<span><span class="co">## 1   1112412  1112412 1087070431 3.531971e+16 187935399 0.1728824 17.28824</span></span>
+<span><span class="co">## 2   1112412  1112412  486064932 1.855175e+16 136204803 0.2802194 28.02194</span></span>
+<span><span class="co">## 3   1112412  1112412   29660243 7.580112e+13   8706384 0.2935372 29.35372</span></span>
 <span><span class="co">## 4   1112412  1112412          0 0.000000e+00         0       NaN      NaN</span></span>
 <span><span class="co">##    CI99left  CI99right  CI95left  CI95right  CI68left  CI68right</span></span>
-<span><span class="co">## 1 592890158 1548457991 707125423 1434222726 886214653 1255133496</span></span>
-<span><span class="co">## 2 149958799  839995238 232450583  757503454 361774834  628179202</span></span>
-<span><span class="co">## 3   7081060   51797754  12426807   46452007  20807455   38071359</span></span>
+<span><span class="co">## 1 602980922 1571159939 718723817 1455417045 900176591 1273964270</span></span>
+<span><span class="co">## 2 135224610  836905254 219108425  753021440 350614993  621514872</span></span>
+<span><span class="co">## 3   7234084   52086401  12596044   46724441  21002111   38318375</span></span>
 <span><span class="co">## 4         0          0         0          0         0          0</span></span></code></pre>
 </details><div class="sourceCode" id="cb120"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">colest</span><span class="op">)</span>        <span class="co"># estimates by column for population (i.e., WY)</span></span></code></pre></div>
@@ -1422,13 +1422,13 @@ output
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">unit_grpest</span><span class="op">)</span>   <span class="co"># estimates by row and column, by estimation unit (i.e., ESTN_UNIT)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##   ONEUNIT grpvar       nhat    nhat.var NBRPLT NBRPLT.gt0 FORTYPCD STDSZCD</span></span>
-<span><span class="co">## 1       1  201#1  13.621172   151.25203     37          1      201       1</span></span>
-<span><span class="co">## 2       1  201#3   2.512623    21.98039     37          1      201       3</span></span>
-<span><span class="co">## 3       1  265#1 313.186532 17986.46558     37          3      265       1</span></span>
-<span><span class="co">## 4       1  265#2 -20.646845  8163.40351     37          1      265       2</span></span>
-<span><span class="co">## 5       1  266#1  87.129961  9899.32555     37          3      266       1</span></span>
-<span><span class="co">## 6       1  266#2  25.728108   155.65881     37          1      266       2</span></span>
+</summary><pre><code><span><span class="co">##   ONEUNIT grpvar       nhat   nhat.var NBRPLT NBRPLT.gt0 FORTYPCD STDSZCD</span></span>
+<span><span class="co">## 1       1  201#1  13.014750   152.8914     37          1      201       1</span></span>
+<span><span class="co">## 2       1  201#3   2.615201    22.0028     37          1      201       3</span></span>
+<span><span class="co">## 3       1  265#1 303.447940 18110.8690     37          3      265       1</span></span>
+<span><span class="co">## 4       1  265#2 -26.509621  8094.8527     37          1      265       2</span></span>
+<span><span class="co">## 5       1  266#1  79.342431  9690.2120     37          3      266       1</span></span>
+<span><span class="co">## 6       1  266#2  25.645546   155.6185     37          1      266       2</span></span>
 <span><span class="co">##   Stand-size class                      Forest type ACRES_GIS AREAUSED</span></span>
 <span><span class="co">## 1   Large diameter                      Douglas-fir   1112412  1112412</span></span>
 <span><span class="co">## 2   Small diameter                      Douglas-fir   1112412  1112412</span></span>
@@ -1437,19 +1437,19 @@ output
 <span><span class="co">## 5   Large diameter Engelmann spruce / subalpine fir   1112412  1112412</span></span>
 <span><span class="co">## 6  Medium diameter Engelmann spruce / subalpine fir   1112412  1112412</span></span>
 <span><span class="co">##         est      est.var    est.se     est.cv        pse CI99left CI99right</span></span>
-<span><span class="co">## 1  15152360 1.871685e+14  13680955  0.9028927   90.28927        0  50392164</span></span>
-<span><span class="co">## 2   2795073 2.719988e+13   5215351  1.8659090  186.59090        0  16228926</span></span>
-<span><span class="co">## 3 348392567 2.225755e+16 149189658  0.4282228   42.82228        0 732679660</span></span>
-<span><span class="co">## 4 -22967806 1.010190e+16 100508186 -4.3760465 -437.60465        0 235924125</span></span>
-<span><span class="co">## 5  96924444 1.225003e+16 110679861  1.1419190  114.19190        0 382016875</span></span>
-<span><span class="co">## 6  28620266 1.926217e+14  13878824  0.4849299   48.49299        0  64369747</span></span>
-<span><span class="co">##   CI95left CI95right  CI68left CI68right</span></span>
-<span><span class="co">## 1        0  41966539   1547227  28757493</span></span>
-<span><span class="co">## 2        0  13016972         0   7981519</span></span>
-<span><span class="co">## 3 55986211 640798924 200029736 496755399</span></span>
-<span><span class="co">## 4        0 174024619         0  76983352</span></span>
-<span><span class="co">## 5        0 313852987         0 206990905</span></span>
-<span><span class="co">## 6  1418271  55822260  14818360  42422171</span></span></code></pre>
+<span><span class="co">## 1  14477769 1.891972e+14  13754899  0.9500703   95.00703        0  49908040</span></span>
+<span><span class="co">## 2   2909182 2.722761e+13   5218008  1.7936340  179.36340        0  16349880</span></span>
+<span><span class="co">## 3 337559237 2.241150e+16 149704704  0.4434917   44.34917        0 723173001</span></span>
+<span><span class="co">## 4 -29489630 1.001707e+16 100085296 -3.3939149 -339.39149        0 228313008</span></span>
+<span><span class="co">## 5  88261500 1.199126e+16 109504620  1.2406839  124.06839        0 370326709</span></span>
+<span><span class="co">## 6  28528422 1.925718e+14  13877026  0.4864281   48.64281        0  64273272</span></span>
+<span><span class="co">##   CI95left CI95right    CI68left CI68right</span></span>
+<span><span class="co">## 1        0  41436875    799101.3  28156436</span></span>
+<span><span class="co">## 2        0  13136290         0.0   8098271</span></span>
+<span><span class="co">## 3 44143408 630975066 188684213.4 486434260</span></span>
+<span><span class="co">## 4        0 166673945         0.0  70040981</span></span>
+<span><span class="co">## 5        0 302886611         0.0 197159233</span></span>
+<span><span class="co">## 6  1329951  55726893  14728304.3  42328540</span></span></code></pre>
 </details><div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">grpest</span><span class="op">)</span>        <span class="co"># estimates by row and column for population (i.e., WY)</span></span></code></pre></div>
 <details><summary>
@@ -1558,14 +1558,14 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##                  Species    Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1          subalpine fir 119911383.8                  20.66</span></span>
+<span><span class="co">## 1          subalpine fir 117036939.1                  20.78</span></span>
 <span><span class="co">## 2 Rocky Mountain juniper          --                     --</span></span>
-<span><span class="co">## 3       Engelmann spruce 125194430.4                  15.69</span></span>
-<span><span class="co">## 4         lodgepole pine 261081052.4                  18.02</span></span>
-<span><span class="co">## 5            limber pine   4963775.5                 125.84</span></span>
-<span><span class="co">## 6            Douglas-fir  25622497.9                 108.26</span></span>
-<span><span class="co">## 7          quaking aspen  14768776.6                  88.07</span></span>
-<span><span class="co">## 8                  Total       Total                  Total</span></span></code></pre>
+<span><span class="co">## 3       Engelmann spruce 123334760.1                  15.94</span></span>
+<span><span class="co">## 4         lodgepole pine 260668686.6                  18.14</span></span>
+<span><span class="co">## 5            limber pine   4996348.9                 125.15</span></span>
+<span><span class="co">## 6            Douglas-fir  25445385.3                 109.24</span></span>
+<span><span class="co">## 7          quaking aspen  15095940.7                   86.1</span></span>
+<span><span class="co">## 8                  Total 341528276.1                  13.13</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -1612,37 +1612,37 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##                  Species    Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1          subalpine fir 807206036.3                   13.7</span></span>
+<span><span class="co">## 1          subalpine fir 795266354.7                  13.82</span></span>
 <span><span class="co">## 2 Rocky Mountain juniper          --                     --</span></span>
-<span><span class="co">## 3       Engelmann spruce 230152346.7                   22.1</span></span>
-<span><span class="co">## 4         lodgepole pine 334749661.5                  17.84</span></span>
-<span><span class="co">## 5            limber pine  44942397.4                 119.38</span></span>
-<span><span class="co">## 6            Douglas-fir    56005845                  105.4</span></span>
-<span><span class="co">## 7          quaking aspen 150389922.4                   65.7</span></span>
-<span><span class="co">## 8                  Total       Total                  Total</span></span></code></pre>
+<span><span class="co">## 3       Engelmann spruce 226522023.3                  22.37</span></span>
+<span><span class="co">## 4         lodgepole pine 333518419.3                  17.97</span></span>
+<span><span class="co">## 5            limber pine  45851027.5                  117.1</span></span>
+<span><span class="co">## 6            Douglas-fir  56082522.7                 105.42</span></span>
+<span><span class="co">## 7          quaking aspen 153434173.9                  64.29</span></span>
+<span><span class="co">## 8                  Total 948282173.2                     16</span></span></code></pre>
 </details><div class="sourceCode" id="cb145"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Compare estimates with and without seedlings</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tree5</span><span class="op">$</span><span class="va">est</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##                  Species    Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1          subalpine fir 119911383.8                  20.66</span></span>
+<span><span class="co">## 1          subalpine fir 117036939.1                  20.78</span></span>
 <span><span class="co">## 2 Rocky Mountain juniper          --                     --</span></span>
-<span><span class="co">## 3       Engelmann spruce 125194430.4                  15.69</span></span>
-<span><span class="co">## 4         lodgepole pine 261081052.4                  18.02</span></span>
-<span><span class="co">## 5            limber pine   4963775.5                 125.84</span></span>
-<span><span class="co">## 6            Douglas-fir  25622497.9                 108.26</span></span></code></pre>
+<span><span class="co">## 3       Engelmann spruce 123334760.1                  15.94</span></span>
+<span><span class="co">## 4         lodgepole pine 260668686.6                  18.14</span></span>
+<span><span class="co">## 5            limber pine   4996348.9                 125.15</span></span>
+<span><span class="co">## 6            Douglas-fir  25445385.3                 109.24</span></span></code></pre>
 </details><div class="sourceCode" id="cb147"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tree6</span><span class="op">$</span><span class="va">est</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##                  Species    Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1          subalpine fir 807206036.3                   13.7</span></span>
+<span><span class="co">## 1          subalpine fir 795266354.7                  13.82</span></span>
 <span><span class="co">## 2 Rocky Mountain juniper          --                     --</span></span>
-<span><span class="co">## 3       Engelmann spruce 230152346.7                   22.1</span></span>
-<span><span class="co">## 4         lodgepole pine 334749661.5                  17.84</span></span>
-<span><span class="co">## 5            limber pine  44942397.4                 119.38</span></span>
-<span><span class="co">## 6            Douglas-fir    56005845                  105.4</span></span></code></pre>
+<span><span class="co">## 3       Engelmann spruce 226522023.3                  22.37</span></span>
+<span><span class="co">## 4         lodgepole pine 333518419.3                  17.97</span></span>
+<span><span class="co">## 5            limber pine  45851027.5                  117.1</span></span>
+<span><span class="co">## 6            Douglas-fir  56082522.7                 105.42</span></span></code></pre>
 </details></details><!-- #### Example 11: Number of seedlings by species, Wyoming, 2011-2013 --><!-- Of course, we can also look at *only* seedlings. --><!-- Note: seedling data are only available for number of trees (estvar = TPA_UNADJ). --><!-- Note: must include seedling data in population data calculations. --><!-- ```{r} --><!-- ## Number of live trees seedlings by species --><!-- tree7 <- modMAtree( --><!--     MApopdat = MApopdat_seed,         # pop - population calculations --><!--     MAmethod = "greg",           # est - model-assisted method --><!--     estseed = "only",            # est - add seedling data --><!--     landarea = "FOREST",         # est - forest land filter --><!--     estvar = "TPA_UNADJ",        # est - number of trees per acre  --><!--     rowvar = "SPCD",             # est - row domain --><!--     returntitle = TRUE,          # out - return title information --><!--     table_opts = table_options( --><!--       row.FIAname = TRUE,          # est - row domain names --><!--       allin1 = FALSE               # out - return output with est and pse --><!--       ) --><!--     ) --><!-- ``` --><!-- And again we can look at our outputs and compare estimates: --><!-- ```{r} --><!-- ## Look at output list --><!-- names(tree7) --><!-- ## Estimate and percent sampling error of estimate --><!-- tree7$est --><!-- ## Compare estimates with, without, and only seedlings --><!-- head(tree5$est) --><!-- head(tree6$est) --><!-- head(tree7$est) --><!-- ``` -->
 </div>
 </div>

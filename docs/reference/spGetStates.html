@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.4.9000</span>
       </span>
     </div>
 
@@ -95,6 +95,7 @@
 <span>  RS <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  states <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  overlap <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  clipbnd <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showsteps <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  savebnd <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -137,12 +138,16 @@ included.</p></dd>
 <dd><p>Number. Percent overlap to include.</p></dd>
 
 
+<dt>clipbnd</dt>
+<dd><p>Logical. If TRUE, clips boundary to state/RS restrictions.</p></dd>
+
+
 <dt>showsteps</dt>
-<dd><p>Logical. If yes, display intersecting boundaries.</p></dd>
+<dd><p>Logical. If TRUE, display intersecting boundaries.</p></dd>
 
 
 <dt>savebnd</dt>
-<dd><p>Logical. If yes, save boundary to outfolder.</p></dd>
+<dd><p>Logical. If TRUE, save boundary to outfolder.</p></dd>
 
 
 <dt>savedata_opts</dt>

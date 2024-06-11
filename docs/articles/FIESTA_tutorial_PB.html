@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.4.9000</span>
       </span>
     </div>
 
@@ -1266,7 +1266,7 @@ output
 <span><span class="co">## 4            Barren     11.8                  19.53</span></span>
 <span><span class="co">## 5        Impervious     10.8                  19.38</span></span>
 <span><span class="co">## 6             Water     23.1                  15.47</span></span>
-<span><span class="co">## 7             Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 7             Total      100                      0</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -1308,7 +1308,7 @@ output
 <span><span class="co">## 4            Barren 108670.5                  19.53</span></span>
 <span><span class="co">## 5        Impervious  99267.8                  19.38</span></span>
 <span><span class="co">## 6             Water 213333.3                  15.47</span></span>
-<span><span class="co">## 7             Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 7             Total   922543                      0</span></span></code></pre>
 </details><p>We can now use the <code>PBpoparea</code> set of population data to
 run percent estimates as well. Let’s save the data to the outfolder and
 return titles as well. Note: Saving data adds a new folder in outfolder
@@ -1346,7 +1346,7 @@ output
 <span><span class="co">## 4            Barren     11.8                  19.53</span></span>
 <span><span class="co">## 5        Impervious     10.8                  19.38</span></span>
 <span><span class="co">## 6             Water     23.1                  15.47</span></span>
-<span><span class="co">## 7             Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 7             Total      100                      0</span></span></code></pre>
 </details><p>And titles:</p>
 <div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Estimate and percent sampling error of estimate</span></span>
@@ -1421,7 +1421,7 @@ output
 <span><span class="co">## 4            Barren     16.9                  16.36</span></span>
 <span><span class="co">## 5        Impervious     11.5                  18.44</span></span>
 <span><span class="co">## 6             Water     17.2                  18.71</span></span>
-<span><span class="co">## 7             Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 7             Total      100                      0</span></span></code></pre>
 </details><p>Now we can compare the estimates from Time 2 with estimates from Time
 1 and look at net change. We will use the raw data with numeric
 values.</p>
@@ -1529,7 +1529,7 @@ output
 <span><span class="co">## 3 Removal or Loss of Vegetation      0.1                  68.17</span></span>
 <span><span class="co">## 4           Stress or Mortality      0.1                    100</span></span>
 <span><span class="co">## 5               Expected Change        5                  34.25</span></span>
-<span><span class="co">## 6                         Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 6                         Total      100                      0</span></span></code></pre>
 </details><p>Now, let’s get area estimates. Notice, we can change the resulting
 area units to metric units (i.e., hectares).</p>
 <div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
@@ -1560,7 +1560,7 @@ output
 <span><span class="co">## 3 Removal or Loss of Vegetation      499                  68.17</span></span>
 <span><span class="co">## 4           Stress or Mortality    187.1                    100</span></span>
 <span><span class="co">## 5               Expected Change  18651.4                  34.25</span></span>
-<span><span class="co">## 6                         Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 6                         Total 373340.2                      0</span></span></code></pre>
 </details><p>The resulting area units are identified in the raw data.</p>
 <div class="sourceCode" id="cb103"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chg_ag.area</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">areaunits</span></span></code></pre></div>
@@ -1605,7 +1605,7 @@ output
 <span><span class="co">## 3 Removal or Loss of Vegetation      0.1                  68.17</span></span>
 <span><span class="co">## 4           Stress or Mortality      0.1                    100</span></span>
 <span><span class="co">## 5               Expected Change      1.7                  50.46</span></span>
-<span><span class="co">## 6                         Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 6                         Total       12                  23.54</span></span></code></pre>
 </details><p>Notice, the estimate titles reflect this filter.</p>
 <div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Estimate and percent sampling error of estimate</span></span>
@@ -1666,7 +1666,7 @@ output
 <span><span class="co">## 3 Removal or Loss of Vegetation      0.1                  68.17</span></span>
 <span><span class="co">## 4           Stress or Mortality      0.1                    100</span></span>
 <span><span class="co">## 5               Expected Change        5                  34.25</span></span>
-<span><span class="co">## 6                         Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 6                         Total      100                      0</span></span></code></pre>
 </details><div class="sourceCode" id="cb115"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Land with observed change</span></span>
 <span><span class="va">chg_ag.plts</span><span class="op">$</span><span class="va">titlelst</span><span class="op">$</span><span class="va">title.estpse</span></span></code></pre></div>
@@ -1683,7 +1683,7 @@ output
 <span><span class="co">## 3 Removal or Loss of Vegetation      0.1                  68.17</span></span>
 <span><span class="co">## 4           Stress or Mortality      0.1                    100</span></span>
 <span><span class="co">## 5               Expected Change      1.7                  50.46</span></span>
-<span><span class="co">## 6                         Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 6                         Total       12                  23.54</span></span></code></pre>
 </details><div class="sourceCode" id="cb119"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Estimated change</span></span>
 <span><span class="va">chg_ag.pnts</span><span class="op">$</span><span class="va">titlelst</span><span class="op">$</span><span class="va">title.estpse</span></span></code></pre></div>
@@ -1699,7 +1699,7 @@ output
 <span><span class="co">## 2 Removal or Loss of Vegetation      1.5                  68.82</span></span>
 <span><span class="co">## 3           Stress or Mortality      0.8                    100</span></span>
 <span><span class="co">## 4               Expected Change      7.5                  30.53</span></span>
-<span><span class="co">## 5                         Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 5                         Total       15                  20.69</span></span></code></pre>
 </details><p>Let’s create a barplot of estimated change by agent with the
 <code><a href="../reference/datBarplot.html">datBarplot()</a></code> function from <code>FIESTA</code>.</p>
 <div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
@@ -2134,7 +2134,7 @@ output
 <span><span class="co">## 18                    Water-Barren      4.6                  39.46</span></span>
 <span><span class="co">## 19           Water-OtherVegetation      1.7                  53.25</span></span>
 <span><span class="co">## 20                     Water-Water     16.9                  19.16</span></span>
-<span><span class="co">## 21                           Total    Total                  Total</span></span></code></pre>
+<span><span class="co">## 21                           Total      100                      0</span></span></code></pre>
 </details><div class="sourceCode" id="cb164"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cover12</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
 <details><summary>

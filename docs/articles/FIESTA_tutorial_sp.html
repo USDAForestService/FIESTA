@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.4.9000</span>
       </span>
     </div>
 
@@ -360,7 +360,7 @@ global environment:</p>
 <span></span>
 <span><span class="co"># Other spatial layers used for examples, extracted using the geodata package, gadm function.</span></span>
 <span><span class="co"># County-level boundaries for USA and subset for Wyoming (Note: must have internet connection)</span></span>
-<span><span class="va">USAco</span> <span class="op">&lt;-</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geodata/man/gadm.html" class="external-link">gadm</a></span><span class="op">(</span>country <span class="op">=</span> <span class="st">"USA"</span>, level <span class="op">=</span> <span class="fl">2</span>, path<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>    </span>
+<span><span class="va">USAco</span> <span class="op">&lt;-</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu">gadm</span><span class="op">(</span>country <span class="op">=</span> <span class="st">"USA"</span>, level <span class="op">=</span> <span class="fl">2</span>, path<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>    </span>
 <span><span class="va">WYco</span> <span class="op">&lt;-</span> <span class="va">USAco</span><span class="op">[</span><span class="va">USAco</span><span class="op">$</span><span class="va">NAME_1</span> <span class="op">==</span> <span class="st">"Wyoming"</span>,<span class="op">]</span></span></code></pre></div>
 <p>Finally, you’ll need to set up an “outfolder”. This is just a file
 path to a folder where you’d like <code>FIESTA</code> to send your data
