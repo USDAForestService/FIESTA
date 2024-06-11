@@ -133,13 +133,13 @@ DBgetEvalid <- function(states = NULL,
   EVAL_GRP_Endyr=evalTypelist=STATECD=EVALID=evaltyp=invyrs <- NULL
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0) gui <- TRUE
   if (gui) {
     evalCur=evalAll=evalType <- NULL
   }
 
   ## Define variables
   SCHEMA. <- ""
+  indb <- FALSE
 
   ## Define evalType choices
   evalTypelst <- unique(c(sub("EXP", "", FIESTAutils::ref_evaltyp$EVAL_TYP), "GRM"))
@@ -207,7 +207,7 @@ DBgetEvalid <- function(states = NULL,
   ## Check database connection
   ######################################################
   if (!is.null(dbconn) && DBI::dbIsValid(dbconn)) {
-    datsource == "sqlite"
+    indb <- TRUE
     dbtablst <- DBI::dbListTables(dbconn)
     if (length(dbtablst) == 0) {
       stop("no data in database")
@@ -287,7 +287,7 @@ DBgetEvalid <- function(states = NULL,
   ## Get database tables - SURVEY, POP_EVAL, POP_EVAL_GRP, POP_EVAL_TYP
   ######################################################################################
   ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
-  if (datsource == "sqlite") {
+  if (indb) {
     if (is.null(plotnm)) {
       if (!is.null(plot_layer) && is.data.frame(plot_layer)) {
         PLOT <- plot_layer
@@ -428,7 +428,7 @@ DBgetEvalid <- function(states = NULL,
           "SELECT * ",
 	        "\nFROM ", SCHEMA., surveynm, " ", surveynm,
       	  surveywhere.qry)
-    if (datsource == "sqlite") {
+    if (indb) {
       SURVEY <- setDT(DBI::dbGetQuery(dbconn, survey.qry)) 
     } else {
       SURVEY <- setDT(sqldf::sqldf(survey.qry, connection = NULL)) 
@@ -442,7 +442,7 @@ DBgetEvalid <- function(states = NULL,
           "\nFROM ", SCHEMA., "POP_EVAL_TYP ptyp ",
 			    "\nJOIN ", SCHEMA., "POP_EVAL_GRP pgrp ON(pgrp.CN = ptyp.EVAL_GRP_CN) ",
 			    "\nWHERE pgrp.statecd IN (", toString(stcdlst), ")")
-    if (datsource == "sqlite") {
+    if (indb) {
       POP_EVAL_TYP <- setDT(DBI::dbGetQuery(dbconn, pop_eval_typ_qry)) 
     } else {
       POP_EVAL_TYP <- setDT(sqldf::sqldf(pop_eval_typ_qry, connection = NULL)) 
@@ -465,7 +465,7 @@ DBgetEvalid <- function(states = NULL,
 		       "\nFROM ", SCHEMA., popevalnm,
 			     "\nWHERE statecd IN(", toString(stcdlst), ")")
     }
-    if (datsource == "sqlite") {
+    if (indb) {
       POP_EVAL <- setDT(DBI::dbGetQuery(dbconn, pop_eval_qry)) 
     } else {
       POP_EVAL <- setDT(sqldf::sqldf(pop_eval_qry, connection = NULL)) 
@@ -476,7 +476,7 @@ DBgetEvalid <- function(states = NULL,
 	        "SELECT * ",
 	        "\nFROM ", SCHEMA., popevalgrpnm, 
 			    "\nWHERE statecd IN(", toString(stcdlst), ")")
-    if (datsource == "sqlite") {
+    if (indb) {
       POP_EVAL_GRP <- setDT(DBI::dbGetQuery(dbconn, pop_eval_grp_qry)) 
     } else {
       POP_EVAL_GRP <- setDT(sqldf::sqldf(pop_eval_grp_qry, connection = NULL)) 
@@ -500,7 +500,7 @@ DBgetEvalid <- function(states = NULL,
 	  nopoptables <- TRUE
 		
     state.qry <- paste("SELECT DISTINCT statecd FROM", plotnm)
-    if (datsource == "sqlite") {
+    if (indb) {
       stcdlstdb <- tryCatch( 
         DBI::dbGetQuery(dbconn, state.qry)[[1]],
 				           error = function(e) {
@@ -601,7 +601,7 @@ DBgetEvalid <- function(states = NULL,
       evalid.qry <- paste0(
            "SELECT DISTINCT evalid", 
 	         "\nFROM ", SCHEMA., ppsanm) 
-      if (datsource == "sqlite") {
+      if (indb) {
         evalidindb <- DBI::dbGetQuery(dbconn, evalid.qry)[[1]]
       } else {
         evalidindb <- sqldf::sqldf(evalid.qry, connection=NULL)[[1]]
@@ -636,7 +636,7 @@ DBgetEvalid <- function(states = NULL,
 	          invqry <- paste0(invqry,
 	                 "\nGROUP BY p.statecd, p.invyr",
 	                 "\nORDER BY p.statecd, p.invyr") 
-	          if (datsource == "sqlite") {
+	          if (indb) {
 	            invyrtab <- DBI::dbGetQuery(dbconn, invqry)
 	          } else {
 	            invyrtab <- sqldf::sqldf(invqry, connection = NULL)
@@ -661,7 +661,7 @@ DBgetEvalid <- function(states = NULL,
 		          "\nFROM ", SCHEMA., ppsanm, 
 						  "\nWHERE evalid IN(", toString(evalid), ")",
 						  "\nGROUP BY statecd, invyr") 
-          if (datsource == "sqlite") {
+          if (indb) {
             invyrtab <- DBI::dbGetQuery(dbconn, invqry)
           } else {
             invyrtab <- sqldf::sqldf(invqry, connection = NULL)
@@ -677,7 +677,7 @@ DBgetEvalid <- function(states = NULL,
 							   "\nWHERE evalid IN(", toString(evalid), ")", 
 							   "\nGROUP BY p.statecd, p.invyr")
 								
-             if (datsource == "sqlite") {
+             if (indb) {
                 invyrtab <- DBI::dbGetQuery(dbconn, invqry)
               } else {
                 invyrtab <- sqldf::sqldf(invqry, connection = NULL)
@@ -696,7 +696,7 @@ DBgetEvalid <- function(states = NULL,
 		          "\nFROM ", SCHEMA., plotnm, 
 						  "\nWHERE statecd IN(", toString(stcdlst), ")",
 				      "\nGROUP BY statecd, invyr")
-          if (datsource == "sqlite") {
+          if (indb) {
             invyrtab <- DBI::dbGetQuery(dbconn, invqry)
           } else {
             invyrtab <- sqldf::sqldf(invqry, connection = NULL)
@@ -738,7 +738,7 @@ DBgetEvalid <- function(states = NULL,
 			          "\nWHERE ", stfilter, 
 							  "\nGROUP BY statecd, invyr", 
 							  "\nORDER BY statecd, invyr")   
-            if (datsource == "sqlite") {
+            if (indb) {
               invyrtab <- DBI::dbGetQuery(dbconn, invyrqry)
             } else {
               invyrtab <- sqldf::sqldf(invyrqry, connection = NULL)
@@ -842,7 +842,7 @@ DBgetEvalid <- function(states = NULL,
               returnlst$PLOT <- PLOT
             }
           }
-          if (datsource == "sqlite" && !dbconnopen) {
+          if (indb && !dbconnopen) {
             DBI::dbDisconnect(dbconn)
           } else {
             returnlst$dbconn <- dbconn
@@ -879,7 +879,7 @@ DBgetEvalid <- function(states = NULL,
         }
       } 
     }
-    
+   
     ## Get last year of evaluation period and the evaluation type
     if (evalresp) {
       ## Get the evalidation type
@@ -889,8 +889,8 @@ DBgetEvalid <- function(states = NULL,
       if (is.null(evalType)) {
         evalType <- "VOL"
       }
- 
-      if (datsource == "sqlite" && nopoptables) {
+
+      if (indb && nopoptables) {
         #ppsanm <- chkdbtab(dbtablst, ppsa_layer)
         #if (is.null(ppsanm)) {
         #  warning("must include pop_plot_stratum_assgn table in database when eval='FIA'\n")
@@ -1010,6 +1010,7 @@ DBgetEvalid <- function(states = NULL,
         }
 
       } else {    ## datsource="datamart" or datsource="csv" & poptables
+        
         invyrs <- list()
         evalidlist <- sapply(states, function(x) NULL)
         evalEndyrlist <- sapply(states, function(x) NULL)
@@ -1033,11 +1034,12 @@ DBgetEvalid <- function(states = NULL,
         evalTypelist <- sapply(states, function(x) list(unique(evalType)))
         evalTypelist <- lapply(evalTypelist, function(x) paste0("EXP", x))
 
-      
         ## Loop thru states
         for (stcd in stcdlst) {
           state <- pcheck.states(stcd, "MEANING")
           stabbr <- pcheck.states(stcd, "ABBR")
+          message("getting FIA Evaluation info for: ", state, "(", stcd, ")...")
+          
           stinvyrs <- unique(stinvyr.vals[[state]])
           invtype.invyrs <- setDT(invyrtab)[invyrtab$STATECD == stcd][["INVYR"]]
           if (stcd == 64) {
@@ -1053,7 +1055,6 @@ DBgetEvalid <- function(states = NULL,
 #          } else {
             POP_EVAL_GRPstcd <- POP_EVAL_GRP[STATECD == stcd,]
 #          }
-    
           if (!is.null(POP_EVAL)) {
 
             ## Get evalid and inventory years from POP_EVAL table
@@ -1106,6 +1107,7 @@ DBgetEvalid <- function(states = NULL,
                 }
               }
             }
+
             ## Populate evalEndyrlist
             evalEndyrlist[[state]] <- Endyr
 
@@ -1151,7 +1153,7 @@ DBgetEvalid <- function(states = NULL,
         }  ## for state loop
       }  ## datsource
     } else {  ## evalresp = FALSE
-      if (datsource == "sqlite") {
+      if (indb) {
         ## Create table of inventory years
         invdbtab <- NULL
         if (!is.null(plotnm) && "INVYR" %in% DBI::dbListFields(dbconn, plotnm)) {
@@ -1204,7 +1206,7 @@ DBgetEvalid <- function(states = NULL,
         ppsa.qry <- paste0(ppsa.qry, 
                          "\nWHERE evalid IN(", toString(unlist(evalidlist)), ")")	
       }	
-      if (datsource == "sqlite") {	    
+      if (indb) {	    
         assign(ppsanm, DBI::dbGetQuery(dbconn, ppsa.qry))
       } else {
         assign(ppsanm, sqldf::sqldf(ppsa.qry, connection=NULL))
@@ -1218,7 +1220,7 @@ DBgetEvalid <- function(states = NULL,
 	  returnlst$ppsaindb <- ppsaindb
   }
   #returnlst$POP_EVAL <- POP_EVAL[EVALID %in% unlist(evalidlist),]
-  if (datsource == "sqlite" && !dbconnopen) {
+  if (indb && !dbconnopen) {
     DBI::dbDisconnect(dbconn)
   } else {
     returnlst$dbconn <- dbconn
