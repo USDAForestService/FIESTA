@@ -688,6 +688,10 @@ modSApop <- function(popType = "VOL",
   condx <- condx[pltassgnx[, c(pltassgnid, dunitvar, prednames), with=FALSE]]
   setkeyv(condx, c(cuniqueid, condid))
 
+  if ("MACRPROP_UNADJ" %in% names(condx) && is.character(condx$MACRPROP_UNADJ)) {
+    condx$MACRPROP_UNADJ <- as.numeric(condx$MACRPROP_UNADJ)
+  }
+  
   if (adj == "none") {
     setkeyv(condx, c(cuniqueid, condid))
   } else {
