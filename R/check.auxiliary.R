@@ -7,7 +7,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 	minplotnum.strat=2, na.rm=TRUE, removeifnostrata=FALSE, 
  	auxtext="auxlut", removetext="unitarea",
 	pvars2keep=NULL, standardize=TRUE, AOI=FALSE, 
-	keepadjvars=FALSE, adjvars=NULL){
+	keepadjvars=FALSE, adjvars=NULL) {
 
   ##################################################################################
   ## DESCRIPTION:
