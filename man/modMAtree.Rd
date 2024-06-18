@@ -15,7 +15,7 @@ modMAtree(
   pcfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
-  sumunits = TRUE,
+  sumunits = FALSE,
   prednames = NULL,
   modelselect = FALSE,
   FIA = TRUE,

@@ -52,6 +52,8 @@
 #' only one domain, rowvar = domain variable. If more than one domain, include
 #' colvar. If no domain, rowvar = NULL.
 #' @param colvar String. Name of the column domain variable in cond or tree.
+#' @param sumunits Logical. If TRUE, estimation units are summed and returned
+#' in one table.
 #' @param bootstrap Logical. If TRUE, returns bootstrap variance estimates,
 #' otherwise uses Horvitz-Thompson estimator under simple random sampling
 #' without replacement.
@@ -250,6 +252,7 @@ modMAarea <- function(MApopdat,
                       pcfilter = NULL, 
                       rowvar = NULL, 
                       colvar = NULL, 
+                      sumunits = FALSE,
                       bootstrap = FALSE,
                       returntitle = FALSE, 
                       savedata = FALSE, 
@@ -283,7 +286,6 @@ modMAarea <- function(MApopdat,
   esttype="AREA"
   parameters <- FALSE
   returnlst <- list()
-  sumunits <- FALSE
   rawdata <- TRUE
   
   ## Set global variables
