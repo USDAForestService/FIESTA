@@ -67,6 +67,8 @@
 #' @param colvar String. Optional. If rowvar != NULL, name of domain variable
 #' to group estvar by for columns in table output. Colvar must be included in
 #' an input data frame (i.e., plt, cond, tree).
+#' @param sumunits Logical. If TRUE, estimation units are summed and returned
+#' in one table.
 #' @param prednames String vector. Name(s) of predictor variables to include in
 #' model.
 #' @param modelselect Logical. If TRUE, an elastic net regression model is fit 
@@ -284,6 +286,7 @@ modMAtree <- function(MApopdat,
                       pcfilter = NULL, 
                       rowvar = NULL, 
                       colvar = NULL, 
+                      sumunits = FALSE,
                       prednames = NULL, 
                       modelselect = FALSE, 
                       FIA = TRUE,
@@ -319,7 +322,6 @@ modMAtree <- function(MApopdat,
   esttype="TREE"
   parameters <- FALSE
   returnlst <- list()
-  sumunits <- FALSE
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL <- NULL
