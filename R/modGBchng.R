@@ -267,7 +267,7 @@ modGBchng <- function(GBpopdat,
   parameters <- FALSE
   returnlst <- list()
   rawdata <- TRUE
-  colvar <- NULL
+  #colvar <- NULL
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=
@@ -501,46 +501,44 @@ modGBchng <- function(GBpopdat,
   setkeyv(condx, c(cuniqueid, condid))
   setkeyv(condf, c(cuniqueid, condid))
 
-
-#  if (rowvar == "TOTAL" || colvar == "NONE") {
-#    stop("must include a rowvar and a colvar for area change estimates")
-#  }
-  
-#  groupby.qry <- paste0("c.", cuniqueid, ", c.", condid)
-
   groupby.qry <- paste0(toString(paste0("sccm.", strunitvars)), ", c.", cuniqueid, ", c.", condid)
-#  groupby.qry <- paste0(toString(strunitvars), ", "c.", cuniqueid)
+
   prev_rowvar <- paste0("PREV_", rowvar)
+  rowvar_keep <- NULL
 
   if (rowvar != "TOTAL") {
-    select.qry <- paste0(groupby.qry, ", pcond.", rowvar, " AS ", prev_rowvar)
+    
     if (colvar != "NONE") {
-      select.qry <- paste0(select.qry, ", c.", colvar, " AS ", colvar)
+      
+      select.qry <- paste0(groupby.qry, ", c.", rowvar, " AS ", rowvar, ", c.", colvar, " AS ", colvar)
+      
     } else {
-
+      
+      select.qry <- paste0(groupby.qry, ", pcond.", rowvar, " AS ", prev_rowvar)
+      
       ## Copy rowvar information to colvar
       colvar <- rowvar
-	  colvarnm <- rowvarnm
+	    colvarnm <- rowvarnm
       uniquecol <- copy(uniquerow)
       title.colvar <- title.rowvar
-      if (!is.null(row.orderby)) {
-        col.orderby <- row.orderby
-      }
+      
+      rowvar_keep <- rowvar
+      
+      if (!is.null(row.orderby)) col.orderby <- row.orderby
+
       select.qry <- paste0(select.qry, ", c.", rowvar)
 
       ## Add prefix to rowvar
       names(uniquerow) <- paste0("PREV_", names(uniquerow))
       rowvar <- prev_rowvar 
       rowvarnm <- paste0("PREV_", rowvarnm)
-      if (!is.null(row.orderby)) {
-        row.orderby <- paste0("PREV_", row.orderby)
-      }
+      if (!is.null(row.orderby)) row.orderby <- paste0("PREV_", row.orderby)
 
       ## Get group variable for cell values
       grpvar <- c(rowvar, colvar)
     }
-#  } else {
-#    select.qry <- groupby.qry
+  } else {
+   select.qry <- groupby.qry
   }
  
   if (chngtype == "annual") {
@@ -564,19 +562,13 @@ modGBchng <- function(GBpopdat,
 						AND COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0 
                         AND COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0",
                "\nGROUP BY ", groupby.qry)
-			   
-  # condf_chng.qry <- paste0(condf_chng.qry,
-               # "\nFROM condf c",
-               # "\nJOIN condf pcond ON (pcond.PLT_CN = c.PREV_PLT_CN)",
-			   # "\nJOIN condx sccm ON (sccm.plt_cn = c.plt_cn 
-                          # AND sccm.prev_plt_cn = pcond.plt_cn 
-                          # AND sccm.condid = c.condid 
-                          # AND sccm.prevcond = pcond.condid)",
-               # "\nGROUP BY ", groupby.qry)
-
 
   if (rowvar != "TOTAL") {
-    condf_chng.qry <- paste0(condf_chng.qry, ", ", rowvar, ", c.", colvar)
+    if (!is.null(rowvar_keep)) {
+      condf_chng.qry <- paste0(condf_chng.qry, ", ", rowvar, ", c.", colvar)
+    } else {
+      condf_chng.qry <- paste0(condf_chng.qry, ", c.", rowvar, ", c.", colvar) 
+    }
   }
   message(condf_chng.qry)
 
@@ -589,7 +581,7 @@ modGBchng <- function(GBpopdat,
 
   if (length(unitvars) == 2) {
     cdomdat[, (unitvar) := paste(cdomdat[[unitvars[1]]], cdomdat[[unitvars[2]]], sep="-")]
-	strunitvars <- c(unitvar, strvar)
+	  strunitvars <- c(unitvar, strvar)
   }
 	
   } else {  ## cdomdat
