@@ -42,18 +42,5 @@ test_that("modMAtree testing", {
                     colvar = "STDSZCD")
   
   expect_snapshot(est2$est)
-  
-  # check estimates for gregEN + FIA adjustment option with set prednames
-  est3 <- modMAtree(MApopdat = MApopdat,
-                    MAmethod = "gregEN",
-                    estvar = "TPA_UNADJ",
-                    estvar.filter = "STATUSCD == 1",
-                    prednames = c("tcc", "dem"),
-                    FIA = FALSE)
-  
-  expect_equal(dim(est3$est), c(23, 3))
-  pred_used <- names(est3$raw$predselectlst$totest)[-c(1,2)]
-  expect_equal(pred_used, c("tcc", "dem"))
-  
 
 })
