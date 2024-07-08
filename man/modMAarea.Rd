@@ -14,6 +14,7 @@ modMAarea(
   pcfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
+  sumunits = FALSE,
   bootstrap = FALSE,
   returntitle = FALSE,
   savedata = FALSE,
@@ -53,6 +54,9 @@ only one domain, rowvar = domain variable. If more than one domain, include
 colvar. If no domain, rowvar = NULL.}
 
 \item{colvar}{String. Name of the column domain variable in cond or tree.}
+
+\item{sumunits}{Logical. If TRUE, estimation units are summed and returned
+in one table.}
 
 \item{bootstrap}{Logical. If TRUE, returns bootstrap variance estimates,
 otherwise uses Horvitz-Thompson estimator under simple random sampling

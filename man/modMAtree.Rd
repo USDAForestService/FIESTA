@@ -15,6 +15,7 @@ modMAtree(
   pcfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
+  sumunits = FALSE,
   prednames = NULL,
   modelselect = FALSE,
   FIA = TRUE,
@@ -64,6 +65,9 @@ for the total estimation unit. Include colvar for grouping by 2 variables.}
 \item{colvar}{String. Optional. If rowvar != NULL, name of domain variable
 to group estvar by for columns in table output. Colvar must be included in
 an input data frame (i.e., plt, cond, tree).}
+
+\item{sumunits}{Logical. If TRUE, estimation units are summed and returned
+in one table.}
 
 \item{prednames}{String vector. Name(s) of predictor variables to include in
 model.}

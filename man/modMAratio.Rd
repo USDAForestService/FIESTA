@@ -19,7 +19,7 @@ modMAratio(
   FIA = TRUE,
   rowvar = NULL,
   colvar = NULL,
-  sumunits = TRUE,
+  sumunits = FALSE,
   returntitle = FALSE,
   savedata = FALSE,
   table_opts = NULL,
