@@ -311,6 +311,10 @@ spGetXY <- function(bnd,
   ## Import boundary
   ########################################################
   bndx <- pcheck.spatial(layer=bnd, dsn=bnd_dsn, caption="boundary")
+  if (any(!sf::st_is_valid(bndx))) {
+    bndx <- sf::st_make_valid(bndx)
+  }
+  
  
   if (!is.null(bndx)) {
     ## bnd.filter
@@ -398,7 +402,7 @@ spGetXY <- function(bnd,
                             stbnd.att = "COUNTYFIPS", 
                             RS = RS, 
                             states = states, 
-                            clipbnd = TRUE,
+                            clipbnd = FALSE,
                             showsteps = showsteps)
     bndx <- statedat$bndx
     stbnd.att <- statedat$stbnd.att

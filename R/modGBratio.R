@@ -294,8 +294,8 @@
 #' @export modGBratio
 modGBratio <- function(GBpopdat, 
                        estseed = "none", 
-                       ratiotype = "PERACRE", 
-					   woodland = "Y",
+                       ratiotype = "PERACRE",
+                       woodland = "Y",
                        landarea = "FOREST", 
                        pcfilter = NULL, 
                        estvarn = NULL, 
@@ -483,8 +483,8 @@ modGBratio <- function(GBpopdat,
   estdat <- check.estdata(esttype=esttype, pop_fmt=pop_fmt, pop_dsn=pop_dsn, 
                 pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid, 
                 treex=treex, seedx=seedx, estseed=estseed, woodland=woodland,
-				sumunits=sumunits, landarea=landarea, 
-				ACI.filter=ACI.filter, pcfilter=pcfilter, 
+				        sumunits=sumunits, landarea=landarea, 
+				        ACI.filter=ACI.filter, pcfilter=pcfilter, 
                 allin1=allin1, estround=estround, pseround=pseround, 
                 divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
                 rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
@@ -539,10 +539,10 @@ modGBratio <- function(GBpopdat,
 	                row.add0=row.add0, col.add0=col.add0, 
 	                title.rowvar=title.rowvar, title.colvar=title.colvar, 
 	                rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-					rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-                    landarea=landarea, states=states, 
-					whereqry = whereqry, tfilter = tfilter, 
-					cvars2keep="COND_STATUS_CD")
+					        rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+                  landarea=landarea, states=states, 
+					        whereqry = whereqry, tfilter = tfilter, 
+					        cvars2keep="COND_STATUS_CD")
   treef <- rowcolinfo$treef
   seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf

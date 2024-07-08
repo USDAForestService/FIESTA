@@ -68,6 +68,7 @@
 #' @param POP_PLOT_STRATUM_ASSGN Data frame. The name of the 
 #' POP_PLOT_STRATUM_ASSGN data frame object if it is already downloaded 
 #' and stored in environment. 
+#' @param dbconn Open database connection.
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
 #' @param evalInfo List. List object output from DBgetEvalid or DBgetXY 
 #' FIESTA functions. 
@@ -106,7 +107,7 @@
 #' @export DBgetXY
 DBgetXY <- function (states = NULL, 
                      RS = NULL, 
-                     xy_datsource, 
+                     xy_datsource = NULL, 
                      xy_dsn = NULL, 
                      xy = "PLOT", 
                      xy_opts = xy_options(),
@@ -128,6 +129,7 @@ DBgetXY <- function (states = NULL,
                      PLOT = NULL,
                      POP_PLOT_STRATUM_ASSGN = NULL,
                      SURVEY = NULL,
+                     dbconn = NULL,
                      dbconnopen = FALSE,
                      evalInfo = NULL
                      ) {
@@ -143,8 +145,8 @@ DBgetXY <- function (states = NULL,
   
   ## Set global variables
   parameters <- FALSE
-  SCHEMA.=invyrtab=evalEndyr=plotnm=ppsanm=ppsanm=pltflds=ppsaflds=pvars=
-  dbconn=XYdf <- NULL
+  SCHEMA.=invyrtab=evalEndyr=plotnm=ppsanm=ppsanm=pltflds=
+    ppsaflds=pvars=XYdf <- NULL
 
 
   ##################################################################
@@ -265,71 +267,82 @@ DBgetXY <- function (states = NULL,
   ###########################################################################
   ## Check XY database 
   ###########################################################################
-  xy_datsourcelst <- c("datamart", "sqlite", "csv", "obj")
-  xy_datsource <- pcheck.varchar(var2check=xy_datsource, varnm="xy_datsource", 
-		gui=gui, checklst=xy_datsourcelst, caption="XY data source?")
-
-  if (xy_datsource == "sqlite" && !is.null(xy_dsn)) {
-    xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE)
-    xytablst <- DBI::dbListTables(xyconn)
-    if (length(xytablst) == 0) {
-      stop("no data in ", xy_datsource)
-    }
-	  xyindb=plotindb=ppsaindb <- FALSE
-  }
-
-  ## Check xy database
-  ####################################################################
-  if (all(list(class(xy), class(plot_layer)) == "character") && 
-		(is.null(datsource) || xy_datsource == datsource)) {
-    xyisplot <- ifelse (identical(tolower(xy), tolower(plot_layer)), TRUE, FALSE)
-  } else if (!identical(xy_datsource, datsource)) {
-    xyisplot <- FALSE
-  } else if (xy_datsource == "datamart" && datsource == "datamart") {
+  xyindb=plotindb=ppsaindb <- FALSE
+  if (!is.null(dbconn) && DBI::dbIsValid(dbconn)) {
+    xyconn <- dbconn
     xyisplot <- TRUE
+    xy_datsource=datsource <- "sqlite"
+    xytablst <- DBI::dbListTables(xyconn)
   } else {
-    xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
-  }
+    xy_datsourcelst <- c("datamart", "sqlite", "csv", "obj")
+    xy_datsource <- pcheck.varchar(var2check = xy_datsource, 
+                                   varnm = "xy_datsource", gui=gui, 
+                                   checklst = xy_datsourcelst, 
+                                   caption="XY data source?")
 
-  ###########################################################################
-  ## Check plot database (if xyisplot = FALSE)
-  ###########################################################################
-  if (xyisplot) {
-    datsource <- xy_datsource
-    data_dsn <- xy_dsn
-  } else {
-    if (is.null(datsource)) {
-      datsource <- xy_datsource
-      data_dsn <- xy_dsn
-    } else if (!identical(xy_datsource, datsource) || !identical(xy_dsn, data_dsn)) {
-      ## Check database connection - data_dsn
-      ########################################################
-      datsourcelst <- c("datamart", "sqlite", "csv", "obj", "shp")
-      datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
-		       gui=gui, checklst=datsourcelst, caption="Plot data source?",
-           stopifnull=TRUE, stopifinvalid=TRUE)
-    } else {
-      datsource <- xy_datsource
-      data_dsn <- xy_dsn
+    if (xy_datsource == "sqlite" && !is.null(xy_dsn)) {
+      xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE)
+      xytablst <- DBI::dbListTables(xyconn)
+      if (length(xytablst) == 0) {
+        stop("no data in ", xy_datsource)
+      }
     }
-  }
-
-  if (datsource == "sqlite" && !is.null(data_dsn)) {
-    if (!is.null(xy_dsn) && data_dsn == xy_dsn) {
-      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-    } else {
-      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-    }
-    dbtablst <- DBI::dbListTables(dbconn)
-    if (length(dbtablst) == 0) {
-      message("no data in ", datsource)
-	  return(NULL)
-    }
-  }
   
-  if (datsource == "sqlite" && is.null(data_dsn)) {
-    message("datsource=", datsource, " but data_dsn=NULL... returning NULL")
-	  return(NULL)
+
+    ## Check xy database
+    ####################################################################
+    if (all(list(class(xy), class(plot_layer)) == "character") && 
+		  (is.null(datsource) || xy_datsource == datsource)) {
+      xyisplot <- ifelse (identical(tolower(xy), tolower(plot_layer)), TRUE, FALSE)
+    } else if (!identical(xy_datsource, datsource)) {
+      xyisplot <- FALSE
+    } else if (xy_datsource == "datamart" && datsource == "datamart") {
+      xyisplot <- TRUE
+    } else {
+      xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
+    }
+
+    ###########################################################################
+    ## Check plot database (if xyisplot = FALSE)
+    ###########################################################################
+    if (xyisplot) {
+      datsource <- xy_datsource
+      data_dsn <- xy_dsn
+    } else {
+      if (is.null(datsource)) {
+        datsource <- xy_datsource
+        data_dsn <- xy_dsn
+      } else if (!identical(xy_datsource, datsource) || !identical(xy_dsn, data_dsn)) {
+        ## Check database connection - data_dsn
+        ########################################################
+        datsourcelst <- c("datamart", "sqlite", "csv", "obj", "shp")
+        datsource <- pcheck.varchar(var2check = datsource, 
+                                    varnm = "datsource", gui=gui, 
+                                    checklst = datsourcelst, 
+                                    caption = "Plot data source?",
+                                    stopifnull = TRUE, stopifinvalid = TRUE)
+      } else {
+        datsource <- xy_datsource
+        data_dsn <- xy_dsn
+      }
+    }
+
+    if (datsource == "sqlite" && !is.null(data_dsn)) {
+      if (!is.null(xy_dsn) && data_dsn == xy_dsn) {
+        dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+      } else {
+        dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+      }
+      dbtablst <- DBI::dbListTables(dbconn)
+      if (length(dbtablst) == 0) {
+        message("no data in ", datsource)
+	      return(NULL)
+      }
+    }
+    if (datsource == "sqlite" && is.null(data_dsn)) {
+      message("datsource=", datsource, " but data_dsn=NULL... returning NULL")
+	    return(NULL)
+    }
   }
 
   ## Check eval
@@ -353,7 +366,7 @@ DBgetXY <- function (states = NULL,
   ## Check exportsp
   ####################################################################
   exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
-		title="Export spatial?", first="YES", gui=gui)
+		              title="Export spatial?", first="YES", gui=gui)
   if (exportsp) {
     issp <- TRUE
   }

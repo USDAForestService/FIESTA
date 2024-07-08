@@ -635,7 +635,6 @@ spGetPlots <- function(bnd = NULL,
           #pop_plot_stratum_assgn <- rbind(pop_plot_stratum_assgn1, pop_plot_stratum_assgn2)
 
         } else {
-
           xydat <- spGetXY(bnd = bndx, 
                          states = states, 
                          RS = RS, 

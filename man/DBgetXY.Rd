@@ -7,7 +7,7 @@
 DBgetXY(
   states = NULL,
   RS = NULL,
-  xy_datsource,
+  xy_datsource = NULL,
   xy_dsn = NULL,
   xy = "PLOT",
   xy_opts = xy_options(),
@@ -29,6 +29,7 @@ DBgetXY(
   PLOT = NULL,
   POP_PLOT_STRATUM_ASSGN = NULL,
   SURVEY = NULL,
+  dbconn = NULL,
   dbconnopen = FALSE,
   evalInfo = NULL
 )
@@ -116,6 +117,8 @@ and stored in environment.}
 
 \item{SURVEY}{Data frame. The name of the SURVEY data frame object
 if it has been already downloaded and stored in environment.}
+
+\item{dbconn}{Open database connection.}
 
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 
