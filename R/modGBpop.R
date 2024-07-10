@@ -934,7 +934,7 @@ modGBpop <- function(popType = "VOL",
     }      
 
     if (popType %in% c("ALL", "VOL", "CURR")) {
-      source("C:\\_tsf\\_GitHub\\FIESTAutils\\R\\getadjfactorVOL.R") 
+       
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 
                         treex = treef, 

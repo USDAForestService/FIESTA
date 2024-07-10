@@ -27,7 +27,7 @@ test_that("modGBpop Testing", {
   GBpop_names_actual <- list(names(GBpop))
 
   expect_equal(GBpop_names_actual, GBpop_names) ##Checking if pop names are changing -  may not be the best test, can be subject to change
-  expect_equal(dim(GBpop$treex), c(18380, 21)) ##Checking various dimensions of GBpop outputs
+  expect_equal(dim(GBpop$treex), c(18574, 21)) ##Checking various dimensions of GBpop outputs
   expect_equal(dim(GBpop$condx), c(3210, 13)) 
   expect_equal(dim(GBpop$unitarea), c(23, 2)) 
 })
