@@ -192,6 +192,7 @@ datSumTree <- function(tree = NULL,
   ## If gui.. set variables to NULL
   if (gui) ACI=bycond=tuniqueid=puniqueid=cuniqueid=TPA=tfun=adjtree=adjsamp=
 	savedata=outfolder <- NULL
+
   ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry=pcwhereqry=pcfromqry=pcselectvars <- NULL
   datindb <- FALSE
@@ -216,20 +217,17 @@ datSumTree <- function(tree = NULL,
   carbvars <- c("CARBON_BG", "CARBON_AG")
 
   ## SET VARIABLES TO CONVERT (from pounds to short tons.. * 0.0005)
-  vars2convert <- c(biovars, carbvars, paste(biovars, "TPA", sep="_"), 
-	paste(carbvars, "TPA", sep="_"))
+  vars2convert <- c(biovars, carbvars, paste(biovars, "TPA", sep="_"), paste(carbvars, "TPA", sep="_"))
 	
-  timberonly <- FIESTAutils::ref_units[FIESTAutils::ref_units$WOODLAND == "N", 
-			"VARIABLE"]
-  woodlandvars <- FIESTAutils::ref_units[FIESTAutils::ref_units$WOODLAND == "Y", 
-			"VARIABLE"]
+  timberonly <- FIESTAutils::ref_units[FIESTAutils::ref_units$WOODLAND == "N", "VARIABLE"]
+  woodlandvars <- FIESTAutils::ref_units[FIESTAutils::ref_units$WOODLAND == "Y", "VARIABLE"]
  
   growvars <- c("TPAGROW_UNADJ", "GROWCFGS", "GROWBFSL", "GROWCFAL", "FGROWCFGS", 
-	"FGROWBFSL", "FGROWCFAL")
+                "FGROWBFSL", "FGROWCFAL")
   mortvars <- c("TPAMORT_UNADJ", "MORTCFGS", "MORTBFSL", "MORTCFAL", "FMORTCFGS", 
-	"FMORTBFSL", "FMORTCFAL")
+                "FMORTBFSL", "FMORTCFAL")
   remvars <- c("TPAREMV_UNADJ", "REMVCFGS", "REMVBFSL", "REMVCFAL", "FREMVCFGS", 
-	"FREMVBFSL", "FREMVCFAL")
+               "FREMVBFSL", "FREMVCFAL")
   tpavars <- c("TPA_UNADJ", "TPAMORT_UNADJ", "TPAGROW_UNADJ", "TPAREMV_UNADJ")
   propvar <- "CONDPROP_UNADJ"
 
@@ -517,8 +515,8 @@ datSumTree <- function(tree = NULL,
   ## Check tuniqueid
   if (!seedonly) {
     tuniqueid <- pcheck.varchar(var2check = tuniqueid, varnm = "tuniqueid", 	
-		     checklst = treeflds, caption = "UniqueID variable - tree", 
-		     warn = paste(tuniqueid, "not in tree table"), stopifnull = TRUE)
+                                checklst = treeflds, caption = "UniqueID variable - tree", 
+                                warn = paste(tuniqueid, "not in tree table"), stopifnull = TRUE)
     tsumuniqueid <- tuniqueid
 
     if (addseed) {
@@ -648,7 +646,7 @@ datSumTree <- function(tree = NULL,
         message(toString(treeflds))
         stop()
       } else {
-        tderivevars <- unique(as.vector(unlist(tderivevars)))
+        tderivevars <- unique(unlist(tderivevars, use.names = FALSE))
       }
     }
   }
@@ -656,7 +654,7 @@ datSumTree <- function(tree = NULL,
   ## CHECK TPA and tsumvars
   ###########################################################  
   TPA <- pcheck.logical(TPA, varnm="TPA", title="Calculate TPA?", first="NO", 
-		stopifnull=TRUE, gui=gui)
+		                    stopifnull=TRUE, gui=gui)
  
   if (TPA) {
     if (!seedonly && !is.null(tsumvarlst)) {
@@ -734,14 +732,14 @@ datSumTree <- function(tree = NULL,
     subpcondnm=subplotnm <- NULL
     if (!is.null(subp_cond) && is.data.frame(subp_cond)) {
       subpcondx <- pcheck.table(subp_cond, gui=gui, tabnm="subp_cond", 
-				                   caption="Subpcond table?")
+				                        caption="Subpcond table?")
       if (!is.null(subpcondx)) {
         subpcondx <- setDT(int64tochar(subpcondx))
         subpcflds <- names(subpcondx)
         subpcondnm <- "subpcondx"
       }
       subplotx <- pcheck.table(subplot, gui=gui, tabnm="subplot", 
-                       caption="Subplot table?")
+                               caption="Subplot table?")
       if (!is.null(subplotx)) {
         subplotx <- setDT(int64tochar(subplotx))
         subpflds <- names(subplotx)
@@ -808,24 +806,24 @@ datSumTree <- function(tree = NULL,
   ##########################################################################
   if (!seedonly) {
     lbs2tons <- pcheck.logical(lbs2tons, varnm="lbs2tons", title="Pounds to tons?", 
-		              first="YES", gui=gui, stopifnull=TRUE)
+		                           first="YES", gui=gui, stopifnull=TRUE)
   }
   
   ## Check metric
   ##########################################################################
   metric <- pcheck.logical(metric, varnm="metric", title="Metric?", 
-		          first="NO", gui=gui, stopifnull=TRUE)
+		                       first="NO", gui=gui, stopifnull=TRUE)
 
   ## Check checkNA
   ##########################################################################
   NAto0 <- pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
-		         first="YES", gui=gui)
+		                      first="YES", gui=gui)
   if (is.null(NAto0)) NAto0 <- FALSE
 
   ## Check checkNA
   ##########################################################################
   checkNA <- pcheck.logical(checkNA, varnm="checkNA", title="Check NA values?", 
-		           first="YES", gui=gui)
+		                        first="YES", gui=gui)
   if (is.null(checkNA)) checkNA <- FALSE
 
 
@@ -833,16 +831,16 @@ datSumTree <- function(tree = NULL,
   ## (COND_STATUS_CD = 1)
   ######################################################################################
   ACI <- pcheck.logical(ACI, varnm="ACI", title="Include ACI tree data?", 
-		       first="NO", gui=gui)
+		                    first="NO", gui=gui)
 
   ## Check getadjplot
   ###########################################################  
   getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
-		              title="Get plot adjustment?", first="NO", gui=gui)
+		                           title="Get plot adjustment?", first="NO", gui=gui)
   
   ## Check adjtree
   adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Adjust trees", 
-		           first="NO", gui=gui)
+		                        first="NO", gui=gui)
   if (getadjplot) adjtree <- TRUE
   
   ## Check pltidsWITHqry
@@ -908,18 +906,22 @@ datSumTree <- function(tree = NULL,
       }
     }
   }
-
+  
   ### Get tfun used for aggregation
   ###########################################################################
   tfunlst <- c("sum", "mean", "max", "min", "length", "median")
+  sqltfun_ver <- c("SUM", "AVG", "MAX", "MIN", "COUNT", "MEDIAN")
 
   if (is.null(tfun)) {
     if (gui) {
-      tfunstr <- select.list(tfunlst, title="Aggregate function", multiple=FALSE)
-      if (tfunstr == "") stop("")
-      tfun <- get(tfunstr)
+      tfunnm <- select.list(tfunlst, title="Aggregate function", multiple=FALSE)
+      if (tfunnm == "") stop("")
+      tfun <- get(tfunnm)
+      tfunstr <- sqltfun_ver[which(tfunlst == tfunnm)]
     } else {
       tfun <- sum
+      tfunnm <- "sum"
+      tfunstr <- "SUM"
     }
   }
 
@@ -928,24 +930,18 @@ datSumTree <- function(tree = NULL,
   } else {
     if(!is.null(tsumvarlst) && tuniqueid %in% tsumvarlst && !identical(tfun, sum))
       stop("use sum with PLT_CN for getting number of trees.")
-
-    if (length(grep("mean", deparse(tfun))) > 0) {
-      tfunstr <- "mean"
+    tfunnm <- deparse(substitute(tfun))
+    if (!tfunnm %in% tfunlst) {
+      stop("invalid tfun supplied")
     } else {
-      tfunnm <- noquote(strsplit(deparse(tfun), ".Primitive")[[1]][2])
-      if (is.na(tfunnm))
-        tfunnm <- noquote(strsplit(deparse(tfun), "UseMethod"))[[2]][2]
-      if (is.na(tfunnm)) {
-        warning("unknown function")
-        tfunstr <- "fun"
-      } else {  
-        tfunstr <- substr(tfunnm, 3, nchar(tfunnm)-2)
-      }
+      tfunstr <- sqltfun_ver[which(tfunlst == tfunnm)]
     }
+    
   }
+  message(paste0("aggregating data using '", tfunnm, "'"))
 
   ## CHECK tround
-  if (is.null(tround) | !is.numeric(tround)) {
+  if (is.null(tround) || !is.numeric(tround)) {
     warning("tround is invalid.. rounding to 5 digits")
     tround <- 5
   }
@@ -957,9 +953,9 @@ datSumTree <- function(tree = NULL,
   ## Check output parameters
   if (savedata) {
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-        out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-        overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-        add_layer=add_layer, append_layer=append_layer, gui=gui)
+                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+                            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outlst$out_layer <- "treesum"
   }
    
@@ -991,8 +987,7 @@ datSumTree <- function(tree = NULL,
       twhereqry <- paste("\n WHERE", RtoSQL(tfilter, x=treeflds))
     }
     if (addseed || seedonly) {
-      sfilter <- suppressMessages(
-	               check.logic(seedflds, statement=tfilter, stopifinvalid=FALSE))
+      sfilter <- suppressMessages(check.logic(seedflds, statement=tfilter, stopifinvalid=FALSE))
       if (!is.null(sfilter)) {
         swhereqry <- paste("\n WHERE", RtoSQL(tfilter))
       }
@@ -1099,16 +1094,16 @@ datSumTree <- function(tree = NULL,
         }	
         
         subpcx <- subpsamp(cond = condx, 
-                         subp_cond = subpcondx, 
-                         subplot = subplotx, 
-                         subpuniqueid = subpuniqueid, 
-                         subpid = subpid, ACI=ACI)
+                           subp_cond = subpcondx, 
+                           subplot = subplotx, 
+                           subpuniqueid = subpuniqueid, 
+                           subpid = subpid, ACI=ACI)
 
         adjfacdata <- getadjfactorPLOTqry(cond = subpcx,
-                         datsource = datsource, 
-                         dbconn = dbconn, 
-                         cuniqueid = c(subpuniqueid, subpid),
-                         areawt = "CONDPROP_UNADJ")
+                                          datsource = datsource, 
+                                          dbconn = dbconn, 
+                                          cuniqueid = c(subpuniqueid, subpid),
+                                          areawt = "CONDPROP_UNADJ")
       } else {  ## if (bysubp = FALSE)
 
 	  
@@ -1211,6 +1206,8 @@ datSumTree <- function(tree = NULL,
 	    tpavarid <- which(tsumvarlst == tpavar)
   	  tpavarnm <- tpavar
 	  #}
+    } else {
+      tpavarnm <- NULL
     } 
     if (any(tsumvarlst %in% tpavars)) {
       cntvar <- tsumvarlst[tsumvarlst %in% tpavars]
@@ -1236,15 +1233,14 @@ datSumTree <- function(tree = NULL,
     }
   
     if (seedonly) {
-      NEWt <- ifelse(TPA, cntvar, 
-                     paste0(cntvar, " > 0)"))
+      NEWt <- ifelse(TPA, cntvar, paste0(cntvar, " > 0)"))
       tsumvardf <- rbind(tsumvardf, 
-	       data.frame(TSUMVAR = "TPA_UNADJ", 
-	                  TABLE = "SEED", 
-								    NEW = NEWt,
-                    NAME = "COUNT",
-								    TUNITS = "trees",
-								    DERIVE = FALSE))
+                         data.frame(TSUMVAR = "TPA_UNADJ", 
+	                                  TABLE = "SEED", 
+								                    NEW = NEWt,
+                                    NAME = "COUNT",
+						                        TUNITS = "trees",
+	  	                              DERIVE = FALSE))
     } else { 
       if (addseed) {  
         NEWt <- ifelse(TPA, cntvar, 
@@ -1253,49 +1249,49 @@ datSumTree <- function(tree = NULL,
 	      NAMEs <- ifelse(TPA, paste0(cntnm, "_SEED"), cntnm)
 
 	      tsumvardf <- rbind(tsumvardf, 
-	        data.frame(TSUMVAR = cntvar, 
-							       TABLE = "TREE",
-									   NEW = NEWt,
-						         NAME = paste0(cntnm, "_TREE"),
-									   TUNITS = "trees",
-									   DERIVE = FALSE))
+	                         data.frame(TSUMVAR = cntvar, 
+							                        TABLE = "TREE",
+									                    NEW = NEWt,
+						                          NAME = paste0(cntnm, "_TREE"),
+									                    TUNITS = "trees",
+									                    DERIVE = FALSE))
  	      tsumvardf <- rbind(tsumvardf, 
-	        data.frame(TSUMVAR = cntvar, 
-							       TABLE = "SEED",
-									   NEW = NEWt,
-						         NAME = NAMEs,
-									   TUNITS = "trees",
-									   DERIVE = FALSE))						
+                           data.frame(TSUMVAR = cntvar, 
+                                      TABLE = "SEED",
+                                      NEW = NEWt,
+                                      NAME = NAMEs,
+                                      TUNITS = "trees",
+                                      DERIVE = FALSE))						
 	      tsumvardf <- rbind(tsumvardf, 
-	        data.frame(TSUMVAR = cntvar, 
-							       TABLE = "TREESEED",
-	                   NEW = NEWt,
-						         NAME = cntnm,
-									   TUNITS = "trees",
-									   DERIVE = FALSE))
+	                         data.frame(TSUMVAR = cntvar, 
+							                        TABLE = "TREESEED",
+	                                    NEW = NEWt,
+						                          NAME = cntnm,
+									                    TUNITS = "trees",
+									                    DERIVE = FALSE))
       } else {
 	      if (!is.null(cntvar)) {
 	        for (cvar in cntvar) {
 		        NEW <- ifelse(TPA, cvar, 
 		                     paste0(cvar, " > 0)"))
 	          tsumvardf <- rbind(tsumvardf, 
-	             data.frame(TSUMVAR = cvar, 
-							            TABLE = "TREE",
-	                        NEW = NEW,
-						              NAME = cntnm,
-									        TUNITS = "trees",
-									        DERIVE = FALSE))
+                               data.frame(TSUMVAR = cvar, 
+                                          TABLE = "TREE",
+                                          NEW = NEW,
+                                          NAME = cntnm,
+                                          TUNITS = "trees",
+                                          DERIVE = FALSE))
 	 	      }							
 	      }
       }
 	    if (length(tsumvarlst) > 0) {
         tsumvardf <- rbind(tsumvardf,
-	         data.frame(TSUMVAR = tsumvarlst, 
-	                    TABLE = "TREE", 
-	                    NEW = tsumvarlst,
-                      NAME = tsumvarnmlst,
-									    TUNITS = "trees",
-									    DERIVE = FALSE))
+                           data.frame(TSUMVAR = tsumvarlst, 
+                                      TABLE = "TREE", 
+                                      NEW = tsumvarlst,
+                                      NAME = tsumvarnmlst,
+                                      TUNITS = "trees",
+                                      DERIVE = FALSE))
 	    }			
     }
   
@@ -1455,7 +1451,8 @@ datSumTree <- function(tree = NULL,
     ###########################################################################
   #  tsumvardf$SELECT <- paste0("\n  COALESCE(SUM(", tsumvardf$NEW, "),0) AS ", 
   #                           tsumvardf$NAME)
-    tsumvardf$SELECT <- paste0("COALESCE(SUM(", tsumvardf$NEW, "),0)")
+    tsumvardf$SELECT <- paste0("COALESCE(", tfunstr, "(", tsumvardf$NEW, "),0)")
+  
   }
   
   ## Add derived variables to tsumvardf
@@ -1463,12 +1460,12 @@ datSumTree <- function(tree = NULL,
   if (!is.null(tderive)) {
     for (i in 1: length(tderive)) {
       tderivedf <- data.frame(TSUMVAR = tderive[[i]], 
-                          TABLE = "TREE", 
-                          NEW = tderive[[i]], 
-                          NAME = names(tderive)[i], 
-                          TUNITS = "trees",
-                          DERIVE = TRUE,
-                          SELECT = tderive[[i]])
+                              TABLE = "TREE", 
+                              NEW = tderive[[i]], 
+                              NAME = names(tderive)[i], 
+                              TUNITS = "trees",
+                              DERIVE = TRUE,
+                              SELECT = tderive[[i]])
       tsumvardf <- rbind(tsumvardf, tderivedf)
       tsumvarlst <- unique(c(tsumvarlst, tderive[[i]]))
     }
@@ -1540,10 +1537,14 @@ datSumTree <- function(tree = NULL,
     twithqry <- "SELECT 'TREE' src,"
 	  twithSelect <- unique(c(tsumuniqueid, "SUBP", "TREE", 
          unique(c(tpavarnm, tsumvardf$TSUMVAR[tsumvardf$TABLE == "TREE" & !tsumvardf$DERIVE]))))
-	  tderivevars <- tderivevars[!tderivevars %in% twithSelect]
-	  if (length(tderivevars) > 0) {
-	    twithSelect <- c(twithSelect, tderivevars)
-	  }
+	  if (!is.null(tderive)) {
+      tderivevars <- tderivevars[!tderivevars %in% twithSelect]
+      if (length(tderivevars) > 0) {
+	      twithSelect <- c(twithSelect, tderivevars)
+  	  }
+
+    }
+  
 	  twithqry <- paste(twithqry, toString(paste0(talias., twithSelect)))	
 
 	  if (adjtree) {
@@ -1597,10 +1598,11 @@ datSumTree <- function(tree = NULL,
 	    swithqry <- paste0("\n SELECT 'SEED' src, ", 
 	                       toString(paste0(salias., unique(c(tsumuniqueid, "SUBP")))))
 	    swithqry <- paste0(swithqry, ", 0, ", paste0(salias., "TPA_UNADJ"))
-	    if (length(tderivevars) > 0) {
-	      nbrvar <- nbrvar + length(tderivevars)
-	    }
-	    
+	    if (!is.null(tderive)) {
+        if (length(tderivevars) > 0) {
+	        nbrvar <- nbrvar + length(tderivevars)
+	      }
+      }
 	    if (nbrvar > 0) {
 	      swithqry <- paste0(swithqry, ", ", toString(rep('null', nbrvar)))
 	    }
@@ -1643,10 +1645,9 @@ datSumTree <- function(tree = NULL,
 	                       swithwhereqry)
 	    
 	    ## Build UNION WITH query, including tree and seedling data
-	    twithqry <- paste0(
-	      twithqry, 
-	      "\n UNION",
-	      swithqry)
+	    twithqry <- paste0(twithqry, 
+                         "\n UNION",
+                         swithqry)
 	  }
 	  
   } else {  ## if seedonly
@@ -1721,10 +1722,9 @@ datSumTree <- function(tree = NULL,
 
   ## Build query to summarize tree data
   ################################################################
-  tqry <- paste0(
-      tselectqry,
-      "\nFROM ", twithalias,
-      "\nGROUP BY ", toString(tsumuniqueid))	
+  tqry <- paste0(tselectqry,
+                 "\nFROM ", twithalias,
+                 "\nGROUP BY ", toString(tsumuniqueid))	
     
     
   ## Build final query to summarize tree data including WITH queries
@@ -1736,17 +1736,26 @@ datSumTree <- function(tree = NULL,
     
   if (datindb) {
     treedat <- tryCatch(
-	      DBI::dbGetQuery(dbconn, tree.qry),
-				       error=function(e) {
-				         warning(e)
-  			         return(NULL)})
+                    {
+                      DBI::dbGetQuery(dbconn, tree.qry)
+                    },
+                    error = function(e) {
+                      warning(e)
+                      return(NULL)
+                    }
+                )
   } else {
 	  treedat <- tryCatch(
-	      sqldf::sqldf(tree.qry),
-				       error=function(e) {
-				         warning(e)
-  			         return(NULL)})
+                   {
+                     sqldf::sqldf(tree.qry)
+                   },
+                   error = function(e) {
+                     warning(e)
+                     return(NULL)
+                   }
+                )
   }
+
   setkeyv(setDT(treedat), tuniqueid)
   
  
@@ -1869,7 +1878,7 @@ datSumTree <- function(tree = NULL,
     sumdat <- setDF(sumdat)
   }
   sumtreelst <- list(treedat=sumdat, sumvars=tsumvardf$NAME, treeqry=tree.qry)
-  sumtreelst$estunits <- estunits
+  #sumtreelst$estunits <- estunits
   if (!is.null(tfilter)) {
     sumtreelst$tfilter <- tfilter
   }
