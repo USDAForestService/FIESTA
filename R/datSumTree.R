@@ -1496,12 +1496,12 @@ datSumTree <- function(tree = NULL,
   if (addseed) {
     if (!is.null(tround)) {
       tsumvardf$SELECT[tsumvardf$TABLE == "TREE"] <- 
-           paste0("\n  ROUND(COALESCE(SUM(CASE WHEN src = 'TREE' THEN ", 
+           paste0("\n  ROUND(COALESCE(", tfunstr, "(CASE WHEN src = 'TREE' THEN ", 
 	                 tsumvardf$NEW[tsumvardf$TABLE == "TREE"], " ELSE 0 END),0),", tround, ")",
 					 " AS ", tsumvardf$NAME[tsumvardf$TABLE == "TREE"])
   
       tsumvardf$SELECT[tsumvardf$TABLE == "SEED"] <- 
-           paste0("\n  ROUND(COALESCE(SUM(CASE WHEN src = 'SEED' THEN ", 
+           paste0("\n  ROUND(COALESCE(", tfunstr, "(CASE WHEN src = 'SEED' THEN ", 
 	                 tsumvardf$NEW[tsumvardf$TABLE == "SEED"], " ELSE 0 END),0),", tround, ")",
 					 " AS ", tsumvardf$NAME[tsumvardf$TABLE == "SEED"])
     }    
