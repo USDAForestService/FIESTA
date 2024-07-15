@@ -54,12 +54,12 @@
 #' subp_cond table.
 #' @param subpid String. Unique identifier of each subplot.
 #' @param tsumvarlst String (vector). Tree-level variable(s) to aggregate
-#' (e.g., "TPA_UNADJ", "BA"). Use "TPA_UNADJ" (tfun=sum) for summed tree
+#' (e.g., "TPA_UNADJ", "BA"). Use "TPA_UNADJ" for summed tree
 #' count.
 #' @param tsumvarnmlst String (vector). Name of the tree-level variable(s) to
 #' aggregate (e.g., "TPALIVE", "BALIVE"). This list must have the same number
 #' of variables as tsumvarlst and be in respective order. If NULL, the default
-#' names will be tsumvar'_tfun' (e.g., "TPA_UNADJ_SUM", "BA_SUM").
+#' names will be tsumvar_SUM (e.g., "TPA_UNADJ_SUM", "BA_SUM").
 #' @param addseed Logical. If TRUE, add seedling counts to tree counts. Note:
 #' tdomvar must be 'SPCD' or 'SPGRPCD'.
 #' @param seedonly Logical. If TRUE, seedling counts only. Note: tdomvar
@@ -67,8 +67,6 @@
 #' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 #' respective trees-per-acre variable (see details) to get per-acre
 #' measurements.
-#' @param tfun Function. The name of the function to use to aggregate the data
-#' (e.g., sum, mean, max).
 #' @param ACI Logical. If TRUE, if ACI (All Condition Inventory) plots exist,
 #' any trees on these plots will be included in summary. If FALSE, you must
 #' include condition table.
@@ -156,8 +154,7 @@ datSumTree <- function(tree = NULL,
                        addseed = FALSE, 
                        seedonly = FALSE,
                        woodland = "Y",
-                       TPA = TRUE, 
-                       tfun = sum, 
+                       TPA = TRUE,  
                        ACI = FALSE, 
                        tfilter = NULL, 
                        lbs2tons = TRUE, 
@@ -190,11 +187,11 @@ datSumTree <- function(tree = NULL,
 
 
   ## If gui.. set variables to NULL
-  if (gui) ACI=bycond=tuniqueid=puniqueid=cuniqueid=TPA=tfun=adjtree=adjsamp=
+  if (gui) ACI=bycond=tuniqueid=puniqueid=cuniqueid=TPA=adjtree=adjsamp=
 	savedata=outfolder <- NULL
 
   ref_estvar <- FIESTAutils::ref_estvar
-  twhereqry=swhereqry=tfromqry=sfromqry=pcwhereqry=pcfromqry=pcselectvars <- NULL
+  twhereqry=swhereqry=tfromqry=sfromqry=pcwhereqry=pcfromqry=pcselectvars=tpavarnm <- NULL
   datindb <- FALSE
   
   ## Query alias.
@@ -600,18 +597,6 @@ datSumTree <- function(tree = NULL,
   if (is.null(tsumvarnmlst)) {
     getnm <- TRUE
   } else {
-    if (!is.null(tsumvarlst) && length(tsumvarnmlst) != length(tsumvarlst)) {
-      message(paste("number of names in tsumvarnmlst does not match number of tsumvars.",
- 		                "using default names."))
-      getnm <- TRUE
-    }
-  } 
-  
-  ## Get name for summed tree variable(s)
-  getnm <- FALSE
-  if (is.null(tsumvarnmlst)) {
-    getnm <- TRUE
-  } else {
     if (seedonly) {
 	    if (length(tsumvarnmlst) != 1) {
 	      message("tsumvarnmlst must be a vector of length 1 with name for number of seedlings")
@@ -655,6 +640,10 @@ datSumTree <- function(tree = NULL,
   ###########################################################  
   TPA <- pcheck.logical(TPA, varnm="TPA", title="Calculate TPA?", first="NO", 
 		                    stopifnull=TRUE, gui=gui)
+  
+  if (TPA && is.null(tsumvarlst)) {
+    stop("TPA must be implemented by the user within tderive specifications")
+  }
  
   if (TPA) {
     if (!seedonly && !is.null(tsumvarlst)) {
@@ -907,40 +896,7 @@ datSumTree <- function(tree = NULL,
     }
   }
   
-  ### Get tfun used for aggregation
-  ###########################################################################
-  tfunlst <- c("sum", "mean", "max", "min", "length", "median")
-  sqltfun_ver <- c("SUM", "AVG", "MAX", "MIN", "COUNT", "MEDIAN")
-
-  if (is.null(tfun)) {
-    if (gui) {
-      tfunnm <- select.list(tfunlst, title="Aggregate function", multiple=FALSE)
-      if (tfunnm == "") stop("")
-      tfun <- get(tfunnm)
-      tfunstr <- sqltfun_ver[which(tfunlst == tfunnm)]
-    } else {
-      tfun <- sum
-      tfunnm <- "sum"
-      tfunstr <- "SUM"
-    }
-  }
-
-  if (!is.function(tfun)) {
-    stop("tfun is not a function")
-  } else {
-    if(!is.null(tsumvarlst) && tuniqueid %in% tsumvarlst && !identical(tfun, sum))
-      stop("use sum with PLT_CN for getting number of trees.")
-    tfunnm <- deparse(substitute(tfun))
-    if (!tfunnm %in% tfunlst) {
-      stop("invalid tfun supplied")
-    } else {
-      tfunstr <- sqltfun_ver[which(tfunlst == tfunnm)]
-    }
-    
-  }
-  message(paste0("aggregating data using '", tfunnm, "'"))
-
-  ## CHECK tround
+    ## CHECK tround
   if (is.null(tround) || !is.numeric(tround)) {
     warning("tround is invalid.. rounding to 5 digits")
     tround <- 5
@@ -1451,7 +1407,7 @@ datSumTree <- function(tree = NULL,
     ###########################################################################
   #  tsumvardf$SELECT <- paste0("\n  COALESCE(SUM(", tsumvardf$NEW, "),0) AS ", 
   #                           tsumvardf$NAME)
-    tsumvardf$SELECT <- paste0("COALESCE(", tfunstr, "(", tsumvardf$NEW, "),0)")
+    tsumvardf$SELECT <- paste0("COALESCE(SUM(", tsumvardf$NEW, "),0)")
   
   }
   
@@ -1496,12 +1452,12 @@ datSumTree <- function(tree = NULL,
   if (addseed) {
     if (!is.null(tround)) {
       tsumvardf$SELECT[tsumvardf$TABLE == "TREE"] <- 
-           paste0("\n  ROUND(COALESCE(", tfunstr, "(CASE WHEN src = 'TREE' THEN ", 
+           paste0("\n  ROUND(COALESCE(SUM(CASE WHEN src = 'TREE' THEN ", 
 	                 tsumvardf$NEW[tsumvardf$TABLE == "TREE"], " ELSE 0 END),0),", tround, ")",
 					 " AS ", tsumvardf$NAME[tsumvardf$TABLE == "TREE"])
   
       tsumvardf$SELECT[tsumvardf$TABLE == "SEED"] <- 
-           paste0("\n  ROUND(COALESCE(", tfunstr, "(CASE WHEN src = 'SEED' THEN ", 
+           paste0("\n  ROUND(COALESCE(SUM(CASE WHEN src = 'SEED' THEN ", 
 	                 tsumvardf$NEW[tsumvardf$TABLE == "SEED"], " ELSE 0 END),0),", tround, ")",
 					 " AS ", tsumvardf$NAME[tsumvardf$TABLE == "SEED"])
     }    
