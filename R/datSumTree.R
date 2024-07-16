@@ -857,7 +857,7 @@ datSumTree <- function(tree = NULL,
     if (!seedonly) {
       if (!adjvar %in% treeflds) {
         if (is.null(condnm) && is.null(pltidsWITHqry)) {
-          stop(paste0("must include cond or pltidsWITHqry or ", adjvar, " in tree table when adj != 'none'"))_
+          stop(paste0("must include cond or pltidsWITHqry or ", adjvar, " in tree table when adj != 'none'"))
         } else {
           if (!is.null(pltidsWITHqry) && grepl("pltidsadj", pltidsWITHqry)) {
             getadjplot <- FALSE
