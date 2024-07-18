@@ -198,7 +198,6 @@ datSumTree <- function(tree = NULL,
   talias. <- "t."
   salias. <- "s."
 
- 
   ## For documentation
   # subplot Dataframe or comma-delimited file (*.csv). If getadjplot=TRUE, 
   # The subplot-level table with SUBP_STATUS_CD variable for calculating
@@ -275,8 +274,7 @@ datSumTree <- function(tree = NULL,
   ########################################################
   if (!is.null(dbconn)) {
     if (!DBI::dbIsValid(dbconn)) {
-      message("invalid database dbconnection") 
-      return(NULL)
+      stop("invalid database dbconnection") 
     }
     datindb <- TRUE
   } else {  
@@ -305,14 +303,12 @@ datSumTree <- function(tree = NULL,
         dbconn <- DBtestSQLite(dsn, dbconnopen = TRUE, 
                              createnew = FALSE, returnpath = FALSE)
         if (is.null(dbconn)) {
-          message("invalid database")
-		      return(NULL)
+          stop("invalid database")
         } else {
           datindb <- TRUE
         }
       } else {
-        message("datsource = 'sqlite' and dsn is NULL")
-        return(NULL)
+        stop("datsource = 'sqlite' and dsn is NULL")
       }
     } 
   }
@@ -344,8 +340,7 @@ datSumTree <- function(tree = NULL,
 		                         checklst=woodlandlst, gui=gui, caption="Woodland?") 
 
   if (addseed && seedonly) {
-    message("addseed and seedonly are TRUE")
-	  return(NULL)
+    stop("cannot set both addseed and seedonly to TRUE")
   }
   
   ## Check tree, seedling tables
@@ -355,7 +350,7 @@ datSumTree <- function(tree = NULL,
   treenm=seednm=dbname=ref_sppnm=woodlandnm <- NULL
 
   if (!is.null(dbconn)) {
-
+    
     if (!seedonly) {
       treex <- chkdbtab(dbtablst, tree)
       if (!is.null(treex)) {
@@ -386,12 +381,10 @@ datSumTree <- function(tree = NULL,
 		        refspcdnm <- findnm("SPCD", refflds)
 		        tspcdnm <- findnm("SPCD", treeflds)
 		        if (is.null(twoodlandnm)) {
-		          warning("WOODLAND attribute not in ref_species table... returning NULL")
-		          return(NULL)
+		          stop("WOODLAND attribute not in ref_species table... returning NULL")
 		        }
           } else {
-		        warning("ref_species table not in database... returning NULL")
-		        return(NULL)
+		        stop("ref_species table not in database... returning NULL")
           }
         }	
 	    }
@@ -407,12 +400,10 @@ datSumTree <- function(tree = NULL,
 		        refspcdnm <- findnm("SPCD", refflds)
 		        sspcdnm <- findnm("SPCD", seedflds)
 		        if (seedonly && is.null(swoodlandnm)) {
-		          warning("WOODLAND attribute not in ref_species table... returning NULL")
-		          return(NULL)
+		          stop("WOODLAND attribute not in ref_species table... returning NULL")
 		        }
           } else if (seedonly) {
-		        warning("ref_species table not in database... returning NULL")
-		        return(NULL)
+		        stop("ref_species table not in database... returning NULL")
           }
 		    }
       }	  	  
@@ -502,6 +493,28 @@ datSumTree <- function(tree = NULL,
     message("must include tree table")
 	  return(NULL)
   }
+  
+  # indicator for whether dbconn is for a postgresql database
+  pg <- ifelse(!is.null(dbconn),
+               ifelse(attr(class(dbconn), "package") == "RPostgres", TRUE, FALSE),
+               FALSE)
+  
+  if (pg) {
+    all_dbtabs <- list(tree, seed, cond, plt, subp_cond, subplot)
+    for (nm in seq_along(all_dbtabs)) {
+      if (!is.null(all_dbtabs[[nm]])) {
+        all_dbtabs[[nm]] <- paste0("\"", all_dbtabs[[nm]], "\"")
+      }
+    }
+    treenm <- all_dbtabs[[1]]
+    seednm <- all_dbtabs[[2]]
+    condnm <- all_dbtabs[[3]]
+    pltnm <- all_dbtabs[[4]]
+    subp_condnm <- all_dbtabs[[5]]
+    subplotnm <- all_dbtabs[[6]]
+  }
+  
+  
    
   ## Check unique identifiers and set unique keys if R objects
   ###########################################################################
@@ -976,14 +989,11 @@ datSumTree <- function(tree = NULL,
         ## Build WHERE query for removing nonsampled subplots 
         if (sum(is.null(subpcondx), is.null(condx)) < 3) {
           if (sum(is.null(subpcondx), is.null(condx)) == 2) {
-            message("must include subp_cond and cond to adjust to plot")
-			      return(NULL)
+            stop("must include subp_cond and cond to adjust to plot")
           } else if (is.null(condx)) {
-            message("must include cond to adjust to plot")
-			      return(NULL)
+            stop("must include cond to adjust to plot")
           } else if (is.null(subpcondx)) {
-            message("must include subp_cond to adjust to plot")
-			      return(NULL)
+            stop("must include subp_cond to adjust to plot")
           }
         } 
         
@@ -1471,7 +1481,7 @@ datSumTree <- function(tree = NULL,
 	      twithSelect <- c(twithSelect, tderivevars)
   	  }
 
-    }
+	  }
   
 	  twithqry <- paste(twithqry, toString(paste0(talias., twithSelect)))	
 
@@ -1653,13 +1663,23 @@ datSumTree <- function(tree = NULL,
   tqry <- paste0(tselectqry,
                  "\nFROM ", twithalias,
                  "\nGROUP BY ", toString(tsumuniqueid))	
-    
+  
+  twithSelect
     
   ## Build final query to summarize tree data including WITH queries
   ################################################################
-  tree.qry <- paste(pltidsWITHqry, 
+  tree.qry <- paste0(pltidsWITHqry, 
                     "\n-------------------------------------------",
-                    tqry)						
+                    tqry)		
+  
+  # replace instances of twithSelect vars with their double quoted versions in tree.qry
+  # only replace instances that are not already single quoted or double quoted
+  for (s in twithSelect) {
+    pat <- paste0("(?<!['\"])", "\\b", s, "\\b", "(?!['\"])")
+    tree.qry <- gsub(pat, paste0("\"", s, "\""), tree.qry, perl = TRUE)
+  }
+  
+  cat(tree.qry)
     
   if (datindb) {
     treedat <- tryCatch(
