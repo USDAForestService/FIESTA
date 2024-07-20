@@ -1,15 +1,22 @@
-check.estdata <- function(esttype, datindb=FALSE, 
-    pop_dsn=NULL, pop_fmt=NULL, pop_schema=pop_schema, totals=TRUE, 
-    pltcondf=NULL, cuniqueid="PLT_CN", condid="CONDID", treex=NULL, seedx=NULL, 
-	  vcondx=NULL, tuniqueid="PLT_CN", vuniqueid="PLT_CN", sumunits=FALSE, 
-	  estseed="none", woodland="Y", landarea=NULL, ACI.filter=NULL, pcfilter=NULL, 
-	  tfilter=NULL, TPA=TRUE, tpavar="TPA_UNADJ", allin1=FALSE, estround=6, pseround=3, 
-	  divideby=NULL, addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
-	  savedata=FALSE, outfolder=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
-	  outfn.pre=NULL, outfn.date=TRUE, append_layer=FALSE, raw_fmt="csv", 
-	  raw_dsn=NULL, gui=FALSE){
+check.estdata <- 
+  function(esttype,
+           popType, 
+           popdatindb, popconn = NULL,
+           pltcondflds, totals,
+           pop_fmt = NULL, pop_dsn = NULL, 
+           sumunits = FALSE, landarea = NULL, 
+           ACI.filter = NULL, pcfilter = NULL, 
+	         allin1 = FALSE, divideby = NULL, 
+           estround = 6, pseround = 3, 
+	         addtitle = TRUE, returntitle = TRUE, 
+           rawonly = FALSE, 
+	         savedata = FALSE, outfolder = NULL, 
+           overwrite_dsn = FALSE, overwrite_layer = TRUE,
+           outfn.pre = NULL, outfn.date = TRUE, 
+           append_layer = FALSE, 
+           raw_fmt = "csv", raw_dsn = NULL, gui = FALSE){
 
-  ###################################################################################
+  #############################################################################
   ## DESCRIPTION: Checks data inputs
   ## Apply plot filter
   ## - pcfilter (e.g., COUNTY == 3, FORTYPCD == 122)
@@ -31,166 +38,157 @@ check.estdata <- function(esttype, datindb=FALSE,
   ## - If rawdata, adds a folder named 'rawdata' to outfolder to add raw data
   ## - estround - round estimate values
   ## - pseround - round percent standard error values
-  ###################################################################################
+  #############################################################################
 
   ## Set global variables
   rawfolder <- NULL
-  isdb <- FALSE
-  whereqry <- NULL
+  rawdata <- TRUE
+
 
   #############################################################################
   ## Check esttype
   #############################################################################
-  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC", "P2VEG", "DWM")
+  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC")
   esttype <- pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
 	checklst=esttypelst, caption="Esttype?")
 
   ## Check totals
   if (esttype %in% c("AREA", "TREE")) {
     totals <- pcheck.logical(totals, varnm="totals",
-		title="Totals?", first="NO", gui=gui, stopifnull=TRUE)
-  }      
-
+		         title="Totals?", first="NO", gui=gui, stopifnull=TRUE)
+  }   
+  
   ## Check pop_fmt and pop_dsn
   ###############################################
-  if (!is.null(pop_dsn)) {
-    if (is.null(pop_fmt) || pop_fmt == "") {
-      #pop_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'shp')
-	    message("pop_fmt is invalid... checking pop_dsn extension")
-	    pop_ext <- getext(pop_dsn)
-	  if (pop_ext %in% c("db", "db3", "sqlite")) {
-      pop_fmt == "sqlite"
-	  } else { 
-	    stop("fmt not available")
-	  }
-	}
-  if (pop_fmt == "sqlite") {
-    dbconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE, 
-                         createnew = FALSE, returnpath = FALSE)
-  }
-	if (is.null(dbconn)) {
-      stop("invalid database")
-    } else {
-      isdb <- TRUE
+  if (popdatindb) {
+    if (!is.null(popconn)) {
+      if (!DBI::dbIsValid(popconn)) {
+        message("database connection is invalid... ")
+        message(popconn)
+        stop()
+      }
+    } else if (!is.null(pop_dsn)) {
+      if (is.null(pop_fmt) || pop_fmt == "") {
+        #pop_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'shp')
+        message("pop_fmt is invalid... checking pop_dsn extension")
+        pop_ext <- getext(pop_dsn)
+        if (pop_ext %in% c("db", "db3", "sqlite")) {
+          pop_fmt == "sqlite"
+        } else { 
+          stop("fmt not available")
+        }
+      }
+      if (pop_fmt == "sqlite") {
+        popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE, 
+                           createnew = FALSE, returnpath = FALSE)
+      }
+      if (is.null(popconn)) {
+        stop("invalid database")
+      } 
     }
-    tablst <- DBI::dbListTables(dbconn)
   }
 
-  ## Check pltcondf
+
+  ## Build where statement with plot/condition filters
   ###########################################################################
-  pltcondf <- pcheck.table(pltcondf, conn = dbconn, stopifnull = TRUE, 
-                       stopifinvalid = TRUE)
-  setkeyv(pltcondf, c(cuniqueid, condid))
+  where.qry <- {}
   
+  ## Check pcfilter (plot and cond filters) and add to where.qry
   ###########################################################################
-  ## Apply pcfilter (plot and cond filters) to pltcondf table
-  ###########################################################################
+  pcfilter <- check.logic(pltcondflds, pcfilter, syntax="SQL", filternm="pcfilter")
   if (!is.null(pcfilter)) {
-    whereqry <- paste0("\nWHERE ", RtoSQL(pcfilter))
-  }
-  pltcondnmlst <- names(pltcondf)
-  pltcondf <- datFilter(x = pltcondf, 
-                        xfilter = pcfilter, 
-						            title.filter = "plt filter?",
-						            gui = gui, 
-						            filternm = "pcfilter", 
-						            xnm = "pltcondf")$xf
-  if (is.null(pltcondf)) {
-    message(paste(pcfilter, "removed all records"))
-    return(NULL)
+    
+    ## Check to make sure variable in pcfilter are in pltcondflds
+    pcfiltervars  <- unlist(lapply(pcfilter, 
+        function(x) pltcondflds[sapply(pltcondflds, function(y) grepl(y, x))]))
+    if (length(pcfiltervars) == 0) {
+      stop("pcfilter is invalid: ", pcfilter)
+    }
+    pcfiltertmp <- pcfilter
+    for (pcfiltervar in pcfiltervars) {
+      pcfiltertmp <- gsub(pcfiltervar, paste0("pc.", pcfiltervar), pcfiltertmp)
+    }
+    
+    pcfilter <- RtoSQL(pcfilter)
+    where.qry <- paste0("\nWHERE ", pcfilter)
   }
 
+  ## Check landarea and add to where.qry
   #############################################################################
-  ## Check landarea
-  #############################################################################
-#  if (esttype == "RATIO") {
-#    landarealst <- c("FOREST", "TIMBERLAND")
-#  } else {
-    landarealst <- c("FOREST", "ALL", "TIMBERLAND")
-#  }
-  if (esttype == "LULC") {
-    landarealst <- c(landarealst, "CHANGE")
-  }
+  landarealst <- c("FOREST", "ALL", "TIMBERLAND")
   landarea <- pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
-	checklst=landarealst, caption="Sample land area?")
-
+	                  checklst=landarealst, caption="Sample land area?")
 
   ## Create landarea.filter
-  #############################################################################
   landarea.filter <- NULL
   landcols <- {}
   if (landarea != "ALL") {
     if (landarea == "FOREST") {
-      if ("COND_STATUS_CD" %in% names(pltcondf)) {
-        landarea.filter <- "COND_STATUS_CD == 1"
+      if ("COND_STATUS_CD" %in% pltcondflds) {
+        landarea.filter <- "pc.COND_STATUS_CD = 1"
+        # if (popType %in% c("CHNG", "GRM")) {
+        #   landarea.filterCHNG <- gsub("pc.", "ppc.", landarea.filter)
+        #   landarea.filter <- paste0(landarea.filter, " AND ", landarea.filterCHNG)
+        # }
         landcols <- "COND_STATUS_CD"
-      }
+      } else {
+	      message("COND_STATUS_CD not in pltcond")
+		    return(NULL)
+	    }
     } else if (landarea == "TIMBERLAND") {
       landcols <- c("SITECLCD", "RESERVCD")
-      if (any(!landcols %in% pltcondnmlst)) {
-        landcols.miss <- landcols[which(!landcols %in% pltcondnmlst)]
+      if (any(!landcols %in% pltcondflds)) {
+        landcols.miss <- landcols[which(!landcols %in% pltcondflds)]
         stop(paste("missing variables for TIMBERLAND landarea filter:",
-		               paste(landcols.miss, collapse=", ")))
+		                paste(landcols.miss, collapse=", ")))
       }
-      landarea.filter <- "SITECLCD %in% c(1:6) & RESERVCD == 0"
+      landarea.filter <- "pc.SITECLCD IN(1:6) AND pc.RESERVCD = 0"
+      # if (popType %in% c("CHNG", "GRM")) {
+      #   landarea.filterCHNG <- gsub("pc.", "ppc.", landarea.filter)
+      #   landarea.filter <- paste0(landarea.filter, " AND ", landarea.filterCHNG)
+      # }
     }
     ## Check for missing landcols
     if (length(landcols) > 0) {
-      landcolsmiss <- landcols[which(!landcols %in% pltcondnmlst)]
+      landcolsmiss <- landcols[which(!landcols %in% pltcondflds)]
       if (length(landcolsmiss) > 0) {
-        stop("missing variables: ", paste(landcolsmiss, collapse=", "))
+        message("missing variables: ", paste(landcolsmiss, collapse=", "))
+		    return(NULL)
       }
     }
   }
+
+  ## Add landarea filter to where.qry
   if (!is.null(landarea.filter)) {
-    if (!is.null(whereqry)) {
-      whereqry <- paste0(whereqry, " AND ", RtoSQL(landarea.filter))
-	  } else {
-	    whereqry <- paste0("\nWHERE ", RtoSQL(landarea.filter))
-    }	  
-  }
-
-  ###################################################################################
-  ## Apply landarea filters
-  ###################################################################################
-
-  ## Apply landarea.filter to pltcondf
-  pltcondf <- datFilter(x=pltcondf, xfilter=landarea.filter,
-		  title.filter="landarea filter", gui=gui, stopifnull=FALSE)$xf
-  if (is.null(pltcondf)) {
-    message(paste(landarea.filter, "removed all records"))
-    return(NULL)
-  }
-
-  ## Apply ACI.filter to condf
-  if (landarea != "ALL") {
-    pltcondf <- datFilter(x=pltcondf, xfilter=ACI.filter,
-			title.filter="ACI.filter", gui=gui, stopifnull=FALSE)$xf
-    if (is.null(pltcondf)) {
-      message(paste(ACI.filter, "removed all records"))
-      return(NULL)
+    if (!is.null(where.qry)) {
+      where.qry <- paste0(where.qry,
+                        "\n  AND ", landarea.filter)
+    } else {
+      where.qry <- paste0("\nWHERE ", landarea.filter)
     }
   }
+
+  ## Add ACI.filter to where.qry
+  ###################################################################################
+  if (!is.null(ACI.filter) && landarea != "FOREST") {
+    if (!is.null(where.qry)) {
+      where.qry <- paste0(where.qry,
+                          "\n  AND ", ACI.filter)
+    } else {
+      where.qry <- paste0("\nWHERE ", ACI.filter)
+    }
+  }
+  
 
   ## Check sumunits
   ########################################################
   sumunits <- pcheck.logical(sumunits, varnm="sumunits",
 		title="Sum estimation units?", first="YES", gui=gui, stopifnull=TRUE)
 
-
-  ## Check TPA
-  ########################################################
-  TPA <- pcheck.logical(TPA, varnm="TPA",
-		title="TPA?", first="YES", gui=gui, stopifnull=TRUE)
-
-  ## Check rawtable
-  rawdata <- pcheck.logical(rawdata, varnm="rawdata", title="Output raw data?",
-		first="NO", gui=gui, stopifnull=TRUE)
-
   ## Check rawonly
   rawonly <- pcheck.logical(rawonly, varnm="rawonly", title="Raw data only?",
 		first="NO", gui=gui, stopifnull=TRUE)
-  if (rawonly && !rawdata) rawdata <- TRUE
+  if (rawonly) rawdata <- TRUE
 
 
   ## Check divideby
@@ -203,7 +201,6 @@ check.estdata <- function(esttype, datindb=FALSE,
   ## Check allin1
   allin1 <- pcheck.logical(allin1, varnm="allin1",
 		title="All 1 table - Est (%error)?", first="NO", gui=gui)
-
 
   ## Check returntitle
   returntitle <- pcheck.logical(returntitle, varnm="returntitle",
@@ -222,17 +219,19 @@ check.estdata <- function(esttype, datindb=FALSE,
   if (rawdata) {
     raw_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp')
     raw_fmt <- pcheck.varchar(raw_fmt, varnm="raw_fmt", checklst=raw_fmtlst,
-		caption="Out raw format", gui=gui)
+		             caption="Out raw format", gui=gui)
   }
-
 
   ## Check output info
   ########################################################
   if (savedata) {
     if (!rawonly) {
-      outlst <- pcheck.output(out_fmt="csv", outfolder=outfolder,
-		           outfn.pre=outfn.pre, outfn.date=outfn.date,
-		           overwrite_layer=overwrite_layer, append_layer=append_layer, gui=gui)
+      outlst <- pcheck.output(out_fmt = "csv", 
+                    outfolder = outfolder,
+		                outfn.pre = outfn.pre, 
+		                outfn.date = outfn.date,
+		                overwrite_layer = overwrite_layer, 
+		                append_layer = append_layer, gui=gui)
       outfolder <- outlst$outfolder
       overwrite_layer <- outlst$overwrite_layer
       outfn.pre <- outfn.pre
@@ -245,10 +244,13 @@ check.estdata <- function(esttype, datindb=FALSE,
         if (is.null(raw_dsn)) {
           raw_dsn <- "rawdata"
         }
-        outlst <- pcheck.output(out_dsn=raw_dsn, out_fmt=raw_fmt,
-		          outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date,
-		          overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-		          append_layer=append_layer, gui=gui)
+        outlst <- pcheck.output(out_dsn = raw_dsn, out_fmt = raw_fmt,
+		                  outfolder = outfolder, 
+		                  outfn.pre = outfn.pre, 
+		                  outfn.date = outfn.date,
+		                  overwrite_dsn = overwrite_dsn, 
+		                  overwrite_layer = overwrite_layer,
+		                  append_layer = append_layer, gui=gui)
         rawfolder <- outlst$outfolder
         raw_fmt <- outlst$out_fmt
         raw_dsn <- outlst$out_dsn
@@ -278,149 +280,27 @@ check.estdata <- function(esttype, datindb=FALSE,
 
   ## Set up list of variables to return
   ######################################################################################
-  returnlst <- list(pltcondf=setDT(pltcondf), cuniqueid=cuniqueid, sumunits=sumunits,
-	    TPA=TPA, allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
-	    addtitle=addtitle, returntitle=returntitle, estround=estround, pseround=pseround,
- 	    landarea=landarea, rawdata=rawdata, rawonly=rawonly, savedata=savedata,
-	    outfolder=outfolder, overwrite_layer=overwrite_layer, append_layer=append_layer,
-	    rawfolder=rawfolder, raw_fmt=raw_fmt, raw_dsn=raw_dsn, pop_fmt=pop_fmt, 
-	    pop_dsn=pop_dsn, whereqry=whereqry)
-
-
-  if (esttype %in% c("TREE", "RATIO", "SEED")) {
-
-    ## Check estseed
-    ########################################################
-    estseedlst <- c("none", "only", "add")
-    estseed <- pcheck.varchar(var2check=estseed, varnm="estseed",
-		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
-    if (estseed == "none") {
-      seedx <- NULL
-    } else {
-      if (is.null(seedx)) {
-        message("no seedling data in population data")
-		    return(NULL)
-      }
-    }
-
- 	## Check treex and seedx
-    ###########################################################################
-    if (estseed != "only") {
-      treex <- pcheck.table(treex, conn = dbconn, stopifnull = TRUE, 
-                       stopifinvalid = TRUE, checkonly = TRUE)				
-      if (is.data.frame(treex)) {
-        ## Check the values of tuniqueid in treex are all in cuniqueid in pltcondf
-        treef <- check.matchval(treex, pltcondf, tuniqueid, cuniqueid, 
-                      tab1txt="tree", tab2txt="cond", subsetrows=TRUE)
-        returnlst$treef <- data.table(treef)
-		    treenames <- names(treef)
-		    
-		    ## set key 			   
-		    setkeyv(treef, c(tuniqueid, condid))	  
-      } else {
-	      returnlst$treef <- treex
-		    treenames <- DBI::dbListFields(dbconn, treex)
-	    }
-    
-      ## check tuniqueid in tree table
-      tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui,
-	                   checklst=treenames, caption="tuniqueid")
-
-	    ## Check tfilter
-	    if (!is.null(tfilter)) {
-		    tfilter <- RtoSQL(tfilter, x = treenames)
-#	    if (is.null(whereqry)) {
-#          whereqry <- paste0(whereqry, " AND ", tfilter)
-#		} else {
-#          whereqry <- paste0("\nWHERE ", tfilter)
-#        }
-        returnlst$tfilter <- tfilter		
-      }
-    }
-	
-    if (estseed %in% c("add", "only")) {
-      seedx <- pcheck.table(seedx, conn = dbconn, stopifnull = TRUE, 
-                       stopifinvalid = TRUE, checkonly = TRUE)
-      if (is.data.frame(seedx)) {
-        ## Check the values of tuniqueid in seedx are all in cuniqueid in pltcondf
-        seedf <- check.matchval(seedx, pltcondf, tuniqueid, cuniqueid, 
-                       tab1txt="seed", tab2txt="cond", subsetrows=TRUE)
-        returnlst$seedf <- data.table(seedf)
-		    seednames <- names(seedf)
-
-		    ## set key 			   
-		    setkeyv(seedf, c(tuniqueid, condid))
-      } else {
-	      returnlst$seedf <- seedx
-		    seednames <- DBI::dbListFields(dbconn, seedx)
-      }
- 
-      ## check tuniqueid in tree table
-      tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui,
-	                   checklst=seednames, caption="tuniqueid")
-
-	    ## check tuniqueid in seed table	
-      if (!tuniqueid %in% seednames) {
-	      message(tuniqueid, " not in seed table")
-	      return(NULL)
-	    }
-	  
-	    ## Check tfilter
-	    if (estseed == "only" && !is.null(tfilter)) {
-#		tfilter <- RtoSQL(tfilter, x = seednames)
-#	    if (is.null(whereqry)) {
-#          whereqry <- paste0(whereqry, " AND ", tfilter)
-#		} else {
-#          whereqry <- paste0("\nWHERE ", tfilter)
-#        }		  
-        returnlst$tfilter <- tfilter		
-      }
-	  }
-	
-    returnlst$tuniqueid <- tuniqueid
-    returnlst$estseed <- estseed
-	
-    ## Check woodland
-    woodlandlst <- c("Y", "N", "only")
-    woodland <- pcheck.varchar(var2check=woodland, varnm="woodland", 
-		checklst=woodlandlst, gui=gui, caption="Woodland?") 
-	  returnlst$woodland <- woodland
-  }
-
-  if (esttype == "P2VEG") {
-    vcondx <- pcheck.table(vcondx, conn = dbconn, stopifnull = TRUE, 
-                       stopifinvalid = TRUE, checkonly = TRUE)
-    if (is.data.frame(vcondx)) {
-      ## Check the values of vuniqueid in vcondsppx are all in cuniqueid in pltcondf
-      vcondf <- check.matchval(vcondx, pltcondf, c(vuniqueid, condid), 
-				c(cuniqueid, condid), tab1txt="vcondx", tab2txt="cond", 
-				subsetrows=TRUE)
-	    returnlst$vcondf <- vcondf
-	    vnames <- names(vcondf)
-	  } else {
-      returnlst$vcondf <- vcondx
-      vnames <- DBI::dbListFields(dbconn, vcondx)
-	  }
-    returnlst$vuniqueid <- vuniqueid
-
-    ## Check tfilter
-	  if (!is.null(tfilter)) {
-	    tfilter <- RtoSQL(tfilter, x = vnames)
-#	  if (is.null(whereqry)) {
-#        whereqry <- paste0(whereqry, " AND ", tfilter)
-#      } else {
-#        whereqry <- paste0("\nWHERE ", tfilter)
-#      }
-      returnlst$tfilter <- tfilter		
-    }
-  }
-
-  if (esttype %in% c("AREA", "TREE")) {
-    returnlst$totals <- totals
-  }
-
-  if (isdb) {
-    returnlst$dbconn <- dbconn
+  returnlst <- list(esttype = esttype, 
+                    sumunits = sumunits,
+                    totals = totals,
+                    landarea = landarea, 
+                    allin1 = allin1, 
+                    divideby = divideby,
+                    estround = estround, pseround = pseround, 
+                    addtitle = addtitle, 
+                    returntitle = returntitle,
+                    rawonly = rawonly, 
+                    savedata = savedata,
+                    outfolder = outfolder, 
+                    overwrite_layer = overwrite_layer, 
+                    append_layer = append_layer,
+                    rawfolder = rawfolder, 
+                    raw_fmt = raw_fmt, 
+                    raw_dsn = raw_dsn, 
+                    landarea.filter = landarea.filter,
+                    where.qry = where.qry)
+  if (popdatindb) {
+    returnlst$popconn <- popconn
   }
 
   return(returnlst)
