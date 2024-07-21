@@ -215,21 +215,23 @@ DBgetEvalid <- function(states = NULL,
   } else {
     datsourcelst <- c("sqlite", "datamart", "csv", "obj")
     datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
-		gui=gui, checklst=datsourcelst, caption="Data source?",
-           stopifnull=TRUE, stopifinvalid=TRUE)
+		              gui=gui, checklst=datsourcelst, caption="Data source?",
+                  stopifnull=TRUE, stopifinvalid=TRUE)
     if (datsource == "sqlite") {
-	  if (is.null(data_dsn)) {
-	    message("dsn is NULL")
-		return(NULL)
-	  }
+	    if (is.null(data_dsn)) {
+	      message("dsn is NULL")
+		    return(NULL)
+	    }
       dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
       dbtablst <- DBI::dbListTables(dbconn)
       if (length(dbtablst) == 0) {
         stop("no data in database")
+      } else{
+        indb <- TRUE
       }
     }
   }
- 
+
   ## Check evalid, invyrtab, and state/RS parameters
   ######################################################
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
