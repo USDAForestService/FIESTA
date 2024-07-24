@@ -287,7 +287,7 @@ check.popdataVOL <-
                 cuniqueid = cuniqueid,
                 pltassgnid = pltassgnid,
                 strunitvars = strunitvars,
-                plta. = "pltids.",
+                selecta. = "pltids.",
                 propqry = NULL)
   #message(ADJqry)
 
@@ -320,6 +320,7 @@ check.popdataVOL <-
     message(adjfactors.qry)
     return(NULL)
   }
+  setkeyv(setDT(adjfactors), strunitvars)
   dbqueries$adjfactors <- adjfactors.qry
 
   

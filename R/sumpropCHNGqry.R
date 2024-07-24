@@ -25,10 +25,10 @@ sumpropCHNGqry <- function(fromqry = NULL,
     
     ## CHANGE from query		 
     fromqry <- paste0(pcfromqry,  
-                           "\n JOIN ", SCHEMA., "SUBP_COND_CHNG_MTRX sccm ON(sccm.PLT_CN = c.PLT_CN)", 
-                           "\n   AND sccma.PREV_PLT_CN = pcond.PLT_CN",
-                           "\n   AND sccma.PLT_CN = c.PLT_CN", 
-                           "\n   AND sccma.PREV_PLT_CN = pcond.PLT_CN") 
+      "\n JOIN ", SCHEMA., "SUBP_COND_CHNG_MTRX sccm ON(sccm.PLT_CN = c.PLT_CN)", 
+      "\n   AND sccma.PREV_PLT_CN = pcond.PLT_CN",
+      "\n   AND sccma.PLT_CN = c.PLT_CN", 
+      "\n   AND sccma.PREV_PLT_CN = pcond.PLT_CN") 
     
   }
 

@@ -926,34 +926,51 @@ modGBpop <- function(popType = "VOL",
   }
 
   if (popType == "P2VEG") {
-    popcheck <- check.popdataP2VEG(tabs = popTabs, tabIDs = popTabIDs, 
-          popType = popType, datindb = datindb, pltaindb = pltaindb,
-          popFilter = popFilter, pltassgnid = pltassgnid, pltx = pltx,
-          adj = adj, ACI = ACI, plotlst = plotlst, pltidsqry = pltidsqry, 
-          pwhereqry = pwhereqry, pltfromqry = pltfromqry, 
-          condid = condid, areawt = areawt, areawt2 = areawt2,
-          unitvars = unitvars, strunitvars = strunitvars, 
-          nonsamp.cfilter = nonsamp.cfilter, 
-          pdoms2keep = pdoms2keep, defaultVars = defaultVars, 
-          dbconn = dbconn, schema = NULL, returndata = returndata,
-          savedata = savedata, outlst = outlst)
+    #areawt <- "SUBPTYP_PROP_CHNG"
+    popcheck <- 
+      check.popdataP2VEG(tabs = popTabs, tabIDs = popTabIDs, 
+                         popType = popType, 
+                         datindb = datindb, pltaindb = pltaindb, 
+                         pltidsqry = pltidsqry, pltidsid = pltidsid,
+                         pltidvars = pltidvars, 
+                         pdoms2keep = pdoms2keep,
+                         defaultVars = defaultVars,
+                         pltidsadjindb = pltidsadjindb, 
+                         pltassgnid = pltassgnid, pltx = pltx,
+                         adj = adj, ACI = ACI, 
+                         plotlst = plotlst, 
+                         pwhereqry = pwhereqry, 
+                         pltfromqry = pltfromqry,
+                         condid = condid, 
+                         areawt = areawt, 
+                         areawt2 = areawt2,
+                         unitvars = unitvars,
+                         strunitvars = strunitvars,
+                         #unitvars = c(projidvars, unitvars), 
+                         #strunitvars = c(projidvars, strunitvars), 
+                         nonsamp.cfilter = nonsamp.cfilter, 
+                         dbconn = dbconn, schema = NULL, 
+                         returndata = returndata,
+                         savedata = savedata, 
+                         outlst = outlst)
+    if (is.null(popcheck)) return(0)
     pltidsadj <- popcheck$pltidsadj
     pltcondx <- popcheck$pltcondx
-    areawtx <- popcheck$areawtx
+    pltcondflds <- popcheck$pltcondflds
     cuniqueid <- popcheck$cuniqueid
     condid <- popcheck$condid
-    areawtnm <- popcheck$areawtnm
-    areawt2nm <- popcheck$areawt2nm
     adjfactors <- popcheck$adjfactors
     adjvarlst <- popcheck$adjvarlst
     condsampcnt <- popcheck$condsampcnt
-    ACI.filter <- popcheck$ACI.filter
-    sccmx <- popcheck$sccmx
     dbqueries <- popcheck$dbqueries
-    
+    dbqueriesWITH <- popcheck$dbqueriesWITH
+    ACI.filter <- popcheck$ACI.filter
+    areawtcase <- popcheck$areawtcase
+    varadjP2VEG <- popcheck$varadjP2VEG
+
     if (returndata) {
-      pltx <- popcheck$pltx
-      condx <- popcheck$condx
+      #pltx <- popcheck$pltx
+      #condx <- popcheck$condx
       subplotx <- popcheck$subplotx
       subp_condx <- popcheck$subp_condx
       p2veg_subp_structure <- popcheck$p2veg_subp_structure

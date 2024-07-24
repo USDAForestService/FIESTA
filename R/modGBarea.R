@@ -375,8 +375,7 @@ modGBarea <- function(GBpopdat,
       }
     }
   }
-
-  
+ 
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -504,7 +503,6 @@ modGBarea <- function(GBpopdat,
   ### Check row and column data
   ###################################################################################
   #withqry = dbqueriesWITH$pltcondxWITH
-  source("C:\\_tsf\\_GitHub\\_branch\\_update\\check.rowcol7.R")
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
@@ -642,26 +640,27 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
-  source("C:\\_tsf\\_GitHub\\_branch\\_update\\getestimates.R")
   estdat <- 
-    getestimates(domdat = cdomdat,
-                 cuniqueid = cuniqueid,
-                 estvar.name <- areawtnm,
-                 rowvar = rowvar, colvar = colvar, 
-                 grpvar = grpvar,
-                 pltassgnx = pltassgnx,
-                 unitarea = unitarea,
-                 unitvars = unitvars,
-                 stratalut = stratalut,
-                 strvar = strvar,
-                 totals = totals,
-                 sumunits = sumunits,
-                 uniquerow = uniquerow,
-                 uniquecol = uniquecol,
-                 row.orderby = row.orderby,
-                 col.orderby = col.orderby,
-                 row.add0 = row.add0,
-                 col.add0 = col.add0)
+    getGBestimates(esttype = esttype,
+                   domdat = cdomdat,
+                   cuniqueid = cuniqueid,
+                   estvar.name <- areawtnm,
+                   rowvar = rowvar, colvar = colvar, 
+                   grpvar = grpvar,
+                   pltassgnx = pltassgnx,
+                   unitarea = unitarea,
+                   unitvars = unitvars,
+                   areavar = areavar,
+                   stratalut = stratalut,
+                   strvar = strvar,
+                   totals = totals,
+                   sumunits = sumunits,
+                   uniquerow = uniquerow,
+                   uniquecol = uniquecol,
+                   row.orderby = row.orderby,
+                   col.orderby = col.orderby,
+                   row.add0 = row.add0,
+                   col.add0 = col.add0)
   
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest

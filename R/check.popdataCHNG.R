@@ -390,7 +390,7 @@ check.popdataCHNG <-
                                SCHEMA. = SCHEMA.)
   #message(sumpropqry) 
   
-  ## Next, add sumpropqry to get getADJqry to build a subquery
+  ## Next, add sumpropqry to get getADJqry 
   ADJqry <- 
     getADJqry(popType = popType,
               adj = adj,
@@ -400,7 +400,7 @@ check.popdataCHNG <-
               cuniqueid = cuniqueid,
               pltassgnid = pltassgnid,
               strunitvars = strunitvars,
-              plta. = NULL,
+              selecta. = NULL,
               propqry = NULL)
   #message(ADJqry)
 
@@ -440,7 +440,7 @@ check.popdataCHNG <-
   
   
   ## Check with FIADB population data - VOL
-  #source("E:/workspace/jyamamoto/FIESTA_EVALIDator_compare/FIESTA_EVALIDator_compare_functions.R")
+  #source("C:\\_tsf\\FIESTA\\FIESTA_WebApp\\EVALIDator_compare\\compareADJ.R") 
   #FIADBpop <- getFIADBpop(state, evaltype = "03", evalyr, dbconn=dbconn)$pop_stratum
   #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="03")
   #popVOL_compare

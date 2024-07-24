@@ -1,12 +1,13 @@
-getGBestimates <- function(domdat, cuniqueid, estvar.name,
-                         rowvar, colvar, grpvar,
-                         pltassgnx, pltassgnid,
-                         unitarea, unitvar, 
-                         stratalut, strvar,
-                         totals, sumunits, 
-                         uniquerow, uniquecol,
-                         row.add0, col.add0,
-                         row.orderby, col.orderby) {
+getGBestimates <- function(esttype,
+                           domdat, cuniqueid, estvar.name,
+                           rowvar, colvar, grpvar,
+                           pltassgnx, pltassgnid,
+                           unitarea, unitvar, areavar,
+                           stratalut, strvar,
+                           totals, sumunits, 
+                           uniquerow, uniquecol,
+                           row.add0, col.add0,
+                           row.orderby, col.orderby) {
 
   ## Set global variables
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL

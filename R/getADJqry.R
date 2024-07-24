@@ -8,7 +8,8 @@ getADJqry <- function(popType,
 							        cuniqueid,
 							        pltassgnid,
 							        strunitvars = NULL,
-							        plta. = "",
+							        othervars = NULL,
+							        selecta. = "",
 							        propqry = NULL) {
 
   ####################################################################################
@@ -61,14 +62,17 @@ getADJqry <- function(popType,
   ## 4.1 Set different grouping variables depending in adj
   ##########################################################
   if (adj == "plot") {
-    grpvars <- toString(paste0(plta., pltassgnid))
+    grpvars <- toString(paste0(selecta., pltassgnid))
   } else {  ## if (adj == "samp")
-    grpvars <- toString(paste0(plta., strunitvars))
+    grpvars <- toString(paste0(selecta., strunitvars))
   }
 
   ## 4.2 Build select statement with propvars
   ##########################################################
-  selectqry <- paste("SELECT", grpvars)   
+  selectqry <- paste("SELECT", grpvars)  
+  if (!is.null(othervars)) {
+    selectqry <- paste0(selectqry, ", ", toString(othervars))
+  }
   
   for (i in 1:length(propvars)) {
     if (adj == "plot") {
@@ -91,7 +95,7 @@ getADJqry <- function(popType,
                    adjfromqry)
   
   if (!is.null(propqry)) {
-    adjjoinqry <- getjoinqry(cuniqueid, pltassgnid, "c.", plta.)
+    adjjoinqry <- getjoinqry(cuniqueid, pltassgnid, "c.", selecta.)
     adjqry <- paste0(adjqry, 
                 "\nLEFT JOIN",
                 "\n (", propqry, ") c ", adjjoinqry)

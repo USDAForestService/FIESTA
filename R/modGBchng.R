@@ -395,7 +395,7 @@ modGBchng <- function(GBpopdat,
   areawt2 <- GBpopdat$areawt2
   areawtcase <- GBpopdat$areawtcase
   adj <- GBpopdat$adj
-  
+    
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
       if (!is.null(pop_dsn)) {
@@ -716,24 +716,26 @@ modGBchng <- function(GBpopdat,
   ## GENERATE ESTIMATES
   ###################################################################################
   estdat <- 
-    getGBestimates(domdat = cdomdat,
-                 cuniqueid = cuniqueid,
-                 estvar.name <- areawtnm,
-                 rowvar = rowvar, colvar = colvar, 
-                 grpvar = grpvar,
-                 pltassgnx = pltassgnx,
-                 unitarea = unitarea,
-                 unitvar = unitvar,
-                 stratalut = stratalut,
-                 strvar = strvar,
-                 totals = totals,
-                 sumunits = sumunits,
-                 uniquerow = uniquerow,
-                 uniquecol = uniquecol,
-                 row.orderby = row.orderby,
-                 col.orderby = col.orderby,
-                 row.add0 = row.add0,
-                 col.add0 = col.add0)
+    getGBestimates(esttype = esttype,
+                   domdat = cdomdat,
+                   cuniqueid = cuniqueid,
+                   estvar.name <- areawtnm,
+                   rowvar = rowvar, colvar = colvar, 
+                   grpvar = grpvar,
+                   pltassgnx = pltassgnx,
+                   unitarea = unitarea,
+                   unitvar = unitvar,
+                   areavar = areavar,
+                   stratalut = stratalut,
+                   strvar = strvar,
+                   totals = totals,
+                   sumunits = sumunits,
+                   uniquerow = uniquerow,
+                   uniquecol = uniquecol,
+                   row.orderby = row.orderby,
+                   col.orderby = col.orderby,
+                   row.add0 = row.add0,
+                   col.add0 = col.add0)
   
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest
