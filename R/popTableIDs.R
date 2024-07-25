@@ -28,7 +28,9 @@
 #' @param tree_grm_begin String. 
 #' @param midpt String. 
 #' @param tree_grm_midpt String. 
-#' @param pltu String. 
+#' @param plot String. 
+#' @param pltu String.
+#' @param plotu String. 
 #' @param condu String. 
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for strata.
@@ -42,27 +44,29 @@ popTableIDs <- function(cond = "PLT_CN",
                         plt = "CN", 
                         tree = "PLT_CN", 
                         seed = "PLT_CN",
-						seedling = "PLT_CN",
+						            seedling = "PLT_CN",
                         vsubpspp = "PLT_CN", 
-						p2veg_subplot_spp = "PLT_CN",
+						            p2veg_subplot_spp = "PLT_CN",
                         vsubpstr = "PLT_CN",
-						p2veg_subp_structure = "PLT_CN",
+						            p2veg_subp_structure = "PLT_CN",
                         invsubp = "PLT_CN", 
-						invasive_subplot_spp = "PLT_CN",
+						            invasive_subplot_spp = "PLT_CN",
                         subplot = "PLT_CN",
                         subp_cond = "PLT_CN", 
-						dwm = "PLT_CN",
+						            dwm = "PLT_CN",
                         cond_dwm_calc = "PLT_CN",
                         sccm = "PLT_CN", 
-					    subp_cond_chng_mtrx = "PLT_CN",
+					              subp_cond_chng_mtrx = "PLT_CN",
                         grm = "PLT_CN",
-					    tree_grm_component = "PLT_CN",
+					              tree_grm_component = "PLT_CN",
                         begin = "PLT_CN",
-						tree_grm_begin = "PLT_CN",
+						            tree_grm_begin = "PLT_CN",
                         midpt = "PLT_CN",
-						tree_grm_midpt = "PLT_CN",
-						pltu = "PLT_CN",
-						condu = "PLT_CN",
+						            tree_grm_midpt = "PLT_CN",
+						            plot = "CN",
+						            pltu = "CN",
+						            plotu = "CN",
+						            condu = "PLT_CN",
                        ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
