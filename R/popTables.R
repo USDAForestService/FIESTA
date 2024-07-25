@@ -65,7 +65,11 @@
 #' Tree-level growth, removal, and mortality data (TREE_GRM_MIDPT).
 #' @param tree_grm_midpt DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Tree-level growth, removal, and mortality data (TREE_GRM_MIDPT).
+#' @param plot DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Plot data unioned with remeasured plot data.
 #' @param pltu DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Plot data unioned with remeasured plot data.
+#' @param plotu DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Plot data unioned with remeasured plot data.
 #' @param condu DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Cond data unioned with remeasured cond data.
@@ -83,25 +87,27 @@ popTables <- function(cond = "COND",
                       seed = "SEEDLING", 
                       seedling = "SEEDLING", 
                       vsubpspp = "P2VEG_SUBPLOT_SPP", 
-					  p2veg_subplot_spp = "P2VEG_SUBPLOT_SPP",
+					            p2veg_subplot_spp = "P2VEG_SUBPLOT_SPP",
                       vsubpstr = "P2VEG_SUBP_STRUCTURE", 
-					  p2veg_subp_structure = "P2VEG_SUBP_STRUCTURE",
+					            p2veg_subp_structure = "P2VEG_SUBP_STRUCTURE",
                       invsubp = "INVASIVE_SUBPLOT_SPP",
-					  invasive_subplot_spp = "INVASIVE_SUBPLOT_SPP",
+					            invasive_subplot_spp = "INVASIVE_SUBPLOT_SPP",
                       subplot = "SUBPLOT", 
                       subp_cond = "SUBP_COND", 
                       dwm = "COND_DWM_CALC",
-					  cond_dwm_calc = "COND_DWM_CALC",
+					            cond_dwm_calc = "COND_DWM_CALC",
                       sccm = "SUBP_COND_CHNG_MTRX",
-					  subp_cond_chng_mtrx = "SUBP_COND_CHNG_MTRX",
+					            subp_cond_chng_mtrx = "SUBP_COND_CHNG_MTRX",
                       grm = "TREE_GRM_COMPONENT",
-					  tree_grm_component = "TREE_GRM_COMPONENT",
+					            tree_grm_component = "TREE_GRM_COMPONENT",
                       begin = "TREE_GRM_BEGIN",
-					  tree_grm_begin = "TREE_GRM_BEGIN",
+					            tree_grm_begin = "TREE_GRM_BEGIN",
                       midpt = "TREE_GRM_MIDPT",
-					  tree_grm_midpt = "TREE_GRM_MIDPT",
-					  pltu = "pltu",
-					  condu = "condu",
+					            tree_grm_midpt = "TREE_GRM_MIDPT",
+					            plot = "plot",
+					            pltu = "pltu",
+					            plotu = "plotu",
+					            condu = "condu",
                       ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
