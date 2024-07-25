@@ -506,7 +506,7 @@ DBgetPlots <- function (states = NULL,
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-  saveSURVEY=isveg=ischng=isdwm=isgrm=islulc=isinv=issccm=subcycle99=biojenk <- FALSE
+  saveSURVEY=isveg=ischng=isdwm=isgrm=islulc=isinv=issccm=subcycle99=biojenk=savePOP2 <- FALSE
 
   other_tables <- c("BOUNDARY", "COND_DWM_CALC", "COUNTY", "DWM_COARSE_WOODY_DEBRIS", 
 	"DWM_DUFF_LITTER_FUEL", "DWM_FINE_WOODY_DEBRIS", "DWM_MICROPLOT_FUEL", 
@@ -775,6 +775,9 @@ DBgetPlots <- function (states = NULL,
 
   if ((biojenk || greenwt) && !istree) {
     istree <- TRUE
+  }
+  if (all(Type %in% c("CHNG", "P2VEG", "INV", "DWM"))) {
+    istree <- FALSE
   }
  
   ## Check coordType
@@ -2559,9 +2562,10 @@ DBgetPlots <- function (states = NULL,
 
       if (savedata) {
         message("saving pltu and condu tables...")
+        
         index.unique.pltux = index.pltux <- NULL
         if (!append_layer) {
-          index.unique.pltux <- c("CN")
+          index.unique.pltux <- list("CN", c("CN", "PREV_PLT_CN"))
           if (all(c("STATECD", "UNITCD", "COUNTYCD", "PLOT") %in% names(pltux))) {
             index.pltux <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
           }
@@ -2583,8 +2587,8 @@ DBgetPlots <- function (states = NULL,
         index.unique.condux <- NULL
         if (!append_layer) index.unique.condux <- c("PLT_CN", "CONDID")
         datExportData(condux, 
-            index.unique = index.unique.condux,
-            savedata_opts = list(outfolder = outfolder, 
+                      index.unique = index.unique.condux,
+                      savedata_opts = list(outfolder = outfolder, 
                                    out_fmt = out_fmt, 
                                    out_dsn = out_dsn, 
                                    out_layer = "condu",
@@ -2698,10 +2702,14 @@ DBgetPlots <- function (states = NULL,
 	          }
           }
           if (savedata) {
-            index.unique.sccmx <- NULL
-            if (!append_layer) index.unique.sccmx <- c("PLT_CN", "CONDID")
-              datExportData(sccmx, 
+            index.unique.sccmx = index.sccmx <- NULL
+            if (!append_layer) {
+              index.unique.sccmx <- c("PLT_CN","PREV_PLT_CN","SUBP","SUBPTYP","CONDID","PREVCOND")
+              index.sccmx <- list("PLT_CN", "PREV_PLT_CN")
+            }
+            datExportData(sccmx, 
                   index.unique = index.unique.sccmx,
+                  index = index.sccmx,
                   savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
@@ -2721,7 +2729,6 @@ DBgetPlots <- function (states = NULL,
 		    }
       }
     }
-
     ##############################################################
     ## Tree data
     ##############################################################
@@ -3071,7 +3078,7 @@ DBgetPlots <- function (states = NULL,
                 index.unique.treeux <- NULL
                 if (!append_layer) {
                   index.unique.treeux <- list(c("PLT_CN", "CONDID", "SUBP", "TREE"), 
-				                               "TREE_CN")
+				                                      "TREE_CN", c("PLT_CN", "PREV_TRE_CN"))
                 }
                 datExportData(treeux, 
                    index.unique = index.unique.treeux,
@@ -3283,10 +3290,10 @@ DBgetPlots <- function (states = NULL,
 	                }
                 }
                 if (savedata) {
-                  index.unique.grmx <- NULL
-                  if (!append_layer) index.unique.grmx <- c("TRE_CN")
+                  index.unique.grmbx <- NULL
+                  if (!append_layer) index.unique.grmbx <- c("TRE_CN")
                   datExportData(grmbx, 
-                      index.unique = index.unique.grmx,
+                      index.unique = index.unique.grmbx,
                       savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
@@ -3354,19 +3361,19 @@ DBgetPlots <- function (states = NULL,
 	                }
                 }
                 if (savedata) {
-                  index.unique.grmx <- NULL
-                  if (!append_layer) index.unique.grmx <- c("TRE_CN")
+                  index.unique.grmmx <- NULL
+                  if (!append_layer) index.unique.grmmx <- c("TRE_CN")
                   datExportData(grmmx, 
-                      index.unique = index.unique.grmx,
-                      savedata_opts = list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="tree_grm_midpt",
-                                outfn.pre=outfn.pre, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                outfn.date=outfn.date, 
-                                add_layer=TRUE))
+                                index.unique = index.unique.grmmx,
+                                savedata_opts = list(outfolder=outfolder, 
+                                      out_fmt=out_fmt, 
+                                      out_dsn=out_dsn, 
+                                      out_layer="tree_grm_midpt",
+                                      outfn.pre=outfn.pre, 
+                                      overwrite_layer=overwrite_layer,
+                                      append_layer=append_layer,
+                                      outfn.date=outfn.date, 
+                                      add_layer=TRUE))
                   rm(grmmx)
                   # gc()  
                 } 
@@ -3531,8 +3538,8 @@ DBgetPlots <- function (states = NULL,
               index.unique.seedx <- c("PLT_CN", "CONDID", "SUBP")
             }
             datExportData(seedx, 
-                index.unique = index.unique.seedx,
-                savedata_opts = list(outfolder=outfolder, 
+                          index.unique = index.unique.seedx,
+                          savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="seedling",
@@ -3675,8 +3682,8 @@ DBgetPlots <- function (states = NULL,
             index.unique.vsubpsppx <- NULL
             if (!append_layer) index.unique.vsubpsppx <- c("PLT_CN", "CONDID")
             datExportData(p2veg_subplot_sppx, 
-                 index.unique = index.unique.vsubpsppx,
-                 savedata_opts = list(outfolder=outfolder, 
+                          index.unique = index.unique.vsubpsppx,
+                          savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="p2veg_subplot_spp",
@@ -3753,8 +3760,8 @@ DBgetPlots <- function (states = NULL,
             index.unique.vsubpstrx <- NULL
             if (!append_layer) index.unique.vsubpstrx <- c("PLT_CN", "CONDID")
             datExportData(p2veg_subp_structurex, 
-                index.unique = index.unique.vsubpstrx,
-                savedata_opts = list(outfolder = outfolder, 
+                          index.unique = index.unique.vsubpstrx,
+                          savedata_opts = list(outfolder = outfolder, 
                                 out_fmt = out_fmt, 
                                 out_dsn = out_dsn, 
                                 out_layer = "p2veg_subp_structure",
@@ -3875,8 +3882,8 @@ DBgetPlots <- function (states = NULL,
             index.unique.invsubpx <- NULL
             if (!append_layer) index.unique.invsubpx <- c("PLT_CN", "CONDID")
             datExportData(invasive_subplot_sppx, 
-                index.unique = index.unique.invsubpx,
-                savedata_opts = list(outfolder = outfolder, 
+                          index.unique = index.unique.invsubpx,
+                          savedata_opts = list(outfolder = outfolder, 
                                 out_fmt = out_fmt, 
                                 out_dsn = out_dsn, 
                                 out_layer = "invasive_subplot_spp",
@@ -4013,8 +4020,8 @@ DBgetPlots <- function (states = NULL,
             index.unique.subpx <- NULL
             if (!append_layer) index.unique.subpx <- "PLT_CN"
             datExportData(subpx, 
-                index.unique = index.unique.subpx,
-                savedata_opts = list(outfolder = outfolder, 
+                          index.unique = index.unique.subpx,
+                          savedata_opts = list(outfolder = outfolder, 
                                 out_fmt = out_fmt, 
                                 out_dsn = out_dsn, 
                                 out_layer = "subplot",
@@ -4023,7 +4030,6 @@ DBgetPlots <- function (states = NULL,
                                 append_layer = append_layer,
                                 outfn.date = outfn.date, 
                                 add_layer = TRUE)) 
-            index.unique.subpcx <- NULL
             rm(subpx)
             # gc()
           }
@@ -4084,10 +4090,11 @@ DBgetPlots <- function (states = NULL,
 	          }
           }
           if (savedata) {
+            index.unique.subpcx <- NULL
             if (!append_layer) index.unique.subpcx <- c("PLT_CN", "CONDID")
             datExportData(subpcx, 
-                index.unique = index.unique.subpcx,
-                savedata_opts = list(outfolder = outfolder, 
+                          index.unique = index.unique.subpcx,
+                          savedata_opts = list(outfolder = outfolder, 
                                 out_fmt = out_fmt, 
                                 out_dsn = out_dsn, 
                                 out_layer = "subp_cond",
@@ -4206,8 +4213,8 @@ DBgetPlots <- function (states = NULL,
             index.unique.dwmx <- NULL
             if (!append_layer) index.unique.dwmx <- c("PLT_CN", "CONDID")
             datExportData(cond_dwm_calcx, 
-                  index.unique = index.unique.dwmx,
-                  savedata_opts = list(outfolder=outfolder, 
+                          index.unique = index.unique.dwmx,
+                          savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="cond_dwm_calc",
@@ -4532,10 +4539,12 @@ DBgetPlots <- function (states = NULL,
         message("saving cond table...")
 
         index.unique.condx <- NULL
-        if (!append_layer) index.unique.condx <- c("PLT_CN", "CONDID")
+        if (!append_layer) {
+          index.unique.condx <- c("PLT_CN", "CONDID")
+        }
         datExportData(condx, 
-              index.unique = index.unique.condx,
-              savedata_opts = list(outfolder = outfolder, 
+                      index.unique = index.unique.condx,
+                      savedata_opts = list(outfolder = outfolder, 
                                    out_fmt = out_fmt, 
                                    out_dsn = out_dsn, 
                                    out_layer = "cond",
@@ -4550,10 +4559,17 @@ DBgetPlots <- function (states = NULL,
       if (savedata && savePOP && !is.null(ppsax)) {
         message("saving pop_plot_stratum_assgn table...")
 
-        #index.unique.ppsax <- NULL
-        #if (i == 1) index.unique.ppsax <- "PLT_CN"
+        index.unique.ppsax=index.ppsax <- NULL
+        if (!append_layer) {
+          index.unique.ppsax <- "PLT_CN"
+          if (all(c("STATECD","UNITCD","COUNTYCD","PLOT") %in% names(ppsax))) {
+            index.ppsax <- c("STATECD","UNITCD", "COUNTYCD","PLOT")
+          }
+        }
         datExportData(ppsax, 
-            savedata_opts=list(outfolder = outfolder, 
+                      index.unique = index.unique.ppsax,
+                      index = index.ppsax,
+                      savedata_opts=list(outfolder = outfolder, 
                                out_fmt = out_fmt, 
                                out_dsn = out_dsn, 
                                out_layer = "pop_plot_stratum_assgn",
@@ -4565,7 +4581,14 @@ DBgetPlots <- function (states = NULL,
         rm(ppsax)
       }
       if (savePOPall && !"pop_stratum" %in% othertables) {
-          datExportData(popstratumx, 
+        message("saving pop_stratum table...")
+        
+        index.unique.popstratumx <- NULL
+        if (!append_layer) {
+          index.unique.popstratumx <- c("RSCD","EVALID","ESTN_UNIT","STRATUMCD")
+        }
+        datExportData(popstratumx, 
+                      index.unique = index.unique.popstratumx,
                       savedata_opts=list(outfolder = outfolder, 
                                out_fmt = out_fmt, 
                                out_dsn = out_dsn, 
@@ -4575,10 +4598,17 @@ DBgetPlots <- function (states = NULL,
                                append_layer = append_layer,
                                outfn.date = outfn.date, 
                                add_layer = TRUE)) 
-          rm(popstratumx)
+        rm(popstratumx)
       }
       if (savePOPall && !"pop_estn_unit" %in% othertables) {
-          datExportData(popestnunitx, 
+        message("saving pop_estn_unit table...")
+        
+        index.unique.popestnunitx <- NULL
+        if (!append_layer) {
+          index.unique.popestnunitx <- c("RSCD","EVALID","ESTN_UNIT")
+        }
+        datExportData(popestnunitx, 
+                      index.unique = index.unique.popestnunitx,
                       savedata_opts=list(outfolder = outfolder, 
                                out_fmt = out_fmt, 
                                out_dsn = out_dsn, 
@@ -4605,7 +4635,8 @@ DBgetPlots <- function (states = NULL,
     message("saving ref_species...")
 
     datExportData(ref_species, 
-        savedata_opts=list(outfolder = outfolder, 
+                  index.unique = list("SPCD", "SPECIES_SYMBOL"),
+                  savedata_opts=list(outfolder = outfolder, 
                            out_fmt = out_fmt, 
                            out_dsn = out_dsn, 
                            out_layer = "ref_species",
@@ -4620,7 +4651,8 @@ DBgetPlots <- function (states = NULL,
     message("saving survey table...")
 
     datExportData(SURVEY, 
-        savedata_opts=list(outfolder = outfolder, 
+                  index.unique = "CN",
+                  savedata_opts=list(outfolder = outfolder, 
                            out_fmt = out_fmt, 
                            out_dsn = out_dsn, 
                            out_layer = "survey",
