@@ -380,8 +380,8 @@ modGBarea <- function(GBpopdat,
   ## CHECK PARAMETER INPUTS
   ##################################################################
   list.items <- c("pltcondx", "cuniqueid", "condid", 
-  "ACI.filter", "unitarea", "unitvar", "stratalut", "strvar",
-  "plotsampcnt", "condsampcnt")
+             "unitarea", "unitvar", "stratalut", "strvar",
+             "plotsampcnt", "condsampcnt")
   GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   if (is.null(GBpopdat)) return(NULL)
   pltidsadj <- GBpopdat$pltidsadj
@@ -449,7 +449,7 @@ modGBarea <- function(GBpopdat,
   if (is.null(key(unitarea))) {
      setkeyv(unitarea, unitvar)
   }
-  
+
   ###################################################################################
   ## Check parameter inputs and plot/condition filters
   ###################################################################################
@@ -649,7 +649,7 @@ modGBarea <- function(GBpopdat,
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
                    unitarea = unitarea,
-                   unitvars = unitvars,
+                   unitvar = unitvar,
                    areavar = areavar,
                    stratalut = stratalut,
                    strvar = strvar,
