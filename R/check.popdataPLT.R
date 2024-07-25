@@ -77,7 +77,10 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
   ##############################################################################
   ## 3. Check database connection (dbconn) or dsn and define SCHEMA.
   ##############################################################################
-  if (!is.null(dbconn) && DBI::dbIsValid(dbconn)) {
+  if (!is.null(dbconn)) {
+    if (!DBI::dbIsValid(dbconn)) {
+      stop("dbconn is invalid")
+    }
     dbinfo <- DBI::dbGetInfo(dbconn)
     SCHEMA. <- ifelse (is.null(schema), "", paste0(schema, "."))
     dbtablst <- DBI::dbListTables(dbconn)
@@ -90,7 +93,7 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
     }
     SCHEMA. <- ifelse (is.null(schema), "", paste0(schema, "."))
   }
-  
+ 
   ##############################################################################
   ## 4. Check plot and pltassgn tables.
   ##############################################################################
@@ -99,11 +102,11 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
   ## 4.1. Check plot table.
   ###########################################################
   if (popType %in% c("CHNG", "GRM")) {
-    tabnames <- c("pltu", "plt")
+    tabnames <- c("pltu", "plotu", "plt", "plot")
   } else {
     tabnames <- "plt"
   }
-  
+ 
   plotlst <- popTabchk(tabnames, tabtext = "plt", 
                        tabs, tabIDs, dbtablst, dbconn) 
   plotnm <- plotlst$tabnm
@@ -116,7 +119,7 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
     datindb <- TRUE
     pfromqry <- paste0("\nFROM ", plotnm, " p")
   }	
- 
+
   ## 4.2. Check pltassgn table.
   ############################################################# 
   
