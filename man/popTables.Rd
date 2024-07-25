@@ -28,7 +28,9 @@ popTables(
   tree_grm_begin = "TREE_GRM_BEGIN",
   midpt = "TREE_GRM_MIDPT",
   tree_grm_midpt = "TREE_GRM_MIDPT",
+  plot = "plot",
   pltu = "pltu",
+  plotu = "plotu",
   condu = "condu",
   ...
 )
@@ -117,7 +119,13 @@ Tree-level growth, removal, and mortality data (TREE_GRM_MIDPT).}
 \item{tree_grm_midpt}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 Tree-level growth, removal, and mortality data (TREE_GRM_MIDPT).}
 
+\item{plot}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Plot data unioned with remeasured plot data.}
+
 \item{pltu}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Plot data unioned with remeasured plot data.}
+
+\item{plotu}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 Plot data unioned with remeasured plot data.}
 
 \item{condu}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
