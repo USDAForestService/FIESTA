@@ -386,21 +386,25 @@ check.popdataCHNG <-
   sumpropqry <- sumpropCHNGqry(fromqry = fromqry, 
                                whereqry = paste0("\n WHERE ", adjwhereqry),
                                ACI = ACI,
-                               selectvars = toString(paste0("pltids.", strunitvars)),
+                               selectvars = NULL,
                                SCHEMA. = SCHEMA.)
   #message(sumpropqry) 
+  
+  ## Build adjfromqry
+  adjfromqry <- paste0("\n FROM pltids",
+                       "\n LEFT OUTER JOIN subpcprop c ON (", pltidsa., pltidsid, " = c.", sccmid, ")")
   
   ## Next, add sumpropqry to get getADJqry 
   ADJqry <- 
     getADJqry(popType = popType,
               adj = adj,
               propvars = propvars,
-              adjfromqry = "\n FROM subpcprop c",
+              adjfromqry = adjfromqry,
               pwhereqry = NULL,
-              cuniqueid = cuniqueid,
               pltassgnid = pltassgnid,
               strunitvars = strunitvars,
-              selecta. = NULL,
+              pltidsa. = pltidsa.,
+              pltidsid = pltidsid,
               propqry = NULL)
   #message(ADJqry)
 

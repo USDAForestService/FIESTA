@@ -284,10 +284,10 @@ check.popdataVOL <-
                 propvars = propvars,
                 adjfromqry = pcfromqry,
                 pwhereqry = whereqry,
-                cuniqueid = cuniqueid,
+                pltidsid = pltidsid,
                 pltassgnid = pltassgnid,
                 strunitvars = strunitvars,
-                selecta. = "pltids.",
+                pltidsa. = "pltids.",
                 propqry = NULL)
   #message(ADJqry)
 

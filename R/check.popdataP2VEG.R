@@ -408,9 +408,9 @@ check.popdataP2VEG <-
               adjfromqry = pcfromqry,
               pwhereqry = paste0("\n WHERE ", adjwhereqry),
               pltassgnid = pltassgnid,
-              cuniqueid = cuniqueid,
+              pltidsid = pltidsid,
               strunitvars = strunitvars,
-              selecta. = "pltids.",
+              pltidsa. = pltidsa.,
               propqry = NULL)
   #message(ADJqry)
   dbqueries$ADJqry <- ADJqry    
@@ -452,14 +452,15 @@ check.popdataP2VEG <-
   sumpropqry <- sumpropP2VEGqry(fromqry = P2VEGfromqry, 
                                whereqry = P2VEGwhereqry,
                                ACI = ACI,
-                               selectvars = toString(paste0("pltids.", strunitvars)),
+                               selectvars = NULL,
                                SCHEMA. = SCHEMA.)
   
 
   ## Next, add sumpropqry to get getADJqry to build a subquery
-  adjjoinqry <- getjoinqry(strunitvars, strunitvars, "adj.", "c.")
+  adjjoinqry <- getjoinqry(strunitvars, strunitvars, "adj.", pltidsa.)
   adjfromqry <- paste0(
-    "\n FROM subpcprop c",
+    "\n FROM pltids",
+    "\n LEFT OUTER JOIN subpcprop c ON (", pltidsa., pltidsid, " = c.", subplotid, ")",
     "\n JOIN adjfactors adj ", adjjoinqry)
   othervars <- c(propvars['SUBP'],propvars['MACR'],propvars['MICR'])
   
@@ -469,10 +470,10 @@ check.popdataP2VEG <-
               propvars = propvars['COND'],
               adjfromqry = adjfromqry,
               pwhereqry = NULL,
-              cuniqueid = cuniqueid,
+              pltidsid = pltidsid,
               pltassgnid = pltassgnid,
               strunitvars = strunitvars,
-              selecta. = "c.",
+              pltidsa. = pltidsa.,
               othervars <- othervars,
               propqry = NULL)
   #message(ADJqryP2VEG)
@@ -489,7 +490,7 @@ check.popdataP2VEG <-
     "\n(", sumpropqry, ")",
     "\n-------------------------------------------",
     "\n", ADJqryP2VEG)
-  ##message(adjfactorsP2VEG.qry)
+  #message(adjfactorsP2VEG.qry)
 
   ## Run query to calculate adjustment factors
   if (datindb) {
