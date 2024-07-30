@@ -590,6 +590,7 @@ modGBchng <- function(GBpopdat,
     
   } else if (colvar == "NONE") {
     cdomdatvars <- c(paste0("ppc.", rowvar, " AS PREV_", rowvar), paste0("pc.", rowvar))
+    grpbyvars <- c(byvars, c(paste0("ppc.", rowvar), paste0("pc.", rowvar)))
     colvar <- rowvar
     col.orderby <- row.orderby
     colvarnm <- rowvarnm
@@ -602,13 +603,13 @@ modGBchng <- function(GBpopdat,
     rowvarnm <- paste0("PREV_", rowvarnm)
     title.rowvar <- paste0("PREV_", title.rowvar)
     grpvar <- c(rowvar, colvar)
-    grpbyvars <- c(byvars, rowvar)
-    
+
     uniquecol <- uniquerow
     names(uniquerow) <- paste0("PREV_", names(uniquerow))
     
   } else {
     cdomdatvars <- c(paste0("ppc.", rowvar, " AS PREV_", rowvar), paste0("pc.", colvar))
+    grpbyvars <- c(byvars, c(paste0("ppc.", rowvar), paste0("pc.", colvar)))
     rowvar <- paste0("PREV_", rowvar)
     
     if (!is.null(row.orderby)) {
@@ -618,7 +619,6 @@ modGBchng <- function(GBpopdat,
     title.rowvar <- paste0("PREV_", title.rowvar)
     title.colvar <- title.rowvar
     grpvar <- c(rowvar, colvar)
-    grpbyvars <- c(byvars, rowvar, colvar)
   }
   cdomdatvars <- c(byvars, cdomdatvars)
   cdomdatselectqry <- 
