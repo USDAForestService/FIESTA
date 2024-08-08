@@ -132,7 +132,7 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     msg <- "## warnings/errors"
     message("\n################################### \n",
             msg, "\n###################################")
-    message(paste0(capture.output(data.frame(pltcnt)), collapse = "\n"))
+    message(paste0(capture.output(data.frame(pltcnt[pltcnt$errtyp == "warn",])), collapse = "\n"))
 
     if (stopiferror && any(errtab[["errtyp"]] == "warn")) {
       stop("not enough plots in strata")

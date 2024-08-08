@@ -15,6 +15,9 @@ getGBestimates <- function(esttype,
   strunitvar <- c(unitvar, strvar)
   
   message("getting estimates using GB...")
+  
+  ## Append TOTAL to domdat
+  domdat$TOTAL <- 1
 
   ## Set key to domvar and join to pltassgnx
   domdat <- pltassgnx[domdat]

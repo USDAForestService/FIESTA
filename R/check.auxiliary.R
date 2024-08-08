@@ -355,26 +355,28 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   nostrat <- pltcnts$nostrat
 
   ## If unit.action="remove", remove estimation with less than minplotnum.unit plots
+  ## If unit.action="keep", return estimation units with less than minplotnum.unit as NA
+  unitltmin <- 0
   if (any(auxlut$n.total < minplotnum.unit)) {
     unitltmin <- unique(errtab[[unitvar]][errtab$n.total < minplotnum.unit])
 
     if (length(unitltmin) > 0) {
-      if (unit.action == "remove") {
-        message("removing domains with plots less than ", minplotnum.unit,
-		         ": ", toString(unitltmin))
-        auxlut <- auxlut[!auxlut[[unitvar]] %in% unitltmin, ]
-        pltx <- pltx[!pltx[[unitvar]] %in% unitltmin, ]
-        unitarea <- unitarea[!unitarea[[unitvar]] %in% unitltmin, ]
-        errtab <- errtab[!errtab[[unitvar]] %in% unitltmin, ]
-      } else if (unit.action == "keep") {
-        message("there are ", length(unitltmin), " units with less than minplotnum.unit (", 
-		            minplotnum.unit, ") plots:\n", 
-		            toString(unitltmin)) 
-        message("if want to combine units that are less than minplotnum.unit, ",
-		            "set unit.action='combine' in unit.opts parameter... ",
-				        "\ncheck returned object, stratwarnlut\n")		   
-        minplotnum.unit <- 0
-        #errtab <- errtab[, errtyp := "none"]
+      if (unit.action %in% c("remove", "keep")) {
+        
+        if (unit.action == "remove") {
+          message("removing domains with plots less than ", minplotnum.unit,
+                  ": ", toString(unitltmin))
+        } else {
+          message("there are ", length(unitltmin), " units with less than minplotnum.unit (", 
+                  minplotnum.unit, ") plots:\n", 
+                  toString(unitltmin)) 
+          message("returning NA values for these units...")
+          message("if want to combine units that are less than minplotnum.unit, ",
+                  "set unit.action='combine' in unit.opts parameter... ",
+                  "\ncheck returned object, stratwarnlut\n")	
+          
+        }
+        auxlut <- auxlut[!auxlut[[unitvar]] %in% unitltmin,]
       }
     }
   }
@@ -554,10 +556,10 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     setcolorder(auxlut, c(strunitvars, names(auxlut)[!names(auxlut) %in% strunitvars]))
   #}
 
-  returnlst <- list(pltx=as.data.table(pltx),
-		auxlut=as.data.table(auxlut),
-		unitvar=unitvar, unitvars=unitvars,
-		prednames=prednames, predfac=predfac)
+  returnlst <- list(pltx = as.data.table(pltx),
+		                auxlut = as.data.table(auxlut),
+		                unitvar = unitvar, unitvars = unitvars,
+		                prednames = prednames, predfac = predfac)
 
   if (!is.null(unitarea)) {
     setkeyv(unitarea, unitvar)
@@ -608,6 +610,10 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 	    returnlst$stratwarnlut <- errtab
 	  }
   }
+  if (length(unitltmin) > 0 &&  unit.action == "keep") {
+    returnlst$unitltmin <- unitltmin
+  }
+  
 
   return(returnlst)
 }

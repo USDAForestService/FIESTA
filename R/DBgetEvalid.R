@@ -597,8 +597,8 @@ DBgetEvalid <- function(states = NULL,
 	  }
     if (!is.null(ppsanm)) {
       #invyrnm <- findnm("INVYR", ppsaflds, returnNULL=TRUE) 
-      invyrnm <- findnm("INVYR", pltflds, returnNULL=TRUE) 
-      
+      invyrnm <- findnm("INVYR", ppsaflds, returnNULL=TRUE) 
+
       ## Check evalids 
       evalid.qry <- paste0(
            "SELECT DISTINCT evalid", 
@@ -655,14 +655,13 @@ DBgetEvalid <- function(states = NULL,
         ppsanm <- NULL
 		
       } else {
-	  
 	      ## Create invyrtab with evalid
         if (!is.null(invyrnm)) {
           invqry <- paste(
               "SELECT statecd, invyr, COUNT(*) NBRPLOTS", 
 		          "\nFROM ", SCHEMA., ppsanm, 
 						  "\nWHERE evalid IN(", toString(evalid), ")",
-						  "\nGROUP BY statecd, invyr") 
+						  "\nGROUP BY statecd, invyr")
           if (indb) {
             invyrtab <- DBI::dbGetQuery(dbconn, invqry)
           } else {

@@ -6,7 +6,7 @@ check.popdataP2VEG <-
            pltidsadjindb = FALSE, 
            defaultVars = TRUE,
            pltassgnid, pltx, adj, ACI, plotlst, 
-           pltfromqry, pwhereqry = NULL, 
+           pltfromqry, 
            condid = "CONDID", 
            areawt = "CONDPROP_UNADJ", areawt2 = NULL,
            MICRO_BREAKPOINT_DIA = 5, 
@@ -280,94 +280,13 @@ check.popdataP2VEG <-
   
   ## Build ADJqry FROM statement (i.e., excluding nonresponse)
   adjwhereqry <- NULL
-  
   if (adj != "none") {
-    whereqry <- pwhereqry
-    P2VEGwhereqry <- {}
+    adjwhereqry=P2VEGwhereqry <- getADJwherePLOT(condflds)
     
-    ## Condition filters
-    #################################################################
-    
-    ## Filter for nonsampled conditions
-    ## (COND_STATUS_CD <> 5)
-    cstatusnm <- findnm("COND_STATUS_CD", condflds, returnNULL = TRUE)
-    if (is.null(cstatusnm)) {
-      message("COND_STATUS_CD is not in dataset... assuming all conditions are sampled")
-    } else {
-      ## Build where query to remove conditions that were not sampled
-      cstatus.filter <- paste0(conda., cstatusnm, " <> 5")
-      if (is.null(adjwhereqry)) {
-        adjwhereqry <- cstatus.filter
-      } else {
-        adjwhereqry <- paste0(adjwhereqry, 
-                              "\n   AND ", cstatus.filter)
-      }	
-      if (is.null(P2VEGwhereqry)) {
-        P2VEGwhereqry <- paste0("\n WHERE ", cstatus.filter)
-      } else {
-        P2VEGwhereqry <- paste0(P2VEGwhereqry, 
-                                "\n   AND ", cstatus.filter)
-      }	
-    }
-    
-    ## If ACI, filter for nonsampled nonforest conditions 
-    ## (NF_COND_STATUS_CD is NULL or NF_COND_STATUS_CD <> 5)
-    if (ACI) {
-      cnfstatusnm <- findnm("NF_COND_STATUS_CD", condflds, returnNULL = TRUE)
-      if (is.null(cnfstatusnm)) {
-        message("NF_COND_STATUS_CD is not in dataset... assuming all nonforest conditions are sampled")
-      } else {
-        ## Build where query to remove nonforest conditions that were not sampled
-        cnfstatus.filter <- paste0("(", conda., cnfstatusnm, " IS NULL OR ", conda., cnfstatusnm, " <> 5)")
-        if (is.null(adjwhereqry)) {
-          adjwhereqry <- cnfstatus.filter
-        } else {
-          adjwhereqry <- paste0(adjwhereqry, 
-                                "\n   AND ", cnfstatus.filter)
-        }	
-        if (is.null(P2VEGwhereqry)) {
-          P2VEGwhereqry <- paste0("\n WHERE ", cnfstatus.filter)
-        } else {
-          P2VEGwhereqry <- paste0(P2VEGwhereqry, 
-                                  "\n   AND ", cnfstatus.filter)
-        }	
-      }
-    }
-
     ## Subplot filters
     #################################################################
+    P2VEGwhereqry <- getADJwhereSUBP(subplotflds, adjwhereqry=P2VEGwhereqry)
     
-    ## Filter for nonsampled subplots in subplot
-    ## (SUBP_STATUS_CD <> 3)
-    subpstatusnm <- findnm("SUBP_STATUS_CD", subplotflds, returnNULL = TRUE)
-    if (is.null(subpstatusnm)) {
-      message("SUBP_STATUS_CD is not in dataset... assuming all subplots are sampled")
-    } else {
-      ## Build where query to remove subplots that wasn't sampled
-      subpstatus.filter <- paste0(subpa., subpstatusnm, " <> 3")
-      if (is.null(P2VEGwhereqry)) {
-        P2VEGwhereqry <- paste0("\n WHERE ", subpstatus.filter)
-      } else {
-        P2VEGwhereqry <- paste0(P2VEGwhereqry, 
-                                "\n    AND ", subpstatus.filter)
-      }	
-    }
-    
-    ## If ACI, filter for nonsampled nonforest subplots in subplot
-    ## (NF_SUBP_STATUS_CD is NULL or NF_SUBP_STATUS_CD <> 3)
-    subpnfstatusnm <- findnm("SUBP_STATUS_CD", subplotflds, returnNULL = TRUE)
-    if (is.null(subpnfstatusnm)) {
-      message("NF_SUBP_STATUS_CD is not in dataset... assuming all nonforest subplots are sampled")
-    } else {
-      ## Build where query to remove nonforest subplots that were not sampled
-      subpnfstatus.filter <- paste0("(", subpa., subpnfstatusnm, " IS NULL OR ", subpa., subpnfstatusnm, " <> 3)")
-      if (is.null(P2VEGwhereqry)) {
-        P2VEGwhereqry <- paste0("\n WHERE ", subpnfstatus.filter)
-      } else {
-        P2VEGwhereqry <- paste0(P2VEGwhereqry, 
-                                "\n    AND ", subpnfstatus.filter)
-      }	
-    }
     
     ## P2 vegetation filters
     #################################################################
@@ -1055,7 +974,7 @@ check.popdataP2VEG <-
     ## 8.5 Return and/or save p2veg_subp_structure (vsubstrx / P2VEG_SUBP_STRUCTRUE)
     ##################################################################
     vsubpstra. <- "vsubpstr."
-    
+
     ## 8.5.1. Check variables
     vcondid <- findnm("CONDID", vsubpstrflds, returnNULL = TRUE)
     vsubp <- findnm("SUBP", vsubpstrflds, returnNULL = TRUE)
@@ -1131,7 +1050,6 @@ check.popdataP2VEG <-
                     savedata_opts = outlst)
     }
     #rm(vsubpstrx)  
-    
     
     ## 8.6 Return and/or save p2veg_subplot_spp (vsubsppx / P2VEG_SUBPLOT_SPP)
     ##################################################################
@@ -1258,7 +1176,7 @@ check.popdataP2VEG <-
   
   ## If ACI, check NF_PLOT_STATUS_CD and generate table with number of plots
   ##########################################################################
-  if (popFilter$ACI) {
+  if (ACI) {
     nfcstatuschk <- findnm("NF_COND_STATUS_CD", pltcondflds, returnNULL=TRUE)
     if (is.null(nfcstatuschk)) {
       message("NF_COND_STATUS_CD not in dataset.. assuming all ACI nonforest conditions sampled")

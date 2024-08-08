@@ -68,6 +68,7 @@ getpopFilterqry <- function(popType,
   if (is.null(evalInfo)) {
     iseval <- FALSE
   }
+
 #  if (is.null(evalInfo)) {
     #message("no data to return")
     #return(NULL)

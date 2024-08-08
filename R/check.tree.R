@@ -1,63 +1,25 @@
-check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
-	plt=NULL, bycond=TRUE, bytdom, tuniqueid=NULL, cuniqueid=NULL,
-	condid="CONDID", puniqueid=NULL, esttype="TREE", ratiotype="PERACRE",
-	estvarn=NULL, estvarn.TPA=TRUE, estvarn.filter=NULL, estvarn.name=NULL,
-	esttotn=TRUE, estvard=NULL, estvard.TPA=TRUE, estvard.filter=NULL,
-	estvard.name=NULL, esttotd=TRUE, tdomvar=NULL, tdomvar2=NULL,
-	adjtree=FALSE, adjvar="tadjfac", adjtpa=FALSE, metric=FALSE, 
-	ACI=FALSE, woodland="Y") {
+check.tree <- 
+  function(gui, treex, seedx = NULL, estseed = "none", 
+           condx = NULL, plt = NULL, bycond = TRUE, tuniqueid = NULL,  
+           cuniqueid = NULL, condid = "CONDID", puniqueid = NULL, 
+           esttype = "TREE", ratiotype = "PERACRE",
+	         estvarn = NULL, estvarn.TPA = TRUE, estvarn.filter = NULL, 
+           estvarn.name = NULL, esttotn = TRUE, 
+           estvard = NULL, estvard.TPA = TRUE, estvard.filter = NULL,
+	         estvard.name = NULL, esttotd = TRUE, 
+           bytdom, tdomvar = NULL, tdomvar2 = NULL,
+           bydomainlst = NULL,
+	         adjtree = FALSE, adjvar = "tadjfac", 
+           pltassgn = NULL, adjTPA = 1, tderive = NULL, metric = FALSE, 
+	         ACI = FALSE, woodland = "Y", dbconn = NULL, pwithqry = NULL,
+           pcwhereqry = NULL) {
 
   ###################################################################################
   ### GETS ESTIMATION DATA FROM TREE TABLE
   ###################################################################################
 
   ## Set global variables
-  tdomvarlstn=estunitsd <- NULL
-
-  if (estseed == "only") {
-    tnames <- names(seedf)
-  } else {
-    tnames <- names(treef)
-  }
-  
-  ## SET ESTIMATION VARIABLE LIST
-  estvarlst.not <- c("TREE", "CONDID", "PREV_TRE_CN", "SUBP")
-  estvarlst <- tnames[!tnames %in% estvarlst.not] 	## Estimation variables
-
-  ## GET TREE ESTIMATION VARIABLE AND CHECK IF IN TREE DATA SET (NUMERATOR)
-  varnm <- ifelse(esttype == "TREE", "estvar", "estvarn")
-  estvarn <- pcheck.varchar(var2check=estvarn, varnm=varnm, gui=gui,
-		checklst=estvarlst, caption=paste0("Est variable (NUM)"),
-		warn=paste(estvarn, "not in tree table"), stopifnull=TRUE)
-
-  ## GETS TPA (NUMERATOR)
-  estvarn.TPA <- pcheck.logical(estvarn.TPA, varnm="estvarn.TPA",
-		title=paste0("Calculate TPA (NUM)"), first="YES", gui=gui)
-  if (!grepl("TPA", estvarn)) {
-    if (estvarn.TPA) message("multiplying ", estvarn, " by TPA")
-  }
-  ## GET NAME FOR ESTIMATION VARIABLE FOR ALL TREE DOMAINS
-  if (!is.null(estvarn.name) && !is.character(estvarn.name)) {
-    stop("invalid estvarn.name.. must be a string")
-  }
-
-  ## TO INCREASE TREES PER ACRE IF ONLY USING 1 SUBPLOT
-  if (adjtpa && "SUBP" %in% tnames) {
-    if (estseed == "only") {
-      nbrsubp <- length(unique(seedf$SUBP))
-    } else {
-      nbrsubp <- length(unique(treef$SUBP))
-    }
-    if (nbrsubp == 1) {
-      adjTPA <- 4
-    } else if (nbrsubp == 2) {
-      adjTPA <- 2
-    } else {
-      stop("can only adjust subplots with 1 or 2 subplots")
-    }
-  } else {
-    adjTPA <- 1
-  }
+  tdomvarlstn=estunitsd <- NULL  
 
   if (estseed == "only") {
     seedonly <- TRUE
@@ -68,12 +30,13 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
   } else {
     seedonly=addseed <- FALSE
   }
-  
+
 
   ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (NUMERATOR)
   ###############################################################################
   if (bytdom) {
     pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
+
     suppressWarnings(
     tdomdata <- datSumTreeDom(tree=treef, seed=seedf, cond=condf, plt=plt, 
            tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
@@ -84,27 +47,42 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
            addseed=addseed, seedonly=seedonly, woodland=woodland))
     if (is.null(tdomdata)) return(NULL)
     tdomdat <- tdomdata$tdomdat
-
-
-    #if (!pivot) {
-    #  tdomdat <- tdomdat[!is.na(tdomdat[[tdomvar]]),]
-    #}
+    if (!pivot) {
+      tdomdat <- tdomdat[!is.na(tdomdat[[tdomvar]]),]
+    }
     tdomvarn <- tdomdata$tdomtotnm
     tdomvarlstn <- tdomdata$tdomlst
     estunitsn <- tdomdata$estunits
 
   } else {
-    treedata <- datSumTree(tree=treef, seed=seedf, cond=condf, plt=plt, 
-           tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
-           bycond=bycond, condid=condid,
-           tsumvarlst=estvarn, tsumvarnmlst=estvarn.name, TPA=estvarn.TPA,
-           tfilter=estvarn.filter, adjtree=adjtree, 
-           adjvar=adjvar, adjTPA=adjTPA, ACI=ACI,
-           metric=metric, addseed=addseed, seedonly=seedonly, woodland=woodland)
+
+    treedata <- 
+      datSumTree(tree = treex, seed = seedx, 
+                 cond = condx, plt = plt, 
+                 tuniqueid = tuniqueid, 
+                 cuniqueid = cuniqueid, puniqueid = puniqueid, 
+                 bycond = bycond, condid = condid,
+                 tsumvarlst = estvarn, 
+                 tsumvarnmlst = estvarn.name, 
+                 TPA = estvarn.TPA,
+                 tfilter = estvarn.filter,
+                 bydomainlst = bydomainlst,
+                 adjtree = adjtree, 
+                 adjvar = adjvar, 
+                 adjTPA = adjTPA,
+                 tderive = tderive,
+                 metric = metric, 
+                 addseed = addseed, 
+                 seedonly = seedonly, 
+                 woodland = woodland,
+                 dbconn = dbconn, 
+                 pltidsWITHqry = pwithqry,
+                 pcwhereqry = pcwhereqry)
     if (is.null(treedata)) return(NULL)
     tdomdat <- treedata$treedat
     tdomvarn <- treedata$sumvars
     estunitsn <- treedata$estunits
+    treeqry <- treedata$treeqry
   }
 
   #############################################################################
@@ -205,5 +183,8 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     treedat <- list(tdomdat=tdomdat, estvar=estvarn, estvar.name=tdomvarn,
 		estvar.filter=estvarn.filter, tdomvarlst=tdomvarlstn, estunits=estunitsn)
   }
+
+  treedat$treeqry <- treeqry
+  return(treedat)
 }
 

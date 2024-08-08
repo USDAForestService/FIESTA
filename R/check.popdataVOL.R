@@ -6,7 +6,7 @@ check.popdataVOL <-
            pltidsadjindb = FALSE, 
            defaultVars = TRUE,
            pltassgnid, pltx, adj, ACI, plotlst, 
-           pltfromqry, pwhereqry = NULL, 
+           pltfromqry, 
            condid = "CONDID", 
            areawt = "CONDPROP_UNADJ", areawt2 = NULL,
            MICRO_BREAKPOINT_DIA = 5, 
@@ -62,7 +62,7 @@ check.popdataVOL <-
   
   
   ## Set global variables
-  treenm=seednm=condsampcnt=areawtcase <- NULL
+  treenm=seednm=condsampcnt=adjcase <- NULL
   SCHEMA. <- ""
   dbqueries=dbqueriesWITH <- list()
   cpropvars <- list(COND="CONDPROP_UNADJ", SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ")
@@ -70,7 +70,7 @@ check.popdataVOL <-
   diavar <- "DIA"
   pltcondindb <- datindb
 
-  suffix=whereqry=areawt2nm <- NULL
+  suffix=areawt2nm <- NULL
   
   ##############################################################################
   ## 1. Define variables necessary for estimation
@@ -213,77 +213,42 @@ check.popdataVOL <-
   plota. <- "p."
   conda. <- "c."
   
+  
   ## Build ADJqry FROM statement
-  pjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
-  cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., plota.)
-  pcfromqry <- paste0(
-    "\n FROM pltids",
-    "\n JOIN ", SCHEMA., plotnm, suffix, " p ", pjoinqry,
-    "\n JOIN ", SCHEMA., condnm, suffix, " c ", cjoinqry)
-    
+  if (!is.null(plotnm)) {
+    plota. <- "p."
+    pjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
+    cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., plota.)
+    pcfromqry <- paste0(
+      "\n FROM pltids",
+      "\n JOIN ", SCHEMA., plotnm, suffix, " p ", pjoinqry,
+      "\n JOIN ", SCHEMA., condnm, suffix, " c ", cjoinqry)
+  } else {
+    cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., pltidsa.)
+    pcfromqry <- paste0(
+      "\n FROM pltids",
+      "\n JOIN ", SCHEMA., condnm, suffix, " c ", cjoinqry)
+  }
+  
   pltidsjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., "plta.")
   pltidsfromqry <- paste0(
     "\nFROM pltids plta ",
     "\nJOIN ", SCHEMA., condnm, " c ", pltidsjoinqry)
   
   
-  ## Build ADJqry FROM statement (i.e., excluding nonresponse)
+  ## Build ADJqry WHERE statement (i.e., excluding nonresponse)
   adjwhereqry <- NULL
-  
   if (adj != "none") {
-      
-    ## Condition filters
-    #################################################################
-    
-    ## Filter for nonsampled conditions
-    ## (COND_STATUS_CD <> 5)
-    cstatusnm <- findnm("COND_STATUS_CD", condflds, returnNULL = TRUE)
-    if (is.null(cstatusnm)) {
-      message("COND_STATUS_CD is not in dataset... assuming all conditions are sampled")
-    } else {
-      ## Build where query to remove conditions that were not sampled
-      cstatus.filter <- paste0(conda., cstatusnm, " <> 5")
-      if (is.null(adjwhereqry)) {
-        adjwhereqry <- cstatus.filter
-      } else {
-        adjwhereqry <- paste0(adjwhereqry, 
-                         "\n    AND ", cstatus.filter)
-      }	
-    }
-  
-    ## If ACI, filter for nonsampled nonforest conditions 
-    ## (NF_COND_STATUS_CD is NULL or NF_COND_STATUS_CD <> 5)
-    if (ACI) {
-      cnfstatusnm <- findnm("NF_COND_STATUS_CD", condflds, returnNULL = TRUE)
-      if (is.null(cnfstatusnm)) {
-        message("NF_COND_STATUS_CD is not in dataset... assuming all nonforest conditions are sampled")
-      } else {
-        ## Build where query to remove nonforest conditions that were not sampled
-        cnfstatus.filter <- paste0("(", conda., cnfstatusnm, " is NULL or ", conda., cnfstatusnm, " <> 5)")
-        if (is.null(adjwhereqry)) {
-          adjwhereqry <- cnfstatus.filter
-        } else {
-          adjwhereqry <- paste0(adjwhereqry, 
-                                "\n    AND ", cnfstatus.filter)
-        }	
-      }
-    }
+    adjwhereqry <- getADJwherePLOT(condflds)
   }
 
-  
-  ## 5.4. Build query for adjustment factors based on popType (ADJqry)
-  if (is.null(whereqry)) {
-    whereqry <- paste0("\n WHERE ", adjwhereqry)
-  } else {
-    whereqry <- paste0(whereqry,
-                       "\n    AND ", adjwhereqry)
-  }
+  ## Build query for adjustment factors based on popType (ADJqry)
   ADJqry <- 
       getADJqry(popType = popType,
                 adj = adj,
                 propvars = propvars,
                 adjfromqry = pcfromqry,
-                pwhereqry = whereqry,
+                pwhereqry = adjwhereqry,
                 pltidsid = pltidsid,
                 pltassgnid = pltassgnid,
                 strunitvars = strunitvars,
@@ -292,7 +257,7 @@ check.popdataVOL <-
   #message(ADJqry)
 
   
-  ## 5.5. Build final query for adjustment factors, including pltids WITH query
+  ## 5.4. Build final query for adjustment factors, including pltids WITH query
   adjfactors.qry <- paste0(
     pltidsWITH.qry,
     "\n-------------------------------------------",
@@ -514,11 +479,11 @@ check.popdataVOL <-
     propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
   
     if (is.null(propbasisnm)) {
-      areawtcase <- paste0("CASE pc.", propvars['MACR'], " IS NULL", 
+      adjcase <- paste0("CASE pc.", propvars['MACR'], " IS NULL", 
                            " THEN ", adjvars['SUBP'], 
                            " ELSE ", adjvars['MACR'], " END")
     } else {
-      areawtcase <- paste0("CASE pc.", propbasisnm, 
+      adjcase <- paste0("CASE pc.", propbasisnm, 
                            " WHEN 'MACR' THEN ", adjvars['MACR'], 
                            " ELSE ", adjvars['SUBP'], " END")
     }
@@ -531,7 +496,7 @@ check.popdataVOL <-
                     pltcondflds = pltcondflds,
                     cuniqueid = cuniqueid, condid = condid, 
                     adjfactors = adjfactors,
-                    areawtcase = areawtcase,
+                    adjcase = adjcase,
                     adjvarlst = adjvars)
 
   if (returndata || savedata) {

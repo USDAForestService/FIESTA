@@ -812,6 +812,8 @@ modGBpop <- function(popType = "VOL",
   strvar <- auxdat$strvar
   strwtvar <- auxdat$strwtvar
   stratcombinelut <- auxdat$stratcombinelut
+  unitltmin <- auxdat$unitltmin
+  
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
   
@@ -836,7 +838,7 @@ modGBpop <- function(popType = "VOL",
                        pltassgnid = pltassgnid, pltx = pltx,
                        adj = adj, ACI = ACI, 
                        plotlst = plotlst,  
-                       pwhereqry = pwhereqry, 
+                       #pwhereqry = pwhereqry, 
                        pltfromqry = pltfromqry, 
 	                     condid = condid, 
                        areawt = areawt, areawt2 = areawt2,
@@ -860,7 +862,7 @@ modGBpop <- function(popType = "VOL",
     dbqueriesWITH <- popcheck$dbqueriesWITH
     estfromqry <- popcheck$estfromqry
     ACI.filter <- popcheck$ACI.filter
-    areawtcase <- popcheck$areawtcase
+    adjcase <- popcheck$adjcase
 
     if (popType == "VOL") {
       treex <- popcheck$treex
@@ -911,7 +913,7 @@ modGBpop <- function(popType = "VOL",
     dbqueries <- popcheck$dbqueries
     dbqueriesWITH <- popcheck$dbqueriesWITH
     ACI.filter <- popcheck$ACI.filter
-    areawtcase <- popcheck$areawtcase
+    adjcase <- popcheck$adjcase
     sccmx <- popcheck$sccmx
 
     if (returndata) {
@@ -965,7 +967,7 @@ modGBpop <- function(popType = "VOL",
     dbqueries <- popcheck$dbqueries
     dbqueriesWITH <- popcheck$dbqueriesWITH
     ACI.filter <- popcheck$ACI.filter
-    areawtcase <- popcheck$areawtcase
+    adjcase <- popcheck$adjcase
     varadjP2VEG <- popcheck$varadjP2VEG
 
     if (returndata) {
@@ -1062,12 +1064,13 @@ modGBpop <- function(popType = "VOL",
                 cuniqueid = cuniqueid, condid = condid, 
                 sccmx = sccmx,
                 ACI.filter = ACI.filter,
-                areawt = areawt, areawt2 = areawt2, areawtcase = areawtcase,
+                areawt = areawt, areawt2 = areawt2, adjcase = adjcase,
                 dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH,
                 pltassgnx = pltassgnx, 
                 unitarea = unitarea, 
                 areavar = areavar, areaunits = areaunits, 
                 unitvar = unitvar, unitvars = unitvars, 
+                unitltmin = unitltmin,
                 strata = strata, stratalut = stratalut, 
                 strvar = strvar, strwtvar = strwtvar, 
                 plotsampcnt = plotsampcnt, condsampcnt = condsampcnt, 

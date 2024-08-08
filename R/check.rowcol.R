@@ -97,7 +97,7 @@ check.rowcol <-
     stop("invalid tuniqueid")
   }
   #ref_titles <- FIESTAutils::ref_titles
-  bytdom <- FALSE
+  bytdom=bypcdom <- FALSE
   seedclnm <- "<1"
 
   ##################################################################
@@ -200,7 +200,8 @@ check.rowcol <-
     ## Define pltcondvars
     #pltcondvars = unique(c(cuniqueid, condid, cvars2keep, domainlst))
     
-    returnlst <- list(bytdom = bytdom, domainlst = domainlst, 
+    returnlst <- list(bytdom = bytdom, bypcdom = bypcdom, 
+                      domainlst = domainlst, 
                       uniquerow = NULL, uniquecol = NULL, 
                       rowvar = rowvar, rowvarnm = rowvar, colvar = colvar, 
                       row.orderby = row.orderby, col.orderby = col.orderby,
@@ -285,6 +286,7 @@ check.rowcol <-
       ## Build fromqry for rowvar 
       ###############################################
       if (rowvar %in% pltcondflds) {
+        bypcdom <- TRUE
         rowisdb <- isdbc
         rowflds <- pltcondflds
         if (!rowisdb) {
@@ -755,6 +757,7 @@ check.rowcol <-
       
       ## Build fromqry for colvar 
       if (colvar %in% pltcondflds) {
+        bypcdom <- TRUE
         colisdb <- isdbc
         colflds <- pltcondflds
         if (!colisdb) {
@@ -1565,7 +1568,8 @@ check.rowcol <-
   
 
   returnlst <- list(pltcondvars = pltcondvars, 
-                    bytdom = bytdom, domainlst = domainlst, 
+                    bytdom = bytdom, bypcdom = bypcdom, 
+                    domainlst = domainlst, 
                     uniquerow = uniquerow, uniquecol = uniquecol, 
                     rowvar = rowvar, rowvarnm = rowvarnm, 
                     colvar = colvar, colvarnm = colvarnm,

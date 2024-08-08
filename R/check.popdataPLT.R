@@ -718,7 +718,6 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
 	      auxlutx <- pcheck.table(auxlut, conn = dbconn,
                       tabnm = auxtabnm, caption = paste(auxtabnm, " table?"),
 		                  tabqry = auxlutqry, returnsf = FALSE)
-			
 	      if (is.null(auxlutx) || nrow(auxlutx) == 0) {
 		      ## Check popevalid values in database	  
 	        sevalidqry <- paste0("SELECT DISTINCT ", evalidnm, 

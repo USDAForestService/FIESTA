@@ -418,7 +418,7 @@ modGBarea <- function(GBpopdat,
   dbqueriesWITH <- GBpopdat$dbqueriesWITH
   areawt <- GBpopdat$areawt
   areawt2 <- GBpopdat$areawt2
-  areawtcase <- GBpopdat$areawtcase
+  adjcase <- GBpopdat$adjcase
 
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
@@ -553,25 +553,28 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   ### Create query for cdomdat
   ###################################################################################
-  areawtnm <- "ESTIMATED_VALUE"
-  areawta. <- "pc."
+  estnm <- "ESTIMATED_VALUE"
+  estvara. <- "pc."
 
   ## Define select query for estimates
-  areawtvar <- paste0(areawta., areawt)
+  estvarqry <- paste0(estvara., areawt)
   if (!is.null(areawt2)) {
-    areawtvar <- areawt * areawt2
+    estvarqry <- areawt * areawt2
   }
   if (adj %in% c("samp", "plot")) {
-    areawtvar <- paste0(areawtvar, " * ", areawtcase)
+    estvarqry <- paste0(estvarqry, " * ", adjcase)
   }
-  areawtqry <- paste0("SUM(COALESCE(", areawtvar, ", 0)) AS ", areawtnm)
+  estvarqry <- paste0("SUM(COALESCE(", estvarqry, ", 0)) AS ", estnm)
 
   ## Build SELECT query
   byvars <- paste0("pc.", c(cuniqueid, condid))
   cdomdatvars <- c(byvars, paste0("pc.", domainlst))
+#  cdomdatselectqry <- 
+#    paste0("SELECT ", toString(cdomdatvars), ", 1 AS TOTAL, ",
+#           "\n    ", estvarqry)
   cdomdatselectqry <- 
-    paste0("SELECT ", toString(cdomdatvars), ", 1 AS TOTAL, ",
-           "\n    ", areawtqry)
+    paste0("SELECT ", toString(cdomdatvars), ", ",
+           "\n    ", estvarqry)
   
   ## Build cdomdat FROM query
   joinqry <- getjoinqry(joinid1 = cuniqueid, joinid2 = cuniqueid,
@@ -644,7 +647,7 @@ modGBarea <- function(GBpopdat,
     getGBestimates(esttype = esttype,
                    domdat = cdomdat,
                    cuniqueid = cuniqueid,
-                   estvar.name <- areawtnm,
+                   estvar.name <- estnm,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
@@ -676,7 +679,6 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   message("getting output...")
   estnm <- "est" 
-  source("C:\\_tsf\\_GitHub\\FIESTA\\R\\est.outtabs.R")
   tabs <- 
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 
@@ -754,13 +756,13 @@ modGBarea <- function(GBpopdat,
             out_layer <- outfn.rawtab
           }
           datExportData(rawtab, 
-                savedata_opts=list(outfolder=rawfolder, 
-                                    out_fmt=raw_fmt, 
-                                    out_dsn=raw_dsn, 
-                                    out_layer=out_layer,
-                                    overwrite_layer=overwrite_layer,
-                                    append_layer=append_layer,
-                                    add_layer=TRUE))
+                savedata_opts = list(outfolder = rawfolder, 
+                                     out_fmt = raw_fmt, 
+                                     out_dsn = raw_dsn, 
+                                     out_layer = out_layer,
+                                     overwrite_layer = overwrite_layer,
+                                     append_layer = append_layer,
+                                     add_layer = TRUE))
         }
       }
     }

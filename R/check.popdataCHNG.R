@@ -316,45 +316,8 @@ check.popdataCHNG <-
   
   ## Build ADJqry FROM statement (i.e., excluding nonresponse)
   adjwhereqry <- NULL
-  
   if (adj != "none") {
-    
-    ## Condition filters
-    #################################################################
-    
-    ## Filter for nonsampled conditions
-    ## (COND_STATUS_CD <> 5)
-    cstatusnm <- findnm("COND_STATUS_CD", condflds, returnNULL = TRUE)
-    if (is.null(cstatusnm)) {
-      message("COND_STATUS_CD is not in dataset... assuming all conditions are sampled")
-    } else {
-      ## Build where query to remove conditions that were not sampled
-      cstatus.filter <- paste0(conda., cstatusnm, " <> 5")
-      if (is.null(adjwhereqry)) {
-        adjwhereqry <- cstatus.filter
-      } else {
-        adjwhereqry <- paste0(adjwhereqry, 
-                              "\n   AND ", cstatus.filter)
-      }	
-    }
-    
-    ## If ACI, filter for nonsampled nonforest conditions 
-    ## (NF_COND_STATUS_CD is NULL or NF_COND_STATUS_CD <> 5)
-    if (ACI) {
-      cnfstatusnm <- findnm("NF_COND_STATUS_CD", condflds, returnNULL = TRUE)
-      if (is.null(cnfstatusnm)) {
-        message("NF_COND_STATUS_CD is not in dataset... assuming all nonforest conditions are sampled")
-      } else {
-        ## Build where query to remove nonforest conditions that were not sampled
-        cnfstatus.filter <- paste0("(", conda., cnfstatusnm, " is NULL or ", conda., cnfstatusnm, " <> 5)")
-        if (is.null(adjwhereqry)) {
-          adjwhereqry <- cnfstatus.filter
-        } else {
-          adjwhereqry <- paste0(adjwhereqry, 
-                                "\n   AND ", cnfstatus.filter)
-        }	
-      }
-    }
+    adjwhereqry <- getADJwherePLOT(condflds)
     
     ## Other filters for change
     #################################################################
@@ -651,11 +614,11 @@ check.popdataCHNG <-
     propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
     
     if (is.null(propbasisnm)) {
-      areawtcase <- paste0("\nCASE pc.", propvars['MACR'], " IS NULL", 
+      adjcase <- paste0("\nCASE pc.", propvars['MACR'], " IS NULL", 
                            " THEN ", adjvars['SUBP'], 
                            " ELSE ", adjvars['MACR'], " END")
     } else {
-      areawtcase <- paste0("\nCASE pc.", propbasisnm, 
+      adjcase <- paste0("\nCASE pc.", propbasisnm, 
                            " WHEN 'MACR' THEN ", adjvars['MACR'], 
                            " ELSE ", adjvars['SUBP'], " END")
     }
@@ -667,11 +630,11 @@ check.popdataCHNG <-
     propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
     
     if (is.null(propbasisnm)) {
-      areawtcase <- paste0("CASE pc.", propvars['MACR'], " IS NULL", 
+      adjcase <- paste0("CASE pc.", propvars['MACR'], " IS NULL", 
                            " THEN ", adjvars['SUBP'], 
                            " ELSE ", adjvars['MACR'], " END")
     } else {
-      areawtcase <- paste0("CASE pc.", propbasisnm, 
+      adjcase <- paste0("CASE pc.", propbasisnm, 
                            " WHEN 'MACR' THEN ", adjvars['MACR'], 
                            " ELSE ", adjvars['SUBP'], " END")
     }
@@ -684,7 +647,7 @@ check.popdataCHNG <-
                     pltcondflds = pltcondflds,
                     cuniqueid = cuniqueid, condid = condid, 
                     adjfactors = adjfactors,
-                    areawtcase = areawtcase,
+                    adjcase = adjcase,
                     adjvarlst = adjvars)
   
   if (returndata || savedata) {

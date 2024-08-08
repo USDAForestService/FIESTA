@@ -6,6 +6,7 @@ check.estdata <-
            pop_fmt = NULL, pop_dsn = NULL, 
            sumunits = FALSE, landarea = NULL, 
            ACI.filter = NULL, pcfilter = NULL, 
+           T1filter = NULL, T2filter = NULL,
 	         allin1 = FALSE, divideby = NULL, 
            estround = 6, pseround = 3, 
 	         addtitle = TRUE, returntitle = TRUE, 
@@ -88,7 +89,6 @@ check.estdata <-
     }
   }
 
-
   ## Build where statement with plot/condition filters
   ###########################################################################
   where.qry <- {}
@@ -109,9 +109,61 @@ check.estdata <-
       pcfiltertmp <- gsub(pcfiltervar, paste0("pc.", pcfiltervar), pcfiltertmp)
     }
     
-    pcfilter <- RtoSQL(pcfilter)
-    where.qry <- paste0("\nWHERE ", pcfilter)
+    pcfiltertmp <- RtoSQL(pcfiltertmp)
+    where.qry <- paste0("\nWHERE ", pcfiltertmp)
   }
+  
+  
+  ## Check T1filter (plot and cond filters) and add to where.qry
+  ###########################################################################
+  T1filter <- check.logic(pltcondflds, T1filter, syntax="SQL", filternm="T1filter")
+  if (!is.null(T1filter)) {
+    
+    ## Check to make sure variable in pcfilter are in pltcondflds
+    T1filtervars  <- unlist(lapply(T1filter, 
+            function(x) pltcondflds[sapply(pltcondflds, function(y) grepl(y, x))]))
+    if (length(T1filtervars) == 0) {
+      stop("T1filter is invalid: ", T1filter)
+    }
+    T1filtertmp <- T1filter
+    for (T1filtervar in T1filtervars) {
+      T1filtertmp <- gsub(T1filtervar, paste0("pc.", T1filtervar), T1filtertmp)
+    }
+    
+    T1filtertmp <- RtoSQL(T1filtertmp)
+    if (is.null(where.qry)) {
+      where.qry <- paste0("\nWHERE ", T1filtertmp)
+    } else {
+      where.qry <- paste0(where.qry, " AND ", T1filtertmp)
+    }
+  }
+  
+  
+  ## Check T1filter (plot and cond filters) and add to where.qry
+  ###########################################################################
+  T2filter <- check.logic(pltcondflds, T2filter, syntax="SQL", filternm="T2filter")
+  if (!is.null(T2filter)) {
+    
+    ## Check to make sure variable in pcfilter are in pltcondflds
+    T2filtervars  <- unlist(lapply(T2filter, 
+            function(x) pltcondflds[sapply(pltcondflds, function(y) grepl(y, x))]))
+    if (length(T2filtervars) == 0) {
+      stop("T2filter is invalid: ", T2filter)
+    }
+    T2filtertmp <- T2filter
+    for (T2filtervar in T2filtervars) {
+      T2filtertmp <- gsub(T2filtervar, paste0("ppc.", T2filtervar), T2filtertmp)
+    }
+    
+    T2filtertmp <- RtoSQL(T2filtertmp)
+    if (is.null(where.qry)) {
+      where.qry <- paste0("\nWHERE ", T2filtertmp)
+    } else {
+      where.qry <- paste0(where.qry, " AND ", T2filtertmp)
+    }
+  }
+  
+  
 
   ## Check landarea and add to where.qry
   #############################################################################
