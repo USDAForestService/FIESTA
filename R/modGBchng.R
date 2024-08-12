@@ -237,14 +237,13 @@ modGBchng <- function(GBpopdat,
                       table_opts = NULL, 
                       title_opts = NULL, 
                       savedata_opts = NULL, 
-                      gui = FALSE, 
                       ...){
 
   ###################################################################################
   ## DESCRIPTION: 
   ## Generates acre estimates by domain (and estimation unit)
   ###################################################################################
-
+  gui <- FALSE
   
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0 && is.null(GBpopdat)) {
@@ -479,7 +478,7 @@ modGBchng <- function(GBpopdat,
   rawfolder <- estdat$rawfolder
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
-  where.qry <- estdat$where.qry
+  pcwhereqry <- estdat$where.qry
   landarea.filter <- estdat$landarea.filter
 
   
@@ -507,7 +506,7 @@ modGBchng <- function(GBpopdat,
                  cvars2keep=c("PREV_PLT_CN","REMPER","PROP_BASIS",
 				                       "COND_STATUS_CD","CONDPROP_UNADJ", 
 							                 "COND_NONSAMPLE_REASN_CD"),
-                 whereqry = where.qry,
+                 whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -529,154 +528,28 @@ modGBchng <- function(GBpopdat,
   
 
   ###################################################################################
-  ### Create query for cdomdat
+  ### Get condition-level domain data
   ###################################################################################
-  areawtnm <- "ESTIMATED_VALUE"
-  areawta. <- "sccm."
-  sccmnm <- ifelse(popdatindb, sccmx, "sccmx")
-  
-  ## Add past landarea.filter to WHERE statement
-  if (!is.null(landarea.filter)) {
-    landarea.filterCHNG <- gsub("pc.", "ppc.", landarea.filter)
-    where.qry <- paste0(where.qry,
-                        "\n  AND ", landarea.filterCHNG)
-  }
-
-  ## Define select query for estimates
-  areawtvar <- paste0(areawta., areawt)
-  if (!is.null(areawt2)) {
-    areawtvar <- areawt * areawt2
-  }
-
-  ## Define select query for estimates
-  if (chngtype == "annual") {
-    areawtvar <- paste0(areawtvar, " / 4 / pc.REMPER")
-  } else {
-    areawtvar <- paste0(areawtvar, " / 4")
-  }
-  
-  if (adj %in% c("samp", "plot")) {
-    areawtvar <- paste0(areawtvar, " * ", 
-                        "\n    ", areawtcase)
-  }
-  
-  ## Define select query for estimates
-  if (chngtype == "annual") {
-    areawtqry <- paste0("SUM(COALESCE(", areawtvar, ", 0)) AS ", areawtnm)
-  } else {
-    areawtqry <- paste0("SUM(COALESCE(", areawtvar, ", 0)) AS ", areawtnm)
-  }
-  
-  if (is.null(where.qry)) {
-    whereCHNG.qry <- paste0(
-      "\nWHERE pc.CONDPROP_UNADJ IS NOT NULL",
-      "\n    AND ((sccm.SUBPTYP = 3 AND pc.PROP_BASIS = 'MACR') OR 
-              (sccm.SUBPTYP = 1 AND pc.PROP_BASIS = 'SUBP'))",
-      "\n    AND COALESCE(pc.COND_NONSAMPLE_REASN_CD, 0) = 0",
-      "\n    AND COALESCE(ppc.COND_NONSAMPLE_REASN_CD, 0) = 0")
-  } else {
-    whereCHNG.qry <- paste0(where.qry, 
-      "\n    AND pc.CONDPROP_UNADJ IS NOT NULL",
-      "\n    AND ((sccm.SUBPTYP = 3 AND pc.PROP_BASIS = 'MACR') OR 
-              (sccm.SUBPTYP = 1 AND pc.PROP_BASIS = 'SUBP'))",
-      "\n    AND COALESCE(pc.COND_NONSAMPLE_REASN_CD, 0) = 0",
-      "\n    AND COALESCE(ppc.COND_NONSAMPLE_REASN_CD, 0) = 0")
-    
-  }  
-
-  ## Build SELECT query
-  byvars <- paste0("pc.", c(cuniqueid, condid))
-  if (rowvar == "TOTAL") {
-    cdomdatvars <- "pc.TOTAL"
-    
-  } else if (colvar == "NONE") {
-    cdomdatvars <- c(paste0("ppc.", rowvar, " AS PREV_", rowvar), paste0("pc.", rowvar))
-    grpbyvars <- c(byvars, c(paste0("ppc.", rowvar), paste0("pc.", rowvar)))
-    colvar <- rowvar
-    col.orderby <- row.orderby
-    colvarnm <- rowvarnm
-    title.colvar <- title.rowvar
-    rowvar <- paste0("PREV_", rowvar)
-    
-    if (!is.null(row.orderby)) {
-      row.orderby <- paste0("PREV_", row.orderby)
-    }
-    rowvarnm <- paste0("PREV_", rowvarnm)
-    title.rowvar <- paste0("PREV_", title.rowvar)
-    grpvar <- c(rowvar, colvar)
-
-    uniquecol <- uniquerow
-    names(uniquerow) <- paste0("PREV_", names(uniquerow))
-    
-  } else {
-    cdomdatvars <- c(paste0("ppc.", rowvar, " AS PREV_", rowvar), paste0("pc.", colvar))
-    grpbyvars <- c(byvars, c(paste0("ppc.", rowvar), paste0("pc.", colvar)))
-    rowvar <- paste0("PREV_", rowvar)
-    
-    if (!is.null(row.orderby)) {
-      row.orderby <- paste0("PREV_", row.orderby)
-    }
-    rowvarnm <- paste0("PREV_", rowvarnm)
-    title.rowvar <- paste0("PREV_", title.rowvar)
-    title.colvar <- title.rowvar
-    grpvar <- c(rowvar, colvar)
-  }
-  cdomdatvars <- c(byvars, cdomdatvars)
-  cdomdatselectqry <- 
-    paste0("SELECT ", toString(cdomdatvars), ", 1 AS TOTAL, ",
-           "\n    ", areawtqry)
-  
-  ## Build cdomdat FROM query
-  joinqry <- getjoinqry(joinid1 = cuniqueid, joinid2 = cuniqueid,
-                        alias1 = "pltidsadj.", alias2 = "pc.")
-  
-  cdomdatfromqry <- 
-    paste0("\nFROM pltidsadj",
-           "\nJOIN pltcondx pc ", joinqry)
-  
-  cdomdatfromqry <- 
-    paste0(cdomdatfromqry, 
-           "\nJOIN pltcondx ppc ON (ppc.PLT_CN = pc.PREV_PLT_CN)",
-           "\nJOIN ", sccmnm, " sccm ON (sccm.plt_cn = pc.plt_cn 
-                          AND sccm.prev_plt_cn = ppc.plt_cn 
-                          AND sccm.condid = pc.condid 
-                          AND sccm.prevcond = ppc.condid)")
-  
-  ## Build cdomdat query
-  cdomdat.qry <- 
-    paste0(cdomdatselectqry, 
-           cdomdatfromqry,
-           whereCHNG.qry,
-           "\nGROUP BY ", toString(grpbyvars))
-  
-  #Run query for cdomdat
-  if (!popdatindb) {
-    cdomdat <- tryCatch(
-      sqldf::sqldf(cdomdat.qry, connection = NULL),
-      error = function(e) {
-              message("invalid cdomdat query...")
-              message(e,"\n")
-              return(NULL) })
-  } else {
-    ## Append WITH query
-    if (!is.null(pltcondxadjWITHqry)) {
-      cdomdat.qry <- paste0(pltcondxadjWITHqry,
-                           "\n-------------------------------------------",
-                           "\n", cdomdat.qry)
-      cdomdat <- tryCatch(
-        DBI::dbGetQuery(popconn, cdomdat.qry),
-        error = function(e) {
-                message("invalid cdomdat query...")
-                message(e,"\n")
-                return(NULL) })
-    }  
-  }
-  if (is.null(cdomdat) || nrow(cdomdat) == 0) {
-    message(cdomdat.qry)
-    return(NULL)
-  }
-  setkeyv(setDT(cdomdat), c(cuniqueid, condid)) 
-  
+  conddat <- 
+    check.condCHNG(areawt = areawt,
+                   areawt2 = areawt2,
+                   adj = adj,
+                   adjcase = adjcase,
+                   chngtype = chngtype,
+                   cuniqueid = cuniqueid, 
+                   condid = condid,
+                   rowvar = rowvar,
+                   colvar = colvar,
+                   popdatindb = popdatindb,
+                   popconn = popconn,
+                   pltcondx = pltcondx,
+                   pltidsadj = pltidsadj,
+                   pltcondxadjWITHqry = pltcondxadjWITHqry,
+                   pcwhereqry = pcwhereqry,
+                   landarea.filter = landarea.filter)
+  cdomdat <- conddat$cdomdat
+  cdomdatqry <- conddat$cdomdatqry
+  estnm <- conddat$estnm
  
 
   ###################################################################################
@@ -712,7 +585,9 @@ modGBchng <- function(GBpopdat,
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
-
+  
+print("TEST")
+print(head(cdomdat))
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
@@ -720,7 +595,7 @@ modGBchng <- function(GBpopdat,
     getGBestimates(esttype = esttype,
                    domdat = cdomdat,
                    cuniqueid = cuniqueid,
-                   estvar.name <- areawtnm,
+                   estvar.name <- estnm,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
@@ -737,7 +612,6 @@ modGBchng <- function(GBpopdat,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
                    col.add0 = col.add0)
-  
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest
   unit_colest <- estdat$unit_colest

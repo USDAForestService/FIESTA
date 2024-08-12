@@ -184,7 +184,7 @@ datSumTree <- function(tree = NULL,
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## Set global variables  
-  treex=seedx=cond.nonsamp.filter=meta=tvars2convert=
+  pltx=treex=seedx=cond.nonsamp.filter=meta=tvars2convert=
     ssumvarlst=cntvar=fname=tderivevars <- NULL
 
 
@@ -901,7 +901,7 @@ datSumTree <- function(tree = NULL,
                               "\n FROM ", condnm, ")")
       pltidsnm <- "pltids"
       pltidsa. <- "pltids."
-      pltidsid <- cuniqueid
+      pltidsid=pjoinid <- cuniqueid
     }
       
     if (!condinWITHqry) {
@@ -1577,7 +1577,6 @@ datSumTree <- function(tree = NULL,
       if (length(tderivevars) > 0) {
 	      twithSelect <- c(twithSelect, tderivevars)
   	  }
-
 	  }
     
 	  twithqry <- paste(twithqry, toString(paste0(talias., twithSelect)))	
@@ -1611,10 +1610,10 @@ datSumTree <- function(tree = NULL,
 	  } 
 	  if (!is.null(pltidsWITHqry)) {
 	    tjoinqry <- getjoinqry(tuniqueid, pjoinid, talias., "pltids.")
-	    twithfromqry <- paste0(tfromqry,
+	    twithfromqry <- paste0(twithfromqry,
 	                           "\n JOIN pltids ", tjoinqry)
 	  } else {
-	    twithfromqry <- tfromqry
+	    twithfromqry <- twithfromqry
 	  }
 	  
 	  ## WHERE statement - Woodland
@@ -1666,10 +1665,10 @@ datSumTree <- function(tree = NULL,
 	    } 
 	    if (!is.null(pltidsWITHqry)) {
 	      sjoinqry <- getjoinqry(tuniqueid, pjoinid, salias., "pltids.")
-	      swithfromqry <- paste0(sfromqry,
+	      swithfromqry <- paste0(swithfromqry,
 	                             "\n JOIN pltids ", sjoinqry)
 	    } else {
-	      swithfromqry <- sfromqry
+	      swithfromqry <- swithfromqry
 	    }
 	    
 	    ## WHERE statement - Woodland
@@ -1783,20 +1782,23 @@ datSumTree <- function(tree = NULL,
   ################################################################
   tfromqry <- paste0("\nFROM ", twithalias)
   
-  if (!is.null(pltidsnm)) {
+  if (bycond && !is.null(condnm)) {
+    tfromqry <- paste0("\nFROM ", condnm, " pc")
+    tjoinid <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "tdat.", conda.)
+  } else if (!is.null(pltidsnm)) {
     tfromqry <- paste0("\nFROM ", pltidsnm, " pltids")
-    
-    pltidsjoinqry <- getjoinqry(tuniqueid, pltidsid, "tdat.", pltidsa.)
-    tfromqry <- paste0(tfromqry, 
-                       "\nLEFT JOIN tdat ", pltidsjoinqry)
+    tjoinid <- getjoinqry(tuniqueid, pltidsid, "tdat.", pltidsa.)
+  } else if (!is.null(plotnm)) {
+    tfromqry <- paste0("\nFROM ", plotnm)
+    tjoinid <- getjoinqry(tuniqueid, pltidsid, "tdat.", pltidsa.)
+  } else {
+    tfromqry <- paste0("\nFROM ", twithalias)
   }
   
-  if (!is.null(bydomainlst) && !is.null(condnm)) {
-    cjoinid <- getjoinqry(c(cuniqueid, condid), c(cuniqueid, condid), conda., "tdat.")
-    tfromqry <- paste0(tfromqry, 
-                       "\nJOIN ", condnm, " pc ", cjoinid)
-  }
-  
+  ## Use LEFT JOIN for tdat to get all records, no data filled with 0
+  tfromqry <- paste0(tfromqry,
+                     "\nLEFT JOIN tdat ", tjoinid)
+
   
   ## Build query to summarize tree data
   ################################################################
@@ -1842,7 +1844,6 @@ datSumTree <- function(tree = NULL,
                    }
                 )
   }
-
   setkeyv(setDT(sumdat), pjoinid)
   
 

@@ -344,10 +344,10 @@ check.popdataCHNG <-
   
   
   ## 5.4. Build query for adjustment factors based on popType (ADJqry)
-  
+
   ## First, get query for summarizing CHNG sampled proportions
   sumpropqry <- sumpropCHNGqry(fromqry = fromqry, 
-                               whereqry = paste0("\n WHERE ", adjwhereqry),
+                               whereqry = adjwhereqry,
                                ACI = ACI,
                                selectvars = NULL,
                                SCHEMA. = SCHEMA.)
@@ -542,11 +542,11 @@ check.popdataCHNG <-
 
   ## 6.3. Build query for pltcondx
   pltcondx.qry <- paste0("SELECT ", cselectqry, ", ",
-                     "\n", pselectqry, ", 1 AS TOTAL",
+                     "\n", pselectqry,
                      pcfromqry,
                      "\n UNION",
                      " \n SELECT ", pcondselectqry, ", ",
-                     "\n", pplotselectqry, ", 1 AS TOTAL", 
+                     "\n", pplotselectqry, 
                      pcfromqry)
   dbqueries$pltcondx <- pltcondx.qry
   
@@ -573,7 +573,7 @@ check.popdataCHNG <-
     pltcondxqry <- paste0("WITH pltids AS ",
                         "\n(", pltidsqry, ")",
                         "\n", pltcondx.qry)
-  
+
     ## 6.1.4. Run final plot/cond query, including pltidsqry
     if (datindb) {
       pltcondx <- tryCatch(
@@ -590,6 +590,7 @@ check.popdataCHNG <-
                     message(e,"\n")
                     return(NULL) })
     }
+
     if (is.null(pltcondx) || nrow(pltcondx) == 0) {
       message(pltcondxqry)
       return(NULL)

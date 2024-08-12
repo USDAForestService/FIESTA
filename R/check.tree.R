@@ -11,7 +11,7 @@ check.tree <-
            bydomainlst = NULL,
 	         adjtree = FALSE, adjvar = "tadjfac", 
            pltassgn = NULL, adjTPA = 1, tderive = NULL, metric = FALSE, 
-	         ACI = FALSE, woodland = "Y", dbconn = NULL, pwithqry = NULL,
+	         ACI = FALSE, woodland = "Y", dbconn = NULL, pltidsWITHqry = NULL,
            pcwhereqry = NULL) {
 
   ###################################################################################
@@ -76,7 +76,7 @@ check.tree <-
                  seedonly = seedonly, 
                  woodland = woodland,
                  dbconn = dbconn, 
-                 pltidsWITHqry = pwithqry,
+                 pltidsWITHqry = pltidsWITHqry,
                  pcwhereqry = pcwhereqry)
     if (is.null(treedata)) return(NULL)
     tdomdat <- treedata$treedat

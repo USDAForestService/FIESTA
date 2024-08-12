@@ -496,13 +496,12 @@ modGBarea <- function(GBpopdat,
   rawfolder <- estdat$rawfolder
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
-  where.qry <- estdat$where.qry
+  pcwhereqry <- estdat$where.qry
 
 
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  #withqry = dbqueriesWITH$pltcondxWITH
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
@@ -522,7 +521,7 @@ modGBarea <- function(GBpopdat,
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  landarea = landarea, states = states, 
                  #cvars2keep = "COND_STATUS_CD",
-                 whereqry = where.qry,
+                 whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -548,61 +547,29 @@ modGBarea <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-
+  
   
   ###################################################################################
-  ### Create query for cdomdat
+  ### Get condition-level domain data
   ###################################################################################
-  estnm <- "ESTIMATED_VALUE"
-  estvara. <- "pc."
-
-  ## Define select query for estimates
-  estvarqry <- paste0(estvara., areawt)
-  if (!is.null(areawt2)) {
-    estvarqry <- areawt * areawt2
-  }
-  if (adj %in% c("samp", "plot")) {
-    estvarqry <- paste0(estvarqry, " * ", adjcase)
-  }
-  estvarqry <- paste0("SUM(COALESCE(", estvarqry, ", 0)) AS ", estnm)
-
-  ## Build SELECT query
-  byvars <- paste0("pc.", c(cuniqueid, condid))
-  cdomdatvars <- c(byvars, paste0("pc.", domainlst))
-#  cdomdatselectqry <- 
-#    paste0("SELECT ", toString(cdomdatvars), ", 1 AS TOTAL, ",
-#           "\n    ", estvarqry)
-  cdomdatselectqry <- 
-    paste0("SELECT ", toString(cdomdatvars), ", ",
-           "\n    ", estvarqry)
+  conddat <- 
+    check.cond(areawt = areawt,
+               areawt2 = areawt2,
+               adj = adj,
+               adjcase = adjcase,
+               cuniqueid = cuniqueid, 
+               condid = condid,
+               bydomainlst = domainlst,
+               popdatindb = popdatindb,
+               popconn = popconn,
+               pltcondx = pltcondx,
+               pltidsadj = pltidsadj,
+               pltcondxadjWITHqry = pltcondxadjWITHqry,
+               pcwhereqry = pcwhereqry)
+  cdomdat <- conddat$cdomdat
+  cdomdatqry <- conddat$cdomdatqry
+  estnm <- conddat$estnm
   
-  ## Build cdomdat FROM query
-  joinqry <- getjoinqry(joinid1 = cuniqueid, joinid2 = cuniqueid,
-                        alias1 = "pltidsadj.", alias2 = "pc.")
-  cdomdatfromqry <- 
-    paste0("\nFROM pltidsadj",
-           "\nLEFT JOIN pltcondx pc ", joinqry)
-  
-  ## Build cdomdat query
-  cdomdatqry <- 
-    paste0(cdomdatselectqry, 
-           cdomdatfromqry,
-           where.qry,
-           "\nGROUP BY ", toString(cdomdatvars))
-  
-  #Run query for cdomdat
-  if (!popdatindb) {
-    cdomdat <- setDT(sqldf::sqldf(cdomdatqry))
-  } else {
-    ## Append WITH query
-    if (!is.null(pltcondxadjWITHqry)) {
-      cdomdatqry <- paste0(pltcondxadjWITHqry,
-                           "\n-------------------------------------------",
-                           "\n", cdomdatqry)
-    }  
-    cdomdat <- setDT(DBI::dbGetQuery(popconn, cdomdatqry))
-  }
-  setkeyv(cdomdat, c(cuniqueid, condid))
   
 
   ###################################################################################

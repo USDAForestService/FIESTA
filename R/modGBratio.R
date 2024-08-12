@@ -333,13 +333,15 @@ modGBratio <- function(GBpopdat,
   }
   
   ## Set parameters
-  rowcol.total <- TRUE
   esttype <- "RATIO"
+  popType <- "VOL"
+  nonresp <- FALSE
+  substrvar <- FALSE
   parameters <- FALSE
   returnlst <- list()
-  rawdata <- TRUE
   row.addNA=col.addNA <- FALSE
-
+  rowcol.total <- TRUE
+  
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=tdom=estvar.name=
 		variable=estvard.name <- NULL
@@ -424,24 +426,26 @@ modGBratio <- function(GBpopdat,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  
-  list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
-	                "tuniqueid", "ACI.filter", "unitarea", "unitvar", "stratalut",
-                  "strvar", "plotsampcnt", "condsampcnt")
+  list.items <- c("pltcondx", "cuniqueid", "condid", 
+                  "treex", "tuniqueid", 
+                  "unitarea", "unitvar", "stratalut", "strvar",
+                  "plotsampcnt", "condsampcnt")
   GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
-
   if (is.null(GBpopdat)) return(NULL)
-  condx <- GBpopdat$condx
-  pltcondx <- GBpopdat$pltcondx	
+  pltidsadj <- GBpopdat$pltidsadj
+  pltcondx <- GBpopdat$pltcondx
+  pltcondflds <- GBpopdat$pltcondflds
+  cuniqueid <- GBpopdat$cuniqueid
+  condid <- GBpopdat$condid
   treex <- GBpopdat$treex
   seedx <- GBpopdat$seedx
   if (is.null(treex) && is.null(seedx)) {
-    stop("must include tree data for ratio estimates")
+    stop("must include tree data for tree estimates")
   }
-  cuniqueid <- GBpopdat$cuniqueid
-  condid <- GBpopdat$condid
   tuniqueid <- GBpopdat$tuniqueid
+  ACI <- GBpopdat$ACI
   ACI.filter <- GBpopdat$ACI.filter
+  pltassgnx <- GBpopdat$pltassgnx
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
   areaunits <- GBpopdat$areaunits
@@ -454,15 +458,37 @@ modGBratio <- function(GBpopdat,
   condsampcnt <- GBpopdat$condsampcnt
   states <- GBpopdat$states
   invyrs <- GBpopdat$invyrs
-  estvar.area <- GBpopdat$estvar.area
   stratcombinelut <- GBpopdat$stratcombinelut
   strwtvar <- GBpopdat$strwtvar
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
   strata <- GBpopdat$strata
+  popdatindb <- GBpopdat$popdatindb
   pop_fmt <- GBpopdat$pop_fmt
   pop_dsn <- GBpopdat$pop_dsn
-
+  pop_schema <- GBpopdat$pop_schema
+  popconn <- GBpopdat$popconn
+  dbqueries <- GBpopdat$dbqueries
+  dbqueriesWITH <- GBpopdat$dbqueriesWITH
+  adjcase <- GBpopdat$adjcase
+  
+  if (popdatindb) {
+    if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
+      if (!is.null(pop_dsn)) {
+        if (pop_fmt == "sqlite") {
+          popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
+        }
+      } else {
+        stop("invalid database connection")
+      }
+    }
+    #pltcondx <- dbqueries$pltcondx
+    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
+    pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
+  } else {
+    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
+  }
+  
 
   ########################################
   ## Check area units
@@ -480,72 +506,101 @@ modGBratio <- function(GBpopdat,
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pop_fmt=pop_fmt, pop_dsn=pop_dsn, 
-                pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid, 
-                treex=treex, seedx=seedx, estseed=estseed, woodland=woodland,
-				        sumunits=sumunits, landarea=landarea, 
-				        ACI.filter=ACI.filter, pcfilter=pcfilter, 
-                allin1=allin1, estround=estround, pseround=pseround, 
-                divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-                rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
-                outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-                overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
-                outfn.date=outfn.date, append_layer=append_layer, 
-                raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+  estdat <- 
+    check.estdata(esttype = esttype, 
+                  popType = popType,
+                  popdatindb = popdatindb, 
+                  popconn = popconn,
+                  pltcondflds = pltcondflds,
+                  total = totals,
+                  pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
+                  sumunits = sumunits, 
+                  landarea = landarea,
+                  ACI.filter = ACI.filter, 
+                  pcfilter = pcfilter,
+                  allin1 = allin1, divideby = divideby,
+                  estround = estround, pseround = pseround,
+                  addtitle = addtitle, returntitle = returntitle, 
+                  rawonly = rawonly, 
+                  savedata = savedata, 
+                  outfolder = outfolder, 
+                  overwrite_dsn = overwrite_dsn, 
+                  overwrite_layer = overwrite_layer, 
+                  outfn.pre = outfn.pre, outfn.date = outfn.date, 
+                  append_layer = append_layer, 
+                  raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+                  gui = gui)
   if (is.null(estdat)) return(NULL)
-  pltcondf <- estdat$pltcondf
-  cuniqueid <- estdat$cuniqueid
-  treef <- estdat$treef
-  seedf <- estdat$seedf
-  tuniqueid <- estdat$tuniqueid
-  estseed <- estdat$estseed
-  woodland <- estdat$woodland
+  esttype <- estdat$esttype
   sumunits <- estdat$sumunits
+  totals <- estdat$totals
   landarea <- estdat$landarea
   allin1 <- estdat$allin1
+  divideby <- estdat$divideby
   estround <- estdat$estround
   pseround <- estdat$pseround
-  divideby <- estdat$divideby
   addtitle <- estdat$addtitle
   returntitle <- estdat$returntitle
-  rawdata <- estdat$rawdata
   rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
   overwrite_layer <- estdat$overwrite_layer
+  append_layer = estdat$append_layer
+  rawfolder <- estdat$rawfolder
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
-  rawfolder <- estdat$rawfolder
-  whereqry <- estdat$whereqry
-  tfilter <- estdat$tfilter
-
-  if ("STATECD" %in% names(pltcondf)) {
-    states <- pcheck.states(sort(unique(pltcondf$STATECD)))
-  }
-  if ("INVYR" %in% names(pltcondf)) {
-    invyr <- sort(unique(pltcondf$INVYR))
-  }
-
+  pcwhereqry <- estdat$where.qry
+  
+  ###################################################################################
+  ## Check parameter inputs and tree filters
+  ###################################################################################
+  estdatVOL <- 
+    check.estdataVOL(esttype = esttype,
+                     popdatindb = popdatindb,
+                     popconn = popconn,
+                     cuniqueid = cuniqueid, condid = condid,
+                     treex = treex, seedx = seedx,
+                     tuniqueid = tuniqueid,
+                     estseed = estseed,
+                     woodland = woodland,
+                     TPA = TPA,
+                     tfilter = tfilter,
+                     gui = gui)
+  treex <- estdatVOL$treex
+  treeflds <- estdatVOL$treeflds
+  tuniqueid <- estdatVOL$tuniqueid
+  estseed <- estdatVOL$estseed
+  woodland <- estdatVOL$woodland
+  
+  seedx <- estdatVOL$seedx
+  seedflds <- estdatVOL$seedflds
+  
+  
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
-                    treef=treef, seedf=seedf,
-	                condf=pltcondf, cuniqueid=cuniqueid, 
-	                tuniqueid=tuniqueid, estseed=estseed, 
-	                rowvar=rowvar, colvar=colvar, 
-	                row.FIAname=row.FIAname, col.FIAname=col.FIAname,
- 	                row.orderby=row.orderby, col.orderby=col.orderby, 
-	                row.add0=row.add0, col.add0=col.add0, 
-	                title.rowvar=title.rowvar, title.colvar=title.colvar, 
-	                rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-					        rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-                  landarea=landarea, states=states, 
-					        whereqry = whereqry, tfilter = tfilter, 
-					        cvars2keep="COND_STATUS_CD")
-  treef <- rowcolinfo$treef
-  seedf <- rowcolinfo$seedf
-  condf <- rowcolinfo$condf
+  #withqry = dbqueriesWITH$pltcondxWITH
+  rowcolinfo <- 
+    check.rowcol(esttype = esttype, 
+                 popType = popType,
+                 popdatindb = popdatindb,
+                 popconn = popconn,
+                 pltcondx = pltcondx,
+                 pltcondflds = pltcondflds,
+                 withqry = pltcondxWITHqry,
+                 cuniqueid = cuniqueid, condid = condid,
+                 rowvar = rowvar, colvar = colvar, 
+                 row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
+                 row.orderby = row.orderby, col.orderby = col.orderby, 
+                 row.add0 = row.add0, col.add0 = col.add0, 
+                 title.rowvar = title.rowvar, title.colvar = title.colvar, 
+                 rowlut = rowlut, collut = collut, 
+                 rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
+                 rowgrpord = rowgrpord, title.rowgrp = NULL,
+                 landarea = landarea, states = states, 
+                 #cvars2keep = "COND_STATUS_CD",
+                 whereqry = pcwhereqry,
+                 gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
@@ -561,13 +616,81 @@ modGBratio <- function(GBpopdat,
   title.colvar <- rowcolinfo$title.colvar
   rowgrpnm <- rowcolinfo$rowgrpnm
   title.rowgrp <- rowcolinfo$title.rowgrp
-  bytdom <- rowcolinfo$bytdom
-  tdomvar <- rowcolinfo$tdomvar
-  tdomvar2 <- rowcolinfo$tdomvar2
   grpvar <- rowcolinfo$grpvar
-  rm(rowcolinfo) 
-
-  if (rowvar == "TOTAL") rowcol.total <- TRUE
+  bytdom <- rowcolinfo$bytdom
+  bypcdom <- rowcolinfo$bypcdom
+  #rm(rowcolinfo)
+  
+  ## Generate a uniquecol for estimation units
+  if (!sumunits && colvar == "NONE") {
+    uniquecol <- data.table(unitarea[[unitvar]])
+    setnames(uniquecol, unitvar)
+    uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
+  }
+  
+  ###############################################################################
+  ### Get estimation data from tree table
+  ###############################################################################
+  adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
+  if (popdatindb) {
+    pltidsWITHqry <- ifelse(bypcdom, dbqueriesWITH$pltcondxadjWITH, dbqueriesWITH$pltidsadjWITH)
+  } else {
+    pltidsWITHqry <- NULL
+  }
+  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTree.R")
+  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.tree.R")
+  treedat <- 
+    check.tree(treex = treex, 
+               seedx = seedx, 
+               estseed = estseed,
+               bycond = TRUE, 
+               condx = pltcondx, 
+               tuniqueid = tuniqueid, cuniqueid = cuniqueid, 
+               esttype = esttype, 
+               ratiotype = ratiotype,
+               estvarn = estvar, 
+               estvarn.filter = estvar.filter, 
+               esttotn = TRUE, 
+               bydomainlst = domainlst,
+               adjtree = adjtree, 
+               metric = metric, 
+               woodland = woodland,
+               dbconn = popconn,
+               pltidsWITHqry = pltidsWITHqry,
+               pcwhereqry = pcwhereqry,
+               bytdom = bytdom,
+               gui = gui)
+  if (is.null(treedat)) return(NULL) 
+  tdomdat <- treedat$tdomdat
+  estvar <- treedat$estvar
+  estvar.name <- treedat$estvar.name
+  estvar.filter <- treedat$estvar.filter
+  tdomvarlst <- treedat$tdomvarlst
+  estunits <- treedat$estunits
+  treeqry <- treedat$treeqry
+  
+  
+  if (ratiotype == "PERACRE") {
+    ###################################################################################
+    ### Get condition-level domain data
+    ###################################################################################
+    conddat <- 
+      check.cond(areawt = areawt,
+                 areawt2 = areawt2,
+                 adjcase = adjcase,
+                 cuniqueid = cuniqueid, 
+                 condid = condid,
+                 domainlst = domainlst,
+                 popdatindb = popdatindb,
+                 popconn = popconn,
+                 pltcondx = pltcondx,
+                 pltidsadj = pltidsadj,
+                 pltcondxadjWITHqry = pltcondxadjWITHqry,
+                 pcwhereqry = pcwhereqry)
+    cdomdat <- conddat$cdomdat
+    cdomdatqry <- conddat$cdomdatqry
+    
+  }
   
   #####################################################################################
   ### Get estimation data from tree table
@@ -586,10 +709,10 @@ modGBratio <- function(GBpopdat,
   tdomdat <- treedat$tdomdat
 
   ## Merge tdomdat with condx
-  xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
-  condx <- xchk$tab1
+  xchk <- check.matchclass(pltidsadj, tdomdat, cuniqueid)
+  pltidsadj <- xchk$tab1
   tdomdat <- xchk$tab2  
-  tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
+  tdomdat <- merge(pltidsadj, tdomdat, cuniqueid, condid)
  
   if (!is.null(tdomvar)) {
     ## Merge condf with condx
