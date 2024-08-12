@@ -130,9 +130,7 @@ check.condCHNG <- function(areawt, areawt2,
            cdomdatfromqry,
            pcwhereqry,
            "\nGROUP BY ", toString(grpbyvars))
-print("XXXXXXXXX")
-message(cdomdat.qry)
-print("OOO")
+
   #Run query for cdomdat
   if (!popdatindb) {
     cdomdat <- tryCatch(
