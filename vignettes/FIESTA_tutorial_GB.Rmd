@@ -499,7 +499,7 @@ The following estimates match output from [EVALIDator](https://apps.fs.usda.gov/
 area1.1 <- modGBarea(
     GBpopdat = GBpopdat,      # pop - population calculations for WY, post-stratification
     landarea = "FOREST",      # est - forest land filter
-    sumunits = TRUE,          # est - sum estimation units to population
+    sumunits = TRUE          # est - sum estimation units to population
     )
 
 ```
