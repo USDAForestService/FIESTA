@@ -296,7 +296,7 @@ spExtractPoly <- function(xyplt,
     }
   }
   
-  # check ncores arg
+  # check ncores argument
   if (!is.null(ncores)) {
     if (!isNamespaceLoaded('parallel')) {
       stop("ncores > 1 requires 'parallel' namespace.")
