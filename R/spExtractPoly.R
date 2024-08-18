@@ -311,7 +311,7 @@ spExtractPoly <- function(xyplt,
         message("ncores is greater than number of available cores")
         ncores <- nbrcores
       }
-      message("Using ", ncores, " cores...")
+      message("Using ", nbrcores, " cores...")
     }
   } else {
     ncores <- 1
