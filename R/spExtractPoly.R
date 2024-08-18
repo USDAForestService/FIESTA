@@ -212,7 +212,7 @@ spExtractPoly <- function(xyplt,
 		warn=paste(xy.uniqueid, "not in spplt"), stopifnull=TRUE)
   }
 
-  ## Verify polygons
+  ## Verify polygons 
   ########################################################
   if (!is.null(polyvlst) && any(class(polyvlst) != "list")) {
     if ("sf" %in% class(polyvlst) || (methods::canCoerce(polyvlst, "sf"))) {
