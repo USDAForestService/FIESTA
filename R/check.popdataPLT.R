@@ -149,7 +149,7 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
   ## If pltassgn is a data.frame, import the plot table as data.frame R object.
   if (!is.null(pltassgnx) && is.data.frame(pltassgn) && !is.data.frame(pltx)) {	  
     if (!is.null(plotnm)) {
-      pltx <- pcheck.table(plt, conn = dbconn, 
+      pltx <- pcheck.table(plotnm, conn = dbconn, 
                            tabnm = plotnm, returnsf = FALSE)
       plotnm <- "pltx"
       pltflds <- names(pltx)
@@ -452,7 +452,6 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
   ##################################################################################
   popFilterqry <- getpopFilterqry(popType = popType, 
                                 popFilter = popFilter, 
-                                pfromqry = pfromqry,
                                 pltfromqry = pltfromqry,
                                 plotnm = plotnm,
                                 pltassgnnm = pltassgnnm,
@@ -482,7 +481,111 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
   ppsanm <- popFilterqry$ppsanm
   POP_PLOT_STRATUM_ASSGN <- popFilterqry$POP_PLOT_STRATUM_ASSGN
   plotsampcnt = popFilterqry$plotsampcnt
+  
+  
+  
+  ## 3.10. Check PLOT_STATUS_CD and generate table with number of plots
+  ########################################################################
+  pstatusvars <- c("PLOT_STATUS_CD", "PSTATUSCD")
+  pstatuschk <- unlist(sapply(pstatusvars, findnm, pflds, returnNULL=TRUE))
+  if (!is.null(pstatuschk)) {
+    ref_plot_status_cd <- ref_codes[ref_codes$VARIABLE == "PLOT_STATUS_CD", ]
+    if (length(pstatuschk) > 1) {
+      pstatuscdnm <- pstatuschk[1]
+    } else {
+      pstatuscdnm <- pstatuschk
+    }  
+    
+    ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
+    plotsampcntqry <- paste0(
+      "SELECT p.", pstatuscdnm, ", COUNT(*) AS NBRPLOTS", 
+      pltfromqry, 
+      pwhereqry, 
+      "\nGROUP BY p.", pstatuscdnm,
+      "\nORDER BY p.", pstatuscdnm)
+    
+    if (pltaindb) {      
+      plotsampcnt <- tryCatch(
+        DBI::dbGetQuery(dbconn, plotsampcntqry),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
+    } else {
+      plotsampcnt <- tryCatch(
+        sqldf::sqldf(plotsampcntqry, connection = NULL),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
+    }
+    
+    if (is.null(plotsampcnt)) {
+      message("invalid plotsampcnt query")
+      message(plotsampcntqry)
+    }
+    
+    ## create data frame of plot counts
+    plotsampcnt <-
+      cbind(PLOT_STATUS_NM = ref_plot_status_cd[match(plotsampcnt$PLOT_STATUS_CD,
+                                                      ref_plot_status_cd$VALUE), "MEANING"], plotsampcnt)
+  }						  
+ 
 
+  ## If ACI, check NF_PLOT_STATUS_CD and generate table with number of plots
+  ##########################################################################
+  if (popFilter$ACI) {
+    nfpstatusvars <- c("NF_PLOT_STATUS_CD", "PSTATUSNF")
+    nfpstatuschk <- unlist(sapply(nfpstatusvars, findnm, pflds, returnNULL=TRUE))
+    if (!is.null(nfpstatuschk)) {
+      ref_nf_plot_status_cd <- ref_codes[ref_codes$VARIABLE == "NF_PLOT_STATUS_CD", ]
+      if (length(nfpstatuschk) > 1) {
+        nfpstatuscdnm <- nfpstatuschk[1]
+      } else {
+        nfpstatuscdnm <- nfpstatuschk
+      }  
+      
+      ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
+      nfplotsampcntqry <- paste0(
+        "SELECT p.", nfpstatuscdnm, ", COUNT(*) AS NBRPLOTS", 
+        pltfromqry, 
+        pwhereqry,
+        "\nGROUP BY p.", nfpstatuscdnm,
+        "\nORDER BY p.", nfpstatuscdnm)
+      
+      if (pltaindb) {      
+        nfplotsampcnt <- tryCatch(
+          DBI::dbGetQuery(dbconn, nfplotsampcntqry),
+          error = function(e) {
+            message(e,"\n")
+            return(NULL) })
+      } else {
+        nfplotsampcnt <- tryCatch(
+          sqldf::sqldf(nfplotsampcntqry, connection = NULL),
+          error = function(e) {
+            message(e,"\n")
+            return(NULL) })
+      }
+      if (is.null(plotsampcnt)) {
+        message("invalid plotsampcnt query")
+        message(plotsampcntqry)
+      }
+      
+      ## create data frame of nonforest plot counts
+      nfplotsampcnt <- nfplotsampcnt[!is.na(nfplotsampcnt$NF_PLOT_STATUS_CD), ]
+      if (nrow(nfplotsampcnt) > 0) {
+        nfplotsampcnt <-
+          cbind(NF_PLOT_STATUS_NM = ref_nf_plot_status_cd[match(nfplotsampcnt$NF_PLOT_STATUS_CD,
+                                                                ref_nf_plot_status_cd$VALUE), "MEANING"], nfplotsampcnt)
+        ## Append to plotsampcnt
+        if (!is.null(plotsampcnt)) {
+          plotsampcnt <- rbindlist(list(plotsampcnt, nfplotsampcnt), use.names=FALSE)
+        } else {
+          plotsampcnt <- nfplotsampcnt
+        }
+        
+      }        
+    }
+  }
+  
 
   ##################################################################################
   ## 9. Get estimation unit(s) (unitvars) values
@@ -829,11 +932,11 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
   }
 
   ## Build select for pltassgnx
-  pltassgnselectqry <- paste0("SELECT ",
+  pltassgn_selectqry <- paste0("SELECT ",
                               toString(pltassgnselectvars))
 
   ## Build query for pltassgnx
-  pltassgnxqry <- paste0(pltassgnselectqry, 
+  pltassgnxqry <- paste0(pltassgn_selectqry, 
                          pltfromqry,
                          pwhereqry)
   if (pltaindb) {      
@@ -842,6 +945,35 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
 	  pltassgnx <- data.table(sqldf::sqldf(pltassgnxqry, connection = NULL))
   }
   setkeyv(pltassgnx, pltassgnid)
+  
+  
+  
+  ######################################################################################
+  ## 13. Get plot counts
+  ######################################################################################
+
+  ## Build select for plot counts
+  pltcnt_grpbyvars <- toString(paste0(pltassgn., unitvars))
+  pltcnt_selectqry <- paste0(
+      "\nSELECT ", pltcnt_grpbyvars, ", COUNT(*) NBRPLOTS")
+  if (!is.null(pstatuscdnm)) {    
+    pltcnt_selectqry <- paste0(pltcnt_selectqry, ", ",
+      "\n  SUM(CASE WHEN p.PLOT_STATUS_CD == 1 THEN 1 ELSE 0 END) AS FOREST,",
+      "\n  SUM(CASE WHEN p.PLOT_STATUS_CD == 2 THEN 1 ELSE 0 END) AS NONFOREST")
+  }  
+    
+
+  ## Build query for plot counts
+  plotunitcntqry <- paste0(pltcnt_selectqry, 
+                        pltfromqry,
+                        pwhereqry,
+                        "\nGROUP BY ", pltcnt_grpbyvars,
+                        "\nORDER BY ", pltcnt_grpbyvars)
+  if (pltaindb) {      
+    plotunitcnt <- DBI::dbGetQuery(dbconn, plotunitcntqry)
+  } else {
+    plotunitcnt <- sqldf::sqldf(plotunitcntqry, connection = NULL)
+  }
   
 
   #############################################################################
@@ -856,7 +988,7 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
 		    unitvar=unitvar, unitarea=unitareax, unitvar2=unitvar2, areavar=areavar, 
 		    areaunits=areaunits, unit.action=unit.action, ACI=ACI, 
  		    P2POINTCNT=as.data.frame(P2POINTCNT), unitlevels=unitlevels, 
-		    plotsampcnt=as.data.frame(plotsampcnt),  
+		    plotsampcnt=as.data.frame(plotsampcnt), plotunitcnt = plotunitcnt,
 		    nonsamp.pfilter=nonsamp.pfilter, POP_PLOT_STRATUM_ASSGN=POP_PLOT_STRATUM_ASSGN,
 		    states=states, invyrs=invyrs, pltaindb=pltaindb, datindb=datindb, 
 		    dbconn=dbconn)

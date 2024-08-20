@@ -28,6 +28,7 @@
 #' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.
 #' @param AOIonly Logical. If TRUE, and there is an AOI (1/0) attribute in the
 #' population data, only AOI=1 are used for estimation.
+#' @param pfilter String. Logical filter for plot or pltassgn.
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for population
 #' data filters.
@@ -48,6 +49,7 @@ popFilters <- function(evalid = NULL,
                        intensity = NULL,
                        ACI = FALSE,
                        AOIonly = FALSE,
+                       pfilter = NULL,
                        ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]

@@ -765,6 +765,7 @@ modGBpop <- function(popType = "VOL",
   adjbyvars <- pltcheck$adjbyvars
   pltfromqry <- pltcheck$pltfromqry
   pwhereqry <- pltcheck$pwhereqry
+  plotunitcnt <- pltcheck$plotunitcnt
   
   
   if (ACI) {
@@ -1075,7 +1076,8 @@ modGBpop <- function(popType = "VOL",
                 strvar = strvar, strwtvar = strwtvar, 
                 plotsampcnt = plotsampcnt, condsampcnt = condsampcnt, 
                 states = states, invyrs = invyrs, 
-                adj = adj, P2POINTCNT = P2POINTCNT))
+                adj = adj, P2POINTCNT = P2POINTCNT,
+                plotunitcnt = plotunitcnt))
   
   if (popType == "VOL") {
     if (!is.null(treex)) {

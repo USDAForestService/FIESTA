@@ -1,11 +1,10 @@
 getpopFilterqry <- function(popType, 
                             popFilter,
-                            pfromqry,
                             pltfromqry,
                             plotnm,
                             pltassgnnm,
                             pflds, 
-                            pltassgnflds,
+                            pltassgnflds = NULL,
                             puniqueid, 
                             pltassgn., 
                             plt.,
@@ -13,9 +12,9 @@ getpopFilterqry <- function(popType,
                             dbTabs = dbTables(plot_layer = tabs$plt),
                             datindb,
                             pltaindb,
-                            pltassgnx,
-                            pltx,
                             selectpvars,
+                            pltassgnx = NULL,
+                            pltx = NULL,
                             projectid = NULL,
                             SCHEMA. = "",
                             chkvalues = FALSE,
@@ -29,19 +28,34 @@ getpopFilterqry <- function(popType,
   syntax <- "SQL"
   subcycle99 <- FALSE
   
-  getjoinqry <- function (joinid1, joinid2, alias1 = "p.", alias2 = "plta.") {
-    joinqry <- "ON ("
-    for (i in 1:length(joinid1)) {
-      joinqry <- paste0(joinqry, alias1, joinid1[i], " = ", alias2, 
-                        joinid2[i])
-      if (i == length(joinid1)) {
-        joinqry <- paste0(joinqry, ")")
-      }
-      else {
-        joinqry <- paste(joinqry, "AND ")
-      }
+#  getjoinqry <- function (joinid1, joinid2, alias1 = "p.", alias2 = "plta.") {
+#    joinqry <- "ON ("
+#    for (i in 1:length(joinid1)) {
+#      joinqry <- paste0(joinqry, alias1, joinid1[i], " = ", alias2, 
+#                        joinid2[i])
+#      if (i == length(joinid1)) {
+#        joinqry <- paste0(joinqry, ")")
+#      }
+#      else {
+#        joinqry <- paste(joinqry, "AND ")
+#      }
+#    }
+#    return(joinqry)
+#  }
+  
+  ## Check states
+  if (popFilter$evalCur && is.null(popFilter$states) && !is.null(pltassgnflds)) {
+    statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
+    states.qry <- paste0(
+      "\nSELECT DISTINCT ", statenm,
+      "\nFROM ", pltassgnnm)
+    
+    if (pltaindb) {
+      states <- DBI::dbGetQuery(dbconn, states.qry)[[1]]
+    } else {
+      states <- sqldf::sqldf(states.qry)[[1]]
     }
-    return(joinqry)
+    popFilter$states <- states
   }
   
   ##################################################################################
@@ -134,10 +148,10 @@ getpopFilterqry <- function(popType,
       evalida. <- ifelse(evalidnm %in% ppsaflds, ppsa., plt.)
       pltfromqry <- paste0(
 	        pltfromqry, 
-            "\nJOIN ", ppsanm, " ppsa ON (", ppsa., "PLT_CN = ", plt., puniqueid, ")")
-      pfromqry <- paste0(
-	        pfromqry, 
-            "\nJOIN ", ppsanm, " ppsa ON (", ppsa., "PLT_CN = ", plt., puniqueid, ")")
+            "\n JOIN ", ppsanm, " ppsa ON (", ppsa., "PLT_CN = ", plt., puniqueid, ")")
+#      pfromqry <- paste0(
+#	        pfromqry, 
+#            "\n JOIN ", ppsanm, " ppsa ON (", ppsa., "PLT_CN = ", plt., puniqueid, ")")
     } else {
       evalida. <- ifelse(evalidnm %in% pltassgnflds, pltassgn., plt.)	  
     }
@@ -226,7 +240,7 @@ getpopFilterqry <- function(popType,
       }
     }
 	
-	## 3.5. If P2VEG Plots, remove plots that have no sampled P2VEG data
+	  ## 3.5. If P2VEG Plots, remove plots that have no sampled P2VEG data
     ######################################################################################
     if (popType == "P2VEG") {
       p2vegstatusnm <- findnm("P2VEG_SAMPLING_STATUS_CD", pflds, returnNULL = TRUE)
@@ -281,7 +295,7 @@ getpopFilterqry <- function(popType,
       }
     }
   }
- 
+
   ## 3.7. Check invyrs and add to where query. 
   ############################################################################
   if (!is.null(popFilter$invyrs)) {
@@ -360,7 +374,7 @@ getpopFilterqry <- function(popType,
 #      pltidsqry <- paste0(pltidsqry, pwhereqry)
 #    }
   }   
-  
+
   ## 3.9 Check INTENSITY and add to where query.
   ########################################################################
   if (!is.null(popFilter$intensity)) { 	   
@@ -408,52 +422,16 @@ getpopFilterqry <- function(popType,
     message("PLOT_STATUS_CD not in dataset.. assuming all plots are at least ",
             "partially sampled")
   } else {
-    ref_plot_status_cd <- ref_codes[ref_codes$VARIABLE == "PLOT_STATUS_CD", ]
     if (length(pstatuschk) > 1) {
       pstatuscdnm <- pstatuschk[1]
     } else {
       pstatuscdnm <- pstatuschk
     }  
-
-    ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
-    plotsampcntqry <- paste0(
-	     "SELECT p.", pstatuscdnm, ", COUNT(*) AS NBRPLOTS", 
-          pltfromqry, 
-          pwhereqry, 
-          "\nGROUP BY p.", pstatuscdnm,
-          "\nORDER BY p.", pstatuscdnm)
-
-    if (pltaindb) {      
-      plotsampcnt <- tryCatch(
-                 DBI::dbGetQuery(dbconn, plotsampcntqry),
-                     error = function(e) {
-                     message(e,"\n")
-                     return(NULL) })
-    } else {
-      plotsampcnt <- tryCatch(
-                 sqldf::sqldf(plotsampcntqry, connection = NULL),
-                     error = function(e) {
-                     message(e,"\n")
-                     return(NULL) })
-    }
-
-    if (is.null(plotsampcnt)) {
-      message("invalid plotsampcnt query")
-      message(plotsampcntqry)
-    }
-    plotsampcnt <-
-      cbind(PLOT_STATUS_NM = ref_plot_status_cd[match(plotsampcnt$PLOT_STATUS_CD,
-            ref_plot_status_cd$VALUE), "MEANING"], plotsampcnt)
-    
-
     ## Create nonsamp.pfilter
     if (!is.null(pstatuscdnm) && (is.null(nonsamp.pfilter) || nonsamp.pfilter == "")) {
       nonsamp.pfilter <- paste0(plt., "PLOT_STATUS_CD != 3")
+      message("removing nonsampled forest plots...")
     }
-    nbrnonsampled <- plotsampcnt$NBRPLOTS[plotsampcnt$PLOT_STATUS_CD == 3]
-    if (length(nbrnonsampled) > 0) {
-      message("removing ", nbrnonsampled, " nonsampled forest plots")
-    }						  
   } 
 
   ## If ACI, check NF_PLOT_STATUS_CD and generate table with number of plots
@@ -464,66 +442,22 @@ getpopFilterqry <- function(popType,
     if (is.null(nfpstatuschk)) {
       message("NF_PLOT_STATUS_CD not in dataset.. assuming all ACI nonforest plots are at least ",
               "partially sampled")
-    } else {  
-      ref_nf_plot_status_cd <- ref_codes[ref_codes$VARIABLE == "NF_PLOT_STATUS_CD", ]
+    } else {
       if (length(nfpstatuschk) > 1) {
         nfpstatuscdnm <- nfpstatuschk[1]
       } else {
         nfpstatuscdnm <- nfpstatuschk
       }  
-      
-      ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
-      nfplotsampcntqry <- paste0(
-	       "SELECT p.", nfpstatuscdnm, ", COUNT(*) AS NBRPLOTS", 
-            pltfromqry, 
-            pwhereqry,
-            "\nGROUP BY p.", nfpstatuscdnm,
-            "\nORDER BY p.", nfpstatuscdnm)
-            
-      if (pltaindb) {      
-        nfplotsampcnt <- tryCatch(
-                    DBI::dbGetQuery(dbconn, nfplotsampcntqry),
-                         error = function(e) {
-                         message(e,"\n")
-                         return(NULL) })
+      ## Create nonsamp.pfilter
+      if (!is.null(nfpstatuscdnm) && (is.null(nonsamp.pfilter) || nonsamp.pfilter == "")) {
+        nfnonsamp.pfilter <- paste(plt., "NF_PLOT_STATUS_CD != 3")
+      }
+      if (!is.null(nonsamp.pfilter)) {
+        nonsamp.pfilter <- paste0(nonsamp.pfilter, " AND ", nfnonsamp.pfilter)
       } else {
-        nfplotsampcnt <- tryCatch(
-                    sqldf::sqldf(nfplotsampcntqry, connection = NULL),
-                         error = function(e) {
-                         message(e,"\n")
-                         return(NULL) })
-      }
-      if (is.null(plotsampcnt)) {
-        message("invalid plotsampcnt query")
-        message(plotsampcntqry)
-      }
-      
-      nfplotsampcnt <- nfplotsampcnt[!is.na(nfplotsampcnt$NF_PLOT_STATUS_CD), ]
-      if (nrow(nfplotsampcnt) > 0) {
-        nfplotsampcnt <-
-          cbind(NF_PLOT_STATUS_NM = ref_nf_plot_status_cd[match(nfplotsampcnt$NF_PLOT_STATUS_CD,
-                   ref_nf_plot_status_cd$VALUE), "MEANING"], nfplotsampcnt)
-        ## Append to plotsampcnt
-        if (!is.null(plotsampcnt)) {
-          plotsampcnt <- rbindlist(list(plotsampcnt, nfplotsampcnt), use.names=FALSE)
-        } else {
-          plotsampcnt <- nfplotsampcnt
-        }
-
-        ## Create nonsamp.pfilter
-        if (!is.null(nfpstatuscdnm) && (is.null(nonsamp.pfilter) || nonsamp.pfilter == "")) {
-          nfnonsamp.pfilter <- paste(plt., "NF_PLOT_STATUS_CD != 3")
-        }
-        if (!is.null(nonsamp.pfilter)) {
-          nonsamp.pfilter <- paste0(nonsamp.pfilter, " AND ", nfnonsamp.pfilter)
-        } else {
-          nonsamp.pfilter <- nfnonsamp.pfilter
-        }  
-        nbrnfnonsampled <- nfplotsampcnt$NBRPLOTS[nfplotsampcnt$NF_PLOT_STATUS_CD == 3]
-        if (length(nbrnfnonsampled) > 0) {
-          message("removing ", nbrnfnonsampled, " nonsampled nonforest plots")
-        }
-      }        
+        nonsamp.pfilter <- nfnonsamp.pfilter
+      }  
+      message("removing nonsampled nonforest plots...")
     }
   }
 
@@ -578,7 +512,7 @@ getpopFilterqry <- function(popType,
       if (is.null(pwhereqry)) {
         pwhereqry <- Endyr.filter
       } else {
-        pwhereqry <- paste(paste(pwhereqry, Endyr.filter, sep=" AND "))
+        pwhereqry <- paste(paste(pwhereqry, Endyr.filter, sep="\n   AND "))
       }
     }
     
@@ -621,6 +555,39 @@ getpopFilterqry <- function(popType,
                         pltfromqry)
   }
 
+  ###################################################################################
+  ## Get most current plots in database
+  ###################################################################################
+  if (!is.null(popFilter$pfilter)) {
+    
+    pfilter <- popFilter$pfilter
+
+    if (!is.null(pltassgnflds)) {
+      pfilter <- tryCatch(
+        check.logic(pltassgnflds, pfilter, syntax="SQL", filternm="pfilter"),
+        error = function(e) {
+          return(NULL) })
+    
+    
+      if (is.null(pfilter)) {
+        pfilter <- tryCatch(
+          check.logic(pflds, pfilter, syntax="SQL", filternm="pfilter"),
+          error = function(e) {
+            return(NULL) })
+        if (length(pfiltervars) == 0) {
+          stop("pfilter is invalid: ", pfilter)
+        }
+      } 
+    }
+    if (!is.null(pfilter)) {
+      if (is.null(pwhereqry)) {
+        pwhereqry <- pfilter
+      } else {
+        pwhereqry <- paste(paste(pwhereqry, pfilter, sep="\n   AND "))
+      }
+    }
+  }
+
   ## Add pwhereqry to pltidsqry
   if (!is.null(pwhereqry) || pwhereqry != "") {
     pltidsqry <- paste0(pltidsqry, pwhereqry)
@@ -634,7 +601,8 @@ getpopFilterqry <- function(popType,
   returnlst <- list(pltidsqry = pltidsqry,  
                     states = states, invyrs = invyrs, 
                     pwhereqry = pwhereqry, ewhereqry = ewhereqry, 
-                    pfromqry = pfromqry, pltfromqry = pltfromqry,
+                    #pfromqry = pfromqry, 
+                    pltfromqry = pltfromqry,
                     nonsamp.pfilter = nonsamp.pfilter,
                     datindb = datindb)
   if (!is.null(plotsampcnt)) {
