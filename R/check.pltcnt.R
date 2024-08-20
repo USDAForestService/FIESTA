@@ -60,17 +60,23 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     ## Add number of plots by unit
     pltcnt <- pltx[, list(n.total=.N), by=unitvars]
     setkeyv(pltcnt, unitvars)
-
-    pltstrcnt <- pltx[, list(n.strata=.N), by=strunitvars]
-    setkeyv(pltstrcnt, strunitvars)
-
+    
+    ## combine total counts and strata counts
+    setkeyv(unitlut, unitvars)
+    unitlut <- merge(unitlut, pltcnt, by=unitvars, all.x=TRUE)
+    
     ## combine total counts and strata counts
     pltcnt <- pltcnt[pltstrcnt]
     setkeyv(pltcnt, strunitvars)
+    
+    ## Get strata counts
+    pltstrcnt <- pltx[, list(n.strata=.N), by=strunitvars]
+    setkeyv(pltstrcnt, strunitvars)
+
 
     ## combine total counts and strata counts
     setkeyv(unitlut, strunitvars)
-    unitlut <- merge(unitlut, pltcnt, by=strunitvars, all.x=TRUE)
+    unitlut <- merge(unitlut, pltstrcnt, by=strunitvars, all.x=TRUE)
     cols <- c("n.total", "n.strata")
     cols <- cols[cols %in% names(unitlut)]
     if (length(cols) > 0) {
@@ -97,7 +103,7 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     #pltcnt[pltcnt$n.strata < minplotnum.strat & pltcnt$n.total < minplotnum.unit
 	#	& pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
     pltcnt[((pltcnt$n.strata < minplotnum.strat & pltcnt$n.total > minplotnum.unit) |
-		pltcnt$n.total < minplotnum.unit), "errtyp"] <- "warn"
+		      pltcnt$n.total < minplotnum.unit), "errtyp"] <- "warn"
     pltcnt[pltcnt$n.total < minplotnum.strat & pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
 
     ## ## Remove NBRSTRATA and merge to unitlut
@@ -133,7 +139,8 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     message("\n################################### \n",
             msg, "\n###################################")
     message(paste0(capture.output(data.frame(pltcnt[pltcnt$errtyp == "warn",])), collapse = "\n"))
-
+    message("not enough plots in strata")
+    
     if (stopiferror && any(errtab[["errtyp"]] == "warn")) {
       stop("not enough plots in strata")
     }
@@ -142,7 +149,7 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     ###############################################################
     if (savedata) {
       write2csv(pltcnt, outfolder=outfolder, outfilenm=outfn, outfn.date=outfn.date,
-		outfn.pre=outfn.pre, overwrite=overwrite)
+		        outfn.pre=outfn.pre, overwrite=overwrite)
     }
   }
 
