@@ -346,9 +346,10 @@ getpopFilterqry <- function(popType,
       measyears <- measyears[!measyears %in% measyr.miss]
     }
     
-    ## Create pltidsqry
+    ## Build pltidsqry
+    pltselectqry <- paste0("SELECT DISTINCT ", toString(selectpvars))
     pltidsqry <- paste0(
-	      "SELECT DISTINCT ", toString(selectpvars),
+          pltselectqry,
           pltfromqry)	   
     
     ## Add measyears to where statement 
@@ -543,7 +544,8 @@ getpopFilterqry <- function(popType,
     
     ## Create pltidsqry
     subjoinqry <- getjoinqry(c(groupvars, varCur), c(groupvars, "MAXYR"), alias2 = "pp.")
-    pltidsqry <- paste0("SELECT DISTINCT ", toString(selectpvars),
+    pltselectqry <- paste0("SELECT DISTINCT ", toString(selectpvars))
+    pltidsqry <- paste0(pltselectqry,
                         pltfromqry, 
                         "\n INNER JOIN ",
                         "\n (", subqry, ") pp ", subjoinqry)
@@ -551,7 +553,8 @@ getpopFilterqry <- function(popType,
   } else {
 
     ## Create pltidsqry
-    pltidsqry <- paste0("SELECT ", toString(selectpvars),
+    pltselectqry <- paste0("SELECT ", toString(selectpvars))
+    pltidsqry <- paste0(pltselectqry,
                         pltfromqry)
   }
 
@@ -602,6 +605,7 @@ getpopFilterqry <- function(popType,
                     states = states, invyrs = invyrs, 
                     pwhereqry = pwhereqry, ewhereqry = ewhereqry, 
                     #pfromqry = pfromqry, 
+                    pltselectqry = pltselectqry,
                     pltfromqry = pltfromqry,
                     nonsamp.pfilter = nonsamp.pfilter,
                     datindb = datindb)

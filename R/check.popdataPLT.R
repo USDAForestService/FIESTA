@@ -473,6 +473,7 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
   pwhereqry <- popFilterqry$pwhereqry
   ewhereqry <- popFilterqry$ewhereqry
   pfromqry <- popFilterqry$pfromqry
+  pltselectqry <- popFilterqry$pltselectqry
   pltfromqry <- popFilterqry$pltfromqry
   states <- popFilterqry$states
   invyrs <- popFilterqry$invyrs
@@ -980,7 +981,8 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
   ## 13. Return data
   #############################################################################
   returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid,
-        pltidsqry=pltidsqry, pwhereqry=pwhereqry, pltfromqry=pltfromqry,
+        pltidsqry=pltidsqry, pwhereqry=pwhereqry, 
+        pltselectqry=pltselectqry, pltfromqry=pltfromqry,
         pltx=pltx, plotlst=plotlst, pltidsid = pltidsid,
         projidvars=projidvars, pltidvars=as.vector(pltidvars),
         pdoms2keep=as.vector(unique(c(pvars2keep, pdoms2keep))),
