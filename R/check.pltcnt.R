@@ -65,15 +65,14 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     setkeyv(unitlut, unitvars)
     unitlut <- merge(unitlut, pltcnt, by=unitvars, all.x=TRUE)
     
-    ## combine total counts and strata counts
-    pltcnt <- pltcnt[pltstrcnt]
-    setkeyv(pltcnt, strunitvars)
-    
     ## Get strata counts
     pltstrcnt <- pltx[, list(n.strata=.N), by=strunitvars]
     setkeyv(pltstrcnt, strunitvars)
 
-
+    ## combine total counts and strata counts
+    pltcnt <- pltcnt[pltstrcnt]
+    setkeyv(pltcnt, strunitvars)
+    
     ## combine total counts and strata counts
     setkeyv(unitlut, strunitvars)
     unitlut <- merge(unitlut, pltstrcnt, by=strunitvars, all.x=TRUE)
