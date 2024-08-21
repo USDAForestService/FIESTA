@@ -247,11 +247,11 @@ spClipRast <- function(rast,
     if (fmt == "HFA") {
       co <- paste0("COMPRESSION=", TRUE)
     } else {
-      compresslst <- c("LZW", "PACKBITS", "DEFLATE")
-      compress <- pcheck.varchar(var2check=compress, varnm="compress", 
-                        checklst=compresslst, caption="Compress output?", gui=gui)
-      if (!is.null(compress)) {
-        co <- paste0("COMPRESS=", compress)
+      compressTypelst <- c("LZW", "PACKBITS", "DEFLATE")
+      compressType <- pcheck.varchar(var2check=compressType, varnm="compress", 
+                        checklst=compressTypelst, caption="Compress Type?", gui=gui)
+      if (!is.null(compressType)) {
+        co <- paste0("COMPRESS=", compressType)
       }
     }
   }  
@@ -299,7 +299,7 @@ spClipRast <- function(rast,
   
   ## Clip raster
   clipRaster(src = clippolyvx, 
-             srcfile = rastfn, 
+             srcfile = normalizePath(rastfn), 
 			       src_band = bands, 
 			       dstfile = outfilenm, 
              fmt = fmt, 
