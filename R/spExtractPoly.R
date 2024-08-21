@@ -228,7 +228,7 @@ spExtractPoly <- function(xyplt,
   polyvlst <- lapply(polyvlst, 
 		function(layer, polyv_dsn, gui) pcheck.spatial(layer, dsn=polyv_dsn, gui=gui),
  		polyv_dsn, gui)
- 
+
   ## Check polyvarlst
   if (!is.null(polyvarlst)) {
     if (is.list(polyvarlst)) {
@@ -247,11 +247,16 @@ spExtractPoly <- function(xyplt,
   } 
  
   if (!is.null(polyvarnmlst)) {
-    if (length(polyvarlst) != length(polyvarnmlst))
-      stop("the length of polyvarnmlst must correspond with the length of polyvarlst") 
-    if (!is.list(polyvarnmlst)) 
-      polyvarnmlst <- as.list(polyvarnmlst)
-    
+    if (is.list(polyvarnmlst)) {
+      if (length(polyvarnmlst) != length(polyvarlst))
+        stop("the length of polyvarlst must correspond with the length of polyvlst") 
+    } else {
+      if (length(polyvlst) > 1) {
+        stop("polyvarnmlst must be a list corresponding to the length of polyvlst") 
+      } else {  
+        polyvarnmlst <- list(polyvarnmlst)
+      }
+    }
   } else {
     polyvarnmlst <- polyvarlst
   }
