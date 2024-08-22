@@ -343,7 +343,7 @@ modGBpop <- function(popType = "VOL",
           case.qry <- paste0(case.qry, when.qry, " THEN '", tocolsi[k], "'")
         }  
       }
-      case.qry <- paste0(case.qry, " END) AS ", tocol)
+      case.qry <- paste0(case.qry, " END) AS '", tocol, "'")
       classify.qry <- paste0(classify.qry, case.qry)
       if (to < length(tocols)) {
         classify.qry <- paste0(classify.qry, ",")
@@ -812,7 +812,7 @@ modGBpop <- function(popType = "VOL",
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
- 
+
   ###################################################################################
   ## Check Auxiliary Data
   ###################################################################################
@@ -905,7 +905,8 @@ modGBpop <- function(popType = "VOL",
                        pdoms2keep = pdoms2keep, 
                        defaultVars = defaultVars, 
                        pltidsadjindb = pltidsadjindb, 
-                       pltassgnid = pltassgnid, pltx = pltx,
+                       pltassgnid = pltassgnid, 
+                       pltassgnx = pltassgnx, pltx = pltx,
                        adj = adj, ACI = ACI, 
                        plotlst = plotlst,  
                        #pwhereqry = pwhereqry, 
