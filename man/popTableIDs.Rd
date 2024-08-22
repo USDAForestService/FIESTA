@@ -28,7 +28,9 @@ popTableIDs(
   tree_grm_begin = "PLT_CN",
   midpt = "PLT_CN",
   tree_grm_midpt = "PLT_CN",
-  pltu = "PLT_CN",
+  plot = "CN",
+  pltu = "CN",
+  plotu = "CN",
   condu = "PLT_CN",
   ...
 )
@@ -80,7 +82,11 @@ popTableIDs(
 
 \item{tree_grm_midpt}{String.}
 
+\item{plot}{String.}
+
 \item{pltu}{String.}
+
+\item{plotu}{String.}
 
 \item{condu}{String.}
 
