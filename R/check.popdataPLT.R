@@ -981,7 +981,7 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
   ## 13. Return data
   #############################################################################
   returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid,
-        pltidsqry=pltidsqry, pwhereqry=pwhereqry, 
+        pltidsqry=pltidsqry, pwhereqry=pwhereqry, pltassgn.=pltassgn.,
         pltselectqry=pltselectqry, pltfromqry=pltfromqry,
         pltx=pltx, plotlst=plotlst, pltidsid = pltidsid,
         projidvars=projidvars, pltidvars=as.vector(pltidvars),

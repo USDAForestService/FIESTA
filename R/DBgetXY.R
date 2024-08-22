@@ -287,8 +287,10 @@ DBgetXY <- function (states = NULL,
         stop("no data in ", xy_datsource)
       }
     }
-  
-
+    if (is.null(xy_datsource) && !is.null(datsource)) {
+      xy_datsource <- datsource
+    }
+    
     ## Check xy database
     ####################################################################
     if (all(list(class(xy), class(plot_layer)) == "character") && 
@@ -302,6 +304,7 @@ DBgetXY <- function (states = NULL,
       xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
     }
 
+    
     ###########################################################################
     ## Check plot database (if xyisplot = FALSE)
     ###########################################################################

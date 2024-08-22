@@ -97,7 +97,7 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     pltcnt <- merge(pltcnt, unitlutcnt, all.x=TRUE, all.y=TRUE)
     pltcnt[is.na(pltcnt)] <- 0
     nostrata <- subset(pltcnt, NBRPLOTS > 0 & NBRSTRATA == 0)
-
+    
     pltcnt$errtyp <- "none"
     #pltcnt[pltcnt$n.strata < minplotnum.strat & pltcnt$n.total < minplotnum.unit
 	#	& pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
@@ -137,7 +137,8 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     msg <- "## warnings/errors"
     message("\n################################### \n",
             msg, "\n###################################")
-    message(paste0(capture.output(data.frame(pltcnt[pltcnt$errtyp == "warn",])), collapse = "\n"))
+    message(paste0(capture.output(data.frame(pltcnt[pltcnt$errtyp == "warn",], check.names=FALSE)), 
+                   collapse = "\n"))
     message("not enough plots in strata")
     
     if (stopiferror && any(errtab[["errtyp"]] == "warn")) {

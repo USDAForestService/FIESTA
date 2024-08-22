@@ -100,7 +100,7 @@ check.popdataVOL <-
   plotflds <- plotlst$tabflds
   puniqueid <- plotlst$tabid
   pltx <- plotlst$tabx
-  
+
   ## cond table
   condlst <- popTabchk("cond", tabtext = "cond", 
                        tabs, tabIDs, dbtablst, dbconn, datindb) 
@@ -115,7 +115,7 @@ check.popdataVOL <-
   if (datindb && !pltaindb) {
     assign(condnm, DBI::dbReadTable(dbconn, condnm))
   }
-  
+
   if (popType == "VOL") {
     
     ## tree table
@@ -688,7 +688,7 @@ check.popdataVOL <-
                  return(NULL)})
       } else {
         treex <- tryCatch(
-           sqldf::sqldf(treeqry, conection = NULL),
+           sqldf::sqldf(treeqry, connection = NULL),
                  error = function(e) {
                    message("invalid tree query")
                    message(e,"\n")
@@ -774,7 +774,7 @@ check.popdataVOL <-
                  return(NULL)})
       } else {
         seedx <- tryCatch(
-            sqldf::sqldf(seedqry, conection = NULL),
+            sqldf::sqldf(seedqry, connection = NULL),
                  error = function(e) {
                    message("invalid seedling query")
                    message(e,"\n")

@@ -275,9 +275,6 @@ modGBpop <- function(popType = "VOL",
                      objnm = "GBpopdat",
                      unit_opts = NULL,
                      strata_opts = NULL, 
-                     newvars_opts = list(
-                           pcclassify = list(FORESTYPCD = lut, PLT_CN = lut),
-                           tclassify = list(DIA = c(0, 20, 60))),
                      savedata_opts = NULL, 
                      projectid = NULL,
                      GBdata = NULL, 
@@ -313,6 +310,48 @@ modGBpop <- function(popType = "VOL",
   #nonsamp.vfilter.fixed <- FALSE
   poponly <- FALSE
   returnlst <- list(module = "GB")
+  
+  
+  ## Define function
+  getcombineqry <- function(lut, 
+                            classcols,
+                            fromcols,
+                            tocols,
+                            tab. = "") {
+    
+    classify.qry <- {}
+    for (to in 1:length(tocols)) {
+      tocol <- tocols[to]
+      
+      case.qry <- "\n(CASE"
+      for (i in 1:(nrow(lut))) { 
+        luti <- lut[i,]
+        
+        classcolsi <- as.vector(t(luti[, classcols]))
+        fromcolsi <- as.vector(t(luti[, fromcols]))
+        tocolsi <- as.vector(t(luti[, tocol]))
+        
+        ## Build when query
+        when.qry <- paste0("\nWHEN (", tab., classcols[1], " = ", classcolsi[1]) 
+        for (j in 2:length(classcols)) {
+          when.qry <- paste0(when.qry, " AND ", tab., classcols[j], " = ", classcolsi[j])
+        }
+        when.qry <- paste0(when.qry, ")")
+        
+        ## Build then query
+        for (k in 1:length(tocolsi)) {
+          case.qry <- paste0(case.qry, when.qry, " THEN '", tocolsi[k], "'")
+        }  
+      }
+      case.qry <- paste0(case.qry, " END) AS ", tocol)
+      classify.qry <- paste0(classify.qry, case.qry)
+      if (to < length(tocols)) {
+        classify.qry <- paste0(classify.qry, ",")
+      }
+    }
+    return(classify.qry)
+  }
+  
   
  
   ## Set global variables
@@ -457,7 +496,7 @@ modGBpop <- function(popType = "VOL",
     }
   }
 
-  ## Set user-supplied strata values
+  ## Set user-supplied strata options
   if (length(strata_opts) > 0) {
     for (i in 1:length(strata_opts)) {
       if (names(strata_opts)[[i]] %in% names(strata_defaults_list)) {
@@ -467,7 +506,7 @@ modGBpop <- function(popType = "VOL",
       }
     }
   } 
-
+  
  ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -733,6 +772,7 @@ modGBpop <- function(popType = "VOL",
   pltx <- pltcheck$pltx
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
+  pltassgn. <- pltcheck$pltassgn.
   plotlst <- pltcheck$plotlst
   palias <- pltcheck$palias
   pjoinid <- pltcheck$pjoinid
@@ -763,6 +803,7 @@ modGBpop <- function(popType = "VOL",
   datindb <- pltcheck$datindb
   POP_PLOT_STRATUM_ASSGN <- pltcheck$POP_PLOT_STRATUM_ASSGN
   adjbyvars <- pltcheck$adjbyvars
+  pltselectqry <- pltcheck$pltselectqry
   pltfromqry <- pltcheck$pltfromqry
   pwhereqry <- pltcheck$pwhereqry
   plotunitcnt <- pltcheck$plotunitcnt
@@ -808,6 +849,33 @@ modGBpop <- function(popType = "VOL",
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
+  
+  stratcombinelut <- auxdat$stratcombinelut
+  if (!is.null(stratcombinelut)) {
+    classcols <- c(unitvar2, unitvar, strvar)
+    if (!is.null(auxdat$unitltmin)) {
+      fromcols <- c(unitvar2, unitvar, strvar)
+      tocols <- c(auxdat$unitvar, auxdat$strvar)
+    } else {
+      fromcols <- strvar
+      tocols <- auxdat$strvar
+    }
+    
+    ## Get select join for new strata variables
+    combineqry <- 
+      getcombineqry(lut = stratcombinelut,
+                    classcols = classcols,
+                    fromcols = fromcols,
+                    tocols = tocols,
+                    tab. = pltassgn.)
+    
+    pltidsqry <- paste0(
+      pltselectqry, ", ",
+      combineqry,
+      pltfromqry,
+      pwhereqry)
+    
+  }  
   unitvar <- auxdat$unitvar
   unitvars <- auxdat$unitvars
   strvar <- auxdat$strvar
@@ -817,6 +885,7 @@ modGBpop <- function(popType = "VOL",
   
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
+  
   
   ###################################################################################
   ## Check Population Data

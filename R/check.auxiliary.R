@@ -360,7 +360,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   unitltmin <- 0
   if (any(auxlut$n.total < minplotnum.unit)) {
     unitltmin <- unique(errtab[[unitvar]][errtab$n.total < minplotnum.unit])
-
     if (length(unitltmin) > 0) {
       if (unit.action %in% c("remove", "keep")) {
         
@@ -392,6 +391,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   ## Collapse strata and/or estimation unit classes if errtab warnings
   ###################################################################################
   if (!nonresp && any(errtab$errtyp == "warn")) {
+    auxlut <- auxlut[auxlut[[unitvar]] %in% errtab[[unitvar]],]
     if (any(c(getwtvar, npixelvar, strwtvar) %in% names(auxlut))) {
       vars2combine <- unique(c(vars2combine, c(getwtvar, npixelvar, strwtvar)))
       vars2combine <- vars2combine[vars2combine %in% names(auxlut)]
@@ -415,6 +415,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 	    message("check strata groups in returned object, unitstrgrplut\n")
       unitstrgrplut <- collapse$unitstrgrplut
 	    unitstrgrplut <- merge(errtab, unitstrgrplut, by=strunitvars)
+	    if (!is.null(unitvar2)) {
+	      unitstrgrplut[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+	    }
     }
 
     ## Get new variable definitions
@@ -500,7 +503,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       }
     }
   }
-  
+ 
   ##################################################################################
   ## Check estimation unit values from auxlut with unitarea
   ##################################################################################
@@ -606,15 +609,14 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       returnlst$getwtvar <- getwtvar
     }
     if (!is.null(unitstrgrplut)) {
-      returnlst$stratcombinelut <- unitstrgrplut
+      returnlst$stratcombinelut <- data.frame(unitstrgrplut, check.names=FALSE)
     } else if (!is.null(errtab)) {
 	    returnlst$stratwarnlut <- errtab
 	  }
   }
-  if (length(unitltmin) > 0 &&  unit.action == "keep") {
+  #if (length(unitltmin) > 0 &&  unit.action == "keep") {
     returnlst$unitltmin <- unitltmin
-  }
+  #}
   
-
   return(returnlst)
 }
