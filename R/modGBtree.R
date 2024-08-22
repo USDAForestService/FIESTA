@@ -298,7 +298,8 @@ modGBtree <- function(GBpopdat,
   ## DESCRIPTION:
   ## Generates estimates of trees by domain using non-ratio estimators.
   ##################################################################################
-
+  gui <- FALSE
+  
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0 && is.null(GBpopdat)) {
     gui <- TRUE
@@ -320,6 +321,7 @@ modGBtree <- function(GBpopdat,
   parameters <- FALSE
   returnlst <- list()
   rawdata <- TRUE  
+  gui <- FALSE
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder <- NULL
