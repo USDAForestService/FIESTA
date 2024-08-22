@@ -507,7 +507,6 @@ check.popdataVOL <-
     returnlst$pltcondx <- "pltcondx"
   }
 
-
   ##############################################################################
   ## 8. Build and run queries for other necessary tables (if returndata/savedata = TRUE) 
   ##############################################################################  
@@ -572,8 +571,7 @@ check.popdataVOL <-
       datExportData(pltx, 
                     savedata_opts = outlst)
     }
-    rm(pltx) 
-    
+
     
     ## 8.2 Return and/or save cond data (condx / COND)
     ##################################################################
