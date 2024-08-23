@@ -2129,7 +2129,7 @@ DBgetPlots <- function (states = NULL,
                            eval_opts = eval_options(Cur = TRUE, varCur=varCur, Type="ALL"),
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
-                           pvars2keep = c("INVYR", "PLOT_STATUS_CD"))
+                           pvars2keep = c("INVYR", "PLOT_STATUS_CD", "INTENSITY"))
 		      xyxnm <- paste0("xyCurx_", coordType)
 		      xynm <- paste0("xyCur_", coordType)
 		      assign(xyxnm, 
@@ -2151,7 +2151,7 @@ DBgetPlots <- function (states = NULL,
                            eval_opts = eval_opts,
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
-                           pvars2keep = c("INVYR", "PLOT_STATUS_CD"),
+                           pvars2keep = c("INVYR", "PLOT_STATUS_CD", "INTENSITY"),
 						               evalInfo = evalInfo,
                            SURVEY = SURVEY,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)

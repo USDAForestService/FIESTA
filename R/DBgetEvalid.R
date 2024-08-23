@@ -299,7 +299,7 @@ DBgetEvalid <- function(states = NULL,
       }
     }	  
 	  if (is.null(plotnm)) {
-	    message(plot_layer, " does not exist in database")
+	    message(plot_layer, " is not available...")
 	    return(NULL)
 	  }
     pltflds <- names(DBI::dbGetQuery(dbconn, 
@@ -592,7 +592,7 @@ DBgetEvalid <- function(states = NULL,
     #############################################################################
 	
 	  if (is.null(surveynm)) {
-      message("SURVEY table does not exist in database... assuming ANNUAL inventory plots")
+      message("SURVEY table is not available... assuming ANNUAL inventory plots")
       #invtype <- "ANNUAL"
 	  }
     if (!is.null(ppsanm)) {

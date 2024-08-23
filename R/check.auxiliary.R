@@ -342,6 +342,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   
   if (strata) {
     if (minplotnum.strat > minplotnum.unit) {
+      message("minplotnum.unit (", minplotnum.unit, 
+              ") is less than minplotnum.strat (", minplotnum.strat, ")... ",
+              "changing minplotnum.unit to ", minplotnum.strat)
       minplotnum.strat <- minplotnum.unit
     }
   } else {
@@ -412,7 +415,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
                                vars2combine=vars2combine)						 
 
     if ((stratcombine || unitcombine) && !is.null(collapse$unitstrgrplut)) {
-	    message("check strata groups in returned object, unitstrgrplut\n")
+	    message("check strata groups in returned object, stratcombinelut\n")
       unitstrgrplut <- collapse$unitstrgrplut
 	    unitstrgrplut <- merge(errtab, unitstrgrplut, by=strunitvars)
 	    if (!is.null(unitvar2)) {

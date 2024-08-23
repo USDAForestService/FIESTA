@@ -9,6 +9,7 @@ getpopFilterqry <- function(popType,
                             pltassgn., 
                             plt.,
                             dbconn,
+                            datsource,
                             dbTabs = dbTables(plot_layer = tabs$plt),
                             datindb,
                             pltaindb,
@@ -57,7 +58,7 @@ getpopFilterqry <- function(popType,
     }
     popFilter$states <- states
   }
-  
+ 
   ##################################################################################
   ## 1. Get FIA Evaluation info
   ##################################################################################
@@ -65,7 +66,7 @@ getpopFilterqry <- function(popType,
   returnPOP <- ifelse(pltaindb, FALSE, TRUE)
   evalInfo <- tryCatch( 
     DBgetEvalid(states = popFilter$states, 
-                datsource = "sqlite",
+                datsource = datsource,
                 invtype = "ANNUAL", 
                 evalid = popFilter$evalid, 
                 evalCur = popFilter$evalCur, 

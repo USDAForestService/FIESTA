@@ -67,7 +67,6 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
     pvars2keep <- c(pvars2keep, "INVASIVE_SAMPLING_STATUS_CD", "INVASIVE_SPECIMEN_RULE_CD")
   }  
   
-
   ###################################################################################
   ## 2. Define a set of plot-level domain variables used for estimation. 
   ###################################################################################
@@ -450,25 +449,27 @@ check.popdataPLT <- function(dsn, datsource, schema = NULL, tabs, tabIDs,
   ##################################################################################
   ## 8. Check popFilters and create pltidsqry
   ##################################################################################
-  popFilterqry <- getpopFilterqry(popType = popType, 
-                                popFilter = popFilter, 
-                                pltfromqry = pltfromqry,
-                                plotnm = plotnm,
-                                pltassgnnm = pltassgnnm,
-                                pflds = pflds,
-                                pltassgnflds = pltassgnflds, 
-                                puniqueid = puniqueid, 
-                                pltassgn. = pltassgn., 
-                                plt. = plt.,
-                                selectpvars = selectpvars,
-                                dbconn = dbconn,
-                                dbTabs = dbTables(plot_layer = tabs$plt),
-                                datindb = datindb,
-                                pltaindb = pltaindb,
-                                pltassgnx = pltassgnx,
-                                pltx = pltx,
-                                chkvalues = FALSE,
-                                projectid = projectid) 
+  popFilterqry <- 
+    getpopFilterqry(popType = popType, 
+                    popFilter = popFilter, 
+                    pltfromqry = pltfromqry,
+                    plotnm = plotnm,
+                    pltassgnnm = pltassgnnm,
+                    pflds = pflds,
+                    pltassgnflds = pltassgnflds, 
+                    puniqueid = puniqueid, 
+                    pltassgn. = pltassgn., 
+                    plt. = plt.,
+                    selectpvars = selectpvars,
+                    dbconn = dbconn,
+                    datsource = datsource,
+                    dbTabs = dbTables(plot_layer = tabs$plt),
+                    datindb = datindb,
+                    pltaindb = pltaindb,
+                    pltassgnx = pltassgnx,
+                    pltx = pltx,
+                    chkvalues = FALSE,
+                    projectid = projectid) 
   pltidsqry <- popFilterqry$pltidsqry
   pwhereqry <- popFilterqry$pwhereqry
   ewhereqry <- popFilterqry$ewhereqry
