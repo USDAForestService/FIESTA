@@ -627,6 +627,7 @@ modGBpop <- function(popType = "VOL",
   } else {
     ## Extract list objects
     if (!is.null(pltdat)) {
+      datsource <- "obj"
 	    tabnames <- if (sum(names(pltdat$tabs) %in% names(popTables())) == 0) {
 	    stop("no tables exist in pltdat")
       }			  
@@ -886,7 +887,7 @@ modGBpop <- function(popType = "VOL",
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
   
-  
+
   ###################################################################################
   ## Check Population Data
   ###################################################################################
@@ -1162,7 +1163,7 @@ modGBpop <- function(popType = "VOL",
 
   if (strata) {
     if (!is.null(stratcombinelut)) {
-      returnlst$stratcombinelut <- stratcombinelut
+      returnlst$stratcombinelut <- setDF(stratcombinelut)
     }
   }
   if (!is.null(evalid)) {
