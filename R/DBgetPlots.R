@@ -1838,10 +1838,12 @@ DBgetPlots <- function (states = NULL,
         pltcondx <- tryCatch(DBI::dbGetQuery(dbconn, pltcond.qry),
 			                 error=function(e) message(e, "\n"))
       } else {
-        pltcondx <- tryCatch(setDT(sqldf::sqldf(pltcond.qry, 
-                                                stringsAsFactors=FALSE, connection=NULL)),
+        pltcondx <- tryCatch(sqldf::sqldf(pltcond.qry, 
+                                                stringsAsFactors=FALSE, connection=NULL),
                        error=function(e) message(e, "\n"))
-        pltcondx <- setDT(pltcondx)
+      }
+      if (!is.null(pltcondx)) {
+        pltcondx <- data.table::setDT(pltcondx)
       }
 
       ## Write query to outfolder
@@ -2328,12 +2330,14 @@ DBgetPlots <- function (states = NULL,
         pltcondux <- tryCatch(DBI::dbGetQuery(dbconn, pltcondu.qry),
 			           error=function(e) message("pltcondu query is invalid"))
       } else {
-        pltcondux <- tryCatch(setDT(sqldf::sqldf(pltcondu.qry, 
+        pltcondux <- tryCatch(sqldf::sqldf(pltcondu.qry, 
                          stringsAsFactors=FALSE, connection=NULL)),
-		 	          error=function(e) message("pltcondu query is invalid"))
+		 	          error=function(e) message("pltcondu query is invalid")
       }
 	    if (is.null(pltcondux)) {
 	      message(pltcondu.qry)
+	    } else {
+	      pltcondux <- setDT(pltcondux)
 	    }
 
       ## Write query to outfolder
@@ -2665,12 +2669,12 @@ DBgetPlots <- function (states = NULL,
 
  	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
-          sccmx <- tryCatch( setDT(DBI::dbGetQuery(dbconn, sccm.qry)),
+          sccmx <- tryCatch( data.table::setDT(DBI::dbGetQuery(dbconn, sccm.qry)),
 			              error=function(e) {
                     message("SUBP_COND_CHNG_MTRX query is invalid")
                     return(NULL) })
         } else {
-          sccmx <- tryCatch( setDT(sqldf::sqldf(sccm.qry, 
+          sccmx <- tryCatch( data.table::setDT(sqldf::sqldf(sccm.qry, 
                          stringsAsFactors=FALSE, connection=NULL)),
 			              error=function(e) {
                     message("SUBP_COND_CHNG_MTRX query is invalid")
@@ -2684,7 +2688,7 @@ DBgetPlots <- function (states = NULL,
             dbqueries[[state]]$subp_cond_chng_mtrx <- sccm.qry
 	        }
 
-          sccmx <- setDT(sccmx)
+          sccmx <- data.table::setDT(sccmx)
           sccmx[, PLT_CN := as.character(PLT_CN)]
           setkey(sccmx, PLT_CN, CONDID)
 
@@ -2822,7 +2826,7 @@ DBgetPlots <- function (states = NULL,
             dbqueries[[state]]$tree <- tree.qry
 	        }
 
-          treex <- setDT(treex)
+          treex <- data.table::setDT(treex)
           treex[, PLT_CN := as.character(PLT_CN)]
           treex[, CN := as.character(CN)]
           setkey(treex, CN)
@@ -2984,7 +2988,7 @@ DBgetPlots <- function (states = NULL,
                 dbqueries[[state]]$treeu <- treeu.qry
 	            }
 
-              treeux <- setDT(treeux)
+              treeux <- data.table::setDT(treeux)
               treeux[, PLT_CN := as.character(PLT_CN)]
               treeux[, CN := as.character(CN)]
               setkey(treeux, CN)
@@ -3199,7 +3203,7 @@ DBgetPlots <- function (states = NULL,
                   dbqueries[[state]]$tree_grm_component <- grm.qry
 	            }
 
-                grmx <- setDT(grmx)
+                grmx <- data.table::setDT(grmx)
                 grmx[, PLT_CN := as.character(PLT_CN)]
                 grmx[, TRE_CN := as.character(TRE_CN)]
                 setkey(grmx, TRE_CN)
@@ -3270,7 +3274,7 @@ DBgetPlots <- function (states = NULL,
                   dbqueries[[state]]$tree_grm_begin <- grmb.qry
 	              }
 
-                grmbx <- setDT(grmbx)
+                grmbx <- data.table::setDT(grmbx)
                 grmbx[, PLT_CN := as.character(PLT_CN)]
                 grmbx[, TRE_CN := as.character(TRE_CN)]
                 setkey(grmbx, TRE_CN)
@@ -3341,7 +3345,7 @@ DBgetPlots <- function (states = NULL,
                   dbqueries[[state]]$tree_grm_midpt <- grmm.qry
 	              }
 
-                grmmx <- setDT(grmmx)
+                grmmx <- data.table::setDT(grmmx)
                 grmmx[, PLT_CN := as.character(PLT_CN)]
                 grmmx[, TRE_CN := as.character(TRE_CN)]
                 setkey(grmmx, TRE_CN)
@@ -3482,7 +3486,7 @@ DBgetPlots <- function (states = NULL,
             dbqueries[[state]]$seed <- seed.qry
 	        }
 
-          seedx <- setDT(seedx)
+          seedx <- data.table::setDT(seedx)
           seedx[, PLT_CN := as.character(PLT_CN)]
           setkey(seedx, PLT_CN, CONDID)
 
@@ -3660,7 +3664,7 @@ DBgetPlots <- function (states = NULL,
             dbqueries[[state]]$p2veg_subplot_spp <- vsubpspp.qry
 	        }
 
-          p2veg_subplot_sppx <- setDT(p2veg_subplot_sppx)
+          p2veg_subplot_sppx <- data.table::setDT(p2veg_subplot_sppx)
           p2veg_subplot_sppx[, PLT_CN := as.character(PLT_CN)]
           setkey(p2veg_subplot_sppx, PLT_CN)
 
@@ -3738,7 +3742,7 @@ DBgetPlots <- function (states = NULL,
             dbqueries[[state]]$p2veg_subp_structure <- vsubpstr.qry
 	        }
 
-          p2veg_subp_structurex <- setDT(p2veg_subp_structurex)
+          p2veg_subp_structurex <- data.table::setDT(p2veg_subp_structurex)
           p2veg_subp_structurex[, PLT_CN := as.character(PLT_CN)]
           setkey(p2veg_subp_structurex, PLT_CN)
 
@@ -3860,7 +3864,7 @@ DBgetPlots <- function (states = NULL,
             dbqueries[[state]]$invasive_subplot_spp <- vsubpstr.qry
 	        }
 
-          invasive_subplot_sppx <- setDT(invasive_subplot_sppx)
+          invasive_subplot_sppx <- data.table::setDT(invasive_subplot_sppx)
           invasive_subplot_sppx[, PLT_CN := as.character(PLT_CN)]
           setkey(invasive_subplot_sppx, PLT_CN)
 
@@ -3999,7 +4003,7 @@ DBgetPlots <- function (states = NULL,
             dbqueries[[state]]$subplot <- subp.qry
 	        }
 
-          subpx <- setDT(subpx)
+          subpx <- data.table::setDT(subpx)
           subpx[, PLT_CN := as.character(PLT_CN)]
           setkey(subpx, PLT_CN)
 
@@ -4072,7 +4076,7 @@ DBgetPlots <- function (states = NULL,
             dbqueries[[state]]$subp_cond <- subpc.qry
 	        }
 
-          subpcx <- setDT(subpcx)
+          subpcx <- data.table::setDT(subpcx)
           subpcx[, PLT_CN := as.character(PLT_CN)]
           setkey(subpcx, PLT_CN)
 
@@ -4192,7 +4196,7 @@ DBgetPlots <- function (states = NULL,
             dbqueries[[state]]$cond_dwm_calc <- dwm.qry
 	        }
 
-          cond_dwm_calcx <- setDT(cond_dwm_calcx)
+          cond_dwm_calcx <- data.table::setDT(cond_dwm_calcx)
           cond_dwm_calcx[, PLT_CN := as.character(PLT_CN)]
           setkey(cond_dwm_calcx, PLT_CN, CONDID)
 
@@ -4354,7 +4358,7 @@ DBgetPlots <- function (states = NULL,
         }
 
         if (!is.null(otab)) {
-          assign(othertablexnm, setDT(otab))
+          assign(othertablexnm, data.table::setDT(otab))
  
           if ("PLT_CN" %in% names(get(othertablexnm))) {
             get(othertablexnm)[, PLT_CN := as.character(PLT_CN)]
@@ -4429,7 +4433,7 @@ DBgetPlots <- function (states = NULL,
         stop()
       }
       if (!is.null(ppsax) && nrow(ppsax) != 0) {
-        ppsax <- setDT(ppsax)
+        ppsax <- data.table::setDT(ppsax)
         ppsax[, PLT_CN := as.character(PLT_CN)]
         setkey(ppsax, PLT_CN)
         

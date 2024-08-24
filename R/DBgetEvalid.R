@@ -431,9 +431,9 @@ DBgetEvalid <- function(states = NULL,
 	        "\nFROM ", SCHEMA., surveynm, " ", surveynm,
       	  surveywhere.qry)
     if (indb) {
-      SURVEY <- setDT(DBI::dbGetQuery(dbconn, survey.qry)) 
+      SURVEY <- data.table::setDT(DBI::dbGetQuery(dbconn, survey.qry)) 
     } else {
-      SURVEY <- setDT(sqldf::sqldf(survey.qry, connection = NULL)) 
+      SURVEY <- data.table::setDT(sqldf::sqldf(survey.qry, connection = NULL)) 
     }
     #if (nrow(SURVEY) == 0) return(NULL)
   }
@@ -445,9 +445,9 @@ DBgetEvalid <- function(states = NULL,
 			    "\nJOIN ", SCHEMA., "POP_EVAL_GRP pgrp ON(pgrp.CN = ptyp.EVAL_GRP_CN) ",
 			    "\nWHERE pgrp.statecd IN (", toString(stcdlst), ")")
     if (indb) {
-      POP_EVAL_TYP <- setDT(DBI::dbGetQuery(dbconn, pop_eval_typ_qry)) 
+      POP_EVAL_TYP <- data.table::setDT(DBI::dbGetQuery(dbconn, pop_eval_typ_qry)) 
     } else {
-      POP_EVAL_TYP <- setDT(sqldf::sqldf(pop_eval_typ_qry, connection = NULL)) 
+      POP_EVAL_TYP <- data.table::setDT(sqldf::sqldf(pop_eval_typ_qry, connection = NULL)) 
     }
   }
   if (!is.null(popevalnm)) {
@@ -479,9 +479,9 @@ DBgetEvalid <- function(states = NULL,
 	        "\nFROM ", SCHEMA., popevalgrpnm, 
 			    "\nWHERE statecd IN(", toString(stcdlst), ")")
     if (indb) {
-      POP_EVAL_GRP <- setDT(DBI::dbGetQuery(dbconn, pop_eval_grp_qry)) 
+      POP_EVAL_GRP <- data.table::setDT(DBI::dbGetQuery(dbconn, pop_eval_grp_qry)) 
     } else {
-      POP_EVAL_GRP <- setDT(sqldf::sqldf(pop_eval_grp_qry, connection = NULL)) 
+      POP_EVAL_GRP <- data.table::setDT(sqldf::sqldf(pop_eval_grp_qry, connection = NULL)) 
     }
 
     ## Add a parsed EVAL_GRP endyr to POP_EVAL_GRP
@@ -920,11 +920,13 @@ DBgetEvalid <- function(states = NULL,
 #			             from", ppsanm,  
 #			             "where", stfilter, "order by STATECD, EVALID")
         evaldt <- tryCatch( 
-              setDT(DBI::dbGetQuery(dbconn, eval.qry)),
+              DBI::dbGetQuery(dbconn, eval.qry),
 			             error=function(e) 
 			               return(NULL))
         if (is.null(evaldt)) {
           return(NULL)
+        } else {
+          evaldt <- data.table::setDT(evaldt)
         }
  
         if (!"STATECD" %in% names(evaldt)) {
@@ -1042,7 +1044,7 @@ DBgetEvalid <- function(states = NULL,
           message("getting FIA Evaluation info for: ", state, "(", stcd, ")...")
           
           stinvyrs <- unique(stinvyr.vals[[state]])
-          invtype.invyrs <- setDT(invyrtab)[invyrtab$STATECD == stcd][["INVYR"]]
+          invtype.invyrs <- data.table::setDT(invyrtab)[invyrtab$STATECD == stcd][["INVYR"]]
           if (stcd == 64) {
             invtype.invyrs[invtype.invyrs == 2016] <- 6416
           }
