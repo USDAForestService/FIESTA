@@ -2331,8 +2331,8 @@ DBgetPlots <- function (states = NULL,
 			           error=function(e) message("pltcondu query is invalid"))
       } else {
         pltcondux <- tryCatch(sqldf::sqldf(pltcondu.qry, 
-                         stringsAsFactors=FALSE, connection=NULL)),
-		 	          error=function(e) message("pltcondu query is invalid")
+                         stringsAsFactors=FALSE, connection=NULL),
+		 	          error=function(e) message("pltcondu query is invalid"))
       }
 	    if (is.null(pltcondux)) {
 	      message(pltcondu.qry)
