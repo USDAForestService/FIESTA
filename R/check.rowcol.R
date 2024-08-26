@@ -792,7 +792,7 @@ check.rowcol <-
         joinid <- tuniqueid
       }
       colfromqry <- paste0(
-        "\nFROM ", coltabnm)
+        "\nFROM ", coltabnm, " pc")
       
       ## Check col.orderby
       if (!is.null(col.orderby) && col.orderby != "NONE") {
@@ -900,7 +900,7 @@ check.rowcol <-
                  colfromqry,
                  whereqry,
                  "\nORDER BY ", colvar)
-        
+
         #message("getting unique values for ", colvar, ":\n", cuniquex.qry, "\n")
         if (colisdb) {
           if (!is.null(withqry)) {
