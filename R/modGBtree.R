@@ -625,9 +625,6 @@ modGBtree <- function(GBpopdat,
   } else {
     pltidsWITHqry <- NULL
   }
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTree.R")
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTreeDom.R")
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.tree.R")
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 

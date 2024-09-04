@@ -291,11 +291,12 @@ check.popdataVOL <-
   dbqueries$adjfactors <- adjfactors.qry
 
   
-  ## Check with FIADB population data - VOL
-  #source("E:/workspace/jyamamoto/FIESTA_EVALIDator_compare/FIESTA_EVALIDator_compare_functions.R")
-  #FIADBpop <- getFIADBpop(state, evaltype = "03", evalyr, dbconn=dbconn)$pop_stratum
-  #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="03")
-  #popVOL_compare
+  ## Check adjustment factors
+  #evalid <- 81901
+  #FIADBpop <- getFIADBpop(evalid = evalid, dbconn = FIAconn)$pop_stratum
+  #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
+  #adjfactors <- replacepopfun(adjfactors, FIADBpop)
+  #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
   
   
   ## 5.6. Build WITH query to append adjustment factors to pltids, including ADJ query
@@ -869,7 +870,7 @@ check.popdataVOL <-
     if (!is.null(condsampcnt)) {
       condsampcnt <-
         cbind(COND_STATUS_NM = ref_cond_status_cd[match(condsampcnt$COND_STATUS_CD,
-                                                        ref_cond_status_cd$VALUE), "MEANING"], condsampcnt)
+                  ref_cond_status_cd$VALUE), "MEANING"], condsampcnt)
       
       nbrnonsampled <- condsampcnt$NBRCONDS[condsampcnt$COND_STATUS_CD == 5]
       if (length(nbrnonsampled) > 0) {

@@ -97,8 +97,9 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
 
   ## Get row estimate  
   if (rowvar != "TOTAL") {
-    
-    ## Sum numerator to plot, domain (TOTAL) level
+
+    ## Sum numerator to plot, rowvar level
+    domdatn <- domdatn[!is.na(domdatn[[rowvar]]),] 
     domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
               by = c(strunitvar, uniqueid, rowvar), .SDcols=estvarn.name]
@@ -108,6 +109,12 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
         domdatdtot <- 
           domdatd[, lapply(.SD, sum, na.rm=TRUE), 
                   by = c(strunitvars, cuniqueid, rowvar), .SDcols = estvard.name]
+       
+        ## Check class of ddomdattot and domdatdtot and merge tables
+        tabchk <- check.matchclass(domdattot, domdatdtot, c(strunitvars, cuniqueid, rowvar))
+        domdattot <- tabchk$tab1
+        domdatdtot <- tabchk$tab2
+        
         domdattot <- merge(domdattot, domdatdtot, 
                             by = c(strunitvars, cuniqueid, rowvar))
       } else {
@@ -133,16 +140,25 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
 
   ## Get column (and cell) estimate  
   if (colvar != "NONE") {
-    ## Sum numerator to plot, domain (TOTAL) level
+    
+    ## Sum numerator to plot, colvar level
+    domdatn <- domdatn[!is.na(domdatn[[colvar]]),] 
     domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
               by = c(strunitvar, uniqueid, colvar), .SDcols=estvarn.name]
+
     if (esttype == "RATIO") {
       ## Sum denominator to plot, domain (TOTAL) level 
       if (colvar %in% names(domdatd)) {
         domdatdtot <- 
           domdatd[, lapply(.SD, sum, na.rm=TRUE), 
                   by = c(strunitvars, cuniqueid, colvar), .SDcols = estvard.name]
+        
+        ## Check class of ddomdattot and domdatdtot and merge tables
+        tabchk <- check.matchclass(domdattot, domdatdtot, c(strunitvars, cuniqueid, colvar))
+        domdattot <- tabchk$tab1
+        domdatdtot <- tabchk$tab2
+
         domdattot <- merge(domdattot, domdatdtot, 
                            by = c(strunitvars, cuniqueid, colvar))
       } else {
@@ -164,12 +180,21 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
                  unitvar = unitvar, 
                  strvar = strvar, 
                  domain = colvar)
+
+   ## Sum numerator to plot, grpvar level
+   domdatn <- domdatn[!is.na(domdatn[[rowvar]]) & domdatn[[rowvar]] != "NA",] 
+   domdatn <- domdatn[!is.na(domdatn[[colvar]]) & domdatn[[colvar]] != "NA",] 
    domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
                  by = c(strunitvar, uniqueid, grpvar), .SDcols=estvarn.name]
+   
    if (esttype == "RATIO") {
-     ## Sum denominator to plot, domain (TOTAL) level 
-     if (grpvar %in% names(domdatd)) {
+
+     if (all(grpvar %in% names(domdatd))) {
+       ## Sum denominator to plot, grpvar level 
+       domdatd <- domdatd[!is.na(domdatd[[rowvar]]) & domdatd[[rowvar]] != "NA",] 
+       domdatd <- domdatd[!is.na(domdatd[[colvar]]) & domdatd[[colvar]] != "NA",] 
+       
        domdatdtot <- 
          domdatd[, lapply(.SD, sum, na.rm=TRUE), 
                  by = c(strunitvars, cuniqueid, grpvar), .SDcols = estvard.name]
@@ -187,6 +212,8 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
       GBest.pbar(sumyn = estvarn.name, 
                  sumyd = estvard.name,
                  ysum = domdattot,
+                 esttype = esttype,
+                 ratiotype = ratiotype,
                  uniqueid = uniqueid, 
                  stratalut = stratalut,
                  unitvar = unitvar, 
@@ -257,7 +284,7 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
     }      
     setkeyv(unit_colest, c(unitvar, colvar))
   }
-  
+ 
   if (!is.null(unit_grpest)) {
     unit_grpest <-
       add0unit(x = unit_grpest, 
@@ -271,10 +298,10 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
     tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
     unit_grpest <- tabs$tab2 
-    
-    if (!row.add0 && any(unit_rowest$nhat == 0)) {
-      unit_rowest <- unit_rowest[unit_rowest$nhat > 0,]
-    }
+
+    #if (!row.add0 && any(unit_grpest$nhat == 0)) {
+    #  unit_grpest <- unit_rowest[unit_grpest$nhat > 0,]
+    #}
     
   
     if (!is.null(row.orderby) && row.orderby != "NONE") {

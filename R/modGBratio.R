@@ -630,7 +630,8 @@ modGBratio <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-  
+
+    
   ###############################################################################
   ### Get estimation data from tree table
   ###############################################################################
@@ -640,9 +641,6 @@ modGBratio <- function(GBpopdat,
   } else {
     pltidsWITHqry <- NULL
   }
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTree.R")
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTreeDom2.R")
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.tree.R")
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -667,20 +665,29 @@ modGBratio <- function(GBpopdat,
                gui = gui)
   if (is.null(treedat)) return(NULL) 
   tdomdat <- treedat$tdomdat
-  estvar <- treedat$estvar
-  estvar.name <- treedat$estvarn.name
-  estvar.filter <- treedat$estvarn.filter
-  tdomvarlst <- treedat$tdomvarlst
-  estunits <- treedat$estunits
+  estvarn <- treedat$estvarn
+  estvarn.name <- treedat$estvarn.name
+  estvarn.filter <- treedat$estvarn.filter
+  tdomvarlstn <- treedat$tdomvarlstn
+  estunitsn <- treedat$estunitsn
+  estunitsd <- treedat$estunitsd
   treeqry <- treedat$treeqry
   pcdomainlst <- treedat$pcdomainlst
   
-  
+  if (ratiotype == "PERTREE") {
+    estvard <- treedat$estvard
+    estvard.name <- treedat$estvard.name
+    tdomvarlstd <- treedat$tdomvarlstd
+  } else {
+    estvard.name <- areawt
+    tdomvarlstd <- NULL
+    estunitsd <- areaunits
+  }  
+
   if (ratiotype == "PERACRE") {
     ###################################################################################
     ### Get condition-level domain data
     ###################################################################################
-    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.cond.R")
     conddat <- 
       check.cond(areawt = areawt,
                  areawt2 = areawt2,
@@ -700,6 +707,52 @@ modGBratio <- function(GBpopdat,
   }
   
   
+  ###############################################################################
+  ### Get titles for output tables
+  ###############################################################################
+  alltitlelst <- 
+    check.titles(dat = tdomdat, 
+                 esttype = esttype, 
+                 estseed = estseed, 
+                 woodland = woodland, 
+                 sumunits = sumunits, 
+                 title.main = title.main, 
+                 title.ref = title.ref, 
+                 title.rowvar = title.rowvar, 
+                 title.rowgrp = title.rowgrp, 
+                 title.colvar = title.colvar, 
+                 title.unitvar = title.unitvar, 
+                 title.filter = title.filter, 
+                 title.unitsn = estunitsn,
+                 title.unitsd=estunitsd,
+                 title.estvarn = title.estvarn, 
+                 unitvar = unitvar, 
+                 rowvar = rowvar, colvar = colvar, 
+                 estvarn = estvarn, 
+                 estvarn.filter = estvarn.filter,
+                 estvard = estvard, 
+                 estvard.filter = estvard.filter,
+                 addtitle = addtitle, 
+                 returntitle = returntitle, 
+                 rawdata = rawdata, 
+                 states = states, invyrs = invyrs,
+                 landarea = landarea, 
+                 pcfilter = pcfilter, 
+                 allin1 = allin1, 
+                 divideby = divideby, 
+                 outfn.pre = outfn.pre)
+  title.unitvar <- alltitlelst$title.unitvar
+  title.est <- alltitlelst$title.est
+  title.pse <- alltitlelst$title.pse
+  title.estpse <- alltitlelst$title.estpse
+  title.ref <- alltitlelst$title.ref
+  outfn.estpse <- alltitlelst$outfn.estpse
+  outfn.param <- alltitlelst$outfn.param
+  if (rawdata) {
+    outfn.rawdat <- alltitlelst$outfn.rawdat
+  }
+
+    
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
@@ -711,8 +764,6 @@ modGBratio <- function(GBpopdat,
   estvarn.name = "COUNT_TPA_ADJ"
   estvard.name = "ESTIMATED_VALUE"
   ratiotype = "PERACRE"
-  
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\getGBestimates.R")
   
   estdat <- 
     getGBestimates(esttype = esttype,
@@ -875,12 +926,6 @@ modGBratio <- function(GBpopdat,
       rawdat$estunitsd <- estunitsd
     }
     returnlst$raw <- rawdat
-  }
-  if ("STATECD" %in% names(pltcondf)) {
-    returnlst$statecd <- sort(unique(pltcondf$STATECD))
-  }
-  if ("INVYR" %in% names(pltcondf)) {
-    returnlst$invyr <- sort(unique(pltcondf$INVYR))
   }
 
   return(returnlst)

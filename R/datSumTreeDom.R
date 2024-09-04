@@ -248,6 +248,7 @@ datSumTreeDom <- function(tree = NULL,
                           tdombarplot = FALSE, 
                           tdomtot = FALSE, 
                           tdomtotnm  =NULL, 
+                          bydomainlst = NULL,
                           FIAname = FALSE, 
                           spcd_name = "COMMON",
                           pivot = TRUE, 
@@ -364,7 +365,7 @@ datSumTreeDom <- function(tree = NULL,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  bydomainlst <- c(tdomvar, tdomvar2)
+  bydomainlst <- unique(c(tdomvar, tdomvar2, bydomainlst))
   
   ### Check tsumvar 
   ###########################################################  
@@ -448,6 +449,7 @@ datSumTreeDom <- function(tree = NULL,
     out_conn = outlst$out_conn
   }
 
+  
   ################################################################################  
   ################################################################################  
   ### DO WORK
@@ -487,7 +489,7 @@ datSumTreeDom <- function(tree = NULL,
   treeqry <- sumdat$treeqry
   tdomainlst <- sumdat$tdomainlst
   pcdomainlst <- sumdat$pcdomainlst
-  
+
 
   ## Get unique values of tdomvar
   tdoms <- sort(unique(tdomtree[[tdomvar]]))
@@ -662,7 +664,7 @@ datSumTreeDom <- function(tree = NULL,
 
   ## Sum tree (and seed) by tdomvarnm
   #####################################################################
-  byvars <- unique(c(tsumuniqueid, tdomvar, tdomvarnm))
+  byvars <- unique(c(tsumuniqueid, tdomvar, tdomvarnm, bydomainlst))
   
   tdomtreef <- tdomtree[, lapply(.SD, tfun, na.rm=TRUE), by=byvars, .SDcols=tsumname]
   setkeyv(tdomtreef, tsumuniqueid)
@@ -687,12 +689,13 @@ datSumTreeDom <- function(tree = NULL,
     ## If pivot=TRUE, aggregate tree domain data
     ######################################################################## 
     tdoms <- datPivot(tdomtreef, pvar = tsumname, 
-                      xvar = tsumuniqueid, yvar = tdomvarnm,
+                      xvar = byvars, yvar = tdomvarnm,
                       pvar.round = tround, returnDT = TRUE)
   	tdoms <- setDT(tdoms)
 
+
     ## check if tree domain in tdomlst.. if not, create column with all 0 values
-    tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% tsumuniqueid]
+    tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% byvars]
     UNMATCH <- tdomvarlst2[is.na(match(tdomvarlst2, tdomscols))] 
     if (length(UNMATCH) > 0) {
       tdoms[, (UNMATCH) := 0]
@@ -709,18 +712,19 @@ datSumTreeDom <- function(tree = NULL,
     } else {
       tdomscolstot <- tdomvarlst2
     }
- 
+
     ## Create a table of proportions for each tdom by total by plot
     if (proportion) {
-      tdoms.prop <- tdoms[, lapply(.SD, function(x, tdomtotnm) round(x / get(eval(tdomtotnm))), 
-			tdomtotnm), by=key(tdoms), .SDcols=tdomscolstot]
+      tdoms.prop <- tdoms[, lapply(.SD, 
+          function(x, tdomtotnm) round(x / get(eval(tdomtotnm))), tdomtotnm), 
+               by=key(tdoms), .SDcols=tdomscolstot]
       setcolorder(tdoms.prop, c(key(tdoms.prop), tdomscolstot))
     }
 
     ## Create a table of presence/absence (1/0) by plot
     if (presence) {
-      tdoms.pres <- tdoms[, lapply(.SD, function(x) x / x), by=key(tdoms), 
-		.SDcols=tdomscolstot]
+      tdoms.pres <- tdoms[, lapply(.SD, 
+          function(x) x / x), by=key(tdoms), .SDcols=tdomscolstot]
       tdoms.pres[is.na(tdoms.pres)] <- 0        
       setcolorder(tdoms.pres, c(key(tdoms.pres), tdomscolstot))
     }
@@ -1088,6 +1092,8 @@ datSumTreeDom <- function(tree = NULL,
   if (!is.null(tdomtotnm)) {
     tdomdata$tdomtotnm <- tdomtotnm
   }
+  tdomdata$tdomainlst <- tdomainlst
+  tdomdata$pcdomainlst <- pcdomainlst
 
   if (any(c(tdomvar, tdomvar2) == "SPCD")) {
     tdomdata$ref_spcd <- ref_spcd

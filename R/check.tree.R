@@ -45,6 +45,7 @@ check.tree <-
                     tdomtotnm = estvarn.name, 
                     tfilter = estvarn.filter,
                     tdomvar = tdomvar, tdomvar2 = tdomvar2, 
+                    bydomainlst = bydomainlst,
                     adjtree = adjtree,
                     adjvar = adjvar, 
                     adjTPA = adjTPA, 
@@ -71,10 +72,10 @@ check.tree <-
 
     if (pivot) {
       ## Transpose back to rows
-      tdomdat <- transpose2row(tdomdat, uniqueid = tsumuniqueid,
+      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst),
                              tvars = tdomvarlstn, na.rm = FALSE)
-      setnames(tdomdat, "value", tsumvarn)
-    
+      setnames(tdomdat, c("variable", "value"), c(tdomvar, tsumvarn))
+
       if (!is.null(tdomvar2)) {
         tdomdat <- data.table(tdomdat, tdomdat[, tstrsplit(variable, "#", fixed=TRUE)])
         setnames(tdomdat, c("V1", "V2"), c(tdomvar, tdomvar2))
