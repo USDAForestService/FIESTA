@@ -53,7 +53,7 @@ check.rowcol <-
   SITECLCD=GSSTKCD=domainlst=tdomvar=tdomvar2=grpvar=rowvarnm=colvarnm <- NULL
   tuniquex=suniquex=coluniquex <- NULL
   #keepNA <- ifelse(landarea == "ALL", TRUE, FALSE)
-  keepNA=isdbc=colgrp <- FALSE
+  keepNA=isdbc=isdbt=colgrp <- FALSE
 
   ## define function to make factors
   makefactor <- function(x) {
@@ -87,6 +87,11 @@ check.rowcol <-
     isdbt <- TRUE
     if (is.character(pltcondx)) {
       isdbc <- TRUE
+      pltcondxnm <- pltcondx
+    }
+  } else {
+    if (!is.null(pltcondx) && is.data.frame(pltcondx)) {
+      pltcondxnm <- "pltcondx"
     }
   }
 
@@ -99,6 +104,7 @@ check.rowcol <-
   #ref_titles <- FIESTAutils::ref_titles
   bytdom=bypcdom <- FALSE
   seedclnm <- "<1"
+  seedonly <- ifelse(estseed == "only", TRUE, FALSE)
 
   ##################################################################
   ## SET UP VARIABLE LISTS
@@ -299,30 +305,43 @@ check.rowcol <-
         ## add rowvar to cvars2keep
         cvars2keep <- c(cvars2keep, rowvar)
         
-      } else if (seedonly && rowvar %in% seedflds) {
-        bytdom <- TRUE
-        rowisdb <- isdbt
-        rowflds <- seedflds
-        if (!rowisdb) {
-          rowtabnm <- "seedx"
-        } else {
-          rowtabnm <- seedx
+        ## build row fromqry
+        rowfromqry <- paste0(
+          "\nFROM ", rowtabnm, " pc")
+        
+      } else {
+        if (seedonly && rowvar %in% seedflds) {
+          bytdom <- TRUE
+          rowisdb <- isdbt
+          rowflds <- seedflds
+          if (!rowisdb) {
+            rowtabnm <- "seedx"
+          } else {
+            rowtabnm <- seedx
+          }
+        } else if (rowvar %in% treeflds) {
+          bytdom <- TRUE
+          rowisdb <- isdbt
+          rowflds <- treeflds
+          if (!rowisdb) {
+            rowtabnm <- "treex"
+          } else {
+            rowtabnm <- treex
+          }
         }
-        joinid <- tuniqueid
-      } else if (rowvar %in% treeflds) {
-        bytdom <- TRUE
-        rowisdb <- isdbt
-        rowflds <- treeflds
-        if (!rowisdb) {
-          rowtabnm <- "treex"
-        } else {
-          rowtabnm <- treex
+
+        ## build row fromqry
+        rowfromqry <- paste0(
+          "\nFROM ", rowtabnm, " t")
+        
+        if (!is.null(pltcondx)) {
+          rowtjoinqry <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "t.", "pc.")
+          rowfromqry <- paste0(
+            rowfromqry,
+            "\nJOIN ", pltcondxnm, " pc ", rowtjoinqry)
         }
-        joinid <- tuniqueid
-      }
-      rowfromqry <- paste0(
-        "\nFROM ", rowtabnm, " pc")
-      
+      }  
+
 	    ## Check row.orderby
       ###############################################
       if (!is.null(row.orderby) && row.orderby != "NONE") {
@@ -352,7 +371,7 @@ check.rowcol <-
 		      rowvartmp <- row.orderby
 		      row.orderby <- rowvar
 		      rowvar <- rowvartmp
-		  
+
 		      #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
  	        if (popdatindb) {
             uniquerow <- tryCatch(
@@ -372,25 +391,23 @@ check.rowcol <-
         }  ## end row.orderby != "NONE"
         
         if (rowvar %in% treeflds && estseed %in% c("add", "only")) {
-          if (!is.null(seedf)) {
+          if (!is.null(seedx)) {
 
-            ## Build fromqry for seedling rowvar 
-            seedfromqry <- paste0("\nFROM ", seedfnnm)
-            if (isdbc) {
-              paste0(seedfromqry,
-                     "\nJOIN pltids ON(pltids.CN = ", seedfnnm, ".", cuniqueid,")")
-            }
-            
             if (!row.orderby %in% seedflds) {
               message(row.orderby, " not in seed")
               return(NULL)
-            }	  
+            }	 
             
-            ## Build query to get unique seedling rowvar values
+            ## Build query for getting unique values within population
             uniquerow.qry <- 
-                  paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
-                         seedfromqry,
-                         "\nORDER BY ", toString(c(row.orderby, rowvar)))
+              paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
+                     rowfromqry,
+                     whereqry,
+                     "\nORDER BY ", toString(c(row.orderby, rowvar)))
+            if (!is.null(pltcondxWITHqry)) {
+              uniquerow.qry <- paste0(pltcondxWITHqry,
+                                      "\n", uniquerow.qry)
+            }
 
             #message("getting unique values for ", rowvar, ":\n", uniquerow.qry, "\n")
             if (rowisdb) {
@@ -409,12 +426,12 @@ check.rowcol <-
                            return(NULL)})
             }
             
-            if (estseed == "add" && rowvar == "DIACL" && is.data.frame(treef)) {
-              seedclord <- min(treef[[row.orderby]]) - 0.5
-              seedf[[row.orderby]] <- seedclord
+            if (estseed == "add" && rowvar == "DIACL" && is.data.frame(treex)) {
+              seedclord <- min(treex[[row.orderby]]) - 0.5
+              seedx[[row.orderby]] <- seedclord
             } else {
-              if (estseed == "add" && is.data.frame(seedf) && rowvar=="DIACL" && !"DIACL" %in% seedflds) {
-                seedf$DIACL <- seedclnm
+              if (estseed == "add" && is.data.frame(seedx) && rowvar=="DIACL" && !"DIACL" %in% seedflds) {
+                seedx$DIACL <- seedclnm
               }
             }			
           } else {
@@ -466,13 +483,8 @@ check.rowcol <-
         if (rowvar %in% treeflds && estseed == "add") {
           
           ## Build seedling from query
-          if (!is.null(seedf)) {
-            seedfromqry <- paste0("\nFROM ", seedfnnm)
-            if (isdbc) {
-              paste0(seedfromqry,
-                     "\nJOIN pltids ON(pltids.CN = ", seedfnnm, ".", cuniqueid,")")
-            }
-            
+          if (!is.null(seedx)) {
+
             if (estseed == "add" && rowvar == "DIACL") {
               suniquex <- "<1"
               seedflds <- c(seedflds, "DIACL")
@@ -485,7 +497,7 @@ check.rowcol <-
               ## Build query for getting unique seedling rowvar values within population
               suniquex.qry <- 
                 paste0("SELECT DISTINCT ", rowvar, 
-                       seedfromqry,
+                       rowfromqry,
                        "\nORDER BY ", rowvar)
               if (estseed == "only") {
                 #message("getting unique values for ", rowvar, ":\n", suniquex.qry, "\n")
@@ -559,17 +571,17 @@ check.rowcol <-
               if (rowvar == "GROWTH_HABIT_CD") {
                 rowlut <- ref_growth_habit
                 rowLUTnm <- "GROWTH_HABIT_NM"
-                if (is.data.table(treef)) {
-                  treef <- merge(treef, ref_growth_habit, by=rowvar, all.x=TRUE)
-                  rowlut <- data.table(rowlut[rowlut[[rowvar]] %in% treef[[rowvar]], ])
+                if (is.data.table(treex)) {
+                  treex <- merge(treex, ref_growth_habit, by=rowvar, all.x=TRUE)
+                  rowlut <- data.table(rowlut[rowlut[[rowvar]] %in% treex[[rowvar]], ])
                 }
                 rowlut <- rowlut[, lapply(.SD, makefactor)]
               } else {
                 if (estseed != "only") {
-                  if (!is.data.frame(treef)) { 
+                  if (!is.data.frame(treex)) { 
                     x <- treeflds 
                   } else { 
-                    x <- treef 
+                    x <- treex 
                   } 
                   
                   if (rowvar == "SPCD") {
@@ -588,12 +600,12 @@ check.rowcol <-
                                        uniquex = uniquex)
                   }
                   if (!rowisdb) {
-                    treef <- setDT(rowLUT$xLUT)
+                    treex <- setDT(rowLUT$xLUT)
                   }
                   rowlut <- setDT(rowLUT$LUT)
                   rowLUTnm <- rowLUT$xLUTnm
                 } ## end estseed != only
-              
+                
                 if (estseed %in% c("add", "only") && !is.null(seedf)) {
                   if (!is.data.frame(seedf)) { 
                     x <- seedflds 
@@ -603,18 +615,18 @@ check.rowcol <-
                   if (rowvar %in% seedflds) {
                     if (rowvar == "SPCD") {
                       rowLUT <- datLUTspp(x = x, 
-                                        add0 = row.add0, 
-                                        xtxt = "seed", 
-                                        uniquex = suniquex)
+                                          add0 = row.add0, 
+                                          xtxt = "seed", 
+                                          uniquex = suniquex)
                     } else {            
                       rowLUT <- datLUTnm(x = x, 
-                                       xvar = rowvar, 
-                                       LUT = NULL, 
-                                       FIAname = row.FIAname,
-                                       group = rowLUTgrp, 
-                                       add0 = row.add0, 
-                                       xtxt = "seed", 
-                                       uniquex = suniquex)
+                                         xvar = rowvar, 
+                                         LUT = NULL, 
+                                         FIAname = row.FIAname,
+                                         group = rowLUTgrp, 
+                                         add0 = row.add0, 
+                                         xtxt = "seed", 
+                                         uniquex = suniquex)
                     }  
                     rowluts <- setDT(rowLUT$LUT)
                     rowluts <- rowluts[!rowluts[[rowvar]] %in% rowlut[[rowvar]],]
@@ -634,12 +646,12 @@ check.rowcol <-
               }
             } else { ## rowvar in pltcondflds
               rowLUT <- datLUTnm(x = rowflds, 
-                               xvar = rowvar, 
-                               uniquex = uniquex,
-                               LUT = rowlut, 
-                               FIAname = row.FIAname,
-                               group = rowLUTgrp,
-                               add0 = row.add0)
+                                 xvar = rowvar, 
+                                 uniquex = uniquex,
+                                 LUT = rowlut, 
+                                 FIAname = row.FIAname,
+                                 group = rowLUTgrp,
+                                 add0 = row.add0)
               rowlut <- setDT(rowLUT$LUT)
               rowLUTnm <- rowLUT$xLUTnm
             }
@@ -754,7 +766,7 @@ check.rowcol <-
         }
       }
     } else {  ## domlut is null
-      
+
       ## Build fromqry for colvar 
       if (colvar %in% pltcondflds) {
         bypcdom <- TRUE
@@ -770,29 +782,43 @@ check.rowcol <-
         ## add rowvar to cvars2keep
         cvars2keep <- c(cvars2keep, colvar)
         
-      } else if (seedonly && colvar %in% seedflds) {
-        bytdom <- TRUE
-        colisdb <- isdbt
-        colflds <- seedflds
-        if (!colisdb) {
-          coltabnm <- "seedx"
-        } else {
-          coltabnm <- seedx
+        ## build column fromqry
+        colfromqry <- paste0(
+          "\nFROM ", coltabnm, " pc")
+        
+        
+      } else {
+        if (seedonly && colvar %in% seedflds) {
+          bytdom <- TRUE
+          colisdb <- isdbt
+          colflds <- seedflds
+          if (!colisdb) {
+            coltabnm <- "seedx"
+          } else {
+            coltabnm <- seedx
+          }
+        } else if (colvar %in% treeflds) {
+          bytdom <- TRUE
+          colisdb <- isdbt
+          colflds <- treeflds
+          if (!colisdb) {
+            coltabnm <- "treex"
+          } else {
+            coltabnm <- treex
+          }
         }
-        joinid <- tuniqueid
-      } else if (colvar %in% treeflds) {
-        bytdom <- TRUE
-        colisdb <- isdbt
-        colflds <- colflds
-        if (!colisdb) {
-          coltabnm <- "treex"
-        } else {
-          coltabnm <- treex
-        }
-        joinid <- tuniqueid
+        
+        ## build column fromqry
+        colfromqry <- paste0(
+          "\nFROM ", coltabnm, " t")
+        
+        if (!is.null(pltcondx)) {
+          coltjoinqry <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "t.", "pc.")
+          colfromqry <- paste0(
+            colfromqry,
+            "\nJOIN ", pltcondxnm, " pc ", coltjoinqry)
+        } 
       }
-      colfromqry <- paste0(
-        "\nFROM ", coltabnm, " pc")
       
       ## Check col.orderby
       if (!is.null(col.orderby) && col.orderby != "NONE") {
@@ -879,8 +905,8 @@ check.rowcol <-
                   return(NULL)})
             }
             
-            if (estseed == "add" && colvar == "DIACL" && is.data.frame(treef)) {
-              seedclord <- min(treef[[col.orderby]]) - 0.5
+            if (estseed == "add" && colvar == "DIACL" && is.data.frame(treex)) {
+              seedclord <- min(treex[[col.orderby]]) - 0.5
               seedf[[col.orderby]] <- seedclord
             } else {
               if (estseed == "add" && is.data.frame(seedf) && colvar=="DIACL" && !"DIACL" %in% seedflds) {
@@ -930,7 +956,7 @@ check.rowcol <-
         if (colvar %in% treeflds && estseed %in% c("add", "only")) {
           
           ## Build seedling from query
-          if (!is.null(seedf)) {
+          if (!is.null(seedx)) {
             seedfromqry <- paste0("\nFROM ", seedfnnm)
             if (isdbc) {
               paste0(seedfromqry,
@@ -976,7 +1002,7 @@ check.rowcol <-
           } else {
             suniquex <- NULL
           }
-          coluniquex <- sort(unique(c(uniquex, suniquex)))
+          c <- sort(unique(c(uniquex, suniquex)))
         }
         if (col.FIAname || !is.null(collut)) {
           
@@ -1020,27 +1046,27 @@ check.rowcol <-
             
             if (colvar %in% treeflds) {
               
-              if (colvar == "GcolTH_HABIT_CD") {
+              if (colvar == "GROWTH_HABIT_CD") {
                 collut <- ref_gcolth_habit
-                colLUTnm <- "GcolTH_HABIT_NM"
-                if (is.data.table(treef)) {
-                  treef <- merge(treef, ref_gcolth_habit, by=colvar, all.x=TRUE)
-                  collut <- data.table(collut[collut[[colvar]] %in% treef[[colvar]], ])
+                colLUTnm <- "GROWTH_HABIT_NM"
+                if (is.data.table(treex)) {
+                  treex <- merge(treex, ref_gcolth_habit, by=colvar, all.x=TRUE)
+                  collut <- data.table(collut[collut[[colvar]] %in% treex[[colvar]], ])
                 }
                 collut <- collut[, lapply(.SD, makefactor)]
               } else {
                 if (estseed != "only") {
-                  if (!is.data.frame(treef)) { 
+                  if (!is.data.frame(treex)) { 
                     x <- treeflds 
                   } else { 
-                    x <- treef 
+                    x <- treex 
                   } 
                   
                   if (colvar == "SPCD") {
                     colLUT <- datLUTspp(x = x, 
                                         add0 = col.add0, 
                                         xtxt = "tree", 
-                                        uniquex = uniquex)
+                                        uniquex = coluniquex)
                   } else {
                     colLUT <- datLUTnm(x = x, 
                                        xvar = colvar, 
@@ -1049,20 +1075,20 @@ check.rowcol <-
                                        group = colLUTgrp, 
                                        add0 = col.add0, 
                                        xtxt = "tree", 
-                                       uniquex = uniquex)
+                                       uniquex = coluniquex)
                   }
                   if (!colisdb) {
-                    treef <- setDT(colLUT$xLUT)
+                    treex <- setDT(colLUT$xLUT)
                   }
                   collut <- setDT(colLUT$LUT)
                   colLUTnm <- colLUT$xLUTnm
                 } ## end estseed != only
                 
-                if (estseed %in% c("add", "only") && !is.null(seedf)) {
-                  if (!is.data.frame(seedf)) { 
+                if (estseed %in% c("add", "only") && !is.null(seedx)) {
+                  if (!is.data.frame(seedx)) { 
                     x <- seedflds 
                   } else { 
-                    x <- seedf 
+                    x <- seedx 
                   } 
                   if (colvar %in% seedflds) {
                     if (colvar == "SPCD") {
@@ -1087,11 +1113,11 @@ check.rowcol <-
                       collut <- rbind(collut, colluts)
                     }
                     if (!colisdb) {
-                      seedf <- colLUT$xLUT
+                      seedx <- colLUT$xLUT
                     }       
                   } else if (colvar == "DIACL") {
                     if (colisdb) {
-                      seedf$DIACL <- seedclnm
+                      seedx$DIACL <- seedclnm
                     }
                   }
                 }  ## end estseed %in% c("add", "only")
@@ -1161,7 +1187,7 @@ check.rowcol <-
     if (esttype %in% c("TREE", "RATIO")) {
       ## If rowvar and colvar both in tree table, concatenate columns for calculation.
       if (all(c(rowvar, colvar) %in% treeflds)) {
-        setkeyv(treef, c(rowvar, colvar))
+        #setkeyv(treex, c(rowvar, colvar))
         tdomvar <- rowvar
         tdomvar2 <- colvar
       } else if (any(c(rowvar, colvar) %in% treeflds)) {
@@ -1429,9 +1455,9 @@ check.rowcol <-
 	  
 	    if (is.factor(treex[[colvar]])) {
         if (estseed == "add" && colvar == "DIACL") {
-          collevels <- c(seedclnm, levels(treef[[colvar]]))
+          collevels <- c(seedclnm, levels(treex[[colvar]]))
         } else {
-          collevels <- levels(treef[[colvar]])
+          collevels <- levels(treex[[colvar]])
         }
         #uniquecol <- as.data.table(collevels)
         #names(uniquecol) <- colvar
@@ -1441,7 +1467,7 @@ check.rowcol <-
         if (estseed == "add" && colvar == "DIACL") {
           colvals <- c(seedclnm, sort(na.omit(unique(treex[, colvar, with=FALSE][[1]]))))
         } else {
-          colvals <- sort(na.omit(unique(treef[, colvar, with=FALSE][[1]])))
+          colvals <- sort(na.omit(unique(treex[, colvar, with=FALSE][[1]])))
         }
         uniquecol <- as.data.table(colvals)
         names(uniquecol) <- colvar
@@ -1479,9 +1505,9 @@ check.rowcol <-
         uniquecol[[colvar]] <- sort(uniquecol[[colvar]])
       } else {
         if (estseed == "add" && colvar == "DIACL") {
-          colvals <- c(seedclnm, sort(na.omit(unique(treef[, colvar, with=FALSE][[1]]))))
+          colvals <- c(seedclnm, sort(na.omit(unique(treex[, colvar, with=FALSE][[1]]))))
         } else {
-          colvals <- sort(na.omit(unique(treef[, colvar, with=FALSE][[1]])))
+          colvals <- sort(na.omit(unique(treex[, colvar, with=FALSE][[1]])))
         }
         uniquecol <- as.data.table(colvals)
         names(uniquecol) <- colvar
@@ -1514,8 +1540,8 @@ check.rowcol <-
       }
       if (any(c(colvar, col.orderby) %in% names(treex))) {
         if (col.orderby %in% names(treex)) {
-          if (class(treef[[col.orderby]]) != class(val)) {
-            class(val) <- class(treef[[col.orderby]])
+          if (class(treex[[col.orderby]]) != class(val)) {
+            class(val) <- class(treex[[col.orderby]])
           } 
           treex[treex[[col.orderby]] %in% vals2chg, col.orderby] <- val
         } else {

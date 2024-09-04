@@ -442,7 +442,6 @@ spExtractRast <- function(xyplt,
     ncores <- 1
   }
 
-
   inputs <- data.table(rasterfile, band, var.name, interpolate, windowsize, statistic,
 			rast.NODATA)
   message(paste0(capture.output(inputs), collapse = "\n"))

@@ -612,9 +612,9 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   estdat <- 
     getGBestimates(esttype = esttype,
-                   domdat = cdomdat,
-                   cuniqueid = cuniqueid,
-                   estvar.name <- estnm,
+                   domdatn = cdomdat,
+                   uniqueid = cuniqueid,
+                   estvarn.name = estnm,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
@@ -631,7 +631,7 @@ modGBarea <- function(GBpopdat,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
                    col.add0 = col.add0)
-  
+ 
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest
   unit_colest <- estdat$unit_colest

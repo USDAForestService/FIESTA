@@ -200,13 +200,13 @@ datLUTnm <- function(xvar,
   if (isdb) {
     datnmlst <- DBI::dbListFields(dbconn, datnm)
 	
-	## Check dbwrite 
+	  ## Check dbwrite 
     dbwrite <- pcheck.logical(dbwrite, 
 	                          varnm = "dbwrite", 
 	                          title = "Write to database?", 
                               first = "NO", gui=gui)
 
-	## Check dbreturn 
+	  ## Check dbreturn 
     dbreturn <- pcheck.logical(dbreturn, 
 	                           varnm = "dbreturn", 
 	                           title = "Return data from database?", 
@@ -243,7 +243,7 @@ datLUTnm <- function(xvar,
       issf <- ifelse ("sf" %in% class(datx), TRUE, FALSE)
       if (issf) datx <- data.table(datx) 
       datnmlst <- names(datx) 
-	     datkey <- key(datx)
+	    datkey <- key(datx)
 	  }
   }
 
@@ -649,7 +649,7 @@ datLUTnm <- function(xvar,
 	    LUTx <- LUTx[LUTx[[LUTvar]] %in% uniquex, ]
 	  }
   }
-          
+
   ## Return list
   ########################################################
   if ((!isdb || dbreturn) && !is.null(datx)) {

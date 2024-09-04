@@ -25,13 +25,18 @@ check.cond <- function(areawt, areawt2,
   estvarqry <- paste0("SUM(COALESCE(", estvarqry, ", 0)) AS ", estnm)
   
   ## Build SELECT query
-  byvars <- paste0("pc.", c(cuniqueid, condid))
-  cdomdatvars <- c(byvars, paste0("pc.", bydomainlst))
+  byvars <- c(cuniqueid, condid)
+  if (!is.null(bydomainlst) || length(bydomainlst) > 0) {
+    byvars <- c(byvars, bydomainlst)
+  }
+  cdomdatvars <- toString(paste0("pc.", byvars))
+
+
   #  cdomdatselectqry <- 
   #    paste0("SELECT ", toString(cdomdatvars), ", 1 AS TOTAL, ",
   #           "\n    ", estvarqry)
   cdomdatselectqry <- 
-    paste0("SELECT ", toString(cdomdatvars), ", ",
+    paste0("SELECT ", cdomdatvars, ", ",
            "\n    ", estvarqry)
   
   ## Build cdomdat FROM query
@@ -46,8 +51,8 @@ check.cond <- function(areawt, areawt2,
     paste0(cdomdatselectqry, 
            cdomdatfromqry,
            pcwhereqry,
-           "\nGROUP BY ", toString(cdomdatvars))
-  
+           "\nGROUP BY ", cdomdatvars)
+
   #Run query for cdomdat
   if (!popdatindb) {
     cdomdat <- tryCatch(
@@ -71,7 +76,7 @@ check.cond <- function(areawt, areawt2,
         return(NULL) })
   }
   if (is.null(cdomdat) || nrow(cdomdat) == 0) {
-    message(cdomdat.qry)
+    message(cdomdatqry)
     return(NULL)
   }
   setkeyv(setDT(cdomdat), c(cuniqueid, condid))

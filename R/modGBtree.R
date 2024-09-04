@@ -451,6 +451,10 @@ modGBtree <- function(GBpopdat,
   dbqueriesWITH <- GBpopdat$dbqueriesWITH
   adjcase <- GBpopdat$adjcase
   
+  #adjfactors <- GBpopdat$adjfactors
+  #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
+  #popVOL_compare
+  
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
       if (!is.null(pop_dsn)) {
@@ -554,7 +558,7 @@ modGBtree <- function(GBpopdat,
   seedx <- estdatVOL$seedx
   seedflds <- estdatVOL$seedflds
   
-  
+
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -567,6 +571,9 @@ modGBtree <- function(GBpopdat,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
                  withqry = pltcondxWITHqry,
+                 estseed = estseed,
+                 treex = treex, treeflds = treeflds,
+                 seedx = seedx, seedflds = seedflds,
                  cuniqueid = cuniqueid, condid = condid,
                  rowvar = rowvar, colvar = colvar, 
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
@@ -598,8 +605,10 @@ modGBtree <- function(GBpopdat,
   grpvar <- rowcolinfo$grpvar
   bytdom <- rowcolinfo$bytdom
   bypcdom <- rowcolinfo$bypcdom
+  tdomvar <- rowcolinfo$tdomvar
+  tdomvar2 <- rowcolinfo$tdomvar2
   #rm(rowcolinfo)
-  
+
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
     uniquecol <- data.table(unitarea[[unitvar]])
@@ -612,10 +621,13 @@ modGBtree <- function(GBpopdat,
   ###############################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   if (popdatindb) {
-    pltidsWITHqry <- ifelse(bypcdom, dbqueriesWITH$pltcondxadjWITH, dbqueriesWITH$pltidsadjWITH)
+    pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
   } else {
     pltidsWITHqry <- NULL
   }
+  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTree.R")
+  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTreeDom.R")
+  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.tree.R")
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -628,7 +640,9 @@ modGBtree <- function(GBpopdat,
                estvarn.filter = estvar.filter, 
                esttotn = TRUE, 
                bydomainlst = domainlst,
+               tdomvar = tdomvar, tdomvar2 = tdomvar2,
                adjtree = adjtree, 
+               adjvar = "tadjfac",
                metric = metric, 
                woodland = woodland,
                dbconn = popconn,
@@ -636,7 +650,7 @@ modGBtree <- function(GBpopdat,
                pcwhereqry = pcwhereqry,
                bytdom = bytdom,
                gui = gui)
-  if (is.null(treedat)) return(NULL) 
+  if (is.null(treedat)) stop(NULL) 
   tdomdat <- treedat$tdomdat
   estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name
@@ -688,15 +702,14 @@ modGBtree <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
-  
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
   estdat <- 
     getGBestimates(esttype = esttype,
-                   domdat = tdomdat,
-                   cuniqueid = cuniqueid,
-                   estvar.name <- estvar.name,
+                   domdatn = tdomdat,
+                   uniqueid = cuniqueid,
+                   estvarn.name = estvar.name,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
@@ -713,6 +726,7 @@ modGBtree <- function(GBpopdat,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
                    col.add0 = col.add0)
+  if (is.null(estdat)) stop()
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest
   unit_colest <- estdat$unit_colest
@@ -720,7 +734,7 @@ modGBtree <- function(GBpopdat,
   rowunit <- estdat$rowunit
   totunit <- estdat$totunit
   unitvar <- estdat$unitvar
-  
+
   
   ###################################################################################
   ## GENERATE OUTPUT TABLES
@@ -758,10 +772,21 @@ modGBtree <- function(GBpopdat,
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
   
+  if (!row.add0 && any(est2return$Total == "--")) {
+    est2return <- est2return[est2return$Total != "--",]
+  }
+  
+  
   if (!is.null(est2return)) {
+    if (!row.add0 && any(est2return$Total == "--")) {
+      est2return <- est2return[est2return$Total != "--",]
+    }
     returnlst$est <- setDF(est2return)
   }
   if (!is.null(pse2return)) {
+    if (!row.add0 && any(pse2return$Total == "--")) {
+      pse2return <- pse2return[pse2return$Total != "--",]
+    }
     returnlst$pse <- setDF(pse2return) 
   }
   if(returntitle) {
