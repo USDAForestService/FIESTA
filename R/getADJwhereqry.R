@@ -47,6 +47,7 @@ getADJwhereSUBP <- function(subplotflds, ACI = FALSE, adjwhereqry = NULL) {
   
   ## Description:
   ## Checks nonresponse filters for subplots
+  subpa. <- "subp."
   
   ## Filter for nonsampled subplots in subplot
   ## (SUBP_STATUS_CD <> 3)

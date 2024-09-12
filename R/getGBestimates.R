@@ -140,7 +140,7 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
 
   ## Get column (and cell) estimate  
   if (colvar != "NONE") {
-    
+
     ## Sum numerator to plot, colvar level
     domdatn <- domdatn[!is.na(domdatn[[colvar]]),] 
     domdattot <- 
@@ -187,7 +187,7 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
    domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
                  by = c(strunitvar, uniqueid, grpvar), .SDcols=estvarn.name]
-   
+  
    if (esttype == "RATIO") {
 
      if (all(grpvar %in% names(domdatd))) {

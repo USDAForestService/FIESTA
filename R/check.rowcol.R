@@ -13,6 +13,7 @@ check.rowcol <-
 	         rowvar = NULL, colvar = NULL, 
            row.FIAname = FALSE, col.FIAname = FALSE,
 	         row.orderby = NULL, col.orderby = NULL, 
+           row.classify = NULL, col.classify = NULL,
            row.add0 = FALSE, col.add0 = FALSE, 
 	         domvarlst = NULL, domlut = NULL, 
            title.rowvar = NULL, title.colvar = NULL, 
@@ -219,7 +220,7 @@ check.rowcol <-
 
   if (rowvar != "NONE") {   
     rowuniquex <- NULL
-    rowvarnm <- rowvar
+    rowvarnm=rowvarnew <- rowvar
 
     if (!is.null(row.FIAname) && row.FIAname) {
       ## Get FIA reference table for xvar
@@ -443,11 +444,11 @@ check.rowcol <-
         
         ## Build query for getting unique rowvar values within population
         uniquex.qry <- 
-		        paste0("SELECT DISTINCT ", rowvar, 
-		            rowfromqry,
-			          whereqry,
-				       "\nORDER BY ", rowvar)
-
+		      paste0("SELECT DISTINCT ", rowvar, 
+		               rowfromqry,
+			             whereqry,
+				           "\nORDER BY ", rowvar)
+        
 		    #message("getting unique values for ", rowvar, ":\n", cuniquex.qry, "\n")
 	      if (rowisdb) {
 	        if (!is.null(withqry)) {
@@ -474,11 +475,103 @@ check.rowcol <-
             message(uniquex.qry)
           }
 		    }
+        
+        ## Build query for getting unique rowclass values within population
+        if (!is.null(row.classify)) {
+          class. <- ifelse (rowvar %in% pltcondflds, "pc.", "t.")
+            
+          if (is.vector(row.classify)) {
+            minx <- min(uniquex, na.rm=TRUE)
+            #maxx <- max(uniquex, na.rm=TRUE)
+            minbrk <- min(row.classify)
+            #maxbrk <- max(row.classify)
+            if (minx < minbrk) {
+              minxmiss <- sort(unique(minx[minx < minbrk]))
+              message("there are values in dataset less than class breaks defined for ", rowvar)
+              message("...these values are classified as NA: ", toString(minxmiss))
+            }
+            #if (maxx > maxbrk) {
+            #  maxxmiss <- sort(unique(maxx[maxx > maxbrk]))
+            #  message("there are values in dataset greater than class breaks defined for ", rowvar)
+            #  message("...these values are classified as NA: ", toString(maxxmiss))
+            #}
+            
+            rowclassnm <- paste0(rowvar, "CL")
+            rowclassqry <- classifyqry(classcol = rowvar,
+                                       cutbreaks = row.classify,
+                                       class. = class.,
+                                       fill = NULL)
+            
+          } else if (is.data.frame(row.classify)) {
+            if (ncol(row.classify) != 2) {
+              message("invalid row.classify... must be a vector of class breaks or a data.frame with 2 columns")
+              stop()
+            }
+            rowclassnm <- names(row.classify)[!names(row.classify) %in% rowvar]
+            if (length(rowclassnm) != 1) {
+              message("invalid classes for ", rowvar, 
+                      "... the data.frame must include name of variable to classify: ", rowvar)
+              stop()
+            }
+            fromval <- row.classify[[rowvar]]
+            toval <- row.classify[[rowclassnm]]
+            
+            ## Check values of fromval
+            if (any(!fromval %in% uniquex)) {
+              missvals <- fromval[which(!fromval %in% uniquex)]
+              message("missing values in row.classify: ", toString(missvals))
+            }
+            rowclassqry <- classqry(rowvar, fromval, toval, 
+                                    classnm = rowclassnm, 
+                                    class. = class.,
+                                    fill = NULL)
+          } else {
+            message("invalid row.classify... must be a vector of class breaks or a data.frame with 2 columns")
+            stop()
+          }
+          
+          ## Build query for getting unique rowclass values within population
+          rowvarnm=rowvarnew <- rowclassnm
+          uniquex.qry <- 
+            paste0("SELECT DISTINCT \n", 
+                   rowclassqry,
+                   rowfromqry,
+                   whereqry,
+                   "\nORDER BY ", rowclassnm)
+          
+          
+          ## get unique values for classified rowvar
+          if (rowisdb) {
+            if (!is.null(withqry)) {
+              uniquex.qry <- paste0(withqry, 
+                                    "\n", uniquex.qry)
+            }
+            uniquex <- tryCatch(
+              DBI::dbGetQuery(popconn, uniquex.qry)[[1]],
+              error=function(e) {
+                message("invalid unique rowvar query...")
+                message(e,"\n")
+                return(NULL)})
+            if (is.null(uniquex)) {
+              message(uniquex.qry)
+            }
+          } else {
+            uniquex <- tryCatch(
+              sqldf::sqldf(uniquex.qry, connection = NULL)[[1]],
+              error=function(e) {
+                message("invalid unique row query...")
+                message(e,"\n")
+                return(NULL)})
+            if (is.null(uniquex)) {
+              message(uniquex.qry)
+            }
+          }
+        }
         if (any(is.na(uniquex)) && !keepNA) {
           uniquex <- uniquex[!is.na(uniquex)]		
 		    }
         rowuniquex <- uniquex
-      
+
         ## Check seedling table
         if (rowvar %in% treeflds && estseed == "add") {
           
@@ -692,7 +785,7 @@ check.rowcol <-
     }  ## end domlut is null
   } ## end rowvar != "NONE"      
 
-  
+
   ##############################################################
   ## COLUMN VARIABLE
   ##############################################################
@@ -707,7 +800,7 @@ check.rowcol <-
 
   if (colvar != "NONE") {
     coluniquex <- NULL
-    colvarnm <- colvar
+    colvarnm=colvarnew <- colvar
 	
     if (!is.null(col.FIAname) && col.FIAname) {
       ## Get FIA reference table for xvar
@@ -947,6 +1040,85 @@ check.rowcol <-
               message(e,"\n")
               return(NULL)})
         }
+        
+        if (!is.null(col.classify)) {
+          class. <- ifelse (colvar %in% pltcondflds, "pc.", "t.")
+            
+          if (is.vector(col.classify)) {
+            minx <- min(uniquex, na.rm=TRUE)
+            #maxx <- max(uniquex, na.rm=TRUE)
+            minbrk <- min(col.classify)
+            #maxbrk <- max(col.classify)
+            if (minx < minbrk) {
+              minxmiss <- sort(unique(minx[minx < minbrk]))
+              message("there are values in dataset less than class breaks defined for ", colvar)
+              message("...these values are classified as NA: ", toString(minxmiss))
+            }
+            #if (maxx > maxbrk) {
+            #  maxxmiss <- sort(unique(maxx[maxx > maxbrk]))
+            #  message("there are values in dataset greater than class breaks defined for ", colvar)
+            #  message("...these values are classified as NA: ", toString(maxxmiss))
+            #}
+            
+            colclassnm <- paste0(colvar, "CL")
+            colclassqry <- classifyqry(classcol = colvar,
+                                       cutbreaks = col.classify,
+                                       class. = class.,
+                                       fill = NULL)
+            
+          } else if (is.data.frame(col.classify)) {
+            if (ncol(col.classify) != 2) {
+              message("invalid col.classify... must be a vector of class breaks or a data.frame with 2 columns")
+              stop()
+            }
+            colclassnm <- names(col.classify)[!names(col.classify) %in% colvar]
+            if (length(colclassnm) != 1) {
+              message("invalid classes for ", colvar, 
+                      "... the data.frame must include name of variable to classify: ", colvar)
+              stop()
+            }
+            fromval <- col.classify[[colvar]]
+            toval <- row.classify[[colclassnm]]
+            colclassqry <- classqry(colvar, fromval, toval, 
+                                    classnm = colclassnm, 
+                                    class. = class.,
+                                    fill = NULL)
+          } else {
+            message("invalid col.classify... must be a vector of class breaks or a data.frame with 2 columns")
+            stop()
+          }
+          
+          ## Build query for getting unique colclass values within population
+          colvarnm=colvarnew <- colclassnm
+          uniquex.qry <- 
+            paste0("SELECT DISTINCT \n", 
+                   colclassqry,
+                   colfromqry,
+                   whereqry,
+                   "\nORDER BY ", colclassnm)
+          
+          ## get unique values for classified colvar
+          if (colisdb) {
+            if (!is.null(withqry)) {
+              uniquex.qry <- paste0(withqry, 
+                                    "\n", uniquex.qry)
+            }
+            uniquex <- tryCatch(
+              DBI::dbGetQuery(popconn, uniquex.qry)[[1]],
+              error=function(e) {
+                message("invalid unique colvar query...")
+                message(e,"\n")
+                return(NULL)})
+          } else {
+            uniquex <- tryCatch(
+              sqldf::sqldf(uniquex.qry, connection = NULL)[[1]],
+              error=function(e) {
+                message("invalid unique col query...")
+                message(e,"\n")
+                return(NULL)})
+          }
+        }
+        
         if (any(is.na(uniquex)) && !keepNA) {
           uniquex <- uniquex[!is.na(uniquex)]		
         }
@@ -1002,7 +1174,7 @@ check.rowcol <-
           } else {
             suniquex <- NULL
           }
-          c <- sort(unique(c(uniquex, suniquex)))
+          coluniquex <- sort(unique(c(uniquex, suniquex)))
         }
         if (col.FIAname || !is.null(collut)) {
           
@@ -1204,7 +1376,7 @@ check.rowcol <-
   domainlst <- c(domainlst, rowvar, colvar)
   domainlst <- domainlst[domainlst != "NONE"]
 
-  
+
   ############################################################################
   ## Get uniquerow and uniquecol
   ############################################################################
@@ -1227,11 +1399,11 @@ check.rowcol <-
 	             row.orderby %in% names(uniquerow)) {
       setkeyv(uniquerow, c(rowgrpnm, row.orderby))
     }
+    
   } else if (!is.null(rowuniquex)) {
-    
     uniquerow <- as.data.table(rowuniquex)
-    names(uniquerow) <- rowvar
-    
+    names(uniquerow) <- rowvarnew
+
     if (rowvar == "GROWTH_HABIT_CD") {
       ghcodes <- ref_growth_habit[[rowvar]]
       ghord <- ghcodes[ghcodes %in% rowuniquex]
@@ -1242,8 +1414,8 @@ check.rowcol <-
         rowuniquex <- rowuniquex[match(ghord, rowuniquex)]
       }
     }
-    uniquerow[[rowvar]] <- factor(uniquerow[[rowvar]], levels=rowuniquex)
-    setkeyv(uniquerow, rowvar)
+    uniquerow[[rowvarnew]] <- factor(uniquerow[[rowvarnew]], levels=rowuniquex)
+    setkeyv(uniquerow, rowvarnew)
     
   } else if (rowvar %in% pltcondflds && is.data.frame(pltcondx)) {
     if (!is.null(row.orderby) && row.orderby != "NONE") {
@@ -1377,7 +1549,6 @@ check.rowcol <-
     }
   }
 
-
   #if (!is.null(landarea) && landarea %in% c("FOREST", "TIMBERLAND")) {
   #  uniquerow2 <- uniquerow[!uniquerow[[rowvar]] %in% c(0, "Nonforest"),]
   #}
@@ -1396,12 +1567,13 @@ check.rowcol <-
 	  }
   } else if (!is.null(uniquecol)) {
     uniquecol <- setDT(uniquecol)
-    if (col.orderby != "NONE" && col.orderby %in% names(uniquecol))
+    if (!is.null(col.orderby)  && col.orderby != "NONE" && 
+        col.orderby %in% names(uniquecol))
       setkeyv(uniquecol, col.orderby)
-  } else if (!is.null(coluniquex)) {
     
+  } else if (!is.null(coluniquex)) {
     uniquecol <- as.data.table(coluniquex)
-    names(uniquecol) <- colvar
+    names(uniquecol) <- colvarnew
     
     if (colvar == "GROWTH_HABIT_CD") {
       ghcodes <- ref_growth_habit[[colvar]]
@@ -1413,8 +1585,9 @@ check.rowcol <-
         coluniquex <- rowuniquex[match(ghord, coluniquex)]
       }
     }
-    uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=coluniquex)
-    setkeyv(uniquecol, colvar)
+    uniquecol[[colvarnew]] <- factor(uniquecol[[colvarnew]], levels=coluniquex)
+    setkeyv(uniquecol, colvarnew)
+    
   } else if (colvar %in% pltcondflds && is.data.frame(pltcondx)) {
     if (!is.null(col.orderby) && col.orderby != "NONE") {
       uniquecol <- unique(pltcondx[, c(colvar, col.orderby), with=FALSE])
@@ -1435,23 +1608,28 @@ check.rowcol <-
     }
   } else if (colvar %in% treeflds) {
     if (!is.null(col.orderby) && col.orderby != "NONE") {
-      uniquecol <- unique(treex[,c(colvar, col.orderby), with=FALSE])
-      setkeyv(uniquecol, col.orderby)
-
-      if (estseed == "add" && !is.null(seedf)) {
-        if (all(c(colvar, col.orderby) %in% names(seedx)) && colvar == "DIACL") {
-          if (is.factor(uniquecol[[colvar]])) {
-            levels(uniquecol[[colvar]]) <- c(seedclnm, levels(uniquecol[[colvar]]))
+      if (estseed == "only" && is.data.frame(seedx)) {
+        uniquecol <- unique(seedx[,c(colgrpord, colgrpnm, col.orderby, colvar), with=FALSE])
+        setkeyv(uniquecol, c(colgrpord, colgrpnm, col.orderby))
+      } else {
+        uniquecol <- unique(treex[,c(colgrpord, colgrpnm, col.orderby, colvar), with=FALSE])
+        setkeyv(uniquecol, c(colgrpord, colgrpnm, col.orderby))
+        
+        if (estseed == "add" && !is.null(seedf)) {
+          if (all(c(colvar, col.orderby) %in% names(seedx)) && colvar == "DIACL") {
+            if (is.factor(uniquecol[[colvar]])) {
+              levels(uniquecol[[colvar]]) <- c(seedclnm, levels(uniquecol[[colvar]]))
+            }
+            if (is.factor(uniquecol[[col.orderby]])) {
+              levels(uniquecol[[col.orderby]]) <- c(seedclord, levels(uniquecol[[col.orderby]]))
+            }
+            uniqueseed <- data.table(seedclord, seedclnm)
+            setreeflds(uniqueseed, c(col.orderby, colvar))
+            uniquecol <- rbindlist(list(uniqueseed, uniquecol))
           }
-          if (is.factor(uniquecol[[col.orderby]])) {
-            levels(uniquecol[[col.orderby]]) <- c(seedclord, levels(uniquecol[[col.orderby]]))
-          }
-          uniqueseed <- data.table(seedclord, seedclnm)
-          setreeflds(uniqueseed, c(col.orderby, colvar))
-          uniquecol <- rbindlist(list(uniqueseed, uniquecol))
         }
       }
-    } else if (!is.null(uniquecol)) {
+    } else if (!is.null(uniquecol) && is.data.frame(treex)) {
 	  
 	    if (is.factor(treex[[colvar]])) {
         if (estseed == "add" && colvar == "DIACL") {
@@ -1475,24 +1653,8 @@ check.rowcol <-
         uniquecol[[colvar]] <- sort(uniquecol[[colvar]])
         setkeyv(uniquecol, colvar)
       }
-    } else if (!is.null(coluniquex)) {
-      uniquecol <- as.data.table(coluniquex)
-      names(uniquecol) <- colvar
-	  
-	    if (colvar == "GROWTH_HABIT_CD") {
-	      ghcodes <- c("SD", "ST", "GR", "FB", "SH", "TT", "LT", "TR", "NT")
-	      ghord <- ghcodes[ghcodes %in% coluniquex]
-	      if (length(ghord) < length(coluniquex)) {
-	        missgh <- coluniquex[!coluniquex %in% ghord]
-          message("growth_habit_cd not in ref: ", toString(missgh)) 
-        } else {		  
-	        coluniquex <- coluniquex[match(ghord, coluniquex)]
-	      }
-      }
-      uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=coluniquex)
-	    setkeyv(uniquecol, colvar)
-	  
-	  } else {
+
+	  } else if (is.data.frame(treex)) {
 	    if (is.factor(treex[[colvar]])) {
         if (estseed == "add" && colvar == "DIACL") {
           collevels <- c(seedclnm, levels(treex[[colvar]]))
@@ -1574,7 +1736,7 @@ check.rowcol <-
 
     ## Create factors for ordering
 	  uniquerow <- uniquerow[, lapply(.SD, makefactor)]
-	  setkeyv(uniquerow, rowvar)
+	  setkeyv(uniquerow, rowvarnew)
   }
 
   if (!is.null(uniquecol)) {
@@ -1587,6 +1749,7 @@ check.rowcol <-
 
     ## Create factors for ordering
 	  uniquecol <- uniquecol[, lapply(.SD, makefactor)]
+	  setkeyv(uniquecol, colvarnew)
   }
 
   ## Define pltcondvars
@@ -1605,6 +1768,22 @@ check.rowcol <-
                     rowgrpnm = rowgrpnm, title.rowgrp = title.rowgrp, 
                     tdomvar = tdomvar, tdomvar2 = tdomvar2, grpvar = grpvar)
   
+  if (any(!is.null(row.classify), !is.null(col.classify))) {
+    if (!is.null(row.classify)) {
+      classifyrow <- list()
+      classifyrow[["row.classify"]] <- row.classify
+      classifyrow[["rowclassnm"]] <- rowclassnm
+      classifyrow[["rowclassqry"]] <- rowclassqry
+      returnlst$classifyrow <- classifyrow
+    }
+    if (!is.null(col.classify)) {
+      classifycol <- list()
+      classifycol[["col.classify"]] <- col.classify
+      classifycol[["colclassnm"]] <- colclassnm
+      classifycol[["colclassqry"]] <- colclassqry
+      returnlst$classifycol <- classifycol
+    }
+  }
   return(returnlst)
 }
 

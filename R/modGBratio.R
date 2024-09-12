@@ -300,8 +300,10 @@ modGBratio <- function(GBpopdat,
                        pcfilter = NULL, 
                        estvarn = NULL, 
                        estvarn.filter = NULL, 
+                       estvarn.tderive = NULL,
                        estvard = NULL, 
                        estvard.filter = NULL, 
+                       estvard.tderive = NULL,
                        rowvar = NULL, 
                        colvar = NULL, 
                        sumunits = TRUE, 
@@ -344,7 +346,7 @@ modGBratio <- function(GBpopdat,
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=tdom=estvar.name=
-		variable=estvard.name <- NULL
+		variable=estvard.name=classify <- NULL
   
   
   ##################################################################
@@ -470,6 +472,8 @@ modGBratio <- function(GBpopdat,
   popconn <- GBpopdat$popconn
   dbqueries <- GBpopdat$dbqueries
   dbqueriesWITH <- GBpopdat$dbqueriesWITH
+  areawt <- GBpopdat$areawt
+  areawt2 <- GBpopdat$areawt2
   adjcase <- GBpopdat$adjcase
   
   if (popdatindb) {
@@ -575,7 +579,7 @@ modGBratio <- function(GBpopdat,
   seedx <- estdatVOL$seedx
   seedflds <- estdatVOL$seedflds
   
-  
+
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -596,6 +600,7 @@ modGBratio <- function(GBpopdat,
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
                  row.orderby = row.orderby, col.orderby = col.orderby, 
                  row.add0 = row.add0, col.add0 = col.add0, 
+                 row.classify = row.classify, col.classify = col.classify,
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
@@ -619,10 +624,26 @@ modGBratio <- function(GBpopdat,
   title.colvar <- rowcolinfo$title.colvar
   rowgrpnm <- rowcolinfo$rowgrpnm
   title.rowgrp <- rowcolinfo$title.rowgrp
+  tdomvar <- rowcolinfo$tdomvar
+  tdomvar2 <- rowcolinfo$tdomvar2
   grpvar <- rowcolinfo$grpvar
   bytdom <- rowcolinfo$bytdom
   bypcdom <- rowcolinfo$bypcdom
+  classifyrow <- rowcolinfo$classifyrow
+  classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
+  
+  
+  ## if classified columns, create classify list for summarizing tree data
+  if (any(!is.null(classifyrow), !is.null(classifycol))) {
+    classify <- list()
+    if (!is.null(classifyrow)) {
+      classify[[rowvar]] <- classifyrow$row.classify
+    }
+    if (!is.null(classifycol)) {
+      classify[[colvar]] <- classifycol$col.classify
+    }
+  }
   
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
@@ -630,7 +651,6 @@ modGBratio <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-
     
   ###############################################################################
   ### Get estimation data from tree table
@@ -641,6 +661,9 @@ modGBratio <- function(GBpopdat,
   } else {
     pltidsWITHqry <- NULL
   }
+  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTree.R")
+  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTreeDom.R")
+  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.tree.R")
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -650,14 +673,17 @@ modGBratio <- function(GBpopdat,
                tuniqueid = tuniqueid, cuniqueid = cuniqueid, 
                esttype = esttype, 
                ratiotype = ratiotype,
-               estvarn = estvar, 
+               estvarn = estvarn, 
                estvarn.filter = estvarn.filter, 
                esttotn = TRUE, 
                tdomvar = tdomvar, tdomvar2 = tdomvar2,
                bydomainlst = domainlst,
                adjtree = adjtree, 
+               adjvar = "tadjfac",
                metric = metric, 
                woodland = woodland,
+               tderive = tderive,
+               classify = classify,
                dbconn = popconn,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
@@ -672,6 +698,7 @@ modGBratio <- function(GBpopdat,
   estunitsn <- treedat$estunitsn
   estunitsd <- treedat$estunitsd
   treeqry <- treedat$treeqry
+  classifynmlst <- treedat$classifynmlst
   pcdomainlst <- treedat$pcdomainlst
   
   if (ratiotype == "PERTREE") {
@@ -679,6 +706,7 @@ modGBratio <- function(GBpopdat,
     estvard.name <- treedat$estvard.name
     tdomvarlstd <- treedat$tdomvarlstd
   } else {
+    estvard <- treedat$estvard
     estvard.name <- areawt
     tdomvarlstd <- NULL
     estunitsd <- areaunits
@@ -695,17 +723,32 @@ modGBratio <- function(GBpopdat,
                  adjcase = adjcase,
                  cuniqueid = cuniqueid, 
                  condid = condid,
-                 bydomainlst = pcdomainlst,
+                 rowvar = rowvar, colvar = colvar,
+                 pcdomainlst = pcdomainlst,
                  popdatindb = popdatindb,
                  popconn = popconn,
                  pltcondx = pltcondx,
                  pltidsadj = pltidsadj,
                  pltcondxadjWITHqry = pltcondxadjWITHqry,
-                 pcwhereqry = pcwhereqry)
+                 pcwhereqry = pcwhereqry,
+                 classifyrow = classifyrow,
+                 classifycol = classifycol)
     cdomdat <- conddat$cdomdat
     cdomdatqry <- conddat$cdomdatqry
   }
   
+  ## If classified rowvar or colvar, get class names
+  if (!is.null(classifynmlst)) {
+    if (!is.null(classifynmlst[[rowvar]])) {
+      rowvar <- classifynmlst[[rowvar]]
+    }
+    if (!is.null(classifynmlst[[colvar]])) {
+      colvar <- classifynmlst[[colvar]]
+    }
+    if (!is.null(grpvar)) {
+      grpvar <- c(rowvar, colvar)
+    }
+  }
   
   ###############################################################################
   ### Get titles for output tables
@@ -834,8 +877,6 @@ modGBratio <- function(GBpopdat,
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
   
-  est2return
-  
   if (!row.add0 && any(est2return$Total == "--")) {
     est2return <- est2return[est2return$Total != "--",]
   }
@@ -864,12 +905,12 @@ modGBratio <- function(GBpopdat,
     NBRPLTtot <- stratalut[stratalut[[unitvar]] %in% UNITStot, list(NBRPLT = sum(n.strata, na.rm=TRUE)), 
 	                 by=unitvars]
 
-	if ("unit_totest" %in% names(tabs$rawdat)) {
-	  tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
-	}
-	if (sumunits && "totest" %in% names(tabs$rawdat)) {
-	  tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
-	}
+	  if ("unit_totest" %in% names(tabs$rawdat)) {
+	    tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
+	  }
+	  if (sumunits && "totest" %in% names(tabs$rawdat)) {
+	    tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
+	  }
 
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(tdomdat) 
@@ -909,6 +950,7 @@ modGBratio <- function(GBpopdat,
         }
       }
     }
+
     rawdat$module <- "GB"
     rawdat$esttype <- esttype
     rawdat$GBmethod <- ifelse(strata, "PS", "HT")

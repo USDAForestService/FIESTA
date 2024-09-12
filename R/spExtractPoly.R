@@ -476,7 +476,6 @@ spExtractPoly <- function(xyplt,
     spxyext <- spxyext[!apply(sf::st_drop_geometry(spxyext[, polyvcolslst]), 1, 
                                 function(x) all(is.na(x))),]
   }
-  
 
   if (savedata) {
     datExportData(spxyext, 

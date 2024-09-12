@@ -10,8 +10,10 @@ check.tree <-
            bytdom, tdomvar = NULL, tdomvar2 = NULL,
            bydomainlst = NULL,
 	         adjtree = FALSE, adjvar = "tadjfac", 
-           pltassgn = NULL, adjTPA = 1, tderive = NULL, metric = FALSE, 
-	         ACI = FALSE, woodland = "Y", dbconn = NULL, 
+           pltassgn = NULL, adjTPA = 1, metric = FALSE, 
+	         ACI = FALSE, woodland = "Y", 
+           tderive = NULL, classify = NULL, 
+           dbconn = NULL, 
            pltidsWITHqry = NULL, pcwhereqry = NULL) {
 
   ###################################################################################
@@ -30,7 +32,7 @@ check.tree <-
   } else {
     seedonly=addseed <- FALSE
   }
-
+ 
   if (bytdom) {
     pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
     tdomdata <- 
@@ -49,19 +51,22 @@ check.tree <-
                     adjtree = adjtree,
                     adjvar = adjvar, 
                     adjTPA = adjTPA, 
-                    tclassify = tclassify, tderive = tderive,
                     pivot = pivot, 
                     metric = metric,
                     addseed = addseed, 
                     seedonly = seedonly, 
                     woodland = woodland,
+                    tderive = tderive,
+                    classify = classify,
                     tround = 12,
                     dbconn = dbconn, 
                     pltidsWITHqry = pltidsWITHqry,
                     pcwhereqry = pcwhereqry)
+print("WWW")
     if (is.null(tdomdata)) return(NULL)
     tdomdat <- data.table(tdomdata$tdomdat)
     treeqry <- tdomdata$treeqry
+    domainlst <- tdomdata$domainlst
     tdomainlst <- tdomdata$tdomainlst
     pcdomainlst <- tdomdata$pcdomainlst
     
@@ -69,17 +74,24 @@ check.tree <-
     tdomvarlstn <- tdomdata$tdomlst
     estunitsn <- tdomdata$estunits
     tsumuniqueid <- tdomdata$tsumuniqueid
-
+    classifynmlst <- tdomdata$classifynmlst
+print("OOO")
+print(head(tdomdat))
+print(pivot)
     if (pivot) {
       ## Transpose back to rows
-      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst),
-                             tvars = tdomvarlstn, na.rm = FALSE)
-      setnames(tdomdat, c("variable", "value"), c(tdomvar, tsumvarn))
-
+#      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst, tdomvar2),
+#                             tvars = tdomvarlstn, na.rm = FALSE)
+      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, domainlst),
+                               tvars = tdomvarlstn, na.rm = FALSE)
+print("TTTTTT")
+print(head(tdomdat))
       if (!is.null(tdomvar2)) {
         tdomdat <- data.table(tdomdat, tdomdat[, tstrsplit(variable, "#", fixed=TRUE)])
-        setnames(tdomdat, c("V1", "V2"), c(tdomvar, tdomvar2))
+        setnames(tdomdat, c("V1", "V2", "value"), c(tdomvar, tdomvar2, tsumvarn))
         tdomdat$variable <- NULL
+      } else {
+        setnames(tdomdat, c("variable", "value"), c(tdomvar, tsumvarn))
       }
     }
 
@@ -105,6 +117,8 @@ check.tree <-
                  addseed = addseed, 
                  seedonly = seedonly, 
                  woodland = woodland,
+                 tderive = tderive,
+                 classify = classify,
                  tround = 6,
                  dbconn = dbconn, 
                  pltidsWITHqry = pltidsWITHqry,
@@ -232,6 +246,9 @@ check.tree <-
 		                pcdomainlst = pcdomainlst)
   }
   
+  if (!is.null(classifynmlst)) {
+    treedat$classifynmlst <- classifynmlst
+  }
   treedat$treeqry <- treeqry
   return(treedat)
 }

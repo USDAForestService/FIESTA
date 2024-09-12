@@ -1,13 +1,16 @@
 check.cond <- function(areawt, areawt2, 
                        adj, adjcase, 
                        cuniqueid, condid, 
-                       bydomainlst,
+                       rowvar, colvar,
+                       pcdomainlst = NULL,
                        popdatindb,
                        popconn = NULL,
                        pltcondx = NULL,
                        pltidsadj = NULL,
                        pltcondxadjWITHqry = NULL,
-                       pcwhereqry = NULL) {
+                       pcwhereqry = NULL,
+                       classifyrow = NULL,
+                       classifycol = NULL) {
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################
@@ -24,20 +27,45 @@ check.cond <- function(areawt, areawt2,
   }
   estvarqry <- paste0("SUM(COALESCE(", estvarqry, ", 0)) AS ", estnm)
   
+  
   ## Build SELECT query
-  byvars <- c(cuniqueid, condid)
-  if (!is.null(bydomainlst) || length(bydomainlst) > 0) {
-    byvars <- c(byvars, bydomainlst)
+  byvars <- paste0("pc.", c(cuniqueid, condid))
+  cselectqry <- paste0("SELECT ", toString(byvars))
+  #cdomdatvars <- paste0("pc.", byvars)
+  
+  ## Check pcdomainlst
+  if (is.null(pcdomainlst)) {
+    pcdomainlst <- c(rowvar, colvar)
   }
-  cdomdatvars <- toString(paste0("pc.", byvars))
-
+  
+  ## Append classified variables to query
+  if (!is.null(rowvar) && rowvar %in% pcdomainlst) {
+    if (!is.null(classifyrow)) {
+      cselectqry <- paste0(cselectqry, ", \n",
+                         classifyrow$rowclassqry)
+      byvars <- c(byvars, classifyrow$rowclassnm)
+      #rowvar <- rowclassnm
+    } else {
+      cselectqry <- paste0(cselectqry, ", pc.", rowvar)
+    }
+  }
+  if (!is.null(colvar) && colvar != "NONE" && colvar %in% pcdomainlst) {
+    if (!is.null(classifycol)) {
+      cselectqry <- paste0(cselectqry, ", \n",
+                         classifyrow$colclassqry)
+      byvars <- c(byvars, classifyrow$colclassnm)
+      #colvar <- colclassnm
+    } else {
+      cselectqry <- paste0(cselectqry, ", pc.", colvar)
+    }
+  }
 
   #  cdomdatselectqry <- 
   #    paste0("SELECT ", toString(cdomdatvars), ", 1 AS TOTAL, ",
   #           "\n    ", estvarqry)
   cdomdatselectqry <- 
-    paste0("SELECT ", cdomdatvars, ", ",
-           "\n    ", estvarqry)
+    paste0(cselectqry, ", ",
+           "\n  ", estvarqry)
   
   ## Build cdomdat FROM query
   joinqry <- getjoinqry(joinid1 = cuniqueid, joinid2 = cuniqueid,
@@ -51,7 +79,7 @@ check.cond <- function(areawt, areawt2,
     paste0(cdomdatselectqry, 
            cdomdatfromqry,
            pcwhereqry,
-           "\nGROUP BY ", cdomdatvars)
+           "\nGROUP BY ", toString(byvars))
 
   #Run query for cdomdat
   if (!popdatindb) {

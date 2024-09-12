@@ -586,8 +586,7 @@ modGBchng <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
   
-print("TEST")
-print(head(cdomdat))
+
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################

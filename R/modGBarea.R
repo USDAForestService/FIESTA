@@ -515,6 +515,7 @@ modGBarea <- function(GBpopdat,
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
                  row.orderby = row.orderby, col.orderby = col.orderby, 
                  row.add0 = row.add0, col.add0 = col.add0, 
+                 row.classify = row.classify, col.classify = col.classify,
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
@@ -525,7 +526,7 @@ modGBarea <- function(GBpopdat,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
-  domainlst <- rowcolinfo$domainlst
+  bydomainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
   rowvarnm <- rowcolinfo$rowvarnm
@@ -539,8 +540,11 @@ modGBarea <- function(GBpopdat,
   rowgrpnm <- rowcolinfo$rowgrpnm
   title.rowgrp <- rowcolinfo$title.rowgrp
   grpvar <- rowcolinfo$grpvar
+  classifyrow <- rowcolinfo$classifyrow
+  classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
- 
+  
+  
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
     uniquecol <- data.table(unitarea[[unitvar]])
@@ -559,17 +563,30 @@ modGBarea <- function(GBpopdat,
                adjcase = adjcase,
                cuniqueid = cuniqueid, 
                condid = condid,
-               bydomainlst = domainlst,
+               rowvar = rowvar, colvar = colvar,
                popdatindb = popdatindb,
                popconn = popconn,
                pltcondx = pltcondx,
                pltidsadj = pltidsadj,
                pltcondxadjWITHqry = pltcondxadjWITHqry,
-               pcwhereqry = pcwhereqry)
+               pcwhereqry = pcwhereqry,
+               classifyrow = classifyrow,
+               classifycol = classifycol)
   cdomdat <- conddat$cdomdat
   cdomdatqry <- conddat$cdomdatqry
   estnm <- conddat$estnm
+
   
+  ## If classified rowvar or colvar, get class names
+  if (!is.null(classifyrow)) {
+    rowvar <- classifyrow$rowclassnm
+  }
+  if (!is.null(classifycol)) {
+    colvar <- classifycol$colclassnm
+  }
+  if (!is.null(grpvar)) {
+    grpvar <- c(rowvar, colvar)
+  }
   
 
   ###################################################################################

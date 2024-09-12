@@ -258,7 +258,7 @@ datSumTreeDom <- function(tree = NULL,
                           adjtree = FALSE, 
                           adjvar = "tadjfac", 
                           adjTPA = 1,
-                          tclassify = NULL,
+                          classify = NULL,
                           tderive = NULL,
                           NAto0 = FALSE, 
                           tround = 5, 
@@ -449,7 +449,6 @@ datSumTreeDom <- function(tree = NULL,
     out_conn = outlst$out_conn
   }
 
-  
   ################################################################################  
   ################################################################################  
   ### DO WORK
@@ -475,7 +474,7 @@ datSumTreeDom <- function(tree = NULL,
                adjtree = adjtree, 
                adjvar = adjvar,
                adjTPA = adjTPA, 
-               tclassify = tclassify, tderive = tderive,
+               classify = classify, tderive = tderive,
                NAto0 = NAto0, 
                tround = tround,
                pltidsWITHqry = pltidsWITHqry,
@@ -487,9 +486,27 @@ datSumTreeDom <- function(tree = NULL,
   tsumname <- sumdat$sumvars
   tsumuniqueid <- sumdat$tsumuniqueid
   treeqry <- sumdat$treeqry
-  tdomainlst <- sumdat$tdomainlst
-  pcdomainlst <- sumdat$pcdomainlst
+  domainlst <- sumdat$domainlst     ## new pc and tree variables if classified
+  tdomainlst <- sumdat$tdomainlst   ## original tree variables
+  pcdomainlst <- sumdat$pcdomainlst ## original pc variables
+  classifynmlst <- sumdat$classifynmlst
 
+   
+  if (!is.null(classifynmlst[[tdomvar]])) {
+    tdomvar <- classifynmlst[[tdomvar]]
+  }
+  if (any(pcdomainlst %in% names(classifynmlst))) {
+    pcdomain <- pcdomainlst[!pcdomainlst %in% names(classifynmlst)]
+    bydomainlst <- c(pcdomain, unlist(classifynmlst[pcdomainlst]))
+  } else {
+    bydomainlst <- pcdomainlst
+  }
+  if (any(tdomainlst %in% names(classifynmlst))) {
+    tdomain <- tdomainlst[!tdomainlst %in% names(classifynmlst)]
+    bydomainlst <- c(bydomainlst, tdomain, unlist(classifynmlst[tdomainlst]))
+  } else {
+    bydomainlst <- c(bydomainlst, tdomainlst)
+  }
 
   ## Get unique values of tdomvar
   tdoms <- sort(unique(tdomtree[[tdomvar]]))
@@ -538,7 +555,7 @@ datSumTreeDom <- function(tree = NULL,
       warning("tdomtotnm is not valid... using default")
     }
   }
- 
+
   ## GETS name for tdomvar
   #####################################################################
   ## If tdomvar2 exists, concatenate the columns to one column (if pivot=TRUE)
@@ -570,7 +587,7 @@ datSumTreeDom <- function(tree = NULL,
       tdomvarlst2 <- paste0(tdomprefix, formatC(tdomvarlst, width=maxchar, flag=flag))
 	  } else {
 	    tdomtree[, (tdomvarnm) := paste0(tdomprefix, get(eval(tdomvar)))]
-                    tdomvarlst2 <- paste0(tdomprefix, tdomvarlst)
+      tdomvarlst2 <- paste0(tdomprefix, tdomvarlst)
     }	  
   } else {
     tdomvarnm <- tdomvar
@@ -582,7 +599,7 @@ datSumTreeDom <- function(tree = NULL,
   ## GET tdomvarlst2 or CHECK IF ALL tree domains IN tdomvar2lst ARE INCLUDED IN tdomvar2.
   if (!is.null(tdomvar2)) {
     tdoms2 <- sort(unique(tdomtree[[tdomvar2]]))
-	
+
     if (is.null(tdomvar2lst)) {
       ## GET tdomvar2lst
       if (gui) {
@@ -612,7 +629,9 @@ datSumTreeDom <- function(tree = NULL,
         }
       }
     }
+
     if (!is.null(tdomvar2)) {
+
       tdomtree <- tdomtree[tdomtree[[tdomvar2]] %in% tdomvar2lst,]
       if (FIAname) {
         if (tdomvar2 == "SPCD") {
@@ -649,7 +668,6 @@ datSumTreeDom <- function(tree = NULL,
     }
   }
 
- 
   ## GET NAME FOR SUMMED TREE VARIABLE FOR FILTERED TREE DOMAINS 
   if (is.null(tdomtotnm) && pivot) {
     if (is.null(tdomprefix)) {
@@ -658,7 +676,7 @@ datSumTreeDom <- function(tree = NULL,
       tdomtotnm <- paste0(tdomprefix, "TOT")
     }
   }
- 
+
   ## GET NAME FOR SUMMED TREE VARIABLE FOR ALL TREE DOMAINS (IF PROPORTION = TRUE)
   if (proportion) denomvar <- paste0(tsumname, "_ALL")
 
@@ -669,7 +687,8 @@ datSumTreeDom <- function(tree = NULL,
   tdomtreef <- tdomtree[, lapply(.SD, tfun, na.rm=TRUE), by=byvars, .SDcols=tsumname]
   setkeyv(tdomtreef, tsumuniqueid)
   
-
+print("CCCCCC")
+print(head(tdomtreef))
   ######################################################################## 
   ## If pivot=FALSE
   ######################################################################## 
@@ -684,7 +703,8 @@ datSumTreeDom <- function(tree = NULL,
       tdomvarnm <- c(tdomvar, tdomvar2)
     }
   } else {
-
+ print("WWWWWWWWWWWWWWWWWWWW")  
+print(byvars)
     ######################################################################## 
     ## If pivot=TRUE, aggregate tree domain data
     ######################################################################## 
@@ -692,8 +712,8 @@ datSumTreeDom <- function(tree = NULL,
                       xvar = byvars, yvar = tdomvarnm,
                       pvar.round = tround, returnDT = TRUE)
   	tdoms <- setDT(tdoms)
-
-
+print("JJJJJJ")
+print(head(tdoms))
     ## check if tree domain in tdomlst.. if not, create column with all 0 values
     tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% byvars]
     UNMATCH <- tdomvarlst2[is.na(match(tdomvarlst2, tdomscols))] 
@@ -1092,11 +1112,15 @@ datSumTreeDom <- function(tree = NULL,
   if (!is.null(tdomtotnm)) {
     tdomdata$tdomtotnm <- tdomtotnm
   }
+  tdomdata$domainlst <- domainlst
   tdomdata$tdomainlst <- tdomainlst
   tdomdata$pcdomainlst <- pcdomainlst
 
   if (any(c(tdomvar, tdomvar2) == "SPCD")) {
     tdomdata$ref_spcd <- ref_spcd
+  }
+  if (!is.null(classifynmlst)) {
+    tdomdata$classifynmlst <- classifynmlst
   }
   tdomdata$treeqry <- treeqry
  

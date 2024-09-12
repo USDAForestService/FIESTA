@@ -280,6 +280,7 @@
 modGBtree <- function(GBpopdat, 
                       estvar, 
                       estvar.filter = NULL, 
+                      estvar.tderive = NULL,
                       estseed = "none",
                       woodland = "Y",
                       landarea = "FOREST", 
@@ -326,7 +327,7 @@ modGBtree <- function(GBpopdat,
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder <- NULL
   
-  
+ 
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -339,7 +340,7 @@ modGBtree <- function(GBpopdat,
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-  
+ 
   ## Check parameter lists
   pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
                 savedata_opts=savedata_opts)
@@ -534,6 +535,7 @@ modGBtree <- function(GBpopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
 
+  
   ###################################################################################
   ## Check parameter inputs and tree filters
   ###################################################################################
@@ -577,7 +579,8 @@ modGBtree <- function(GBpopdat,
                  cuniqueid = cuniqueid, condid = condid,
                  rowvar = rowvar, colvar = colvar, 
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
-                 row.orderby = row.orderby, col.orderby = col.orderby, 
+                 row.orderby = row.orderby, col.orderby = col.orderby,
+                 row.classify = row.classify, col.classify = col.classify,
                  row.add0 = row.add0, col.add0 = col.add0, 
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
                  rowlut = rowlut, collut = collut, 
@@ -607,7 +610,20 @@ modGBtree <- function(GBpopdat,
   bypcdom <- rowcolinfo$bypcdom
   tdomvar <- rowcolinfo$tdomvar
   tdomvar2 <- rowcolinfo$tdomvar2
+  classifyrow <- rowcolinfo$classifyrow
+  classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
+  
+  ## if classified columns, create classify list for summarizing tree data
+  if (any(!is.null(classifyrow), !is.null(classifycol))) {
+    classify <- list()
+    if (!is.null(classifyrow)) {
+      classify[[rowvar]] <- classifyrow$row.classify
+    }
+    if (!is.null(classifycol)) {
+      classify[[colvar]] <- classifycol$col.classify
+    }
+  }
 
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
@@ -642,6 +658,8 @@ modGBtree <- function(GBpopdat,
                adjvar = "tadjfac",
                metric = metric, 
                woodland = woodland,
+               tderive = tderive,
+               classify = classify,
                dbconn = popconn,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
@@ -655,8 +673,23 @@ modGBtree <- function(GBpopdat,
   tdomvarlst <- treedat$tdomvarlst
   estunits <- treedat$estunits
   treeqry <- treedat$treeqry
+  classifynmlst <- treedat$classifynmlst
   
- 
+  
+  ## If classified rowvar or colvar, get class names
+  if (!is.null(classifynmlst)) {
+    if (!is.null(classifynmlst[[rowvar]])) {
+      rowvar <- classifynmlst[[rowvar]]
+    }
+    if (!is.null(classifynmlst[[colvar]])) {
+      colvar <- classifynmlst[[colvar]]
+    }
+    if (!is.null(grpvar)) {
+      grpvar <- c(rowvar, colvar)
+    }
+  }
+  
+
   ###############################################################################
   ### Get titles for output tables
   ###############################################################################
