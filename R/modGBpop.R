@@ -1132,7 +1132,7 @@ modGBpop <- function(popType = "VOL",
   }
   returnlst <- append(returnlst, list(
                 pltidsadj = pltidsadj, pltcondx = pltcondx, 
-                pltcondflds = pltcondflds,
+                pltcondflds = pltcondflds, pjoinid = pjoinid,
                 cuniqueid = cuniqueid, condid = condid, 
                 sccmx = sccmx,
                 ACI.filter = ACI.filter,

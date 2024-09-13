@@ -266,7 +266,6 @@ modGBarea <- function(GBpopdat,
                       table_opts = NULL, 
                       title_opts = NULL, 
                       savedata_opts = NULL, 
-                      gui = FALSE, 
                       ...){
 
   ###################################################################################
@@ -276,9 +275,8 @@ modGBarea <- function(GBpopdat,
 
   
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(GBpopdat)) {
-    gui <- TRUE
-  } 
+  #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
+  gui <- FALSE 
   
   ## If gui.. set variables to NULL
   if (gui) { 
@@ -564,6 +562,7 @@ modGBarea <- function(GBpopdat,
                cuniqueid = cuniqueid, 
                condid = condid,
                rowvar = rowvar, colvar = colvar,
+               pcdomainlst = pcdomainlst,
                popdatindb = popdatindb,
                popconn = popconn,
                pltcondx = pltcondx,

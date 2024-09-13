@@ -300,10 +300,10 @@ modGBratio <- function(GBpopdat,
                        pcfilter = NULL, 
                        estvarn = NULL, 
                        estvarn.filter = NULL, 
-                       estvarn.tderive = NULL,
+                       estvarn.derive = NULL,
                        estvard = NULL, 
                        estvard.filter = NULL, 
-                       estvard.tderive = NULL,
+                       estvard.derive = NULL,
                        rowvar = NULL, 
                        colvar = NULL, 
                        sumunits = TRUE, 
@@ -346,7 +346,7 @@ modGBratio <- function(GBpopdat,
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=tdom=estvar.name=
-		variable=estvard.name=classify <- NULL
+		variable=estvard.name=domclassify <- NULL
   
   
   ##################################################################
@@ -506,7 +506,8 @@ modGBratio <- function(GBpopdat,
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
- 
+  
+
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -634,14 +635,14 @@ modGBratio <- function(GBpopdat,
   #rm(rowcolinfo)
   
   
-  ## if classified columns, create classify list for summarizing tree data
+  ## if classified columns, create domclassify list for summarizing tree data
   if (any(!is.null(classifyrow), !is.null(classifycol))) {
-    classify <- list()
+    domclassify <- list()
     if (!is.null(classifyrow)) {
-      classify[[rowvar]] <- classifyrow$row.classify
+      domclassify[[rowvar]] <- classifyrow$row.classify
     }
     if (!is.null(classifycol)) {
-      classify[[colvar]] <- classifycol$col.classify
+      domclassify[[colvar]] <- classifycol$col.classify
     }
   }
   
@@ -661,9 +662,6 @@ modGBratio <- function(GBpopdat,
   } else {
     pltidsWITHqry <- NULL
   }
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTree.R")
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTreeDom.R")
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.tree.R")
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -675,6 +673,10 @@ modGBratio <- function(GBpopdat,
                ratiotype = ratiotype,
                estvarn = estvarn, 
                estvarn.filter = estvarn.filter, 
+               estvarn.derive = estvarn.derive,
+               estvard = estvard, 
+               estvard.filter = estvard.filter, 
+               estvard.derive = estvard.derive,
                esttotn = TRUE, 
                tdomvar = tdomvar, tdomvar2 = tdomvar2,
                bydomainlst = domainlst,
@@ -682,8 +684,7 @@ modGBratio <- function(GBpopdat,
                adjvar = "tadjfac",
                metric = metric, 
                woodland = woodland,
-               tderive = tderive,
-               classify = classify,
+               domclassify = domclassify,
                dbconn = popconn,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
@@ -707,10 +708,22 @@ modGBratio <- function(GBpopdat,
     tdomvarlstd <- treedat$tdomvarlstd
   } else {
     estvard <- treedat$estvard
-    estvard.name <- areawt
     tdomvarlstd <- NULL
     estunitsd <- areaunits
-  }  
+  } 
+  
+  ## If classified rowvar or colvar, get class names
+  if (!is.null(classifynmlst)) {
+    if (!is.null(classifynmlst[[rowvar]])) {
+      rowvar <- classifynmlst[[rowvar]]
+    }
+    if (!is.null(classifynmlst[[colvar]])) {
+      colvar <- classifynmlst[[colvar]]
+    }
+    if (!is.null(grpvar)) {
+      grpvar <- c(rowvar, colvar)
+    }
+  }
 
   if (ratiotype == "PERACRE") {
     ###################################################################################
@@ -735,6 +748,7 @@ modGBratio <- function(GBpopdat,
                  classifycol = classifycol)
     cdomdat <- conddat$cdomdat
     cdomdatqry <- conddat$cdomdatqry
+    estvard.name <- conddat$estnm
   }
   
   ## If classified rowvar or colvar, get class names
@@ -749,7 +763,7 @@ modGBratio <- function(GBpopdat,
       grpvar <- c(rowvar, colvar)
     }
   }
-  
+
   ###############################################################################
   ### Get titles for output tables
   ###############################################################################
@@ -771,9 +785,9 @@ modGBratio <- function(GBpopdat,
                  title.estvarn = title.estvarn, 
                  unitvar = unitvar, 
                  rowvar = rowvar, colvar = colvar, 
-                 estvarn = estvarn, 
+                 estvarn = estvarn.name, 
                  estvarn.filter = estvarn.filter,
-                 estvard = estvard, 
+                 estvard = estvard.name, 
                  estvard.filter = estvard.filter,
                  addtitle = addtitle, 
                  returntitle = returntitle, 
@@ -795,19 +809,9 @@ modGBratio <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
-    
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
-  
-  domdatd = cdomdat
-  domdatn = tdomdat
-  uniqueid = cuniqueid
-  esttype = "RATIO"
-  estvarn.name = "COUNT_TPA_ADJ"
-  estvard.name = "ESTIMATED_VALUE"
-  ratiotype = "PERACRE"
-  
   estdat <- 
     getGBestimates(esttype = esttype,
                    domdatn = tdomdat,
@@ -954,10 +958,13 @@ modGBratio <- function(GBpopdat,
     rawdat$module <- "GB"
     rawdat$esttype <- esttype
     rawdat$GBmethod <- ifelse(strata, "PS", "HT")
-    rawdat$estvarn <- estvarn
+    rawdat$estvarn <- estvarn.name
     rawdat$estvarn.filter <- estvarn.filter
-    if (!is.null(estvard)) rawdat$estvard <- estvard
+    if (!is.null(rawdat$estvarn.derive)) rawdat$estvarn.derive <- estvarn.derive
+    
+    if (!is.null(estvard)) rawdat$estvard <- estvard.name
     if (!is.null(estvard.filter)) rawdat$estvard.filter <- estvard.filter
+    if (!is.null(rawdat$estvard.derive)) rawdat$estvard.derive <- estvard.derive
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
     if (ratiotype == "PERACRE") {

@@ -53,6 +53,9 @@
 #' @param subpuniqueid String. Unique identifier of plot in subplot and 
 #' subp_cond table.
 #' @param subpid String. Unique identifier of each subplot.
+#' @param bydomainst String (vector). Categorical domain variables for 
+#' summing tree data by (e.g., SPCD). Variables must be in tree table or 
+#' plt/cond table if tables are provided.
 #' @param tsumvarlst String (vector). Tree-level variable(s) to aggregate
 #' (e.g., "TPA_UNADJ", "BA"). Use "TPA_UNADJ" for summed tree
 #' count.
@@ -85,15 +88,16 @@
 #' @param adjtree Logical. If TRUE, trees are individually adjusted by
 #' adjustment factors.  Adjustment factors must be included in tree table (see
 #' adjvar).
-#' @param stratalut Data.frame. If adj="samp", a data.frame with strata-level
-#' adjustment factors (e.g., ADJ_FACTOR_SUBP, ADJ_FACTOR_MICR, ADJ_FACTOR_MACR)
 #' @param adjvar String. If adjtree=TRUE, the name of the variable to use for
 #' multiplying by adjustment (e.g., tadjfac).
 #' @param adjTPA Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1
 #' (annual inventory), if using less than 4 subplots. If using only 1 subplot
 #' for estimate, adjTPA=4. The default is 1.
+#' @param domclassify List. List for classifying domain variables in bydomainlst
+#' (e.g., DIA = c(10,20,30)).
 #' @param tderive List. List of derivative to add to output data (e.g., 
-#' list(MEAN_DIA = 'AVG(DIA)'))
+#' list(MEAN_DIA = 'AVG(DIA)', SDI = 'POWER(DIA / 10, 1.605)', 
+#' QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454))'))
 #' @param tround Number. The number of digits to round to. If NULL, default=5.
 #' @param pltidsWITHqry SQL query. A query identifying plots to sum (e.g., 
 #' 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')
@@ -108,7 +112,6 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'treesum'. 
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' 
 #' @return A list of the following items: \item{treedat}{ Data frame. Plot or
 #' condition-level table with aggregated tree attributes. } \item{sumvars}{
@@ -165,7 +168,6 @@ datSumTree <- function(tree = NULL,
                        adjTPA = 1, 
                        domclassify = NULL,
                        tderive = NULL,
-                       NAto0 = FALSE, 
                        tround = 5,
                        pltidsWITHqry = NULL,
                        pcwhereqry = NULL,
@@ -173,31 +175,33 @@ datSumTree <- function(tree = NULL,
                        checkNA = FALSE, 
                        returnDT = TRUE,
                        savedata = FALSE, 
-                       savedata_opts = NULL,
-                       gui = FALSE) {
+                       savedata_opts = NULL) {
   ####################################################################################
   ## DESCRIPTION: Aggregates tree variable(s) to plot(/cond)-level, 
   ##        using specified tree filters (ex. live trees only)
   ####################################################################################
   
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  gui <- FALSE
   
   ## Set global variables  
   pltx=treex=seedx=cond.nonsamp.filter=meta=tvars2convert=
     ssumvarlst=cntvar=fname=tderivevars=pltidsnm=domainlst <- NULL
-  
+ 
   
   ## If gui.. set variables to NULL
   if (gui) ACI=bycond=tuniqueid=puniqueid=cuniqueid=TPA=adjtree=adjsamp=
     savedata=outfolder <- NULL
-  
-  ref_estvar <- FIESTAutils::ref_estvar
+ 
+  #ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry=pcfromqry=pcselectvars=tpavarnm=pcdomainlst <- NULL
+
   datindb <- FALSE
   pltassgnid <- "PLT_CN"
   pltidsid <- pjoinid
-  
+  NAto0 <- TRUE
+ 
   ## Query alias.
   talias. <- "t."
   salias. <- "s."
@@ -267,7 +271,7 @@ datSumTree <- function(tree = NULL,
       }
     }
   }
-  
+ 
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -677,7 +681,7 @@ datSumTree <- function(tree = NULL,
       getnm <- TRUE
     }
   } 
-  
+
   ## Check tderive
   ###########################################################  
   if (!is.null(tderive)) {
@@ -720,7 +724,7 @@ datSumTree <- function(tree = NULL,
                         stopifnull=TRUE, gui=gui)
   
   if (TPA && is.null(tsumvarlst)) {
-    stop("TPA derivations must be implemented by the user within tderive specifications")
+    message("TPA must be included in derivation if want to multiply by...")
   }
   
   if (TPA) {
@@ -843,6 +847,7 @@ datSumTree <- function(tree = NULL,
     grpby. <- pltidsa.
     
   } else if (!is.null(plt)) {
+
     ## Check plt table
     if (!is.null(plt) && is.data.frame(plt)) {
       pltx <- pcheck.table(plt, gui=gui, tabnm="plot", caption="Plot table?")
@@ -873,7 +878,6 @@ datSumTree <- function(tree = NULL,
     grpby. <- pltidsa.
   }
 
-    
   ## Check cond table
   if (!is.null(cond)) {
     condinWITHqry <- FALSE
@@ -947,6 +951,7 @@ datSumTree <- function(tree = NULL,
                               "\n FROM ", condnm, ")")
       pltidsnm <- "pltids"
       pltidsa. <- "pltids."
+      pjoinid=pltidsid <- cuniqueid
     }
     
     if (!condinWITHqry) {
@@ -1048,12 +1053,6 @@ datSumTree <- function(tree = NULL,
   
   ## Check checkNA
   ##########################################################################
-  NAto0 <- pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
-                          first="YES", gui=gui)
-  if (is.null(NAto0)) NAto0 <- FALSE
-  
-  ## Check checkNA
-  ##########################################################################
   checkNA <- pcheck.logical(checkNA, varnm="checkNA", title="Check NA values?", 
                             first="YES", gui=gui)
   if (is.null(checkNA)) checkNA <- FALSE
@@ -1144,7 +1143,7 @@ datSumTree <- function(tree = NULL,
   if (seedonly || addseed) {
     sfromqry <- paste0("\n FROM ", seednm, " s")
   }
-  
+
   #############################################################################
   ## Check and build where queries for filtering tree data
   #############################################################################
@@ -1681,7 +1680,7 @@ datSumTree <- function(tree = NULL,
         twithwhereqry <- paste0(twithwhereqry, " AND ", wtwhereqry)
       }
     }	
-    
+
     ## Build final tree WITH query
     twithqry <- paste0(twithqry,
                        twithfromqry,
@@ -1864,8 +1863,7 @@ datSumTree <- function(tree = NULL,
   # }
   # tgrpbyvars <- toString(tgrpbyvars)
   tselectqry <- paste0("\nSELECT ", toString(tgrpbyvars))
-  
-  
+
   ## Add classifications to select query
   domclassifyqry <- NULL
   if (!is.null(domclassify)) {
@@ -1881,7 +1879,7 @@ datSumTree <- function(tree = NULL,
           classvar. <- "tdat."
           #tcdomainlst[tdomainlst == classifyvar] <- classifynm
         }
-        domainlst <- domainlst[domainlst != classifynm]
+        domainlst <- domainlst[domainlst != classifyvar]
         
         ## Get classification query
         cutbreaks <- domclassify[[classifyvar]]
@@ -1935,7 +1933,7 @@ datSumTree <- function(tree = NULL,
   } else if (!is.null(domainlst)) {
     tselectqry <- paste0(tselectqry, ", ", toString(domainlst))
   }
-  
+ 
   if (!seedonly) {
     
     ## Build select tree query

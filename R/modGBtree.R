@@ -52,6 +52,9 @@
 #' 'VOLCFNET').
 #' @param estvar.filter String. A tree-level filter for estvar. Must be R
 #' syntax (e.g., 'STATUSCD == 1').
+#' @param estvar.derive List. A derivation of a tree variable to estimate.
+#' Must be a named list with one element (e.g., 
+#' list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
 #' @param woodland String. If woodland = 'Y', include woodland tree species  
@@ -280,7 +283,7 @@
 modGBtree <- function(GBpopdat, 
                       estvar, 
                       estvar.filter = NULL, 
-                      estvar.tderive = NULL,
+                      estvar.derive = NULL,
                       estseed = "none",
                       woodland = "Y",
                       landarea = "FOREST", 
@@ -325,7 +328,7 @@ modGBtree <- function(GBpopdat,
   gui <- FALSE
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder <- NULL
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder=domclassify <- NULL
   
  
   ##################################################################
@@ -451,6 +454,7 @@ modGBtree <- function(GBpopdat,
   dbqueries <- GBpopdat$dbqueries
   dbqueriesWITH <- GBpopdat$dbqueriesWITH
   adjcase <- GBpopdat$adjcase
+  pjoinid <- GBpopdat$pjoinid
   
   #adjfactors <- GBpopdat$adjfactors
   #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
@@ -486,6 +490,7 @@ modGBtree <- function(GBpopdat,
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
+  
 
   ###################################################################################
   ## Check parameter inputs and plot/condition filters
@@ -613,15 +618,15 @@ modGBtree <- function(GBpopdat,
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
-  
-  ## if classified columns, create classify list for summarizing tree data
+
+  ## if classified columns, create domclassify list for summarizing tree data
   if (any(!is.null(classifyrow), !is.null(classifycol))) {
-    classify <- list()
+    domclassify <- list()
     if (!is.null(classifyrow)) {
-      classify[[rowvar]] <- classifyrow$row.classify
+      domclassify[[rowvar]] <- classifyrow$row.classify
     }
     if (!is.null(classifycol)) {
-      classify[[colvar]] <- classifycol$col.classify
+      domclassify[[colvar]] <- classifycol$col.classify
     }
   }
 
@@ -638,6 +643,7 @@ modGBtree <- function(GBpopdat,
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   if (popdatindb) {
     pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
+    pjoinid <- "PLT_CN"
   } else {
     pltidsWITHqry <- NULL
   }
@@ -651,6 +657,7 @@ modGBtree <- function(GBpopdat,
                esttype = esttype, 
                estvarn = estvar, 
                estvarn.filter = estvar.filter, 
+               estvarn.derive = estvar.derive,
                esttotn = TRUE, 
                bydomainlst = domainlst,
                tdomvar = tdomvar, tdomvar2 = tdomvar2,
@@ -658,16 +665,17 @@ modGBtree <- function(GBpopdat,
                adjvar = "tadjfac",
                metric = metric, 
                woodland = woodland,
-               tderive = tderive,
-               classify = classify,
+               tderive = estvar.derive,
+               domclassify = domclassify,
                dbconn = popconn,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
+               pjoinid = pjoinid,
                bytdom = bytdom,
                gui = gui)
   if (is.null(treedat)) stop(NULL) 
   tdomdat <- treedat$tdomdat
-  estvar <- treedat$estvar
+  #estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
@@ -688,7 +696,7 @@ modGBtree <- function(GBpopdat,
       grpvar <- c(rowvar, colvar)
     }
   }
-  
+
 
   ###############################################################################
   ### Get titles for output tables
@@ -710,7 +718,7 @@ modGBtree <- function(GBpopdat,
                  title.estvarn = title.estvar, 
 	               unitvar = unitvar, 
                  rowvar = rowvar, colvar = colvar, 
- 	               estvarn = estvar, 
+ 	               estvarn = estvar.name, 
                  estvarn.filter = estvar.filter, 
 	               addtitle = addtitle, 
                  returntitle = returntitle, 
@@ -842,6 +850,7 @@ modGBtree <- function(GBpopdat,
     rawdat$domdatqry <- treeqry
     rawdat$estvar <- estvar.name
     rawdat$estvar.filter <- estvar.filter
+    if (!is.null(rawdat$estvar.derive)) rawdat$estvar.derive <- estvar.derive
     if (savedata) {
       if (!is.null(title.estpse)) {
         title.raw <- paste(title.estpse, title.ref)
@@ -876,7 +885,7 @@ modGBtree <- function(GBpopdat,
     rawdat$module <- "GB"
     rawdat$esttype <- esttype
     rawdat$GBmethod <- ifelse(strata, "PS", "HT")
-    rawdat$estvar <- estvar
+    rawdat$estvar <- estvar.name
     rawdat$estvar.filter <- estvar.filter
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar

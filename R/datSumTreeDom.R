@@ -62,9 +62,9 @@
 #' uniqueid).
 #' @param condid String. Unique identifier for conditions.
 #' @param bysubp Logical. If TRUE, data are aggregated to the subplot level.
+#' @param subpuniqueid String. Unique identifier of plot in subplot and 
+#' subp_cond table.
 #' @param subpid String. Unique identifier of each subplot.
-#' @param presence Logical. If TRUE, an additional table is output with tree
-#' domain values as presence/absence (1/0).
 #' @param tsumvar String. Name of the variable to aggregate (e.g., "BA"). For
 #' summing number of trees, use tsumvar="TPA_UNADJ" with tfun=sum.
 #' @param addseed Logical. If TRUE, add seedling counts to tree counts. Note:
@@ -78,8 +78,6 @@
 #' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 #' respective trees-per-acre variable (see details) to get per-acre
 #' measurements.
-#' @param tfun Function. Name of the function to use to aggregate the data
-#' (e.g., sum, mean, max).
 #' @param ACI Logical. If TRUE, if ACI (All Condition Inventory) plots exist,
 #' any trees on these plots will be included in summary. If FALSE, you must
 #' include condition table.
@@ -109,18 +107,19 @@
 #' in tdomvarlst is calculated and added to output data frame.
 #' @param tdomtotnm String. If tdomtot=TRUE, the variable name for the total
 #' column in output data frame. If NULL, the default will be tdomvar + 'TOT'.
+#' @param bydomainst String (vector). Categorical domain variables not in
+#' tdomvar/tdomvar2. Variables must be in tree table or plt/cond table if tables 
+#' are provided.
 #' @param FIAname Logical. If TRUE, changes names of columns for SPCD and
 #' SPGRPCD from code to FIA names.
 #' @param spcd_name String. Output name type if tdomvar or tdomvar2 = "SPCD"
 #' ('COMMON', 'SCIENTIFIC', 'SYMBOL').
 #' @param pivot Logical. If TRUE, tdomvar data are transposed (pivoted) to
 #' separate columns.
+#' @param presence Logical. If TRUE, an additional table is output with tree
+#' domain values as presence/absence (1/0).
 #' @param proportion Logical. If TRUE and pivot=TRUE, an additional table will
 #' be output with tree domain data as proportions of total tsumvar.
-#' @param cover Logical. If TRUE and pivot=TRUE, , an additional table will be
-#' output with tree domain data as percent cover, based on proportions of
-#' tsumvar (see proportion) and tree canopy cover variable in cond
-#' (LIVE_CANOPY_CVR_PCT) or in plt (CCLIVEPLT).  Does not include seedlings.
 #' @param getadjplot Logical. If TRUE, adjustments are calculated for
 #' nonsampled conditions on plot.
 #' @param adjtree Logical. If TRUE, trees are individually adjusted by
@@ -131,8 +130,18 @@
 #' @param adjTPA Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1
 #' (annual inventory), if using less than 4 subplots. If using only 1 sublot
 #' for estimate, adjTPA=4. The default is 1.
-#' @param NAto0 Logical. If TRUE, convert NA values to 0.
+#' @param domclassify List. List for classifying domain variables in bydomainlst
+#' (e.g., DIA = c(10,20,30)).
+#' @param tderive List. List of derivative to add to output data (e.g., 
+#' list(MEAN_DIA = 'AVG(DIA)', SDI = 'POWER(DIA / 10, 1.605)', 
+#' QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454))'))
 #' @param tround Number. The number of digits to round to. If NULL, default=6.
+#' @param NAto0 Logical. If TRUE, convert NA values to 0.
+#' @param pltidsWITHqry SQL query. A query identifying plots to sum (e.g., 
+#' 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')
+#' @param pcwhereqry String. Plot/Condition filter if plot and/or cond table is 
+#' included.
+#' @param pjoinid String. Name of unique identifier from pltidsWITHqry.
 #' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
 #' returns data.frame object(s).
 #' @param savedata Logical. If TRUE, saves data to outfolder.
@@ -141,8 +150,7 @@
 #' default = 'tdomsum'. 
 #' @param dbconn Open database connection.
 #' @param dbconnopen Logical. If TRUE, keep database connection open.
-#' @param gui Logical. If gui, user is prompted for parameters.
-#'
+#' 
 #' @return tdomdata - a list of the following objects:
 #' 
 #' \item{tdomdat}{ Data frame. Plot or condition-level table with aggregated
@@ -237,7 +245,6 @@ datSumTreeDom <- function(tree = NULL,
                           TPA = TRUE, 
                           ACI = FALSE, 
                           tfilter = NULL, 
-                          tfun = sum, 
                           lbs2tons = TRUE, 
                           metric = FALSE, 
                           tdomvar = "SPCD", 
@@ -247,7 +254,7 @@ datSumTreeDom <- function(tree = NULL,
                           tdomprefix = NULL, 
                           tdombarplot = FALSE, 
                           tdomtot = FALSE, 
-                          tdomtotnm  =NULL, 
+                          tdomtotnm = NULL, 
                           bydomainlst = NULL,
                           FIAname = FALSE, 
                           spcd_name = "COMMON",
@@ -258,18 +265,18 @@ datSumTreeDom <- function(tree = NULL,
                           adjtree = FALSE, 
                           adjvar = "tadjfac", 
                           adjTPA = 1,
-                          classify = NULL,
+                          domclassify = NULL,
                           tderive = NULL,
-                          NAto0 = FALSE, 
                           tround = 5, 
+                          NAto0 = TRUE,
                           pltidsWITHqry = NULL,
                           pcwhereqry = NULL,
+                          pjoinid = "PLT_CN",
                           returnDT = TRUE,
                           savedata = FALSE,
                           savedata_opts = NULL,
                           dbconn = NULL,
-                          dbconnopen = FALSE,
-                          gui = FALSE){
+                          dbconnopen = FALSE){
   ####################################################################################
   ## DESCRIPTION: Aggregates tree domain data (ex. species) to condition or plot level  
   ##		for estimation, mapping, or exploratory data analyses. 
@@ -282,11 +289,12 @@ datSumTreeDom <- function(tree = NULL,
   ########################################################################################
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  gui <- FALSE
 
   ## Set global variables  
   COND_STATUS_CD=COUNT=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=
-	seedx=tunits=TREECOUNT_CALC=cond.nonsamp.filter=ref_spcd <- NULL
+	seedx=tunits=TREECOUNT_CALC=cond.nonsamp.filter=ref_spcd=tdomvar2nm <- NULL
   checkNApvars <- {}
   checkNAcvars <- {}
   checkNAtvars <- {}
@@ -376,6 +384,15 @@ datSumTreeDom <- function(tree = NULL,
     stop("tsumvar is invalid")
   } else if (tsumvar == "PLT_CN") {
     tsumvar <- "TPA_UNADJ"
+  } else if (!is.null(tderive)) {
+    
+    ## Check tderive
+    if (!is.null(tderive)) {
+      if (!all(is.list(tderive), length(tderive) == 1, !is.null(names(tderive)))) {
+        message("tderive must be a named list with one element")
+        stop()
+      }
+    }
   }
     
   ## Check FIAname
@@ -449,6 +466,7 @@ datSumTreeDom <- function(tree = NULL,
     out_conn = outlst$out_conn
   }
 
+
   ################################################################################  
   ################################################################################  
   ### DO WORK
@@ -474,8 +492,7 @@ datSumTreeDom <- function(tree = NULL,
                adjtree = adjtree, 
                adjvar = adjvar,
                adjTPA = adjTPA, 
-               classify = classify, tderive = tderive,
-               NAto0 = NAto0, 
+               domclassify = domclassify, tderive = tderive,
                tround = tround,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
@@ -483,7 +500,7 @@ datSumTreeDom <- function(tree = NULL,
                checkNA = checkNA, 
                returnDT = returnDT)
   tdomtree <- sumdat$treedat
-  tsumname <- sumdat$sumvars
+  tsumvarnm <- sumdat$sumvars
   tsumuniqueid <- sumdat$tsumuniqueid
   treeqry <- sumdat$treeqry
   domainlst <- sumdat$domainlst     ## new pc and tree variables if classified
@@ -491,10 +508,13 @@ datSumTreeDom <- function(tree = NULL,
   pcdomainlst <- sumdat$pcdomainlst ## original pc variables
   classifynmlst <- sumdat$classifynmlst
 
-   
   if (!is.null(classifynmlst[[tdomvar]])) {
     tdomvar <- classifynmlst[[tdomvar]]
   }
+  if (!is.null(classifynmlst[[tdomvar2]])) {
+    tdomvar2 <- classifynmlst[[tdomvar2]]
+  }
+
   if (any(pcdomainlst %in% names(classifynmlst))) {
     pcdomain <- pcdomainlst[!pcdomainlst %in% names(classifynmlst)]
     bydomainlst <- c(pcdomain, unlist(classifynmlst[pcdomainlst]))
@@ -505,7 +525,7 @@ datSumTreeDom <- function(tree = NULL,
     tdomain <- tdomainlst[!tdomainlst %in% names(classifynmlst)]
     bydomainlst <- c(bydomainlst, tdomain, unlist(classifynmlst[tdomainlst]))
   } else {
-    bydomainlst <- c(bydomainlst, tdomainlst)
+    bydomainlst <- c(bydomainlst)
   }
 
   ## Get unique values of tdomvar
@@ -595,7 +615,8 @@ datSumTreeDom <- function(tree = NULL,
     #names(tdomvarlut) <- tdomvarnm
     tdomvarlst2 <- as.character(tdomvarlst) 
   }
-
+  sumbyvars <- unique(c(tsumuniqueid, pcdomainlst, tdomvarnm))
+  
   ## GET tdomvarlst2 or CHECK IF ALL tree domains IN tdomvar2lst ARE INCLUDED IN tdomvar2.
   if (!is.null(tdomvar2)) {
     tdoms2 <- sort(unique(tdomtree[[tdomvar2]]))
@@ -630,92 +651,118 @@ datSumTreeDom <- function(tree = NULL,
       }
     }
 
-    if (!is.null(tdomvar2)) {
-
-      tdomtree <- tdomtree[tdomtree[[tdomvar2]] %in% tdomvar2lst,]
-      if (FIAname) {
-        if (tdomvar2 == "SPCD") {
-          tdomdata <- datLUTspp(x=tdomtree, spcdname=spcd_name)
-          ref_spcd <- tdomdata$ref_spcd
-        } else {
-          tdomdata <- datLUTnm(tdomtree, xvar=tdomvar2, LUTvar="VALUE", FIAname=TRUE)
-        }
-        tdomtree <- tdomdata$xLUT
-        tdomvar2nm <- tdomdata$xLUTnm
-      }
-      if (is.numeric(tdomtree[[tdomvar2]])) {
-        maxchar2 <- max(sapply(tdomvar2lst, function(x) {nchar(x)}))
-	  
-        if (flag != "") {
-          tdomtree[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar2)), 
-			             width=maxchar2, flag=flag))]
-          tdomvarlst2 <- paste0(tdomprefix, formatC(tdomvarlst, width=maxchar, flag=flag))
-	      } else {
-	        tdomtree[, (tdomvarnm) := paste0(tdomprefix, get(eval(tdomvar)))]
-          tdomvarlst2 <- paste0(tdomprefix, tdomvarlst)
-        }	  
-
-	      if (flag != "") {
-	        tdomtree[, (tdomvarnm) := paste0(tdomtree[[tdomvarnm]], "#", 
-                 formatC(tdomtree[[tdomvar2]], width=maxchar2, flag=flag))]
-		    } else {
-		      tdomtree[, (tdomvarnm) := paste0(tdomtree[[tdomvarnm]], "#", tdomtree[[tdomvar2]])]      
-        }		
+    tdomtree <- tdomtree[tdomtree[[tdomvar2]] %in% tdomvar2lst,]
+    tdomvar2nm <- tdomvar2
+    if (FIAname) {
+      if (tdomvar2 == "SPCD") {
+        tdomdata <- datLUTspp(x=tdomtree, spcdname=spcd_name)
+        ref_spcd <- tdomdata$ref_spcd
       } else {
-        tdomtree[, (tdomvarnm) := paste0(tdomtree[[tdomvarnm]], "#", tdomtree[[tdomvar2]])]
+        tdomdata <- datLUTnm(tdomtree, xvar=tdomvar2, LUTvar="VALUE", FIAname=TRUE)
       }
-      tdomvarlst2 <- sort(unique(tdomtree[[tdomvarnm]]))
+      tdomtree <- tdomdata$xLUT
+      tdomvar2nm <- tdomdata$xLUTnm
+    } 
+    
+    if (is.numeric(tdomtree[[tdomvar2]])) {
+      
+      maxchar2 <- max(sapply(tdomvar2lst, function(x) {nchar(x)}))
+      if (!is.null(tdomprefix)) {
+        tdomvar2nm <- paste0(tdomvar2, "NM") 
+        if (flag != "") {
+          tdomtree[, (tdomvar2nm) := paste0(tdomprefix, formatC(get(eval(tdomvar2)),
+			             width=maxchar2, flag=flag))]
+          tdomvarlst2 <- paste0(tdomprefix, formatC(tdomvarlst, width=maxchar2, flag=flag))
+	      } else {
+	        tdomtree[, (tdomvar2nm) := paste0(tdomprefix, get(eval(tdomvar2)))]
+          tdomvarlst2 <- paste0(tdomprefix, tdomvar2lst)
+        }
+      } 
+    }
+   
+    if (pivot) {
+      concatvar <- paste0(tdomvar, "_", tdomvar2)
+      tdomtree[, (concatvar) := paste0(tdomtree[[tdomvarnm]], "#", tdomtree[[tdomvar2]])] 
+      sumbyvars <- unique(c(tsumuniqueid, pcdomainlst, concatvar))
+    } else {
+      sumbyvars <- unique(c(sumbyvars, tdomvar2nm))
     }
   }
 
   ## GET NAME FOR SUMMED TREE VARIABLE FOR FILTERED TREE DOMAINS 
-  if (is.null(tdomtotnm) && pivot) {
+  if (tdomtot && is.null(tdomtotnm) && pivot) {
     if (is.null(tdomprefix)) {
-      tdomtotnm <- paste0(tsumname, "TOT")
+      tdomtotnm <- paste0(tsumvarnm, "TOT")
     } else {
       tdomtotnm <- paste0(tdomprefix, "TOT")
     }
   }
 
   ## GET NAME FOR SUMMED TREE VARIABLE FOR ALL TREE DOMAINS (IF PROPORTION = TRUE)
-  if (proportion) denomvar <- paste0(tsumname, "_ALL")
+  if (proportion) denomvar <- paste0(tsumvarnm, "_ALL")
 
   ## Sum tree (and seed) by tdomvarnm
   #####################################################################
-  byvars <- unique(c(tsumuniqueid, tdomvar, tdomvarnm, bydomainlst))
-  
-  tdomtreef <- tdomtree[, lapply(.SD, tfun, na.rm=TRUE), by=byvars, .SDcols=tsumname]
+  tdomtreef <- tdomtree[, lapply(.SD, tfun, na.rm=TRUE), by=sumbyvars, .SDcols=tsumvarnm]
   setkeyv(tdomtreef, tsumuniqueid)
+
   
-print("CCCCCC")
-print(head(tdomtreef))
+  ## Generate tree domain look-up table (tdomvarlut)
+  #####################################################################
+  nvar <- ifelse(bycond, "NBRCONDS", "NBRPLOTS")
+  tdomvarlut <- tdomtree[, list(sum(get(tsumvarnm), na.rm=TRUE), .N), by=tdomvarnm]
+  names(tdomvarlut) <- c(tdomvarnm, tsumvarnm, nvar)
+  
+  if (!is.null(tdomvar2)) {
+    tdomvar2lut <- tdomtree[, list(sum(get(tsumvarnm), na.rm=TRUE), .N), by=tdomvar2nm]
+    names(tdomvar2lut) <- c(tdomvar2nm, tsumvarnm, nvar)
+  }
+
+  ## Add reference names to tdomvarlut if SPCD
+  #####################################################################
+  if (any(c(tdomvarnm, tdomvar2nm) == "SPCD")) {
+    refcol <- ifelse(spcd_name == "COMMON", "COMMON_NAME", 
+                   ifelse(spcd_name == "SYMBOL", "SPECIES_SYMBOL", 
+                          ifelse(spcd_name == "SCIENTIFIC", "SCIENTIFIC_NAME")))
+    if (tdomvarnm == "SPCD") {
+      tdomvarlut <- merge(FIESTAutils::ref_species[, c("SPCD", refcol)], 
+                        tdomvarlut, by="SPCD")
+    } else {
+      tdomvar2lut <- merge(FIESTAutils::ref_species[, c("SPCD", refcol)], 
+                          tdomvar2lut, by="SPCD")
+    }
+  } else if (any(c(tdomvarnm, tdomvar2nm) == "SPGRPCD")) {
+    ref_spgrpcd <- ref_codes[ref_codes$VARIABLE == "SPGRPCD", c("VALUE", "MEANING")]
+    
+    if (tdomvarnm == "SPGRPCD") {
+      tdomvarlut <- merge(ref_spgrpcd, tdomvarlut, by.x="VALUE", by.y="SPGRPCD")
+      names(tdomvarlut)[names(tdomvarlut) %in% c("VALUE", "MEANING")] <- c("SPGRPCD", "SPGRPNM")
+    } else {
+      tdomvar2lut <- merge(ref_spgrpcd, tdomvar2lut, by.x="VALUE", by.y="SPGRPCD")
+      names(tdomvar2lut)[names(tdomvar2lut) %in% c("VALUE", "MEANING")] <- c("SPGRPCD", "SPGRPNM")
+    }
+  }        
+
   ######################################################################## 
   ## If pivot=FALSE
   ######################################################################## 
   if (!pivot) {
     tdoms <- tdomtreef
-    tdomscolstot <- tsumname
+    tdomscolstot <- tsumvarnm
     tdomscols <- sort(unique(tdomtreef[[tdomvarnm]]))
-    tdomtotnm <- tsumname
 
-    if (!is.null(tdomvar2)) {
-      tdoms <- tdoms[, c(tdomvar, tdomvar2) := tstrsplit(get(tdomvarnm), "#")]
-      tdomvarnm <- c(tdomvar, tdomvar2)
-    }
   } else {
- print("WWWWWWWWWWWWWWWWWWWW")  
-print(byvars)
+
     ######################################################################## 
     ## If pivot=TRUE, aggregate tree domain data
     ######################################################################## 
-    tdoms <- datPivot(tdomtreef, pvar = tsumname, 
-                      xvar = byvars, yvar = tdomvarnm,
+    tdoms <- datPivot(tdomtreef, pvar = tsumvarnm, 
+                      xvar = c(tsumuniqueid, pcdomainlst), yvar = concatvar,
                       pvar.round = tround, returnDT = TRUE)
   	tdoms <- setDT(tdoms)
-print("JJJJJJ")
-print(head(tdoms))
+
     ## check if tree domain in tdomlst.. if not, create column with all 0 values
-    tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% byvars]
+    tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% sumbyvars]
     UNMATCH <- tdomvarlst2[is.na(match(tdomvarlst2, tdomscols))] 
     if (length(UNMATCH) > 0) {
       tdoms[, (UNMATCH) := 0]
@@ -724,8 +771,6 @@ print(head(tdoms))
 
     ## ADD TOTAL OF TREE DOMAINS IN tdomvarlst 
     if ((tdomtot || proportion || cover)) {
-      tdomtotnm <- tsumname
-
       ## Sum the total tree domains in tdomvarlst after any filtering by plot
       tdoms[, (tdomtotnm) := round(rowSums(.SD, na.rm=TRUE), tround), .SDcols=tdomvarlst2]
       tdomscolstot <- c(tdomvarlst2, tdomtotnm)
@@ -760,43 +805,25 @@ print(head(tdoms))
 #    tdomvarlut[[nvar]] <- sapply(tdoms[, tdomvarlst2, with=FALSE], 
 #		function(x) sum(x > 0))
   } 
-
-  ## Generate tree domain look-up table (tdomvarlut)
-  nvar <- ifelse(bycond, "NBRCONDS", "NBRPLOTS")
-  byvars <- unique(c(tdomvar, tdomvarnm))
-  tdomvarlut <- tdomtreef[, list(sum(get(tsumname), na.rm=TRUE), .N), by=byvars]
-  names(tdomvarlut) <- c(byvars, tsumname, nvar)
-
-  if (tdomvar == "SPCD") {
-    refcol <- ifelse(spcd_name == "COMMON", "COMMON_NAME", 
-                 ifelse(spcd_name == "SYMBOL", "SPECIES_SYMBOL", 
-                      ifelse(spcd_name == "SCIENTIFIC", "SCIENTIFIC_NAME")))
-    tdomvarlut <- merge(FIESTAutils::ref_species[, c("SPCD", refcol)], 
-					tdomvarlut, by="SPCD")
-  } else if (tdomvar == "SPGRPCD") {
-    ref_spgrpcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "SPGRPCD", c("VALUE", "MEANING")]
-    tdomvarlut <- merge(ref_spgrpcd, tdomvarlut, by.x="VALUE", by.y="SPGRPCD")
-    names(tdomvarlut)[names(tdomvarlut) %in% c("VALUE", "MEANING")] <- c("SPGRPCD", "SPGRPNM")
-  }        
-
+ 
   ## Generate barplot
   if (tdombarplot) {
     ## Frequency
     ylabel <- ifelse(bycond, "Number of Conditions", "Number of Plots")
     datBarplot(x = tdomvarlut, 
                xvar = tdomvarnm, 
-               yvar = tsumname, 
+               yvar = tsumvarnm, 
                savedata = savedata,
                outfolder=outfolder, 
-               ylabel = tsumname)
+               ylabel = tsumvarnm)
 
     ## Summed variable
     datBarplot(x = tdomvarlut, 
                xvar = tdomvarnm, 
-               yvar = tsumname, 
+               yvar = tsumvarnm, 
                savedata = savedata,
                outfolder = outfolder, 
-               ylabel = tsumname) 
+               ylabel = tsumvarnm) 
   }
 
   ## Merge to cond or plot
@@ -1075,7 +1102,7 @@ print(head(tdoms))
 #     	file = outfile, sep="")
 #     	close(outfile)
 #     }
-   }
+  }
 
   tdomdata <- list()
   if (!notdomdat) {
@@ -1087,6 +1114,11 @@ print(head(tdoms))
   tdomdata$tsumuniqueid <- tsumuniqueid
   if (length(tunits) > 0) {
     tdomdata$tunits <- tunits
+  }
+  tdomdata$tsumvarnm <- tsumvarnm
+  tdomdata$tdomvarnm <- tdomvarnm
+  if (!is.null(tdomvar2)) {
+    tdomdata$tdomvar2nm <- tdomvar2nm
   }
   if (proportion) {
     if (returnDT) {
@@ -1109,7 +1141,7 @@ print(head(tdoms))
   if (!notdomdat) tdomdata$tdomvarlut <- tdomvarlut
 
   tdomdata$tdomlst <- tdomscols
-  if (!is.null(tdomtotnm)) {
+  if (tdomtot && !is.null(tdomtotnm)) {
     tdomdata$tdomtotnm <- tdomtotnm
   }
   tdomdata$domainlst <- domainlst

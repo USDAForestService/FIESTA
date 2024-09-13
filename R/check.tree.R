@@ -3,25 +3,28 @@ check.tree <-
            condx = NULL, pltx = NULL, bycond = TRUE, tuniqueid = NULL,  
            cuniqueid = NULL, condid = "CONDID", puniqueid = NULL, 
            esttype = "TREE", ratiotype = "PERACRE",
-	         estvarn = NULL, estvarn.TPA = TRUE, estvarn.filter = NULL, 
+	         estvarn = NULL, estvarn.TPA = TRUE, 
+           estvarn.filter = NULL, estvarn.derive = NULL,
            estvarn.name = NULL, esttotn = TRUE, 
-           estvard = NULL, estvard.TPA = TRUE, estvard.filter = NULL,
+           estvard = NULL, estvard.TPA = TRUE, 
+           estvard.filter = NULL, estvard.derive = NULL,
 	         estvard.name = NULL, esttotd = TRUE, 
            bytdom, tdomvar = NULL, tdomvar2 = NULL,
            bydomainlst = NULL,
 	         adjtree = FALSE, adjvar = "tadjfac", 
            pltassgn = NULL, adjTPA = 1, metric = FALSE, 
 	         ACI = FALSE, woodland = "Y", 
-           tderive = NULL, classify = NULL, 
+           tderive = NULL, domclassify = NULL, 
            dbconn = NULL, 
-           pltidsWITHqry = NULL, pcwhereqry = NULL) {
+           pltidsWITHqry = NULL, pcwhereqry = NULL,
+           pjoinid = NULL) {
 
   ###################################################################################
   ### GETS ESTIMATION DATA FROM TREE TABLE
   ###################################################################################
 
   ## Set global variables
-  tdomvarlstn=estunitsd=tclassify=tderive <- NULL  
+  tdomvarlstn=estunitsd <- NULL  
 
   if (estseed == "only") {
     seedonly <- TRUE
@@ -32,8 +35,19 @@ check.tree <-
   } else {
     seedonly=addseed <- FALSE
   }
- 
+  
   if (bytdom) {
+    ## Check estvarn.derive
+    if (!is.null(estvarn.derive)) {
+      if (!all(is.list(estvarn.derive), length(estvarn.derive) == 1, !is.null(names(estvarn.derive)))) {
+        message("estvarn.derive must be a named list with one element")
+        stop()
+      }
+      if (!is.null(estvarn)) {
+        estvarn <- NULL
+      }
+    }
+
     pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
     tdomdata <- 
       datSumTreeDom(tree = treex, seed = seedx, 
@@ -56,13 +70,14 @@ check.tree <-
                     addseed = addseed, 
                     seedonly = seedonly, 
                     woodland = woodland,
-                    tderive = tderive,
-                    classify = classify,
+                    tderive = estvarn.derive,
+                    domclassify = domclassify,
                     tround = 12,
                     dbconn = dbconn, 
                     pltidsWITHqry = pltidsWITHqry,
-                    pcwhereqry = pcwhereqry)
-print("WWW")
+                    pcwhereqry = pcwhereqry,
+                    pjoinid = pjoinid)
+
     if (is.null(tdomdata)) return(NULL)
     tdomdat <- data.table(tdomdata$tdomdat)
     treeqry <- tdomdata$treeqry
@@ -70,32 +85,40 @@ print("WWW")
     tdomainlst <- tdomdata$tdomainlst
     pcdomainlst <- tdomdata$pcdomainlst
     
-    tsumvarn <- tdomdata$tdomtotnm
+    tsumvarn <- tdomdata$tsumvarnm
     tdomvarlstn <- tdomdata$tdomlst
     estunitsn <- tdomdata$estunits
     tsumuniqueid <- tdomdata$tsumuniqueid
     classifynmlst <- tdomdata$classifynmlst
-print("OOO")
-print(head(tdomdat))
-print(pivot)
+    tdomvarnm <- tdomdata$tdomvarnm
+    tdomvar2nm <- tdomdata$tdomvar2nm
+
     if (pivot) {
       ## Transpose back to rows
 #      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst, tdomvar2),
 #                             tvars = tdomvarlstn, na.rm = FALSE)
-      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, domainlst),
+      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst),
                                tvars = tdomvarlstn, na.rm = FALSE)
-print("TTTTTT")
-print(head(tdomdat))
       if (!is.null(tdomvar2)) {
         tdomdat <- data.table(tdomdat, tdomdat[, tstrsplit(variable, "#", fixed=TRUE)])
-        setnames(tdomdat, c("V1", "V2", "value"), c(tdomvar, tdomvar2, tsumvarn))
+        setnames(tdomdat, c("V1", "V2", "value"), c(tdomvarnm, tdomvar2nm, tsumvarn))
         tdomdat$variable <- NULL
       } else {
-        setnames(tdomdat, c("variable", "value"), c(tdomvar, tsumvarn))
+        setnames(tdomdat, c("variable", "value"), c(tdomvarnm, tsumvarn))
       }
     }
-
   } else {  
+
+    ## Check estvarn.derive
+    if (!is.null(estvarn.derive)) {
+      if (!all(is.list(estvarn.derive), length(estvarn.derive) == 1, !is.null(names(estvarn.derive)))) {
+        message("estvar.derive must be a named list with one element")
+        stop()
+      }
+      if (!is.null(estvarn)) {
+        estvarn <- NULL
+      }
+    } 
     
     ## Get summed tree data
     treedata <- 
@@ -117,12 +140,13 @@ print(head(tdomdat))
                  addseed = addseed, 
                  seedonly = seedonly, 
                  woodland = woodland,
-                 tderive = tderive,
-                 classify = classify,
+                 tderive = estvarn.derive,
+                 domclassify = domclassify,
                  tround = 6,
                  dbconn = dbconn, 
                  pltidsWITHqry = pltidsWITHqry,
-                 pcwhereqry = pcwhereqry)
+                 pcwhereqry = pcwhereqry,
+                 pjoinid = pjoinid)
     if (is.null(treedata)) return(NULL)
     tdomdat <- treedata$treedat
     tsumvarn <- treedata$sumvars
