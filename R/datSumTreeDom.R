@@ -294,7 +294,7 @@ datSumTreeDom <- function(tree = NULL,
 
   ## Set global variables  
   COND_STATUS_CD=COUNT=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=
-	seedx=tunits=TREECOUNT_CALC=cond.nonsamp.filter=ref_spcd=tdomvar2nm <- NULL
+	seedx=tunits=TREECOUNT_CALC=cond.nonsamp.filter=ref_spcd=tdomvar2nm=concatvar <- NULL
   checkNApvars <- {}
   checkNAcvars <- {}
   checkNAtvars <- {}
@@ -392,6 +392,11 @@ datSumTreeDom <- function(tree = NULL,
         message("tderive must be a named list with one element")
         stop()
       }
+    }
+    
+    if (!is.null(tsumvar) && !is.null(tderive)) {
+      message("both tsumvar and tderive are populated... only 1 sum variable allowed")
+      stop("")
     }
   }
     
@@ -507,7 +512,7 @@ datSumTreeDom <- function(tree = NULL,
   tdomainlst <- sumdat$tdomainlst   ## original tree variables
   pcdomainlst <- sumdat$pcdomainlst ## original pc variables
   classifynmlst <- sumdat$classifynmlst
-
+  
   if (!is.null(classifynmlst[[tdomvar]])) {
     tdomvar <- classifynmlst[[tdomvar]]
   }
@@ -617,6 +622,7 @@ datSumTreeDom <- function(tree = NULL,
   }
   sumbyvars <- unique(c(tsumuniqueid, pcdomainlst, tdomvarnm))
   
+
   ## GET tdomvarlst2 or CHECK IF ALL tree domains IN tdomvar2lst ARE INCLUDED IN tdomvar2.
   if (!is.null(tdomvar2)) {
     tdoms2 <- sort(unique(tdomtree[[tdomvar2]]))
@@ -679,7 +685,7 @@ datSumTreeDom <- function(tree = NULL,
         }
       } 
     }
-   
+
     if (pivot) {
       concatvar <- paste0(tdomvar, "_", tdomvar2)
       tdomtree[, (concatvar) := paste0(tdomtree[[tdomvarnm]], "#", tdomtree[[tdomvar2]])] 
@@ -703,7 +709,7 @@ datSumTreeDom <- function(tree = NULL,
 
   ## Sum tree (and seed) by tdomvarnm
   #####################################################################
-  tdomtreef <- tdomtree[, lapply(.SD, tfun, na.rm=TRUE), by=sumbyvars, .SDcols=tsumvarnm]
+  tdomtreef <- tdomtree[, lapply(.SD, sum, na.rm=TRUE), by=sumbyvars, .SDcols=tsumvarnm]
   setkeyv(tdomtreef, tsumuniqueid)
 
   
@@ -756,8 +762,9 @@ datSumTreeDom <- function(tree = NULL,
     ######################################################################## 
     ## If pivot=TRUE, aggregate tree domain data
     ######################################################################## 
+    yvar <- ifelse (is.null(tdomvar2), tdomvar, concatvar)
     tdoms <- datPivot(tdomtreef, pvar = tsumvarnm, 
-                      xvar = c(tsumuniqueid, pcdomainlst), yvar = concatvar,
+                      xvar = c(tsumuniqueid, pcdomainlst), yvar = yvar,
                       pvar.round = tround, returnDT = TRUE)
   	tdoms <- setDT(tdoms)
 

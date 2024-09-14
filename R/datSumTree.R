@@ -186,8 +186,8 @@ datSumTree <- function(tree = NULL,
   gui <- FALSE
   
   ## Set global variables  
-  pltx=treex=seedx=cond.nonsamp.filter=meta=tvars2convert=
-    ssumvarlst=cntvar=fname=tderivevars=pltidsnm=domainlst <- NULL
+  pltx=treex=seedx=cond.nonsamp.filter=meta=tvars2convert=ssumvarlst=
+    cntvar=fname=tderivevars=pltidsnm=domainlst=classifyvars <- NULL
  
   
   ## If gui.. set variables to NULL
@@ -701,6 +701,28 @@ datSumTree <- function(tree = NULL,
     }
   }
   
+  ## Check domclassify
+  ########################################################### 
+  if (!is.null(domclassify)) {
+    classifynmlst <- vector(mode = "list", length = length(domclassify))
+    names(classifynmlst) <- names(domclassify)
+    if (!is.list(domclassify) || is.null(names(domclassify))) {
+      stop(paste0("domclassify must be a named list object...\n",
+                  "e.g., domclassify = list(DIA = c(0, 20, 60))"))
+    } 
+    if (!all(sapply(domclassify, function(x) is.vector(x) || is.data.frame(x)))) {
+      message("invalid domclassify... all elements of the domclassify list must be a vector of class breaks or a data.frame")
+      stop()
+    }
+    ## Check if variables in domclassify are in bydomainlst... if not, add them
+    classifyvars <- names(domclassify)
+    if (any(!classifyvars %in% bydomainlst)) {
+      classifymiss <- classifyvars[!classifyvars %in% bydomainlst]
+      message("names in domclassify must be in bydomainlst... adding ", toString(classifymiss))
+      bydomainlst <- c(bydomainlst, classifymiss)
+    } 
+  }
+  
   ## Check bydomainlst
   tdomainlst <- NULL
   domainlst <- bydomainlst
@@ -718,6 +740,14 @@ datSumTree <- function(tree = NULL,
     }
   }
   
+  ## Get classifyvars
+  sclassifyvars <- NULL
+  tclassifyvars <- classifyvars[classifyvars %in% tdomainlst]
+  pcclassifyvars <- classifyvars[classifyvars %in% pcdomainlst]
+  if (addseed || seedonly) {
+    sclassifyvars <- classifyvars[classifyvars %in% seedflds]
+  }
+
   ## CHECK TPA and tsumvars
   ###########################################################  
   TPA <- pcheck.logical(TPA, varnm="TPA", title="Calculate TPA?", first="NO", 
@@ -989,6 +1019,10 @@ datSumTree <- function(tree = NULL,
       condnm <- "pltcondx"
       grpby. <- "pc."
     }
+  } else {
+    if (!is.null(pltidsWITHqry)) {
+      grpby. <- "pltids."
+    }
   }
 
   ## Check pcdomainlst
@@ -1002,35 +1036,6 @@ datSumTree <- function(tree = NULL,
       pcdomainlst <- pcdomainlst[pcdomainlst %in% condflds]
     } else {
       message("must include cond and/or plot table for: ", toString(pcdomainlst))
-    }
-  }
-  
-  ## Check domclassify
-  ########################################################### 
-  if (!is.null(domclassify)) {
-    classifynmlst <- vector(mode = "list", length = length(domclassify))
-    names(classifynmlst) <- names(domclassify)
-    tclassifyvars=sclassifyvars=pcclassifyvars <- NULL
-    if (is.null(bydomainlst)) {
-      message("names in domclassify must be in bydomainlst...")
-    }
-    if (!is.list(domclassify) || is.null(names(domclassify))) {
-      stop(paste0("domclassify must be a named list object...\n",
-                  "e.g., domclassify = list(DIA = c(0, 20, 60))"))
-    } 
-    classifyvars <- names(domclassify)
-    if (any(!classifyvars %in% bydomainlst)) {
-      message("names in domclassify must be in bydomainlst...")
-      stop()
-    } 
-    tclassifyvars <- classifyvars[classifyvars %in% tdomainlst]
-    pcclassifyvars <- classifyvars[classifyvars %in% pcdomainlst]
-    if (addseed || seedonly) {
-      sclassifyvars <- classifyvars[classifyvars %in% seedflds]
-    }
-    if (!all(sapply(domclassify, function(x) is.vector(x) || is.data.frame(x)))) {
-      message("invalid domclassify... all elements of the domclassify list must be a vector of class breaks or a data.frame")
-      stop()
     }
   }
   
@@ -1127,7 +1132,6 @@ datSumTree <- function(tree = NULL,
                             add_layer=add_layer, append_layer=append_layer, gui=gui)
     outlst$out_layer <- "treesum"
   }
-  
   
   #########################################################################################
   #########################################################################################
@@ -1321,7 +1325,7 @@ datSumTree <- function(tree = NULL,
       pltidsnm <- "subpcprop"
     }
   }  
-  
+ 
   #############################################################################
   ## Build tsumvardf for tree SELECT statement
   #############################################################################
@@ -1365,7 +1369,7 @@ datSumTree <- function(tree = NULL,
     }
     
     if (seedonly) {
-      NEWt <- ifelse(TPA, cntvar, paste0(cntvar, " > 0)"))
+      NEWt <- ifelse(TPA, cntvar, paste0(cntvar, " > 0"))
       tsumvardf <- rbind(tsumvardf, 
                          data.frame(TSUMVAR = "TPA_UNADJ", 
                                     TABLE = "SEED", 
@@ -1375,7 +1379,7 @@ datSumTree <- function(tree = NULL,
                                     DERIVE = FALSE))
     } else { 
       if (addseed) {  
-        NEWt <- ifelse(TPA, cntvar, paste0(cntvar, " > 0)"))
+        NEWt <- ifelse(TPA, cntvar, paste0(cntvar, " > 0"))
         #NAMEs <- ifelse(getadjplot, paste0(NAMEs, "_ADJ"), NAMEs)
         NAMEs <- ifelse(TPA, paste0(cntnm, "_SEED"), cntnm)
         
@@ -1403,7 +1407,7 @@ datSumTree <- function(tree = NULL,
       } else {
         if (!is.null(cntvar)) {
           for (cvar in cntvar) {
-            NEW <- ifelse(TPA, cvar, paste0(cvar, " > 0)"))
+            NEW <- ifelse(TPA, cvar, paste0(cvar, " > 0"))
             tsumvardf <- rbind(tsumvardf, 
                                data.frame(TSUMVAR = cvar, 
                                           TABLE = "TREE",
@@ -1575,7 +1579,8 @@ datSumTree <- function(tree = NULL,
     tsumvardf$SELECT <- paste0("COALESCE(SUM(", tsumvardf$NEW, "),0)")
     
   }
-  
+
+
   ## Add derived variables to tsumvardf
   ###########################################################################
   if (!is.null(tderive)) {
@@ -1591,7 +1596,6 @@ datSumTree <- function(tree = NULL,
       tsumvarlst <- unique(c(tsumvarlst, tderive[[i]]))
     }
   }
-  
   
   ### Define name - adding tfilter 
   ###########################################################################
@@ -1848,6 +1852,7 @@ datSumTree <- function(tree = NULL,
   } else {
     tfromqry <- paste0("\nFROM ", twithalias)
   }
+
   
   ## Build SELECT statement for summarizing tree data.
   ################################################################
@@ -1864,6 +1869,7 @@ datSumTree <- function(tree = NULL,
   # tgrpbyvars <- toString(tgrpbyvars)
   tselectqry <- paste0("\nSELECT ", toString(tgrpbyvars))
 
+  
   ## Add classifications to select query
   domclassifyqry <- NULL
   if (!is.null(domclassify)) {
@@ -1929,11 +1935,15 @@ datSumTree <- function(tree = NULL,
         domclassifyqry <- paste0(domclassifyqry, ",")
       }
     }
-    tselectqry <- paste0(tselectqry, ", ", toString(domainlst), ", ", domclassifyqry)
-  } else if (!is.null(domainlst)) {
+    if (length(domainlst) > 0) {
+      tselectqry <- paste0(tselectqry, ", ", toString(domainlst), ", ", domclassifyqry)
+    } else {
+      tselectqry <- paste0(tselectqry, ", ", domclassifyqry)
+    }
+  } else if (!is.null(domainlst) && length(domainlst) > 0) {
     tselectqry <- paste0(tselectqry, ", ", toString(domainlst))
   }
- 
+
   if (!seedonly) {
     
     ## Build select tree query
@@ -1955,7 +1965,7 @@ datSumTree <- function(tree = NULL,
                                        collapse=",\n  "))  
     
   }
-   
+  
   ## Build query to summarize tree data
   ################################################################
   tqry <- paste0(tselectqry,
@@ -1986,7 +1996,8 @@ datSumTree <- function(tree = NULL,
       {
         DBI::dbGetQuery(dbconn, tree.qry)
       },
-      error = function(cond) {
+      error = function(e) {
+        message(e, "\n")
         return(NULL)
       }
     )
@@ -1995,7 +2006,8 @@ datSumTree <- function(tree = NULL,
       {
         sqldf::sqldf(tree.qry)
       },
-      error = function(cond) {
+      error = function(e) {
+        message(e, "\n")
         return(NULL)
       }
     )
