@@ -16,6 +16,7 @@ popFilters(
   intensity = NULL,
   ACI = FALSE,
   AOIonly = FALSE,
+  pfilter = NULL,
   ...
 )
 }
@@ -53,6 +54,8 @@ population.}
 
 \item{AOIonly}{Logical. If TRUE, and there is an AOI (1/0) attribute in the
 population data, only AOI=1 are used for estimation.}
+
+\item{pfilter}{String. Logical filter for plot or pltassgn.}
 
 \item{...}{For extendibility.}
 }

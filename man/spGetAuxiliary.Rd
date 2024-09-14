@@ -41,8 +41,7 @@ spGetAuxiliary(
   exportNA = FALSE,
   spMakeSpatial_opts = NULL,
   savedata_opts = NULL,
-  vars2keep = NULL,
-  gui = FALSE
+  vars2keep = NULL
 )
 }
 \arguments{

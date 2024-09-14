@@ -12,13 +12,13 @@ modGBchng(
   rowvar = NULL,
   colvar = NULL,
   sumunits = TRUE,
+  T1filter = NULL,
+  T2filter = NULL,
   returntitle = FALSE,
   savedata = FALSE,
   table_opts = NULL,
   title_opts = NULL,
   savedata_opts = NULL,
-  cdomdat = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -56,11 +56,9 @@ options.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
-\item{cdomdat}{Data.frame of condition-domain data. Output from modGBchng().}
+\item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
-
-\item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
 }
 \value{
 A list with estimates with percent sampling error for rowvar (and

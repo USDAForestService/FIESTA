@@ -56,7 +56,7 @@ warnings.}
 
 \item{dbconn}{Open database connection.}
 
-\item{dbconnopen}{Logica. If TRUE, keep database connection open.}
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.}
 
 \item{dbwrite}{Logical. If TRUE, write class column to database table x.}
 

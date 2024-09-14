@@ -20,13 +20,13 @@ datSumTreeDom(
   bycond = FALSE,
   condid = "CONDID",
   bysubp = FALSE,
+  subpuniqueid = "PLT_CN",
   subpid = "SUBP",
   tsumvar = NULL,
   addseed = FALSE,
   seedonly = FALSE,
   woodland = "Y",
   TPA = TRUE,
-  tfun = sum,
   ACI = FALSE,
   tfilter = NULL,
   lbs2tons = TRUE,
@@ -39,24 +39,28 @@ datSumTreeDom(
   tdombarplot = FALSE,
   tdomtot = FALSE,
   tdomtotnm = NULL,
+  bydomainlst = NULL,
   FIAname = FALSE,
   spcd_name = "COMMON",
   pivot = TRUE,
   presence = FALSE,
   proportion = FALSE,
-  cover = FALSE,
   getadjplot = FALSE,
   adjtree = FALSE,
   adjvar = "tadjfac",
-  NAto0 = FALSE,
   adjTPA = 1,
+  domclassify = NULL,
+  tderive = NULL,
   tround = 5,
+  NAto0 = TRUE,
+  pltidsWITHqry = NULL,
+  pcwhereqry = NULL,
+  pjoinid = "PLT_CN",
   returnDT = TRUE,
   savedata = FALSE,
   savedata_opts = NULL,
   dbconn = NULL,
-  dbconnopen = FALSE,
-  gui = FALSE
+  dbconnopen = FALSE
 )
 }
 \arguments{
@@ -106,6 +110,9 @@ uniqueid).}
 
 \item{bysubp}{Logical. If TRUE, data are aggregated to the subplot level.}
 
+\item{subpuniqueid}{String. Unique identifier of plot in subplot and 
+subp_cond table.}
+
 \item{subpid}{String. Unique identifier of each subplot.}
 
 \item{tsumvar}{String. Name of the variable to aggregate (e.g., "BA"). For
@@ -125,9 +132,6 @@ woodland species.}
 \item{TPA}{Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 respective trees-per-acre variable (see details) to get per-acre
 measurements.}
-
-\item{tfun}{Function. Name of the function to use to aggregate the data
-(e.g., sum, mean, max).}
 
 \item{ACI}{Logical. If TRUE, if ACI (All Condition Inventory) plots exist,
 any trees on these plots will be included in summary. If FALSE, you must
@@ -185,11 +189,6 @@ domain values as presence/absence (1/0).}
 \item{proportion}{Logical. If TRUE and pivot=TRUE, an additional table will
 be output with tree domain data as proportions of total tsumvar.}
 
-\item{cover}{Logical. If TRUE and pivot=TRUE, , an additional table will be
-output with tree domain data as percent cover, based on proportions of
-tsumvar (see proportion) and tree canopy cover variable in cond
-(LIVE_CANOPY_CVR_PCT) or in plt (CCLIVEPLT).  Does not include seedlings.}
-
 \item{getadjplot}{Logical. If TRUE, adjustments are calculated for
 nonsampled conditions on plot.}
 
@@ -200,13 +199,28 @@ adjvar).}
 \item{adjvar}{String. If adjtree=TRUE, the name of the variable to use for
 multiplying by adjustment (e.g., tadjfac).}
 
-\item{NAto0}{Logical. If TRUE, convert NA values to 0.}
-
 \item{adjTPA}{Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1
 (annual inventory), if using less than 4 subplots. If using only 1 sublot
 for estimate, adjTPA=4. The default is 1.}
 
+\item{domclassify}{List. List for classifying domain variables in bydomainlst
+(e.g., DIA = c(10,20,30)).}
+
+\item{tderive}{List. List of derivative to add to output data (e.g., 
+list(MEAN_DIA = 'AVG(DIA)', SDI = 'POWER(DIA / 10, 1.605)', 
+QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454))'))}
+
 \item{tround}{Number. The number of digits to round to. If NULL, default=6.}
+
+\item{NAto0}{Logical. If TRUE, convert NA values to 0.}
+
+\item{pltidsWITHqry}{SQL query. A query identifying plots to sum (e.g., 
+'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')}
+
+\item{pcwhereqry}{String. Plot/Condition filter if plot and/or cond table is 
+included.}
+
+\item{pjoinid}{String. Name of unique identifier from pltidsWITHqry.}
 
 \item{returnDT}{Logical. If TRUE, returns data.table object(s). If FALSE,
 returns data.frame object(s).}
@@ -221,7 +235,9 @@ default = 'tdomsum'.}
 
 \item{dbconnopen}{Logical. If TRUE, keep database connection open.}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
+\item{bydomainst}{String (vector). Categorical domain variables not in
+tdomvar/tdomvar2. Variables must be in tree table or plt/cond table if tables 
+are provided.}
 }
 \value{
 tdomdata - a list of the following objects:
