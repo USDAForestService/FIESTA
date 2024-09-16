@@ -302,12 +302,10 @@ modGBtree <- function(GBpopdat,
   ## DESCRIPTION:
   ## Generates estimates of trees by domain using non-ratio estimators.
   ##################################################################################
-  gui <- FALSE
-  
+
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(GBpopdat)) {
-    gui <- TRUE
-  } 
+  #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
+  gui <- FALSE
   
   ## If gui.. set variables to NULL
   if (gui) { 
@@ -665,7 +663,6 @@ modGBtree <- function(GBpopdat,
                adjvar = "tadjfac",
                metric = metric, 
                woodland = woodland,
-               tderive = estvar.derive,
                domclassify = domclassify,
                dbconn = popconn,
                pltidsWITHqry = pltidsWITHqry,
@@ -809,12 +806,11 @@ modGBtree <- function(GBpopdat,
   
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
-  
+
+
   if (!row.add0 && any(est2return$Total == "--")) {
     est2return <- est2return[est2return$Total != "--",]
   }
-  
-  
   if (!is.null(est2return)) {
     if (!row.add0 && any(est2return$Total == "--")) {
       est2return <- est2return[est2return$Total != "--",]

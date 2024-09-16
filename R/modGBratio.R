@@ -312,7 +312,6 @@ modGBratio <- function(GBpopdat,
                        table_opts = NULL, 
                        title_opts = NULL, 
                        savedata_opts = NULL, 
-                       gui = FALSE, 
                        ...){
 
   ##################################################################################
@@ -322,9 +321,8 @@ modGBratio <- function(GBpopdat,
 
   
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(GBpopdat)) {
-    gui <- TRUE
-  } 
+  #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
+  gui <- FALSE 
   
   ## If gui.. set variables to NULL
   if (gui) { 
@@ -341,6 +339,7 @@ modGBratio <- function(GBpopdat,
   substrvar <- FALSE
   parameters <- FALSE
   returnlst <- list()
+  rawdata <- TRUE  
   row.addNA=col.addNA <- FALSE
   rowcol.total <- TRUE
   

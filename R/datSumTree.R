@@ -201,6 +201,7 @@ datSumTree <- function(tree = NULL,
   pltassgnid <- "PLT_CN"
   pltidsid <- pjoinid
   NAto0 <- TRUE
+  SCHEMA. <- ""
  
   ## Query alias.
   talias. <- "t."
@@ -536,6 +537,7 @@ datSumTree <- function(tree = NULL,
   }
   
   ## Check pltidsWITHqry
+  condinWITHqry <- FALSE
   if (!is.null(pltidsWITHqry)) {
     if (!all(grepl("WITH", pltidsWITHqry))) {
       message("must include WITH in pltidsWITHqry...")
@@ -562,6 +564,12 @@ datSumTree <- function(tree = NULL,
     ## Set name of pltids and alias path
     pltidsnm <- "pltids"
     pltidsa. <- "pltids."
+    
+    
+    ## check if cond in pltidsWITHqry
+    if (!is.null(cond) && grepl(cond, pltidsWITHqry)) {
+      condinWITHqry <- TRUE
+    }
   }
 
   ## Check unique identifiers and set unique keys if R objects
@@ -827,34 +835,6 @@ datSumTree <- function(tree = NULL,
       }
     }
     
-    ## check pltidsWITHqry
-    if (is.null(pltidsWITHqry)) {
-      pltidsWITHqry <- paste0("WITH",
-                              "\npltids AS",
-                              "\n(SELECT PLT_CN, SUBP",
-                              "\n FROM ", subplotnm, ")")
-      pltidsnm <- "pltids"
-      pltidsa. <- "pltids."
-      
-    } else {
-      subpjoinqry <- getjoinqry(subplotnm, pltidsnm, "subp.", pltidsa)
-      subpfromqry <- paste0("\n FROM ", subplotnm, " subp",
-                            "\n JOIN ", pltidsnm, " pltids")
-      pltidsWITHqry <- paste0(pltidsWITHqry, ", ",
-                              "\npltidsSUBP AS",
-                              subpfromqry, ")")
-      
-      ## Set name of pltids and alias path
-      pltidsnm <- "pltidsSUBP"
-      pltidsa. <- "pltidsSUBP"
-    }
-    pltidsid <- "PLT_CN"
-    
-    
-    if (is.null(subp_condnm) || is.null(subplotnm)) {
-      stop("must include subplot and subp_condtables to calculate adjustment factors")
-    } 
-    
     ## Check unique identifiers
     subpuniqueid <- cuniqueid
     subpids <- c(subpuniqueid, subpid)
@@ -864,17 +844,61 @@ datSumTree <- function(tree = NULL,
       if (!all(subpids %in% subpcflds)) {
         stop("uniqueids not in subp_cond: ", toString(subpids))
       }
-      setkeyv(subpcondx, subpids)
     }
     if (!is.null(subplotnm)) {
       if (!all(subpids %in% subplotflds)) {
         stop("uniqueids not in subplot: ", toString(subpids))
       }
-      setkeyv(subplotx, subpids)
     }
-    
+   
+    ## check pltidsWITHqry
+    if (is.null(pltidsWITHqry)) {
+      if (bycond && !is.null(subp_condnm)) {
+        pltidsWITHqry <- paste0("WITH",
+                                "\npltids AS",
+                                "\n(SELECT PLT_CN, SUBP, CONDID",
+                                "\n FROM ", subp_condnm, ")")
+      } else {
+        pltidsWITHqry <- paste0("WITH",
+                              "\npltids AS",
+                              "\n(SELECT PLT_CN, SUBP",
+                              "\n FROM ", subplotnm, ")")
+      }
+      pltidsnm <- "pltids"
+      pltidsa. <- "pltids."
+      pltidsid <- "PLT_CN"
+      
+    } else {
+      #pltidsid <- pjoinid
+      
+      subpjoinqry <- getjoinqry(subpuniqueid, pjoinid, "subp.", pltidsa.)
+      if (bycond && !is.null(subp_condnm)) {
+        subpfromqry <- paste0("\n FROM ", subp_condnm, " subp",
+                            "\n JOIN ", pltidsnm, " pltids ", subpjoinqry)
+        
+        pltidsWITHqry <- paste0(pltidsWITHqry, ", ",
+                                "\npltidsSUBP AS",
+                                "\n(SELECT PLT_CN, SUBP, CONDID",
+                                subpfromqry, ")")
+      } else {
+        subpfromqry <- paste0("\n FROM ", subplotnm, " subp",
+                              "\n JOIN ", pltidsnm, " pltids ", subpjoinqry)
+        
+        pltidsWITHqry <- paste0(pltidsWITHqry, ", ",
+                                "\npltidsSUBP AS",
+                                "\n(SELECT PLT_CN, SUBP",
+                                subpfromqry, ")")
+      }
+
+      ## Set name of pltids and alias path
+      #subplotnm <- "pltidsSUBP"
+    }
+    if (is.null(subp_condnm) || is.null(subplotnm)) {
+      stop("must include subplot and subp_condtables to calculate adjustment factors")
+    } 
+
     ## Set alias path for group by unique identifier
-    grpby. <- pltidsa.
+    grpby. <- "subp."
     
   } else if (!is.null(plt)) {
 
@@ -901,6 +925,7 @@ datSumTree <- function(tree = NULL,
       pltidsid <- "PLT_CN"
       pltidsa. <- "pltids."
     } else {
+      pltidsid <- pjoinid
       pltidsa. <- "pltids."
     }
     
@@ -910,7 +935,6 @@ datSumTree <- function(tree = NULL,
 
   ## Check cond table
   if (!is.null(cond)) {
-    condinWITHqry <- FALSE
     if (is.data.frame(cond)) {
       condx <- pcheck.table(cond, gui=gui, tabnm="cond", caption="Condition table?")
       if (!is.null(condx)) {
@@ -919,7 +943,6 @@ datSumTree <- function(tree = NULL,
         condnm <- "condx"
       }
     } else if (!is.null(pltidsWITHqry) && grepl(cond, pltidsWITHqry)) {
-      condinWITHqry <- TRUE
       condnm <- cond
       
       condflds.qry <- paste0(
@@ -973,6 +996,41 @@ datSumTree <- function(tree = NULL,
       }
     }
     
+    ## Check pcwhereqry
+    if (!is.null(pcwhereqry)) {
+      if (is.null(pcflds)) {
+        stop("must include plot and/or cond if including pcwhereqry")
+      } else {
+        pcwhereqry <- check.logic(pcflds, pcwhereqry)
+        pcwhereqry <- RtoSQL(pcwhereqry)
+      }
+    }
+    ## If ACI, include COND_STATUS_CD = 1 to exclude trees measured on ACI plots
+    if (!ACI) {
+      if (is.null(condflds)) {
+        message("must include cond to exclude ACI plots... assuming data has no ACI plots")
+      } else {
+        if (!"COND_STATUS_CD" %in% condflds) {
+          message("must include COND_STATUS_CD in cond to exclude ACI plots... assuming data has no ACI plots")
+        }
+        if (!is.null(pcwhereqry)) {
+          if (!(grepl("COND_STATUS_CD", pcwhereqry) && 
+                (grepl("COND_STATUS_CD=1", gsub(" ", "", pcwhereqry)) || 
+                 grepl("COND_STATUS_CDin(1)", gsub(" ", "", pcwhereqry))))) {
+            
+            if (!(startsWith(gsub(" ", "", pcwhereqry), "WHERE") || 
+                startsWith(gsub(" ", "", pcwhereqry), "\nWHERE"))) {
+              pcwhereqry <- paste0("\n WHERE ", pcwhereqry)
+            }
+            
+            pcwhereqry <- paste0(pcwhereqry, " AND pc.COND_STATUS_CD = 1")
+          }
+        } else {
+          pcwhereqry <- "\n WHERE pc.COND_STATUS_CD = 1"
+        }
+      }
+    }
+
     ## check and append to pltidsWITHqry
     if (is.null(pltidsWITHqry)) {
       pltidsWITHqry <- paste0("WITH",
@@ -1017,12 +1075,15 @@ datSumTree <- function(tree = NULL,
                               "\n(SELECT ", pltcondfldsqry,
                               pcfromqry, ")")
       condnm <- "pltcondx"
-      grpby. <- "pc."
+      
+      if (!bysubp) {
+        grpby. <- "pc."
+      }
     }
   } else {
-    if (!is.null(pltidsWITHqry)) {
-      grpby. <- "pltids."
-    }
+    #if (!is.null(pltidsWITHqry)) {
+    #  grpby. <- "pltids."
+    #}
   }
 
   ## Check pcdomainlst
@@ -1037,11 +1098,6 @@ datSumTree <- function(tree = NULL,
     } else {
       message("must include cond and/or plot table for: ", toString(pcdomainlst))
     }
-  }
-  
-  ## Check pcwhereqry
-  if (!is.null(pcwhereqry) && is.null(condnm)) {
-    stop("must include cond if including pcwhereqry")
   }
   
   ## Check lbs2tons
@@ -1132,7 +1188,7 @@ datSumTree <- function(tree = NULL,
                             add_layer=add_layer, append_layer=append_layer, gui=gui)
     outlst$out_layer <- "treesum"
   }
-  
+
   #########################################################################################
   #########################################################################################
   ## Build queries
@@ -1191,11 +1247,11 @@ datSumTree <- function(tree = NULL,
         ## Build FROM query including subplot and subp_cond
         subpa. <- "subp."
         subpca. <- "subpc."
-        subpjoinqry <- getjoinqry(subpid, pltidsid, subpa., pltidsa.)
+        subpjoinqry <- getjoinqry(subpuniqueid, pltidsid, subpa., pltidsa.)
         subpfromqry <- paste0(
           pcfromqry,                    
           "\n JOIN ", SCHEMA., subplotnm, " subp ", subpjoinqry,
-          "\n JOIN ", SCHEMA., subp_condnm, " subpc ON (", subpca., subpid, " = ", conda., cuniqueid, 
+          "\n JOIN ", SCHEMA., subp_condnm, " subpc ON (", subpca., subpuniqueid, " = ", conda., cuniqueid, 
           " AND ", subpca., condid, " = ", conda., condid, 
           " AND ", subpca., subpid, " = ", subpa., subpid, ")")
         
@@ -1298,6 +1354,7 @@ datSumTree <- function(tree = NULL,
       
       ## Build FROM query including subplot and subp_cond
       subpa. <- "subp."
+      subpca. <- "subpc."
       subpjoinqry <- getjoinqry(subpid, pltidsid, subpa., pltidsa.)
       subpfromqry <- paste0(
         pcfromqry,                    
@@ -1634,11 +1691,8 @@ datSumTree <- function(tree = NULL,
   }
   
   
-  #############################################################################
-  ## Build SELECT query
-  #############################################################################
-  
-  ## Build WITH query - get tree data (tdat)
+  #################################################################################
+  ## Build WITH query to get tree data (tdat)
   #################################################################################
   adjalias. <- "adj."
   twithalias <- "tdat"
@@ -1816,15 +1870,38 @@ datSumTree <- function(tree = NULL,
                             "\n(", twithqry, ")")
     
   } else {
-    uniqueid <- tuniqueid
+    uniqueid <- pltidsid
     grpby. <- "tdat."
     pltidsWITHqry <- paste0("WITH tdat AS", 
                             "\n(", twithqry, ")")
   }
+  
+  
+  #################################################################################
+  ## Build query for summarizing tree data
+  #################################################################################
 
-  ## Build FROM statement for summarizing tree data
+  ## Build FROM statement 
   ################################################################
-  if (!is.null(condnm)) {
+  if (bysubp) {
+    subpa. <- "subp."
+    tfromqry <- paste0("\nFROM pltidsSUBP subp")
+    if (!is.null(condnm)) {
+      conda. <- "pc."
+      if (bycond) {
+        cjoinid <- getjoinqry(c(cuniqueid, condid), c(subpuniqueid, condid), "pc.", subpa.)
+      } else {
+        cjoinid <- getjoinqry(cuniqueid, subpuniqueid, "pc.", subpa.)
+      }
+      tfromqry <- paste0(tfromqry, 
+                         "\nJOIN ", condnm, " pc ", cjoinid)
+      tjoinid <- getjoinqry(c(tuniqueid, condid), uniqueid, "tdat.", subpa.)
+      
+      ## Use LEFT JOIN for tdat to get all records, no data filled with 0
+      tfromqry <- paste0(tfromqry,
+                         "\nLEFT JOIN tdat ", tjoinid)
+    }
+  } else if (!is.null(condnm)) {
     conda. <- "pc."
     tfromqry <- paste0("\nFROM ", condnm, " pc")
     tjoinid <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "tdat.", conda.)
@@ -1853,9 +1930,8 @@ datSumTree <- function(tree = NULL,
     tfromqry <- paste0("\nFROM ", twithalias)
   }
 
-  
-  ## Build SELECT statement for summarizing tree data.
-  ################################################################
+  ## Build SELECT statement
+  ####################################################################
   
   #tgrpbyvars <- toString(c(paste0(idsa., uniqueid), bydomainlst))
   tgrpbyvars <- paste0(grpby., uniqueid)
@@ -1869,7 +1945,7 @@ datSumTree <- function(tree = NULL,
   # tgrpbyvars <- toString(tgrpbyvars)
   tselectqry <- paste0("\nSELECT ", toString(tgrpbyvars))
 
-  
+
   ## Add classifications to select query
   domclassifyqry <- NULL
   if (!is.null(domclassify)) {
