@@ -387,7 +387,7 @@ modGBarea <- function(GBpopdat,
   pltcondflds <- GBpopdat$pltcondflds
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
-  ACI.filter <- GBpopdat$ACI.filter
+  ACI <- GBpopdat$ACI
   pltassgnx <- GBpopdat$pltassgnx
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
@@ -461,7 +461,7 @@ modGBarea <- function(GBpopdat,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
                   landarea = landarea,
-                  ACI.filter = ACI.filter, 
+                  ACI = ACI, 
                   pcfilter = pcfilter,
                   allin1 = allin1, divideby = divideby,
                   estround = estround, pseround = pseround,
