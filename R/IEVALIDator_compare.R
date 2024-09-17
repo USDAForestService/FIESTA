@@ -518,6 +518,13 @@ compareAPI <- function(EVALIDatorlst,
   #fiesta_estimate <- FIESTAlst$est
   
   
+  compareTypelst <- c("TOTALS", "ROW", "COL", "GRP")
+  compareType <- pcheck.varchar(var2check = compareType, varnm = "compareType",
+                             checklst = compareTypelst, caption = "compareType", 
+                             stopifnull = TRUE)
+  
+  
+  
   if (compareType == "TOTALS") {
     eval_totest <- EVALIDatorlst$eval_totest
     fiesta_totest <- FIESTAlst$raw$totest
