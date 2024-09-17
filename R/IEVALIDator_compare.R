@@ -38,11 +38,12 @@ fiadb_api_GET <- function(url){
 
 getattnbr <- function(popType = "CURR",
                       estvar = NULL, 
+                      estvar.filter = NULL,
                       landarea = "Forest", 
-                      estn_type = "AL",
                       chng_type = "TOTAL",
                       woodland = "Y",
                       dia5inch = TRUE,
+                      saplings = FALSE,
                       dsn = NULL, conn = NULL,
                       EVALIDATOR_POP_ESTIMATE = NULL) {
   
@@ -56,6 +57,7 @@ getattnbr <- function(popType = "CURR",
   ## estimate - c('AREA CHANGE ANNUAL', 'AREA CHANGE")
   ## chng_type - c('total', 'annual')
   ## woodland - c('Y', 'N', 'only')
+  ## dia5inch Logical. If TRUE, gets attribute with 5 inches and above
   ## dsn - data source name of SQLite database with EVALIDATOR_POP_ESTIMATE table
   ## conn - open connection of SQLite database with EVALIDATOR_POP_ESTIMATE table
   ## EVALIDATOR_POP_ESTIMATE - table with attribute numbers
@@ -76,6 +78,13 @@ getattnbr <- function(popType = "CURR",
                         ifelse(landarea == "TIMBERLAND", "Timberland",
                                "All land"))
   
+  if (is.null(estvar) && popType == "VOL") {
+    message("check popType...")
+  }
+  if (!is.null(estvar) && popType != "VOL") {
+    message("check popType... ")
+    popType <- "VOL"
+  }
   
   ## Get EVALIDATOR_POP_ESTIMATE
   popvars <- c("ATTRIBUTE_NBR", "ATTRIBUTE_DESCR", "ESTN_TYPE")
@@ -102,6 +111,15 @@ getattnbr <- function(popType = "CURR",
     }
   }
   EVALIDATOR_POP_ESTIMATE <- setDF(EVALIDATOR_POP_ESTIMATE)
+  ## Remove spaces for consistency
+  EVALIDATOR_POP_ESTIMATE$ESTN_ATTRIBUTE <- gsub(" ", "", EVALIDATOR_POP_ESTIMATE$ESTN_ATTRIBUTE)
+  EVALIDATOR_POP_ESTIMATE$ESTN_ATTRIBUTE <- gsub("\n", "", EVALIDATOR_POP_ESTIMATE$ESTN_ATTRIBUTE)
+  
+  tmpvars <- c("ATTRIBUTE_NBR", "ATTRIBUTE_DESCR", "EVAL_TYP", "LAND_BASIS", "ESTIMATE", "ESTN_TYPE",
+               "ESTN_TREE_PORTION", "ESTN_ATTRIBUTE", "ESTN_UNITS_ATTRIBUTE", "ESTN_UNITS_DISPLAY",
+               "ESTIMATE_VARIANT", "GROWTH_ACCT")
+  tmpdf <- EVALIDATOR_POP_ESTIMATE[, tmpvars]
+
   
   ###############################################################################
   ## Get attribute number for EVALIDator estimate
@@ -111,10 +129,9 @@ getattnbr <- function(popType = "CURR",
     eval_typ <- "EXPCURR"
     estimate <- "AREA"
     
-    attribute_nbr <- EVALIDATOR_POP_ESTIMATE[
-      EVALIDATOR_POP_ESTIMATE$ESTIMATE == estimate & 
-        EVALIDATOR_POP_ESTIMATE$LAND_BASIS == land_basis & 
-        EVALIDATOR_POP_ESTIMATE$EVAL_TYP == eval_typ, "ATTRIBUTE_NBR"]
+    attribute_nbr <- tmpdf[tmpdf$ESTIMATE == estimate & 
+                           tmpdf$LAND_BASIS == land_basis & 
+                           tmpdf$EVAL_TYP == eval_typ, "ATTRIBUTE_NBR"]
     
   } else if (popType == 'CHNG') {
     
@@ -130,29 +147,47 @@ getattnbr <- function(popType = "CURR",
       att_search <- "either measurement"
     }
     
-    attribute_nbr <- EVALIDATOR_POP_ESTIMATE[
-      EVALIDATOR_POP_ESTIMATE$ESTIMATE == estimate & 
-        EVALIDATOR_POP_ESTIMATE$LAND_BASIS == land_basis & 
-        EVALIDATOR_POP_ESTIMATE$EVAL_TYP == eval_typ, "ATTRIBUTE_NBR"]
+    attribute_nbr <- tmpdf[tmpdf$ESTIMATE == estimate & 
+                           tmpdf$LAND_BASIS == land_basis & 
+                           tmpdf$EVAL_TYP == eval_typ, "ATTRIBUTE_NBR"]
     
     if (length(attribute_nbr) > 1) {
-      attribute_nbr <- EVALIDATOR_POP_ESTIMATE[
-        EVALIDATOR_POP_ESTIMATE$ESTIMATE == estimate & 
-          grepl(att_search, EVALIDATOR_POP_ESTIMATE$ATTRIBUTE_DESCR) &
-          EVALIDATOR_POP_ESTIMATE$LAND_BASIS == land_basis & 
-          EVALIDATOR_POP_ESTIMATE$EVAL_TYP == eval_typ, "ATTRIBUTE_NBR"]
+      attribute_nbr <- tmpdf[tmpdf$ESTIMATE == estimate & 
+                             grepl(att_search, tmpdf$ATTRIBUTE_DESCR) &
+                             tmpdf$LAND_BASIS == land_basis & 
+                             tmpdf$EVAL_TYP == eval_typ, "ATTRIBUTE_NBR"]
     }
     
   } else if (popType == "VOL") {
     
+    ## Define estn_type
+    if (!is.null(estvar.filter)) {
+      estvar.filter <- gsub(" ", "", estvar.filter)
+      if (grepl("STATUSCD==1", estvar.filter, ignore.case = TRUE)) {
+        estn_type <- "AL"
+      } else if (grepl("STATUSCD==2", estvar.filter, ignore.case = TRUE)) {
+        estn_type <- "STGD"
+      } else if (grepl("TREECLCD==2", estvar.filter, ignore.case = TRUE)) {
+        estn_type <- "GS"
+      } else {
+        stop("estvar.filter not supported: ", estvar.filter)
+      }
+    } 
+
     eval_typ <- "EXPVOL"
     estn_attribute <- estvar
     if (!is.null(estn_attribute) && estn_attribute %in% c("DRYBIO_AG", "CARBON_AG")) {
-      estn_attribute <- paste0(estn_attribute, " / 2000")
+      estn_attribute <- paste0(estn_attribute, "/2000")
     }  
     
-    tmpdf <- EVALIDATOR_POP_ESTIMATE[
-      (!is.na(EVALIDATOR_POP_ESTIMATE$ESTN_ATTRIBUTE) & EVALIDATOR_POP_ESTIMATE$ESTN_ATTRIBUTE == estn_attribute),]
+    estimate_options <- sort(unique(tmpdf$ESTN_ATTRIBUTE))
+    if (!estn_attribute %in% estimate_options) {
+      message("estn_attribute not in EVALIDATOR_POP_ESTIMATE table:")
+      print(paste(estimate_options, sep = "\n"))
+    }
+    
+    tmpdf <- tmpdf[
+      (!is.na(tmpdf$ESTN_ATTRIBUTE) & tmpdf$ESTN_ATTRIBUTE == estn_attribute),]
     if (nrow(tmpdf) == 0) {
       stop("invalid estn_attribute: ", estn_attribute)
     }
@@ -171,24 +206,33 @@ getattnbr <- function(popType = "CURR",
       stop("invalid eval_typ: ", eval_typ)
     }
     tmpdf <- tmpdf[tmpdf$ESTN_TYPE == estn_type,]
+
     if (estn_attribute == "VOLTSGRS" || startsWith(estn_attribute, "DRYBIO")) {
       if (woodland == "only") {
         tmpdf <- tmpdf[(grepl("woodland", tmpdf$ATTRIBUTE_DESCR) & 
                           !grepl("timber", tmpdf$ATTRIBUTE_DESCR)), ]
-        if (nrow(tmpdf) > 1) {
-          if (dia5inch) {
-            tmpdf <- tmpdf[!grepl("at least 5 inches", tmpdf$ATTRIBUTE_DESCR), ]
-          }
-        }
       } else {
-        tmpdf <- tmpdf[(!grepl("timber", tmpdf$ATTRIBUTE_DESCR) & grepl("woodland", tmpdf$ATTRIBUTE_DESCR)),]
-        if (nrow(tmpdf) > 1) {
-          if (dia5inch) {
-            tmpdf <- tmpdf[!grepl("at least 5 inches", tmpdf$ATTRIBUTE_DESCR), ]
-          }
+        if (estn_attribute == "VOLTSGRS") {
+          tmpdf <- tmpdf[(!grepl("timber", tmpdf$ATTRIBUTE_DESCR) & grepl("woodland", tmpdf$ATTRIBUTE_DESCR)),]
+        } else {
+          tmpdf <- tmpdf[(!grepl("woodland", tmpdf$ATTRIBUTE_DESCR)),]
         }
       }
+    } 
+    
+    if (nrow(tmpdf) > 1) {
+      if (dia5inch) {
+        if (!any(grepl("at least 5 inches", tmpdf$ATTRIBUTE_DESCR))) {
+          message("no attribute exists for dia5inch")
+          message(paste0(utils::capture.output(tmpdf[,popvars]), collapse = "\n"))
+        } else {
+          tmpdf <- tmpdf[grepl("at least 5 inches", tmpdf$ATTRIBUTE_DESCR), ]
+        }
+      } else if (!saplings) {
+        tmpdf <- tmpdf[!grepl("saplings", tmpdf$ATTRIBUTE_DESCR), ]
+      }
     }
+
     if (nrow(tmpdf) == 0) {
       stop("invalid estn_type: ", estn_type)
     } else {
@@ -202,11 +246,11 @@ getattnbr <- function(popType = "CURR",
     stop("no attribute number exists in database")
   } else if (length(attribute_nbr) > 1) {
     message("more than one attributes exist...")
-    df <- EVALIDATOR_POP_ESTIMATE[EVALIDATOR_POP_ESTIMATE$ATTRIBUTE_NBR %in% attribute_nbr[[1]], popvars]
+    df <- tmpdf[tmpdf$ATTRIBUTE_NBR %in% attribute_nbr[[1]], popvars]
     message(paste0(utils::capture.output(df), collapse = "\n"))
     stop()
   }
-  attribute_desc <- EVALIDATOR_POP_ESTIMATE[EVALIDATOR_POP_ESTIMATE$ATTRIBUTE_NBR %in% attribute_nbr, "ATTRIBUTE_DESCR"]
+  attribute_desc <- tmpdf[tmpdf$ATTRIBUTE_NBR %in% attribute_nbr, "ATTRIBUTE_DESCR"]
   message("attribute number ", attribute_nbr, ": \n", attribute_desc)  
   
   return(attribute_nbr) 
@@ -226,6 +270,7 @@ getAPIest <- function(evalid,
                       chng_type = "total",
                       chng_measurements = "both",
                       woodland = "Y",
+                      dia5inch = FALSE, 
                       dsn = NULL, conn = NULL,
                       attribute_nbr = NULL,
                       attribute_nbrd = NULL,
@@ -252,6 +297,7 @@ getAPIest <- function(evalid,
   ## chng_type - c('total', 'annual')
   ## chng_measurements - ('both', 'either')
   ## woodland - ('Y', 'N', 'only') - whether to include woodland tree species
+  ## dia5inch Logical. If TRUE, gets attribute with 5 inches and above
   ## dsn - data source name of SQLite database with EVALIDATOR_POP_ESTIMATE table (if attribute_nbr is NULL)
   ## conn - open connection of SQLite database with EVALIDATOR_POP_ESTIMATE table (if attribute_nbr is NULL)
   ## EVALIDATOR_POP_ESTIMATE - table with attribute numbers (if attribute_nbr is NULL)
@@ -303,11 +349,6 @@ getAPIest <- function(evalid,
                    'Species', 'Species group',
                    'Distance to road'))
   
-  LAND_BASIS <- ifelse (landarea == "FOREST", "Forest land", 
-                        ifelse(landarea == "TIMBERLAND", "Timberland",
-                               "All land"))
-  
-  
   
   #  ## Define estn_type
   #  if (!is.null(estvar.filter)) {
@@ -334,7 +375,8 @@ getAPIest <- function(evalid,
                 landarea = landarea, 
                 estn_type = estn_type,
                 chng_type = chng_type,
-                woodland = woodland)
+                woodland = woodland,
+                dia5inch = dia5inch)
     
     if (ratio) {
       if (ratiotype == "PERACRE") {
@@ -343,7 +385,7 @@ getAPIest <- function(evalid,
         
         ## Define estn_type
         if (!is.null(estvard.filter)) {
-          estvard.filter <- gsub(" ", "", estvardd.filter)
+          estvard.filter <- gsub(" ", "", estvard.filter)
           if (grepl("STATUSCD==1", estvard.filter, ignore.case = TRUE)) {
             estn_type <- "AL"
           } else if (grepl("STATUSCD==2", estvard.filter, ignore.case = TRUE)) {
@@ -361,7 +403,8 @@ getAPIest <- function(evalid,
                     estvar = estvard,
                     landarea = landarea, 
                     estn_type = estd_type,
-                    chng_type = chng_type)
+                    chng_type = chng_type,
+                    dia5inch = dia5inch)
       }
     }
   }  else {
@@ -490,109 +533,6 @@ getAPIest <- function(evalid,
                     eval_grpest = eval_res_grpvar,
                     eval_totest = eval_res_totals)
   return(returnlst)
-}
-
-
-
-compareAPI <- function(EVALIDatorlst, 
-                       FIESTAlst,
-                       compareType = "ROW",
-                       precision_threshold = 1) {
-  
-  ## DESCRIPTION: compare outputs from EVALIDator and FIESTA
-  ##
-  ## ARGUMENTS:
-  ## EVALIDatorlst List of estimates output from EVALIDator
-  ## FIESTAlst List of estimates output from FIESTA
-  ## compareType String. ('TOTALS','ROW','COL','GRP')     
-  
-  
-  ## Define empty list
-  compare_res <- list()
-  diffcnt <- 0
-  
-  ## EVALIDator estimates
-  #eval_estimate <- EVALIDatorlst$eval_estimate
-  
-  ## FIESTA estimates
-  #fiesta_estimate <- FIESTAlst$est
-  
-  
-  compareTypelst <- c("TOTALS", "ROW", "COL", "GRP")
-  compareType <- pcheck.varchar(var2check = compareType, varnm = "compareType",
-                             checklst = compareTypelst, caption = "compareType", 
-                             stopifnull = TRUE)
-  
-  
-  if (compareType == "TOTALS") {
-    eval_totest <- EVALIDatorlst$eval_totest
-    if ("fiesta_totest" %in% names(FIESTAlst)) {
-      fiesta_totest <- FIESTAlst$fiesta_totest
-    } else {
-      fiesta_totest <- FIESTAlst$raw$totest
-    }
-    
-    df <- data.frame(Estimate.fiesta = fiesta_totest$est, 
-                     ESTIMATE = unlist(eval_totest$ESTIMATE))
-    
-  } else if (compareType == "ROW") {
-    eval_rowest <- EVALIDatorlst$eval_rowest
-    if ("fiesta_rowest" %in% names(FIESTAlst)) {
-      fiesta_rowest <- FIESTAlst$fiesta_rowest
-    } else {
-      fiesta_rowest <- FIESTAlst$raw$rowest
-    }
-    #fiesta_rowest <- fiesta_rowest[fiesta_rowest$est != 0,]
-    
-    df <- data.frame(fiesta_rowest[,1, drop=FALSE], 
-                     Estimate.fiesta = fiesta_rowest$est,
-                     ESTIMATE = unlist(eval_rowest$ESTIMATE))
-    
-  } else if (compareType == "COL") {
-    eval_colest <- EVALIDatorlst$eval_colest
-    if ("fiesta_colest" %in% names(FIESTAlst)) {
-      fiesta_colest <- FIESTAlst$fiesta_colest
-    } else {
-      fiesta_colest <- FIESTAlst$raw$colest
-    }
-    df <- data.frame(fiesta_colest[,1, drop=FALSE], 
-                     Estimate.fiesta = fiesta_colest$est,
-                     ESTIMATE = unlist(eval_colest$ESTIMATE))
-    
-  } else if (compareType == "GRP") {
-    eval_grpest <- EVALIDatorlst$eval_grpest
-    if ("fiesta_grpest" %in% names(FIESTAlst)) {
-      fiesta_grpest <- FIESTAlst$fiesta_grpest
-    } else {
-      fiesta_grpest <- FIESTAlst$raw$grpest
-    }
-
-    df <- data.frame(fiesta_grpest[,1, drop=FALSE], 
-                     Estimate.fiesta = fiesta_grpest$est,
-                     ESTIMATE = unlist(eval_grpest$ESTIMATE))
-    
-  } else {
-    message("compareType is invalid... must be in following list: 'TOTALS','ROW','COL','GRP'")
-  }
-  
-  ## Subset data frame of estimate differences
-  df[["Estimate.diff"]] <- round(df[["Estimate.fiesta"]] - df[["ESTIMATE"]], 8)
-  df[["Estimate.pdiff"]] <- round(df[["Estimate.diff"]] / df[["ESTIMATE"]] * 100, 6)
-  dfdiff <- df[with(df, abs(Estimate.diff) > precision_threshold),]
-  if (nrow(dfdiff) > 0) {
-    diffcnt <- diffcnt + 1
-    compare_res[[evalid]] <- dfdiff
-  }
-  
-  if (diffcnt > 0) {
-    msg <- paste0("\nFound differences > ", precision_threshold, " in ",
-                  diffcnt, "/", length(evalids), " evalids")
-    message(msg)
-    return(compare_res)
-  } else {
-    message("\nAll estimates match")
-    return(NULL)
-  }
 }
 
 
@@ -775,139 +715,94 @@ getFIESTAest <- function(evalid,
 }
 
 
-
-
-
-compareAPI_evalid <- function(evalids, 
-                              dsn = NULL, conn = NULL, 
-                              landarea = "FOREST",
-                              estvar = NULL,
-                              estvar.filter = NULL,
-                              estn_type = "AL",
-                              chng_type = "total",
-                              rowvar = NULL,
-                              colvar = NULL,
-                              compareType = "TOTALS",
-                              precision_threshold = 1) {
+compareAPI <- function(EVALIDatorlst, 
+                       FIESTAlst,
+                       compareType = "ROW",
+                       precision_threshold = 1) {
   
-  ## DESCRIPTION: get attribute_nbr from POP table in database
+  ## DESCRIPTION: compare outputs from EVALIDator and FIESTA
   ##
   ## ARGUMENTS:
-  ## ESTN_ATTRIBUTE - c('AREA', 'CHNG', 'VOLCFNET', 'VOLBFNET', 'TPA_UNADJ', 'DRYBIO_AG/2000')
-  ## LAND_BASIS - c('Forest land', Timberland', 'All land')
-  ## estn_type - c('GS', 'STGD', 'AL') - (growing-stock; standing-dead; all live)
-  ## ESTIMATE - c('AREA CHANGE ANNUAL', 'AREA CHANGE")
-  ## chngtype - c('total', 'annual')
-  ## chngmeasurements - c('both', 'either')
-  ## returnType - c('TOTALS', 'ROW', 'COL', 'GRP', 'ESTIMATES')
-  ## estvar
-  ## estvar.filter     
+  ## EVALIDatorlst List of estimates output from EVALIDator
+  ## FIESTAlst List of estimates output from FIESTA
   ## compareType String. ('TOTALS','ROW','COL','GRP')     
   
-  ## 'STATUSCD == 1'  -   estn_type = 'AL'
-  ## 'STATUSCD == 2'  -   estn_type = 'STGD'
-  ## 'TREECLCD == 2'  -   estn_type = 'GS'
   
   ## Define empty list
   compare_res <- list()
   diffcnt <- 0
   
-  ## Loop through evalids
-  for (i in 1:length(evalids)) {
-    evalid <- as.character(evalids[i])
-    message("checking evalid ", evalid, "...\n")
-    
-    
-    ###############################################################################
-    ## Get EVALIDator estimate from API
-    ###############################################################################
-    EVALIDatorlst <- 
-      getAPIest(evalid = evalid, 
-                conn = conn,
-                landarea = landarea,
-                estvar = estvar,
-                estvar.filter = estvar.filter,
-                estn_type = estn_type,
-                chng_type = chng_type,
-                rowvar = rowvar,
-                colvar = colvar)
-    
-    if (is.null(EVALIDatorlst)) {
-      message("no EVALIDator estimate for ", evalid)
-      break()
-    }
-    eval_estimate <- EVALIDatorlst$eval_estimate
-    eval_rowest <- EVALIDatorlst$eval_rowest
-    eval_colest <- EVALIDatorlst$eval_colest
-    eval_grpest <- EVALIDatorlst$eval_grpest
+  ## EVALIDator estimates
+  #eval_estimate <- EVALIDatorlst$eval_estimate
+  
+  ## FIESTA estimates
+  #fiesta_estimate <- FIESTAlst$est
+  
+  
+  compareTypelst <- c("TOTALS", "ROW", "COL", "GRP")
+  compareType <- pcheck.varchar(var2check = compareType, varnm = "compareType",
+                             checklst = compareTypelst, caption = "compareType", 
+                             stopifnull = TRUE)
+  
+  
+  if (compareType == "TOTALS") {
     eval_totest <- EVALIDatorlst$eval_totest
-    
-    
-    ###############################################################################
-    ## Get FIESTA estimate 
-    ###############################################################################
-    #source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.popdataCHNG.R")
-    #source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\modGBpop.R")
-    #source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.condCHNG.R")
-    #source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\getGBestimates.R")
-    #source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\modGBchng.R")
-    #source("C:\\_tsf\\FIESTA\\FIESTA_WebApp\\EVALIDator_compare\\getFIESTAest.R")
-    message("getting estimates from FIESTA...\n")
-    FIESTAlst <- 
-      getFIESTAest(evalid = evalid,
-                   conn = conn,
-                   dsn = dsn,
-                   landarea = landarea,
-                   estvar = estvar,
-                   estvar.filter = estvar.filter,
-                   chng_type = chng_type,
-                   rowvar = rowvar,
-                   colvar = colvar)
-    
-    if (is.null(FIESTAlst)) {
-      message("no FIESTA estimate for ", evalid)
-      break()
-    }
-    fiesta_estimate <- FIESTAlst$fiesta_estimate
-    fiesta_rowest <- FIESTAlst$fiesta_rowest
-    fiesta_colest <- FIESTAlst$fiesta_colest
-    fiesta_grpest <- FIESTAlst$fiesta_grpest
-    fiesta_totest <- FIESTAlst$fiesta_totest
-    
-    fiesta_rowest <- fiesta_rowest[fiesta_rowest$est != 0,]
-    
-    
-    if (compareType == "TOTALS") {
-      df <- data.frame(Estimate.fiesta = fiesta_totest$est, 
-                       ESTIMATE = unlist(eval_totest$ESTIMATE))
-      
-    } else if (compareType == "ROW") {
-      df <- data.frame(fiesta_rowest[,1, drop=FALSE], 
-                       Estimate.fiesta = fiesta_rowest$est,
-                       ESTIMATE = unlist(eval_rowest$ESTIMATE))
-      
-    } else if (compareType == "COL") {
-      df <- data.frame(fiesta_colest[,1, drop=FALSE], 
-                       Estimate.fiesta = fiesta_colest$est,
-                       ESTIMATE = unlist(eval_colest$ESTIMATE))
-      
-    } else if (compareType == "GRP") {
-      df <- data.frame(fiesta_grpest[,1, drop=FALSE], 
-                       Estimate.fiesta = fiesta_grpest$est,
-                       ESTIMATE = unlist(eval_grpest$ESTIMATE))
-      
+    if ("fiesta_totest" %in% names(FIESTAlst)) {
+      fiesta_totest <- FIESTAlst$fiesta_totest
     } else {
-      message("compareType is invalid... must be in following list: 'TOTALS','ROW','COL','GRP'")
+      fiesta_totest <- FIESTAlst$raw$totest
     }
     
-    ## Subset data frame of estimate differences
-    df[["Estimate.diff"]] <- round(df[["Estimate.fiesta"]] - df[["ESTIMATE"]], 8)
-    df[["Estimate.pdiff"]] <- round(df[["Estimate.diff"]] / df[["ESTIMATE"]] * 100, 6)
-    dfdiff <- df[with(df, abs(Estimate.diff) > precision_threshold),]
-    if (nrow(dfdiff) > 0) {
-      diffcnt <- diffcnt + 1
-      compare_res[[evalid]] <- dfdiff
+    df <- data.frame(Estimate.fiesta = fiesta_totest$est, 
+                     ESTIMATE = unlist(eval_totest$ESTIMATE))
+    
+  } else if (compareType == "ROW") {
+    eval_rowest <- EVALIDatorlst$eval_rowest
+    if ("fiesta_rowest" %in% names(FIESTAlst)) {
+      fiesta_rowest <- FIESTAlst$fiesta_rowest
+    } else {
+      fiesta_rowest <- FIESTAlst$raw$rowest
     }
+    fiesta_rowest <- fiesta_rowest[fiesta_rowest$est > 0,]
+    df <- data.frame(fiesta_rowest[,1, drop=FALSE], 
+                     Estimate.fiesta = fiesta_rowest$est,
+                     ESTIMATE = unlist(eval_rowest$ESTIMATE))
+    
+  } else if (compareType == "COL") {
+    eval_colest <- EVALIDatorlst$eval_colest
+    if ("fiesta_colest" %in% names(FIESTAlst)) {
+      fiesta_colest <- FIESTAlst$fiesta_colest
+    } else {
+      fiesta_colest <- FIESTAlst$raw$colest
+    }
+    fiesta_colest <- fiesta_colest[fiesta_colest$est > 0,]
+    df <- data.frame(fiesta_colest[,1, drop=FALSE], 
+                     Estimate.fiesta = fiesta_colest$est,
+                     ESTIMATE = unlist(eval_colest$ESTIMATE))
+    
+  } else if (compareType == "GRP") {
+    eval_grpest <- EVALIDatorlst$eval_grpest
+    if ("fiesta_grpest" %in% names(FIESTAlst)) {
+      fiesta_grpest <- FIESTAlst$fiesta_grpest
+    } else {
+      fiesta_grpest <- FIESTAlst$raw$grpest
+    }
+    fiesta_grpest <- fiesta_grpest[fiesta_grpest$est > 0,]
+    df <- data.frame(fiesta_grpest[,1, drop=FALSE], 
+                     Estimate.fiesta = fiesta_grpest$est,
+                     ESTIMATE = unlist(eval_grpest$ESTIMATE))
+    
+  } else {
+    message("compareType is invalid... must be in following list: 'TOTALS','ROW','COL','GRP'")
+  }
+  
+  ## Subset data frame of estimate differences
+  df[["Estimate.diff"]] <- round(df[["Estimate.fiesta"]] - df[["ESTIMATE"]], 8)
+  df[["Estimate.pdiff"]] <- round(df[["Estimate.diff"]] / df[["ESTIMATE"]] * 100, 6)
+  dfdiff <- df[with(df, abs(Estimate.diff) > precision_threshold),]
+  if (nrow(dfdiff) > 0) {
+    diffcnt <- diffcnt + 1
+    compare_res[[evalid]] <- dfdiff
   }
   
   if (diffcnt > 0) {
@@ -923,6 +818,7 @@ compareAPI_evalid <- function(evalids,
 
 
 compareAPI_evalid <- function(evalids, 
+                              popType,
                               estvar = NULL,
                               estvar.filter = NULL,
                               landarea = "FOREST",
@@ -934,9 +830,10 @@ compareAPI_evalid <- function(evalids,
                               estvard.filter = NULL,
                               chng_type = "total",
                               chng_measurements = "both",
+                              woodland = "Y",
+                              dia5inch = FALSE,
                               dsn = NULL, conn = NULL,
                               EVALIDATOR_POP_ESTIMATE = NULL,
-                              compareType = "TOTALS",
                               precision_threshold = 1) {
   
   ## DESCRIPTION: get attribute_nbr from POP table in database
@@ -960,61 +857,75 @@ compareAPI_evalid <- function(evalids,
   ## chng_type - c('total', 'annual')
   ## chng_measurements - c('both', 'either')
   ## woodland - ('Y', 'N', 'only') - whether to include woodland tree species
+  ## dia5inch Logical. If TRUE, gets attribute with 5 inches and above
   ## dsn - data source name of SQLite database with EVALIDATOR_POP_ESTIMATE table (if attribute_nbr is NULL)
   ## conn - open connection of SQLite database with EVALIDATOR_POP_ESTIMATE table (if attribute_nbr is NULL)
   ## EVALIDATOR_POP_ESTIMATE - table with attribute numbers (if attribute_nbr is NULL)
   
   ## Define empty list
-  compare_res <- list()
-  diffcnt <- 0
-  attribute_nbrd <- NULL
+  attribute_nbr=attribute_nbrd <- NULL
   
   
+  ## Define function
+  getdiff <- function(df, precision_threshold, compareType) {
+    ## DESCRIPTION: gets differences based on precision_threshold
+    
+    ## Subset data frame of estimate differences
+    df[["Estimate.diff"]] <- round(df[["Estimate.fiesta"]] - df[["ESTIMATE"]], 8)
+    df[["Estimate.pdiff"]] <- round(df[["Estimate.diff"]] / df[["ESTIMATE"]] * 100, 6)
+    dfdiff <- df[with(df, abs(Estimate.diff) > precision_threshold),]
+    if (nrow(dfdiff) > 0) {
+      diffcnt <- diffcnt + 1
+      compare_res[[evalid]] <- dfdiff
+    }
+    
+    if (diffcnt > 0) {
+      msg <- paste0("\nFound differences > ", precision_threshold, " in ",
+                    diffcnt, "/", length(evalids), " evalids")
+      message(msg)
+      return(compare_res)
+    } else {
+      message("\nAll estimates match for ", compareType)
+      return(NULL)
+    }
+  }
+
   ###############################################################################
   ## Get attribute number for EVALIDator estimate
   ###############################################################################
   attribute_nbr <- 
     getattnbr(popType = popType,
-              conn = conn,
               estvar = estvar,
+              estvar.filter = estvar.filter,
               landarea = landarea, 
-              estn_type = estn_type,
               chng_type = chng_type,
-              woodland = woodland)
+              woodland = woodland,
+              dia5inch = dia5inch,
+              conn = conn,
+              EVALIDATOR_POP_ESTIMATE = EVALIDATOR_POP_ESTIMATE)
   if (ratio) {
     if (ratiotype == "PERACRE") {
       sdenom <- 2
     } else {
       
-      ## Define estn_type
-      if (!is.null(estvard.filter)) {
-        estvard.filter <- gsub(" ", "", estvardd.filter)
-        if (grepl("STATUSCD==1", estvard.filter, ignore.case = TRUE)) {
-          estn_type <- "AL"
-        } else if (grepl("STATUSCD==2", estvard.filter, ignore.case = TRUE)) {
-          estn_type <- "STGD"
-        } else if (grepl("TREECLCD==2", estvard.filter, ignore.case = TRUE)) {
-          estn_type <- "GS"
-        } else {
-          stop("estvard.filter not supported: ", estvard.filter)
-        }
-      } 
-      
       attribute_nbrd <- 
         getattnbr(popType = popType,
-                  conn = conn,
                   estvar = estvard,
+                  estvar.filter = estvard.filter,
                   landarea = landarea, 
-                  estn_type = estd_type,
                   chng_type = chng_type,
-                  woodland = woodland)
+                  woodland = woodland,
+                  dia5inch = dia5inch,
+                  conn = conn,
+                  EVALIDATOR_POP_ESTIMATE = EVALIDATOR_POP_ESTIMATE)
     }
-  }  else {
-    message("getting estimates from EVALIDator for attribute number ", attribute_nbr, ":")
   }
-  
+  message("getting estimates from EVALIDator for attribute number ", attribute_nbr)
+
   
   ## Loop through evalids
+  evalidlst <- vector(mode = "list", length = length(evalids))
+  names(evalidlst) <- evalids
   for (i in 1:length(evalids)) {
     evalid <- as.character(evalids[i])
     message("checking evalid ", evalid, "...\n")
@@ -1076,51 +987,37 @@ compareAPI_evalid <- function(evalids,
     fiesta_grpest <- FIESTAlst$fiesta_grpest
     fiesta_totest <- FIESTAlst$fiesta_totest
     
+    
+    comparelst <- list()
+
+    ## TOTALS
+    TOTAL <- data.frame(Estimate.fiesta = fiesta_totest$est, 
+                        ESTIMATE = unlist(eval_totest$ESTIMATE))
+    comparelst$TOTAL <- getdiff(TOTAL, precision_threshold, "TOTAL")
+      
+    ## ROWS
     fiesta_rowest <- fiesta_rowest[fiesta_rowest$est != 0,]
+    ROW <- data.frame(fiesta_rowest[,1, drop=FALSE], 
+                      Estimate.fiesta = fiesta_rowest$est,
+                      ESTIMATE = unlist(eval_rowest$ESTIMATE))
+    comparelst$ROW <- getdiff(ROW, precision_threshold, "ROW")
     
+    ## COLUMNS
+    fiesta_colest <- fiesta_colest[fiesta_colest$est != 0,]
+    COL <- data.frame(fiesta_colest[,1, drop=FALSE], 
+                      Estimate.fiesta = fiesta_colest$est,
+                      ESTIMATE = unlist(eval_colest$ESTIMATE))
+    comparelst$COL <- getdiff(COL, precision_threshold, "COL")
     
-    if (compareType == "TOTALS") {
-      df <- data.frame(Estimate.fiesta = fiesta_totest$est, 
-                       ESTIMATE = unlist(eval_totest$ESTIMATE))
-      
-    } else if (compareType == "ROW") {
-      df <- data.frame(fiesta_rowest[,1, drop=FALSE], 
-                       Estimate.fiesta = fiesta_rowest$est,
-                       ESTIMATE = unlist(eval_rowest$ESTIMATE))
-      
-    } else if (compareType == "COL") {
-      df <- data.frame(fiesta_colest[,1, drop=FALSE], 
-                       Estimate.fiesta = fiesta_colest$est,
-                       ESTIMATE = unlist(eval_colest$ESTIMATE))
-      
-    } else if (compareType == "GRP") {
-      df <- data.frame(fiesta_grpest[,1, drop=FALSE], 
-                       Estimate.fiesta = fiesta_grpest$est,
-                       ESTIMATE = unlist(eval_grpest$ESTIMATE))
-      
-    } else {
-      message("compareType is invalid... must be in following list: 'TOTALS','ROW','COL','GRP'")
-    }
+    ## GROUP
+    fiesta_grpest <- fiesta_grpest[fiesta_grpest$est != 0,]
+    GRP <- data.frame(fiesta_grpest[,1, drop=FALSE], 
+                      Estimate.fiesta = fiesta_grpest$est,
+                      ESTIMATE = unlist(eval_grpest$ESTIMATE))
+    comparelst$GRP <- getdiff(GRP, precision_threshold, "GRP")
     
-    ## Subset data frame of estimate differences
-    df[["Estimate.diff"]] <- round(df[["Estimate.fiesta"]] - df[["ESTIMATE"]], 8)
-    df[["Estimate.pdiff"]] <- round(df[["Estimate.diff"]] / df[["ESTIMATE"]] * 100, 6)
-    dfdiff <- df[with(df, abs(Estimate.diff) > precision_threshold),]
-    if (nrow(dfdiff) > 0) {
-      diffcnt <- diffcnt + 1
-      compare_res[[evalid]] <- dfdiff
-    }
-  }
-  
-  if (diffcnt > 0) {
-    msg <- paste0("\nFound differences > ", precision_threshold, " in ",
-                  diffcnt, "/", length(evalids), " evalids")
-    message(msg)
-    return(compare_res)
-  } else {
-    message("\nAll estimates match")
-    return(NULL)
-  }
+    evalidlst[[evalid]] <- comparelst
+  }    
 }
 
 
