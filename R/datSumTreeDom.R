@@ -212,6 +212,7 @@
 #' # Sum of Number of Live Trees by Species, Including Seedlings
 #' datSumTreeDom(cond = WYcond, 
 #'               plt = WYplt, 
+#'               tree = WYtree,
 #'               seed = WYseed, 
 #'               puniqueid = "CN", 
 #'               bycond = FALSE, 
@@ -277,6 +278,7 @@ datSumTreeDom <- function(tree = NULL,
                           savedata_opts = NULL,
                           dbconn = NULL,
                           dbconnopen = FALSE){
+  
   ####################################################################################
   ## DESCRIPTION: Aggregates tree domain data (ex. species) to condition or plot level  
   ##		for estimation, mapping, or exploratory data analyses. 
@@ -295,9 +297,9 @@ datSumTreeDom <- function(tree = NULL,
   ## Set global variables  
   COND_STATUS_CD=COUNT=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=
 	seedx=tunits=TREECOUNT_CALC=cond.nonsamp.filter=ref_spcd=tdomvar2nm=concatvar <- NULL
-  checkNApvars <- {}
-  checkNAcvars <- {}
-  checkNAtvars <- {}
+  checkNApvars <- NULL
+  checkNAcvars <- NULL
+  checkNAtvars <- NULL
   seedclnm <- "<1"
   parameters <- FALSE
   ref_units <- FIESTAutils::ref_units
@@ -314,8 +316,9 @@ datSumTreeDom <- function(tree = NULL,
   ## SET VARIABLE LISTS
   ##################################################################
   biovars <- c("DRYBIO_BOLE", "DRYBIO_STUMP", "DRYBIO_BG", "DRYBIO_SAWLOG", 
-               "DRYBIO_AG", "DRYBIO_STEM", "DRYBIO_STEM_BARK", "DRYBIO_STUMP_BARK", "DRYBIO_BOLE_BARK", "DRYBIO_BRANCH", "DRYBIO_FOLIAGE",    "DRYBIO_SAWLOG_BARK",
-			   "DRYBIOT", "DRYBIOM", "DRYBIOTB", "JBIOTOT")
+               "DRYBIO_AG", "DRYBIO_STEM", "DRYBIO_STEM_BARK", "DRYBIO_STUMP_BARK",
+               "DRYBIO_BOLE_BARK", "DRYBIO_BRANCH", "DRYBIO_FOLIAGE", "DRYBIO_SAWLOG_BARK",
+			         "DRYBIOT", "DRYBIOM", "DRYBIOTB", "JBIOTOT")
   carbvars <- c("CARBON_BG", "CARBON_AG")
 
   ## SET VARIABLES TO CONVERT (from pounds to short tons.. * 0.0005)
@@ -323,11 +326,11 @@ datSumTreeDom <- function(tree = NULL,
 	paste(carbvars, "TPA", sep="_"))
 
   growvars <- c("TPAGROW_UNADJ", "GROWCFGS", "GROWBFSL", "GROWCFAL", "FGROWCFGS", 
-	"FGROWBFSL", "FGROWCFAL")
+	              "FGROWBFSL", "FGROWCFAL")
   mortvars <- c("TPAMORT_UNADJ", "MORTCFGS", "MORTBFSL", "MORTCFAL", "FMORTCFGS", 
-	"FMORTBFSL", "FMORTCFAL")
+	              "FMORTBFSL", "FMORTCFAL")
   remvars <- c("TPAREMV_UNADJ", "REMVCFGS", "REMVBFSL", "REMVCFAL", "FREMVCFGS", 
-	"FREMVBFSL", "FREMVCFAL")
+	             "FREMVBFSL", "FREMVCFAL")
   tpavars <- c("TPA_UNADJ", "TPAMORT_UNADJ", "TPAGROW_UNADJ", "TPAREMV_UNADJ")
   propvar <- "CONDPROP_UNADJ"
   tsumvar.not <- c(condid)
@@ -442,8 +445,8 @@ datSumTreeDom <- function(tree = NULL,
                                 title="Barplot of tdomains?", first="NO", gui=gui)
   
   ## Check tround
-  if (is.null(tround) | !is.numeric(tround)) {
-    warning("tround is invalid.. rounding to 6 digits")
+  if (is.null(tround) || !is.numeric(tround) || (tround %% 1 != 0)) {
+    warning("tround is invalid.. rounding to 4 digits")
     tround <- 4
   }
   
@@ -472,11 +475,12 @@ datSumTreeDom <- function(tree = NULL,
   }
 
 
-  ################################################################################  
-  ################################################################################  
+  ##############################################################################
+  ############################################################################## 
   ### DO WORK
-  ################################################################################ 
-  ################################################################################  
+  ##############################################################################
+  ##############################################################################
+  
   sumdat <- 
     datSumTree(tree = tree, seed = seed, 
                cond = cond, plt = plt, 
@@ -504,6 +508,7 @@ datSumTreeDom <- function(tree = NULL,
                pjoinid = pjoinid,
                checkNA = checkNA, 
                returnDT = returnDT)
+  
   tdomtree <- sumdat$treedat
   tsumvarnm <- sumdat$sumvars
   tsumuniqueid <- sumdat$tsumuniqueid
@@ -572,7 +577,7 @@ datSumTreeDom <- function(tree = NULL,
   ## Check if want to include totals (tdomtot) and check for a totals name
   ## Check tdomtot
   tdomtot <- pcheck.logical(tdomtot, varnm="tdomtot", "Total for domains?", 
-		first="NO", gui=gui)
+		                        first="NO", gui=gui)
 
   ## Check tdomtotnm
   if (tdomtot) {
@@ -762,7 +767,7 @@ datSumTreeDom <- function(tree = NULL,
     ######################################################################## 
     ## If pivot=TRUE, aggregate tree domain data
     ######################################################################## 
-    yvar <- ifelse (is.null(tdomvar2), tdomvar, concatvar)
+    yvar <- ifelse (is.null(tdomvar2), tdomvarnm, concatvar)
     tdoms <- datPivot(tdomtreef, pvar = tsumvarnm, 
                       xvar = c(tsumuniqueid, pcdomainlst), yvar = yvar,
                       pvar.round = tround, returnDT = TRUE)
@@ -787,16 +792,17 @@ datSumTreeDom <- function(tree = NULL,
 
     ## Create a table of proportions for each tdom by total by plot
     if (proportion) {
-      tdoms.prop <- tdoms[, lapply(.SD, 
-          function(x, tdomtotnm) round(x / get(eval(tdomtotnm))), tdomtotnm), 
-               by=key(tdoms), .SDcols=tdomscolstot]
+      tdoms.prop <- tdoms[, lapply(.SD, function(x, tdomtotnm) {
+                                            round(x / get(eval(tdomtotnm)))
+                                        }, tdomtotnm), 
+                            by=key(tdoms), .SDcols=tdomscolstot]
+      
       setcolorder(tdoms.prop, c(key(tdoms.prop), tdomscolstot))
     }
 
     ## Create a table of presence/absence (1/0) by plot
     if (presence) {
-      tdoms.pres <- tdoms[, lapply(.SD, 
-          function(x) x / x), by=key(tdoms), .SDcols=tdomscolstot]
+      tdoms.pres <- tdoms[, lapply(.SD, function(x) x / x), by=key(tdoms), .SDcols=tdomscolstot]
       tdoms.pres[is.na(tdoms.pres)] <- 0        
       setcolorder(tdoms.pres, c(key(tdoms.pres), tdomscolstot))
     }
