@@ -996,6 +996,9 @@ datSumTree <- function(tree = NULL,
       }
     }
     
+    ## list of plot and cond fields
+    pcflds <- c(pltflds, condflds)
+
     ## Check pcwhereqry
     if (!is.null(pcwhereqry)) {
       if (is.null(pcflds)) {
@@ -1003,8 +1006,17 @@ datSumTree <- function(tree = NULL,
       } else {
         pcwhereqry <- check.logic(pcflds, pcwhereqry)
         pcwhereqry <- RtoSQL(pcwhereqry)
+        
+        if (!(startsWith(gsub(" ", "", pcwhereqry), "\nWHERE"))) {
+          if (startsWith(gsub(" ", "", pcwhereqry), "WHERE")) {
+            pcwhereqry <- paste0("\n ", pcwhereqry)
+          } else {
+            pcwhereqry <- paste0("\n WHERE ", pcwhereqry)  
+          }
+        }
       }
     }
+
     ## If ACI, include COND_STATUS_CD = 1 to exclude trees measured on ACI plots
     if (!ACI) {
       if (is.null(condflds)) {
@@ -1017,12 +1029,6 @@ datSumTree <- function(tree = NULL,
           if (!(grepl("COND_STATUS_CD", pcwhereqry) && 
                 (grepl("COND_STATUS_CD=1", gsub(" ", "", pcwhereqry)) || 
                  grepl("COND_STATUS_CDin(1)", gsub(" ", "", pcwhereqry))))) {
-            
-            if (!(startsWith(gsub(" ", "", pcwhereqry), "WHERE") || 
-                startsWith(gsub(" ", "", pcwhereqry), "\nWHERE"))) {
-              pcwhereqry <- paste0("\n WHERE ", pcwhereqry)
-            }
-            
             pcwhereqry <- paste0(pcwhereqry, " AND pc.COND_STATUS_CD = 1")
           }
         } else {
@@ -1088,7 +1094,6 @@ datSumTree <- function(tree = NULL,
 
   ## Check pcdomainlst
   if (!is.null(pcdomainlst) || length(pcdomainlst) > 0) {
-    pcflds <- c(pltflds, condflds)
     if (!is.null(pcflds)) {
       missdom <- pcdomainlst[!pcdomainlst %in% pcflds]
       if (length(missdom) > 0) {
@@ -2018,6 +2023,7 @@ datSumTree <- function(tree = NULL,
     }
   } else if (!is.null(domainlst) && length(domainlst) > 0) {
     tselectqry <- paste0(tselectqry, ", ", toString(domainlst))
+    tgrpbyvars <- unique(c(tgrpbyvars, domainlst))
   }
 
   if (!seedonly) {
@@ -2041,7 +2047,7 @@ datSumTree <- function(tree = NULL,
                                        collapse=",\n  "))  
     
   }
-  
+
   ## Build query to summarize tree data
   ################################################################
   tqry <- paste0(tselectqry,

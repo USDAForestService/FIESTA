@@ -5,7 +5,7 @@ check.estdata <-
            pltcondflds, totals,
            pop_fmt = NULL, pop_dsn = NULL, 
            sumunits = FALSE, landarea = NULL, 
-           ACI.filter = NULL, pcfilter = NULL, 
+           ACI = NULL, pcfilter = NULL, 
            T1filter = NULL, T2filter = NULL,
 	         allin1 = FALSE, divideby = NULL, 
            estround = 6, pseround = 3, 
@@ -222,7 +222,8 @@ check.estdata <-
 
   ## Add ACI.filter to where.qry
   ###################################################################################
-  if (!is.null(ACI.filter) && landarea != "FOREST") {
+  if (!ACI && landarea != "FOREST") {
+    ACI.filter <- "pc.COND_STATUS_CD = 1"
     if (!is.null(where.qry)) {
       where.qry <- paste0(where.qry,
                           "\n  AND ", ACI.filter)

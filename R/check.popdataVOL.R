@@ -413,10 +413,10 @@ check.popdataVOL <-
                        "\n ", ftypqry)
   pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
   
-  
   ## 6.3. Build query for pltcondx
   pltcondx.qry <- paste0("SELECT ", cselectqry, ", ",
                          "\n", pselectqry, ", 1 AS TOTAL",
+                         pcwhereqry,
                          pcfromqry)
   dbqueries$pltcondx <- pltcondx.qry
   

@@ -72,6 +72,7 @@ check.tree <-
                     addseed = addseed, 
                     seedonly = seedonly, 
                     woodland = woodland,
+                    ACI = ACI,
                     tderive = estvarn.derive,
                     domclassify = domclassify,
                     tround = 12,
@@ -82,7 +83,7 @@ check.tree <-
 
     if (is.null(tdomdata)) return(NULL)
     tdomdat <- data.table(tdomdata$tdomdat)
-    treeqry <- tdomdata$treeqry
+    treeqryn <- tdomdata$treeqry
     domainlst <- tdomdata$domainlst
     tdomainlst <- tdomdata$tdomainlst
     pcdomainlst <- tdomdata$pcdomainlst
@@ -131,6 +132,7 @@ check.tree <-
                  addseed = addseed, 
                  seedonly = seedonly, 
                  woodland = woodland,
+                 ACI = ACI,
                  tderive = estvarn.derive,
                  domclassify = domclassify,
                  tround = 6,

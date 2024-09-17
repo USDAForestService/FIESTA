@@ -425,7 +425,6 @@ modGBtree <- function(GBpopdat,
   }
   tuniqueid <- GBpopdat$tuniqueid
   ACI <- GBpopdat$ACI
-  ACI.filter <- GBpopdat$ACI.filter
   pltassgnx <- GBpopdat$pltassgnx
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
@@ -503,7 +502,7 @@ modGBtree <- function(GBpopdat,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
                   landarea = landarea,
-                  ACI.filter = ACI.filter, 
+                  ACI = ACI, 
                   pcfilter = pcfilter,
                   allin1 = allin1, divideby = divideby,
                   estround = estround, pseround = pseround,
@@ -563,7 +562,6 @@ modGBtree <- function(GBpopdat,
   seedx <- estdatVOL$seedx
   seedflds <- estdatVOL$seedflds
   
-
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -663,6 +661,7 @@ modGBtree <- function(GBpopdat,
                adjvar = "tadjfac",
                metric = metric, 
                woodland = woodland,
+               ACI = ACI,
                domclassify = domclassify,
                dbconn = popconn,
                pltidsWITHqry = pltidsWITHqry,

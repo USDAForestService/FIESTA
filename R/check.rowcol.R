@@ -791,7 +791,7 @@ check.rowcol <-
   ##############################################################
   uniquecol <- NULL
   if (!popType %in% c("CHNG", "GRM")) {
-    if (colvar == rowvar) {
+    if (!is.null(colvar) && colvar == rowvar) {
       stop("colvar must be different than rowvar")
     }
     varlst <- varlst[which(!varlst %in% rowvar)]
