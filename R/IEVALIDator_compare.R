@@ -524,17 +524,24 @@ compareAPI <- function(EVALIDatorlst,
                              stopifnull = TRUE)
   
   
-  
   if (compareType == "TOTALS") {
     eval_totest <- EVALIDatorlst$eval_totest
-    fiesta_totest <- FIESTAlst$raw$totest
+    if ("fiesta_totest" %in% names(FIESTAlst)) {
+      fiesta_totest <- FIESTAlst$fiesta_totest
+    } else {
+      fiesta_totest <- FIESTAlst$raw$totest
+    }
     
     df <- data.frame(Estimate.fiesta = fiesta_totest$est, 
                      ESTIMATE = unlist(eval_totest$ESTIMATE))
     
   } else if (compareType == "ROW") {
     eval_rowest <- EVALIDatorlst$eval_rowest
-    fiesta_rowest <- FIESTAlst$raw$rowest
+    if ("fiesta_rowest" %in% names(FIESTAlst)) {
+      fiesta_rowest <- FIESTAlst$fiesta_rowest
+    } else {
+      fiesta_rowest <- FIESTAlst$raw$rowest
+    }
     #fiesta_rowest <- fiesta_rowest[fiesta_rowest$est != 0,]
     
     df <- data.frame(fiesta_rowest[,1, drop=FALSE], 
@@ -543,16 +550,23 @@ compareAPI <- function(EVALIDatorlst,
     
   } else if (compareType == "COL") {
     eval_colest <- EVALIDatorlst$eval_colest
-    fiesta_colest <- FIESTAlst$raw$colest
-    
+    if ("fiesta_colest" %in% names(FIESTAlst)) {
+      fiesta_colest <- FIESTAlst$fiesta_colest
+    } else {
+      fiesta_colest <- FIESTAlst$raw$colest
+    }
     df <- data.frame(fiesta_colest[,1, drop=FALSE], 
                      Estimate.fiesta = fiesta_colest$est,
                      ESTIMATE = unlist(eval_colest$ESTIMATE))
     
   } else if (compareType == "GRP") {
     eval_grpest <- EVALIDatorlst$eval_grpest
-    fiesta_grpest <- FIESTAlst$raw$grpest
-    
+    if ("fiesta_grpest" %in% names(FIESTAlst)) {
+      fiesta_grpest <- FIESTAlst$fiesta_grpest
+    } else {
+      fiesta_grpest <- FIESTAlst$raw$grpest
+    }
+
     df <- data.frame(fiesta_grpest[,1, drop=FALSE], 
                      Estimate.fiesta = fiesta_grpest$est,
                      ESTIMATE = unlist(eval_grpest$ESTIMATE))
