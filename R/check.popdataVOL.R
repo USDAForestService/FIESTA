@@ -17,7 +17,7 @@ check.popdataVOL <-
            strunitvars = NULL, 
            nonsamp.cfilter = NULL, 
            cvars2keep = NULL,
-           dbconn = NULL, schema = NULL, schemadev = FALSE,
+           dbconn = NULL, SCHEMA. = "",
            returndata = FALSE, 
            savedata = FALSE, 
            outlst = NULL,
@@ -64,15 +64,13 @@ check.popdataVOL <-
   
   
   ## Set global variables
-  treenm=seednm=condsampcnt=adjcase <- NULL
-  SCHEMA. <- ""
+  treenm=seednm=condsampcnt=areawt2nm=adjcase <- NULL
   dbqueries=dbqueriesWITH <- list()
   cpropvars <- list(COND="CONDPROP_UNADJ", SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ")
   tpropvars <- list(SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ", MICR="MICRPROP_UNADJ")
   diavar <- "DIA"
   pltcondindb <- datindb
 
-  suffix=areawt2nm <- NULL
   
   ##############################################################################
   ## 1. Define variables necessary for estimation
@@ -89,7 +87,6 @@ check.popdataVOL <-
       stop()
     } else {
       dbtablst <- DBI::dbListTables(dbconn)
-      SCHEMA. <- ifelse (is.null(schema), "", paste0(schema, "."))
     }
   }
   
@@ -223,13 +220,13 @@ check.popdataVOL <-
     cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., plota.)
     pcfromqry <- paste0(
       "\n FROM pltids",
-      "\n JOIN ", SCHEMA., plotnm, suffix, " p ", pjoinqry,
-      "\n JOIN ", SCHEMA., condnm, suffix, " c ", cjoinqry)
+      "\n JOIN ", SCHEMA., plotnm, " p ", pjoinqry,
+      "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry)
   } else {
     cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., pltidsa.)
     pcfromqry <- paste0(
       "\n FROM pltids",
-      "\n JOIN ", SCHEMA., condnm, suffix, " c ", cjoinqry)
+      "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry)
   }
   
   pltidsjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., "plta.")
@@ -244,7 +241,7 @@ check.popdataVOL <-
     adjwhereqry <- getADJwherePLOT(condflds)
   }
 
-  ## Build query for adjustment factors based on popType (ADJqry)
+  ## 5.4. Build query for adjustment factors based on popType (ADJqry)
   ADJqry <- 
       getADJqry(popType = popType,
                 adj = adj,
@@ -259,7 +256,7 @@ check.popdataVOL <-
   #message(ADJqry)
 
   
-  ## 5.4. Build final query for adjustment factors, including pltids WITH query
+  ## 5.5. Build final query for adjustment factors, including pltids WITH query
   adjfactors.qry <- paste0(
     pltidsWITH.qry,
     "\n-------------------------------------------",

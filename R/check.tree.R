@@ -15,7 +15,7 @@ check.tree <-
            pltassgn = NULL, adjTPA = 1, metric = FALSE, 
 	         ACI = FALSE, woodland = "Y", 
            domclassify = NULL, 
-           dbconn = NULL, 
+           dbconn = NULL, schema = NULL,
            pltidsWITHqry = NULL, pcwhereqry = NULL,
            pjoinid = NULL) {
 
@@ -75,8 +75,8 @@ check.tree <-
                     ACI = ACI,
                     tderive = estvarn.derive,
                     domclassify = domclassify,
-                    tround = 12,
-                    dbconn = dbconn, 
+                    tround = 8,
+                    dbconn = dbconn, schema = schema,
                     pltidsWITHqry = pltidsWITHqry,
                     pcwhereqry = pcwhereqry,
                     pjoinid = pjoinid)
@@ -135,8 +135,8 @@ check.tree <-
                  ACI = ACI,
                  tderive = estvarn.derive,
                  domclassify = domclassify,
-                 tround = 6,
-                 dbconn = dbconn, 
+                 tround = 8,
+                 dbconn = dbconn, schema = schema,
                  pltidsWITHqry = pltidsWITHqry,
                  pcwhereqry = pcwhereqry,
                  pjoinid = pjoinid)
@@ -200,8 +200,8 @@ check.tree <-
                       woodland = woodland,
                       tderive = estvard.derive,
                       domclassify = domclassify,
-                      tround = 12,
-                      dbconn = dbconn, 
+                      tround = 8,
+                      dbconn = dbconn, schema = schema,
                       pltidsWITHqry = pltidsWITHqry,
                       pcwhereqry = pcwhereqry,
                       pjoinid = pjoinid)
@@ -254,8 +254,8 @@ check.tree <-
                    woodland = woodland,
                    tderive = estvard.derive,
                    domclassify = domclassify,
-                   tround = 6,
-                   dbconn = dbconn, 
+                   tround = 8,
+                   dbconn = dbconn, schema = schema,
                    pltidsWITHqry = pltidsWITHqry,
                    pcwhereqry = pcwhereqry,
                    pjoinid = pjoinid)

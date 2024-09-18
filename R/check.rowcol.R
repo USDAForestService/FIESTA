@@ -2,7 +2,7 @@ check.rowcol <-
   function(esttype, 
            popType, 
            popdatindb, 
-           popconn = NULL, 
+           popconn = NULL, SCHEMA. = "",
            pltcondx, pltcondflds, 
            withqry = NULL, 
            estseed = "none",
@@ -333,7 +333,7 @@ check.rowcol <-
 
         ## build row fromqry
         rowfromqry <- paste0(
-          "\nFROM ", rowtabnm, " t")
+          "\nFROM ", SCHEMA., rowtabnm, " t")
         
         if (!is.null(pltcondx)) {
           rowtjoinqry <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "t.", "pc.")
@@ -906,7 +906,7 @@ check.rowcol <-
         
         ## build column fromqry
         colfromqry <- paste0(
-          "\nFROM ", coltabnm, " t")
+          "\nFROM ", SCHEMA., coltabnm, " t")
         
         if (!is.null(pltcondx)) {
           coltjoinqry <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "t.", "pc.")

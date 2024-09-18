@@ -256,7 +256,6 @@ modGBpop <- function(popType = "VOL",
                      dsn = NULL, 
                      dbconn = NULL,
                      schema = NULL,
-                     schemadev = TRUE,
                      pjoinid = "CN", 
                      areawt = "CONDPROP_UNADJ", 
                      areawt2 = NULL,
@@ -281,7 +280,6 @@ modGBpop <- function(popType = "VOL",
                      pltdat = NULL, 
                      stratdat = NULL, 
                      auxdat = NULL, 
-                     gui = FALSE, 
                      ...){
 
   ##################################################################################
@@ -297,7 +295,8 @@ modGBpop <- function(popType = "VOL",
   ##################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0) gui <- TRUE
+  #if (nargs() == 0) gui <- TRUE
+  gui <- FALSE
 
   ## If gui.. set variables to NULL
   if (gui) {
@@ -305,10 +304,7 @@ modGBpop <- function(popType = "VOL",
   }
 
   ## Set parameters
-  adjtree <- FALSE
   nonsamp.pfilter=nonsamp.cfilter <- NULL
-  #nonsamp.vfilter.fixed <- FALSE
-  poponly <- FALSE
   returnlst <- list(module = "GB")
   
   
@@ -318,7 +314,7 @@ modGBpop <- function(popType = "VOL",
                             fromcols,
                             tocols,
                             tab. = "") {
-    
+    ## DESCRIPTION: create classification query for combining strata
     classify.qry <- {}
     for (to in 1:length(tocols)) {
       tocol <- tocols[to]
@@ -352,15 +348,12 @@ modGBpop <- function(popType = "VOL",
     return(classify.qry)
   }
   
-  
  
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
-    	treef=seedf=grmf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=
-	sccmx=cond_pcondx=lulcx=popevalid=pltadj <- NULL
+  strwt=expcondtab=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=sccmx=popevalid <- NULL
   condid <- "CONDID"
   pvars2keep=unitlevels <- NULL
-  pltidsadjindb <- FALSE
+  #pltidsadjindb <- FALSE
 
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -752,11 +745,11 @@ modGBpop <- function(popType = "VOL",
   ## Applies plot filters
   ###################################################################################
   pltcheck <- 
-    check.popdataPLT(dsn = dsn, dbconn = dbconn,
+    check.popdataPLT(dsn = dsn, dbconn = dbconn, schema = schema,
                      datsource = datsource, 
                      tabs = popTabs, tabIDs = popTabIDs, 
                      pltassgn = pltassgn, 
-                     pltassgnid = pltassgnid, pjoinid=pjoinid, 
+                     pltassgnid = pltassgnid, pjoinid = pjoinid, 
                      module = "GB", popType = popType, 
                      popevalid = popevalid, adj = adj,
                      popFilter = popFilter2, 
@@ -770,14 +763,10 @@ modGBpop <- function(popType = "VOL",
                      unitlevels = unitlevels,
                      projectid = projectid)
   if (is.null(pltcheck)) return(0)
-  pltx <- pltcheck$pltx
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
   pltassgn. <- pltcheck$pltassgn.
   plotlst <- pltcheck$plotlst
-  palias <- pltcheck$palias
-  pjoinid <- pltcheck$pjoinid
-  #pltvars <- pltcheck$pltvars
   pltidsqry <- pltcheck$pltidsqry
   pltidsid <- pltcheck$pltidsid
   pltidvars <- pltcheck$pltidvars
@@ -800,10 +789,10 @@ modGBpop <- function(popType = "VOL",
   states <- pltcheck$states
   invyrs <- pltcheck$invyrs
   dbconn <- pltcheck$dbconn
+  SCHEMA. <- pltcheck$SCHEMA.
   pltaindb <- pltcheck$pltaindb
   datindb <- pltcheck$datindb
   POP_PLOT_STRATUM_ASSGN <- pltcheck$POP_PLOT_STRATUM_ASSGN
-  adjbyvars <- pltcheck$adjbyvars
   pltselectqry <- pltcheck$pltselectqry
   pltfromqry <- pltcheck$pltfromqry
   pwhereqry <- pltcheck$pwhereqry
@@ -910,14 +899,13 @@ modGBpop <- function(popType = "VOL",
                        pltassgnx = pltassgnx, pltx = pltx,
                        adj = adj, ACI = ACI, 
                        plotlst = plotlst,  
-                       #pwhereqry = pwhereqry, 
                        pltfromqry = pltfromqry, 
 	                     condid = condid, 
                        areawt = areawt, areawt2 = areawt2,
                        unitvars = unitvars,
                        strunitvars = strunitvars, 
                        nonsamp.cfilter = nonsamp.cfilter, 
-	                     dbconn = dbconn, schema = NULL, 
+	                     dbconn = dbconn, SCHEMA. = SCHEMA., 
                        returndata = returndata,
                        savedata = savedata, 
                        outlst = outlst)
@@ -933,7 +921,6 @@ modGBpop <- function(popType = "VOL",
     dbqueries <- popcheck$dbqueries
     dbqueriesWITH <- popcheck$dbqueriesWITH
     estfromqry <- popcheck$estfromqry
-    ACI.filter <- popcheck$ACI.filter
     adjcase <- popcheck$adjcase
 
     if (popType == "VOL") {
@@ -1259,7 +1246,6 @@ modGBpop <- function(popType = "VOL",
       returnlst$pop_fmt <- datsource
       returnlst$pop_dsn <- dsn
       returnlst$pop_schema <- schema
-      returnlst$pop_schemadev <- schemadev
       returnlst$popconn <- dbconn
     }
   }

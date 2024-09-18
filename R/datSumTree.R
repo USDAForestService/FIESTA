@@ -110,6 +110,9 @@
 #' returns data.frame object(s).
 #' @param savedata Logical. If TRUE, saves data to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
+#' @param dbconn Open database connection.
+#' @param schema String. Name of schema in database.
+#' @param dbconnopen Logical. If TRUE, keep database connection open.
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'treesum'. 
 #' 
@@ -142,7 +145,6 @@ datSumTree <- function(tree = NULL,
                        subplot = NULL, 
                        datsource = "obj", 
                        dsn = NULL, 
-                       dbconn = NULL,
                        tuniqueid = "PLT_CN", 
                        cuniqueid = "PLT_CN", 
                        puniqueid = "CN", 
@@ -175,7 +177,10 @@ datSumTree <- function(tree = NULL,
                        checkNA = FALSE, 
                        returnDT = TRUE,
                        savedata = FALSE, 
-                       savedata_opts = NULL) {
+                       savedata_opts = NULL,
+                       dbconn = NULL,
+                       schema = NULL, 
+                       dbconnopen = FALSE) {
   ####################################################################################
   ## DESCRIPTION: Aggregates tree variable(s) to plot(/cond)-level, 
   ##        using specified tree filters (ex. live trees only)
@@ -320,6 +325,9 @@ datSumTree <- function(tree = NULL,
         stop("datsource = 'sqlite' and dsn is NULL")
       }
     } 
+    if (!is.null(schema)) {
+      SCHEMA. <- paste0(schema, ".")
+    }
   }
   if (datindb) {
     dbtablst <- DBI::dbListTables(dbconn)
@@ -482,7 +490,7 @@ datSumTree <- function(tree = NULL,
   if (woodland %in% c("N", "only")) {
     if (!seedonly) {
       if (twoodlandref) {
-        wtfromqry <- paste0("\n JOIN ", ref_sppnm, 
+        wtfromqry <- paste0("\n JOIN ", SCHEMA., ref_sppnm, 
                             " ref ON (ref.", refspcdnm, " = ", talias., tspcdnm, ")")
       } else {
         wtfromqry <- NULL
@@ -495,7 +503,7 @@ datSumTree <- function(tree = NULL,
     }
     if (seedonly || addseed) {
       if (swoodlandref) {
-        wsfromqry <- paste0("\n JOIN ", ref_sppnm, 
+        wsfromqry <- paste0("\n JOIN ", SCHEMA., ref_sppnm, 
                             " ref ON (ref.", refspcdnm, " = ", salias., sspcdnm, ")")
       } else {
         wsfromqry <- NULL
@@ -857,12 +865,12 @@ datSumTree <- function(tree = NULL,
         pltidsWITHqry <- paste0("WITH",
                                 "\npltids AS",
                                 "\n(SELECT PLT_CN, SUBP, CONDID",
-                                "\n FROM ", subp_condnm, ")")
+                                "\n FROM ", SCHEMA., subp_condnm, ")")
       } else {
         pltidsWITHqry <- paste0("WITH",
                               "\npltids AS",
                               "\n(SELECT PLT_CN, SUBP",
-                              "\n FROM ", subplotnm, ")")
+                              "\n FROM ", SCHEMA., subplotnm, ")")
       }
       pltidsnm <- "pltids"
       pltidsa. <- "pltids."
@@ -873,7 +881,7 @@ datSumTree <- function(tree = NULL,
       
       subpjoinqry <- getjoinqry(subpuniqueid, pjoinid, "subp.", pltidsa.)
       if (bycond && !is.null(subp_condnm)) {
-        subpfromqry <- paste0("\n FROM ", subp_condnm, " subp",
+        subpfromqry <- paste0("\n FROM ", SCHEMA., subp_condnm, " subp",
                             "\n JOIN ", pltidsnm, " pltids ", subpjoinqry)
         
         pltidsWITHqry <- paste0(pltidsWITHqry, ", ",
@@ -881,7 +889,7 @@ datSumTree <- function(tree = NULL,
                                 "\n(SELECT PLT_CN, SUBP, CONDID",
                                 subpfromqry, ")")
       } else {
-        subpfromqry <- paste0("\n FROM ", subplotnm, " subp",
+        subpfromqry <- paste0("\n FROM ", SCHEMA., subplotnm, " subp",
                               "\n JOIN ", pltidsnm, " pltids ", subpjoinqry)
         
         pltidsWITHqry <- paste0(pltidsWITHqry, ", ",
@@ -921,7 +929,7 @@ datSumTree <- function(tree = NULL,
       pltidsWITHqry <- paste0("WITH",
                               "\npltids AS",
                               "\n(SELECT CN AS PLT_CN",
-                              "\n FROM ", plotnm, ")")
+                              "\n FROM ", SCHEMA., plotnm, ")")
       pltidsid <- "PLT_CN"
       pltidsa. <- "pltids."
     } else {
@@ -947,7 +955,7 @@ datSumTree <- function(tree = NULL,
       
       condflds.qry <- paste0(
         pltidsWITHqry,
-        "\nSELECT * FROM ", condnm, " LIMIT 0"
+        "\nSELECT * FROM ", SCHEMA., condnm, " LIMIT 0"
       )
       if (datindb) {
         condfldsdf <- tryCatch(
@@ -1042,7 +1050,7 @@ datSumTree <- function(tree = NULL,
       pltidsWITHqry <- paste0("WITH",
                               "\npltids AS",
                               "\n(SELECT DISTINCT ", cuniqueid,
-                              "\n FROM ", condnm, ")")
+                              "\n FROM ", SCHEMA., condnm, ")")
       pltidsnm <- "pltids"
       pltidsa. <- "pltids."
       pjoinid=pltidsid <- cuniqueid
@@ -1067,12 +1075,12 @@ datSumTree <- function(tree = NULL,
         }
         pjoinqry <- getjoinqry(puniqueid, cuniqueid, "p.", conda.)
         pcfromqry <- paste0(pcfromqry, 
-                            "\n JOIN ", condnm, " c ", cjoinqry,
-                            "\n JOIN ", plotnm, " p ", pjoinqry)
+                            "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry,
+                            "\n JOIN ", SCHEMA., plotnm, " p ", pjoinqry)
       } else {
         pltcondfldsqry <- toString(paste0("c.", condflds))
         pcfromqry <- paste0(pcfromqry, 
-                            "\n JOIN ", condnm, " c ", cjoinqry)
+                            "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry)
       }
       
       pltidsWITHqry <- paste0(pltidsWITHqry, ", ",
@@ -1203,10 +1211,10 @@ datSumTree <- function(tree = NULL,
   ## Build fromqry for twithqry/swithqry
   #############################################################################
   if (!seedonly) {
-    tfromqry <- paste0("\n FROM ", treenm, " t")
+    tfromqry <- paste0("\n FROM ", SCHEMA., treenm, " t")
   }
   if (seedonly || addseed) {
-    sfromqry <- paste0("\n FROM ", seednm, " s")
+    sfromqry <- paste0("\n FROM ", SCHEMA., seednm, " s")
   }
 
   #############################################################################
@@ -1296,7 +1304,7 @@ datSumTree <- function(tree = NULL,
       
         ## Build FROM query
         conda. <- "c."
-        pcfromqry <- paste0("\n FROM ", condnm, " c")
+        pcfromqry <- paste0("\n FROM ", SCHEMA., condnm, " c")
       
         ADJqry <- 
           getADJqry(popType = "VOL",
@@ -1899,7 +1907,7 @@ datSumTree <- function(tree = NULL,
         cjoinid <- getjoinqry(cuniqueid, subpuniqueid, "pc.", subpa.)
       }
       tfromqry <- paste0(tfromqry, 
-                         "\nJOIN ", condnm, " pc ", cjoinid)
+                         "\nJOIN ", SCHEMA., condnm, " pc ", cjoinid)
       tjoinid <- getjoinqry(c(tuniqueid, condid), uniqueid, "tdat.", subpa.)
       
       ## Use LEFT JOIN for tdat to get all records, no data filled with 0

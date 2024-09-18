@@ -149,6 +149,7 @@
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'tdomsum'. 
 #' @param dbconn Open database connection.
+#' @param schema String. Name of schema in database.
 #' @param dbconnopen Logical. If TRUE, keep database connection open.
 #' 
 #' @return tdomdata - a list of the following objects:
@@ -277,6 +278,7 @@ datSumTreeDom <- function(tree = NULL,
                           savedata = FALSE,
                           savedata_opts = NULL,
                           dbconn = NULL,
+                          schema = NULL, 
                           dbconnopen = FALSE){
   
   ####################################################################################
@@ -486,7 +488,7 @@ datSumTreeDom <- function(tree = NULL,
                cond = cond, plt = plt, 
                subp_cond = subp_cond, subplot = subplot, 
                datsource = datsource, dsn = dsn, 
-               dbconn = dbconn,
+               dbconn = dbconn, schema = schema,
                tuniqueid = tuniqueid, cuniqueid = cuniqueid, puniqueid = puniqueid, 
                bycond = bycond, condid = condid, 
                bysubp = bysubp, subpuniqueid = subpuniqueid, subpid = subpid,
@@ -1035,7 +1037,7 @@ datSumTreeDom <- function(tree = NULL,
     }
     
     
-    datExportData(tdomvarlut, dbconn = out_conn, dbconnopen = FALSE,
+    datExportData(tdomvarlut, dbconn = out_conn, dbconnopen = TRUE,
         savedata_opts=list(outfolder=outfolder, 
                             out_fmt=out_fmt, 
                             out_dsn=out_dsn, 
@@ -1168,6 +1170,10 @@ datSumTreeDom <- function(tree = NULL,
     tdomdata$classifynmlst <- classifynmlst
   }
   tdomdata$treeqry <- treeqry
+  
+  if (!is.null(dbconn) && dbconnopen) {
+    DBI::dbDisconnect(dbconn)
+  }
  
   return(tdomdata)
 } 

@@ -17,7 +17,7 @@ getpopFilterqry <- function(popType,
                             pltassgnx = NULL,
                             pltx = NULL,
                             projectid = NULL,
-                            SCHEMA. = "",
+                            schema = NULL,
                             chkvalues = FALSE,
                             dbconnopen = TRUE) {
   ## DESCRIPTION: Creates pwhereqry for plots
@@ -25,10 +25,16 @@ getpopFilterqry <- function(popType,
   ## datindb - if TRUE, PLOT and other tables are in a database
   ## pltaindb - if TRUE, the pltassgn table is in the database
   ## ppsaindb - if TRUE, and EVALID is in popFilters, POP_PLOT_STRATUM_ASSGN is in database
-  pwhereqry=ewhereqry=nonsamp.pfilter=plotsampcnt=ppsaflds <- NULL
+  pwhereqry=ewhereqry=nonsamp.pfilter=ppsaflds <- NULL
   syntax <- "SQL"
   subcycle99 <- FALSE
   
+  SCHEMA. <- ""
+  if (!is.null(schema)) {
+    SCHEMA. <- paste0(schema, ".")
+  }
+  
+
 #  getjoinqry <- function (joinid1, joinid2, alias1 = "p.", alias2 = "plta.") {
 #    joinqry <- "ON ("
 #    for (i in 1:length(joinid1)) {
@@ -49,7 +55,7 @@ getpopFilterqry <- function(popType,
     statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
     states.qry <- paste0(
       "\nSELECT DISTINCT ", statenm,
-      "\nFROM ", pltassgnnm)
+      "\nFROM ", SCHEMA., pltassgnnm)
     
     if (pltaindb) {
       states <- DBI::dbGetQuery(dbconn, states.qry)[[1]]
@@ -74,6 +80,7 @@ getpopFilterqry <- function(popType,
                 evalType = popType, 
                 dbTabs = dbTabs,
                 dbconn = dbconn,
+                schema = schema,
                 dbconnopen = TRUE,
                 returnPOP = returnPOP),
     error = function(e) {
@@ -149,7 +156,7 @@ getpopFilterqry <- function(popType,
       evalida. <- ifelse(evalidnm %in% ppsaflds, ppsa., plt.)
       pltfromqry <- paste0(
 	        pltfromqry, 
-            "\n JOIN ", ppsanm, " ppsa ON (", ppsa., "PLT_CN = ", plt., puniqueid, ")")
+            "\n JOIN ", SCHEMA., ppsanm, " ppsa ON (", ppsa., "PLT_CN = ", plt., puniqueid, ")")
 #      pfromqry <- paste0(
 #	        pfromqry, 
 #            "\n JOIN ", ppsanm, " ppsa ON (", ppsa., "PLT_CN = ", plt., puniqueid, ")")
@@ -176,7 +183,7 @@ getpopFilterqry <- function(popType,
     }
      
     ## Build where query to include popevalid popfilter 
-    ewhereqry <- paste0(evalida., evalidnm, " IN(", toString(popevalid), ")")
+    ewhereqry <- paste0(evalida., evalidnm, " IN (", toString(popevalid), ")")
     if (is.null(pwhereqry)) {
       pwhereqry <- paste0("\n WHERE ", ewhereqry)
     } else {
@@ -194,7 +201,7 @@ getpopFilterqry <- function(popType,
       if (!is.null(statenm)) {
         statenm <- "STATECD"
       }
-      stwhereqry <- paste0(plt., statenm, " IN(", toString(stcds), ")")
+      stwhereqry <- paste0(plt., statenm, " IN (", toString(stcds), ")")
       if (is.null(pwhereqry)) {
         pwhereqry <- paste0("\n WHERE ", stwhereqry)
       } else {
@@ -303,7 +310,9 @@ getpopFilterqry <- function(popType,
     
     #print(invyrs)
     if (chkvalues) {
-      invyrlst.qry <- paste("SELECT DISTINCT invyr \nFROM", plotnm, "\nORDER BY invyr")
+      invyrlst.qry <- paste0("SELECT DISTINCT invyr", 
+                             "\nFROM ", SCHEMA., plotnm, 
+                             "\nORDER BY invyr")
       pltyrs <- DBI::dbGetQuery(dbconn, invyrlst.qry)
       
       invyrs.miss <- invyrs[which(!invyrs %in% pltyrs)]
@@ -335,10 +344,10 @@ getpopFilterqry <- function(popType,
     ## 3.8. Check measyear and add to where query.
     ############################################################################
     if (chk) {
-      measyrlst.qry <- paste(
-	       "SELECT DISTINCT measyear",  
-		   "\nFROM", plotnm, 
-		   "\nORDER BY measyear")
+      measyrlst.qry <- paste0(
+	         "SELECT DISTINCT measyear",  
+		       "\nFROM ", SCHEMA., plotnm, 
+		       "\nORDER BY measyear")
       pltyrs <- DBI::dbGetQuery(dbconn, measyrlst.qry)
       
       measyr.miss <- measyears[which(!measyears %in% pltyrs)]
@@ -480,8 +489,9 @@ getpopFilterqry <- function(popType,
 #    selectidvars <- paste0("'", popType, "' AS POP_TYP, ")
 #  }
   
+  
   ###################################################################################
-  ## Get most current plots in database
+  ## 4. Get most current plots in database
   ###################################################################################
   if (popFilter$measCur) {
     surveyfromqry <- NULL
@@ -500,9 +510,9 @@ getpopFilterqry <- function(popType,
     if (!is.null(measEndyr)) {
       if (chkvalues) {
         yrlst.qry <- paste0(
-		    "SELECT DISTINCT", varCur, 
-            "\nFROM", plotnm, 
-            "\nORDER BY ", varCur)
+		          "SELECT DISTINCT ", varCur, 
+              "\nFROM ", SCHEMA., plotnm, 
+              "\nORDER BY ", varCur)
         pltyrs <- DBI::dbGetQuery(dbconn, yrlst.qry)
         
         if (measEndyr <= min(pltyrs, na.rm=TRUE)) {
@@ -560,7 +570,7 @@ getpopFilterqry <- function(popType,
   }
 
   ###################################################################################
-  ## Get most current plots in database
+  ## 5. Add other filters in popFilter
   ###################################################################################
   if (!is.null(popFilter$pfilter)) {
     
@@ -605,14 +615,10 @@ getpopFilterqry <- function(popType,
   returnlst <- list(pltidsqry = pltidsqry,  
                     states = states, invyrs = invyrs, 
                     pwhereqry = pwhereqry, ewhereqry = ewhereqry, 
-                    #pfromqry = pfromqry, 
                     pltselectqry = pltselectqry,
                     pltfromqry = pltfromqry,
                     nonsamp.pfilter = nonsamp.pfilter,
                     datindb = datindb)
-  if (!is.null(plotsampcnt)) {
-    returnlst$plotsampcnt <- plotsampcnt
-  }
   if (iseval) {
     returnlst$popevalid  <- popevalid
     returnlst$POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGN

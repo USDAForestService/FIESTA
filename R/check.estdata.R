@@ -1,7 +1,7 @@
 check.estdata <- 
   function(esttype,
            popType, 
-           popdatindb, popconn = NULL,
+           popdatindb, popconn = NULL, pop_schema = pop_schema,
            pltcondflds, totals,
            pop_fmt = NULL, pop_dsn = NULL, 
            sumunits = FALSE, landarea = NULL, 
@@ -44,6 +44,7 @@ check.estdata <-
   ## Set global variables
   rawfolder <- NULL
   rawdata <- TRUE
+  SCHEMA. <- ""
 
 
   #############################################################################
@@ -86,6 +87,9 @@ check.estdata <-
       if (is.null(popconn)) {
         stop("invalid database")
       } 
+    }
+    if (!is.null(pop_schema)) {
+      SCHEMA. <- paste0(pop_schema, ".")
     }
   }
 
@@ -354,6 +358,7 @@ check.estdata <-
                     where.qry = where.qry)
   if (popdatindb) {
     returnlst$popconn <- popconn
+    returnlst$SCHEMA. <- SCHEMA.
   }
 
   return(returnlst)

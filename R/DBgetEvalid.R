@@ -112,6 +112,7 @@ DBgetEvalid <- function(states = NULL,
                         invyrtab = NULL, 
                         dbTabs = dbTables(),
                         dbconn = NULL,
+                        schema = NULL,
                         dbconnopen = FALSE,
                         returnPOP = FALSE,
                         gui = FALSE) {
@@ -138,7 +139,6 @@ DBgetEvalid <- function(states = NULL,
   }
 
   ## Define variables
-  SCHEMA. <- ""
   indb <- FALSE
 
   ## Define evalType choices
@@ -229,6 +229,10 @@ DBgetEvalid <- function(states = NULL,
       } else{
         indb <- TRUE
       }
+    }
+    SCHEMA. <- ""
+    if (!is.null(schema)) {
+      SCHEMA. <- paste0(schema, ".")
     }
   }
 
@@ -423,7 +427,7 @@ DBgetEvalid <- function(states = NULL,
   if (!is.null(surveynm)) {
     surveywhere.qry <- paste0(
 	        "\nWHERE ann_inventory IN (", addcommas(ann_inv, quotes=TRUE), ")",
-		      "\n   AND ", surveynm, ".statecd IN(", toString(stcdlst), ")",
+		      "\n   AND ", surveynm, ".statecd IN (", toString(stcdlst), ")",
 				  "\n   AND ", surveynm, ".invyr <> 9999 AND p3_ozone_ind = 'N'")
 
     survey.qry <- paste0(
@@ -459,7 +463,7 @@ DBgetEvalid <- function(states = NULL,
 	         "SELECT ", toString(paste0("pev.", popevalvars)), ", pet.eval_typ",
 		       "\nFROM ", SCHEMA., popevaltypnm, " pet ",
 			     "\nJOIN ", SCHEMA., popevalnm, " pev ON (pev.cn = pet.eval_cn) ",
-		       "\nWHERE pev.STATECD ", paste0("IN(", toString(stcdlst), ")"))
+		       "\nWHERE pev.STATECD ", paste0("IN (", toString(stcdlst), ")"))
 		
     } else {
       pop_eval_qry <- paste0(
@@ -477,7 +481,7 @@ DBgetEvalid <- function(states = NULL,
     pop_eval_grp_qry <- paste0(
 	        "SELECT * ",
 	        "\nFROM ", SCHEMA., popevalgrpnm, 
-			    "\nWHERE statecd IN(", toString(stcdlst), ")")
+			    "\nWHERE statecd IN (", toString(stcdlst), ")")
     if (indb) {
       POP_EVAL_GRP <- data.table::setDT(DBI::dbGetQuery(dbconn, pop_eval_grp_qry)) 
     } else {
@@ -501,7 +505,7 @@ DBgetEvalid <- function(states = NULL,
   if (all(is.null(popevalnm) && is.null(popevaltypnm) && is.null(popevalgrpnm))) {
 	  nopoptables <- TRUE
 		
-    state.qry <- paste("SELECT DISTINCT statecd FROM", plotnm)
+    state.qry <- paste0("SELECT DISTINCT statecd FROM ", SCHEMA., plotnm)
     if (indb) {
       stcdlstdb <- tryCatch( 
         DBI::dbGetQuery(dbconn, state.qry)[[1]],
@@ -628,7 +632,7 @@ DBgetEvalid <- function(states = NULL,
 	                          "\nFROM ", SCHEMA., plotnm, " p")
 	          if (!is.null(surveynm)) {
 	            invqry <- paste0(invqry,
-	                 "\nJOIN ", SCHEMA., surveynm, " ON(", surveynm, ".statecd = p.statecd",
+	                 "\nJOIN ", SCHEMA., surveynm, " ON (", surveynm, ".statecd = p.statecd",
 	                 "\n  AND ", surveynm, ".invyr = p.invyr)",
 	                 surveywhere.qry)	        
 	          } else {
@@ -660,7 +664,7 @@ DBgetEvalid <- function(states = NULL,
           invqry <- paste(
               "SELECT statecd, invyr, COUNT(*) NBRPLOTS", 
 		          "\nFROM ", SCHEMA., ppsanm, 
-						  "\nWHERE evalid IN(", toString(evalid), ")",
+						  "\nWHERE evalid IN (", toString(evalid), ")",
 						  "\nGROUP BY statecd, invyr")
           if (indb) {
             invyrtab <- DBI::dbGetQuery(dbconn, invqry)
@@ -674,8 +678,8 @@ DBgetEvalid <- function(states = NULL,
               invqry <- paste(
                  "SELECT p.statecd, p.invyr, COUNT(*) NBRPLOTS",
 			           "\nFROM ", SCHEMA., ppsanm, "ppsa", 
-							   "\nJOIN ", SCHEMA., plotnm, "p ON(p.CN = ppsa.PLT_CN)",
-							   "\nWHERE evalid IN(", toString(evalid), ")", 
+							   "\nJOIN ", SCHEMA., plotnm, "p ON (p.CN = ppsa.PLT_CN)",
+							   "\nWHERE evalid IN (", toString(evalid), ")", 
 							   "\nGROUP BY p.statecd, p.invyr")
 								
              if (indb) {
@@ -695,7 +699,7 @@ DBgetEvalid <- function(states = NULL,
           invqry <- paste(
               "SELECT statecd, invyr, COUNT(*) NBRPLOTS", 
 		          "\nFROM ", SCHEMA., plotnm, 
-						  "\nWHERE statecd IN(", toString(stcdlst), ")",
+						  "\nWHERE statecd IN (", toString(stcdlst), ")",
 				      "\nGROUP BY statecd, invyr")
           if (indb) {
             invyrtab <- DBI::dbGetQuery(dbconn, invqry)
@@ -908,11 +912,11 @@ DBgetEvalid <- function(states = NULL,
         if (!is.null(ppsastnm)) {
           eval.qry <- paste(
               "SELECT DISTINCT statecd, evalid",
-		          "\nFROM ", ppsanm, 
-			        "\nWHERE statecd IN(", toString(stcdlst), ")")
+		          "\nFROM ", SCHEMA., ppsanm, 
+			        "\nWHERE statecd IN (", toString(stcdlst), ")")
         } else {
           eval.qry <- paste0(
-              "SELECT DISTINCT evalid FROM ", ppsanm) 
+              "SELECT DISTINCT evalid FROM ", SCHEMA., ppsanm) 
         }
 
         ## Get table of EVALID found in database
@@ -987,25 +991,25 @@ DBgetEvalid <- function(states = NULL,
         ## Create table of inventory years
         if (!is.null(ppsanm)) {
           if ("INVYR" %in% ppsaflds) {
-            invqry <- paste(
+            invqry <- paste0(
                 "SELECT statecd, invyr, COUNT(*) NBRPLOTS",
-            		"\nFROM ", ppsanm, 
-			          "\nWHERE evalid IN(", toString(unlist(evalidlist)), ")", 
+            		"\nFROM ", SCHEMA.ppsanm, 
+			          "\nWHERE evalid IN (", toString(unlist(evalidlist)), ")", 
 							  "\nGROUP BY statecd, invyr")  
           } else if (!is.null(plotnm) && "INVYR" %in% DBI::dbListFields(dbconn, plotnm)) {
-             invqry <- paste(
+             invqry <- paste0(
                 "SELECT p.statecd, p.invyr, COUNT(*) NBRPLOTS", 
-			          "\n FROM ", ppsanm, "ppsa", 
-							  "\nJOIN ", plotnm, "p ON(p.CN = ppsa.PLT_CN)", 
-							  "\nWHERE evalid IN(", toString(unlist(evalidlist)), ")", 
+			          "\nFROM ", SCHEMA., ppsanm, " ppsa", 
+							  "\nJOIN ", SCHEMA., plotnm, " p ON (p.CN = ppsa.PLT_CN)", 
+							  "\nWHERE evalid IN (", toString(unlist(evalidlist)), ")", 
 							  "\nGROUP BY p.statecd, p.invyr")  
           }  
           invyrtab <- DBI::dbGetQuery(dbconn, invqry)       
         } else if (!is.null(plotnm) && "INVYR" %in% DBI::dbListFields(dbconn, plotnm)) {
-          invqry <- paste(
+          invqry <- paste0(
                 "SELECT statecd, invyr, COUNT(*) NBRPLOTS",
-               	"\nFROM ", plotnm, 
-			          "\nWHERE", stfilter, 
+               	"\nFROM ", SCHEMA., plotnm, 
+			          "\nWHERE ", stfilter, 
 						    "\nGROUP BY statecd, invyr")   
           invyrtab <- DBI::dbGetQuery(dbconn, invqry)
         } else {
@@ -1162,7 +1166,7 @@ DBgetEvalid <- function(states = NULL,
         if (!is.null(plotnm) && "INVYR" %in% DBI::dbListFields(dbconn, plotnm)) {
           invqry <- paste0(
               "SELECT statecd, invyr, COUNT(*) NBRPLOTS",
-              "FROM ", plotnm, 
+              "FROM ", SCHEMA., plotnm, 
 			        "WHERE ", stfilter, 
 			        "GROUP BY statecd, invyr",
 			        "ORDER BY statecd, invyr")   
@@ -1204,10 +1208,10 @@ DBgetEvalid <- function(states = NULL,
 #	                        estn_unit, stratumcd, evalid",
 #	                     "\nFROM ", SCHEMA., ppsanm)
       ppsa.qry <- paste0("SELECT *",
-	                     "\nFROM ", SCHEMA., ppsanm)      
+	                       "\nFROM ", SCHEMA., ppsanm)      
 	    if (!is.null(evalidlist)) {
         ppsa.qry <- paste0(ppsa.qry, 
-                         "\nWHERE evalid IN(", toString(unlist(evalidlist)), ")")	
+                         "\nWHERE evalid IN (", toString(unlist(evalidlist)), ")")	
       }	
       if (indb) {	    
         assign(ppsanm, DBI::dbGetQuery(dbconn, ppsa.qry))

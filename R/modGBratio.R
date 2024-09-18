@@ -513,7 +513,7 @@ modGBratio <- function(GBpopdat,
     check.estdata(esttype = esttype, 
                   popType = popType,
                   popdatindb = popdatindb, 
-                  popconn = popconn,
+                  popconn = popconn, pop_schema = pop_schema,
                   pltcondflds = pltcondflds,
                   total = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
@@ -553,6 +553,8 @@ modGBratio <- function(GBpopdat,
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
+  SCHEMA. <- estdat$SCHEMA.
+  
   
   ###################################################################################
   ## Check parameter inputs and tree filters
@@ -587,7 +589,7 @@ modGBratio <- function(GBpopdat,
     check.rowcol(esttype = esttype, 
                  popType = popType,
                  popdatindb = popdatindb,
-                 popconn = popconn,
+                 popconn = popconn, SCHEMA. = SCHEMA.,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
                  withqry = pltcondxWITHqry,
@@ -684,7 +686,7 @@ modGBratio <- function(GBpopdat,
                woodland = woodland,
                ACI = ACI,
                domclassify = domclassify,
-               dbconn = popconn,
+               dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
                bytdom = bytdom,
