@@ -493,7 +493,6 @@ check.popdataPLT <-
   POP_PLOT_STRATUM_ASSGN <- popFilterqry$POP_PLOT_STRATUM_ASSGN
 
   
-  
   ## 9. Check PLOT_STATUS_CD and generate table with number of plots
   ########################################################################
   pstatusvars <- c("PLOT_STATUS_CD", "PSTATUSCD")

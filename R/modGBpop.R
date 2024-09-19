@@ -353,7 +353,7 @@ modGBpop <- function(popType = "VOL",
   strwt=expcondtab=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=sccmx=popevalid <- NULL
   condid <- "CONDID"
   pvars2keep=unitlevels <- NULL
-  #pltidsadjindb <- FALSE
+  pltidsadjindb <- FALSE
 
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -875,7 +875,6 @@ modGBpop <- function(popType = "VOL",
   
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
-  
 
   ###################################################################################
   ## Check Population Data
@@ -1141,7 +1140,7 @@ modGBpop <- function(popType = "VOL",
     if (!is.null(treex)) {
       returnlst$treex <- treex
       returnlst$tuniqueid <- tuniqueid
-      returnlst$adjtree <- adjtree
+      #returnlst$adjtree <- adjtree
     }
     if (!is.null(seedx)) {
       returnlst$seedx <- seedx
