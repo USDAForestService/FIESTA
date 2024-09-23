@@ -1,7 +1,7 @@
 check.popdataPLT <- 
   function(dsn, 
            datsource, schema = NULL, 
-           tabs, tabIDs, 
+           tabs, tabIDs, returndata,
            pltassgn, pltassgnid, pjoinid, 
            module, popType, popevalid, adj, 
            popFilter, nonsamp.pfilter = NULL, 
@@ -14,7 +14,8 @@ check.popdataPLT <-
            pvars2keep = NULL, pdoms2keep = NULL, 
            nullcheck = FALSE, gui = FALSE, dsn_driver = "SQLite", 
            unitlevels = NULL, defaultVars = FALSE, 
-           projectid = NULL, dbconn = NULL) {
+           projectid = NULL, dbconn = NULL,
+           dsnreadonly = TRUE) {
 
   ###################################################################################
   ## DESCRIPTION: Checks plot data inputs
@@ -47,41 +48,43 @@ check.popdataPLT <-
   ## Subset variables for pltx and pltassgnx
   ###################################################################################
 
-  
+    
   ## Set global variables
   ##################################################################################
   plotsampcnt=nonresplut=pfromqry=pltassgnqry=unitareaqry=auxlutqry=
-  pwhereqry=pltx=pltassgnx=popwhereqry=pstratvars <- NULL
-
-  datindb=pltaindb=unitindb=stratindb=subcycle99 <- FALSE
+      pwhereqry=pltx=pltassgnx=popwhereqry=pstratvars=getdataWITHqry=getdataCNs <- NULL
+    
+  datindb=pltaindb=unitindb=stratindb=subcycle99=PLOT <- FALSE
   unitvars <- unique(c(unitvar2, unitvar))
   pltassgnvars <- unique(c(projectid, pltassgnid, unitvars)) 
   returndata <- FALSE
   SCHEMA. <- ""
-  
-  
+    
+    
   ###################################################################################
   ## 1. Define a set of plot-level variables that are necessary to keep for estimation. 
   ###################################################################################
-  pvars2keep <- unique(c(pvars2keep, c("STATECD", "UNITCD", "COUNTYCD", "PLOT",
-               "PLOT_STATUS_CD", "PLOT_NONSAMPLE_REASN_CD", "PSTATUSCD", "INTENSITY"))) 
-  
+  pvars2keep <- unique(c(pvars2keep, 
+                         c("STATECD", "UNITCD", "COUNTYCD", "PLOT",
+                           "PLOT_STATUS_CD", "PLOT_NONSAMPLE_REASN_CD", "PSTATUSCD", "INTENSITY",
+                           "SUBCYCLE"))) 
+    
   ## Set additional pvars2keep depending on popType
   if (popType %in% c("GRM", "CHNG", "LULC")) {
     pvars2keep <- unique(c(pvars2keep, c("PREV_PLT_CN", "REMPER")))
   } else if (popType == "P2VEG") {
     pvars2keep <- c(pvars2keep, "P2VEG_SAMPLING_STATUS_CD", "P2VEG_SAMPLING_LEVEL_DETAIL_CD",
-                    "SAMP_METHOD_CD")
+                      "SAMP_METHOD_CD")
   } else if (popType == "INV") {
     pvars2keep <- c(pvars2keep, "INVASIVE_SAMPLING_STATUS_CD", "INVASIVE_SPECIMEN_RULE_CD")
   }  
-  
+    
   ###################################################################################
   ## 2. Define a set of plot-level domain variables used for estimation. 
   ###################################################################################
   pdoms <- c("INVYR", "MEASYEAR", "RDDISTCD", "WATERCD", "ELEV", 
-	           "ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "DESIGNCD", "EMAP_HEX")
-
+               "ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "DESIGNCD", "EMAP_HEX")
+    
   ##############################################################################
   ## 3. Check database connection (dbconn) or dsn and define SCHEMA.
   ##############################################################################
@@ -94,19 +97,19 @@ check.popdataPLT <-
     dbtablst <- DBI::dbListTables(dbconn)
   } else if (!is.null(dsn)) {
     if (datsource == "sqlite") {
-      dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
+       dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
       dbtablst <- DBI::dbListTables(dbconn)
     } else {
       message("not supported")
     }
     SCHEMA. <- ifelse (is.null(schema), "", paste0(schema, "."))
   }
- 
+    
   ##############################################################################
   ## 4. Check plot and pltassgn tables.
   ##############################################################################
   pltassgnx=pltassgnnm=pfromqry <- NULL
-  
+    
   ## 4.1. Check plot table.
   ###########################################################
   if (popType %in% c("CHNG", "GRM")) {
@@ -114,7 +117,6 @@ check.popdataPLT <-
   } else {
     tabnames <- "plt"
   }
- 
   plotlst <- popTabchk(tabnames, tabtext = "plt", 
                        tabs, tabIDs, dbtablst, dbconn) 
   plotnm <- plotlst$tabnm
@@ -122,24 +124,20 @@ check.popdataPLT <-
   pltflds <- plotlst$tabflds
   pltx <- plotlst$tabx
   plt <- plotlst$tab
-
-  if (is.null(pltx) && !is.null(plotnm)) {
-    datindb <- TRUE
-    pfromqry <- paste0("\nFROM ", SCHEMA., plotnm, " p")
-  }	
-
+    
+    
   ## 4.2. Check pltassgn table.
   ############################################################# 
-  
+    
   ## Check if pltassgn table is a data.frame object
   pltassgnx <- pcheck.table(pltassgn, tabnm="pltassgn", 
-                            caption="pltassgn table?", returnsf=FALSE)
+                              caption="pltassgn table?", returnsf=FALSE)
   if (!is.null(pltassgnx)) {
     pltaindb <- FALSE
     pltassgnnm <- "pltassgnx"
     pltassgnflds <- names(pltassgnx)
   }	   
-  
+    
   ## Check if pltassgn is in database
   if (is.null(pltassgnx) && !is.null(pltassgn)) {
     pltassgnnm <- findnm(pltassgn, dbtablst, returnNULL = TRUE)
@@ -153,101 +151,72 @@ check.popdataPLT <-
       pltassgnflds <- DBI::dbListFields(dbconn, pltassgnnm)
     }
   }
-
-  ## If pltassgn is a data.frame, import the plot table as data.frame R object.
-  if (!is.null(pltassgnx) && is.data.frame(pltassgn) && !is.data.frame(pltx)) {	  
-    if (!is.null(plotnm)) {
-      pltx <- pcheck.table(plotnm, conn = dbconn, 
-                           tabnm = plotnm, returnsf = FALSE)
-      plotnm <- "pltx"
-      pltflds <- names(pltx)
-    }
-  }
-  
-  ## 4.3. Check unique identifier of plot.
+    
+  ## 4.3. Check unique identifier of plot and pltassgn and pjoinid
   ##################################################################################
-  if (!is.null(plotnm)) {
-    puniqueid <- pcheck.varchar(var2check = puniqueid, varnm = "puniqueid", gui=gui,
-          checklst = pltflds, caption = "UniqueID variable of plot",
-          warn = paste(puniqueid, "not in plt table"), stopifnull = TRUE)
-  }
-  
-  ## 4.4. Check pjoinid and pltassgnid
-  ##################################################################################
-  ## Note: If pjoinid is NULL, set to pltassgnid
-  if (!is.null(plotnm) && !is.null(pltassgnnm)) {
-    pjoinidchk <- unlist(sapply(pjoinid, findnm, pltflds, returnNULL=TRUE))
-    pltassgnchk <- unlist(sapply(pltassgnid, findnm, pltassgnflds, returnNULL=TRUE))
-    if (is.null(pltassgnchk)) {
-      pltassgnid <- pjoinid
-      pltassgnchk <- unlist(sapply(pltassgnid, findnm, pltassgnflds, returnNULL=TRUE))
-      if (is.null(pltassgnchk)) {
-        stop("pltassgnid is invalid")
-      }
-    }
-    if (length(pltassgnchk) < length(pltassgnid)) {
-      pltassgnidmiss <- pltassgnid[!pltassgnid %in% pltassgnchk]
-      message("pltassgnid variables are missing from dataset: ", toString(pltassgnidmiss))
-      stop()
-    } 
-    if (is.null(pjoinidchk)) {
-      pjoinid <- puniqueid
-      pjoinidchk <- unlist(sapply(pjoinid, findnm, pltflds, returnNULL=TRUE))
-      if (is.null(pjoinidchk)) {
-        stop("invalid pjoinid")
-      }
-    } else if (length(pjoinidchk) != length(pltassgnid)) {
-      message("pjoinid must be same number of variables as pltassgnid")
-      stop()
-    } else {
-      pjoinid <- pjoinidchk
-    }
-  }
-
-  ## 4.5. Build pfromqry using information above.
-  ##################################################################################
-  pwhereqry <- NULL
+  ## Define alias prefixes for pltassgn and plt
   pltassgn. <- "plta."
   plt. <- "p."
-  
-  ## Build from qry for all popfilters (epopfromqry)
-  if (is.null(pfromqry)) {
-    if (is.null(plotnm)) {
-      pfromqry <- paste0("\nFROM ", SCHEMA., pltassgnnm, " plta")
-      pflds <- pltassgnflds
-      pltassgnvars <- pltassgnid	
-    } else {
+    
+  if (!is.null(plotnm)) {
+    puniqueid <- 
+      pcheck.varchar(var2check = puniqueid, varnm = "puniqueid", gui=gui,
+                    checklst = pltflds, caption = "UniqueID variable of plot",
+                    warn = paste(puniqueid, "not in plt table"), stopifnull = TRUE)
+      
+    ## Build from query for plot
+    ## If pltx is NULL and plotnm is not null, the assumption is that all plot data are a database
+    if (is.null(pltx)) {
+      datindb <- TRUE
       pfromqry <- paste0("\nFROM ", SCHEMA., plotnm, " p")
-      pflds <- pltflds
-      pltassgnvars <- puniqueid
     }
-  }
-  if (!is.null(plotnm) && !is.null(pltassgnnm)) {
-    pjoinqry <- getjoinqry(pjoinid, pltassgnid, plt., pltassgn.)
-    pltfromqry <- paste0("\n FROM ", SCHEMA., pltassgnnm, " plta ", 
-                         "\n JOIN ", SCHEMA., plotnm, " p ", pjoinqry)
-    pflds <- c(pltassgnflds, pltflds[!pltflds %in% pltassgnflds])
-    pltassgnvars <- pltassgnid	
-  }	else {
-    pltfromqry <- pfromqry
-  }
-  
-  ## Get default variables for plot
-  if (defaultVars) {
-    #pdoms2keep <- DBvars.default()$pltvarlst
-    pdoms2keep <- pdoms
-    pdoms2keep <- pdoms2keep[pdoms2keep %in% pflds]
+      
+    ## Check pjoinid and pltassgnid
+    if (!is.null(pltassgnnm)) {
+      pltassgnchk <- unlist(sapply(pltassgnid, findnm, pltassgnflds, returnNULL=TRUE))
+      if (is.null(pltassgnchk)) {
+        if (pltassgnid == "CN" && !is.null(findnm("PLT_CN", pltassgnflds, returnNULL=TRUE))) {
+           pltassgnid <- findnm("PLT_CN", pltassgnflds)
+        } else if (pltassgnid == "PLT_CN" && !is.null(findnm("CN", pltassgnflds, returnNULL=TRUE))) {
+          pltassgnid <- findnm("CN", pltassgnflds)
+        } else {
+          stop("pltassgnid is not in pltassgn")
+        }
+      }
+    }
+    if (!is.null(pjoinid)) {
+      pjoinidchk <- unlist(sapply(pjoinid, findnm, pltflds, returnNULL=TRUE))
+      if (is.null(pjoinidchk)) {
+        stop("invalid pjoinid... must be in plot table")
+      }
+    } else {
+      pjoinid <- puniqueid
+    }
+    if (length(pjoinidchk) != length(pltassgnid)) {
+      pltassgnchk <- unlist(sapply(pjoinidchk, findnm, pltassgnflds, returnNULL=TRUE))
+      if (is.null(pltassgnchk)) {
+        message("pjoinid must be same number of variables as pltassgnid")
+        stop()
+      } else {
+        pltassgnid <- pltassgnchk
+      }
+    }
+    pltassgnvars <- pltassgnid
+      
   } else {
-    pdoms2keep <- pflds
+      
+    ## Build pfromqry using pltassgn table
+    pfromqry <- paste0("\nFROM ", SCHEMA., pltassgnnm, " p")
+    pltassgnvars <- pjoinid	
   }
-  
-  ## 4.6. Define select variables (selectpvars).
+
+  ## 4.5. Define select variables (selectpvars)
   ##################################################################################
   pltidvars <- {}
   ## Add projectid and popType to selectqry
   if (!is.null(projectid)) {
     selectidvars <- c(paste0("'", projectid, "' AS PROJECTID"), 
-                      paste0("'", popType, "' AS POP_TYP"))
+                        paste0("'", popType, "' AS POP_TYP"))
     projidvars <- c("PROJECTID", "POP_TYP")
   } else {
     selectidvars <- paste0("'", popType, "' AS POP_TYP")
@@ -257,73 +226,73 @@ check.popdataPLT <-
   selectpvars <- c(selectidvars, paste0(plt., puniqueid, " AS PLT_CN"))
   pltidsid <- "PLT_CN"
   pltidvars <- c(projidvars, "PLT_CN")
-  
+    
   ## Append pjoinid
   if (!identical(as.vector(pjoinid), as.vector(puniqueid))) {
     selectpvars <- c(selectpvars, paste0(plt., pjoinid))
     pltidvars <- c(projidvars, pjoinid)
   } 
-  
-  
+    
+    
   ###################################################################################
   ## 5. Check input parameters
   ###################################################################################
-
+    
   ## 5.1. Check adj
   ##########################################################
   adjlst <- c("samp", "plot", "none")
   adj <- pcheck.varchar(var2check=adj, varnm="adj", gui=gui,
-		checklst=adjlst, caption="adj", multiple=FALSE, stopifnull=TRUE)
+                        checklst=adjlst, caption="adj", multiple=FALSE, stopifnull=TRUE)
   if (adj == "plot" && module == "GB") {
     message("adj='plot' is not typical for GA modules")
   }
   if (adj != "none") {
     pvars2keep <- c(pvars2keep, "MACRO_BREAKPOINT_DIA")
   }
-
+    
   ## 5.2. Check ACI (if ACI=FALSE, need to filter COND_STATUS_CD == 1)
   ###################################################################################
   ACI <- pcheck.logical(popFilter$ACI, varnm="ACI", title="ACI?", first="NO", gui=gui)
   if (ACI) {
     pvars2keep <- c(pvars2keep, "NF_SAMPLING_STATUS_CD", "NF_PLOT_STATUS_CD")
   }
-
+    
   ## 5.3. Check defaultVars
   ###################################################################################
   defaultVars <- pcheck.logical(defaultVars, varnm="defaultVars", 
-                       title="Default variables?", first="NO", gui=gui)
-
+                                  title="Default variables?", first="NO", gui=gui)
+    
   ## 5.4. Check unit.action
   ###################################################################################
   unit.actionlst <- c("keep", "remove", "combine")
   unit.action <- pcheck.varchar(var2check=unit.action, varnm="unit.action", gui=gui,
-		checklst=unit.actionlst, caption="unit.action", multiple=FALSE, stopifnull=TRUE)
-
-
+                                  checklst=unit.actionlst, caption="unit.action", multiple=FALSE, stopifnull=TRUE)
+    
+    
   ## 5.5. Check strata and other strata parameters.
   ###################################################################################
   strata <- pcheck.logical(strata, varnm="strata",
-		title="Post stratify?", first="YES", gui=gui, stopifnull=TRUE)
-
+                             title="Post stratify?", first="YES", gui=gui, stopifnull=TRUE)
+    
   ## Check strata parameters
   ########################################################
   if (strata) {
     ## 5.5.1. Check pivot
     pivot <- pcheck.logical(pivot, varnm="pivot",
-		              title="Pivot stratalut?", first="NO", gui=gui)
+                            title="Pivot stratalut?", first="NO", gui=gui)
     ## 5.5.2. Check nonresp
     nonresp <- pcheck.logical(nonresp, varnm="nonresp",
-		               title="Post stratify?", first="YES", gui=gui)
+                              title="Post stratify?", first="YES", gui=gui)
     if (nonresp) {
       pstratvars <- unique(c(pstratvars, c("PLOT_STATUS_CD", "SAMP_METHOD_CD")))
       pltassgnvars <- unique(c(pltassgnvars, prednames))
     } 
-
+      
     ## 5.5.3. Check stratcombine
     stratcombine <- pcheck.logical(stratcombine, varnm="stratcombine",
-		               title="Combine strata?", first="YES", gui=gui, stopifnull=TRUE)
+                                   title="Combine strata?", first="YES", gui=gui, stopifnull=TRUE)
   }
-  
+    
   ## 5.6 Check predfac.
   ###################################################################################
   if (!is.null(predfac)) {
@@ -337,15 +306,16 @@ check.popdataPLT <-
       if (length(predfac) == 0) predfac <- NULL
     }
   }
-
+    
+    
   ##################################################################################
-  ## 6. Check estimation unit(s) and auxiliary information in plt/pltassgn.
+  ## 6. Check estimation unit(s) and auxiliary information in pltassgn.
   ##################################################################################
-  
+    
   ## 6.1. Check unitvars (unitvar, unitvar2)
   #######################################################################
   if (!is.null(unitvars)) {
-    unitvarchk <- unlist(sapply(unitvars, findnm, pflds, returnNULL=TRUE))
+    unitvarchk <- unlist(sapply(unitvars, findnm, pltassgnflds, returnNULL=TRUE))
     if (is.null(unitvarchk)) {
       message("unitvars must be included in dataset")
       return(NULL)
@@ -372,7 +342,7 @@ check.popdataPLT <-
     selectpvars <- c(selectpvars, paste0(unitvarsa., unitvars))
     pltidvars <- c(pltidvars, unitvars)
   }
-
+    
   ## 6.2. Check strata variable (strvar) in plot/pltassgn.
   #######################################################################
   if (strata) {
@@ -382,7 +352,7 @@ check.popdataPLT <-
       if (length(strvar) > 1) {
         stop("invalid strvar... only 1 variable allowed")
       }
-      strvar <- findnm(strvar, pflds, returnNULL=TRUE)
+      strvar <- findnm(strvar, pltassgnflds, returnNULL=TRUE)
       if (is.null(strvar)) {
         message("strata=TRUE, strvar must be included in dataset")
         return(NULL)
@@ -391,109 +361,168 @@ check.popdataPLT <-
     pltassgnvars <- unique(c(pltassgnvars, strvar))
     if (adj == "samp") {
       adjbyvars <- c(adjbyvars, strvar)
-      strvara. <- ifelse(all(strvar %in% pltassgnflds), pltassgn., plt.)	
-      
-      if (any(strvar %in% pltidvars)) {
-        strvar2 <- strvar[!strvar %in% pltidvars]
-        if (length(strvar2) > 0) {
-          selectpvars <- c(selectpvars, paste0(strvara., strvar2))
-        }
-      } else {
+      strvara. <- ifelse(all(strvar %in% pltassgnflds), pltassgn., plt.)
+        
+      if (!is.null(strvar)) {
         selectpvars <- c(selectpvars, paste0(strvara., strvar))
       }
     }
   } else {
     strvar <- NULL
   }
-  
+    
   ## 6.3. Check prednames in plot/pltassgn.
   #######################################################################
   if (!is.null(prednames)) {
-    prednameschk <- unlist(sapply(prednames, findnm, pflds, returnNULL=TRUE))
+    prednameschk <- unlist(sapply(prednames, findnm, pltassgnflds, returnNULL=TRUE))
     if (is.null(prednameschk)) {
       message("no prednames are not found in dataset")
       return(NULL)
     } else if (length(prednameschk) < length(prednames)) {
       message("prednames are missing from dataset: ", 
-              toString(prednames[!prednames %in% prednameschk]))
-      return(NULL)
+                toString(prednames[!prednames %in% prednameschk]))
+       return(NULL)
     } else {
       prednames <- prednameschk
     }
     pltassgnvars <- unique(c(pltassgnvars, prednames))
   }
-
-  
-  ## 7. Check pvars2keep in plot/pltassgn.
+    
+    
+  ## 7. Check pvars2keep in pltassgn and pdomskeep in plt
   #######################################################################
   if (!is.null(pvars2keep)) {
-    pvars2keepchk <- unlist(sapply(pvars2keep, findnm, pflds, returnNULL = TRUE))
-	  if (length(pvars2keepchk) < length(pvars2keep)) {
-	    pvars2keepmiss <- pvars2keep[!pvars2keep %in% pvars2keepchk]
-	    pvars2keepmiss <- pvars2keepmiss[pvars2keepmiss != "PSTATUSCD"]
-	    if (length(pvars2keepmiss) > 0) {
-        message("variables are missing from dataset: ", toString(pvars2keepmiss))
-	    } else {
-	      pvars2keep <- pvars2keepchk
-	    }
-      #return(NULL)
+    if (!is.null(pvars2keep)) {
+      pvars2keepchk <- unlist(sapply(pvars2keep, findnm, pflds, returnNULL = TRUE))
+      if (length(pvars2keepchk) < length(pvars2keep)) {
+        pvars2keepmiss <- pvars2keep[!pvars2keep %in% pvars2keepchk]
+        pvars2keepmiss <- pvars2keepmiss[pvars2keepmiss != "PSTATUSCD"]
+        if (length(pvars2keepmiss) > 0) {
+          message("variables are missing from dataset: ", toString(pvars2keepmiss))
+        } else {
+          pvars2keep <- pvars2keepchk
+        }
+        #return(NULL)
+      } else {
+        pvars2keep <- pvars2keepchk
+      }
+    }
+  }
+    
+  ## Get default variables for plot
+  if (defaultVars) {
+    #pdoms2keep <- DBvars.default()$pltvarlst
+    pdoms2keep <- pdoms
+    pdoms2keep <- pdoms2keep[pdoms2keep %in% pltflds]
+  } else {
+    pdoms2keep <- pltflds
+  }
+    
+    
+  ## 8. Write pltassgnx to database 
+  ##################################################################################
+  if (datindb && !pltaindb && !is.null(dbconn)) {
+    if (dsnreadonly) {
+      message("consider writing pltassgn to database or including dsnreadonly=TRUE, for more efficient queries...")
     } else {
-      pvars2keep <- pvars2keepchk
-    }	  
+      index <- NULL
+      pltassgnnm <- checknm("pltassgn", dbtablst)
+      if (!identical(pltassgnid, pjoinid)) index <- pjoinid
+      write2sqlite(pltassgnx[, pltassgnvars, with=FALSE], 
+                     dbconn = dbconn, out_name = pltassgnm, index = index)
+      pltaindb <- TRUE
+    }
   }
-
-  pvars <- unique(c(pvars2keep, pdoms))
-  pvars <- pvars[pvars %in% pflds]
-  pltvars <- pvars[pvars %in% pltflds]
-  pltavars <- pvars[!pvars %in% c(adjbyvars, pltvars) & pvars %in% pltassgnflds]
-  if (length(pvars) > 0) {
-    pltvars <- paste0(plt., pvars)
-    #selectpvars <- unique(c(selectpvars, pltvars))
-  }
-  if (length(pltavars)) {
-    pltavars <- paste0(pltassgn., pltavars)
-    #selectpvars <- unique(c(selectpvars, pltvars))
-  }
-
+  
+    
   ##################################################################################
-  ## 8. Check popFilters and create pltidsqry
+  ## 10. Check popFilters and create pltidsqry
   ##################################################################################
+  if (!is.null(pltx))  {
+    dbTabs <- dbTables(plot_layer = pltx)
+  } else {
+    dbTabs <- dbTables(plot_layer = tabs$plt)
+  }
   popFilterqry <- 
     getpopFilterqry(popType = popType, 
                     popFilter = popFilter, 
-                    pltfromqry = pltfromqry,
+                    pfromqry = pfromqry,
                     plotnm = plotnm,
                     pltassgnnm = pltassgnnm,
-                    pflds = pflds,
                     pltassgnflds = pltassgnflds, 
+                    pltflds = pltflds,
                     puniqueid = puniqueid, 
+                    pjoinid = pjoinid,
+                    pltassgnid = pltassgnid,
                     pltassgn. = pltassgn., 
                     plt. = plt.,
                     selectpvars = selectpvars,
                     dbconn = dbconn,
                     schema = schema,
                     datsource = datsource,
-                    dbTabs = dbTables(plot_layer = tabs$plt),
+                    dbTabs = dbTabs,
                     datindb = datindb,
                     pltaindb = pltaindb,
                     pltassgnx = pltassgnx,
-                    pltx = pltx,
                     chkvalues = FALSE,
                     projectid = projectid) 
+  if (is.null(popFilterqry)) {
+    return(NULL)
+  }
   pltidsqry <- popFilterqry$pltidsqry
   pwhereqry <- popFilterqry$pwhereqry
-  pfromqry <- popFilterqry$pfromqry
   pltselectqry <- popFilterqry$pltselectqry
-  pltfromqry <- popFilterqry$pltfromqry
+  pfromqry <- popFilterqry$pfromqry
+  pltafromqry <- popFilterqry$pltafromqry
   states <- popFilterqry$states
   invyrs <- popFilterqry$invyrs
   nonsamp.pfilter <- popFilterqry$nonsamp.pfilter
-  popevalid <- popFilterqry$popevalid
-  ppsanm <- popFilterqry$ppsanm
-  POP_PLOT_STRATUM_ASSGN <- popFilterqry$POP_PLOT_STRATUM_ASSGN
+  iseval <- popFilterqry$iseval
 
+  if (iseval) {
+    popevalid <- popFilterqry$popevalid
+    ppsanm <- popFilterqry$ppsanm
+    ppsa. <- popFilterqry$ppsa.
+    POP_PLOT_STRATUM_ASSGN <- popFilterqry$POP_PLOT_STRATUM_ASSGN
+    PLOT <- popFilterqry$PLOT
+  } 
   
-  ## 9. Check PLOT_STATUS_CD and generate table with number of plots
+  ## 11. Build WITH queries and extract plt
+  ##################################################################################
+   
+  # Define WITH query for returning other data tables in database
+  getdataWITHqry <- paste0("WITH",
+                           "\npltids AS",
+                           "\n(SELECT p.", puniqueid, " AS PLT_CN",
+                           pfromqry,
+                           pwhereqry, ")")
+  
+  if (!pltaindb && datindb && !is.null(plotnm)) {
+    if (!is.null(PLOT)) {
+      pltx <- PLOT
+    } else {
+      ## Build query to query plot data
+      pltqry <- paste0("SELECT ", toString(pvars),
+                     pfromqry,
+                     pwhereqry)
+    
+      ## Get plot data from database (to join to pltassgn and filter popFilters)
+      pltx <- DBI::dbGetQuery(dbconn, getpltx.qry)
+    }
+    
+    ## Subset pltx to pltassgnx
+    pltx <- merge(pltx, pltassgnx[,pltassgnid, with=FALSE], by.x = pjoinid, by.y=pltassgnid)
+    
+    ## Substitute plot name for pltafromqry and pltidsqry
+    pltafromqry <- sub(plotnm, "pltx", pltafromqry, plotnm)
+    pltidsqry <- sub(plotnm, "pltx", pltidsqry, plotnm)
+    
+    plotnm <- "pltx"
+    pltflds <- pvars
+  }  
+  
+  
+  ## 12. Check PLOT_STATUS_CD and generate table with number of plots
   ########################################################################
   pstatusvars <- c("PLOT_STATUS_CD", "PSTATUSCD")
   pstatuschk <- unlist(sapply(pstatusvars, findnm, pflds, returnNULL=TRUE))
@@ -506,12 +535,13 @@ check.popdataPLT <-
     }  
     
     ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
+    pstatuscda. <- ifelse(pstatuscdnm %in% pltflds, plt., pltassgn.)
     plotsampcntqry <- paste0(
-      "SELECT p.", pstatuscdnm, ", COUNT(*) AS NBRPLOTS", 
-      pltfromqry, 
+      "SELECT ", pstatuscda., pstatuscdnm, ", COUNT(*) AS NBRPLOTS", 
+      pltafromqry, 
       pwhereqry, 
-      "\nGROUP BY p.", pstatuscdnm,
-      "\nORDER BY p.", pstatuscdnm)
+      "\nGROUP BY ", pstatuscda., pstatuscdnm,
+      "\nORDER BY ", pstatuscda., pstatuscdnm)
     
     if (pltaindb) {      
       plotsampcnt <- tryCatch(
@@ -538,7 +568,6 @@ check.popdataPLT <-
                     ref_plot_status_cd$VALUE), "MEANING"], plotsampcnt)
   }						  
  
-
   ## If ACI, check NF_PLOT_STATUS_CD and generate table with number of plots
   ##########################################################################
   if (popFilter$ACI) {
@@ -553,9 +582,10 @@ check.popdataPLT <-
       }  
       
       ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
+      nfpstatuscda. <- ifelse(nfpstatuscdnm %in% pltassgnflds, pltassgn., plt.)
       nfplotsampcntqry <- paste0(
         "SELECT p.", nfpstatuscdnm, ", COUNT(*) AS NBRPLOTS", 
-        pltfromqry, 
+        pltafromqry, 
         pwhereqry,
         "\nGROUP BY p.", nfpstatuscdnm,
         "\nORDER BY p.", nfpstatuscdnm)
@@ -594,19 +624,20 @@ check.popdataPLT <-
       }        
     }
   }
-  
 
   ##################################################################################
-  ## 10. Get estimation unit(s) (unitvars) values
+  ## 13. Get estimation unit(s) (unitvars) values
   ##################################################################################
+
   if (!is.null(unitvars)) {
+    
     ## Check unitvars in plot data
-    unitvarsa. <- ifelse(all(unitvars %in% pltflds), plt., pltassgn.)	  	
+    unitvarsa. <- ifelse(all(unitvars %in% pltassgnflds), pltassgn., plt.)	  	
 	  unitvarqry <- paste0(
 	      "SELECT DISTINCT ", toString(paste0(unitvarsa., unitvars)), 
-          pltfromqry,
-          pwhereqry,
-          "\nORDER BY ", toString(paste0(unitvarsa., unitvars)))
+	      pltafromqry, 
+	      pwhereqry,
+	      "\nORDER BY ", toString(paste0(unitvarsa., unitvars)))
     if (pltaindb) {      
       unitvartab <- tryCatch(
                data.table(DBI::dbGetQuery(dbconn, unitvarqry)),
@@ -640,7 +671,7 @@ check.popdataPLT <-
   }
 
   ######################################################################################
-  ## 11. Check unitarea 
+  ## 14. Check unitarea 
   ######################################################################################
   vars2keep=unitareax <- NULL
   if (module == "SA" && "AOI" %in% names(unitarea)) {
@@ -886,9 +917,9 @@ check.popdataPLT <-
 	    strunitvarsqry <- paste0(pltassgn., strunitvars)
 	    P2POINTCNTqry <- paste0(
 	         "SELECT ", toString(strunitvarsqry), ", COUNT(*) AS NBRPLOTS", 
-	          pltfromqry,
-			      pwhereqry,
-			      "\nGROUP BY ", toString(strunitvarsqry),
+	         pltafromqry, 
+	         pwhereqry,
+	         "\nGROUP BY ", toString(strunitvarsqry),
 			      "\nORDER BY ", toString(strunitvarsqry))
 	    if (pltaindb) {      
         P2POINTCNT <- data.table(DBI::dbGetQuery(dbconn, P2POINTCNTqry))
@@ -909,9 +940,9 @@ check.popdataPLT <-
         pltnrqry <- paste0(
 		         "SELECT ", toString(strunitvarsqry), ", ",
 		          toString(paste0("p.", c(puniqueid, nonrespvars))),
-              pltfromqry,
-              pwhereqry,
-              "\nORDER BY ", toString(strunitvarsqry), ", ",
+		         pltafromqry, 
+		         pwhereqry,
+		         "\nORDER BY ", toString(strunitvarsqry), ", ",
 		                    toString(paste0("p.", c(puniqueid, nonrespvars))))						   
 	      if (pltaindb) {      
           pltnr <- data.table(DBI::dbGetQuery(dbconn, pltnrqry))
@@ -930,9 +961,9 @@ check.popdataPLT <-
       } 	
     }
   }
-   
+
   ######################################################################################
-  ## 13. Query and import pltassgnx
+  ## 13. Query pltassgnx using popfilters and import pltassgnx
   ######################################################################################
   ppsaselectvars <- {}
   pltassgnvars <- pltassgnvars[pltassgnvars %in% pltassgnflds]
@@ -946,15 +977,29 @@ check.popdataPLT <-
 
   ## Build query for pltassgnx
   pltassgnxqry <- paste0(pltassgn_selectqry, 
-                         pltfromqry,
-                         pwhereqry)
+                         pltafromqry, 
+                         pwhereqry) 
   if (pltaindb) {      
-    pltassgnx <- data.table(DBI::dbGetQuery(dbconn, pltassgnxqry))
+    pltassgnx <- tryCatch(
+      DBI::dbGetQuery(dbconn, pltassgnxqry),
+      error=function(e) {
+        message("invalid pltassgn query...")
+        message(e,"\n")
+        return(NULL)})
   } else {
-	  pltassgnx <- data.table(sqldf::sqldf(pltassgnxqry, connection = NULL))
+    pltassgnx <- tryCatch(
+      sqldf::sqldf(pltassgnxqry, connection = NULL),
+      error=function(e) {
+        message("invalid pltassgn query...")
+        message(e,"\n")
+        return(NULL)})
+  }
+  if (is.null(pltassgnx)) {
+    return(NULL)
+  } else {
+    pltassgnx <- setDT(pltassgnx)
   }
   setkeyv(pltassgnx, pltassgnid)
-  
   
   
   ######################################################################################
@@ -967,22 +1012,35 @@ check.popdataPLT <-
       "\nSELECT ", pltcnt_grpbyvars, ", COUNT(*) NBRPLOTS")
   if (!is.null(pstatuscdnm)) {    
     pltcnt_selectqry <- paste0(pltcnt_selectqry, ", ",
-      "\n  SUM(CASE WHEN p.PLOT_STATUS_CD == 1 THEN 1 ELSE 0 END) AS FOREST,",
-      "\n  SUM(CASE WHEN p.PLOT_STATUS_CD == 2 THEN 1 ELSE 0 END) AS NONFOREST")
+      "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD == 1 THEN 1 ELSE 0 END) AS FOREST,",
+      "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD == 2 THEN 1 ELSE 0 END) AS NONFOREST")
   }  
     
 
   ## Build query for plot counts
   plotunitcntqry <- paste0(pltcnt_selectqry, 
-                        pltfromqry,
-                        pwhereqry,
-                        "\nGROUP BY ", pltcnt_grpbyvars,
-                        "\nORDER BY ", pltcnt_grpbyvars)
+                           pltafromqry, 
+                           pwhereqry,
+                           "\nGROUP BY ", pltcnt_grpbyvars,
+                           "\nORDER BY ", pltcnt_grpbyvars)
   if (pltaindb) {      
     plotunitcnt <- DBI::dbGetQuery(dbconn, plotunitcntqry)
   } else {
     plotunitcnt <- sqldf::sqldf(plotunitcntqry, connection = NULL)
   }
+  
+  ## Subset pltx to plots in pltassgn
+  if (!pltaindb) {
+    getdataCNs <- pltx[[puniqueid]]
+    
+    ## Change plot information in plotlst   
+    plotlst$tabflds <- pltflds
+    plotlst$tabx <- pltx
+  }
+
+  ## check pdoms2keep  
+  pdoms2keep <- unique(c(pvars2keep, pdoms2keep))
+  pdoms2keep <- pdoms2keep[pdoms2keep %in% pltflds]
   
 
   #############################################################################
@@ -990,10 +1048,10 @@ check.popdataPLT <-
   #############################################################################
   returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid,
         pltidsqry=pltidsqry, pwhereqry=pwhereqry, pltassgn.=pltassgn.,
-        pltselectqry=pltselectqry, pltfromqry=pltfromqry,
+        pltselectqry=pltselectqry, pltfromqry=pltfromqry, 
         pltx=pltx, plotlst=plotlst, pltidsid = pltidsid,
         projidvars=projidvars, pltidvars=as.vector(pltidvars),
-        pdoms2keep=as.vector(unique(c(pvars2keep, pdoms2keep))),
+        pdoms2keep=pdoms2keep,
 		    puniqueid=puniqueid, pjoinid=pjoinid, adjbyvars=adjbyvars,
 		    unitvar=unitvar, unitarea=unitareax, unitvar2=unitvar2, areavar=areavar, 
 		    areaunits=areaunits, unit.action=unit.action, ACI=ACI, 
@@ -1001,6 +1059,8 @@ check.popdataPLT <-
 		    plotsampcnt=as.data.frame(plotsampcnt), plotunitcnt = plotunitcnt,
 		    nonsamp.pfilter=nonsamp.pfilter, POP_PLOT_STRATUM_ASSGN=POP_PLOT_STRATUM_ASSGN,
 		    states=states, invyrs=invyrs, pltaindb=pltaindb, datindb=datindb, 
+		    getdataWITHqry = getdataWITHqry, getdataCNs = getdataCNs, 
+		    returndata = returndata,
 		    dbconn=dbconn, SCHEMA.=SCHEMA.)
 
   if (module == "GB") {

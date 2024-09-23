@@ -1,7 +1,9 @@
 check.popdataVOL <- 
   function(tabs, tabIDs, popType, 
-           datindb, pltaindb, pltidsqry,
+           datindb, pltaindb, 
+           pltidsqry,
            pltidsid, pltidvars, 
+           plotnm,
            pdoms2keep = NULL, 
            pltidsadjindb = FALSE, 
            defaultVars = TRUE,
@@ -18,6 +20,8 @@ check.popdataVOL <-
            nonsamp.cfilter = NULL, 
            cvars2keep = NULL,
            dbconn = NULL, SCHEMA. = "",
+           getdataWITHqry = NULL,
+           getdataCNs = NULL,
            returndata = FALSE, 
            savedata = FALSE, 
            outlst = NULL,
@@ -96,9 +100,9 @@ check.popdataVOL <-
  
   ## plot table
   plotnm <- plotlst$tabnm
-  plotflds <- plotlst$tabflds
   puniqueid <- plotlst$tabid
   pltx <- plotlst$tabx
+  pltxnm <- ifelse (!is.null(pltx), "pltx", plotnm) 
 
   ## cond table
   condlst <- popTabchk("cond", tabtext = "cond", 
@@ -107,14 +111,81 @@ check.popdataVOL <-
   condflds <- condlst$tabflds
   cuniqueid <- condlst$tabid
   condx <- condlst$tabx
-  
+
+
   if (is.null(condnm)) {
     stop("must include cond for estimation")
   }
   if (datindb && !pltaindb) {
-    assign(condnm, DBI::dbReadTable(dbconn, condnm))
+    
+    ## 3.1. Build cond FROM query
+    if (!is.null(getdataWITHqry) && !is.null(getdataCNs)) {
+      condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
+      condfromqry <- paste0("\n JOIN ", SCHEMA., condnm, " c ", condjoinqry)
+    
+      ## 3.2. Build cond SELECT query
+      if (defaultVars) {
+        condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
+      } else {
+        condvars <- "*"
+      }
+      condselectqry <- toString(paste0(conda., condvars))
+    
+      ## 3.3. Build final cond query, including getdataWITHqry
+      condqry <- paste0(getdataWITHqry,
+                        "\n-------------------------------------------",
+                        "\n SELECT ", condselectqry,
+                        "\n FROM pltids",
+                        condfromqry) 
+      dbqueries$COND <- condqry
+    
+      ## 3.4. Run final cond query, including pltidsqry
+      if (datindb) {
+        condx <- tryCatch(
+          DBI::dbGetQuery(dbconn, condqry),
+          error=function(e) {
+            message("invalid cond query...")
+            message(e,"\n")
+            return(NULL)})
+      } else {
+        condx <- tryCatch(
+          sqldf::sqldf(condqry, connection = NULL),
+          error = function(e) {
+            message("invalid cond query...")
+            message(e,"\n")
+            return(NULL) })
+      }
+      if (is.null(condx) || nrow(condx) == 0) {
+        message(condqry)
+        return(NULL)
+      }
+    
+      ## 3.5. Return and/or save cond data
+      condkey <- c(cuniqueid, condid)
+      setkeyv(setDT(condx), condkey)
+      
+      ## Subset condx to plots in pltassgn
+      condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
+      
+    } else {
+      assign(condnm, DBI::dbReadTable(dbconn, condnm))
+    }
+    
+    ## Add to returnlst 
+    if (returndata) {
+      #returnlst$condx <- condx
+      returnlst$cuniqueid <- cuniqueid
+    }
+    ## Save data
+    if (savedata) {
+      message("saving COND...")
+      outlst$out_layer <- "COND"
+      if (!append_layer) index.unique.cond <- condkey
+      datExportData(condx, 
+                    savedata_opts = outlst)
+    }
   }
-
+  
   if (popType == "VOL") {
     
     ## tree table
@@ -141,6 +212,7 @@ check.popdataVOL <-
   ##############################################################################
   ## 4. Check for necessary variables in tables
   ##############################################################################
+  condxnm <- ifelse (!is.null(condx), "condx", condnm) 
   
   ## 4.1. Cond table
   ##############################################################################
@@ -214,25 +286,25 @@ check.popdataVOL <-
   
   
   ## Build ADJqry FROM statement
-  if (!is.null(plotnm)) {
+  if (!is.null(pltxnm)) {
     plota. <- "p."
     pjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
     cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., plota.)
     pcfromqry <- paste0(
       "\n FROM pltids",
-      "\n JOIN ", SCHEMA., plotnm, " p ", pjoinqry,
-      "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry)
+      "\n JOIN ", SCHEMA., pltxnm, " p ", pjoinqry,
+      "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry)
   } else {
     cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., pltidsa.)
     pcfromqry <- paste0(
       "\n FROM pltids",
-      "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry)
+      "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry)
   }
   
   pltidsjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., "plta.")
   pltidsfromqry <- paste0(
     "\nFROM pltids plta ",
-    "\nJOIN ", SCHEMA., condnm, " c ", pltidsjoinqry)
+    "\nJOIN ", SCHEMA., condxnm, " c ", pltidsjoinqry)
   
   
   ## Build ADJqry WHERE statement (i.e., excluding nonresponse)
@@ -265,22 +337,21 @@ check.popdataVOL <-
   ## message(adjfactors.qry)
   
   ## Run query to calculate adjustment factors
-  if (datindb) {
+  if (pltaindb) {
     adjfactors <- tryCatch(
       DBI::dbGetQuery(dbconn, adjfactors.qry),
       error=function(e) {
-        message("invalid adjustment query...")
         message(e,"\n")
         return(NULL)})
   } else {
     adjfactors <- tryCatch(
       sqldf::sqldf(adjfactors.qry, connection = NULL),
       error = function(e) {
-        message("invalid adjustment query...")
         message(e,"\n")
         return(NULL) })
   }
   if (is.null(adjfactors) || nrow(adjfactors) == 0) {
+    message("invalid adjustment query...")
     message(adjfactors.qry)
     return(NULL)
   }
@@ -335,7 +406,7 @@ check.popdataVOL <-
 
   
   ## Run query to identify plotids, including adjustment factors
-  if (datindb) {
+  if (pltaindb) {
     pltidsadj <- tryCatch(
       DBI::dbGetQuery(dbconn, pltidsadj.qry),
       error=function(e) {
@@ -439,7 +510,7 @@ check.popdataVOL <-
     pltcondxqry <- paste0("WITH pltids AS ",
                           "\n(", pltidsqry, ")",
                           "\n", pltcondx.qry)
-    if (datindb) {
+    if (pltaindb) {
       pltcondx <- tryCatch(
         DBI::dbGetQuery(dbconn, pltcondxqry),
         error=function(e) {
@@ -504,11 +575,12 @@ check.popdataVOL <-
     returnlst$pltcondx <- "pltcondx"
   }
 
+  
   ##############################################################################
   ## 8. Build and run queries for other necessary tables (if returndata/savedata = TRUE) 
   ##############################################################################  
   if ((returndata || savedata) && popType == "VOL") {
-
+    
     ## 8.1 Return and/or save plot data (pltx / PLOT)
     ##################################################################
     
@@ -521,13 +593,11 @@ check.popdataVOL <-
       pselectqry <- toString(paste0(plota., c(puniqueid, pdoms2keep)))
       
       ## 8.1.3. Build final plot query, including pltidsqry
-      pltqry <- paste0("\n SELECT ", pselectqry,
+      pltqry <- paste0(getdataWITHqry,
+                       "\n-------------------------------------------",
+                       "\n SELECT ", pselectqry,
                        "\n FROM pltids",
                        plotfromqry) 
-      pltqry <- paste0("WITH pltids AS ",
-                       "\n(", pltidsqry, ")",
-                       "\n-------------------------------------------",
-                       pltqry)
       dbqueries$PLOT <- pltqry
       
       ## 8.1.4. Run final plot query, including pltidsqry
@@ -535,18 +605,17 @@ check.popdataVOL <-
         pltx <- tryCatch(
           DBI::dbGetQuery(dbconn, pltqry),
                 error=function(e) {
-                  message("invalid plot query...")
                   message(e,"\n")
                   return(NULL)})
       } else {
         pltx <- tryCatch(
            sqldf::sqldf(pltqry, connection = NULL),
                 error = function(e) {
-                  message("invalid plot query...")
                   message(e,"\n")
                   return(NULL) })
       }
       if (is.null(pltx) || nrow(pltx) == 0) {
+        message("invalid plot query...")
         message(pltqry)
         return(NULL)
       }
@@ -554,10 +623,10 @@ check.popdataVOL <-
     
     ## 8.1.5. Return and/or save plot data
     setkeyv(setDT(pltx), puniqueid)
+    pltx <- pltx[pltx[[puniqueid]] %in% getdataCNs,]
     
     ## Add to returnlst 
     if (returndata) {
-      #returnlst$pltx <- pltx
       returnlst$puniqueid <- puniqueid
     }
     ## Save data
@@ -573,56 +642,56 @@ check.popdataVOL <-
     ## 8.2 Return and/or save cond data (condx / COND)
     ##################################################################
     
-    ## 8.2.1. Build cond FROM query
-    condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
-    condfromqry <- paste0("\n JOIN ", SCHEMA., condnm, " c ", condjoinqry)
+    if (is.null(condx)) {
+      
+      ## 8.2.1. Build cond FROM query
+      condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
+      condfromqry <- paste0("\n JOIN ", SCHEMA., condnm, " c ", condjoinqry)
     
-    ## 8.2.2. Build cond SELECT query
-    if (defaultVars) {
-      condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
-    } else {
-      condvars <- "*"
-    }
-    condselectqry <- toString(paste0(conda., condvars))
+      ## 8.2.2. Build cond SELECT query
+      if (defaultVars) {
+        condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
+      } else {
+        condvars <- "*"
+      }
+      condselectqry <- toString(paste0(conda., condvars))
     
-    ## 8.2.3. Build final cond query, including pltidsqry
-    condqry <- paste0("\n SELECT ", condselectqry,
-                      "\n FROM pltids",
-                      condfromqry) 
-    condqry <- paste0("WITH pltids AS ",
-                      "\n(", pltidsqry, ")",
-                      "\n-------------------------------------------",
-                      condqry)
-    dbqueries$COND <- condqry
+      ## 8.2.3. Build final cond query, including pltidsqry
+      condqry <- paste0(getdataWITHqry,
+                        "\n-------------------------------------------",
+                        "\n SELECT ", condselectqry,
+                        "\n FROM pltids",
+                        condfromqry) 
+      dbqueries$COND <- condqry
     
-    ## 8.2.4. Run final cond query, including pltidsqry
-    if (datindb) {
-      condx <- tryCatch(
-         DBI::dbGetQuery(dbconn, condqry),
+      ## 8.2.4. Run final cond query, including pltidsqry
+      if (datindb) {
+        condx <- tryCatch(
+           DBI::dbGetQuery(dbconn, condqry),
                error=function(e) {
-                 message("invalid cond query...")
                  message(e,"\n")
                  return(NULL)})
-    } else {
-      condx <- tryCatch(
-         sqldf::sqldf(condqry, connection = NULL),
+      } else {
+        condx <- tryCatch(
+           sqldf::sqldf(condqry, connection = NULL),
               error = function(e) {
-                message("invalid cond query...")
                 message(e,"\n")
                 return(NULL) })
+      }
+      if (is.null(condx) || nrow(condx) == 0) {
+        message("invalid cond query...")
+        message(condqry)
+        return(NULL)
+      }
+      
+      ## 8.2.5. Return and/or save cond data
+      condkey <- c(cuniqueid, condid)
+      setkeyv(setDT(condx), condkey)
+      condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
     }
-    if (is.null(condx) || nrow(condx) == 0) {
-      message(condqry)
-      return(NULL)
-    }
-    
-    ## 8.2.5. Return and/or save cond data
-    condkey <- c(cuniqueid, condid)
-    setkeyv(setDT(condx), condkey)
     
     ## Add to returnlst 
     if (returndata) {
-      #returnlst$condx <- condx
       returnlst$cuniqueid <- cuniqueid
     }
     ## Save data
@@ -666,13 +735,11 @@ check.popdataVOL <-
     
 
       ## 8.3.4. Build final tree query, including pltidsqry
-      treeqry <- paste0("\n SELECT ", tselectqry,
-                         "\n FROM pltids",
-                         tfromqry) 
-      treeqry <- paste0("WITH pltids AS ",
-                        "\n(", pltidsqry, ")",
+      treeqry <- paste0(getdataWITHqry,
                         "\n-------------------------------------------",
-                        treeqry)
+                        "\n SELECT ", tselectqry,
+                        "\n FROM pltids",
+                        tfromqry) 
       dbqueries$TREE <- treeqry
     
       ## 8.3.5. Run final tree query, including pltidsqry
@@ -680,25 +747,25 @@ check.popdataVOL <-
         treex <- tryCatch(
             DBI::dbGetQuery(dbconn, treeqry),
                  error=function(e) {
-                   message("invalid tree query")
                    message(e,"\n")
                  return(NULL)})
       } else {
         treex <- tryCatch(
            sqldf::sqldf(treeqry, connection = NULL),
                  error = function(e) {
-                   message("invalid tree query")
                    message(e,"\n")
                  return(NULL) })
       }
       if (is.null(treex) || nrow(treex) == 0) {
-         message(treeqry)
-         return(NULL)
+        message("invalid tree query...")
+        message(treeqry)
+        return(NULL)
       }
 
       ## 8.3.6. Return and/or save tree data
       treekey <- c(tuniqueid, condid, tsubp, ttree)
       setkeyv(setDT(treex), treekey)
+      treex <- treex[treex[[tuniqueid]] %in% getdataCNs,]
       
       ## Add to returnlst 
       if (returndata) {
@@ -752,13 +819,11 @@ check.popdataVOL <-
     
     
       ## 8.4.4. Build final seedling query, including pltidsqry
-      seedqry <- paste0("\n SELECT ", sselectqry,
+      seedqry <- paste0(getdataWITHqry,
+                        "\n-------------------------------------------",
+                        "\n SELECT ", sselectqry,
                         "\n FROM pltids",
                         sfromqry) 
-      seedqry <- paste0("WITH pltids AS ",
-                        "\n(", pltidsqry, ")",
-                        "\n-------------------------------------------",
-                        seedqry)
       dbqueries$SEEDLING <- seedqry
     
       ## 8.4.5. Run final seedling query, including pltidsqry
@@ -766,18 +831,17 @@ check.popdataVOL <-
         seedx <- tryCatch(
             DBI::dbGetQuery(dbconn, seedqry),
                  error=function(e) {
-                   message("invalid seedling query")
                    message(e,"\n")
                  return(NULL)})
       } else {
         seedx <- tryCatch(
             sqldf::sqldf(seedqry, connection = NULL),
                  error = function(e) {
-                   message("invalid seedling query")
                    message(e,"\n")
                  return(NULL) })
       }
       if (is.null(seedx) || nrow(seedx) == 0) {
+        message("invalid seedling query...")
         message(seedqry)
         return(NULL)
       }
@@ -785,7 +849,8 @@ check.popdataVOL <-
       ## 8.4.6. Return and/or save seedling data
       seedkey <- c(suniqueid, scondid, ssubp)
       setkeyv(setDT(seedx), seedkey)
-
+      seedx <- seedx[seedx[[tuniqueid]] %in% getdataCNs,]
+      
       ## Add to returnlst 
       if (returndata) {
         ## Append adjustment factors to tree data
@@ -840,10 +905,9 @@ check.popdataVOL <-
                                condfromqry,
                                "\nGROUP BY ", cstatuscdnm,
                                "\nORDER BY ", cstatuscdnm)
-      condsampcntqry <- paste0("WITH pltids AS ",
-                               "\n(", pltidsqry, ")",
+      condsampcntqry <- paste0(getdataWITHqry,
                                condsampcntqry)
-      
+
       if (pltcondindb) {      
         condsampcnt <- tryCatch(
           DBI::dbGetQuery(dbconn, condsampcntqry),
@@ -904,8 +968,7 @@ check.popdataVOL <-
                                    condfromqry,
                                    "\nGROUP BY ", nfcstatuscdnm,
                                    "\nORDER BY ", nfcstatuscdnm)
-        nfcondsampcntqry <- paste0("WITH pltids AS ",
-                                   "\n(", pltidsqry, ")",
+        nfcondsampcntqry <- paste0(getdataWITHqry,
                                    nfcondsampcntqry)
         
         if (pltcondindb) {      

@@ -255,7 +255,6 @@ modGBpop <- function(popType = "VOL",
                      datsource = "sqlite",
                      dsn = NULL, 
                      dbconn = NULL,
-                     schema = NULL,
                      pjoinid = "CN", 
                      areawt = "CONDPROP_UNADJ", 
                      areawt2 = NULL,
@@ -268,7 +267,6 @@ modGBpop <- function(popType = "VOL",
                      stratalut = NULL, 
                      strvar = "STRATUMCD",
                      returndata = TRUE, 
-                     savepltids = FALSE,
                      savedata = FALSE,
                      saveobj = FALSE, 
                      objnm = "GBpopdat",
@@ -276,6 +274,7 @@ modGBpop <- function(popType = "VOL",
                      strata_opts = NULL, 
                      savedata_opts = NULL, 
                      projectid = NULL,
+                     dsnreadonly = TRUE,
                      GBdata = NULL, 
                      pltdat = NULL, 
                      stratdat = NULL, 
@@ -304,7 +303,7 @@ modGBpop <- function(popType = "VOL",
   }
 
   ## Set parameters
-  nonsamp.pfilter=nonsamp.cfilter <- NULL
+  nonsamp.pfilter=nonsamp.cfilter=schema <- NULL
   returnlst <- list(module = "GB")
   
   
@@ -402,7 +401,7 @@ modGBpop <- function(popType = "VOL",
   if (length(popFilter) > 0) {
     for (i in 1:length(popFilter)) {
       if (names(popFilter)[[i]] %in% names(popFilters_defaults_list)) {
-		popFilter2[[names(popFilter)[[i]]]] <- popFilter[[i]]
+		    popFilter2[[names(popFilter)[[i]]]] <- popFilter[[i]]
       } else {
         stop(paste("Invalid parameter: ", names(popFilter)[[i]]))
       }
@@ -704,7 +703,7 @@ modGBpop <- function(popType = "VOL",
       }
     }
   } else {
-    stop("need to include popTabs")
+    stop("need to include popTab  s")
   }
   list.items <- c("cond")
   if (popType == "VOL") {
@@ -744,9 +743,12 @@ modGBpop <- function(popType = "VOL",
   ## Remove nonsampled plots (if nonsamp.pfilter != "NONE")
   ## Applies plot filters
   ###################################################################################
+  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\getpopFilterqry.R")
+  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.popdataPLT.R")
   pltcheck <- 
     check.popdataPLT(dsn = dsn, dbconn = dbconn, schema = schema,
                      datsource = datsource, 
+                     returndata = returndata,
                      tabs = popTabs, tabIDs = popTabIDs, 
                      pltassgn = pltassgn, 
                      pltassgnid = pltassgnid, pjoinid = pjoinid, 
@@ -797,6 +799,9 @@ modGBpop <- function(popType = "VOL",
   pltfromqry <- pltcheck$pltfromqry
   pwhereqry <- pltcheck$pwhereqry
   plotunitcnt <- pltcheck$plotunitcnt
+  getdataWITHqry <- pltcheck$getdataWITHqry
+  getdataCNs <- pltcheck$getdataCNs
+  returndata <- pltcheck$returndata
   
   
   if (ACI) {
@@ -884,6 +889,7 @@ modGBpop <- function(popType = "VOL",
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
     ###################################################################################
+    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.popdataVOL.R")
     areawt <- "CONDPROP_UNADJ"
     popcheck <- 
       check.popdataVOL(tabs = popTabs, tabIDs = popTabIDs, 
@@ -895,7 +901,7 @@ modGBpop <- function(popType = "VOL",
                        defaultVars = defaultVars, 
                        pltidsadjindb = pltidsadjindb, 
                        pltassgnid = pltassgnid, 
-                       pltassgnx = pltassgnx, pltx = pltx,
+                       pltassgnx = pltassgnx, 
                        adj = adj, ACI = ACI, 
                        plotlst = plotlst,  
                        pltfromqry = pltfromqry, 
@@ -905,6 +911,8 @@ modGBpop <- function(popType = "VOL",
                        strunitvars = strunitvars, 
                        nonsamp.cfilter = nonsamp.cfilter, 
 	                     dbconn = dbconn, SCHEMA. = SCHEMA., 
+                       getdataWITHqry = getdataWITHqry,
+                       getdataCNs = getdataCNs,
                        returndata = returndata,
                        savedata = savedata, 
                        outlst = outlst)
