@@ -629,7 +629,7 @@ modMApop <- function(popType="VOL",
                                areaunits = areaunits, unit.action = unit.action, 
                                auxlut = unitzonal, defaultVars = defaultVars,
                                prednames = prednames, predfac = predfac,
-                               pvars2keep = pvars2keep)
+                               pvars2keep = pvars2keep, dsnreadonly = dsnreadonly)
   
   
   if (is.null(pltcheck)) return(0)
@@ -718,7 +718,7 @@ modMApop <- function(popType="VOL",
   names(pltassgnx)[pltassgnxcols] <- dfnames
   prednames <- dfnames
   
-  if (popType %in% c("ALL", "CURR", "AREA", "VOL")) {
+  if (popType %in% c("ALL", "CURR", "VOL")) {
     
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
@@ -770,22 +770,10 @@ modMApop <- function(popType="VOL",
       seedx <- popcheck$seedx
     }    
   
+  } else {
+    stop("invalid popType")
   }
  
-  ## Merge plot strata info to condx (still do this?)
-  if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
-  condx <- condx[pltassgnx[,c(pltassgnid, unitvar, prednames), with=FALSE]]
-  
-  ## If more than one unitvar, 
-  ## split the concatenated unitvar variable to keep original columns
-  if (!is.null(unitvar2)) {
-    condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
-  }
-  
-  if ("MACRPROP_UNADJ" %in% names(condx) && is.character(condx$MACRPROP_UNADJ)) {
-    condx$MACRPROP_UNADJ <- as.numeric(condx$MACRPROP_UNADJ)
-  }
-  
 
   ###################################################################################
   ## Return population data objects
@@ -794,7 +782,6 @@ modMApop <- function(popType="VOL",
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
-  
   
   ###################################################################################
   ## Add new variables to pltcondx for estimation
@@ -861,13 +848,19 @@ modMApop <- function(popType="VOL",
     returnlst$bndx <- bndx
   }
   
-  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
-                                      cuniqueid=cuniqueid, condid=condid, ACI = ACI,
-                                      unitarea=unitarea, areavar=areavar, areaunits=areaunits,
-                                      unitvar=unitvar, unitvars=unitvars, unitlut=data.table(unitlut), 
-                                      plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-                                      npixels=npixels, npixelvar=npixelvar,
-                                      states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
+  returnlst <- append(returnlst, list(pltidsadj = pltidsadj, pltcondx=pltcondx, 
+                                      pltcondflds = pltcondflds, pjoinid = pjoinid,
+                                      cuniqueid = cuniqueid, condid = condid, ACI = ACI,
+                                      areawt = areawt, areawt2 = areawt2, adjcase = adjcase,
+                                      dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH,
+                                      pltassgnx = pltassgnx, unitlut = data.table(unitlut),
+                                      unitarea = unitarea, npixels = npixels,
+                                      npixelvar = npixelvar, estvar.area = estvar.area,
+                                      areavar = areavar, areaunits = areaunits, 
+                                      unitvar = unitvar, unitvars = unitvars,
+                                      plotsampcnt = plotsampcnt, condsampcnt = condsampcnt,
+                                      states = states, invyrs = invyrs, adj = adj,
+                                      P2POINTCNT = P2POINTCNT, plotunitcnt = plotunitcnt))
   
   if (popType == "VOL") {
     if (!is.null(treex)) {
