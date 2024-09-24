@@ -41,7 +41,7 @@ getpopFilterqry <- function(popType,
   if (!is.null(plotnm)) {
     pjoinqry <- getjoinqry(pltassgnid, pjoinid, pltassgn., plt.)
     pltafromqry <- paste0(pfromqry, 
-        "\n JOIN ", SCHEMA., pltassgnnm, " plta ", pjoinqry)
+                          "\n JOIN ", SCHEMA., pltassgnnm, " plta ", pjoinqry)
   }
   
   
@@ -56,16 +56,16 @@ getpopFilterqry <- function(popType,
       message("STATECD is not in pltassgn...  getting all states in database...")
     }
     if (is.null(statenm) && datindb) {
-        
+      
       if (!is.null(plotnm)) {
         message("STATECD is not in pltassgn...  extracting plot data for all states in database...")
-          
+        
         getpltx.qry <- paste0(
           "\nSELECT p.CN, p.STATECD, p.COUNTYCD",
           pfromqry)
         pltxtmp <- DBI::dbGetQuery(dbconn, getpltx.qry)
         states <- unique(pltxtmp[[statenm]])
-          
+        
         countynm <- findnm("COUNTYCD", names(pltxtmp))
         if (!is.null(countynm)) {
           stcntywhereqry <- NULL
@@ -77,7 +77,7 @@ getpopFilterqry <- function(popType,
                 stcntywhereqry <- paste0(stcntywhereqry, "\n  AND ")
               }
               stcntywhereqry <- paste0(stcntywhereqry, 
-                  "(p.", statenm, " = ", stcd, " AND p.", countynm, " IN (", toString(cntycds), "))")
+                                       "(p.", statenm, " = ", stcd, " AND p.", countynm, " IN (", toString(cntycds), "))")
             }
           }
         } else {
@@ -88,7 +88,7 @@ getpopFilterqry <- function(popType,
         stcntywhereqry <- NULL
       }
     } else {
-        
+      
       states <- unique(pltassgnx[[statenm]])
       countynm <- findnm("COUNTYCD", pltassgnflds)
       countycda. <- ifelse(countynm %in% pltflds, plt., pltassgn.)
@@ -102,7 +102,7 @@ getpopFilterqry <- function(popType,
               stcntywhereqry <- paste0(stcntywhereqry, "\n  AND ")
             }
             stcntywhereqry <- paste0(stcntywhereqry, 
-                 "(", statecda., statenm, " = ", stcd, " AND ", countycda., countynm, " IN (", toString(cntycds), "))")
+                                     "(", statecda., statenm, " = ", stcd, " AND ", countycda., countynm, " IN (", toString(cntycds), "))")
           }
         }
       } else {
@@ -110,7 +110,7 @@ getpopFilterqry <- function(popType,
       }
     }
   }
-
+  
   ##################################################################################
   ## 3. Get FIA Evaluation info
   ##################################################################################
@@ -135,7 +135,7 @@ getpopFilterqry <- function(popType,
   if (is.null(evalInfo)) {
     iseval <- FALSE
   }
-
+  
   if (is.null(evalInfo)) {
     #message("no data to return")
     return(NULL)
@@ -154,26 +154,26 @@ getpopFilterqry <- function(popType,
     ppsa. <- "ppsa."
     ppsaindb <- evalInfo$ppsaindb
   }
-
+  
   ####################################################################
   ## 4. Check custom Evaluation data
   ####################################################################
   if (!iseval) {
     evalchk <- tryCatch(
-        customEvalchk(states = popFilter$states, 
-                      measCur = popFilter$measCur, 
-                      measEndyr = popFilter$measEndyr, 
-                      invyrs = popFilter$invyrs, 
-                      measyrs = popFilter$measyrs,
-                      invyrtab = invyrtab),
-        error = function(e) {
-          message(e,"\n")
-          return(NULL) })
+      customEvalchk(states = popFilter$states, 
+                    measCur = popFilter$measCur, 
+                    measEndyr = popFilter$measEndyr, 
+                    invyrs = popFilter$invyrs, 
+                    measyrs = popFilter$measyrs,
+                    invyrtab = invyrtab),
+      error = function(e) {
+        message(e,"\n")
+        return(NULL) })
     if (!is.null(evalchk)) {
-#    if (is.null(evalchk)) {
-#      stop("must specify an evaluation timeframe for data extraction... \n", 
-#           "...see eval_opts parameter, (e.g., eval_opts=eval_options(Cur=TRUE))")
-#    }
+      #    if (is.null(evalchk)) {
+      #      stop("must specify an evaluation timeframe for data extraction... \n", 
+      #           "...see eval_opts parameter, (e.g., eval_opts=eval_options(Cur=TRUE))")
+      #    }
       measCur <- evalchk$measCur
       measEndyr <- evalchk$measEndyr
       invyrs <- evalchk$invyrs
@@ -182,7 +182,7 @@ getpopFilterqry <- function(popType,
       measyrlst <- evalchk$measyrlst
     }
   }
-
+  
   
   ###################################################################################
   ## 5. Build pwhereqry
@@ -193,7 +193,7 @@ getpopFilterqry <- function(popType,
   if (!is.null(popevalid)) {
     ## If filtering with EVALID, check if POP_PLOT_STRATUM_ASSGN is in database
     #datindb <- ifelse(!ppsaindb, FALSE, datindb) 
-
+    
     ## Check popevalid pop filter in ppsa and plt
     evalidnm <- findnm("EVALID", pflds, returnNULL = TRUE)
     if (is.null(evalidnm)) {
@@ -203,7 +203,7 @@ getpopFilterqry <- function(popType,
       } 
       evalida. <- ppsa.
       ejoinqry <- paste0("\n JOIN ", SCHEMA., ppsanm, " ppsa ON (", evalida., "PLT_CN = ", plt., puniqueid, ")")
-
+      
       pfromqry <- paste0(pfromqry, 
                          ejoinqry)
       pltafromqry <- paste0(pltafromqry, 
@@ -215,13 +215,13 @@ getpopFilterqry <- function(popType,
       pfromqry <- paste0(pfromqry, 
                          ejoinqry)
     }
-
+    
     ## Check popevalid values in database
     if (chkvalues) {
       evalidqry <- paste0(
-	       "SELECT DISTINCT ", evalida., evalidnm, 
-           pfromqry,
-           "\nORDER BY ", evalida., evalidnm)
+        "SELECT DISTINCT ", evalida., evalidnm, 
+        pfromqry,
+        "\nORDER BY ", evalida., evalidnm)
       if (datindb) {      
         evalidvals <- DBI::dbGetQuery(dbconn, evalidqry)[[1]]
       } else {
@@ -233,7 +233,7 @@ getpopFilterqry <- function(popType,
         return(NULL)
       }
     }
-
+    
     ## Build where query to include popevalid popfilter 
     ewhereqry <- paste0(evalida., evalidnm, " IN (", toString(popevalid), ")")
     if (is.null(pwhereqry)) {
@@ -242,7 +242,7 @@ getpopFilterqry <- function(popType,
       pwhereqry <- paste0(pwhereqry, 
                           "\n  AND ", ewhereqry)
     }
-
+    
   } else {
     
     ## 5.2. Check states, add to where query
@@ -259,7 +259,7 @@ getpopFilterqry <- function(popType,
           pwhereqry <- paste0("\n WHERE ", stwhereqry)
         } else {
           pwhereqry <- paste0(pwhereqry, 
-                            "\n  AND ", stwhereqry)
+                              "\n  AND ", stwhereqry)
         }
       }
     } else if (!is.null(stcntywhereqry)) {
@@ -270,7 +270,7 @@ getpopFilterqry <- function(popType,
                             "\n  AND ", stcntywhereqry)
       }
     }
-
+    
     ## 5.3. Check subcycle, add to where statement
     ############################################################################
     if (!is.null(subcycle99) && !subcycle99) {
@@ -278,7 +278,7 @@ getpopFilterqry <- function(popType,
       if (is.null(subcyclenm)) {
         message("SUBCYCLE not in data... assuming all SUBCYCLE <> 99")
       } else {
-
+        
         ## Build where query to include subcycle = 99
         subcyclea. <- ifelse(subcyclenm %in% pltflds, plt., pltassgn.)
         subcycle.filter <- paste0(subcyclea., subcyclenm, " <> 99")
@@ -291,7 +291,7 @@ getpopFilterqry <- function(popType,
         }
       }
     }
-
+    
     ## 5.4. If Change Plots, remove plots that have no remeasurement data
     ######################################################################################
     if (popType %in% c("GRM", "CHNG", "LULC")) {
@@ -311,15 +311,15 @@ getpopFilterqry <- function(popType,
         }	
       }
     }
-	
-	  ## 5.5. If P2VEG Plots, remove plots that have no sampled P2VEG data
+    
+    ## 5.5. If P2VEG Plots, remove plots that have no sampled P2VEG data
     ######################################################################################
     if (popType == "P2VEG") {
       p2vegstatusnm <- findnm("P2VEG_SAMPLING_STATUS_CD", pflds, returnNULL = TRUE)
       if (is.null(p2vegstatusnm)) {
         message("P2VEG_SAMPLING_STATUS_CD is not in dataset... assuming all plots sample P2VEG")
       } else {
-
+        
         ## Build where query to remove plots that didn't sample P2VEG
         p2vegstatusa. <- ifelse(p2vegstatusnm %in% pltflds, plt., pltassgn.)
         p2vegstatus.filter <- paste0(p2vegstatusa., p2vegstatusnm, " < 3")
@@ -331,7 +331,7 @@ getpopFilterqry <- function(popType,
         }	
       }
     }
-
+    
     
     ## 5.6. Check designcd in ppsa and plt
     #######################################################################
@@ -340,14 +340,14 @@ getpopFilterqry <- function(popType,
       if (is.null(designcdnm)) {
         message("DESIGNCD is not in dataset... assuming one plot design")
       } else {
-
+        
         ## Check designcd values in database
         designcda. <- ifelse(designcdnm %in% pltflds, plt., pltassgn.)
         designcdqry <- paste0(
-		    "SELECT DISTINCT ", designcda., designcdnm, 
-              pfromqry,
-              pwhereqry,
-              "\nORDER BY ", designcda., designcdnm)
+          "SELECT DISTINCT ", designcda., designcdnm, 
+          pfromqry,
+          pwhereqry,
+          "\nORDER BY ", designcda., designcdnm)
         if (pltaindb) {      
           designcdvals <- DBI::dbGetQuery(dbconn, designcdqry)[[1]]
         } else {
@@ -367,7 +367,7 @@ getpopFilterqry <- function(popType,
       }
     }
   }
-
+  
   ## 5.7. Check invyrs and add to where query. 
   ############################################################################
   if (!is.null(popFilter$invyrs)) {
@@ -386,15 +386,15 @@ getpopFilterqry <- function(popType,
     }
     
     ## Create pltidsqry
-#    pltidsqry <- paste0("SELECT DISTINCT ", selectpvars,
-#                       pfromqry)	   
+    #    pltidsqry <- paste0("SELECT DISTINCT ", selectpvars,
+    #                       pfromqry)	   
     
     ## Add invyrs to where statement 
     invyrnm <- findnm("INVYR", pflds, returnNULL=TRUE)
     if (is.null(invyrnm)) {
       message("INVYR variable not in data")
     } else {
-
+      
       ## Build where statement for INVYR
       invyra. <- ifelse(invyrnm %in% pltflds, plt., pltassgn.)
       invyr.filter <- paste0(invyra., invyrnm, " IN (", toString(invyrs), ")")
@@ -412,9 +412,9 @@ getpopFilterqry <- function(popType,
     ############################################################################
     if (chkvalues) {
       measyrlst.qry <- paste0(
-	         "SELECT DISTINCT measyear",  
-		       "\nFROM ", SCHEMA., plotnm, 
-		       "\nORDER BY measyear")
+        "SELECT DISTINCT measyear",  
+        "\nFROM ", SCHEMA., plotnm, 
+        "\nORDER BY measyear")
       pltyrs <- DBI::dbGetQuery(dbconn, measyrlst.qry)
       
       measyr.miss <- measyears[which(!measyears %in% pltyrs)]
@@ -426,15 +426,15 @@ getpopFilterqry <- function(popType,
     ## Build pltidsqry
     pltselectqry <- paste0("SELECT DISTINCT ", toString(selectpvars))
     pltidsqry <- paste0(
-          pltselectqry,
-          pltafromqry)	   
+      pltselectqry,
+      pltafromqry)	   
     
     ## Add measyears to where statement 
     measyrnm <- findnm("MEASYEAR", pflds, returnNULL=TRUE)
     if (is.null(measyrnm)) {
       message("MEASYEAR variable not in data")
     } else {
-
+      
       ## Build where statement for measyer
       measyr. <- ifelse(measyrnm %in% pltflds, plt., pltassgn.)
       measyears.filter <- paste0(measyr., measyrnm, " IN (", toString(measyears), ")")
@@ -451,11 +451,11 @@ getpopFilterqry <- function(popType,
     }
     
     ## Add pwhereqry to pltidsqry
-#    if (!is.null(pwhereqry) || pwhereqry != "") {
-#      pltidsqry <- paste0(pltidsqry, pwhereqry)
-#    }
+    #    if (!is.null(pwhereqry) || pwhereqry != "") {
+    #      pltidsqry <- paste0(pltidsqry, pwhereqry)
+    #    }
   }   
-
+  
   ## 5.9 Check INTENSITY and add to where query.
   ########################################################################
   if (!is.null(popFilter$intensity)) { 	
@@ -465,15 +465,15 @@ getpopFilterqry <- function(popType,
       message("the INTENSITY field does not exist in data set...")
       return(NULL)
     }
-
+    
     intensitya. <- ifelse(intensitynm %in% pltflds, plt., pltassgn.)   
     if (chkvalues) {
       ## Check intensity values in database
       intensity.qry <- paste0(
-	       "SELECT DISTINCT ", intensitya., intensitynm, 
-            pfromqry,
-            pwhereqry,
-           "\nORDER BY ", intensitya., intensitynm)
+        "SELECT DISTINCT ", intensitya., intensitynm, 
+        pfromqry,
+        pwhereqry,
+        "\nORDER BY ", intensitya., intensitynm)
       if (datindb) {      
         intensityvals <- DBI::dbGetQuery(dbconn, intensity.qry)[[1]]
       } else {
@@ -495,7 +495,7 @@ getpopFilterqry <- function(popType,
                           "\n  AND ", iwhere.qry)
     }
   }
-
+  
   ## 5.10. Check PLOT_STATUS_CD and generate table with number of plots
   ########################################################################
   pstatusvars <- c("PLOT_STATUS_CD", "PSTATUSCD")
@@ -509,7 +509,7 @@ getpopFilterqry <- function(popType,
     } else {
       pstatuscdnm <- pstatuschk
     }  
-
+    
     ## Create nonsamp.pfilter
     if (!is.null(pstatuscdnm) && (is.null(nonsamp.pfilter) || nonsamp.pfilter == "")) {
       pstatuscda. <- ifelse(pstatuscdnm %in% pltflds, plt., pltassgn.)
@@ -517,7 +517,7 @@ getpopFilterqry <- function(popType,
       message("removing nonsampled forest plots...")
     }
   } 
-
+  
   ## If ACI, check NF_PLOT_STATUS_CD and generate table with number of plots
   ##########################################################################
   if (popFilter$ACI) {
@@ -532,7 +532,7 @@ getpopFilterqry <- function(popType,
       } else {
         nfpstatuscdnm <- nfpstatuschk
       }  
-
+      
       ## Create nonsamp.pfilter
       if (!is.null(nfpstatuscdnm) && (is.null(nonsamp.pfilter) || nonsamp.pfilter == "")) {
         nfpstatuscda. <- ifelse(nfpstatuscdnm %in% pltflds, plt., pltassgn.)
@@ -546,7 +546,7 @@ getpopFilterqry <- function(popType,
       message("removing nonsampled nonforest plots...")
     }
   }
-
+  
   ## Add plot_status_cd to where statement
   ##########################################################################
   if (popType != "All" && !is.null(nonsamp.pfilter) && is.null(popevalid)) {
@@ -556,13 +556,13 @@ getpopFilterqry <- function(popType,
       pwhereqry <- paste0(pwhereqry, " AND ", nonsamp.pfilter)
     } 
   }   
-
-#  ## Add projectid and popType to selectqry
-#  if (!is.null(projectid)) {
-#    selectidvars <- paste0("'", projectid, "' AS PROJECTID, '", popType, "' AS POP_TYP, ")
-#  } else {
-#    selectidvars <- paste0("'", popType, "' AS POP_TYP, ")
-#  }
+  
+  #  ## Add projectid and popType to selectqry
+  #  if (!is.null(projectid)) {
+  #    selectidvars <- paste0("'", projectid, "' AS PROJECTID, '", popType, "' AS POP_TYP, ")
+  #  } else {
+  #    selectidvars <- paste0("'", popType, "' AS POP_TYP, ")
+  #  }
   
   
   ###################################################################################
@@ -577,7 +577,7 @@ getpopFilterqry <- function(popType,
       surveynm <- findnm(dbTabs$survey_layer, DBI::dbListTables(dbconn), returnNULL = TRUE)
       if (!is.null(surveynm) && "SRV_CN" %in% pflds) {
         surveyfromqry <- paste0("\n JOIN ", SCHEMA., surveynm,
-		      " survey ON (survey.CN = ", plt., "SRV_CN AND survey.ANN_INVENTORY = 'Y')")
+                                " survey ON (survey.CN = ", plt., "SRV_CN AND survey.ANN_INVENTORY = 'Y')")
       }
     }
     
@@ -585,9 +585,9 @@ getpopFilterqry <- function(popType,
     if (!is.null(measEndyr)) {
       if (chkvalues) {
         yrlst.qry <- paste0(
-		          "SELECT DISTINCT ", varCur, 
-              "\nFROM ", SCHEMA., plotnm, 
-              "\nORDER BY ", varCur)
+          "SELECT DISTINCT ", varCur, 
+          "\nFROM ", SCHEMA., plotnm, 
+          "\nORDER BY ", varCur)
         pltyrs <- DBI::dbGetQuery(dbconn, yrlst.qry)
         
         if (measEndyr <= min(pltyrs, na.rm=TRUE)) {
@@ -614,7 +614,7 @@ getpopFilterqry <- function(popType,
     } else {
       groupvars <- as.vector(pgroupvars)
     }
-
+    
     ## Create subquery
     #######################################################################
     subqry <- paste0("SELECT ", toString(paste0(plt., groupvars)), 
@@ -635,26 +635,26 @@ getpopFilterqry <- function(popType,
                         "\n (", subqry, ") pp ", subjoinqry)
     
   } else {
-
+    
     ## Create pltidsqry
     pltselectqry <- paste0("SELECT ", toString(selectpvars))
     pltidsqry <- paste0(pltselectqry,
                         pltafromqry)
   }
-
+  
   ###################################################################################
   ## 7. Add other filters in popFilter
   ###################################################################################
   if (!is.null(popFilter$pfilter)) {
     pfilter <- popFilter$pfilter
-
+    
     if (!is.null(pltassgnflds)) {
       pfilter <- tryCatch(
         check.logic(pltassgnflds, pfilter, syntax="SQL", filternm="pfilter"),
         error = function(e) {
           return(NULL) })
-    
-    
+      
+      
       if (is.null(pfilter)) {
         pfilter <- tryCatch(
           check.logic(pflds, pfilter, syntax="SQL", filternm="pfilter"),
@@ -673,7 +673,7 @@ getpopFilterqry <- function(popType,
       }
     }
   }
-
+  
   
   ###################################################################################
   ## 8. Create pltidsqry to use as WITH statement for extracting data (if pltassgn in database)
@@ -707,4 +707,3 @@ getpopFilterqry <- function(popType,
   
   return(returnlst)
 }
-

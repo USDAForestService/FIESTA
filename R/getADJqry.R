@@ -3,15 +3,15 @@
 getADJqry <- function(popType,
                       adj,
                       propvars,
-							        adjfromqry,
-							        pwhereqry,
-							        pltidsid,
-							        pltassgnid,
-							        strunitvars = NULL,
-							        othervars = NULL,
-							        pltidsa. = "plotids.",
-							        propqry = NULL) {
-
+                      adjfromqry,
+                      pwhereqry,
+                      pltidsid,
+                      pltassgnid,
+                      strunitvars = NULL,
+                      othervars = NULL,
+                      pltidsa. = "plotids.",
+                      propqry = NULL) {
+  
   ####################################################################################
   ## DESCRIPTION:
   ## Calculates adjustment factors for plots to account for nonsampled conditions.
@@ -38,19 +38,19 @@ getADJqry <- function(popType,
   ##     estunit (*PROP_UNADJ_SUM / n.total)
   ##  2. Adjusted condition proportion (CONDPROP_ADJ) appended to condx
   ####################################################################################
-
+  
   ## 1. Get list of condition proportion variables for calculating adjustments
   ##########################################################################
   propvars <- unique(propvars)
-
+  
   if (popType == "DWM") {
     adjvarlst <- lapply(propvars, 
-		function(x) paste0("ADJ_FACTOR_", sub("CONDPROP_", "", x)))
+                        function(x) paste0("ADJ_FACTOR_", sub("CONDPROP_", "", x)))
   } else if (popType == "P2VEG") {
     adjvarlst <- list("ADJ_FACTOR_P2VEG_SUBP")
   } else {
     adjvarlst <- lapply(propvars, 
-		function(x) paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)))
+                        function(x) paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)))
   } 
   areawtadj <- adjvarlst[[1]][1]
   popwtadj <- unlist(adjvarlst[!adjvarlst %in% areawtadj])
@@ -58,15 +58,15 @@ getADJqry <- function(popType,
   
   ## 2. Build query to calculate adjustment factors
   ##########################################################################
-
+  
   ## 4.1 Set different grouping variables depending in adj
   ##########################################################
   if (adj == "plot") {
-    grpvars <- toString(paste0(pltidsa., pltassgnid))
+    grpvars <- toString(paste0(pltidsa., pltidsid))
   } else {  ## if (adj == "samp")
     grpvars <- toString(paste0(pltidsa., strunitvars))
   }
-
+  
   ## 4.2 Build select statement with propvars
   ##########################################################
   selectqry <- paste("SELECT", grpvars)  
@@ -77,15 +77,15 @@ getADJqry <- function(popType,
   for (i in 1:length(propvars)) {
     if (adj == "plot") {
       selectqry <- paste0(selectqry, ",", 
-		    "\n   COALESCE(1 / NULLIF(SUM(", propvars[[i]], "),0), 0) AS ", 
-                           adjvarlst[[i]])
+                          "\n   COALESCE(1 / NULLIF(SUM(", propvars[[i]], "),0), 0) AS ", 
+                          adjvarlst[[i]])
     } else if (adj == "samp") {  
       selectqry <- paste0(selectqry, ",",  
-        "\n   COALESCE(COUNT(DISTINCT ", pltidsa., pltidsid, ") / NULLIF(SUM(", propvars[[i]], "),0), 0) AS ", 
-                           adjvarlst[[i]])
+                          "\n   COALESCE(COUNT(DISTINCT ", pltidsa., pltidsid, ") / NULLIF(SUM(", propvars[[i]], "),0), 0) AS ", 
+                          adjvarlst[[i]])
     } else { ## if (adj == "none")
       selectqry <- paste0(selectqry, ",",  
-         "\n   1 AS ", adjvarlst[[i]])
+                          "\n   1 AS ", adjvarlst[[i]])
     }
   } 
   
@@ -97,14 +97,14 @@ getADJqry <- function(popType,
   if (!is.null(propqry)) {
     adjjoinqry <- getjoinqry(cuniqueid, pltassgnid, "c.", pltidsa.)
     adjqry <- paste0(adjqry, 
-                "\nLEFT JOIN",
-                "\n (", propqry, ") c ", adjjoinqry)
+                     "\nLEFT JOIN",
+                     "\n (", propqry, ") c ", adjjoinqry)
   }
   adjqry <- paste0(adjqry, 
                    pwhereqry,
                    "\n GROUP BY ", grpvars)
   
-
+  
   ## Return query 
   return(adjqry)
 }
