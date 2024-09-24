@@ -36,7 +36,8 @@ getpopFilterqry <- function(popType,
     SCHEMA. <- paste0(schema, ".")
   }
   
-  ## Create join for including pltassgnx
+  ## 1. Create join for including pltassgnx
+  ##################################################################################
   if (!is.null(plotnm)) {
     pjoinqry <- getjoinqry(pltassgnid, pjoinid, pltassgn., plt.)
     pltafromqry <- paste0(pfromqry, 
@@ -44,7 +45,7 @@ getpopFilterqry <- function(popType,
   }
   
   
-  ## Check states
+  ## 2. Check states for subsetting data if evalid and state are not in popFilter
   ##################################################################################
   states <- popFilter$states
   if (is.null(popFilter$evalid) && is.null(states)) {
@@ -111,7 +112,7 @@ getpopFilterqry <- function(popType,
   }
 
   ##################################################################################
-  ## 1. Get FIA Evaluation info
+  ## 3. Get FIA Evaluation info
   ##################################################################################
   iseval=subcycle <- FALSE 
   returnPOP <- ifelse(pltaindb, FALSE, TRUE)
@@ -155,7 +156,7 @@ getpopFilterqry <- function(popType,
   }
 
   ####################################################################
-  ## 2. Check custom Evaluation data
+  ## 4. Check custom Evaluation data
   ####################################################################
   if (!iseval) {
     evalchk <- tryCatch(
@@ -184,10 +185,10 @@ getpopFilterqry <- function(popType,
 
   
   ###################################################################################
-  ## 3. Build pwhereqry
+  ## 5. Build pwhereqry
   ###################################################################################
   
-  ## 3.1. Check popevalid and add to where statement (ewhereqry)
+  ## 5.1. Check popevalid and add to where statement (ewhereqry)
   ############################################################################
   if (!is.null(popevalid)) {
     ## If filtering with EVALID, check if POP_PLOT_STRATUM_ASSGN is in database
@@ -244,7 +245,7 @@ getpopFilterqry <- function(popType,
 
   } else {
     
-    ## 3.2. Check states, add to where query
+    ## 5.2. Check states, add to where query
     ############################################################################
     if (!is.null(popFilter$states)) {
       stcds <- pcheck.states(popFilter$states, statereturn = "VALUE")
@@ -270,7 +271,7 @@ getpopFilterqry <- function(popType,
       }
     }
 
-    ## 3.3. Check subcycle, add to where statement
+    ## 5.3. Check subcycle, add to where statement
     ############################################################################
     if (!is.null(subcycle99) && !subcycle99) {
       subcyclenm <- findnm("SUBCYCLE", pflds, returnNULL=TRUE)
@@ -291,7 +292,7 @@ getpopFilterqry <- function(popType,
       }
     }
 
-    ## 3.4. If Change Plots, remove plots that have no remeasurement data
+    ## 5.4. If Change Plots, remove plots that have no remeasurement data
     ######################################################################################
     if (popType %in% c("GRM", "CHNG", "LULC")) {
       rempernm <- findnm("REMPER", pflds, returnNULL = TRUE)
@@ -311,7 +312,7 @@ getpopFilterqry <- function(popType,
       }
     }
 	
-	  ## 3.5. If P2VEG Plots, remove plots that have no sampled P2VEG data
+	  ## 5.5. If P2VEG Plots, remove plots that have no sampled P2VEG data
     ######################################################################################
     if (popType == "P2VEG") {
       p2vegstatusnm <- findnm("P2VEG_SAMPLING_STATUS_CD", pflds, returnNULL = TRUE)
@@ -332,7 +333,7 @@ getpopFilterqry <- function(popType,
     }
 
     
-    ## 3.6. Check designcd in ppsa and plt
+    ## 5.6. Check designcd in ppsa and plt
     #######################################################################
     if (chkvalues) {
       designcdnm <- findnm("DESIGNCD", pflds, returnNULL = TRUE)
@@ -367,7 +368,7 @@ getpopFilterqry <- function(popType,
     }
   }
 
-  ## 3.7. Check invyrs and add to where query. 
+  ## 5.7. Check invyrs and add to where query. 
   ############################################################################
   if (!is.null(popFilter$invyrs)) {
     
@@ -407,7 +408,7 @@ getpopFilterqry <- function(popType,
     
   } else if (!is.null(popFilter$measyrs)) {
     
-    ## 3.8. Check measyear and add to where query.
+    ## 5.8. Check measyear and add to where query.
     ############################################################################
     if (chkvalues) {
       measyrlst.qry <- paste0(
@@ -455,7 +456,7 @@ getpopFilterqry <- function(popType,
 #    }
   }   
 
-  ## 3.9 Check INTENSITY and add to where query.
+  ## 5.9 Check INTENSITY and add to where query.
   ########################################################################
   if (!is.null(popFilter$intensity)) { 	
     intensity <- popFilter$intensity
@@ -495,7 +496,7 @@ getpopFilterqry <- function(popType,
     }
   }
 
-  ## 3.10. Check PLOT_STATUS_CD and generate table with number of plots
+  ## 5.10. Check PLOT_STATUS_CD and generate table with number of plots
   ########################################################################
   pstatusvars <- c("PLOT_STATUS_CD", "PSTATUSCD")
   pstatuschk <- unlist(sapply(pstatusvars, findnm, pflds, returnNULL=TRUE))
@@ -565,7 +566,7 @@ getpopFilterqry <- function(popType,
   
   
   ###################################################################################
-  ## 4. Get most current plots in database
+  ## 6. Get most current plots in database
   ###################################################################################
   if (popFilter$measCur) {
     surveyfromqry <- NULL
@@ -642,7 +643,7 @@ getpopFilterqry <- function(popType,
   }
 
   ###################################################################################
-  ## 5. Add other filters in popFilter
+  ## 7. Add other filters in popFilter
   ###################################################################################
   if (!is.null(popFilter$pfilter)) {
     pfilter <- popFilter$pfilter
@@ -675,11 +676,9 @@ getpopFilterqry <- function(popType,
 
   
   ###################################################################################
-  ## 6. Create pltidsqry and getdataWITH queries for identifying plots
-  ## pltidsqry - used as WITH statement for extracting data (if pltassgn in database)
+  ## 8. Create pltidsqry to use as WITH statement for extracting data (if pltassgn in database)
   ## getdataWITHqry - used for extracting data (if pltassgn not in database)
   ###################################################################################
-  
   
   ## Add pwhereqry to pltidsqry
   if (!is.null(pwhereqry) || pwhereqry != "") {
@@ -691,15 +690,12 @@ getpopFilterqry <- function(popType,
   }
   
   returnlst <- list(pltidsqry = pltidsqry,  
-                    pltx = pltx, plotnm = plotnm,
                     states = states, invyrs = invyrs, 
                     pwhereqry = pwhereqry, 
                     pltselectqry = pltselectqry,
                     pfromqry = pfromqry,
                     pltafromqry = pltafromqry,
                     nonsamp.pfilter = nonsamp.pfilter,
-                    datindb = datindb,
-                    getdataWITHqry = getdataWITHqry,
                     iseval = iseval)
   if (iseval) {
     returnlst$popevalid  <- popevalid
@@ -707,7 +703,6 @@ getpopFilterqry <- function(popType,
     returnlst$PLOT <- PLOT
     returnlst$ppsanm <- ppsanm
     returnlst$plotnm <- plotnm
-    returnlst$ppsa. <- "ppsa."
   }
   
   return(returnlst)

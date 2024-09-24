@@ -210,7 +210,7 @@ check.popdataPLT <-
     pltassgnvars <- pjoinid	
   }
 
-  ## 4.5. Define select variables (selectpvars)
+  ## 4.4. Define select variables (selectpvars)
   ##################################################################################
   pltidvars <- {}
   ## Add projectid and popType to selectqry
@@ -389,7 +389,7 @@ check.popdataPLT <-
   }
     
     
-  ## 7. Check pvars2keep in pltassgn and pdomskeep in plt
+  ## 7. Check pvars2keep in pltassgn and pdoms2keep in plt
   #######################################################################
   if (!is.null(pvars2keep)) {
     if (!is.null(pvars2keep)) {
@@ -436,7 +436,7 @@ check.popdataPLT <-
   
     
   ##################################################################################
-  ## 10. Check popFilters and create pltidsqry
+  ## 9. Check popFilters and create pltidsqry
   ##################################################################################
   if (!is.null(pltx))  {
     dbTabs <- dbTables(plot_layer = pltx)
@@ -482,22 +482,22 @@ check.popdataPLT <-
   if (iseval) {
     popevalid <- popFilterqry$popevalid
     ppsanm <- popFilterqry$ppsanm
-    ppsa. <- popFilterqry$ppsa.
     POP_PLOT_STRATUM_ASSGN <- popFilterqry$POP_PLOT_STRATUM_ASSGN
     PLOT <- popFilterqry$PLOT
   } 
   
-  ## 11. Build WITH queries and extract plt
+  ## 10. Build WITH queries and extract plt
   ##################################################################################
    
-  # Define WITH query for returning other data tables in database
-  getdataWITHqry <- paste0("WITH",
-                           "\npltids AS",
-                           "\n(SELECT p.", puniqueid, " AS PLT_CN",
-                           pfromqry,
-                           pwhereqry, ")")
-  
+  ## Build WITH query for returning data tables in database if pltassgn is not in database
+  ## Note: if pltassgn is in database, getdatWITHqry = pltidsqry
   if (!pltaindb && datindb && !is.null(plotnm)) {
+    getdataWITHqry <- paste0("WITH",
+                             "\npltids AS",
+                             "\n(SELECT p.", puniqueid, " AS PLT_CN",
+                             pfromqry,
+                             pwhereqry, ")")
+    ## Get plot data (pltx)
     if (!is.null(PLOT)) {
       pltx <- PLOT
     } else {
@@ -519,10 +519,13 @@ check.popdataPLT <-
     
     plotnm <- "pltx"
     pltflds <- pvars
-  }  
+  } else {
+    
+    getdataWITHqry <- pltidsqry
+  }
   
   
-  ## 12. Check PLOT_STATUS_CD and generate table with number of plots
+  ## 11. Check PLOT_STATUS_CD and generate table with number of plots
   ########################################################################
   pstatusvars <- c("PLOT_STATUS_CD", "PSTATUSCD")
   pstatuschk <- unlist(sapply(pstatusvars, findnm, pflds, returnNULL=TRUE))
@@ -626,7 +629,7 @@ check.popdataPLT <-
   }
 
   ##################################################################################
-  ## 13. Get estimation unit(s) (unitvars) values
+  ## 12. Get estimation unit(s) (unitvars) values
   ##################################################################################
 
   if (!is.null(unitvars)) {
@@ -671,14 +674,14 @@ check.popdataPLT <-
   }
 
   ######################################################################################
-  ## 14. Check unitarea 
+  ## 13. Check unitarea 
   ######################################################################################
   vars2keep=unitareax <- NULL
   if (module == "SA" && "AOI" %in% names(unitarea)) {
     vars2keep <- "AOI"
   }
   
-  ## 11.1. Check if unitarea is a data.frame object
+  ## 13.1. Check if unitarea is a data.frame object
   ###################################################################
   if (is.null(unitarea)) {
     message("unitarea is missing... include with population data if total estimates are desired")
@@ -703,7 +706,7 @@ check.popdataPLT <-
 	    }
 	  } 
 
-    ## 11.2. Check evalid and filter 
+    ## 13.2. Check evalid and filter 
     ###################################################################
     if (is.null(unitareax) && !is.null(chkdbtab(dbtablst, unitarea))) {
       unitindb <- TRUE
@@ -755,7 +758,7 @@ check.popdataPLT <-
 	    }
     }
 	
-    ## 11.3. Check areavar 
+    ## 13.3. Check areavar 
     ###################################################################
     areavar <- pcheck.varchar(var2check=areavar, varnm="areavar", gui=gui,
 		      checklst=names(unitareax), caption="Area variable?", stopifnull=TRUE)
@@ -796,7 +799,7 @@ check.popdataPLT <-
 	      return(NULL)
 	    }	 
 	
-      ## 11.4. Check if all values in unitarea are in pltassgn
+      ## 13.4. Check if all values in unitarea are in pltassgn
       ###############################################################################
       ## Check unit.vals with punit.vals
 	    unit.vals <- sort(do.call(paste, unitareax[, unitvars, with=FALSE]))
@@ -817,14 +820,14 @@ check.popdataPLT <-
 	    return(NULL)
 	  }  
 
-	  ## 11.5. Sum areavar by unitvars to aggregate any duplicate rows
+	  ## 13.5. Sum areavar by unitvars to aggregate any duplicate rows
 	  ###############################################################################
     unitareax <- unitareax[, sum(.SD, na.rm=TRUE), by=c(unitvars, vars2keep), .SDcols=areavar]
     setnames(unitareax, "V1", areavar)
   }	
 
   ######################################################################################
-  ## 12. Check auxiliary data in auxlut.
+  ## 14. Check auxiliary data in auxlut.
   ######################################################################################
   strunitvars <- unitvars
   
@@ -839,7 +842,7 @@ check.popdataPLT <-
 	    }
 	    return(NULL)
     }	
-	  ## 12.1. Check if auxlut is a data.frame R object
+	  ## 14.1. Check if auxlut is a data.frame R object
     auxlutx <- pcheck.table(auxlut, tabnm = auxtabnm, 
 		             caption = paste(auxtabnm, " table?"), returnsf=FALSE)
 
@@ -849,7 +852,7 @@ check.popdataPLT <-
 	    auxlutflds <- DBI::dbListFields(dbconn, auxlut_layer)
       auxlutqry <- paste0("SELECT * \nFROM ", SCHEMA., auxlut_layer)
 	  
-      ## 12.2. Check evalid and filter 
+      ## 14.2. Check evalid and filter 
       ###################################################################
       if (!is.null(popevalid)) {
 	      evalidnm <- findnm("EVALID", auxlutflds, returnNULL = TRUE) 
@@ -891,13 +894,13 @@ check.popdataPLT <-
         stratalutx <- auxlutx
       }
 
-      ## 12.4. Check if strvar is in auxlut, if strata=TRUE
+      ## 14.4. Check if strvar is in auxlut, if strata=TRUE
       ###################################################################
       strvar <- pcheck.varchar(var2check = strvar, varnm = "strvar", gui=gui,
 		     checklst = names(stratalutx), caption = "strata variable",
 		     warn=paste(strvar, "not in strata table"), stopifnull=TRUE)
 
- 	    ## 12.5. Check unitlevels for collapsing
+ 	    ## 14.5. Check unitlevels for collapsing
 	    if (!is.null(unitlevels)) {
 	      unitvals <- unique(stratalutx[[unitvar]])
 	      if (length(unitlevels) != length(unitvals)) {
@@ -911,7 +914,7 @@ check.popdataPLT <-
         }		
       } 	
 
-      ## 12.6. Create a table of number of plots by strata and estimation unit
+      ## 14.6. Create a table of number of plots by strata and estimation unit
       ###################################################################
       strunitvars <- unique(c(unitvars, strvar))
 	    strunitvarsqry <- paste0(pltassgn., strunitvars)
@@ -928,7 +931,7 @@ check.popdataPLT <-
       }
       setkeyv(P2POINTCNT, strunitvars)
  
-      ## 12.7. If nonresp, get Response Homogeneity Groups for WestFest
+      ## 14.7. If nonresp, get Response Homogeneity Groups for WestFest
       #####################################################################
       if (nonresp) {
         nonrespvars <- c("PLOT_STATUS_CD", "SAMP_METHOD_CD")
@@ -963,7 +966,7 @@ check.popdataPLT <-
   }
 
   ######################################################################################
-  ## 13. Query pltassgnx using popfilters and import pltassgnx
+  ## 15. Query pltassgnx using popfilters and import pltassgnx
   ######################################################################################
   ppsaselectvars <- {}
   pltassgnvars <- pltassgnvars[pltassgnvars %in% pltassgnflds]
@@ -1003,7 +1006,7 @@ check.popdataPLT <-
   
   
   ######################################################################################
-  ## 14. Get plot counts by estimation unit
+  ## 16. Get plot counts by estimation unit
   ######################################################################################
 
   ## Build select for plot counts
@@ -1044,7 +1047,7 @@ check.popdataPLT <-
   
 
   #############################################################################
-  ## 13. Return data
+  ## 17. Return data
   #############################################################################
   returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid,
         pltidsqry=pltidsqry, pwhereqry=pwhereqry, pltassgn.=pltassgn.,
