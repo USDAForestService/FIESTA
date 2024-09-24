@@ -952,7 +952,9 @@ datSumTree <- function(tree = NULL,
       }
     } else if (!is.null(pltidsWITHqry) && grepl(cond, pltidsWITHqry)) {
       condnm <- cond
-      
+      grpby. <- "pc."
+      pltidsid <- "pltids"
+     
       condflds.qry <- paste0(
         pltidsWITHqry,
         "\nSELECT * FROM ", SCHEMA., condnm, " LIMIT 0"
@@ -1095,6 +1097,7 @@ datSumTree <- function(tree = NULL,
       }
     }
   } else {
+
     #if (!is.null(pltidsWITHqry)) {
     #  grpby. <- "pltids."
     #}
@@ -1709,7 +1712,7 @@ datSumTree <- function(tree = NULL,
   #################################################################################
   adjalias. <- "adj."
   twithalias <- "tdat"
-  
+
   if (!seedonly) {
     
     ## Build twithqry
@@ -1734,11 +1737,12 @@ datSumTree <- function(tree = NULL,
                                "\n JOIN pltidsadj adj ", tadjjoinqry)
       }
       twithqry <- paste0(twithqry, ", ", tadjcase)
-    } 
-    if (!is.null(pltidsWITHqry)) {
-      tjoinqry <- getjoinqry(tuniqueid, pltidsid, talias., "pltids.")
-      twithfromqry <- paste0(twithfromqry,
+    } else {
+      if (!is.null(pltidsWITHqry)) {
+        tjoinqry <- getjoinqry(tuniqueid, pltidsid, talias., "pltids.")
+        twithfromqry <- paste0(twithfromqry,
                              "\n JOIN pltids ", tjoinqry)
+      }
     }
     
     ## WHERE statement - Woodland

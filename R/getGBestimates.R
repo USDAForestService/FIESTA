@@ -39,7 +39,7 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
   ## Set global variables
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
-  strunitvar <- c(unitvar, strvar)
+  strunitvars <- c(unitvar, strvar)
   
   message("getting estimates using GB...")
   
@@ -58,12 +58,12 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
     ## Sum numerator to plot, domain (TOTAL) level
     domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-              by = c(strunitvar, uniqueid, "TOTAL"), .SDcols=estvarn.name]
+              by = c(strunitvars, uniqueid, "TOTAL"), .SDcols=estvarn.name]
     if (esttype == "RATIO") {
       ## Sum denominator to plot, domain (TOTAL) level 
       domdatdtot <- 
         domdatd[, lapply(.SD, sum, na.rm=TRUE), 
-              by = c(strunitvar, uniqueid, "TOTAL"), .SDcols=estvard.name]
+              by = c(strunitvars, uniqueid, "TOTAL"), .SDcols=estvard.name]
       domdattot <- merge(domdattot, domdatdtot, by=c(strunitvars, uniqueid, "TOTAL"))
     }
     unit_totest <- 
@@ -102,27 +102,27 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
     domdatn <- domdatn[!is.na(domdatn[[rowvar]]),] 
     domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-              by = c(strunitvar, uniqueid, rowvar), .SDcols=estvarn.name]
+              by = c(strunitvars, uniqueid, rowvar), .SDcols=estvarn.name]
     if (esttype == "RATIO") {
       ## Sum denominator to plot, domain (TOTAL) level 
       if (rowvar %in% names(domdatd)) {
         domdatdtot <- 
           domdatd[, lapply(.SD, sum, na.rm=TRUE), 
-                  by = c(strunitvars, cuniqueid, rowvar), .SDcols = estvard.name]
+                  by = c(strunitvars, uniqueid, rowvar), .SDcols = estvard.name]
        
         ## Check class of ddomdattot and domdatdtot and merge tables
-        tabchk <- check.matchclass(domdattot, domdatdtot, c(strunitvars, cuniqueid, rowvar))
+        tabchk <- check.matchclass(domdattot, domdatdtot, c(strunitvars, uniqueid, rowvar))
         domdattot <- tabchk$tab1
         domdatdtot <- tabchk$tab2
         
         domdattot <- merge(domdattot, domdatdtot, 
-                            by = c(strunitvars, cuniqueid, rowvar))
+                            by = c(strunitvars, uniqueid, rowvar))
       } else {
         domdatdtot <- 
           domdatd[, lapply(.SD, sum, na.rm=TRUE),
-                  by = c(strunitvars, cuniqueid), .SDcols = estvard.name]
+                  by = c(strunitvars, uniqueid), .SDcols = estvard.name]
         domdattot <- merge(domdattot, domdatdtot, 
-                            by = c(strunitvars, cuniqueid))
+                            by = c(strunitvars, uniqueid))
       }
     }  
     unit_rowest <- 
@@ -145,28 +145,28 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
     domdatn <- domdatn[!is.na(domdatn[[colvar]]),] 
     domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-              by = c(strunitvar, uniqueid, colvar), .SDcols=estvarn.name]
+              by = c(strunitvars, uniqueid, colvar), .SDcols=estvarn.name]
 
     if (esttype == "RATIO") {
       ## Sum denominator to plot, domain (TOTAL) level 
       if (colvar %in% names(domdatd)) {
         domdatdtot <- 
           domdatd[, lapply(.SD, sum, na.rm=TRUE), 
-                  by = c(strunitvars, cuniqueid, colvar), .SDcols = estvard.name]
+                  by = c(strunitvars, uniqueid, colvar), .SDcols = estvard.name]
         
         ## Check class of ddomdattot and domdatdtot and merge tables
-        tabchk <- check.matchclass(domdattot, domdatdtot, c(strunitvars, cuniqueid, colvar))
+        tabchk <- check.matchclass(domdattot, domdatdtot, c(strunitvars, uniqueid, colvar))
         domdattot <- tabchk$tab1
         domdatdtot <- tabchk$tab2
 
         domdattot <- merge(domdattot, domdatdtot, 
-                           by = c(strunitvars, cuniqueid, colvar))
+                           by = c(strunitvars, uniqueid, colvar))
       } else {
         domdatdtot <- 
           domdatd[, lapply(.SD, sum, na.rm=TRUE),
-                  by = c(strunitvars, cuniqueid), .SDcols = estvard.name]
+                  by = c(strunitvars, uniqueid), .SDcols = estvard.name]
         domdattot <- merge(domdattot, domdatdtot, 
-                           by = c(strunitvars, cuniqueid))
+                           by = c(strunitvars, uniqueid))
       }
     }  
     unit_colest <- 
@@ -186,7 +186,7 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
    domdatn <- domdatn[!is.na(domdatn[[colvar]]) & domdatn[[colvar]] != "NA",] 
    domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-                 by = c(strunitvar, uniqueid, grpvar), .SDcols=estvarn.name]
+                 by = c(strunitvars, uniqueid, grpvar), .SDcols=estvarn.name]
   
    if (esttype == "RATIO") {
 
@@ -197,15 +197,15 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
        
        domdatdtot <- 
          domdatd[, lapply(.SD, sum, na.rm=TRUE), 
-                 by = c(strunitvars, cuniqueid, grpvar), .SDcols = estvard.name]
+                 by = c(strunitvars, uniqueid, grpvar), .SDcols = estvard.name]
        domdattot <- merge(domdattot, domdatdtot, 
-                          by = c(strunitvars, cuniqueid, grpvar))
+                          by = c(strunitvars, uniqueid, grpvar))
      } else {
        domdatdtot <- 
          domdatd[, lapply(.SD, sum, na.rm=TRUE),
-                 by = c(strunitvars, cuniqueid), .SDcols = estvard.name]
+                 by = c(strunitvars, uniqueid), .SDcols = estvard.name]
        domdattot <- merge(domdattot, domdatdtot, 
-                          by = c(strunitvars, cuniqueid))
+                          by = c(strunitvars, uniqueid))
      }
    }  
    unit_grpest <- 
@@ -337,13 +337,13 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
   
     ## AGGREGATE UNIT stratalut FOR ROWVAR and GRAND TOTAL
     stratalut2 <- data.table(stratalut, ONEUNIT=1)
-    strunitvar2 <- c("ONEUNIT", strvar)
+    strunitvars2 <- c("ONEUNIT", strvar)
     stratalut2 <- 
       stratalut2[, lapply(.SD, sum, na.rm=TRUE), 
-                    by = strunitvar2, .SDcols=c(strwtvar, "n.strata")]
+                    by = strunitvars2, .SDcols=c(strwtvar, "n.strata")]
     stratalut2[, strwt:=prop.table(get(strwtvar)), by="ONEUNIT"]
     stratalut2[, n.total := sum(n.strata)]
-    setkeyv(stratalut2, strunitvar2)
+    setkeyv(stratalut2, strunitvars2)
   
     unitarea2 <- data.table(unitarea, ONEUNIT=1)
     unitarea2 <- unitarea2[, lapply(.SD, sum, na.rm=TRUE), by="ONEUNIT", 
@@ -355,7 +355,7 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
     ## CALCULATE UNIT TOTALS FOR ROWVAR
     domdatnsum <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-                 by = c(strunitvar2, uniqueid, rowvar), .SDcols=estvar.name]
+                 by = c(strunitvars2, uniqueid, rowvar), .SDcols=estvar.name]
     rowunit <- 
       GBest.pbar(sumyn = estvar.name, 
                  ysum = domdatnsum,
@@ -390,7 +390,7 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
     domdatnsum <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-                 by = c(strunitvar2, uniqueid, "TOTAL"), .SDcols=estvar.name]
+                 by = c(strunitvars2, uniqueid, "TOTAL"), .SDcols=estvar.name]
     totunit <- 
       GBest.pbar(sumyn = estvar.name, 
                  ysum = domdatnsum,

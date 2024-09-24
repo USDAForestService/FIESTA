@@ -473,7 +473,7 @@ modGBratio <- function(GBpopdat,
   areawt <- GBpopdat$areawt
   areawt2 <- GBpopdat$areawt2
   adjcase <- GBpopdat$adjcase
-  
+
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
       if (!is.null(pop_dsn)) {
@@ -845,7 +845,7 @@ modGBratio <- function(GBpopdat,
   totunit <- estdat$totunit
   unitvar <- estdat$unitvar
   
-  
+
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
@@ -902,7 +902,6 @@ modGBratio <- function(GBpopdat,
   if(returntitle) {
     returnlst$titlelst <- alltitlelst
   }
-  
 
   if (rawdata) {
     ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
