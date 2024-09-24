@@ -239,6 +239,7 @@ modMApop <- function(popType="VOL",
                      returndata = TRUE,
                      savedata = FALSE, 
                      saveobj = FALSE, 
+                     savepltids = FALSE,
                      objnm = "MApopdat", 
                      unit_opts = NULL, 
                      savedata_opts = NULL, 
@@ -746,41 +747,32 @@ modMApop <- function(popType="VOL",
                                  returndata = returndata,
                                  savedata = savedata,
                                  outlst = outlst)
-    
-    tabchk <- sapply("cond", findnm, names(popTabs))
-    tablst <- lapply(tabchk, function(x) popTabs[[x]])
-    tabchk <- unlist(tabchk)[1]
-    condlst <- popTabchk("cond", tabtext = "cond", 
-                         tabs = popTabs, tabIDs = popTabIDs, dbtablst = NULL,
-                         dbconn = NULL, datindb = F) 
+  
     
     if (is.null(popcheck)) return(NULL)
+    
     condx <- popcheck$condx
+    pltidsadj <- popcheck$pltidsadj
     pltcondx <- popcheck$pltcondx
-    treef <- popcheck$treef
-    seedf <- popcheck$seedf
+    pltcondflds <- popcheck$pltcondflds
     cuniqueid <- popcheck$cuniqueid
     condid <- popcheck$condid
-    tuniqueid <- popcheck$tuniqueid
-    ACI.filter <- popcheck$ACI.filter
+    adjfactors <- popcheck$adjfactors
+    adjvarlst <- popcheck$adjvarlst
     condsampcnt <- popcheck$condsampcnt
-    areawt <- popcheck$areawt
-    tpropvars <- popcheck$tpropvars
-  }
+    dbqueries <- popcheck$dbqueries
+    dbqueriesWITH <- popcheck$dbqueriesWITH
+    estfromqry <- popcheck$estfromqry
+    adjcase <- popcheck$adjcase
+    
+    if(popType == "VOL") {
+      treex <- popcheck$treex
+      seedx <- popcheck$seedx
+    }    
   
-  ###################################################################################
-  ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
-  ## Calculates adjustment factors for area and trees by strata (and estimation unit)
-  ##		to account for nonsampled plots and conditions.
-  ## Creates an adjusted condition proportion by merging strata-level adjustment
-  ##		factors to cond and dividing CONDPROP_UNADJ by adjustment factor.
-  ###################################################################################
-  ## Returns:
-  ##  1. Summed proportions (*PROP_UNADJ_SUM) and adjustment factors (*PROP_ADJFAC)  
-  ##     by strata and estunit (*PROP_UNADJ_SUM / n.strata)
-  ##  2. Adjusted condition proportion (CONDPROP_ADJ) appended to condx
-  ###################################################################################
-  ## Merge plot strata info to condx
+  }
+ 
+  ## Merge plot strata info to condx (still do this?)
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
   condx <- condx[pltassgnx[,c(pltassgnid, unitvar, prednames), with=FALSE]]
   
@@ -794,45 +786,11 @@ modMApop <- function(popType="VOL",
     condx$MACRPROP_UNADJ <- as.numeric(condx$MACRPROP_UNADJ)
   }
   
-  if (adj == "none") {
-    setkeyv(condx, c(cuniqueid, condid))
-  } else {
-    if (popType %in% c("ALL", "VOL", "CURR")) {
-      areawt <- "CONDPROP_UNADJ"
-      adjfacdata <- getadjfactorVOL(adj=adj, 
-                                    condx = condx, 
-                                    treex = treef, 
-                                    seedx = seedf, 
-                                    cuniqueid = cuniqueid, 
-                                    condid = condid,
-                                    unitlut = unitlut, 
-                                    unitvars = unitvar,
-                                    unitarea = unitarea,
-                                    areavar = areavar, 
-                                    areawt = areawt,
-                                    tpropvars = tpropvars
-      )
-      condx <- adjfacdata$condx
-      treef <- adjfacdata$treex
-      seedf <- adjfacdata$seedx
-      varadjlst <- adjfacdata$varadjlst
-      areawtnm <- adjfacdata$areawtnm
-      stratalut <- adjfacdata$unitlut
-      expcondtab <- adjfacdata$expcondtab
-    }
-  }
-  
-  
-  
-  
+
   ###################################################################################
   ## Return population data objects
   ###################################################################################
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
-  returnlst$popType <- popType
-  if (!is.null(bndx)) {
-    returnlst$bndx <- bndx
-  }
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
@@ -841,68 +799,160 @@ modMApop <- function(popType="VOL",
   ###################################################################################
   ## Add new variables to pltcondx for estimation
   ###################################################################################
-  ## Get order of pltcondx columns
-  pltcondxcols <- names(pltcondx)
-  newcols <- {}
-  
-  if (!"LANDSTATUSCD" %in% names(pltcondx) && "LANDSTATUSCD" %in% names(pltcondx)) {
-    ## Add LANDSTATUSCD based on the following lookup table
-    LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
-                                LANDSTATUSCD = c(rep(1, 6), rep(2, 2), rep(3, 6), 4),
-                                LANDSTATUSNM = c(rep("Timberland", 6), 
-                                                 rep("Other forestland", 2), 
-                                                 rep("Reserved productive forestland", 6),
-                                                 "Reserved other forestland"))
-    pltcondx$LANDSTATUS <- with(pltcondx, COND_STATUS_CD * 100 + RESERVCD * 10 + SITECLCD)
-    pltcondx <- merge(pltcondx, LANDSTATUSlut, by="LANDSTATUS", all.x=TRUE)
-    pltcondx$LANDSTATUS <- NULL
-    newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
+  if (returndata || savedata) {
+    
+    pltcondxcols <- names(pltcondx)
+    pltcondxkey <- key(pltcondx)
+    newcols <- {}
+    
+    if (!"LANDSTATUSCD" %in% names(pltcondx) && "LANDSTATUSCD" %in% names(pltcondx)) {
+      ## Add LANDSTATUSCD based on the following lookup table
+      LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
+                                  LANDSTATUSCD = c(rep(1, 6), rep(2, 2), rep(3, 6), 4),
+                                  LANDSTATUSNM = c(rep("Timberland", 6), 
+                                                   rep("Other forestland", 2), 
+                                                   rep("Reserved productive forestland", 6),
+                                                   "Reserved other forestland"))
+      pltcondx$LANDSTATUS <- with(pltcondx, COND_STATUS_CD * 100 + RESERVCD * 10 + SITECLCD)
+      pltcondx <- merge(pltcondx, LANDSTATUSlut, by="LANDSTATUS", all.x=TRUE)
+      pltcondx$LANDSTATUS <- NULL
+      newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
+    }
+    
+    if (!"FORTYPGRPCD" %in% names(pltcondx) && "FORTYPCD" %in% names(pltcondx)) {
+      ## Add FORTYPGRPCD to pltcondx if not already in dataset
+      #pltcondx <- addFORTYPGRPCD(pltcondx)
+      ref_fortyp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
+      names(ref_fortyp) <- c("FORTYPCD", "FORTYPGRPCD")
+      pltcondx <- merge(pltcondx, ref_fortyp, by="FORTYPCD", all.x=TRUE)
+      newcols <- c(newcols, "FORTYPGRPCD")
+    }
+    
+    if (!"DSTRBGRP" %in% names(pltcondx) && "DSTRBCD1" %in% names(pltcondx)) {
+      ## Add FORTYPGRPCD to pltcondx if not already in dataset
+      #pltcondx <- addFORTYPGRPCD(pltcondx)
+      ref_dstrbcd <- ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")]
+      names(ref_dstrbcd) <- c("DSTRBCD1", "DSTRBGRP")
+      pltcondx <- merge(pltcondx, ref_dstrbcd, by="DSTRBCD1", all.x=TRUE)
+      newcols <- c(newcols, "DSTRBGRP")
+    }
+    
+    ## Move new columns to end of table
+    setcolorder(pltcondx, c(pltcondxcols, newcols))
+    pltcondflds <- c(pltcondflds, newcols)
+    setkeyv(pltcondx, pltcondxkey)
+    
   }
-  
-  if (!"FORTYPGRPCD" %in% names(pltcondx) && "FORTYPCD" %in% names(pltcondx)) {
-    ## Add FORTYPGRPCD to pltcondx if not already in dataset
-    #pltcondx <- addFORTYPGRPCD(pltcondx)
-    ref_fortyp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
-    names(ref_fortyp) <- c("FORTYPCD", "FORTYPGRPCD")
-    pltcondx <- merge(pltcondx, ref_fortyp, by="FORTYPCD", all.x=TRUE)
-    newcols <- c(newcols, "FORTYPGRPCD")
+
+  if (savepltids) {
+    message("saving pltids...")
+    outlst$out_layer <- "pltids"
+    if (!append_layer) index.unique.pltids <- c(projectid, puniqued)
+    datExportData(pltidsadj, 
+                  savedata_opts = outlst)
   }
-  
-  if (!"DSTRBGRP" %in% names(pltcondx) && "DSTRBCD1" %in% names(pltcondx)) {
-    ## Add FORTYPGRPCD to pltcondx if not already in dataset
-    #pltcondx <- addFORTYPGRPCD(pltcondx)
-    ref_dstrbcd <- ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")]
-    names(ref_dstrbcd) <- c("DSTRBCD1", "DSTRBGRP")
-    pltcondx <- merge(pltcondx, ref_dstrbcd, by="DSTRBCD1", all.x=TRUE)
-    newcols <- c(newcols, "DSTRBGRP")
-  }
-  
-  ## Move new columns to end of table
-  setcolorder(pltcondx, c(pltcondxcols, newcols))
-  
   
   
   ## Build list of data to return
   ###################################################################################
+  
+  returnlst$popType <- popType
+  if(!is.null(bndx)) {
+    returnlst$bndx <- bndx
+  }
+  
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
-                                      cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter,
+                                      cuniqueid=cuniqueid, condid=condid, ACI = ACI,
                                       unitarea=unitarea, areavar=areavar, areaunits=areaunits,
                                       unitvar=unitvar, unitvars=unitvars, unitlut=data.table(unitlut), 
                                       plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
                                       npixels=npixels, npixelvar=npixelvar,
                                       states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
   
-  if (!is.null(treef)) {
-    returnlst$treex <- treef
-    returnlst$tuniqueid <- tuniqueid
-    returnlst$adjtree <- adjtree
+  if (popType == "VOL") {
+    if (!is.null(treex)) {
+      returnlst$treex <- treex
+      returnlst$tuniqueid <- tuniqueid
+      returnlst$adjtree <- adjtree
+    }
+    if (!is.null(seedx)) {
+      returnlst$seedx <- seedx
+    }
   }
-  if (!is.null(seedf)) {
-    returnlst$seedx <- seedf
+  
+  if (!is.null(popevalid)) {
+    returnlst$evalid <- popevalid
   }
+  if (adj != "none") {
+    returnlst$adjfactors <- adjfactors
+    returnlst$adjvarlst <- adjvarlst
+  }
+
   returnlst$prednames <- prednames
   returnlst$predfac <- predfac
   
+  
+  ## Save data frames
+  ##################################################################
+  if (returndata) {
+    returnlst$popdatindb <- FALSE
+  } else {
+    returnlst$popdatindb <- TRUE
+    
+    if (savedata) {
+      if (outlst$out_fmt == "sqlite") {
+        returnlst$pop_fmt <- "sqlite"
+        returnlst$pop_dsn <- file.path(outlst$outfolder, outlst$out_dsn)
+        returnlst$pop_schema <- NULL
+      }
+      
+      message("saving pltassgnx...")
+      outlst$out_layer <- "pltassgn"
+      datExportData(pltassgnx, 
+                    savedata_opts = outlst)
+      
+      message("saving unitarea...")
+      outlst$out_layer <- "unitarea"
+      datExportData(unitarea, 
+                    savedata_opts = outlst)
+      
+      rm(pltassgnx)
+      rm(unitarea)
+
+      
+      if (popType %in% c("TREE", "GRM")) {
+        message("saving REF_SPECIES...")
+        outlst$out_layer <- "REF_SPECIES"
+        datExportData(REF_SPECIES,
+                      saveadata_opts = outlst)
+      }
+      
+      
+      if (!is.null(vcondsppf)) {
+        message("saving vcondsppx...")
+        outlst$out_layer <- "vcondsppx"
+        datExportData(vcondsppf, 
+                      savedata_opts = outlst)
+        rm(vcondsppf)
+        # gc()
+      }
+      if (!is.null(vcondstrf)) {
+        message("saving vcondstrx...")
+        outlst$out_layer <- "vcondstrx"
+        datExportData(vcondstrf, 
+                      savedata_opts = outlst)
+        rm(vcondstrf)
+        # gc()
+      }
+      
+    } else if (datindb) {
+      
+      returnlst$pop_fmt <- datsource
+      returnlst$pop_dsn <- dsn
+      returnlst$pop_schema <- schema
+      returnlst$popconn <- dbconn
+    }
+  }
   
   ## Save list object
   ##################################################################
@@ -918,82 +968,10 @@ modMApop <- function(popType="VOL",
     } 
   } 
   
-  ## Save data frames
-  ##################################################################
-  if (savedata) {
-    datExportData(condx, 
-                  savedata_opts=list(outfolder=outfolder, 
-                                     out_fmt=out_fmt, 
-                                     out_dsn=out_dsn, 
-                                     out_layer="condx",
-                                     outfn.pre=outfn.pre, 
-                                     outfn.date=outfn.date, 
-                                     overwrite_layer=overwrite_layer,
-                                     append_layer=append_layer,
-                                     add_layer=TRUE))
-    datExportData(pltcondx, 
-                  savedata_opts=list(outfolder=outfolder, 
-                                     out_fmt=out_fmt, 
-                                     out_dsn=out_dsn, 
-                                     out_layer="pltcondx",
-                                     outfn.pre=outfn.pre, 
-                                     outfn.date=outfn.date, 
-                                     overwrite_layer=overwrite_layer,
-                                     append_layer=append_layer,
-                                     add_layer=TRUE))
-    
-    if (!is.null(treef)) {
-      datExportData(treef, 
-                    savedata_opts=list(outfolder=outfolder, 
-                                       out_fmt=out_fmt, 
-                                       out_dsn=out_dsn, 
-                                       out_layer="treex",
-                                       outfn.pre=outfn.pre, 
-                                       outfn.date=outfn.date, 
-                                       overwrite_layer=overwrite_layer,
-                                       append_layer=append_layer,
-                                       add_layer=TRUE))
-    }
-    if (!is.null(seedf)) {
-      datExportData(seedf, 
-                    savedata_opts=list(outfolder=outfolder, 
-                                       out_fmt=out_fmt, 
-                                       out_dsn=out_dsn, 
-                                       out_layer="seedx",
-                                       outfn.pre=outfn.pre, 
-                                       outfn.date=outfn.date, 
-                                       overwrite_layer=overwrite_layer,
-                                       append_layer=append_layer,
-                                       add_layer=TRUE))
-    }
-    
-    datExportData(pltassgnx, 
-                  savedata_opts=list(outfolder=outfolder, 
-                                     out_fmt=out_fmt, 
-                                     out_dsn=out_dsn, 
-                                     out_layer="pltassgn",
-                                     outfn.pre=outfn.pre, 
-                                     outfn.date=outfn.date, 
-                                     overwrite_layer=overwrite_layer,
-                                     append_layer=append_layer,
-                                     add_layer=TRUE))
-    datExportData(unitarea, 
-                  savedata_opts=list(outfolder=outfolder, 
-                                     out_fmt=out_fmt, 
-                                     out_dsn=out_dsn, 
-                                     out_layer="unitarea",
-                                     outfn.pre=outfn.pre, 
-                                     outfn.date=outfn.date, 
-                                     overwrite_layer=overwrite_layer,
-                                     append_layer=append_layer,
-                                     add_layer=TRUE))
-  }
   
+
+  return(returnlst)
   
-  
-  if (returndata) {
-    return(returnlst)
-  } 
   
 }
 

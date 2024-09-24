@@ -1159,8 +1159,8 @@ modGBpop <- function(popType = "VOL",
       returnlst$stratcombinelut <- setDF(stratcombinelut)
     }
   }
-  if (!is.null(evalid)) {
-    returnlst$evalid <- evalid
+  if (!is.null(popevalid)) {
+    returnlst$evalid <- popevalid
   }
   if (popType == "P2VEG") {
     returnlst$vcondsppx <- vcondsppf
@@ -1273,12 +1273,7 @@ modGBpop <- function(popType = "VOL",
   
   
   rm(popcheck)
-  # gc()
-  
-  #  if (!is.null(dbconn)) {
-  #    DBI::dbDisconnect(dbconn)
-  #  }
-  
+
   
   return(returnlst)
 }
