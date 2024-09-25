@@ -142,7 +142,7 @@ check.popdataPLT <-
     ## Check if pltassgn is in database
     if (is.null(pltassgnx) && !is.null(pltassgn)) {
       pltassgnnm <- findnm(pltassgn, dbtablst, returnNULL = TRUE)
-      if (is.null(pltassgn)) {
+      if (is.null(pltassgnnm)) {
         message("pltassgn does not exist in database")
         if (!is.null(popevalid)) {
           return(NULL)

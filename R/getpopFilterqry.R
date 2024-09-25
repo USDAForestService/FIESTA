@@ -88,15 +88,29 @@ getpopFilterqry <- function(popType,
         stcntywhereqry <- NULL
       }
     } else {
-      
-      states <- unique(pltassgnx[[statenm]])
+      if (pltaindb) {
+        getstates.qry <- paste0(
+          "\nSELECT DISTINCT ", statenm,
+          "\nFROM ", pltassgnnm)
+        states <- DBI::dbGetQuery(dbconn, getstates.qry)[[1]]
+      } else {
+        states <- unique(pltassgnx[[statenm]])
+      }
       countynm <- findnm("COUNTYCD", pltassgnflds)
       countycda. <- ifelse(countynm %in% pltflds, plt., pltassgn.)
       if (!is.null(countynm)) {
         stcntywhereqry <- NULL
         for (i in 1: length(states)) {
           stcd <- states[i]
-          cntycds <- unique(pltassgnx[pltassgnx[[statenm]] %in% stcd, countynm, with=FALSE])[[1]]
+          if (pltaindb) {
+            getcntycds.qry <- paste0(
+              "\nSELECT DISTINCT ", countynm,
+              "\nFROM ", pltassgnnm,
+              "\nWHERE ", statenm, " = ", stcd)
+            cntycds <- DBI::dbGetQuery(dbconn, getcntycds.qry)[[1]]
+          } else {
+            cntycds <- unique(pltassgnx[pltassgnx[[statenm]] %in% stcd, countynm, with=FALSE])[[1]]
+          }
           if (length(cntycds) > 0) {
             if (!is.null(stcntywhereqry)) {
               stcntywhereqry <- paste0(stcntywhereqry, "\n  AND ")
@@ -132,10 +146,6 @@ getpopFilterqry <- function(popType,
     error = function(e) {
       message(e,"\n")
       return(NULL) })
-  if (is.null(evalInfo)) {
-    iseval <- FALSE
-  }
-  
   if (is.null(evalInfo)) {
     #message("no data to return")
     return(NULL)

@@ -939,6 +939,7 @@ modGBpop <- function(popType = "VOL",
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
     ###################################################################################
+    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.popdataCHNG.R")
     areawt <- "SUBPTYP_PROP_CHNG"
     popcheck <- 
       check.popdataCHNG(tabs = popTabs, tabIDs = popTabIDs, 
@@ -949,20 +950,21 @@ modGBpop <- function(popType = "VOL",
                         pdoms2keep = pdoms2keep,
                         defaultVars = defaultVars,
                         pltidsadjindb = pltidsadjindb, 
-                        pltassgnid = pltassgnid, pltx = pltx,
+                        pltassgnid = pltassgnid, 
+                        pltassgnx = pltassgnx,
+                        POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
                         adj = adj, ACI = ACI, 
                         plotlst = plotlst, 
                         pwhereqry = pwhereqry, 
                         pltfromqry = pltfromqry,
                         condid = condid, 
-                        areawt = areawt, 
-                        areawt2 = areawt2,
+                        areawt = areawt, areawt2 = areawt2,
                         unitvars = unitvars,
                         strunitvars = strunitvars,
-                        #unitvars = c(projidvars, unitvars), 
-                        #strunitvars = c(projidvars, strunitvars), 
                         nonsamp.cfilter = nonsamp.cfilter, 
-                        dbconn = dbconn, schema = NULL, 
+                        dbconn = dbconn, SCHEMA. = SCHEMA., 
+                        getdataWITHqry = getdataWITHqry,
+                        getdataCNs = getdataCNs,
                         returndata = returndata,
                         savedata = savedata, 
                         outlst = outlst)
@@ -994,6 +996,7 @@ modGBpop <- function(popType = "VOL",
   
   if (popType == "P2VEG") {
     #areawt <- "SUBPTYP_PROP_CHNG"
+    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.popdataP2VEG.R")
     popcheck <- 
       check.popdataP2VEG(tabs = popTabs, tabIDs = popTabIDs, 
                          popType = popType, 
@@ -1013,10 +1016,10 @@ modGBpop <- function(popType = "VOL",
                          areawt2 = areawt2,
                          unitvars = unitvars,
                          strunitvars = strunitvars,
-                         #unitvars = c(projidvars, unitvars), 
-                         #strunitvars = c(projidvars, strunitvars), 
                          nonsamp.cfilter = nonsamp.cfilter, 
-                         dbconn = dbconn, schema = NULL, 
+                         dbconn = dbconn, SCHEMA. = SCHEMA., 
+                         getdataWITHqry = getdataWITHqry,
+                         getdataCNs = getdataCNs,
                          returndata = returndata,
                          savedata = savedata, 
                          outlst = outlst)

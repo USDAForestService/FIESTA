@@ -942,7 +942,9 @@ DBgetEvalid <- function(states = NULL,
           evaldttyp <- sort(unique(evaldt$evaltyp))
           notype <- evalTypecd[!evalTypecd %in% evaldttyp]
           if (length(notype) > 0) {
-            stop(notype, " not in database")
+            message("invalid evalType... not in database")
+            messagedf(evaldt)
+            return(NULL)
           } else {
             stop("invalid evalType... must be in following list: ", toString(evaldttyp)) 
           }

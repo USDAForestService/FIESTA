@@ -411,18 +411,17 @@ check.popdataVOL <-
       pltidsadj <- tryCatch(
         DBI::dbGetQuery(dbconn, pltidsadj.qry),
         error=function(e) {
-          message("invalid pltids query...")
           message(e,"\n")
           return(NULL)})
     } else {
       pltidsadj <- tryCatch(
         sqldf::sqldf(pltidsadj.qry, connection = NULL),
         error = function(e) {
-          message("invalid pltids query...")
           message(e,"\n")
           return(NULL) })
     }
     if (is.null(pltidsadj) || nrow(pltidsadj) == 0) {
+      message("invalid pltids query...")
       message(pltidsadj.qry)
       return(NULL)
     }
@@ -515,18 +514,17 @@ check.popdataVOL <-
         pltcondx <- tryCatch(
           DBI::dbGetQuery(dbconn, pltcondxqry),
           error=function(e) {
-            message("invalid pltcondx query...")
             warning(e)
             return(NULL)})
       } else {
         pltcondx <- tryCatch(
           sqldf::sqldf(pltcondxqry, connection = NULL),
           error = function(e) {
-            message("invalid pltcondx query...")
             message(e,"\n")
             return(NULL) })
       }
       if (is.null(pltcondx) || nrow(pltcondx) == 0) {
+        message("invalid pltcondx query...")
         message(pltcondxqry)
         return(NULL)
       }
