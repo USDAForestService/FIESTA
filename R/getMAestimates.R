@@ -4,7 +4,7 @@ getMAestimates <- function(esttype, ratiotype = "PERACRE",
                            rowvar, colvar, grpvar,
                            MAmethod, modelselect,
                            modelselect_bydomain,
-                           prednames, FIA,
+                           prednames, FIA, bootstrap,
                            pltassgnx, pltassgnid,
                            unitarea, unitvar, areavar,
                            unitlut, npixels, npixelvar,
@@ -16,6 +16,7 @@ getMAestimates <- function(esttype, ratiotype = "PERACRE",
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
   response <- estvarn.name
+  predselectlst <- list()
   
   masemethod <- switch(MAmethod,
                        PS = "postStrat",
@@ -276,7 +277,10 @@ getMAestimates <- function(esttype, ratiotype = "PERACRE",
   returnlst <- list(unit_totest = unit_totest,
                     unit_rowest = unit_rowest,
                     unit_colest = unit_colest,
-                    unit_grpest = unit_grpest)
+                    unit_grpest = unit_grpest,
+                    predselectlst = predselectlst,
+                    predselect.overall = predselect.overall,
+                    unit_weights = unit_weights)
   
   return(returnlst)
   

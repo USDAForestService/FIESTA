@@ -777,6 +777,7 @@ modMAtree <- function(MApopdat,
                    modelselect_bydomain = modelselect_bydomain,
                    prednames = prednames,
                    FIA = FIA,
+                   bootstrap = bootstrap,
                    pltassgnx = pltassgnx,
                    unitarea = unitarea,
                    unitvar = unitvar,
@@ -797,6 +798,9 @@ modMAtree <- function(MApopdat,
   unit_rowest <- estdat$unit_rowest
   unit_colest <- estdat$unit_colest
   unit_grpest <- estdat$unit_grpest
+  predselectlst <- estdat$predselectlst
+  predselect.overall <- estdat$predselect.overall
+  unit_weights <- estdat$unit_weights
  
   ###############################################################################
   ## GENERATE OUTPUT TABLES
