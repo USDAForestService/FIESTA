@@ -850,7 +850,7 @@ modMApop <- function(popType="VOL",
   
   returnlst <- append(returnlst, list(pltidsadj = pltidsadj, pltcondx=pltcondx, 
                                       pltcondflds = pltcondflds, pjoinid = pjoinid,
-                                      cuniqueid = cuniqueid, condid = condid, ACI = ACI,
+                                      cuniqueid = cuniqueid, pltassgnid = pltassgnid, condid = condid, ACI = ACI,
                                       areawt = areawt, areawt2 = areawt2, adjcase = adjcase,
                                       dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH,
                                       pltassgnx = pltassgnx, unitlut = data.table(unitlut),
