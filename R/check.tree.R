@@ -111,7 +111,6 @@ check.tree <-
       }
     }
   } else {  
-    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTree.R")
     
     ## Get summed tree data
     treedata <- 
