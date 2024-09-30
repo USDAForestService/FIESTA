@@ -359,13 +359,6 @@ modMApop <- function(popType="VOL",
     }
   }
   
-  ## Set strata defaults
-  strata_defaults_list <- formals(strata_options)[-length(formals(strata_options))]
-  
-  for (i in 1:length(strata_defaults_list)) {
-    assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
-  }
-  
   ## Set popTables defaults
   popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
   
