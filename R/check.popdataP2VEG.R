@@ -175,7 +175,7 @@ check.popdataP2VEG <-
   vsubpsppflds <- vsubpspplst$tabflds
   vsubpsppid <- vsubpspplst$tabid
   vsubpsppx <- vsubpspplst$tabx
-  if (!is.null(vsubpsppx)) {
+  if (!is.null(vsubpsppnm)) {
     vsubpsppa. <- "vsubpspp."
   }
 
@@ -625,8 +625,8 @@ check.popdataP2VEG <-
       }	
     }
   }  ## END adj = 'none'
-  
-  
+
+ 
   ## 5.4. Build query for adjustment factors based on popType (ADJqry)
   
   ## 5.4.1. First, build query for VOL adjustments
@@ -643,6 +643,7 @@ check.popdataP2VEG <-
               propqry = NULL)
   #message(ADJqry)
   dbqueries$ADJqry <- ADJqry    
+
   
   ## 5.5. Build final query for adjustment factors, including pltids WITH query
   adjfactors.qry <- paste0(
@@ -656,24 +657,28 @@ check.popdataP2VEG <-
   if (datindb) {
     adjfactors <- tryCatch(
       DBI::dbGetQuery(dbconn, adjfactors.qry),
-      error=function(e) {
-        message("invalid adjustment query...")
-        message(e,"\n")
-        return(NULL)})
+                error=function(e) {
+                  message(e,"\n")
+                  return(NULL)})
   } else {
     adjfactors <- tryCatch(
       sqldf::sqldf(adjfactors.qry, connection = NULL),
-      error = function(e) {
-        message("invalid adjustment query...")
-        message(e,"\n")
-        return(NULL) })
+                error = function(e) {
+                  message(e,"\n")
+                  return(NULL) })
   }
   if (is.null(adjfactors) || nrow(adjfactors) == 0) {
+    message("invalid adjustment query...")
     message(adjfactors.qry)
     return(NULL)
   }
+  if (adj == "samp") {
+    setkeyv(setDT(adjfactors), strunitvars)
+  } else {
+    setkeyv(setDT(adjfactors), pltidsid)
+  }
   dbqueries$adjfactors <- adjfactors.qry
-  
+
 
   ## 5.4.2. Next, build query for P2VEG adjustments
   
@@ -707,7 +712,7 @@ check.popdataP2VEG <-
               propqry = NULL)
   #message(ADJqryP2VEG)
 
-  
+
   ## 5.5. Build final query for adjustment factors, including pltids WITH query
   adjfactorsP2VEG.qry <- paste0(
     pltidsWITH.qry, ", ",
@@ -806,18 +811,17 @@ check.popdataP2VEG <-
     pltidsadj <- tryCatch(
         DBI::dbGetQuery(dbconn, pltidsadj.qry),
                  error=function(e) {
-                   message("invalid pltids query...")
                    message(e,"\n")
                    return(NULL)})
   } else {
     pltidsadj <- tryCatch(
         sqldf::sqldf(pltidsadj.qry, connection = NULL),
                   error = function(e) {
-                    message("invalid pltids query...")
                     message(e,"\n")
                     return(NULL) })
   }
   if (is.null(pltidsadj) || nrow(pltidsadj) == 0) {
+    message("invalid pltids query...")
     message(pltidsadj.qry)
     return(NULL)
   }
@@ -918,18 +922,17 @@ check.popdataP2VEG <-
       pltcondx <- tryCatch(
         DBI::dbGetQuery(dbconn, pltcondxqry),
                   error=function(e) {
-                    message("invalid pltcondx query...")
                     warning(e)
                     return(NULL)})
     } else {
       pltcondx <- tryCatch(
         sqldf::sqldf(pltcondxqry, connection = NULL),
                   error = function(e) {
-                    message("invalid pltcondx query...")
                     message(e,"\n")
                     return(NULL) })
     }
     if (is.null(pltcondx) || nrow(pltcondx) == 0) {
+      message("invalid pltcondx query...")
       message(pltcondxqry)
       return(NULL)
     }
@@ -1124,7 +1127,7 @@ check.popdataP2VEG <-
       datExportData(condx, 
                     savedata_opts = outlst)
     }
-    #rm(condx)  
+    rm(condx)  
     
     
     if (is.null(subplotx)) {

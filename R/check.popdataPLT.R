@@ -247,7 +247,7 @@ check.popdataPLT <-
     adj <- pcheck.varchar(var2check=adj, varnm="adj", gui=gui,
                           checklst=adjlst, caption="adj", multiple=FALSE, stopifnull=TRUE)
     if (adj == "plot" && module == "GB") {
-      message("adj='plot' is not typical for GA modules")
+      message("adj='plot' is not typical for GB modules")
     }
     if (adj != "none") {
       pvars2keep <- c(pvars2keep, "MACRO_BREAKPOINT_DIA")
