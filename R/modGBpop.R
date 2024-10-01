@@ -802,11 +802,11 @@ modGBpop <- function(popType = "VOL",
   getdataCNs <- pltcheck$getdataCNs
   returndata <- pltcheck$returndata
   
-  
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
   
+
   ###################################################################################
   ## Check Auxiliary Data
   ###################################################################################
@@ -1006,14 +1006,15 @@ modGBpop <- function(popType = "VOL",
                          pdoms2keep = pdoms2keep,
                          defaultVars = defaultVars,
                          pltidsadjindb = pltidsadjindb, 
-                         pltassgnid = pltassgnid, pltx = pltx,
+                         pltassgnid = pltassgnid, 
+                         pltassgnx = pltassgnx,
+                         POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
                          adj = adj, ACI = ACI, 
                          plotlst = plotlst, 
                          pwhereqry = pwhereqry, 
                          pltfromqry = pltfromqry,
                          condid = condid, 
-                         areawt = areawt, 
-                         areawt2 = areawt2,
+                         areawt = areawt, areawt2 = areawt2,
                          unitvars = unitvars,
                          strunitvars = strunitvars,
                          nonsamp.cfilter = nonsamp.cfilter, 
@@ -1066,7 +1067,7 @@ modGBpop <- function(popType = "VOL",
     areawt <- popcheck$areawt
     dwmpropvars <- popcheck$dwmpropvars
   }
-  
+
   ###################################################################################
   ## Add new variables to pltcondx for estimation
   ###################################################################################
@@ -1119,7 +1120,7 @@ modGBpop <- function(popType = "VOL",
                   savedata_opts = outlst)
   }
   
-  
+
   ## Build list of data to return
   ###################################################################################
   returnlst$popType <- popType

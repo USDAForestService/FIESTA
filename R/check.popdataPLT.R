@@ -58,7 +58,7 @@ check.popdataPLT <-
     unitvars <- unique(c(unitvar2, unitvar))
     pltassgnvars <- unique(c(projectid, pltassgnid, unitvars)) 
     SCHEMA. <- ""
-    P2POINTCNT <- NULL
+    P2POINTCNT=POP_PLOT_STRATUM_ASSGN <- NULL
     
     
     ###################################################################################
@@ -183,6 +183,8 @@ check.popdataPLT <-
           } else {
             stop("pltassgnid is not in pltassgn")
           }
+        } else {
+          pltassgnid <- pltassgnchk
         }
       }
       if (!is.null(pjoinid)) {
@@ -245,7 +247,7 @@ check.popdataPLT <-
     adj <- pcheck.varchar(var2check=adj, varnm="adj", gui=gui,
                           checklst=adjlst, caption="adj", multiple=FALSE, stopifnull=TRUE)
     if (adj == "plot" && module == "GB") {
-      message("adj='plot' is not typical for GA modules")
+      message("adj='plot' is not typical for GB modules")
     }
     if (adj != "none") {
       pvars2keep <- c(pvars2keep, "MACRO_BREAKPOINT_DIA")
@@ -438,7 +440,6 @@ check.popdataPLT <-
       }
     }
     
-    
     ##################################################################################
     ## 9. Check popFilters and create pltidsqry
     ##################################################################################
@@ -489,7 +490,8 @@ check.popdataPLT <-
       POP_PLOT_STRATUM_ASSGN <- popFilterqry$POP_PLOT_STRATUM_ASSGN
       PLOT <- popFilterqry$PLOT
     } 
-    
+
+       
     ## 10. Build WITH queries and extract plt
     ##################################################################################
     
@@ -637,48 +639,51 @@ check.popdataPLT <-
     ##################################################################################
     ## 12. Get estimation unit(s) (unitvars) values
     ##################################################################################
-    
+    chkvalues <- TRUE
     if (!is.null(unitvars)) {
-      
-      ## Check unitvars in plot data
-      unitvarsa. <- ifelse(all(unitvars %in% pltassgnflds), pltassgn., plt.)	  	
-      unitvarqry <- paste0(
-        "SELECT DISTINCT ", toString(paste0(unitvarsa., unitvars)), 
-        pltafromqry, 
-        pwhereqry,
-        "\nORDER BY ", toString(paste0(unitvarsa., unitvars)))
-      if (pltaindb) {      
-        unitvartab <- tryCatch(
-          data.table(DBI::dbGetQuery(dbconn, unitvarqry)),
-          error = function(e) {
-            message(e,"\n")
-            return(NULL) })
-        if (is.null(unitvartab) || nrow(unitvartab) == 0) {
-          message(unitvar, " is invalid...")
-          message(unitvarqry)
-          stop()
+
+      if (chkvalues) {
+        
+        ## Check unitvars in plot data
+        unitvarsa. <- ifelse(all(unitvars %in% pltassgnflds), pltassgn., plt.)	  	
+        unitvarqry <- paste0(
+          "SELECT DISTINCT ", toString(paste0(unitvarsa., unitvars)), 
+          pltafromqry, 
+          pwhereqry,
+          "\nORDER BY ", toString(paste0(unitvarsa., unitvars)))
+        if (pltaindb) {      
+          unitvartab <- tryCatch(
+            data.table(DBI::dbGetQuery(dbconn, unitvarqry)),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
+          if (is.null(unitvartab) || nrow(unitvartab) == 0) {
+            message(unitvar, " is invalid...")
+            message(unitvarqry)
+            stop()
+          }
+        } else {
+          unitvartab <- tryCatch(
+            data.table(sqldf::sqldf(unitvarqry, connection = NULL)),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
+          if (is.null(unitvartab) || nrow(unitvartab) == 0) {
+            message(unitvar, " is invalid...")
+            message(unitvarqry)
+            stop()
+          }
         }
-      } else {
-        unitvartab <- tryCatch(
-          data.table(sqldf::sqldf(unitvarqry, connection = NULL)),
-          error = function(e) {
-            message(e,"\n")
-            return(NULL) })
-        if (is.null(unitvartab) || nrow(unitvartab) == 0) {
-          message(unitvar, " is invalid...")
+        if (nrow(unitvartab) > 0) {
+          punit.vals <- sort(do.call(paste, unitvartab[, unitvars, with=FALSE]))
+          nbrunits <- length(punit.vals)
+        } else {
+          message("unitvars not in dataset...")
           message(unitvarqry)
-          stop()
         }
-      }
-      if (nrow(unitvartab) > 0) {
-        punit.vals <- sort(do.call(paste, unitvartab[, unitvars, with=FALSE]))
-        nbrunits <- length(punit.vals)
-      } else {
-        message("unitvars not in dataset...")
-        message(unitvarqry)
       }
     }
-    
+ 
     ######################################################################################
     ## 13. Check unitarea 
     ######################################################################################

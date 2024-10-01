@@ -532,7 +532,11 @@ check.popdataCHNG <-
     message(adjfactors.qry)
     return(NULL)
   }
-  setkeyv(setDT(adjfactors), strunitvars)
+  if (adj == "samp") {
+    setkeyv(setDT(adjfactors), strunitvars)
+  } else {
+    setkeyv(setDT(adjfactors), pltidsid)
+  }
   dbqueries$adjfactors <- adjfactors.qry
   
   

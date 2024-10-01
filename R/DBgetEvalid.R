@@ -593,7 +593,7 @@ DBgetEvalid <- function(states = NULL,
     #############################################################################
     
     if (is.null(surveynm)) {
-      message("SURVEY table does not exist in database... assuming ANNUAL inventory plots")
+      message("SURVEY table does not exist in database... assuming annual inventory plots")
       #invtype <- "ANNUAL"
     }
     if (!is.null(ppsanm)) {

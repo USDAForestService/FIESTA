@@ -281,10 +281,9 @@ check.popdataVOL <-
     pltidsvars <- c(puniqueid, unitvars)
     ## message(pltidsWITH.qry)
     
-    
+
     ## 5.3. Build ADJ query to append adjustment factors to pltids
     #######################################################################
-    
     
     ## Build ADJqry FROM statement
     if (!is.null(pltxnm)) {
@@ -327,8 +326,7 @@ check.popdataVOL <-
                 pltidsa. = "pltids.",
                 propqry = NULL)
     #message(ADJqry)
-    
-    
+
     ## 5.5. Build final query for adjustment factors, including pltids WITH query
     adjfactors.qry <- paste0(
       pltidsWITH.qry,
@@ -356,9 +354,12 @@ check.popdataVOL <-
       message(adjfactors.qry)
       return(NULL)
     }
-    setkeyv(setDT(adjfactors), strunitvars)
+    if (adj == "samp") {
+      setkeyv(setDT(adjfactors), strunitvars)
+    } else {
+      setkeyv(setDT(adjfactors), pltidsid)
+    }
     dbqueries$adjfactors <- adjfactors.qry
-    
     
     ## Check adjustment factors
     #evalid <- 81901
