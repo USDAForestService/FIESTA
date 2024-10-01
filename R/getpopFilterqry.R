@@ -26,7 +26,7 @@ getpopFilterqry <- function(popType,
   ## datindb - if TRUE, PLOT and other tables are in a database
   ## pltaindb - if TRUE, the pltassgn table is in the database
   ## ppsaindb - if TRUE, and EVALID is in popFilters, POP_PLOT_STRATUM_ASSGN is in database
-  pwhereqry=ewhereqry=nonsamp.pfilter=ppsaflds=PLOT=stcntywhereqry <- NULL
+  pwhereqry=ewhereqry=nonsamp.pfilter=ppsaflds=PLOT=stcntywhereqry=POP_PLOT_STRATUM_ASSGN <- NULL
   syntax <- "SQL"
   subcycle99 <- FALSE
   pflds <- unique(c(pltassgnflds, pltflds))
@@ -48,8 +48,9 @@ getpopFilterqry <- function(popType,
   ## 2. Check states for subsetting data if evalid and state are not in popFilter
   ##################################################################################
   states <- popFilter$states
+
   if (is.null(popFilter$evalid) && is.null(states)) {
-    statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
+    statenm <- findnm("STATECD", pltflds, returnNULL=TRUE)
     statecda. <- ifelse(statenm %in% pltflds, plt., pltassgn.)
     
     if (is.null(statenm) && datindb) {
@@ -74,7 +75,7 @@ getpopFilterqry <- function(popType,
             cntycds <- unique(pltassgnx[pltassgnx[[statenm]] %in% stcd, countynm, with=FALSE])[[1]]
             if (length(cntycds) > 0) {
               if (!is.null(stcntywhereqry)) {
-                stcntywhereqry <- paste0(stcntywhereqry, "\n  AND ")
+                stcntywhereqry <- paste0(stcntywhereqry, "\n  OR ")
               }
               stcntywhereqry <- paste0(stcntywhereqry, 
                                        "(p.", statenm, " = ", stcd, " AND p.", countynm, " IN (", toString(cntycds), "))")
@@ -96,8 +97,9 @@ getpopFilterqry <- function(popType,
       } else {
         states <- unique(pltassgnx[[statenm]])
       }
-      countynm <- findnm("COUNTYCD", pltassgnflds)
+      countynm <- findnm("COUNTYCD", pltflds)
       countycda. <- ifelse(countynm %in% pltflds, plt., pltassgn.)
+
       if (!is.null(countynm)) {
         stcntywhereqry <- NULL
         for (i in 1: length(states)) {
@@ -113,7 +115,7 @@ getpopFilterqry <- function(popType,
           }
           if (length(cntycds) > 0) {
             if (!is.null(stcntywhereqry)) {
-              stcntywhereqry <- paste0(stcntywhereqry, "\n  AND ")
+              stcntywhereqry <- paste0(stcntywhereqry, "\n  OR ")
             }
             stcntywhereqry <- paste0(stcntywhereqry, 
                                      "(", statecda., statenm, " = ", stcd, " AND ", countycda., countynm, " IN (", toString(cntycds), "))")
@@ -124,7 +126,7 @@ getpopFilterqry <- function(popType,
       }
     }
   }
-  
+
   ##################################################################################
   ## 3. Get FIA Evaluation info
   ##################################################################################
@@ -164,7 +166,7 @@ getpopFilterqry <- function(popType,
     ppsa. <- "ppsa."
     ppsaindb <- evalInfo$ppsaindb
   }
-  
+
   ####################################################################
   ## 4. Check custom Evaluation data
   ####################################################################
@@ -192,7 +194,6 @@ getpopFilterqry <- function(popType,
       measyrlst <- evalchk$measyrlst
     }
   }
-  
   
   ###################################################################################
   ## 5. Build pwhereqry
@@ -280,7 +281,7 @@ getpopFilterqry <- function(popType,
                             "\n  AND ", stcntywhereqry)
       }
     }
-    
+
     ## 5.3. Check subcycle, add to where statement
     ############################################################################
     if (!is.null(subcycle99) && !subcycle99) {
@@ -333,7 +334,7 @@ getpopFilterqry <- function(popType,
         ## Build where query to remove plots that didn't sample P2VEG
         p2vegstatusa. <- ifelse(p2vegstatusnm %in% pltflds, plt., pltassgn.)
         p2vegstatus.filter <- paste0(p2vegstatusa., p2vegstatusnm, " < 3")
-        if (is.null(p2whereqry)) {
+        if (is.null(pwhereqry)) {
           pwhereqry <- paste0("\n WHERE ", p2vegstatus.filter)
         } else {
           pwhereqry <- paste0(pwhereqry, 
@@ -377,7 +378,7 @@ getpopFilterqry <- function(popType,
       }
     }
   }
-  
+
   ## 5.7. Check invyrs and add to where query. 
   ############################################################################
   if (!is.null(popFilter$invyrs)) {
@@ -573,87 +574,9 @@ getpopFilterqry <- function(popType,
   #  } else {
   #    selectidvars <- paste0("'", popType, "' AS POP_TYP, ")
   #  }
-  
-  
+
   ###################################################################################
-  ## 6. Get most current plots in database
-  ###################################################################################
-  if (popFilter$measCur) {
-    surveyfromqry <- NULL
-    varCur <- "INVYR"
-    
-    ## Check SURVEY table
-    if (!is.null(dbconn)) {
-      surveynm <- findnm(dbTabs$survey_layer, DBI::dbListTables(dbconn), returnNULL = TRUE)
-      if (!is.null(surveynm) && "SRV_CN" %in% pflds) {
-        surveyfromqry <- paste0("\n JOIN ", SCHEMA., surveynm,
-                                " survey ON (survey.CN = ", plt., "SRV_CN AND survey.ANN_INVENTORY = 'Y')")
-      }
-    }
-    
-    ## Add an Endyr to where statement
-    if (!is.null(measEndyr)) {
-      if (chkvalues) {
-        yrlst.qry <- paste0(
-          "SELECT DISTINCT ", varCur, 
-          "\nFROM ", SCHEMA., plotnm, 
-          "\nORDER BY ", varCur)
-        pltyrs <- DBI::dbGetQuery(dbconn, yrlst.qry)
-        
-        if (measEndyr <= min(pltyrs, na.rm=TRUE)) {
-          message(measEndyr, " is less than minimum year in dataset")
-          return(NULL)
-        }
-      }
-      Endyr.filter <- paste0(plt., varCur, " <= ", measEndyr)
-      if (is.null(pwhereqry)) {
-        pwhereqry <- Endyr.filter
-      } else {
-        pwhereqry <- paste(paste(pwhereqry, Endyr.filter, sep="\n   AND "))
-      }
-    }
-    
-    ## Define group variables
-    groupvars <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
-    pgroupvars <- sapply(groupvars, findnm, pflds, returnNULL = TRUE)
-    if (any(is.null(pgroupvars))) {
-      missvars <- pgroupvars[is.null(pgroupvars)]
-      if (length(missvars) > 1 || missvars != "unitcd") {
-        warning("dataset must include statecd, countycd, and plot")
-      }
-    } else {
-      groupvars <- as.vector(pgroupvars)
-    }
-    
-    ## Create subquery
-    #######################################################################
-    subqry <- paste0("SELECT ", toString(paste0(plt., groupvars)), 
-                     ", MAX(", plt., varCur, ") MAXYR  ",
-                     pfromqry, surveyfromqry)
-    if (!is.null(pwhereqry) || pwhereqry != "") {
-      subqry <- paste0(subqry, pwhereqry)
-    }
-    subqry <- paste0(subqry,
-                     "\n GROUP BY ", toString(paste0(plt., groupvars)))
-    
-    ## Create pltidsqry
-    subjoinqry <- getjoinqry(c(groupvars, varCur), c(groupvars, "MAXYR"), alias2 = "pp.")
-    pltselectqry <- paste0("SELECT DISTINCT ", toString(selectpvars))
-    pltidsqry <- paste0(pltselectqry,
-                        pltafromqry, 
-                        "\n INNER JOIN ",
-                        "\n (", subqry, ") pp ", subjoinqry)
-    
-  } else {
-    
-    ## Create pltidsqry
-    pltselectqry <- paste0("SELECT ", toString(selectpvars))
-    pltidsqry <- paste0(pltselectqry,
-                        pltafromqry)
-  }
-  
-  ###################################################################################
-  ## 7. Add other filters in popFilter
+  ## 6. Add other filters in popFilter
   ###################################################################################
   if (!is.null(popFilter$pfilter)) {
     pfilter <- popFilter$pfilter
@@ -684,16 +607,94 @@ getpopFilterqry <- function(popType,
     }
   }
   
+  ###################################################################################
+  ## 7. Get most current plots in database
+  ###################################################################################
+  if (popFilter$measCur) {
+    surveyfromqry <- NULL
+    varCur <- "INVYR"
+    
+    ## Check SURVEY table
+    if (!is.null(dbconn)) {
+      surveynm <- findnm(dbTabs$survey_layer, DBI::dbListTables(dbconn), returnNULL = TRUE)
+      if (!is.null(surveynm) && "SRV_CN" %in% pflds) {
+        surveyfromqry <- paste0("\n JOIN ", SCHEMA., surveynm,
+              " survey ON (survey.CN = ", plt., "SRV_CN AND survey.ANN_INVENTORY = 'Y')")
+      }
+    }
+
+    ## Add an Endyr to where statement
+    if (!is.null(measEndyr)) {
+      if (chkvalues) {
+        yrlst.qry <- paste0(
+          "SELECT DISTINCT ", varCur, 
+          "\nFROM ", SCHEMA., plotnm, 
+          "\nORDER BY ", varCur)
+        pltyrs <- DBI::dbGetQuery(dbconn, yrlst.qry)
+        
+        if (measEndyr <= min(pltyrs, na.rm=TRUE)) {
+          message(measEndyr, " is less than minimum year in dataset")
+          return(NULL)
+        }
+      }
+      Endyr.filter <- paste0(plt., varCur, " <= ", measEndyr)
+      if (is.null(pwhereqry)) {
+        pwhereqry <- Endyr.filter
+      } else {
+        pwhereqry <- paste(paste(pwhereqry, Endyr.filter, sep="\n   AND "))
+      }
+    }
+
+    ## Define group variables
+    groupvars <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
+    pgroupvars <- sapply(groupvars, findnm, pltflds, returnNULL = TRUE)
+    if (any(is.null(pgroupvars))) {
+      missvars <- pgroupvars[is.null(pgroupvars)]
+      if (length(missvars) > 1 || missvars != "unitcd") {
+        warning("dataset must include statecd, countycd, and plot")
+      }
+    } else {
+      groupvars <- as.vector(pgroupvars)
+    }
+   
+    ## Create subquery
+    #######################################################################
+    subqry <- paste0("SELECT ", toString(paste0(plt., groupvars)), 
+                     ", MAX(", plt., varCur, ") MAXYR  ",
+                     pfromqry, surveyfromqry)
+    if (!is.null(pwhereqry) || pwhereqry != "") {
+      subqry <- paste0(subqry, pwhereqry)
+    }
+    subqry <- paste0(subqry,
+                     "\n GROUP BY ", toString(paste0(plt., groupvars)))
+    
+    ## Create pltidsqry
+    subjoinqry <- getjoinqry(c(groupvars, varCur), c(groupvars, "MAXYR"), alias2 = "pp.")
+    pltselectqry <- paste0("SELECT DISTINCT ", toString(selectpvars))
+    pltidsqry <- paste0(pltselectqry,
+                        pltafromqry, 
+                        "\n INNER JOIN ",
+                        "\n (", subqry, ") pp ", subjoinqry)
+  } else {
+    
+    ## Create pltidsqry
+    pltselectqry <- paste0("SELECT ", toString(selectpvars))
+    pltidsqry <- paste0(pltselectqry,
+                        pltafromqry)
+    
+    ## Add pwhereqry to pltidsqry
+    if (!is.null(pwhereqry) || pwhereqry != "") {
+      pltidsqry <- paste0(pltidsqry, pwhereqry)
+    }
+  }
+
   
   ###################################################################################
   ## 8. Create pltidsqry to use as WITH statement for extracting data (if pltassgn in database)
   ## getdataWITHqry - used for extracting data (if pltassgn not in database)
   ###################################################################################
   
-  ## Add pwhereqry to pltidsqry
-  if (!is.null(pwhereqry) || pwhereqry != "") {
-    pltidsqry <- paste0(pltidsqry, pwhereqry)
-  }
+
   
   if (!is.null(dbconn) && !dbconnopen) {
     DBI::dbDisconnect(dbconn)
