@@ -54,11 +54,11 @@ check.popdataPLT <-
     plotsampcnt=nonresplut=pfromqry=pltassgnqry=unitareaqry=auxlutqry=
       pwhereqry=pltx=pltassgnx=popwhereqry=pstratvars=getdataWITHqry=getdataCNs <- NULL
     
-    datindb=pltaindb=unitindb=stratindb=subcycle99=PLOT <- FALSE
+    datindb=pltaindb=unitindb=stratindb=subcycle99 <- FALSE
     unitvars <- unique(c(unitvar2, unitvar))
     pltassgnvars <- unique(c(projectid, pltassgnid, unitvars)) 
     SCHEMA. <- ""
-    P2POINTCNT=POP_PLOT_STRATUM_ASSGN <- NULL
+    P2POINTCNT=POP_PLOT_STRATUM_ASSGN=PLOT<- NULL
     
     
     ###################################################################################
