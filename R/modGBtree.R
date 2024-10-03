@@ -306,7 +306,7 @@ modGBtree <- function(GBpopdat,
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
   gui <- FALSE
-  
+ 
   ## If gui.. set variables to NULL
   if (gui) { 
     landarea=strvar=areavar=sumunits=adjplot=strata=getwt=cuniqueid=ACI=
@@ -452,7 +452,7 @@ modGBtree <- function(GBpopdat,
   dbqueriesWITH <- GBpopdat$dbqueriesWITH
   adjcase <- GBpopdat$adjcase
   pjoinid <- GBpopdat$pjoinid
-  
+
   #adjfactors <- GBpopdat$adjfactors
   #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
   #popVOL_compare
@@ -566,15 +566,16 @@ modGBtree <- function(GBpopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  #withqry = dbqueriesWITH$pltcondxWITH
+  #withqry <- pltcondxWITHqry
+  withqry <- dbqueriesWITH$pltidsWITH
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
                  popdatindb = popdatindb,
                  popconn = popconn, SCHEMA. = SCHEMA.,
-                 pltcondx = pltcondx,
-                 pltcondflds = pltcondflds,
-                 withqry = pltcondxWITHqry,
+                 #pltcondx = pltcondx,
+                 #pltcondflds = pltcondflds,
+                 withqry = withqry,
                  estseed = estseed,
                  treex = treex, treeflds = treeflds,
                  seedx = seedx, seedflds = seedflds,
@@ -590,7 +591,7 @@ modGBtree <- function(GBpopdat,
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  landarea = landarea, states = states, 
                  #cvars2keep = "COND_STATUS_CD",
-                 whereqry = pcwhereqry,
+                 #whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -615,6 +616,7 @@ modGBtree <- function(GBpopdat,
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
+  
 
   ## if classified columns, create domclassify list for summarizing tree data
   if (any(!is.null(classifyrow), !is.null(classifycol))) {
@@ -633,7 +635,7 @@ modGBtree <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-
+print("KKK")
   ###############################################################################
   ### Get estimation data from tree table
   ###############################################################################

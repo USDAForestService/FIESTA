@@ -267,8 +267,7 @@ modGBchng <- function(GBpopdat,
   parameters <- FALSE
   returnlst <- list()
   rawdata <- TRUE
-  colvar <- NULL
-  
+
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder <- NULL
   #estvar <- "CONDPROP_ADJ"
@@ -351,10 +350,9 @@ modGBchng <- function(GBpopdat,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  
   list.items <- c("pltcondx", "cuniqueid", "condid", 
-  "ACI.filter", "unitarea", "unitvar", "stratalut", "strvar",
-  "plotsampcnt", "condsampcnt")
+             "unitarea", "unitvar", "stratalut", "strvar",
+             "plotsampcnt", "condsampcnt")
   GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   if (is.null(GBpopdat)) return(NULL)
   pltidsadj <- GBpopdat$pltidsadj
@@ -363,7 +361,7 @@ modGBchng <- function(GBpopdat,
   pltcondflds <- GBpopdat$pltcondflds
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
-  ACI.filter <- GBpopdat$ACI.filter
+  ACI <- GBpopdat$ACI
   pltassgnx <- GBpopdat$pltassgnx
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
@@ -381,6 +379,7 @@ modGBchng <- function(GBpopdat,
   estvar.name <- GBpopdat$estvar.area
   stratcombinelut <- GBpopdat$stratcombinelut
   strwtvar <- GBpopdat$strwtvar
+  adj <- GBpopdat$adj
   strunitvars <- c(unitvars, strvar)
   strata <- GBpopdat$strata
   popdatindb <- GBpopdat$popdatindb
@@ -392,9 +391,8 @@ modGBchng <- function(GBpopdat,
   dbqueriesWITH <- GBpopdat$dbqueriesWITH
   areawt <- GBpopdat$areawt
   areawt2 <- GBpopdat$areawt2
-  areawtcase <- GBpopdat$areawtcase
-  adj <- GBpopdat$adj
-    
+  adjcase <- GBpopdat$adjcase
+  
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
       if (!is.null(pop_dsn)) {
@@ -438,13 +436,13 @@ modGBchng <- function(GBpopdat,
     check.estdata(esttype = esttype, 
                   popType = popType,
                   popdatindb = popdatindb, 
-                  popconn = popconn,
+                  popconn = popconn, pop_schema = pop_schema,
                   pltcondflds = pltcondflds,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
                   landarea = landarea,
-                  ACI.filter = ACI.filter, 
+                  ACI = ACI, 
                   pcfilter = pcfilter,
                   T1filter = T1filter, T2filter = T2filter,
                   allin1 = allin1, divideby = divideby,
@@ -479,6 +477,7 @@ modGBchng <- function(GBpopdat,
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
+  SCHEMA. <- estdat$SCHEMA.
   landarea.filter <- estdat$landarea.filter
 
   
@@ -489,7 +488,7 @@ modGBchng <- function(GBpopdat,
     check.rowcol(esttype = esttype, 
                  popType = popType,
                  popdatindb = popdatindb,
-                 popconn = popconn,
+                 popconn = popconn, SCHEMA. = SCHEMA.,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
                  withqry = pltcondxWITHqry,
@@ -498,19 +497,20 @@ modGBchng <- function(GBpopdat,
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
                  row.orderby = row.orderby, col.orderby = col.orderby, 
                  row.add0 = row.add0, col.add0 = col.add0, 
+                 row.classify = row.classify, col.classify = col.classify,
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  landarea = landarea, states = states, 
-                 cvars2keep=c("PREV_PLT_CN","REMPER","PROP_BASIS",
-				                       "COND_STATUS_CD","CONDPROP_UNADJ", 
-							                 "COND_NONSAMPLE_REASN_CD"),
+                 #cvars2keep=c("PREV_PLT_CN","REMPER","PROP_BASIS",
+				         #              "COND_STATUS_CD","CONDPROP_UNADJ", 
+							   #              "COND_NONSAMPLE_REASN_CD"),
                  whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
-  domainlst <- rowcolinfo$domainlst
+  bydomainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
   rowvarnm <- rowcolinfo$rowvarnm
@@ -524,9 +524,18 @@ modGBchng <- function(GBpopdat,
   rowgrpnm <- rowcolinfo$rowgrpnm
   title.rowgrp <- rowcolinfo$title.rowgrp
   grpvar <- rowcolinfo$grpvar
+  classifyrow <- rowcolinfo$classifyrow
+  classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
   
-
+  
+  ## Generate a uniquecol for estimation units
+  if (!sumunits && colvar == "NONE") {
+    uniquecol <- data.table(unitarea[[unitvar]])
+    setnames(uniquecol, unitvar)
+    uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
+  }
+ 
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################
@@ -538,19 +547,39 @@ modGBchng <- function(GBpopdat,
                    chngtype = chngtype,
                    cuniqueid = cuniqueid, 
                    condid = condid,
-                   rowvar = rowvar,
+                   rowvar = rowvar, 
+                   row.orderby = row.orderby,
+                   uniquerow = uniquerow,
+                   title.rowvar = title.rowvar,
                    colvar = colvar,
+                   col.orderby = col.orderby,
+                   uniquecol = uniquecol,
+                   title.colvar = title.colvar,
+                   pcdomainlst = bydomainlst,
                    popdatindb = popdatindb,
                    popconn = popconn,
                    pltcondx = pltcondx,
+                   sccmx = sccmx,
                    pltidsadj = pltidsadj,
                    pltcondxadjWITHqry = pltcondxadjWITHqry,
                    pcwhereqry = pcwhereqry,
-                   landarea.filter = landarea.filter)
+                   landarea.filter = landarea.filter,
+                   classifyrow = classifyrow,
+                   classifycol = classifycol)
   cdomdat <- conddat$cdomdat
   cdomdatqry <- conddat$cdomdatqry
   estnm <- conddat$estnm
- 
+  rowvar <- conddat$rowvar
+  row.orderby <- conddat$row.orderby
+  uniquerow <- conddat$uniquerow
+  title.rowvar <- conddat$title.rowvar
+  colvar <- conddat$colvar
+  col.orderby <- conddat$col.orderby
+  uniquecol <- conddat$uniquecol
+  title.colvar <- conddat$title.colvar
+  uniquecol <- conddat$uniquecol
+  grpvar <- conddat$grpvar
+  
 
   ###################################################################################
   ### Get titles for output tables
@@ -592,9 +621,9 @@ modGBchng <- function(GBpopdat,
   ###################################################################################
   estdat <- 
     getGBestimates(esttype = esttype,
-                   domdat = cdomdat,
-                   cuniqueid = cuniqueid,
-                   estvar.name <- estnm,
+                   domdatn = cdomdat,
+                   uniqueid = cuniqueid,
+                   estvarn.name = estnm,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
@@ -619,7 +648,7 @@ modGBchng <- function(GBpopdat,
   totunit <- estdat$totunit
   unitvar <- estdat$unitvar
 
-  
+
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
@@ -633,7 +662,7 @@ modGBchng <- function(GBpopdat,
                 unit_totest = unit_totest, 
                 unit_rowest = unit_rowest, unit_colest = unit_colest, 
                 unit_grpest = unit_grpest,
-                rowvar = rowvarnm, colvar = colvarnm, 
+                rowvar = rowvar, colvar = colvar, 
                 uniquerow = uniquerow, uniquecol = uniquecol,
                 rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                 rowunit = rowunit, totunit = totunit, 
@@ -669,9 +698,21 @@ modGBchng <- function(GBpopdat,
   
 
   if (rawdata) {
+    ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
+    UNITStot <- sort(unique(unit_totest[[unitvar]]))
+    NBRPLTtot <- stratalut[stratalut[[unitvar]] %in% UNITStot, list(NBRPLT = sum(n.strata, na.rm=TRUE)), 
+                           by=unitvars]
+    
+    if ("unit_totest" %in% names(tabs$rawdat)) {
+      tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
+    }
+    if (sumunits && "totest" %in% names(tabs$rawdat)) {
+      tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
+    }
+    
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(cdomdat)
-    rawdat$domdat.qry <- cdomdat.qry
+    rawdat$domdatqry <- cdomdatqry
     if (savedata) {
       if (!is.null(title.estpse)) {
         title.raw <- paste(title.estpse, title.ref)
@@ -713,7 +754,7 @@ modGBchng <- function(GBpopdat,
     returnlst$raw <- rawdat
   }
   returnlst$states <- states
-  returnlst$invyrs <- invyrs
+  returnlst$invyr <- sort(unique(unlist(invyrs)))
   
     
   return(returnlst)

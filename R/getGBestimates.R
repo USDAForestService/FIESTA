@@ -97,7 +97,7 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
 
   ## Get row estimate  
   if (rowvar != "TOTAL") {
-
+    
     ## Sum numerator to plot, rowvar level
     domdatn <- domdatn[!is.na(domdatn[[rowvar]]),] 
     domdattot <- 
@@ -284,7 +284,7 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
     }      
     setkeyv(unit_colest, c(unitvar, colvar))
   }
- 
+
   if (!is.null(unit_grpest)) {
     unit_grpest <-
       add0unit(x = unit_grpest, 

@@ -1119,7 +1119,6 @@ modGBpop <- function(popType = "VOL",
     datExportData(pltidsadj, 
                   savedata_opts = outlst)
   }
-  
 
   ## Build list of data to return
   ###################################################################################

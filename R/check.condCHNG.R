@@ -2,21 +2,28 @@ check.condCHNG <- function(areawt, areawt2,
                            adj, adjcase, 
                            cuniqueid, condid, 
                            chngtype,
-                           rowvar = NULL,
-                           colvar = NULL,
+                           rowvar, row.orderby, 
+                           uniquerow, title.rowvar,
+                           colvar, col.orderby,
+                           uniquecol, title.colvar,
+                           pcdomainlst = NULL,
                            popdatindb,
                            popconn = NULL,
-                           pltcondx = NULL,
+                           pltcondx,
+                           sccmx,
                            pltidsadj = NULL,
                            pltcondxadjWITHqry = NULL,
                            pcwhereqry = NULL,
-                           landarea.filter = NULL) {
+                           landarea.filter = NULL,
+                           classifyrow = NULL,
+                           classifycol = NULL) {
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################
   estnm <- "ESTIMATED_VALUE"
   estvara. <- "sccm."
   sccmnm <- ifelse(popdatindb, sccmx, "sccmx")
+  rowvarnm=colvarnm <- NULL
   
   ## Add past landarea.filter to WHERE statement
   if (!is.null(landarea.filter)) {
@@ -64,54 +71,84 @@ check.condCHNG <- function(areawt, areawt2,
                          "\n    AND COALESCE(pc.COND_NONSAMPLE_REASN_CD, 0) = 0",
                          "\n    AND COALESCE(ppc.COND_NONSAMPLE_REASN_CD, 0) = 0")
   }
-  
+
   
   ## Build SELECT query
   byvars <- paste0("pc.", c(cuniqueid, condid))
-  if (rowvar == "TOTAL") {
-    cdomdatvars <- "pc.TOTAL"
-    
-  } else if (colvar == "NONE") {
-    cdomdatvars <- c(paste0("ppc.", rowvar, " AS PREV_", rowvar), paste0("pc.", rowvar))
-    grpbyvars <- c(byvars, c(paste0("ppc.", rowvar), paste0("pc.", rowvar)))
-    colvar <- rowvar
-    col.orderby <- row.orderby
-    colvarnm <- rowvarnm
-    title.colvar <- title.rowvar
-    rowvar <- paste0("PREV_", rowvar)
-    
-    if (!is.null(row.orderby)) {
-      row.orderby <- paste0("PREV_", row.orderby)
-    }
-    rowvarnm <- paste0("PREV_", rowvarnm)
-    title.rowvar <- paste0("PREV_", title.rowvar)
-    grpvar <- c(rowvar, colvar)
-    
-    uniquecol <- uniquerow
-    names(uniquerow) <- paste0("PREV_", names(uniquerow))
-    
-  } else {
-    cdomdatvars <- c(paste0("ppc.", rowvar, " AS PREV_", rowvar), paste0("pc.", colvar))
-    grpbyvars <- c(byvars, c(paste0("ppc.", rowvar), paste0("pc.", colvar)))
-    rowvar <- paste0("PREV_", rowvar)
-    
-    if (!is.null(row.orderby)) {
-      row.orderby <- paste0("PREV_", row.orderby)
-    }
-    rowvarnm <- paste0("PREV_", rowvarnm)
-    title.rowvar <- paste0("PREV_", title.rowvar)
-    title.colvar <- title.rowvar
-    grpvar <- c(rowvar, colvar)
+  cselectqry <- paste0("SELECT ", toString(byvars))
+  
+  ## Check pcdomainlst
+  if (is.null(pcdomainlst)) {
+    pcdomainlst <- c(rowvar, colvar)
+    pcdomainlst <- pcdomainlst[pcdomainlst != "NONE"]
   }
-  cdomdatvars <- c(byvars, cdomdatvars)
+  
+  
+  ## Append classified variables to query
+  if (!is.null(rowvar) && rowvar %in% pcdomainlst) {
+    
+    ## If colvar = "NONE"
+    if (is.null(colvar) || colvar == "NONE") {
+      colvar <- rowvar
+      col.orderby <- row.orderby
+      title.colvar <- title.rowvar
+      uniquecol <- copy(uniquerow)
+      classifycol <- classifyrow
+
+      if (!is.null(classifycol)) {
+        names(classifycol)[names(classifycol) %in% c("row.classify", "rowclassnm", "rowclassqry")] <- 
+                c("col.classify", "colclassnm", "colclassqry")
+      }
+    }
+    
+    if (!is.null(classifyrow)) {
+      cselectqry <- paste0(cselectqry, ", \n",
+                           classifyrow$rowclassqry)
+      rowclassnm <- classifyrow$rowclassnm
+      cselectqry <- sub(rowclassnm, paste0("PREV_", rowclassnm), cselectqry)
+      cselectqry <- gsub(paste0("pc.", rowvar), paste0("ppc.", rowvar), cselectqry)
+      rowvarnm <- paste0("PREV_", rowclassnm)
+      byvars <- c(byvars, rowvarnm)
+      setnames(uniquerow, rowclassnm, rowvarnm)
+    } else {
+      cselectqry <- paste0(cselectqry, ", ppc.", rowvar, " AS PREV_", rowvar)
+      rowvarnm <- paste0("PREV_", rowvar)
+      byvars <- c(byvars, rowvarnm)
+      names(uniquerow) <- paste0("PREV_", names(uniquerow))
+      #setnames(uniquerow, rowvar, rowvarnm)
+    }
+  }
+    
+  ## Append classified variables to query
+  if (colvar %in% pcdomainlst) {
+    if (!is.null(classifycol)) {
+      cselectqry <- paste0(cselectqry, ", \n",
+                           classifycol$colclassqry)
+      byvars <- c(byvars, classifycol$colclassnm)
+      colvarnm <- classifycol$colclassnm
+    } else {
+      cselectqry <- paste0(cselectqry, ", pc.", colvar)
+      byvars <- c(byvars, paste0("pc.", colvar))
+      colvarnm <- colvar
+    }
+  }
+  
+  ## Rename rowvar variables with prefix 'PREV_'
+  rowvar <- rowvarnm
+  if (!is.null(row.orderby)) {
+    row.orderby <- paste0("PREV_", row.orderby)
+  }
+  title.rowvar <- paste0("Previous ", title.rowvar)
+    
+  
+  ## Final select query
   cdomdatselectqry <- 
-    paste0("SELECT ", toString(cdomdatvars), ", ",
-           "\n    ", estvarqry)
+    paste0(cselectqry, ", ",
+           "\n  ", estvarqry)
   
   ## Build cdomdat FROM query
   joinqry <- getjoinqry(joinid1 = cuniqueid, joinid2 = cuniqueid,
                         alias1 = "pltidsadj.", alias2 = "pc.")
-  
   cdomdatfromqry <- 
     paste0("\nFROM pltidsadj",
            "\nJOIN pltcondx pc ", joinqry)
@@ -129,7 +166,7 @@ check.condCHNG <- function(areawt, areawt2,
     paste0(cdomdatselectqry, 
            cdomdatfromqry,
            pcwhereqry,
-           "\nGROUP BY ", toString(grpbyvars))
+           "\nGROUP BY ", toString(byvars))
 
   #Run query for cdomdat
   if (!popdatindb) {
@@ -157,9 +194,16 @@ check.condCHNG <- function(areawt, areawt2,
     return(NULL)
   }
   setkeyv(setDT(cdomdat), c(cuniqueid, condid)) 
+
   
   return(list(cdomdat = cdomdat, 
               cdomdatqry = cdomdat.qry,
-              estnm = estnm))
+              estnm = estnm,
+              rowvar = rowvarnm, row.orderby = row.orderby, 
+              title.rowvar = title.rowvar, uniquerow = uniquerow,
+              colvar = colvarnm, col.orderby = col.orderby, 
+              title.colvar = title.colvar, uniquecol = uniquecol,
+              grpvar = c(rowvarnm, colvarnm)
+              ))
   
 }

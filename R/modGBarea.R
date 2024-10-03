@@ -562,7 +562,8 @@ modGBarea <- function(GBpopdat,
                adjcase = adjcase,
                cuniqueid = cuniqueid, 
                condid = condid,
-               rowvar = rowvar, colvar = colvar,
+               rowvar = rowvar, 
+               colvar = colvar, 
                pcdomainlst = bydomainlst,
                popdatindb = popdatindb,
                popconn = popconn,
@@ -575,19 +576,10 @@ modGBarea <- function(GBpopdat,
   cdomdat <- conddat$cdomdat
   cdomdatqry <- conddat$cdomdatqry
   estnm <- conddat$estnm
+  rowvar <- conddat$rowvar
+  colvar <- conddat$colvar
+  grpvar <- conddat$grpvar
 
-  
-  ## If classified rowvar or colvar, get class names
-  if (!is.null(classifyrow)) {
-    rowvar <- classifyrow$rowclassnm
-  }
-  if (!is.null(classifycol)) {
-    colvar <- classifycol$colclassnm
-  }
-  if (!is.null(grpvar)) {
-    grpvar <- c(rowvar, colvar)
-  }
-  
 
   ###################################################################################
   ### Get titles for output tables
