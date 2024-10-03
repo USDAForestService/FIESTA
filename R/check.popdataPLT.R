@@ -640,12 +640,12 @@ check.popdataPLT <-
     ## 12. Get estimation unit(s) (unitvars) values
     ##################################################################################
     chkvalues <- TRUE
-    if (!is.null(unitvars)) {
+    if (!is.null(unitvars) && !all(unitvars == "ONEUNIT")) {
 
       if (chkvalues) {
         
         ## Check unitvars in plot data
-        unitvarsa. <- ifelse(all(unitvars %in% pltassgnflds), pltassgn., plt.)	  	
+        unitvarsa. <- ifelse(all(unitvars %in% pltassgnflds), pltassgn., plt.)
         unitvarqry <- paste0(
           "SELECT DISTINCT ", toString(paste0(unitvarsa., unitvars)), 
           pltafromqry, 
@@ -761,6 +761,12 @@ check.popdataPLT <-
           message("invalid unitareax")
           return(NULL)
         } 
+
+        if (any(unitvars == "ONEUNIT")) {
+          unitareax$ONEUNIT <- 1
+          unitareax <- unitareax[ , sum(get(areavar), na.rm = TRUE), by = unitvars]
+          setnames(unitareax, "V1", areavar)
+        }
         
         unitareax <- unique(unitareax[, c(unitvars, areavar), with=FALSE])	  
         if (any(duplicated(unitareax[, unitvars, with=FALSE]))) {
@@ -1021,9 +1027,17 @@ check.popdataPLT <-
     ######################################################################################
     
     ## Build select for plot counts
-    pltcnt_grpbyvars <- toString(paste0(pltassgn., unitvars))
-    pltcnt_selectqry <- paste0(
-      "\nSELECT ", pltcnt_grpbyvars, ", COUNT(*) NBRPLOTS")
+    if (any(unitvars == "ONEUNIT")) {
+      pltcnt_grpbyvars <- "ONEUNIT"
+      pltcnt_selectqry <- paste0(
+        "\nSELECT 1 AS ONEUNIT, COUNT(*) NBRPLOTS")
+    } else {
+      pltcnt_grpbyvars <- paste0(pltassgn., unitvars)
+      pltcnt_selectqry <- paste0(
+        "\nSELECT ", toString(pltcnt_grpbyvars), ", COUNT(*) NBRPLOTS")
+    }
+    
+  
     if (!is.null(pstatuscdnm)) {    
       pltcnt_selectqry <- paste0(pltcnt_selectqry, ", ",
                                  "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD == 1 THEN 1 ELSE 0 END) AS FOREST,",
@@ -1035,8 +1049,9 @@ check.popdataPLT <-
     plotunitcntqry <- paste0(pltcnt_selectqry, 
                              pltafromqry, 
                              pwhereqry,
-                             "\nGROUP BY ", pltcnt_grpbyvars,
-                             "\nORDER BY ", pltcnt_grpbyvars)
+                             "\nGROUP BY ", toString(pltcnt_grpbyvars),
+                             "\nORDER BY ", toString(pltcnt_grpbyvars))
+    
     if (pltaindb) {      
       plotunitcnt <- DBI::dbGetQuery(dbconn, plotunitcntqry)
     } else {
