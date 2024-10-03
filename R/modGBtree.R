@@ -635,7 +635,7 @@ modGBtree <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-print("KKK")
+
   ###############################################################################
   ### Get estimation data from tree table
   ###############################################################################
@@ -672,7 +672,7 @@ print("KKK")
                pjoinid = pjoinid,
                bytdom = bytdom,
                gui = gui)
-  if (is.null(treedat)) stop(NULL) 
+  if (is.null(treedat)) stop() 
   tdomdat <- treedat$tdomdat
   #estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name

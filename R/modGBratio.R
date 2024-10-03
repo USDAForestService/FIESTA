@@ -584,15 +584,16 @@ modGBratio <- function(GBpopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  #withqry = dbqueriesWITH$pltcondxWITH
+  #withqry <- pltcondxWITHqry
+  withqry <- dbqueriesWITH$pltidsWITH
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
                  popdatindb = popdatindb,
                  popconn = popconn, SCHEMA. = SCHEMA.,
-                 pltcondx = pltcondx,
-                 pltcondflds = pltcondflds,
-                 withqry = pltcondxWITHqry,
+                 #pltcondx = pltcondx,
+                 #pltcondflds = pltcondflds,
+                 withqry = withqry,
                  estseed = estseed,
                  treex = treex, treeflds = treeflds,
                  seedx = seedx, seedflds = seedflds,
@@ -608,7 +609,7 @@ modGBratio <- function(GBpopdat,
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  landarea = landarea, states = states, 
                  #cvars2keep = "COND_STATUS_CD",
-                 whereqry = pcwhereqry,
+                 #whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -750,18 +751,23 @@ modGBratio <- function(GBpopdat,
     cdomdat <- conddat$cdomdat
     cdomdatqry <- conddat$cdomdatqry
     estvard.name <- conddat$estnm
-  }
+    rowvar <- conddat$rowvar
+    colvar <- conddat$colvar
+    grpvar <- conddat$grpvar
+    
+  } else {
   
-  ## If classified rowvar or colvar, get class names
-  if (!is.null(classifynmlst)) {
-    if (!is.null(classifynmlst[[rowvar]])) {
-      rowvar <- classifynmlst[[rowvar]]
-    }
-    if (!is.null(classifynmlst[[colvar]])) {
-      colvar <- classifynmlst[[colvar]]
-    }
-    if (!is.null(grpvar)) {
-      grpvar <- c(rowvar, colvar)
+    ## If classified rowvar or colvar, get class names
+    if (!is.null(classifynmlst)) {
+      if (!is.null(classifynmlst[[rowvar]])) {
+        rowvar <- classifynmlst[[rowvar]]
+      }
+      if (!is.null(classifynmlst[[colvar]])) {
+        colvar <- classifynmlst[[colvar]]
+      }
+      if (!is.null(grpvar)) {
+        grpvar <- c(rowvar, colvar)
+      }
     }
   }
 
@@ -836,6 +842,7 @@ modGBratio <- function(GBpopdat,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
                    col.add0 = col.add0)
+  
   if (is.null(estdat)) stop()
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest

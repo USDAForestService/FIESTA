@@ -501,14 +501,16 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
+  #withqry <- pltcondxWITHqry
+  withqry <- dbqueriesWITH$pltidsWITH
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
                  popdatindb = popdatindb,
                  popconn = popconn, SCHEMA. = SCHEMA.,
-                 pltcondx = pltcondx,
-                 pltcondflds = pltcondflds,
-                 withqry = pltcondxWITHqry,
+                 #pltcondx = pltcondx,
+                 #pltcondflds = pltcondflds,
+                 withqry = withqry,
                  cuniqueid = cuniqueid, condid = condid,
                  rowvar = rowvar, colvar = colvar, 
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
@@ -521,7 +523,7 @@ modGBarea <- function(GBpopdat,
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  landarea = landarea, states = states, 
                  #cvars2keep = "COND_STATUS_CD",
-                 whereqry = pcwhereqry,
+                 #whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -573,6 +575,7 @@ modGBarea <- function(GBpopdat,
                pcwhereqry = pcwhereqry,
                classifyrow = classifyrow,
                classifycol = classifycol)
+  if (is.null(conddat)) stop(NULL)
   cdomdat <- conddat$cdomdat
   cdomdatqry <- conddat$cdomdatqry
   estnm <- conddat$estnm
@@ -641,6 +644,7 @@ modGBarea <- function(GBpopdat,
                    row.add0 = row.add0,
                    col.add0 = col.add0)
  
+  if (is.null(estdat)) stop()
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest
   unit_colest <- estdat$unit_colest
