@@ -1003,7 +1003,7 @@ spGetAuxiliary <- function(xyplt = NULL,
   ## Check if any auxiliary data included. If no return estimation unit info only
   noaux <- ifelse (is.null(rastlst.contfn) && is.null(rastlst.catfn), TRUE, FALSE) 
 
-  
+
   ###################################################################################
   ## Get totacres from domain polygons (if areacalc = TRUE)
   ###################################################################################
@@ -1015,10 +1015,6 @@ spGetAuxiliary <- function(xyplt = NULL,
     names(unitarea) <- c(unitvar, vars2keep, areavar)
   }
 
-  if (extract) {
-    pltassgn <- sf::st_drop_geometry(sppltx)
-    spxy <- sppltx
-  }
 
   ## If unitvar2 is not null, split back into 2 columns
   if (!is.null(unitvar2)) {
@@ -1052,16 +1048,22 @@ spGetAuxiliary <- function(xyplt = NULL,
 
   ## Append P1POINTCNT based on pltassgn
   unitvars <- c(unitvar2, unitvar)
-  setkeyv(setDT(pltassgn), unitvars)
   setkeyv(setDT(unitzonal), unitvars)
-  P1POINTCNT <- setDT(pltassgn)[, list(P1POINTCNT=.N), by=unitvars]
-  unitzonal <- unitzonal[P1POINTCNT]
-  if ("PLOT_STATUS_CD" %in% names(pltassgn)) {
-    P1POINTCNTFOR <- pltassgn[PLOT_STATUS_CD == 1, list(P1POINTCNTFOR=.N), by=unitvars]
-    unitzonal <- unitzonal[P1POINTCNTFOR]
+  
+  
+  if (extract) {
+    pltassgn <- sf::st_drop_geometry(sppltx)
+    setkeyv(setDT(pltassgn), unitvars)
+    spxy <- sppltx
+    
+    P1POINTCNT <- setDT(pltassgn)[, list(P1POINTCNT=.N), by=unitvars]
+    unitzonal <- unitzonal[P1POINTCNT]
+    if ("PLOT_STATUS_CD" %in% names(pltassgn)) {
+      P1POINTCNTFOR <- pltassgn[PLOT_STATUS_CD == 1, list(P1POINTCNTFOR=.N), by=unitvars]
+      unitzonal <- unitzonal[P1POINTCNTFOR]
+    }
   }
   
- 
   ## Write data frames to CSV files
   #######################################
   if (savedata) {

@@ -1,7 +1,8 @@
 check.cond <- function(areawt, areawt2, 
                        adj, adjcase, 
                        cuniqueid, condid, 
-                       rowvar, colvar,
+                       rowvar, 
+                       colvar, 
                        pcdomainlst = NULL,
                        popdatindb,
                        popconn = NULL,
@@ -16,6 +17,7 @@ check.cond <- function(areawt, areawt2,
   ###################################################################################
   estnm <- "ESTIMATED_VALUE"
   estvara. <- "pc."
+  rowvarnm=colvarnm <- NULL
   
   ## Define select query for estimates
   estvarqry <- paste0(estvara., areawt)
@@ -43,26 +45,28 @@ check.cond <- function(areawt, areawt2,
     if (!is.null(classifyrow)) {
       cselectqry <- paste0(cselectqry, ", \n",
                          classifyrow$rowclassqry)
-      byvars <- c(byvars, classifyrow$rowclassnm)
-      #rowvar <- rowclassnm
+      rowvarnm <- classifyrow$rowclassnm
+      byvars <- c(byvars, rowvarnm)
     } else {
       cselectqry <- paste0(cselectqry, ", pc.", rowvar)
+      rowvarnm <- rowvar
+      byvars <- c(byvars, paste0("pc.", rowvar))
     }
   }
   if (!is.null(colvar) && colvar != "NONE" && colvar %in% pcdomainlst) {
     if (!is.null(classifycol)) {
       cselectqry <- paste0(cselectqry, ", \n",
-                         classifyrow$colclassqry)
-      byvars <- c(byvars, classifyrow$colclassnm)
-      #colvar <- colclassnm
+                         classifycol$colclassqry)
+      colvarnm <- classifycol$colclassnm
+      byvars <- c(byvars, colvarnm)
     } else {
       cselectqry <- paste0(cselectqry, ", pc.", colvar)
+      colvarnm <- colvar
+      byvars <- c(byvars, paste0("pc.", colvar))
     }
   }
 
-  #  cdomdatselectqry <- 
-  #    paste0("SELECT ", toString(cdomdatvars), ", 1 AS TOTAL, ",
-  #           "\n    ", estvarqry)
+  ## Final select query
   cdomdatselectqry <- 
     paste0(cselectqry, ", ",
            "\n  ", estvarqry)
@@ -109,8 +113,12 @@ check.cond <- function(areawt, areawt2,
   }
   setkeyv(setDT(cdomdat), c(cuniqueid, condid))
   
+  
   return(list(cdomdat = cdomdat, 
               cdomdatqry = cdomdatqry,
-              estnm = estnm))
+              estnm = estnm,
+              rowvar = rowvarnm, 
+              colvar = colvarnm, 
+              grpvar = c(rowvarnm, colvarnm)))
   
 }

@@ -3,7 +3,7 @@ check.rowcol <-
            popType, 
            popdatindb, 
            popconn = NULL, SCHEMA. = "",
-           pltcondx, pltcondflds, 
+           pltcondx = NULL, pltcondflds = NULL, 
            withqry = NULL, 
            estseed = "none",
            treex = NULL, treeflds = NULL,
@@ -98,14 +98,15 @@ check.rowcol <-
 
   ## Check for condid
   if (!is.null(condid) && !condid %in% c(treeflds, pltcondflds)) condid <- NULL
-  if (!is.null(cuniqueid) && !cuniqueid %in% pltcondflds) stop("invalid cuniqueid")
+  if (!is.null(pltcondflds)) {
+    if (!is.null(cuniqueid) && !cuniqueid %in% pltcondflds) stop("invalid cuniqueid")
+  }
   if (!is.null(treex) && !is.null(tuniqueid) && !tuniqueid %in% treeflds) {
     stop("invalid tuniqueid")
   }
   #ref_titles <- FIESTAutils::ref_titles
   bytdom=bypcdom <- FALSE
   seedclnm <- "<1"
-  seedonly <- ifelse(estseed == "only", TRUE, FALSE)
 
   ##################################################################
   ## SET UP VARIABLE LISTS
@@ -311,7 +312,7 @@ check.rowcol <-
           "\nFROM ", rowtabnm, " pc")
         
       } else {
-        if (seedonly && rowvar %in% seedflds) {
+        if (estseed == "only" && rowvar %in% seedflds) {
           bytdom <- TRUE
           rowisdb <- isdbt
           rowflds <- seedflds
@@ -329,6 +330,13 @@ check.rowcol <-
           } else {
             rowtabnm <- treex
           }
+          if (estseed == "add") {
+            if (!rowisdb) {
+              seedtabnm <- "seedx"
+            } else {
+              seedtabnm <- seedx
+            }
+          }
         }
 
         ## build row fromqry
@@ -340,6 +348,18 @@ check.rowcol <-
           rowfromqry <- paste0(
             rowfromqry,
             "\nJOIN ", pltcondxnm, " pc ", rowtjoinqry)
+        }
+        
+        if (estseed == "add") {
+          seedfromqry <- paste0(
+            "\nFROM ", SCHEMA., seedtabnm, " s")
+          
+          if (!is.null(pltcondx)) {
+            rowsjoinqry <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "s.", "pc.")
+            seedfromqry <- paste0(
+              seedfromqry,
+              "\nJOIN ", pltcondxnm, " pc ", rowsjoinqry)
+          }
         }
       }  
 
@@ -402,7 +422,7 @@ check.rowcol <-
             ## Build query for getting unique values within population
             uniquerow.qry <- 
               paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
-                     rowfromqry,
+                     seedfromqry,
                      whereqry,
                      "\nORDER BY ", toString(c(row.orderby, rowvar)))
             if (!is.null(pltcondxWITHqry)) {
@@ -573,29 +593,33 @@ check.rowcol <-
         rowuniquex <- uniquex
 
         ## Check seedling table
-        if (rowvar %in% treeflds && estseed == "add") {
+        if (rowvar %in% seedflds && estseed == "add") {
           
           ## Build seedling from query
           if (!is.null(seedx)) {
 
-            if (estseed == "add" && rowvar == "DIACL") {
+            if (estseed == "add" && rowvar == "DIA" && (!is.null(row.classify))) {
               suniquex <- "<1"
               seedflds <- c(seedflds, "DIACL")
             } else {  
-              if (!rowvar %in% seedflds) {
-                message(rowvar, " not in seed")
-                return(NULL)
-              }	  
+              #if (!rowvar %in% seedflds) {
+              #  message(rowvar, " not in seed")
+              #  return(NULL)
+              #}	  
               
               ## Build query for getting unique seedling rowvar values within population
               suniquex.qry <- 
                 paste0("SELECT DISTINCT ", rowvar, 
-                       rowfromqry,
+                       seedfromqry,
                        "\nORDER BY ", rowvar)
               if (estseed == "only") {
                 #message("getting unique values for ", rowvar, ":\n", suniquex.qry, "\n")
               }
               if (rowisdb) {
+                if (!is.null(withqry)) {
+                  suniquex.qry <- paste0(withqry, 
+                                        "\n", suniquex.qry)
+                }
                 suniquex <- tryCatch(
                     DBI::dbGetQuery(popconn, suniquex.qry)[[1]],
                             error=function(e) {
@@ -699,11 +723,11 @@ check.rowcol <-
                   rowLUTnm <- rowLUT$xLUTnm
                 } ## end estseed != only
                 
-                if (estseed %in% c("add", "only") && !is.null(seedf)) {
-                  if (!is.data.frame(seedf)) { 
+                if (estseed %in% c("add", "only") && !is.null(seedx)) {
+                  if (!is.data.frame(seedx)) { 
                     x <- seedflds 
                   } else { 
-                    x <- seedf 
+                    x <- seedx 
                   } 
                   if (rowvar %in% seedflds) {
                     if (rowvar == "SPCD") {
@@ -728,11 +752,11 @@ check.rowcol <-
                       rowlut <- rbind(rowlut, rowluts)
                     }
                     if (!rowisdb) {
-                      seedf <- rowLUT$xLUT
+                      seedx <- rowLUT$xLUT
                     }       
                   } else if (rowvar == "DIACL") {
                     if (rowisdb) {
-                      seedf$DIACL <- seedclnm
+                      seedx$DIACL <- seedclnm
                     }
                   }
                 }  ## end estseed %in% c("add", "only")
@@ -884,7 +908,7 @@ check.rowcol <-
         
         
       } else {
-        if (seedonly && colvar %in% seedflds) {
+        if (estseed == "only" && colvar %in% seedflds) {
           bytdom <- TRUE
           colisdb <- isdbt
           colflds <- seedflds
@@ -902,9 +926,16 @@ check.rowcol <-
           } else {
             coltabnm <- treex
           }
+          if (estseed == "add") {
+            if (!colisdb) {
+              seedtabnm <- "seedx"
+            } else {
+              seedtabnm <- seedx
+            }
+          }
         }
         
-        ## build column fromqry
+        ## build col fromqry
         colfromqry <- paste0(
           "\nFROM ", SCHEMA., coltabnm, " t")
         
@@ -913,8 +944,20 @@ check.rowcol <-
           colfromqry <- paste0(
             colfromqry,
             "\nJOIN ", pltcondxnm, " pc ", coltjoinqry)
-        } 
-      }
+        }
+        
+        if (estseed == "add") {
+          seedfromqry <- paste0(
+            "\nFROM ", SCHEMA., seedtabnm, " s")
+          
+          if (!is.null(pltcondx)) {
+            colsjoinqry <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "s.", "pc.")
+            seedfromqry <- paste0(
+              seedfromqry,
+              "\nJOIN ", pltcondxnm, " pc ", colsjoinqry)
+          }
+        }
+      }  
       
       ## Check col.orderby
       if (!is.null(col.orderby) && col.orderby != "NONE") {
@@ -962,28 +1005,25 @@ check.rowcol <-
                 return(NULL)})
           }	
         }  ## end col.orderby != "NONE"
-        
+       
         if (colvar %in% treeflds && estseed %in% c("add", "only")) {
-          if (!is.null(seedf)) {
-            
-            ## Build fromqry for seedling colvar 
-            seedfromqry <- paste0("\nFROM ", seedfnnm)
-            if (isdbc) {
-              paste0(seedfromqry,
-                     "\nJOIN pltids ON(pltids.CN = ", seedfnnm, ".", cuniqueid,")")
-            }
-            
+          if (!is.null(seedx)) {
             if (!col.orderby %in% seedflds) {
               message(col.orderby, " not in seed")
               return(NULL)
-            }	  
-            
-            ## Build query to get unique seedling colvar values
+            }	 
+
+            ## Build query for getting unique values within population
             uniquecol.qry <- 
               paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
                      seedfromqry,
+                     whereqry,
                      "\nORDER BY ", toString(c(col.orderby, colvar)))
-            
+            if (!is.null(pltcondxWITHqry)) {
+              uniquecol.qry <- paste0(pltcondxWITHqry,
+                                      "\n", uniquecol.qry)
+            }
+
             #message("getting unique values for ", colvar, ":\n", uniquecol.qry, "\n")
             if (colisdb) {
               uniquecol <- tryCatch(
@@ -1003,10 +1043,10 @@ check.rowcol <-
             
             if (estseed == "add" && colvar == "DIACL" && is.data.frame(treex)) {
               seedclord <- min(treex[[col.orderby]]) - 0.5
-              seedf[[col.orderby]] <- seedclord
+              seedx[[col.orderby]] <- seedclord
             } else {
-              if (estseed == "add" && is.data.frame(seedf) && colvar=="DIACL" && !"DIACL" %in% seedflds) {
-                seedf$DIACL <- seedclnm
+              if (estseed == "add" && is.data.frame(seedx) && colvar=="DIACL" && !"DIACL" %in% seedflds) {
+                seedx$DIACL <- seedclnm
               }
             }			
           } else {
@@ -1015,7 +1055,7 @@ check.rowcol <-
         }  ## end colvar %in% treeflds & estseed in c("add", "only")
         
       } else {   ## !is.null(col.orderby) && col.orderby != "NONE"
-        
+       
         ## Build query for getting unique colvar values within population
         uniquex.qry <- 
           paste0("SELECT DISTINCT ", colvar, 
@@ -1043,7 +1083,7 @@ check.rowcol <-
               message(e,"\n")
               return(NULL)})
         }
-        
+
         if (!is.null(col.classify)) {
           class. <- ifelse (colvar %in% pltcondflds, "pc.", "t.")
             
@@ -1082,6 +1122,12 @@ check.rowcol <-
             }
             fromval <- col.classify[[colvar]]
             toval <- row.classify[[colclassnm]]
+            
+            ## Check values of fromval
+            if (any(!fromval %in% uniquex)) {
+              missvals <- fromval[which(!fromval %in% uniquex)]
+              message("missing values in col.classify: ", toString(missvals))
+            }
             colclassqry <- classqry(colvar, fromval, toval, 
                                     classnm = colclassnm, 
                                     class. = class.,
@@ -1121,31 +1167,26 @@ check.rowcol <-
                 return(NULL)})
           }
         }
-        
+       
         if (any(is.na(uniquex)) && !keepNA) {
           uniquex <- uniquex[!is.na(uniquex)]		
         }
         coluniquex <- uniquex
         
         ## Check seedling table
-        if (colvar %in% treeflds && estseed %in% c("add", "only")) {
+        if (colvar %in% treeflds && estseed == "add") {
           
           ## Build seedling from query
           if (!is.null(seedx)) {
-            seedfromqry <- paste0("\nFROM ", seedfnnm)
-            if (isdbc) {
-              paste0(seedfromqry,
-                     "\nJOIN pltids ON(pltids.CN = ", seedfnnm, ".", cuniqueid,")")
-            }
-            
-            if (estseed == "add" && colvar == "DIACL") {
+
+            if (estseed == "add" && colvar == "DIA" && (!is.null(col.classify))) {
               suniquex <- "<1"
               seedflds <- c(seedflds, "DIACL")
             } else {  
-              if (!colvar %in% seedflds) {
-                message(colvar, " not in seed")
-                return(NULL)
-              }	  
+              #if (!colvar %in% seedflds) {
+              #  message(colvar, " not in seed")
+              #  return(NULL)
+              #}	  
               
               ## Build query for getting unique seedling colvar values within population
               suniquex.qry <- 
@@ -1156,6 +1197,10 @@ check.rowcol <-
                 #message("getting unique values for ", colvar, ":\n", suniquex.qry, "\n")
               }
               if (colisdb) {
+                if (!is.null(withqry)) {
+                  suniquex.qry <- paste0(withqry, 
+                                         "\n", suniquex.qry)
+                }
                 suniquex <- tryCatch(
                   DBI::dbGetQuery(popconn, suniquex.qry)[[1]],
                   error=function(e) {
@@ -1345,7 +1390,7 @@ check.rowcol <-
     }  ## end domlut is null
   } ## end colvar != "NONE"      
  
-  
+
   ###################################################################################
   ## GET DOMAIN. CONCATENATE ROWVAR & COLVAR VARIABLES IF THEY ARE IN THE SAME TABLE.
   ###################################################################################
