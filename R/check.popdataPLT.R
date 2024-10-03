@@ -326,6 +326,9 @@ check.popdataPLT <-
         unitvars <- unitvarchk
       }	
     } else {
+      if (module != "GB") {
+        stop("must include unitvar")
+      }
       unitvar <- checknm("ONEUNIT", pflds)
       message("no unitvar specified...  adding a variable named ", unitvar)
       unitvar=unitvars <- "ONEUNIT"
@@ -762,12 +765,6 @@ check.popdataPLT <-
           return(NULL)
         } 
 
-        if (any(unitvars == "ONEUNIT")) {
-          unitareax$ONEUNIT <- 1
-          unitareax <- unitareax[ , sum(get(areavar), na.rm = TRUE), by = unitvars]
-          setnames(unitareax, "V1", areavar)
-        }
-        
         unitareax <- unique(unitareax[, c(unitvars, areavar), with=FALSE])	  
         if (any(duplicated(unitareax[, unitvars, with=FALSE]))) {
           message("unitarea is invalid... multiple unitvars exist")
@@ -785,6 +782,11 @@ check.popdataPLT <-
                                   gui=gui, checklst=c("acres", "hectares"), caption="Area units?",
                                   stopifnull=TRUE)
       
+      
+      ## Aggregate area to ONEUNIT
+      if (any(unitvars == "ONEUNIT")) {
+        unitareax$ONEUNIT <- 1
+      }
       
       ## Check if areavar column is numeric
       if (!is.numeric(unitareax[[areavar]])) {
@@ -900,6 +902,11 @@ check.popdataPLT <-
         } 
       }
       
+      ## Aggregate area to ONEUNIT
+      if (any(unitvars == "ONEUNIT")) {
+        auxlutx$ONEUNIT <- 1
+      }
+      
       if (strata) {
         
         ## 12.3. Pivot auxlut table based on strwtvar
@@ -934,13 +941,19 @@ check.popdataPLT <-
         ## 14.6. Create a table of number of plots by strata and estimation unit
         ###################################################################
         strunitvars <- unique(c(unitvars, strvar))
-        strunitvarsqry <- paste0(pltassgn., strunitvars)
+        if (any(unitvars == "ONEUNIT")) {
+          strunitvarsqry <- toString(paste0("1 AS ONEUNIT, ", pltassgn., strvar)) 
+          strunitvarsby <- c("ONEUNIT", paste0(pltassgn., strvar))
+        } else {
+          strunitvarsqry <- toString(paste0(pltassgn., strunitvars))
+          strunitvarsby <- paste0(pltassgn., strunitvars)
+        }
         P2POINTCNTqry <- paste0(
-          "SELECT ", toString(strunitvarsqry), ", COUNT(*) AS NBRPLOTS", 
+          "SELECT ", strunitvarsqry, ", COUNT(*) AS NBRPLOTS", 
           pltafromqry, 
           pwhereqry,
-          "\nGROUP BY ", toString(strunitvarsqry),
-          "\nORDER BY ", toString(strunitvarsqry))
+          "\nGROUP BY ", toString(strunitvarsby),
+          "\nORDER BY ", toString(strunitvarsby))
         if (pltaindb) {      
           P2POINTCNT <- data.table(DBI::dbGetQuery(dbconn, P2POINTCNTqry))
         } else {

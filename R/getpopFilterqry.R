@@ -596,7 +596,16 @@ getpopFilterqry <- function(popType,
         if (length(pfiltervars) == 0) {
           stop("pfilter is invalid: ", pfilter)
         }
-      } 
+        pflds_match <- pflds[sapply(pflds, grepl, pfilter)]
+        if (length(pflds_match) == 1) {
+          pfilter <- sub(pflds_match, paste0("p.", pflds_match), pfilter)
+        }
+      } else {
+        ppsaflds_match <- pltassgnflds[sapply(pltassgnflds, grepl, pfilter)]
+        if (length(ppsaflds_match) == 1) {
+          pfilter <- sub(ppsaflds_match, paste0(pltassgn., ppsaflds_match), pfilter)
+        }
+      }
     }
     if (!is.null(pfilter)) {
       if (is.null(pwhereqry)) {
