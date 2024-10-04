@@ -326,9 +326,9 @@ check.popdataPLT <-
         unitvars <- unitvarchk
       }	
     } else {
-      if (module != "GB") {
-        stop("must include unitvar")
-      }
+      # if (module != "GB") {
+      #   stop("must include unitvar")
+      # }
       unitvar <- checknm("ONEUNIT", pflds)
       message("no unitvar specified...  adding a variable named ", unitvar)
       unitvar=unitvars <- "ONEUNIT"
@@ -764,7 +764,13 @@ check.popdataPLT <-
           message("invalid unitareax")
           return(NULL)
         } 
-
+        
+        if (any(unitvars == "ONEUNIT") && !("ONEUNIT" %in% names(unitareax))) {
+          unitareax$ONEUNIT <- 1
+          unitareax <- unitareax[ , sum(get(areavar), na.rm = TRUE), by = unitvars]
+          setnames(unitareax, "V1", areavar)
+        }
+        
         unitareax <- unique(unitareax[, c(unitvars, areavar), with=FALSE])	  
         if (any(duplicated(unitareax[, unitvars, with=FALSE]))) {
           message("unitarea is invalid... multiple unitvars exist")
