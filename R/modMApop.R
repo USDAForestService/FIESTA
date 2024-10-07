@@ -664,6 +664,7 @@ modMApop <- function(popType="VOL",
   returndata <- pltcheck$returndata
   
   
+  
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
@@ -725,7 +726,7 @@ modMApop <- function(popType="VOL",
                                  pdoms2keep = pdoms2keep,
                                  defaultVars = defaultVars,
                                  pltassgnid = pltassgnid,
-                                 pltassgnx = pltassgnx, 
+                                 pltassgnx = pltassgnx, pltx = pltx,
                                  POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
                                  adj = adj, ACI = ACI,
                                  plotlst = plotlst,
@@ -761,6 +762,9 @@ modMApop <- function(popType="VOL",
     if(popType == "VOL") {
       treex <- popcheck$treex
       seedx <- popcheck$seedx
+      if (is.null(treex) && is.null(seedx)) {
+        stop("must include tree data")
+      }
     }    
   
   } else {
@@ -827,7 +831,7 @@ modMApop <- function(popType="VOL",
   if (savepltids) {
     message("saving pltids...")
     outlst$out_layer <- "pltids"
-    if (!append_layer) index.unique.pltids <- c(projectid, puniqued)
+    if (!append_layer) index.unique.pltids <- c(projectid, puniqueid)
     datExportData(pltidsadj, 
                   savedata_opts = outlst)
   }
@@ -843,7 +847,8 @@ modMApop <- function(popType="VOL",
   
   returnlst <- append(returnlst, list(pltidsadj = pltidsadj, pltcondx=pltcondx, 
                                       pltcondflds = pltcondflds, pjoinid = pjoinid,
-                                      cuniqueid = cuniqueid, pltassgnid = pltassgnid, condid = condid, ACI = ACI,
+                                      cuniqueid = cuniqueid, pltassgnid = pltassgnid,
+                                      condid = condid, ACI = ACI,
                                       areawt = areawt, areawt2 = areawt2, adjcase = adjcase,
                                       dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH,
                                       pltassgnx = pltassgnx, unitlut = data.table(unitlut),
