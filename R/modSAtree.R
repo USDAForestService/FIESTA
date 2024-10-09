@@ -495,12 +495,9 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Define empty lists
   estlst <- list()
   predselectlst <- list()
-  if (multest || SAmethod == "unit") {
-    predselectlst.unit <- list()
-  }
-  if (multest || SAmethod == "area") {
-    predselectlst.area <- list()
-  }
+  predselectlst.unit <- list()
+  predselectlst.area <- list()
+
   SAobjlst <- list()
   dunitareabind <- {}
   if (addSAdomsdf) {
@@ -924,11 +921,21 @@ modSAtree <- function(SApopdatlst = NULL,
                                   dunitlutlst_row = dunitlutlst_row,
                                   save4testing = save4testing) 
     
-    largebnd.unique <- SAestimates$largebnd.unique
-    estlst <- SAestimates$estlst
-    domdat <- SAestimates$domdat
-    predselectlst.unit <- SAestimates$predselectlst.unit
+    largebnd.unique <-  SAestimates$largebnd.unique
     response <- SAestimates$response
+    domdat <- SAestimates$domdat
+    SAobjlst <- SAestimates$SAobjlst
+    estlst <- SAestimates$estlst
+    pdomdatlst <- SAestimates$pdomdatlst
+    dunitlutlst <- SAestimates$dunitlutlst
+    SAobjlst_row <- SAestimates$SAobjlst_row
+    estlst_row <- SAestimates$estlst_row
+    predselectlst.unit <- SAestimates$predselectlst.unit
+    predselectlst.area <- SAestimates$predselectlst.area
+    predselectlst.unit_row <- SAestimates$predselectlst.unit_row
+    predselectlst.area_row <- SAestimates$predselectlst.area_row
+    pdomdatlst_row <- SAestimates$pdomdatlst_row
+    dunitlutlst_row <- SAestimates$dunitlutlst_row
     
   }    #### end SApopdat loop
   

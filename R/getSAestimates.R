@@ -296,8 +296,18 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   out <- list(largebnd.unique = largebnd.unique,
               response = response,
               domdat = domdat,
+              SAobjlst = SAobjlst,
+              estlst = estlst,
+              pdomdatlst = pdomdatlst,
+              dunitlutlst = dunitlutlst,
+              SAobjlst_row = SAobjlst_row,
+              estlst_row = estlst_row,
               predselectlst.unit = predselectlst.unit,
-              estlst = estlst)
+              predselectlst.area = predselectlst.area,
+              predselectlst.unit_row = predselectlst.unit_row,
+              predselectlst.area_row = predselectlst.area_row,
+              pdomdatlst_row = pdomdatlst_row,
+              dunitlutlst_row = dunitlutlst_row)
   
   return(out)
   
