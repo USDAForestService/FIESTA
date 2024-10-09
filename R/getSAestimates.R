@@ -64,14 +64,15 @@ getSAestimates <- function(esttype, i, largebnd.unique,
     }
  
   } else {
-    domdat$LARGEBND <- 1
-    largebnd.unique <- "LARGEBND"
     # domdat <- merge(pltassgnx, domdat, 
     #                 by.x=c(pltassgnid, "DOMAIN"), 
     #                 by.y=c(uniqueid, "DOMAIN"), all.x=TRUE)
     domdat <- merge(pltassgnx, domdat, 
                     by.x=c(pltassgnid), 
                     by.y=c(uniqueid), all.x=TRUE)
+    
+    domdat$LARGEBND <- 1
+    largebnd.unique <- "LARGEBND"
   }
   
   if (pltassgnid != uniqueid) {
