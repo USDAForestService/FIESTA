@@ -27,7 +27,7 @@
 #' \tab \tab RESERVCD \tab If landarea=TIMBERLAND. Reserved status.\cr 
 #' \tab \tab SUBPROP_UNADJ \tab Unadjusted proportion of subplot conditions 
 #' on each plot. Set SUBPROP_UNADJ=1, if only 1 condition per subplot.\cr 
-#' \tab \tab MICRPROP_UNADJ \tab If microplot tree attributes. Unadjusted 
+#' \tab \tab MICRPROP_UNADJ \tab If microplot trfee attributes. Unadjusted 
 #' proportion of microplot conditions on each plot. Set MICRPROP_UNADJ=1, 
 #' if only 1 condition per microplot.\cr 
 #' \tab \tab MACRPROP_UNADJ \tab If macroplot tree attributes. Unadjusted 

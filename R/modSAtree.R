@@ -192,6 +192,7 @@ modSAtree <- function(SApopdatlst = NULL,
                       pcfilter = NULL, 
                       estvar = NULL, 
                       estvar.filter = NULL, 
+                      estvar.derive = NULL,
                       rowvar = NULL, 
                       modelselect = FALSE, 
                       prior = function(x) 1/(sqrt(x)*(1+x)),
@@ -207,8 +208,7 @@ modSAtree <- function(SApopdatlst = NULL,
                       title_opts = NULL, 
                       savedata_opts = NULL, 
                       multest_opts = NULL, 
-                      save4testing = FALSE, 
-                      gui = FALSE, 
+                      save4testing = FALSE,
                       ...){
   ######################################################################################
   ## DESCRIPTION: 
@@ -219,9 +219,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ######################################################################################
   
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(SApopdat)) {
-    gui <- TRUE
-  } 
+  gui <- FALSE
 
   ## If gui.. set variables to NULL
   if (gui) { 
@@ -231,7 +229,7 @@ modSAtree <- function(SApopdatlst = NULL,
   }
 
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=domclassify=
 	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
 	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
 
@@ -254,7 +252,6 @@ modSAtree <- function(SApopdatlst = NULL,
   showsteps=FALSE
   sumunits=FALSE
   
-  gui <- FALSE
   returnlst <- list()
   set.seed(66)
   esttype="TREE"
@@ -386,21 +383,26 @@ modSAtree <- function(SApopdatlst = NULL,
   ###################################################################################
   if (is.null(SApopdatlst)) {
     stop("need to include SApopdatlst... from modSApop")
-    #SApopdatlst <- modSApop(gui=gui, prednames=prednames, ...)
   } else {
-    if (!is(SApopdatlst, "list")) {
+    if (!is.list(SApopdatlst)) {
       SApopdatlst <- list(SApopdatlst)
     } else if ("condx" %in% names(SApopdatlst)) {
       SApopdatlst <- list(SApopdatlst)
     }  
 
-    if (is(SApopdatlst, "list")) {
-      list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
-		"tuniqueid", "ACI.filter", "dunitarea", "dunitvar", "dunitlut",
-		"prednames", "plotsampcnt", "condsampcnt")
-      popchk <- tryCatch(pcheck.object(SApopdatlst, list.items=list.items),
-     	 	error=function(e) {
-			return(NULL) })
+    if (is.list(SApopdatlst)) {
+      list.items <- c("pltcondx", "treex", "cuniqueid", "condid", 
+		                  "tuniqueid", "dunitarea", "dunitvar", "dunitlut",
+	                  	"prednames", "plotsampcnt", "condsampcnt")
+      popchk <- tryCatch(
+        {
+          pcheck.object(SApopdatlst, list.items=list.items)
+        },
+      	error = function(cond) {
+      	     message(cond)
+			       return(NULL) 
+      	}
+      )
       if (!is.null(popchk)) {
         SApopdatlst <- list(SApopdatlst)
       }
@@ -413,13 +415,14 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Check output parameters 
   ###################################################################################
   outparams <- check.outparams(esttype=esttype, totals=totals, 
-                  allin1=allin1, estround=estround, pseround=pseround, 
-                  divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-                  rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
-                  outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-                  overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
-                  outfn.date=outfn.date, append_layer=append_layer, 
-                  raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+                               allin1=allin1, estround=estround, pseround=pseround, 
+                               divideby=divideby, addtitle=addtitle,
+                               returntitle=returntitle, rawdata=rawdata,
+                               rawonly=rawonly, savedata=savedata, 
+                               outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+                               overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
+                               outfn.date=outfn.date, append_layer=append_layer, 
+                               raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   allin1 <- outparams$allin1
   estround <- outparams$estround
   pseround <- outparams$pseround
@@ -440,8 +443,12 @@ modSAtree <- function(SApopdatlst = NULL,
 
   ## Check multest 
   ########################################################
-  multest <- pcheck.logical(multest, varnm="multest", 
-		title="Multiple estimates?", first="YES", gui=gui, stopifnull=TRUE)
+  multest <- pcheck.logical(multest,
+                            varnm = "multest", 
+                            title = "Multiple estimates?", 
+                            first = "YES",
+                            gui = gui,
+                            stopifnull= TRUE)
 
   ## Check output for multest 
   ########################################################
@@ -465,19 +472,6 @@ modSAtree <- function(SApopdatlst = NULL,
       } else {
         if (is.null(multest_dsn)) {
           multest_dsn <- paste0("SAmultest_", SApackage, ".", multest_fmt)
-#        }
-#        if (multest_fmt == "gdb") {
-#          multest_dsn <- DBtestESRIgdb(gdbfn=multest_dsn, outfolder=outfolder, 
-#			overwrite=overwrite_dsn, showlist=FALSE, returnpath=FALSE)
-#        }	else if (multest_fmt %in% c("sqlite", "gpkg")) {
-#          gpkg <- ifelse(multest_fmt == "gpkg", TRUE, FALSE)
-#          if (multest.append || !overwrite_dsn) {
-#            multest_dsn <- DBtestSQLite(SQLitefn=multest_dsn, gpkg=gpkg, outfolder=outfolder, 
-#			showlist=FALSE, returnpath=FALSE, createnew=TRUE)
-#          } else {
-#            multest_dsn <- DBcreateSQLite(SQLitefn=multest_dsn, gpkg=gpkg, outfolder=outfolder, 
-#			overwrite=overwrite_dsn, returnpath=FALSE, outfn.date=outfn.date)
-#          }
         }	
       }
     }
@@ -488,6 +482,8 @@ modSAtree <- function(SApopdatlst = NULL,
     if (!dir.exists(stepfolder)) {
       dir.create(stepfolder)
     }
+  } else {
+    stepfolder <- NULL
   }
 
   #####################################################################################
@@ -513,6 +509,9 @@ modSAtree <- function(SApopdatlst = NULL,
   if (save4testing) {
     pdomdatlst <- list()
     dunitlutlst <- list()
+  } else {
+    pdomdatlst <- NULL
+    dunitlutlst <- NULL
   }
 
   if (!is.null(rowvar)) {
@@ -528,11 +527,18 @@ modSAtree <- function(SApopdatlst = NULL,
       pdomdatlst_row <- list()
       dunitlutlst_row <- list()
     }
+  } else {
+    estlst_row <- NULL
+    predselectlst.unit_row <- NULL
+    predselectlst.area_row <- NULL
+    SAobjlst_row <- NULL
+    pdomdatlst_row <- NULL
+    dunitlutlst_row <- NULL
   }
 
   ## Loop through SApopdatlst
   #############################################
-  #largebnd.unique2 <- largebnd.unique
+  dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
   
   for (i in 1:length(SApopdatlst)) {
     SApopdatnm <- names(SApopdatlst)[i]
@@ -546,30 +552,31 @@ modSAtree <- function(SApopdatlst = NULL,
     SApopdat <- SApopdatlst[[i]]
     SApopdat <- pcheck.object(SApopdat, "SApopdat", list.items=list.items)
     if (is.null(SApopdat)) {
-      break
+      stop("SApopdat is NULL")
     }
     message("generating estimates for... ", SApopdatnm)
 
     SAdomsdf <- SApopdat$SAdomsdf
-    condx <- setDT(copy(SApopdat$condx))
-    pltcondx <- copy(SApopdat$pltcondx)
-    pltassgnx <- SApopdat$pltassgnx
+    pltidsadj <- SApopdat$pltidsadj
+    pltcondx <- SApopdat$pltcondx
+    pltcondflds <- SApopdat$pltcondflds
+    cuniqueid <- SApopdat$cuniqueid
     pltassgnid <- SApopdat$pltassgnid
-    treex <- copy(SApopdat$treex)
-    seedx <- copy(SApopdat$seedx)
+    condid <- SApopdat$condid
+    treex <- SApopdat$treex
+    seedx <- SApopdat$seedx
     if (is.null(treex) && is.null(seedx)) {
       stop("must include tree data for tree estimates")
     }
-    cuniqueid <- SApopdat$cuniqueid
-    condid <- SApopdat$condid
     tuniqueid <- SApopdat$tuniqueid
-    ACI.filter <- SApopdat$ACI.filter
+    ACI <- SApopdat$ACI
+    pltassgnx <- SApopdat$pltassgnx
     dunitarea <- setDT(SApopdat$dunitarea)
     areavar <- SApopdat$areavar
     areaunits <- SApopdat$areaunits
     dunitvar <- SApopdat$dunitvar
-    dunitvar2 <- SApopdat$dunitvar2
-    dunitlut <- data.table(SApopdat$dunitlut)
+    dunitvars <- SApopdat$dunitvars
+    dunitlut <- SApopdat$dunitlut
     plotsampcnt <- SApopdat$plotsampcnt
     condsampcnt <- SApopdat$condsampcnt
     states <- SApopdat$states
@@ -577,19 +584,20 @@ modSAtree <- function(SApopdatlst = NULL,
     adj <- SApopdat$adj
     estvar.area <- SApopdat$estvar.area
     predfac <- SApopdat$predfac
+    popdatindb <- SApopdat$popdatindb
     pop_fmt <- SApopdat$pop_fmt
     pop_dsn <- SApopdat$pop_dsn
+    pop_schema <- SApopdat$pop_schema
+    popconn <- SApopdat$popconn
+    dbqueries <- SApopdat$dbqueries
+    dbqueriesWITH <- SApopdat$dbqueriesWITH
+    adjcase <- SApopdat$adjcase
+    pjoinid <- SApopdat$pjoinid
 
 
     ## check smallbnd.dom
     ########################################################
     smallbnd.dom <- "DOMAIN"
-#    if (is.null(smallbnd.dom)) {
-#      smallbnd.dom <- "DOMAIN"
-#    }
-#    smallbnd.dom <- pcheck.varchar(var2check=smallbnd.dom, 
-#    		varnm="smallbnd.dom", checklst=names(dunitlut), 
-#		caption="smallbnd attribute for output?", multiple=FALSE)
 
     ## check SAdomsdf
     ########################################################
@@ -618,12 +626,29 @@ modSAtree <- function(SApopdatlst = NULL,
         }
       }
     }
+    
+    if (popdatindb) {
+      if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
+        if (!is.null(pop_dsn)) {
+          if (pop_fmt == "sqlite") {
+            popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
+          }
+        } else {
+          stop("invalid database connection")
+        }
+      }
+      #pltcondx <- dbqueries$pltcondx
+      pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
+      pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
+    } else {
+      pltcondxWITHqry=pltcondxadjWITHqry <- NULL
+    }
 
     ########################################
     ## Check area units
     ########################################
     unitchk <- pcheck.areaunits(unitarea=dunitarea, areavar=areavar, 
-			      areaunits=areaunits, metric=metric)
+			                          areaunits=areaunits, metric=metric)
     dunitarea <- unitchk$unitarea
     areavar <- unitchk$areavar
     areaunits <- unitchk$outunits
@@ -634,90 +659,204 @@ modSAtree <- function(SApopdatlst = NULL,
     }
     
     ###################################################################################
-    ## Check filter parameters and apply plot and condition filters
+    ## Check parameters and apply plot and condition filters
     ###################################################################################
-    estdat <- check.estfilters(esttype=esttype, pltcondf=pltcondx, 
-		cuniqueid=cuniqueid, treex=treex, seedx=seedx, estseed=estseed, 
-		landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter)
+    estdat <- check.estdata(esttype = esttype,
+                            popType = popType,
+                            popdatindb = popdatindb,
+                            popconn = popconn, pop_schema = pop_schema,
+                            pltcondflds = pltcondflds,
+                            totals = totals,
+                            pop_fmt=pop_fmt, pop_dsn=pop_dsn,
+                            sumunits = sumunits,
+                            landarea = landarea,
+                            ACI = ACI,
+                            pcfilter = pcfilter,
+                            allin1 = allin1, divideby = divideby,
+                            estround = estround, pseround = pseround,
+                            addtitle = addtitle, returntitle = returntitle,
+                            rawonly = rawonly,
+                            savedata = savedata,
+                            outfolder = outfolder,
+                            overwrite_dsn = overwrite_dsn, 
+                            overwrite_layer = overwrite_layer, 
+                            outfn.pre = outfn.pre, outfn.date = outfn.date, 
+                            append_layer = append_layer, 
+                            raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+                            gui = gui)
+    
     if (is.null(estdat)) return(NULL)
-    pltcondf <- estdat$pltcondf
+    esttype <- estdat$esttype
+    sumunits <- estdat$sumunits
+    totals <- estdat$totals
     landarea <- estdat$landarea
-    if (esttype %in% c("TREE", "RATIO")) {
-      treef <- estdat$treef
-      seedf <- estdat$seedf
-      estseed <- estdat$estseed
-    }
-    if (esttype == "P2VEG") {
-      vcondf <- estdat$vcondf
-    }
+    allin1 <- estdat$allin1
+    divideby <- estdat$divideby
+    estround <- estdat$estround
+    pseround <- estdat$pseround
+    addtitle <- estdat$addtitle
+    returntitle <- estdat$returntitle
+    rawonly <- estdat$rawonly
+    savedata <- estdat$savedata
+    outfolder <- estdat$outfolder
+    overwrite_layer <- estdat$overwrite_layer
+    append_layer = estdat$append_layer
+    rawfolder <- estdat$rawfolder
+    raw_fmt <- estdat$raw_fmt
+    raw_dsn <- estdat$raw_dsn
+    pcwhereqry <- estdat$where.qry
+    SCHEMA. <- estdat$SCHEMA.
+    
+    ###################################################################################
+    ## Check parameter inputs and tree filters
+    ###################################################################################
+    estdatVOL <- 
+      check.estdataVOL(esttype = esttype,
+                       popdatindb = popdatindb,
+                       popconn = popconn,
+                       cuniqueid = cuniqueid, condid = condid,
+                       treex = treex, seedx = seedx,
+                       tuniqueid = tuniqueid,
+                       estseed = estseed,
+                       woodland = woodland,
+                       TPA = TPA,
+                       tfilter = tfilter,
+                       gui = gui)
+    treex <- estdatVOL$treex
+    treeflds <- estdatVOL$treeflds
+    tuniqueid <- estdatVOL$tuniqueid
+    estseed <- estdatVOL$estseed
+    woodland <- estdatVOL$woodland
+    
+    seedx <- estdatVOL$seedx
+    seedflds <- estdatVOL$seedflds
+  
 
     ###################################################################################
-    ### GET ROW AND COLUMN INFO FROM condf
+    ### Check row and column data
     ###################################################################################
     if (!sumunits) col.add0 <- TRUE
     if (!is.null(rowvar) && rowvar == "TOTAL") rowvar <- NULL
     rowcolinfo <- 
-      check.rowcol(gui=gui, esttype=esttype, 
-	                 treef=treef, seedf=seedf, 
-                   condf=pltcondf, cuniqueid=cuniqueid,                      
-					         tuniqueid=tuniqueid, estseed=estseed,
-					         rowvar=rowvar, colvar=colvar, 
-                   row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
-                   row.orderby=row.orderby, col.orderby=col.orderby, 
-                   row.add0=row.add0, col.add0=col.add0, 
-                   title.rowvar=title.rowvar, title.colvar=title.colvar, 
-                   rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-                   rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-                   landarea=landarea, states=states, 
-					         cvars2keep="COND_STATUS_CD") 
-    treef <- rowcolinfo$treef
-    seedf <- rowcolinfo$seedf
-    condf <- rowcolinfo$condf
+      check.rowcol(esttype = esttype, 
+                   popType = popType,
+                   popdatindb = popdatindb,
+                   popconn = popconn, SCHEMA. = SCHEMA.,
+                   pltcondx = pltcondx,
+                   pltcondflds = pltcondflds,
+                   withqry = pltcondxWITHqry,
+                   estseed = estseed,
+                   treex = treex, treeflds = treeflds,
+                   seedx = seedx, seedflds = seedflds,
+                   cuniqueid = cuniqueid, condid = condid,
+                   rowvar = rowvar, colvar = colvar, 
+                   row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
+                   row.orderby = row.orderby, col.orderby = col.orderby,
+                   row.classify = row.classify, col.classify = col.classify,
+                   row.add0 = row.add0, col.add0 = col.add0, 
+                   title.rowvar = title.rowvar, title.colvar = title.colvar, 
+                   rowlut = rowlut, collut = collut, 
+                   rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
+                   rowgrpord = rowgrpord, title.rowgrp = NULL,
+                   landarea = landarea, states = states, 
+                   whereqry = pcwhereqry,
+                   gui = gui)
+    
     uniquerow <- rowcolinfo$uniquerow
     uniquecol <- rowcolinfo$uniquecol
     domainlst <- rowcolinfo$domainlst
-    #rowvar <- rowcolinfo$rowvar
-    #colvar <- rowcolinfo$colvar
-    #rowvarnm <- rowcolinfo$rowvarnm
-    #colvarnm <- rowcolinfo$colvarnm
+    rowvar <- rowcolinfo$rowvar
+    colvar <- rowcolinfo$colvar
+    rowvarnm <- rowcolinfo$rowvarnm
     row.orderby <- rowcolinfo$row.orderby
     col.orderby <- rowcolinfo$col.orderby
     row.add0 <- rowcolinfo$row.add0
     col.add0 <- rowcolinfo$col.add0
     title.rowvar <- rowcolinfo$title.rowvar
     title.colvar <- rowcolinfo$title.colvar
+    rowgrpnm <- rowcolinfo$rowgrpnm
+    title.rowgrp <- rowcolinfo$title.rowgrp
+    grpvar <- rowcolinfo$grpvar
     bytdom <- rowcolinfo$bytdom
+    bypcdom <- rowcolinfo$bypcdom
     tdomvar <- rowcolinfo$tdomvar
     tdomvar2 <- rowcolinfo$tdomvar2
-    grpvar <- rowcolinfo$grpvar
-    #rm(rowcolinfo)  
+    classifyrow <- rowcolinfo$classifyrow
+    classifycol <- rowcolinfo$classifycol
+    
+    ## if classified columns, create domclassify list for summarizing tree data
+    if (any(!is.null(classifyrow), !is.null(classifycol))) {
+      domclassify <- list()
+      if (!is.null(classifyrow)) {
+        domclassify[[rowvar]] <- classifyrow$row.classify
+      }
+      if (!is.null(classifycol)) {
+        domclassify[[colvar]] <- classifycol$col.classify
+      }
+    }
 	
 	
     if (esttype == "TREE") {
-      #####################################################################################
-      ### Get estimation data from tree table, with plot-level adjustment for nonresponse
-      #####################################################################################
+      #################################################################################
+      ### GET ESTIMATION DATA FROM TREE TABLE
+      #################################################################################
       adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-      treedat <- check.tree(gui=gui, treef=rowcolinfo$treef, 
-                        seedf=rowcolinfo$seedf, estseed=estseed, woodland=woodland,
-                        bycond=TRUE, condf=rowcolinfo$condf, bytdom=rowcolinfo$bytdom, 
-                        tuniqueid=tuniqueid, cuniqueid=cuniqueid, esttype=esttype, 
-                        estvarn=estvar, estvarn.filter=estvar.filter, esttotn=TRUE, 
-                        tdomvar=rowcolinfo$tdomvar, adjtree=adjtree, metric=metric)
-      if (is.null(treedat)) return(NULL) 
+      
+      if (popdatindb) {
+        pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
+        pjoinid <- "PLT_CN"
+      } else {
+        pltidsWITHqry <- NULL
+      }
+      treedat <- 
+        check.tree(treex = treex, 
+                   seedx = seedx, 
+                   estseed = estseed,
+                   bycond = TRUE, 
+                   condx = pltcondx, 
+                   tuniqueid = tuniqueid, cuniqueid = cuniqueid, 
+                   esttype = esttype, 
+                   estvarn = estvar, 
+                   estvarn.filter = estvar.filter, 
+                   estvarn.derive = estvar.derive,
+                   esttotn = TRUE, 
+                   bydomainlst = domainlst,
+                   tdomvar = tdomvar, tdomvar2 = tdomvar2,
+                   adjtree = adjtree, 
+                   adjvar = "tadjfac",
+                   metric = metric, 
+                   woodland = woodland,
+                   ACI = ACI,
+                   domclassify = domclassify,
+                   dbconn = popconn, schema = pop_schema,
+                   pltidsWITHqry = pltidsWITHqry,
+                   pcwhereqry = pcwhereqry,
+                   pjoinid = pjoinid,
+                   bytdom = bytdom,
+                   gui = gui)
+      if (is.null(treedat)) stop(NULL) 
       tdomdat <- treedat$tdomdat
-	  
-      ## Merge tdomdat with condx
-      xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
-      condx <- xchk$tab1
-      tdomdat <- xchk$tab2
-      tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid), all.x=TRUE)	  
-	  
-      estvar <- treedat$estvar
+      #estvar <- treedat$estvar
       estvar.name <- treedat$estvar.name
       estvar.filter <- treedat$estvar.filter
       tdomvarlst <- treedat$tdomvarlst
-      estvarunits <- treedat$estunits
+      estunits <- treedat$estunits
+      treeqry <- treedat$treeqry
+      classifynmlst <- treedat$classifynmlst
+      
+      
+      ## If classified rowvar or colvar, get class names
+      if (!is.null(classifynmlst)) {
+        if (!is.null(classifynmlst[[rowvar]])) {
+          rowvar <- classifynmlst[[rowvar]]
+        }
+        if (!is.null(classifynmlst[[colvar]])) {
+          colvar <- classifynmlst[[colvar]]
+        }
+        if (!is.null(grpvar)) {
+          grpvar <- c(rowvar, colvar)
+        }
+      }
  
       ## Check for matching levels in x and xunique
       if (!is.null(uniquerow)) {
@@ -742,270 +881,57 @@ modSAtree <- function(SApopdatlst = NULL,
       setnames(uniquecol, dunitvar)
       uniquecol[[dunitvar]] <- factor(uniquecol[[dunitvar]])
     }
+    
 
     #####################################################################################
     ## GENERATE ESTIMATES
     #####################################################################################
-    dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
-    response <- estvar.name
-    #setnames(tdomdat, dunitvar, "DOMAIN")
-
-    if (i == 1) {
-      message("getting estimates for ", response, "...")
-      message("using the following predictors...", toString(prednames))
-    }
-
-    ############################################################################
-    ## Generate models
-    ############################################################################
-    ## Note: not sure why you would want to run by largebnd.unique
-    ## Maybe, if generated SAdoms by province, but want to run by section.
-
-    ## check largebnd.unique
-    ########################################################
-    vars2keep <- NULL
-    if (!is.null(largebnd.unique)) {
-      if (largebnd.unique %in% names(tdomdat) && largebnd.unique %in% names(pltassgnx)) {
-        tdomdat <- merge(pltassgnx, tdomdat, 
-                         by.x = c(largebnd.unique, pltassgnid, "DOMAIN"), 
-                         by.y = c(largebnd.unique, cuniqueid, "DOMAIN"), , all.x=TRUE)
-      } else if (largebnd.unique %in% names(pltassgnx)) {
-        tdomdat <- merge(pltassgnx, tdomdat, 
-                         by.x = c(pltassgnid, "DOMAIN"), 
-                         by.y = c(cuniqueid, "DOMAIN"), all.x=TRUE)
-      } else if (!is.null(SAdomsdf)) {
-        tdomdat <- merge(tdomdat, 
-		        unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
- 		        by=smallbnd.dom)
-      } else {
-        tdomdat$LARGEBND <- 1
-        largebnd.unique <- "LARGEBND"
-      }
-      #addSAdomsdf <- TRUE
-      #SAdomvars <- unique(c(SAdomvars, largebnd.unique))
-    } else {
-      tdomdat$LARGEBND <- 1
-      largebnd.unique <- "LARGEBND"
-      tdomdat <- merge(pltassgnx, tdomdat, 
-                       by.x=c(pltassgnid, "DOMAIN"), 
-                       by.y=c(cuniqueid, "DOMAIN"), all.x=TRUE)
-    }
-    if (pltassgnid != cuniqueid) {
-      setnames(tdomdat, pltassgnid, cuniqueid)
-    }
-    if (SApackage == "spAbundance") {
-      bayes <- TRUE
-    } else {
-      bayes <- FALSE
-    }
-    if (bayes) {
-      vars2keep <- largebnd.unique
-      tdomdat$LARGEBND <- 1
-      largebnd.unique <- "LARGEBND"
-      largebnd.vals <- 1
-    }
-
-    ## Get estimate for total
-    ######################################
-    byvars <- unique(c(vars2keep, largebnd.unique, dunitvar, "AOI", cuniqueid, "TOTAL", prednames))
-    if (all(c("X", "Y") %in% names(pltassgnx))) {
-      byvars <- c(byvars, "X","Y")
-    }
-    ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
-    tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-                        by=byvars, 
-                        .SDcols=estvar.name]
-  
-
-    ## get unique largebnd values
-    largebnd.vals <- sort(unique(tdomdattot[[largebnd.unique]]))
-    largebnd.vals <- largebnd.vals[table(tdomdattot[[largebnd.unique]]) > 30]
-
-    ## Add AOI if not in data
-    ######################################
-#    if (!"AOI" %in% names(tdomdat)) {
-#      tdomdat$AOI <- 1
-#      dunitlut$AOI <- 1
-#    }
-   
-    ## get estimate by domain, by largebnd value
-    #message("generating JoSAE unit-level estimates for ", response, " using ", SApackage, "...")
-
-#    if (!"AOI" %in% names(tdomdattot)) {
-#      tdomdattot$AOI <- 1
-#      dunitlut$AOI <- 1
-#    }
     
-
-## Testing
-#dunitlut <- data.table(SApopdat$dunitlut)
-#dat=tdomdattot
-#largebnd.val=largebnd.vals
-#domain="TOTAL"
-#largebnd.unique="LARGEBND"
-    #source("C:\\_tsf\\_GitHub\\FIESTAutils\\R\\SAest.pbar.R")
-    dunit_totestlst <- 
-      tryCatch(
-        lapply(largebnd.vals, SAest.large, 
-               dat=tdomdattot, 
-               cuniqueid=cuniqueid, largebnd.unique=largebnd.unique, 
-               dunitlut=dunitlut, dunitvar="DOMAIN", 
-               prednames=prednames, domain="TOTAL", response=response, 
-               showsteps=showsteps, savesteps=savesteps, 
-               stepfolder=stepfolder, prior=prior, 
-               modelselect=modelselect, multest=multest,
-               SApackage=SApackage, SAmethod=SAmethod, bayes=bayes, # TODO: pass bayes_opts
-               save4testing=FALSE, vars2keep=vars2keep),
-        error=function(e) {
-          message("error with estimates of ", response, "...")
-          message(e, "\n")
-          return(NULL) })
+    SAestimates <- getSAestimates(esttype = esttype, i = i,
+                                  largebnd.unique = largebnd.unique,
+                                  estvar.name = estvar.name,
+                                  domdat = tdomdat,
+                                  pltassgnx = pltassgnx,
+                                  unitlut = dunitlut,
+                                  unitvar = dunitvar,
+                                  uniqueid = cuniqueid,
+                                  pltassgnid = pltassgnid,
+                                  prednames = prednames,
+                                  rowvar = rowvar,
+                                  SApopdatnm = SApopdatnm,
+                                  SAdomsDF = SAdomsdf,
+                                  smallbnd.dom = smallbnd.dom,
+                                  SApackage = SApackage,
+                                  SAmethod = SAmethod,
+                                  showsteps = showsteps,
+                                  savesteps = savesteps,
+                                  stepfolder = stepfolder,
+                                  prior = prior,
+                                  modelselect = modelselect,
+                                  multest = multest,
+                                  SAobjlst = SAobjlst,
+                                  estlst = estlst,
+                                  pdomdatlst = pdomdatlst,
+                                  dunitlutlst = dunitlutlst,
+                                  SAdomvars = SAdomvars,
+                                  SAobjlst_row = SAobjlst_row,
+                                  estlst_row = estlst_row,
+                                  predselectlst.unit = predselectlst.unit,
+                                  predselectlst.area = predselectlst.area,
+                                  predselectlst.unit_row = predselectlst.unit_row,
+                                  predselectlst.area_row = predselectlst.area_row,
+                                  pdomdatlst_row = pdomdatlst_row,
+                                  dunitlutlst_row = dunitlutlst_row,
+                                  save4testing = save4testing) 
     
-    if (is.null(dunit_totestlst)) {
-      return(NULL)
-    }
-
-    if (length(largebnd.vals) > 1) {
-      dunit_est <- do.call(rbind, do.call(rbind, dunit_totestlst)[,"est.large"])
-      if (multest || SAmethod == "unit") {
-        predselect.unit <- do.call(rbind, dunit_totestlst)[,"predselect.unit"]
-      }
-      if (multest || SAmethod == "area") {
-        predselect.area <- do.call(rbind, dunit_totestlst)[,"predselect.area"]
-      }
-      #names(prednames.select) <- largebnd.vals
-      if (save4testing) {
-        pdomdat <- do.call(rbind, do.call(rbind, dunit_totestlst)[,"pltdat.dom"])
-        dunitlut <- do.call(rbind, do.call(rbind, dunit_totestlst)[,"dunitlut.dom"])
-      }
-      SAobjlst[[SApopdatnm]] <- do.call(rbind, dunit_totestlst)[,"SAobjlst.dom"]
-
-    } else {
-      dunit_est <- do.call(rbind, dunit_totestlst)[,"est.large"]$est.large
-      if (multest || SAmethod == "unit") {
-        predselect.unit <- do.call(rbind, dunit_totestlst)[,"predselect.unit"]$predselect.unit
-      }
-      if (multest || SAmethod == "area") {
-        predselect.area <- do.call(rbind, dunit_totestlst)[,"predselect.area"]$predselect.area
-      }
-      if (save4testing) {
-        pdomdat <- do.call(rbind, dunit_totestlst)[,"pltdat.dom"]$pltdat.dom
-        dunitlut <- do.call(rbind, dunit_totestlst)[,"dunitlut.dom"]$dunitlut.dom
-      }
-      SAobjlst[[SApopdatnm]] <- do.call(rbind, dunit_totestlst)[,"SAobjlst.dom"]$SAobjlst.dom
-    }
-
-    if (multest || SAmethod == "unit") {
-      predselectlst.unit[[SApopdatnm]] <- predselect.unit
-    }
-    if (multest || SAmethod == "area") {
-      predselectlst.area[[SApopdatnm]] <- predselect.area
-    }
-
-    if (save4testing) {
-      ## Merge SAdom attributes to dunit_totest
-      if (addSAdomsdf) {
-        pdomdat <- merge(setDT(SAdomsdf)[, 
-			       unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
-			       pdomdat, by=c("DOMAIN", "AOI"))
-        dunitlut <- merge(setDT(SAdomsdf)[, 
-			       unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
-			       dunitlut, by=c("DOMAIN", "AOI"))
-      }
-      pdomdatlst[[SApopdatnm]] <- pdomdat
-      dunitlutlst[[SApopdatnm]] <- dunitlut
-    }
-    estlst[[SApopdatnm]] <- dunit_est
-
-    if (rowcolinfo$rowvar != "TOTAL") {
-      tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]),] 
-      tdomdatsum <- setDT(tdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
-                      by=c(largebnd.unique, dunitvar, cuniqueid, 
-                           rowcolinfo$rowvar, prednames), .SDcols=estvar.name]
-
-      if (!"DOMAIN" %in% names(tdomdatsum)) {
-        tdomdatsum$DOMAIN <- tdomdatsum[[dunitvar]]
-        tdomdatsum[[dunitvar]] <- NULL
-      }
-      if (!"AOI" %in% names(tdomdatsum)) {
-        tdomdatsum$AOI <- 1
-      }
-
-#dunitlut <- data.table(SApopdat$dunitlut)
-#dat=tdomdatsum
-#largebnd.val=largebnd.vals
-#domain=rowcolinfo$rowvar
-#largebnd.unique="LARGEBND"
-
-      dunit_rowestlst <- 
-		tryCatch(
-			lapply(largebnd.vals, SAest.large, 
-				dat=tdomdatsum, 
-				cuniqueid=cuniqueid, largebnd.unique=largebnd.unique, 
-				dunitlut=dunitlut, dunitvar="DOMAIN",
-				prednames=prednames, domain=rowcolinfo$rowvar,
-				response=response, 
-				showsteps=showsteps, savesteps=savesteps,
-				stepfolder=stepfolder, prior=prior, 
-				modelselect=modelselect, multest=multest, 
-				SApackage=SApackage, SAmethod=SAmethod, bayes=bayes,
-				vars2keep=vars2keep),
-     	 	error=function(e) {
-			message("error with estimates of ", response, " by ", rowvar, "...")
-			message(e, "\n")
-			return(NULL) })
-      
-      if (length(largebnd.vals) > 1) {
-        dunit_est_row <- do.call(rbind, do.call(rbind, dunit_rowestlst)[,"est.large"])
-        if (multest || SAmethod == "unit") {
-          predselect.unit_row <- do.call(rbind, dunit_rowestlst)[,"predselect.unit"]
-        }
-        if (multest || SAmethod == "area") {
-          predselect.area_row <- do.call(rbind, dunit_rowestlst)[,"predselect.area"]
-        }
-        if (save4testing) {
-          pdomdat_row <- do.call(rbind, do.call(rbind, dunit_rowestlst)[,"pltdat.dom"])
-          dunitlut_row <- do.call(rbind, do.call(rbind, dunit_rowestlst)[,"dunitlut.dom"])
-        }
-        SAobjlst_row[[SApopdatnm]] <- do.call(rbind, dunit_rowestlst)[,"SAobjlst.dom"]
-      } else {
-        dunit_est_row <- do.call(rbind, dunit_rowestlst)[,"est.large"]$est.large
-        if (multest || SAmethod == "unit") {
-          predselect.unit_row <- do.call(rbind, dunit_rowestlst)[,"predselect.unit"]$predselect.unit
-        }
-        if (multest || SAmethod == "area") {
-          predselect.area_row <- do.call(rbind, dunit_rowestlst)[,"predselect.area"]$predselect.area
-        }
-        if (save4testing) {
-          pdomdat_row <- do.call(rbind, dunit_rowestlst)[,"pltdat.dom"]$pltdat.dom
-          dunitlut_row <- do.call(rbind, dunit_rowestlst)[,"dunitlut.dom"]$dunitlut.dom
-        }
-        SAobjlst_row[[SApopdatnm]] <- do.call(rbind, dunit_rowestlst)[,"SAobjlst.dom"]$SAobjlst.dom
-      }
-
-      if (multest || SAmethod == "unit") {
-        predselectlst.unit_row[[SApopdatnm]] <- predselect.unit_row
-      }
-      if (multest || SAmethod == "area") {
-        predselectlst.area_row[[SApopdatnm]] <- predselect.area_row
-      }
-
-      if (save4testing) {
-        ## Merge SAdom attributes to dunit_totest
-        if (addSAdomsdf) {
-          pdomdat_row <- merge(setDT(SAdomsdf)[, 
-			            unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
-			            pdomdat_row, by=c("DOMAIN", "AOI"))
-          dunitlut_row <- merge(setDT(SAdomsdf)[, 
-			            unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
-			            dunitlut_row, by=c("DOMAIN", "AOI"))
-        }
-        pdomdatlst_row[[SApopdatnm]] <- pdomdat_row
-        dunitlutlst_row[[SApopdatnm]] <- dunitlut_row
-      }
-      estlst_row[[SApopdatnm]] <- dunit_est_row
-    }
+    largebnd.unique <- SAestimates$largebnd.unique
+    estlst <- SAestimates$estlst
+    domdat <- SAestimates$domdat
+    predselectlst.unit <- SAestimates$predselectlst.unit
+    response <- SAestimates$response
+    
   }    #### end SApopdat loop
+  
 
   ## Combine estimates
   estdf <- do.call(rbind, estlst)
@@ -1016,39 +942,52 @@ modSAtree <- function(SApopdatlst = NULL,
   }	
 
   if (multest || SAmethod == "unit") {
-    predselect.unitdf <- data.frame(DOMAIN=names(predselectlst.unit), 
-					do.call(rbind, predselectlst.unit))
+
+    predselect.unitdf <- data.frame(DOMAIN=names(predselectlst.unit),
+                                    do.call(rbind, predselectlst.unit))
+
     setnames(predselect.unitdf, "DOMAIN", largebnd.unique)
     predselect.unitdf[is.na(predselect.unitdf)] <- 0
+
   }
   if (multest || SAmethod == "area") {
-    predselect.areadf <- data.frame(DOMAIN=names(predselectlst.area), 
-					do.call(rbind, predselectlst.area))
+
+    predselect.areadf <- data.frame(DOMAIN=names(predselectlst.area),
+                                    do.call(rbind, predselectlst.area))
+
     setnames(predselect.areadf, "DOMAIN", largebnd.unique)
     predselect.areadf[is.na(predselect.areadf)] <- 0
+
   }
 
   ## Merge SAdom attributes to estdf_row
   ################################################
   if (addSAdomsdf && is.null(SAdomvars)) {
+    
     SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% names(estdf)])
     estdf <- merge(setDF(SAdomsdfbind)[,c("DOMAIN", SAdomvars2)], estdf, by="DOMAIN")
     estdf <- estdf[order(-estdf$AOI, estdf[["DOMAIN"]]),]
-    #estdf$AOI <- NULL
+
 
   } else if (addSAdomsdf && !is.null(SAdomvars)) {
+    
     SAdomvars2 <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
     SAdomvars2 <- unique(SAdomvars2[!SAdomvars2 %in% names(estdf)])
  
-    if (length(SAdomvars2) != 0) 
+    if (length(SAdomvars) == 0) stop("invalid SAdomvars")
+    
     estdf <- merge(setDF(SAdomsdfbind)[, unique(c("DOMAIN", SAdomvars2))], 
-					estdf, by="DOMAIN")
+                   estdf,
+                   by = "DOMAIN")
     estdf <- estdf[order(-estdf$AOI, estdf[["DOMAIN"]]),]
+
   } else {
+    
     estdf <- estdf[order(-estdf$AOI, estdf[["DOMAIN"]]),]
+    
   }
 
-  if (rowcolinfo$rowvar != "TOTAL") {
+  if (rowvar != "TOTAL") {
 
     ## Combine estimates
     estdf_row <- do.call(rbind, estlst_row)
@@ -1059,35 +998,50 @@ modSAtree <- function(SApopdatlst = NULL,
     }	
 
     if (multest || SAmethod == "unit") {
+      
       predselect.unitdf_row <- data.frame(DOMAIN=names(predselectlst.unit_row), 
-			do.call(rbind, predselectlst.unit_row))
+                                          do.call(rbind, predselectlst.unit_row))
+      
       setnames(predselect.unitdf_row, "DOMAIN", largebnd.unique)
       predselect.unitdf_row[is.na(predselect.unitdf_row)] <- 0
+      
     }
+    
     if (multest || SAmethod == "area") {
+      
       predselect.areadf_row <- data.frame(DOMAIN=names(predselectlst.area_row), 
-			do.call(rbind, predselectlst.area_row))
+                                          do.call(rbind, predselectlst.area_row))
+      
       setnames(predselect.areadf_row, "DOMAIN", largebnd.unique)
       predselect.areadf_row[is.na(predselect.areadf_row)] <- 0
+      
     }
 
     ## Merge SAdom attributes to estdf_row
     if (addSAdomsdf && is.null(SAdomvars)) {
+      
       SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% names(estdf_row)])
       estdf_row <- merge(setDF(SAdomsdfbind)[, c("DOMAIN", SAdomvars2)], 
-					estdf_row, by="DOMAIN")
+                         estdf_row,
+                         by = "DOMAIN")
       estdf_row <- estdf_row[order(-estdf_row$AOI, estdf_row[["DOMAIN"]]),]
 
     } else if (addSAdomsdf && !is.null(SAdomvars)) {
+      
       SAdomvars2 <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
       SAdomvars2 <- unique(SAdomvars2[!SAdomvars2 %in% names(estdf_row)])
     
       if (length(SAdomvars) == 0) stop("invalid SAdomvars")
+      
       estdf_row <- merge(setDF(SAdomsdfbind)[, unique(c("DOMAIN", SAdomvars2))], 
-					multestdf_row, by="DOMAIN")
+                         multestdf_row,
+                         by = "DOMAIN")
       estdf_row <- estdf_row[order(-estdf_row$AOI, estdf_row[["DOMAIN"]]),]
+      
     } else {
+      
       estdf_row <- estdf_row[order(-estdf_row$AOI, estdf_row[["DOMAIN"]]),]
+      
     }
   }
  
@@ -1144,8 +1098,8 @@ modSAtree <- function(SApopdatlst = NULL,
   } 
  
   ## Subset multest to estimation output
-  dunit_totest <- setDT(estdf)[AOI==1, 
-		unique(c("DOMAIN", "nhat", "nhat.se", "NBRPLT.gt0", "estimator")), with=FALSE]
+  subvars <- c("DOMAIN", "nhat", "nhat.se", "NBRPLT.gt0", "estimator")
+  dunit_totest <- setDT(estdf)[AOI == 1, subvars, with = FALSE]
   setkeyv(dunit_totest, "DOMAIN")
 
   ## Merge dunitarea
@@ -1153,83 +1107,111 @@ modSAtree <- function(SApopdatlst = NULL,
   dunitareabind <- tabs$tab1
   dunit_totest <- tabs$tab2
   dunit_totest <- merge(dunit_totest, 
-		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
+                        dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE],
+                        by = "DOMAIN")
 
   if (!is.null(dunit_totest)) {
+    
     dunit_totest[, nhat.var := nhat.se^2]
 
     if (totals) {
-      dunit_totest <- getpse(dunit_totest, areavar=areavar, esttype=esttype)
+      dunit_totest <- getpse(dunit_totest,
+                             areavar = areavar,
+                             esttype = esttype)
     } else {
-      dunit_totest <- getpse(dunit_totest, esttype=esttype)
+      dunit_totest <- getpse(dunit_totest,
+                             esttype = esttype)
     }
   }
   
-  if (rowcolinfo$rowvar != "TOTAL") {
+  if (rowvar != "TOTAL") {
+    
     ## Set up estimates. If estimate is NULL, use direct estimator
     estdf_row <- setDT(estdf_row)
     estdf_row[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
     estdf_row$estimator <- nhat
 
     if (na.fill != "NONE") {
+      
       estdf_row[is.na(estdf_row$nhat), "estimator"] <- na.fill
       na.fill.se <- paste0(na.fill, ".se")
       estdf_row[is.na(estdf_row$nhat), c("nhat", "nhat.se")] <- 
-        estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se), with=FALSE]
+        estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se), with = FALSE]
+      
     }
 
     ## Change values that are less than 0 to 0
     if (!lt0 && any(!is.na(estdf_row$nhat)) && any(na.omit(estdf_row$nhat) < 0)) {
       estdf_row[estdf_row$nhat < 0, "nhat"] <- 0
     } 
-
+    
     ## Subset multest to estimation output
-    dunit_rowest <- setDT(estdf_row)[AOI==1, 
-                     unique(c("DOMAIN", rowcolinfo$rowvar, 
-					 "nhat", "nhat.se", "NBRPLT.gt0", "estimator")),
- 				with=FALSE]
+    dunit_rowest <- setDT(estdf_row)[AOI==1, c(subvars, rowvar), with=FALSE]
     setkeyv(dunit_rowest, "DOMAIN")
 	
     ###############################################################################
     ## Check add0 and Add area
     ###############################################################################
     if (!is.null(dunit_rowest)) {
-      dunit_rowest <- add0unit(x=dunit_rowest, xvar=rowcolinfo$rowvar, uniquex=uniquerow, 
-		       unitvar=dunitvar, xvar.add0=row.add0)
+      
+      dunit_rowest <- add0unit(x = dunit_rowest,
+                               xvar = rowvar, 
+                               uniquex = uniquerow, 
+                               unitvar = dunitvar,
+                               xvar.add0 = row.add0)
+      
       tabs <- check.matchclass(dunitareabind, dunit_rowest, dunitvar)
       dunitareabind <- tabs$tab1
       dunit_rowest <- tabs$tab2
-	}
+      
+    }
     
     if (!is.null(dunit_rowest)) {
+      
       dunit_rowest[, nhat.var := nhat.se^2]
 
       if (totals) {
-        dunit_rowest <- getpse(dunit_rowest, areavar=areavar, esttype=esttype)
+        dunit_rowest <- getpse(dunit_rowest,
+                               areavar = areavar,
+                               esttype = esttype)
       } else {
-        dunit_rowest <- getpse(dunit_rowest, esttype=esttype)
+        dunit_rowest <- getpse(dunit_rowest,
+                               esttype = esttype)
       }
     }
   }
-  estnm <- "est"
 
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
+
   title.dunitvar <- ifelse(is.null(title.unitvar), smallbnd.dom, title.unitvar)
-  alltitlelst <- check.titles(esttype=esttype, estseed=estseed, 
-                    sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
-                    title.rowvar=rowcolinfo$title.rowvar, 
-					title.colvar=rowcolinfo$title.colvar, 
-                    title.unitvar=title.dunitvar, title.filter=title.filter, 
-                    title.unitsn=estvarunits, unitvar="DOMAIN", 
-					title.estvarn=title.estvar, 
-                    rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
-                    estvarn=estvar, estvarn.filter=estvar.filter, 
-                    addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-                    states=states, invyrs=invyrs, landarea=landarea, 
-                    pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
-                    parameters=FALSE)
+  alltitlelst <- check.titles(esttype=esttype,
+                              estseed=estseed,
+                              woodland=woodland,
+                              sumunits=sumunits,
+                              title.main=title.main,
+                              title.ref=title.ref,
+                              title.rowvar=title.rowvar,
+                              title.rowgrp=title.rowgrp,
+                              title.colvar=title.colvar,
+                              title.unitvar=title.dunitvar,
+                              title.filter=title.filter,
+                              title.unitsn=estunits,
+                              title.estvarn=title.estvar,
+                              unitvar="DOMAIN",
+                              rowvar=rowvar, colvar=colvar,
+                              estvarn=estvar.name,
+                              estvarn.filter=estvar.filter,
+                              addtitle=addtitle,
+                              returntitle=returntitle,
+                              rawdata=rawdata,
+                              states=states, invyrs=invyrs,
+                              landarea=landarea,
+                              pcfilter=pcfilter,
+                              allin1=allin1,
+                              divideby=divideby,
+                              outfn.pre=outfn.pre)
   title.dunitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -1238,52 +1220,42 @@ modSAtree <- function(SApopdatlst = NULL,
   title.rowvar <- alltitlelst$title.rowvar
   outfn.estpse <- alltitlelst$outfn.estpse
   outfn.param <- alltitlelst$outfn.param
+
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
-    outfn.rawdat <- paste0(outfn.rawdat, "_modSA_", SApackage, "_", SAmethod) 
-  } 
+    outfn.rawdat <- paste0(outfn.rawdat, "_modSA_", SApackage, "_", SAmethod)
+  }
   ## Append name of package and method to outfile name
-  outfn.estpse2 <- paste0(outfn.estpse, "_modSA_", SApackage, "_", SAmethod) 
+  outfn.estpse2 <- paste0(outfn.estpse, "_modSA_", SApackage, "_", SAmethod)
 
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
   message("getting output...")
+  estnm <- "est"
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-              unitvar="DOMAIN", unit_totest=dunit_totest, 
-			  unit_rowest=dunit_rowest, unit_colest=dunit_colest, 
-			  unit_grpest=dunit_grpest, 
-              rowvar=rowcolinfo$rowvarnm, colvar=rowcolinfo$colvarnm, 
-              uniquerow=rowcolinfo$uniquerow, uniquecol=rowcolinfo$uniquecol, 
-              rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
-			  rowunit=rowunit, totunit=totunit, allin1=allin1, 
-			  savedata=savedata, addtitle=addtitle, title.ref=title.ref, 
-              title.colvar=rowcolinfo$title.colvar, title.rowvar=rowcolinfo$title.rowvar, 
-              title.rowgrp=title.rowgrp, title.unitvar=title.dunitvar, 
-			  title.estpse=title.estpse, title.est=title.est, 
-			  title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, 
-			  outfn.estpse=outfn.estpse2, outfolder=outfolder, 
-              outfn.date=outfn.date, overwrite=overwrite_layer, 
-			  estnm=estnm, estround=estround, pseround=pseround, 
-			  divideby=divideby, returntitle=returntitle, 
-			  estnull=estnull, psenull=psenull) 
+                      unitvar="DOMAIN", unit_totest=dunit_totest, 
+                      unit_rowest=dunit_rowest, unit_colest=dunit_colest, 
+                      unit_grpest=dunit_grpest, rowvar=rowvarnm,
+                      uniquerow=uniquerow,, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
+                      rowunit=rowunit, totunit=totunit, allin1=allin1, 
+                      savedata=savedata, addtitle=addtitle, title.ref=title.ref, 
+                      title.colvar=title.colvar, title.rowvar=title.rowvar,
+                      title.rowgrp=title.rowgrp,title.unitvar=title.dunitvar,
+                      title.estpse=title.estpse, title.est=title.est,
+                      title.pse=title.pse, rawdata=rawdata, rawonly=rawonly,
+                      outfn.estpse=outfn.estpse2, outfolder=outfolder, 
+                      outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm,
+                      estround=estround, pseround=pseround, divideby=divideby,
+                      returntitle=returntitle, estnull=estnull, psenull=psenull) 
+  
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
-#  if (!is.null(est2return)) {
-#    est2return[is.na(est2return$Estimate), "Estimate"] <- estnull 
-#    if ("Percent Sampling Error" %in% names(est2return)) {
-#      est2return[is.na(est2return$"Percent Sampling Error"), 
-#		"Percent Sampling Error"] <- psenull 
-#    }
-
+  if (!is.null(est2return)) {
     returnlst$est <- est2return
-#  } 
+  }  
   if (!is.null(pse2return)) {
-#    if ("Percent Sampling Error" %in% names(pse2return)) {
-#      pse2return[is.na(pse2return$"Percent Sampling Error"), 
-#		"Percent Sampling Error"] <- psenull 
-#    }
     returnlst$pse <- pse2return 
   }
   if (returntitle) {
@@ -1292,10 +1264,6 @@ modSAtree <- function(SApopdatlst = NULL,
  
   domain <- "TOTAL"
   if (multest && !is.null(multestdf)) {
-    ## Merge dunitarea
-    #tabs <- check.matchclass(dunitarea, multestdf, dunitvar)
-    #dunitarea <- tabs$tab1
-    #dunit_multest <- tabs$tab2
  
     multestdf <- merge(multestdf, 
 		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
@@ -1409,7 +1377,7 @@ modSAtree <- function(SApopdatlst = NULL,
     rawdat <- tabs$rawdat
     names(rawdat)[names(rawdat) == "unit_totest"] <- "dunit_totest"
     names(rawdat)[names(rawdat) == "unit_rowest"] <- "dunit_rowest"
-    rawdat$domdat <- setDF(tdomdat)
+    rawdat$domdat <- setDF(domdat)
 
     if (savedata) {
       if (!is.null(title.estpse)) {
@@ -1478,7 +1446,7 @@ modSAtree <- function(SApopdatlst = NULL,
 	  rawdat$colvar <- rowcolinfo$colvar
 	}
     rawdat$areaunits <- areaunits
-    rawdat$estunits <- estvarunits
+    rawdat$estunits <- estunits
     returnlst$raw <- rawdat  
   }
 
@@ -1503,6 +1471,7 @@ modSAtree <- function(SApopdatlst = NULL,
 
 
   return(returnlst)
+  
 }
 
 
