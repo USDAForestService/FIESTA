@@ -562,6 +562,13 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   #} else {
     setcolorder(auxlut, c(strunitvars, names(auxlut)[!names(auxlut) %in% strunitvars]))
   #}
+    
+  if (!is.null(prednames) && standardize) {
+    standardized <- preds.standardize(plt=pltx, aux=auxlut, prednames=prednames)
+    pltx <- standardized$plt
+    auxlut <- standardized$aux
+  }
+    
 
   returnlst <- list(pltx = as.data.table(pltx),
 		                auxlut = as.data.table(auxlut),
@@ -575,12 +582,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   if (!is.null(npixelvar)) {
     returnlst$npixels <- data.table(npixels)
     returnlst$npixelvar <- npixelvar
-  }
-
-  if (!is.null(prednames) && standardize) {
-    standardized <- preds.standardize(plt=pltx, aux=auxlut, prednames=prednames)
-    pltx <- standardized$plt
-    auxlut <- standardized$aux
   }
 
   if (strata) {

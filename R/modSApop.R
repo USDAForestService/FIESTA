@@ -653,7 +653,7 @@ modSApop <- function(popType = "VOL",
   predfac <- pltcheck$predfac
   auxlut <- dunitzonal
   returndata <- pltcheck$returndata
-  
+
   
   
   # subset pvars2keep 
@@ -714,11 +714,11 @@ modSApop <- function(popType = "VOL",
   ## Change names based on data.frame names
   dunitlutcols <- which(names(dunitlut) %in% prednames)
   pltassgnxcols <- which(names(pltassgnx) %in% prednames)
-  dfnames <- colnames(data.frame(dunitlut[, dunitlutcols, with=FALSE]))
-  names(dunitlut)[dunitlutcols] <- dfnames
-  names(pltassgnx)[pltassgnxcols] <- dfnames
-  prednames <- dfnames
-  
+  dfnames_unitlut <- colnames(data.frame(dunitlut[, dunitlutcols, with=FALSE]))
+  dfnames_pltassgn <- colnames(data.frame(pltassgnx[, pltassgnxcols, with = FALSE]))
+  names(dunitlut)[dunitlutcols] <- dfnames_unitlut
+  names(pltassgnx)[pltassgnxcols] <- dfnames_pltassgn
+  prednames <- unique(dfnames_unitlut, dfnames_pltassgn)
 
   if (popType %in% c("ALL", "CURR", "AREA", "VOL")) {
     
