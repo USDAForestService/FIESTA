@@ -42,87 +42,113 @@ getpopFilterqry <- function(popType,
     pjoinqry <- getjoinqry(pltassgnid, pjoinid, pltassgn., plt.)
     pltafromqry <- paste0(pfromqry, 
                           "\n JOIN ", SCHEMA., pltassgnnm, " plta ", pjoinqry)
+  } else {
+    pltafromqry <- paste0("\nFROM ", SCHEMA., pltassgnnm, " plta ")
   }
   
   
   ## 2. Check states for subsetting data if evalid and state are not in popFilter
   ##################################################################################
   states <- popFilter$states
+  pfilter <- popFilter$pfilter
 
   if (is.null(popFilter$evalid) && is.null(states)) {
-    statenm <- findnm("STATECD", pltflds, returnNULL=TRUE)
-    statecda. <- ifelse(statenm %in% pltflds, plt., pltassgn.)
-    
-    if (is.null(statenm) && datindb) {
-      message("STATECD is not in pltassgn...  getting all states in database...")
-    }
-    if (is.null(statenm) && datindb) {
+    if (!is.null(pfilter)) {
+      if (!is.null(plt.)) {
+        statecda. <- ifelse(statenm %in% pltassgnflds, pltassgn., plt.)
+      } else {
+        statecda. <- pltassgn.
+      }
       
-      if (!is.null(plotnm)) {
-        message("STATECD is not in pltassgn...  extracting plot data for all states in database...")
+      states.qry <- paste0(
+        "\nSELECT DISTINCT ", statecda., "statecd",
+        pltfromqry,
+        "\nWHERE ", pfilter)
+      states <- DBI::dbGetQuery(dbconn, states.qry)[[1]]
+     
+    } else {
+      statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
+      if (!is.null(plt.)) {
+        statecda. <- ifelse(statenm %in% pltassgnflds, pltassgn., plt.)
+      } else {
+        statecda. <- pltassgn.
+      }
+      
+      if (is.null(statenm) && datindb) {
+        message("STATECD is not in pltassgn...  getting all states in database...")
+      }
+      if (is.null(statenm) && datindb) {
+      
+        if (!is.null(plotnm)) {
+          message("STATECD is not in pltassgn...  extracting plot data for all states in database...")
         
-        getpltx.qry <- paste0(
-          "\nSELECT p.CN, p.STATECD, p.COUNTYCD",
-          pfromqry)
-        pltxtmp <- DBI::dbGetQuery(dbconn, getpltx.qry)
-        states <- unique(pltxtmp[[statenm]])
+          getpltx.qry <- paste0(
+            "\nSELECT p.CN, p.STATECD, p.COUNTYCD",
+            pfromqry)
+          pltxtmp <- DBI::dbGetQuery(dbconn, getpltx.qry)
+          states <- unique(pltxtmp[[statenm]])
         
-        countynm <- findnm("COUNTYCD", names(pltxtmp))
+          countynm <- findnm("COUNTYCD", names(pltxtmp))
+          if (!is.null(countynm)) {
+            stcntywhereqry <- NULL
+            for (i in 1: length(states)) {
+              stcd <- states[i]
+              cntycds <- unique(pltassgnx[pltassgnx[[statenm]] %in% stcd, countynm, with=FALSE])[[1]]
+              if (length(cntycds) > 0) {
+                if (!is.null(stcntywhereqry)) {
+                  stcntywhereqry <- paste0(stcntywhereqry, "\n  OR ")
+                }
+                stcntywhereqry <- paste0(stcntywhereqry, 
+                    "(p.", statenm, " = ", stcd, " AND p.", countynm, " IN (", toString(cntycds), "))")
+              }
+            }
+          } else {
+            stcntywhereqry <- paste0("p.", statenm, " IN (", toString(states), ")") 
+          }
+        } else {
+          message("STATECD is not in pltassgn...  extracting data for all states in database...")
+          stcntywhereqry <- NULL
+        }
+      } else {
+        if (pltaindb) {
+          getstates.qry <- paste0(
+            "\nSELECT DISTINCT ", statenm,
+            "\nFROM ", pltassgnnm)
+          states <- DBI::dbGetQuery(dbconn, getstates.qry)[[1]]
+        } else {
+          states <- unique(pltassgnx[[statenm]])
+        }
+        countynm <- findnm("COUNTYCD", pltassgnflds)
+        if (!is.null(plt.)) {
+          countycda. <- ifelse(countynm %in% pltassgnflds, pltassgn., plt.)
+        } else {
+          countycda. <- pltassgn.
+        }
+
         if (!is.null(countynm)) {
           stcntywhereqry <- NULL
           for (i in 1: length(states)) {
             stcd <- states[i]
-            cntycds <- unique(pltassgnx[pltassgnx[[statenm]] %in% stcd, countynm, with=FALSE])[[1]]
+            if (pltaindb) {
+              getcntycds.qry <- paste0(
+                "\nSELECT DISTINCT ", countynm,
+                "\nFROM ", pltassgnnm,
+                "\nWHERE ", statenm, " = ", stcd)
+              cntycds <- DBI::dbGetQuery(dbconn, getcntycds.qry)[[1]]
+            } else {
+              cntycds <- unique(pltassgnx[pltassgnx[[statenm]] %in% stcd, countynm, with=FALSE])[[1]]
+            }
             if (length(cntycds) > 0) {
               if (!is.null(stcntywhereqry)) {
                 stcntywhereqry <- paste0(stcntywhereqry, "\n  OR ")
               }
               stcntywhereqry <- paste0(stcntywhereqry, 
-                                       "(p.", statenm, " = ", stcd, " AND p.", countynm, " IN (", toString(cntycds), "))")
+                  "(", statecda., statenm, " = ", stcd, " AND ", countycda., countynm, " IN (", toString(cntycds), "))")
             }
           }
         } else {
-          stcntywhereqry <- paste0("p.", statenm, " IN (", toString(states), ")") 
+          stcntywhereqry <- paste0(statecda., statenm, " IN (", toString(states), ")") 
         }
-      } else {
-        message("STATECD is not in pltassgn...  extracting data for all states in database...")
-        stcntywhereqry <- NULL
-      }
-    } else {
-      if (pltaindb) {
-        getstates.qry <- paste0(
-          "\nSELECT DISTINCT ", statenm,
-          "\nFROM ", pltassgnnm)
-        states <- DBI::dbGetQuery(dbconn, getstates.qry)[[1]]
-      } else {
-        states <- unique(pltassgnx[[statenm]])
-      }
-      countynm <- findnm("COUNTYCD", pltflds)
-      countycda. <- ifelse(countynm %in% pltflds, plt., pltassgn.)
-
-      if (!is.null(countynm)) {
-        stcntywhereqry <- NULL
-        for (i in 1: length(states)) {
-          stcd <- states[i]
-          if (pltaindb) {
-            getcntycds.qry <- paste0(
-              "\nSELECT DISTINCT ", countynm,
-              "\nFROM ", pltassgnnm,
-              "\nWHERE ", statenm, " = ", stcd)
-            cntycds <- DBI::dbGetQuery(dbconn, getcntycds.qry)[[1]]
-          } else {
-            cntycds <- unique(pltassgnx[pltassgnx[[statenm]] %in% stcd, countynm, with=FALSE])[[1]]
-          }
-          if (length(cntycds) > 0) {
-            if (!is.null(stcntywhereqry)) {
-              stcntywhereqry <- paste0(stcntywhereqry, "\n  OR ")
-            }
-            stcntywhereqry <- paste0(stcntywhereqry, 
-                                     "(", statecda., statenm, " = ", stcd, " AND ", countycda., countynm, " IN (", toString(cntycds), "))")
-          }
-        }
-      } else {
-        stcntywhereqry <- paste0(statecda., statenm, " IN (", toString(states), ")") 
       }
     }
   }
@@ -213,8 +239,11 @@ getpopFilterqry <- function(popType,
         stop("EVALID not in data")
       } 
       evalida. <- ppsa.
-      ejoinqry <- paste0("\n JOIN ", SCHEMA., ppsanm, " ppsa ON (", evalida., "PLT_CN = ", plt., puniqueid, ")")
-      
+      if (!is.null(plt.)) {
+        ejoinqry <- paste0("\n JOIN ", SCHEMA., ppsanm, " ppsa ON (", evalida., "PLT_CN = ", plt., puniqueid, ")")
+      } else {
+        ejoinqry <- paste0("\n JOIN ", SCHEMA., ppsanm, " ppsa ON (", evalida., "PLT_CN = ", pltassgn., pltassgnid, ")")
+      }
       pfromqry <- paste0(pfromqry, 
                          ejoinqry)
       pltafromqry <- paste0(pltafromqry, 
@@ -222,7 +251,11 @@ getpopFilterqry <- function(popType,
       
     } else {
       evalida. <- pltassgn.
-      ejoinqry <- paste0("\n JOIN ", SCHEMA., pltassgnnm, " plta ON (", evalida., "PLT_CN = ", plt., puniqueid, ")")
+      if (!is.null(plt.)) {
+        ejoinqry <- paste0("\n JOIN ", SCHEMA., pltassgnnm, " plta ON (", evalida., "PLT_CN = ", plt., puniqueid, ")")
+      } else {
+        ejoinqry <- paste0("\n JOIN ", SCHEMA., pltassgnnm, " plta ON (", evalida., "PLT_CN = ", pltassgn., pltassgnid, ")")
+      }
       pfromqry <- paste0(pfromqry, 
                          ejoinqry)
     }
@@ -498,7 +531,7 @@ getpopFilterqry <- function(popType,
     }
     
     ## Build where query to include invyr popfilter 
-    iwhere.qry <- paste0(intensitya., intensitynm, " IN(", toString(intensity), ")")
+    iwhere.qry <- paste0(intensitya., intensitynm, " IN (", toString(intensity), ")")
     if (is.null(pwhereqry)) {
       pwhereqry <- paste0("\n WHERE ", iwhere.qry)
     } else {
@@ -607,13 +640,13 @@ getpopFilterqry <- function(popType,
         }
       }
     }
-    if (!is.null(pfilter)) {
-      if (is.null(pwhereqry)) {
-        pwhereqry <- pfilter
-      } else {
-        pwhereqry <- paste(paste(pwhereqry, pfilter, sep="\n   AND "))
-      }
-    }
+#    if (!is.null(pfilter)) {
+#      if (is.null(pwhereqry)) {
+#        pwhereqry <- pfilter
+#      } else {
+#        pwhereqry <- paste(paste(pwhereqry, pfilter, sep="\n   AND "))
+#      }
+#    }
   }
   
   ###################################################################################
@@ -723,6 +756,9 @@ getpopFilterqry <- function(popType,
     returnlst$PLOT <- PLOT
     returnlst$ppsanm <- ppsanm
     returnlst$plotnm <- plotnm
+  }
+  if (!is.null(pfilter)) {
+    returnlst$pfilter <- pfilter
   }
   
   return(returnlst)

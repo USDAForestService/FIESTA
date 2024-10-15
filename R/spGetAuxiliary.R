@@ -645,6 +645,7 @@ spGetAuxiliary <- function(xyplt = NULL,
   prednames <- {}
   inputdf <- {}
   zonalnames <- {}
+
   
   if (extract && addN) {
     ## Get plot counts by domain unit
@@ -1102,16 +1103,16 @@ spGetAuxiliary <- function(xyplt = NULL,
   }
 
   if (extract) {
-    returnlst$pltassgn <- pltassgn
+    returnlst$pltassgn <- data.frame(pltassgn)
     returnlst$pltassgnid <- uniqueid
   }
 
   if (areacalc) {
-    returnlst$unitarea <- unitarea
+    returnlst$unitarea <- data.frame(unitarea)
     returnlst$areavar <- areavar
   }
   if (!noaux) {
-    returnlst$unitzonal <- setDF(unitzonal)
+    returnlst$unitzonal <- data.frame(unitzonal)
     returnlst$inputdf <- inputdf
     returnlst$prednames <- unique(prednames)
     returnlst$zonalnames <- unique(zonalnames)
