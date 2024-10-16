@@ -48,7 +48,6 @@ check.popdataPLT <-
     ## Subset variables for pltx and pltassgnx
     ###################################################################################
     
-    
     ## Set global variables
     ##################################################################################
     plotsampcnt=nonresplut=pfromqry=pltassgnqry=unitareaqry=auxlutqry=
@@ -60,7 +59,7 @@ check.popdataPLT <-
     SCHEMA. <- ""
     P2POINTCNT=POP_PLOT_STRATUM_ASSGN=PLOT<- NULL
     
-    
+   
     ###################################################################################
     ## 1. Define a set of plot-level variables that are necessary to keep for estimation. 
     ###################################################################################
@@ -126,7 +125,7 @@ check.popdataPLT <-
     pltx <- plotlst$tabx
     plt <- plotlst$tab
     
-    
+
     ## 4.2. Check pltassgn table.
     ############################################################# 
     

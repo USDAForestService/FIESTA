@@ -737,7 +737,7 @@ modGBpop <- function(popType = "VOL",
       popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]
     }
   }
-  
+
   ###################################################################################
   ## CHECK PLOT PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
