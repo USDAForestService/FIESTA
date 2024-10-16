@@ -148,7 +148,6 @@ DBgetEvalid <- function(states = NULL,
   #		"CRWN", "INV", "P2VEG")
   
   
-  
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
@@ -801,7 +800,7 @@ DBgetEvalid <- function(states = NULL,
     } else if (is.null(evalEndyr)) {
       ## Check evalAll
       ###########################################################
-      evalAll <- pcheck.logical(evalAll, varnm="evalAll", 
+      evalAll <- FIESTAutils::pcheck.logical(evalAll, varnm="evalAll", 
                                 title="All evaluations?", first="YES", gui=gui)
       
       if (is.null(evalAll) || !evalAll) {
@@ -886,7 +885,8 @@ DBgetEvalid <- function(states = NULL,
     ## Get last year of evaluation period and the evaluation type
     if (evalresp) {
       ## Get the evalidation type
-      evalType <- pcheck.varchar(var2check=evalType, varnm="evalType", gui=gui, 
+      if (is.list(evalType)) evalType <- unlist(evalType)
+      evalType <- FIESTAutils::pcheck.varchar(var2check=evalType, varnm="evalType", gui=gui, 
                                  checklst=evalTypelst, caption="Evaluation type", multiple=TRUE, 
                                  preselect="VOL")
       if (is.null(evalType)) {
@@ -901,8 +901,8 @@ DBgetEvalid <- function(states = NULL,
         #}
         
         ## Create lookup and get code for evalType
-        evalCode <- c("00","01","01","03")
-        names(evalCode) <- c("ALL", "CURR", "VOL", "CHNG")  
+        evalCode <- c("00","01","01","03", "10")
+        names(evalCode) <- c("ALL", "CURR", "VOL", "CHNG", "P2VEG")  
         evalTypecd <- unique(evalCode[which(names(evalCode) %in% evalType)])
         
         ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
@@ -949,7 +949,7 @@ DBgetEvalid <- function(states = NULL,
             stop("invalid evalType... must be in following list: ", toString(evaldttyp)) 
           }
         }
-        
+
         ## Create list of evalTypes
         evalTypelist <- rep(list(evalType), length(states))
         names(evalTypelist) <- states
