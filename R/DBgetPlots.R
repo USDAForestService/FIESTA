@@ -147,7 +147,7 @@
 #' type groups on plot.\cr 
 #' \tab CCLIVEPLT - Percent live canopy cover of condition aggregated to plot-level 
 #' (LIVE_CANOPY_CVR_PCT * CONDPROP_UNADJ).\cr 
-#' \tab PLOT_ID - Unique Identifier for a plot ('ID' + STATECD(2) + UNITCD(2) + 
+#' \tab PLOT_ID - Unique Identifier for a plot ('PID' + STATECD(2) + UNITCD(2) + 
 #' COUNTYCD(3) + PLOT(5)).  This variable can be used to identify multiple records 
 #' for each measurement of plot.\cr }
 #' 
@@ -305,6 +305,7 @@
 #' @param alltFilter String. If istree=TRUE, an overall filter for tree data in
 #' all states (e.g., only Whitebark pine trees - 'SPCD == 101'). Note: returns
 #' only plots with trees included in filter.
+#' @param lowernames Logical. If TRUE, output data with lowercase variables.
 #' @param returndata Logical. If TRUE, returns data objects.
 #' @param savedata Logical. If TRUE, saves data to outfolder as comma-delimited
 #' file (*.csv).  No objects are returned. If FALSE, the data are saved as R
@@ -492,6 +493,7 @@ DBgetPlots <- function (states = NULL,
                         stateFilter = NULL, 
                         allFilter = NULL, 
                         alltFilter = NULL,
+                        lowernames = FALSE,
                         returndata = TRUE,
                         savedata = FALSE,
                         exportsp = FALSE,
@@ -2015,7 +2017,7 @@ DBgetPlots <- function (states = NULL,
       ## Generate PLOT_ID, with STATECD, UNIT, COUNTYCD, PLOT to define
       if (all(c("STATECD", "UNITCD", "COUNTYCD", "PLOT") %in% names(pltx)) && 
 		              !"PLOT_ID" %in% names(pltx)) {
-        pltx[, PLOT_ID := paste0("ID", 
+        pltx[, PLOT_ID := paste0("PID", 
 		        formatC(pltx$STATECD, width=2, digits=2, flag=0), 
           	formatC(pltx$UNITCD, width=2, digits=2, flag=0),
           	formatC(pltx$COUNTYCD, width=3, digits=3, flag=0),
@@ -2134,8 +2136,11 @@ DBgetPlots <- function (states = NULL,
                            pvars2keep = c("INVYR", "PLOT_STATUS_CD", "INTENSITY"))
 		      xyxnm <- paste0("xyCurx_", coordType)
 		      xynm <- paste0("xyCur_", coordType)
-		      assign(xyxnm, 
-			           xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ])
+		      xytable <- xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ]
+		      if (lowernames) {
+		        names(xytable) <- tolower(names(xytable))
+		      }
+		      assign(xyxnm, xytable)
           if (returndata) { 
             assign(xynm, rbind(get(xynm), get(xyxnm)))
           } 
@@ -2159,8 +2164,11 @@ DBgetPlots <- function (states = NULL,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
 		      xyxnm <- paste0("xyx_", coordType)
 		      xynm <- paste0("xy_", coordType)
-		      assign(xyxnm, 
-			             xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ])
+		      xytable <- xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ]
+		      if (lowernames) {
+		        names(xytable) <- tolower(names(xytable))
+		      }
+		      assign(xyxnm, xytable)
           if (returndata) { 
             assign(xynm, rbind(get(xynm), get(xyxnm)))
           } 
@@ -2498,7 +2506,7 @@ DBgetPlots <- function (states = NULL,
         }
 
         ## Generate PLOT_ID, with STATECD, UNITCD, COUNTYCD, PLOT to define
-        pltux[, PLOT_ID := paste0("ID",
+        pltux[, PLOT_ID := paste0("PID",
             formatC(pltux$STATECD, width=2, digits=2, flag=0),
           	formatC(pltux$UNITCD, width=2, digits=2, flag=0),
           	formatC(pltux$COUNTYCD, width=3, digits=3, flag=0),
@@ -2544,6 +2552,10 @@ DBgetPlots <- function (states = NULL,
       setkeyv(pltux, "CN")
 
       pltux <- pltux[, pltvarlst2, with=FALSE]
+      if (lowernames) {
+        names(pltux) <- tolower(names(pltux))
+        names(condux) <- tolower(names(condux))
+      }
 
       if (returndata) {
 	  	  if ("pltu" %in% names(tabs)) {
@@ -2694,6 +2706,9 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           sccmx <- sccmx[paste(sccmx$PLT_CN, sccmx$CONDID) %in% pcondID,]
+          if (lowernames) {
+            names(sccmx) <- tolower(names(sccmx))
+          }
 
           if (returndata) {
 		  	    if ("subp_cond_chng_mtrx" %in% names(tabs)) {
@@ -2910,6 +2925,10 @@ DBgetPlots <- function (states = NULL,
             }
           }
 		  
+          if (lowernames) {
+            names(treex) <- tolower(names(treex))
+          }
+          
           ## Append data
           if (treeReturn && returndata) {
 			      if ("tree" %in% names(tabs)) {
@@ -3065,6 +3084,10 @@ DBgetPlots <- function (states = NULL,
                 setcolorder(treeux, c(treenames, sppvarsnew)) 
               } 
 			  
+              if (lowernames) {
+                names(treeux) <- tolower(names(treeux))
+              }
+              
               ## Append data
               if (treeReturn && returndata) {
 			          if ("treeu" %in% names(tabs)) {
@@ -3210,6 +3233,9 @@ DBgetPlots <- function (states = NULL,
 
                 ## Subset overall filters from condx
                 grmx <- grmx[treeux$CN,]
+                if (lowernames) {
+                  names(grmx) <- tolower(names(grmx))
+                }
 
                 if (returndata) {
 		  	          if ("tree_grm_component" %in% names(tabs)) {
@@ -3281,6 +3307,9 @@ DBgetPlots <- function (states = NULL,
 
                 ## Subset overall filters from condx
                 grmbx <- grmbx[treeux$CN,]
+                if (lowernames) {
+                  names(grmbx) <- tolower(names(grmbx))
+                }
 
                 if (returndata) {
 		  	          if ("tree_grm_begin" %in% names(tabs)) {
@@ -3352,6 +3381,9 @@ DBgetPlots <- function (states = NULL,
 
                 ## Subset overall filters from condx
                 grmmx <- grmmx[treeux$CN,]
+                if (lowernames) {
+                  names(grmmx) <- tolower(names(grmmx))
+                }
 
                 if (returndata) {
 		  	          if ("tree_grm_midpt" %in% names(tabs)) {
@@ -3523,6 +3555,10 @@ DBgetPlots <- function (states = NULL,
             ## Create variable, SEEDSUBP6, indicating a species has 6 or more seedlings on a SUBP
             seedx[, SEEDSUBP6 := 0][TREECOUNT_CALC >= 6, SEEDSUBP6 := 1]
           }
+          
+          if (lowernames) {
+            names(seedx) <- tolower(names(seedx))
+          }
 
           if (returndata) {
             ## Append data
@@ -3670,6 +3706,9 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           p2veg_subplot_sppx <- p2veg_subplot_sppx[paste(PLT_CN, CONDID) %in% pcondID,]
+          if (lowernames) {
+            names(p2veg_subplot_sppx) <- tolower(names(p2veg_subplot_sppx))
+          }
 
           if (returndata) {
 		  	    if ("p2veg_subplot_spp" %in% names(tabs)) {
@@ -3748,6 +3787,9 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           p2veg_subp_structurex <- p2veg_subp_structurex[paste(PLT_CN, CONDID) %in% pcondID,]
+          if (lowernames) {
+            names(p2veg_subp_structurex) <- tolower(names(p2veg_subp_structurex))
+          }
 
           if (returndata) {
 		  	    if ("p2veg_subp_structure" %in% names(tabs)) {
@@ -3870,6 +3912,9 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           invasive_subplot_sppx <- invasive_subplot_sppx[paste(PLT_CN, CONDID) %in% pcondID,]
+          if (lowernames) {
+            names(invasive_subplot_sppx) <- tolower(names(invasive_subplot_sppx))
+          }
 
           if (returndata) {
 		  	    if ("invasive_subplot_spp" %in% names(tabs)) {
@@ -4009,6 +4054,9 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           subpx <- subpx[subpx$PLT_CN %in% pltx$CN,]
+          if (lowernames) {
+            names(subpx) <- tolower(names(subpx))
+          }
 
           if (returndata) {
 		  	    if ("subplot" %in% names(tabs)) {
@@ -4082,7 +4130,10 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           subpcx <- subpcx[paste(subpcx$PLT_CN, subpcx$CONDID) %in% pcondID,]
-
+          if (lowernames) {
+            names(subpcx) <- tolower(names(subpcx))
+          }
+          
           if (returndata) {
 		  	    if ("subp_cond" %in% names(tabs)) {
               tabs$subp_cond <- rbind(tabs$subp_cond, data.frame(subpcx))
@@ -4202,6 +4253,10 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           cond_dwm_calcx <- cond_dwm_calcx[paste(PLT_CN, CONDID) %in% pcondID,]
+          if (lowernames) {
+            names(cond_dwm_calcx) <- tolower(names(cond_dwm_calcx))
+          }
+          
           if (returndata) {
 		  	    if ("cond_dwm_calc" %in% names(tabs)) {
               tabs$cond_dwm_calc <- rbind(tabs$cond_dwm_calc, 
@@ -4365,8 +4420,11 @@ DBgetPlots <- function (states = NULL,
             setkey(get(othertablexnm), "PLT_CN")
 
             ## Subset overall filters from pltx
-            assign(othertablexnm, 
-			         get(othertablexnm)[get(othertablexnm)[[joinid]] %in% unique(pltx$CN),])
+            othertablex <- get(othertablexnm)[get(othertablexnm)[[joinid]] %in% unique(pltx$CN),]
+            if (lowernames) {
+              names(othertablex) <- tolower(names(othertablex))
+            }
+            assign(othertablexnm, othertablex)
           }
           if (returndata) {
 		  	    if (tolower(othertable) %in% names(tabs)) {
@@ -4439,6 +4497,9 @@ DBgetPlots <- function (states = NULL,
         
         ## Subset overall filters from pltx
         ppsax <- ppsax[ppsax$PLT_CN %in% unique(pltx$CN),]
+        if (lowername) {
+          names(ppsax) <- tolower(names(ppsax))
+        }
       }
       if (returndata) {
         ppsa <- rbind(ppsa, ppsax)
@@ -4481,6 +4542,11 @@ DBgetPlots <- function (states = NULL,
                      stringsAsFactors=FALSE, connection = NULL), 
                              error=function(e) return(NULL))
         }
+        if (lowername) {
+          names(popstratumx) <- tolower(names(popstratumx))
+          names(popestnunitx) <- tolower(names(popestnunitx))
+        }
+        
         if (returndata) {
           popstratum <- rbind(popstratum, popstratumx)
           popestnunit <- rbind(popestnunit, popestnunitx)
