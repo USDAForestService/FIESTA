@@ -62,7 +62,7 @@ getpopFilterqry <- function(popType,
       
       states.qry <- paste0(
         "\nSELECT DISTINCT ", statecda., "statecd",
-        pltfromqry,
+        pfromqry,
         "\nWHERE ", pfilter)
       states <- DBI::dbGetQuery(dbconn, states.qry)[[1]]
      
@@ -259,7 +259,7 @@ getpopFilterqry <- function(popType,
       pfromqry <- paste0(pfromqry, 
                          ejoinqry)
     }
-    
+   
     ## Check popevalid values in database
     if (chkvalues) {
       evalidqry <- paste0(
@@ -613,21 +613,21 @@ getpopFilterqry <- function(popType,
   ###################################################################################
   if (!is.null(popFilter$pfilter)) {
     pfilter <- popFilter$pfilter
-    
+
     if (!is.null(pltassgnflds)) {
-      pfilter <- tryCatch(
-        check.logic(pltassgnflds, pfilter, syntax="SQL", filternm="pfilter"),
+      pfilterchk <- tryCatch(
+        suppressMessages(check.logic(pltassgnflds, pfilter, 
+                                     syntax="SQL", filternm="pfilter", stopifinvalid = FALSE)),
         error = function(e) {
           return(NULL) })
-      
-      
-      if (is.null(pfilter)) {
-        pfilter <- tryCatch(
+      if (is.null(pfilterchk)) {
+        pfilterchk <- tryCatch(
           check.logic(pflds, pfilter, syntax="SQL", filternm="pfilter"),
           error = function(e) {
             return(NULL) })
-        if (length(pfiltervars) == 0) {
-          stop("pfilter is invalid: ", pfilter)
+        if (length(pfilterchk) == 0) {
+          message(pfilter)
+          stop()
         }
         pflds_match <- pflds[sapply(pflds, grepl, pfilter)]
         if (length(pflds_match) == 1) {
@@ -640,15 +640,8 @@ getpopFilterqry <- function(popType,
         }
       }
     }
-#    if (!is.null(pfilter)) {
-#      if (is.null(pwhereqry)) {
-#        pwhereqry <- pfilter
-#      } else {
-#        pwhereqry <- paste(paste(pwhereqry, pfilter, sep="\n   AND "))
-#      }
-#    }
   }
-  
+
   ###################################################################################
   ## 7. Get most current plots in database
   ###################################################################################
@@ -744,7 +737,7 @@ getpopFilterqry <- function(popType,
   
   returnlst <- list(pltidsqry = pltidsqry,  
                     states = states, invyrs = invyrs, 
-                    pwhereqry = pwhereqry, 
+                    popwhereqry = pwhereqry,
                     pltselectqry = pltselectqry,
                     pfromqry = pfromqry,
                     pltafromqry = pltafromqry,
@@ -758,8 +751,14 @@ getpopFilterqry <- function(popType,
     returnlst$plotnm <- plotnm
   }
   if (!is.null(pfilter)) {
+    if (is.null(pwhereqry)) {
+      pwhereqry <- pfilter
+    } else {
+      pwhereqry <- paste(paste(pwhereqry, pfilter, sep="\n   AND "))
+    }
     returnlst$pfilter <- pfilter
   }
+  returnlst$pwhereqry <- pwhereqry
   
   return(returnlst)
 }
