@@ -1624,28 +1624,30 @@ DBgetPlots <- function (states = NULL,
       if ("P2VEG" %in% Types) {
 	      #evalid.veg <- sapply(evalid, get_evalidtyp, "10")
         evalid.veg <- evalid[endsWith(as.character(evalid), "10")]
-        evalFilter.veg <- paste("ppsa.EVALID IN (", toString(evalid.veg), ")")
+        evalFilter.veg <- paste0("ppsa.EVALID IN (", toString(evalid.veg), ")")
       } else {
         evalFilter.veg <- evalFilter
       }
+
       if ("INV" %in% Types) {
 	      evalid.inv <- evalid[endsWith(as.character(evalid), "09")]
-        evalFilter.inv <- paste("ppsa.EVALID =", evalid.inv)
+        evalFilter.inv <- paste0("ppsa.EVALID IN (", toString(evalid.inv), ")")
       } else {
         evalFilter.inv <- evalFilter
       }
       if ("DWM" %in% Types) {
 	  	  evalid.dwm <- evalid[endsWith(as.character(evalid), "07")]
-        evalFilter.dwm <- paste("ppsa.EVALID =", evalid.dwm)
+        evalFilter.dwm <- paste0("ppsa.EVALID IN (", toString(evalid.dwm), ")")
       } else {
         evalFilter.dwm <- evalFilter
       }
       if (any(c("GROW", "MORT", "REMV", "GRM", "CHNG") %in% Types)) {
 	  	  evalid.grm <- evalid[endsWith(as.character(evalid), "03")]
-        evalFilter.grm <- paste("ppsa.EVALID =", evalid.grm)
+        evalFilter.grm <- paste0("ppsa.EVALID IN (", toString(evalid.grm), ")")
       } else {
         evalFilter.grm <- evalFilter
       }
+
     } else {
       evalFilter <- stFilter 
       if (length(invyrs) > 0){
@@ -1835,7 +1837,7 @@ DBgetPlots <- function (states = NULL,
 	    }
 
       ## Run pltcond query
-      message(pltcond.qry)
+      #message(pltcond.qry)
 
       if (datsource == "sqlite") {
         pltcondx <- tryCatch(DBI::dbGetQuery(dbconn, pltcond.qry),
@@ -2325,7 +2327,7 @@ DBgetPlots <- function (states = NULL,
 	            "\nFROM ", chgfromqry, 
 							"\nWHERE ", paste0(evalFilter.grm, stateFilters))
       pltcondu.qry <- paste(pltcondu.qrya, "\nUNION\n", pltcondu.qryb)
-	  
+
 	    if (!"pltcondu" %in% names(dbqueries[[state]])) {
         dbqueries[[state]]$pltcondu <- pltcondu.qry
 	    }
@@ -2344,7 +2346,7 @@ DBgetPlots <- function (states = NULL,
 		 	          error=function(e) message("pltcondu query is invalid"))
       }
 	    if (is.null(pltcondux)) {
-	      message(pltcondu.qry)
+	      message("\n", pltcondu.qry)
 	    } else {
 	      pltcondux <- setDT(pltcondux)
 	    
@@ -2671,16 +2673,15 @@ DBgetPlots <- function (states = NULL,
         }
 
         ## Create query for SUBP_COND_CHNG_MTRX
-        sccmfromqry <- paste0(chgfromqry, " \nJOIN ", SCHEMA., 
-			 	       "SUBP_COND_CHNG_MTRX sccm ON (sccm.PLT_CN = c.PLT_CN
-												AND sccm.PREV_PLT_CN = pcond.PLT_CN
-												AND sccm.CONDID = c.CONDID 
-												AND sccm.PREVCOND = pcond.CONDID)")
+        sccmfromqry <- paste0(chgfromqry, 
+               " \nJOIN ", SCHEMA., "SUBP_COND_CHNG_MTRX sccm ON (sccm.PLT_CN = c.PLT_CN",
+							 "\n                                     AND sccm.PREV_PLT_CN = pcond.PLT_CN",
+							 "\n                                     AND sccm.CONDID = c.CONDID", 
+							 "\n                                     AND sccm.PREVCOND = pcond.CONDID)")
 
         sccm.qry <- paste0("SELECT ", sccmvars, 
 		                       "\nFROM ", sccmfromqry, 
                            "\nWHERE ", paste0(evalFilter.grm, stateFilters))
-
  	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
           sccmx <- tryCatch( data.table::setDT(DBI::dbGetQuery(dbconn, sccm.qry)),
@@ -4556,6 +4557,10 @@ DBgetPlots <- function (states = NULL,
         }
       }
     }
+    if (lowernames) {
+      names(pltx) <- tolower(names(pltx))
+      names(condx) <- tolower(names(condx))
+    }
     if (returndata) {
 	    if ("plt" %in% names(tabs)) {
         tabs$plt <- rbind(tabs$plt, data.frame(pltx))
@@ -4837,7 +4842,8 @@ DBgetPlots <- function (states = NULL,
     returnlst$args <- args
     return(returnlst)
   } else {
-    returnlst(dbqueries = dbqueries, pltcnt = pltcnt)
+    returnlst <- list(dbqueries = dbqueries, pltcnt = pltcnt)
+    return(returnlst)
   }
 }
 
