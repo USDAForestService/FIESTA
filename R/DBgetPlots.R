@@ -1142,7 +1142,11 @@ DBgetPlots <- function (states = NULL,
   ### Saving data
   ########################################################################
 
-  ## Check returndata
+  ## Check lowernames
+  lowernames <- pcheck.logical(lowernames, varnm="lowernames", 
+                               title="Lowercase names?", first="NO", gui=gui)
+
+    ## Check returndata
   returndata <- pcheck.logical(returndata, varnm="returndata", 
 		    title="Return data?", first="YES", gui=gui)
   
@@ -1373,9 +1377,7 @@ DBgetPlots <- function (states = NULL,
       }
     } 
 
-	  #if (returndata) {
 	  dbqueries[[state]] <- list()
-	  #}
 
     ## If POP_PLOT_STRATUM_ASSGNe from DBgetEvalid is a data.frame, subset to state
     if (savePOP && !is.null(ppsanm) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
@@ -1622,7 +1624,6 @@ DBgetPlots <- function (states = NULL,
       evalFilter <- paste0("ppsa.EVALID IN(", toString(evalid), ")")
 
       if ("P2VEG" %in% Types) {
-	      #evalid.veg <- sapply(evalid, get_evalidtyp, "10")
         evalid.veg <- evalid[endsWith(as.character(evalid), "10")]
         evalFilter.veg <- paste0("ppsa.EVALID IN (", toString(evalid.veg), ")")
       } else {
@@ -1840,12 +1841,15 @@ DBgetPlots <- function (states = NULL,
       #message(pltcond.qry)
 
       if (datsource == "sqlite") {
-        pltcondx <- tryCatch(DBI::dbGetQuery(dbconn, pltcond.qry),
-			                 error=function(e) message(e, "\n"))
+        pltcondx <- tryCatch(
+          DBI::dbGetQuery(dbconn, pltcond.qry),
+			                 error=function(e) 
+			                   message(e, "\n"))
       } else {
-        pltcondx <- tryCatch(sqldf::sqldf(pltcond.qry, 
-                                                stringsAsFactors=FALSE, connection=NULL),
-                       error=function(e) message(e, "\n"))
+        pltcondx <- tryCatch(
+          sqldf::sqldf(pltcond.qry, stringsAsFactors=FALSE, connection=NULL),
+                       error=function(e) 
+                         message(e, "\n"))
       }
       if (!is.null(pltcondx)) {
         pltcondx <- data.table::setDT(pltcondx)
@@ -2338,17 +2342,21 @@ DBgetPlots <- function (states = NULL,
       cat("\n", stat, "\n")
 
       if (datsource == "sqlite") {
-        pltcondux <- tryCatch(DBI::dbGetQuery(dbconn, pltcondu.qry),
-			           error=function(e) message("pltcondu query is invalid"))
+        pltcondux <- tryCatch(
+          DBI::dbGetQuery(dbconn, pltcondu.qry),
+			           error=function(e) 
+			             return(NULL))
       } else {
-        pltcondux <- tryCatch(sqldf::sqldf(pltcondu.qry, 
-                         stringsAsFactors=FALSE, connection=NULL),
-		 	          error=function(e) message("pltcondu query is invalid"))
+        pltcondux <- tryCatch(
+          sqldf::sqldf(pltcondu.qry, stringsAsFactors=FALSE, connection=NULL),
+		 	          error=function(e) 
+		 	            return(NULL))
       }
 	    if (is.null(pltcondux)) {
+	      message("pltcondu query is invalid")
 	      message("\n", pltcondu.qry)
 	    } else {
-	      pltcondux <- setDT(pltcondux)
+	      pltcondux <- data.table::setDT(pltcondux)
 	    
 
         ## Write query to outfolder
@@ -2684,21 +2692,21 @@ DBgetPlots <- function (states = NULL,
                            "\nWHERE ", paste0(evalFilter.grm, stateFilters))
  	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
-          sccmx <- tryCatch( data.table::setDT(DBI::dbGetQuery(dbconn, sccm.qry)),
+          sccmx <- tryCatch( 
+            DBI::dbGetQuery(dbconn, sccm.qry),
 			              error=function(e) {
-                    message("SUBP_COND_CHNG_MTRX query is invalid")
                     return(NULL) })
         } else {
-          sccmx <- tryCatch( data.table::setDT(sqldf::sqldf(sccm.qry, 
-                         stringsAsFactors=FALSE, connection=NULL)),
+          sccmx <- tryCatch( 
+            sqldf::sqldf(sccm.qry, stringsAsFactors=FALSE, connection=NULL),
 			              error=function(e) {
-                    message("SUBP_COND_CHNG_MTRX query is invalid")
                     return(NULL) })
         }
-        if (is.null(sccmx)) {
+        if (is.null(sccmx) || nrow(sccmx) == 0) {
+          message("SUBP_COND_CHNG_MTRX query is invalid")
 		      message(sccm.qry)
-		    }
-        if (!is.null(sccmx) && nrow(sccmx) != 0) {
+        } else {
+
 	  	    if (!"subp_cond_chng_mtrx" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$subp_cond_chng_mtrx <- sccm.qry
 	        }
@@ -2709,6 +2717,7 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           sccmx <- sccmx[paste(sccmx$PLT_CN, sccmx$CONDID) %in% pcondID,]
+          
           if (lowernames) {
             names(sccmx) <- tolower(names(sccmx))
           }
@@ -2828,18 +2837,20 @@ DBgetPlots <- function (states = NULL,
 
 	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
-          treex <- tryCatch( DBI::dbGetQuery(dbconn, tree.qry),
+          treex <- tryCatch( 
+            DBI::dbGetQuery(dbconn, tree.qry),
 			              error=function(e) {
-                    message("TREE query is invalid\n")
                     return(NULL) })
         } else {
-          treex <- tryCatch( sqldf::sqldf(tree.qry, 
-                         stringsAsFactors=FALSE, connection = NULL),
+          treex <- tryCatch( 
+            sqldf::sqldf(tree.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("TREE query is invalid")
                     return(NULL) })
         }
-        if (!is.null(treex) && nrow(treex) != 0) {
+        if (is.null(treex) || nrow(treex) == 0) {
+          message("TREE query is invalid")
+        } else {
+          
 		      if (!"tree" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$tree <- tree.qry
 	        }
@@ -2993,19 +3004,21 @@ DBgetPlots <- function (states = NULL,
 
 	        ## Query SQLite database or R object
             if (datsource == "sqlite") {
-              treeux <- tryCatch( DBI::dbGetQuery(dbconn, treeu.qry),
+              treeux <- tryCatch( 
+                DBI::dbGetQuery(dbconn, treeu.qry),
 			              error=function(e) {
-                    message("TREE query is invalid\n")
                     return(NULL) })
             } else {
-              treeux <- tryCatch( sqldf::sqldf(treeu.qry, 
-                                               stringsAsFactors=FALSE, connection = NULL),
+              treeux <- tryCatch( 
+                sqldf::sqldf(treeu.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("TREEU query is invalid")
                     return(NULL) })
             }
-
-            if (!is.null(treeux) && nrow(treeux) != 0) {
+            if (is.null(treeux) || nrow(treeux) == 0) {
+              message("TREEU query is invalid")
+              message(treeu.qry)
+            } else {
+              
 		          if (!"treeu" %in% names(dbqueries[[state]])) {
                 dbqueries[[state]]$treeu <- treeu.qry
 	            }
@@ -3212,22 +3225,25 @@ DBgetPlots <- function (states = NULL,
 
 	            ## Query SQLite database or R object
               if (datsource == "sqlite") {
-                grmx <- tryCatch( DBI::dbGetQuery(dbconn, grm.qry),
+                grmx <- tryCatch( 
+                  DBI::dbGetQuery(dbconn, grm.qry),
 			              error=function(e) {
-                    message("TREE_GRM_COMPONENT query is invalid")
                     return(NULL) })
 
               } else {
-                grmx <- tryCatch( sqldf::sqldf(grm.qry, 
-                                               stringsAsFactors=FALSE, connection = NULL),
+                grmx <- tryCatch( 
+                  sqldf::sqldf(grm.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("TREE_GRM_COMPONENT query is invalid")
                     return(NULL) })
               }
-              if (!is.null(grmx) && nrow(grmx) != 0) {
-	  	        if (!"tree_grm_component" %in% names(dbqueries[[state]])) {
+              if (is.null(grmx) || nrow(grmx) == 0) {
+                message("TREE_GRM_COMPONENT query is invalid")
+                message(grm.qry)
+              } else {
+                
+	  	          if (!"tree_grm_component" %in% names(dbqueries[[state]])) {
                   dbqueries[[state]]$tree_grm_component <- grm.qry
-	            }
+	              }
 
                 grmx <- data.table::setDT(grmx)
                 grmx[, PLT_CN := as.character(PLT_CN)]
@@ -3236,6 +3252,7 @@ DBgetPlots <- function (states = NULL,
 
                 ## Subset overall filters from condx
                 grmx <- grmx[treeux$CN,]
+                
                 if (lowernames) {
                   names(grmx) <- tolower(names(grmx))
                 }
@@ -3281,24 +3298,28 @@ DBgetPlots <- function (states = NULL,
               grmbfromqry <- paste0(pfromqry, " JOIN ", SCHEMA.,
 				              grmbnm, " grmb ON (grmb.PLT_CN = p.", puniqueid, ")")
 
-              grmb.qry <- paste("select distinct grmb.* \nfrom", grmbfromqry, 
-		                "\nwhere", paste0(evalFilter.grm, stateFilters))
+              grmb.qry <- paste0("SELECT DISTINCT grmb.*",
+                                "\nFROM ", grmbfromqry, 
+		                            "\nWHERE ", paste0(evalFilter.grm, stateFilters))
 
 	          ## Query SQLite database or R object
               if (datsource == "sqlite") {
-                grmbx <- tryCatch( DBI::dbGetQuery(dbconn, grmb.qry),
+                grmbx <- tryCatch( 
+                  DBI::dbGetQuery(dbconn, grmb.qry),
 			              error=function(e) {
-                    message("TREE_GRM_BEGIN query is invalid")
                     return(NULL) })
 
               } else {
-                grmbx <- tryCatch( sqldf::sqldf(grmb.qry, 
-                                                stringsAsFactors=FALSE, connection = NULL),
+                grmbx <- tryCatch( 
+                  sqldf::sqldf(grmb.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("TREE_GRM_BEGIN query is invalid")
                     return(NULL) })
               }
-              if (!is.null(grmbx) && nrow(grmbx) != 0) {
+              if (is.null(grmbx) || nrow(grmbx) == 0) {
+                message("TREE_GRM_BEGIN query is invalid")
+                message(grmb.qry)
+              } else {
+                
 	  	          if (!"tree_grm_begin" %in% names(dbqueries[[state]])) {
                   dbqueries[[state]]$tree_grm_begin <- grmb.qry
 	              }
@@ -3310,6 +3331,7 @@ DBgetPlots <- function (states = NULL,
 
                 ## Subset overall filters from condx
                 grmbx <- grmbx[treeux$CN,]
+                
                 if (lowernames) {
                   names(grmbx) <- tolower(names(grmbx))
                 }
@@ -3355,24 +3377,28 @@ DBgetPlots <- function (states = NULL,
               grmmfromqry <- paste0(pfromqry, " JOIN ", SCHEMA.,
 				           grmmnm, " grmm ON (grmm.PLT_CN = p.", puniqueid, ")")
 
-              grmm.qry <- paste("select distinct grmm.* \nfrom", grmmfromqry, 
-		                "\nwhere", paste0(evalFilter.grm, stateFilters))
+              grmm.qry <- paste0("SELECT DISTINCT grmm.*",
+                                "\nFROM ", grmmfromqry, 
+		                            "\nWHERE ", paste0(evalFilter.grm, stateFilters))
 
 	            ## Query SQLite database or R object
               if (datsource == "sqlite") {
-                grmmx <- tryCatch( DBI::dbGetQuery(dbconn, grmm.qry),
+                grmmx <- tryCatch( 
+                  DBI::dbGetQuery(dbconn, grmm.qry),
 			              error=function(e) {
-                    message("TREE_GRM_MIDPT query is invalid")
                     return(NULL) })
 
               } else {
-                grmmx <- tryCatch( sqldf::sqldf(grmm.qry, 
-                                                stringsAsFactors=FALSE, connection = NULL),
+                grmmx <- tryCatch( 
+                  sqldf::sqldf(grmm.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("TREE_GRM_MIDPT query is invalid")
                     return(NULL) })
               }
-              if (!is.null(grmmx) && nrow(grmmx) != 0) {
+              if (is.null(grmmx) || nrow(grmmx) == 0) {
+                message("TREE_GRM_MIDPT query is invalid")
+                message(grmm.qry)
+              } else {
+                
 	  	          if (!"tree_grm_midpt" %in% names(dbqueries[[state]])) {
                   dbqueries[[state]]$tree_grm_midpt <- grmm.qry
 	              }
@@ -3384,6 +3410,7 @@ DBgetPlots <- function (states = NULL,
 
                 ## Subset overall filters from condx
                 grmmx <- grmmx[treeux$CN,]
+                
                 if (lowernames) {
                   names(grmmx) <- tolower(names(grmmx))
                 }
@@ -3493,30 +3520,27 @@ DBgetPlots <- function (states = NULL,
         sfromqry <- paste0(pfromqry, " \nJOIN ", SCHEMA., 
 				seednm, " s ON (s.PLT_CN = p.", puniqueid, ")")
 
-        seed.qry <- paste("select distinct", ssvars, 
-		                 "\nfrom", sfromqry, 
-						 "\nwhere", xfilter)
+        seed.qry <- paste0("SELECT DISTINCT ", ssvars, 
+		                      "\nFROM ", sfromqry, 
+						              "\nWHERE ", xfilter)
 						 
 	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
-          seedx <- tryCatch( DBI::dbGetQuery(dbconn, seed.qry),
+          seedx <- tryCatch( 
+            DBI::dbGetQuery(dbconn, seed.qry),
 			             error=function(e) {
-                    message("seed query is invalid\n")
-                    message(seed.qry)
                     return(NULL) })
         } else {
-          seedx <- tryCatch( sqldf::sqldf(seed.qry, 
-                                          stringsAsFactors=FALSE, connection = NULL),
+          seedx <- tryCatch( 
+            sqldf::sqldf(seed.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("seed query is invalid\n")
-                    message(seed.qry)
                     return(NULL) })
         }
-        if (is.null(seedx)) {
+        if (is.null(seedx) || nrow(seedx) == 0) {
           message("no seedling data for ", stabbr)
           message(seed.qry)
-        }
-        if (!is.null(seedx) && nrow(seedx) != 0 && length(ssvars) > 0) {
+        } else if (length(ssvars) > 0) {
+          
 	        if (!"seed" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$seed <- seed.qry
 	        }
@@ -3680,24 +3704,27 @@ DBgetPlots <- function (states = NULL,
         vsppfromqry <- paste0(pfromqry, " \nJOIN ", SCHEMA., 
 				vsubpsppnm, " v ON v.PLT_CN = p.", puniqueid)
 
-        vsubpspp.qry <- paste("select distinct", vsubpsppvars, 
-		                     "\nfrom", vsppfromqry,
-							 "\nwhere", paste0(evalFilter.veg, stateFilters))
+        vsubpspp.qry <- paste0("SELECT DISTINCT ", vsubpsppvars, 
+		                          "\nFROM ", vsppfromqry,
+							                "\nWHERE ", paste0(evalFilter.veg, stateFilters))
 
 	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
-          p2veg_subplot_sppx <- tryCatch( DBI::dbGetQuery(dbconn, vsubpspp.qry),
+          p2veg_subplot_sppx <- tryCatch( 
+            DBI::dbGetQuery(dbconn, vsubpspp.qry),
 			              error=function(e) {
-                    message("P2VEG_SUBPLOT_SPP query is invalid\n")
                     return(NULL) })
         } else {
-          p2veg_subplot_sppx <- tryCatch( sqldf::sqldf(vsubpspp.qry, 
-                                     stringsAsFactors=FALSE, connection = NULL),
+          p2veg_subplot_sppx <- tryCatch( 
+            sqldf::sqldf(vsubpspp.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("P2VEG_SUBPLOT_SPP query is invalid\n")
                     return(NULL) })
         }
-        if (!is.null(p2veg_subplot_sppx) && nrow(p2veg_subplot_sppx) != 0) {
+        if (is.null(p2veg_subplot_sppx) || nrow(p2veg_subplot_sppx) == 0) {
+          message("no p2veg species data for ", stabbr)
+          message(vsubpspp.qry)
+        } else {
+          
 	  	    if (!"p2veg_subplot_spp" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$p2veg_subplot_spp <- vsubpspp.qry
 	        }
@@ -3708,6 +3735,7 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           p2veg_subplot_sppx <- p2veg_subplot_sppx[paste(PLT_CN, CONDID) %in% pcondID,]
+          
           if (lowernames) {
             names(p2veg_subplot_sppx) <- tolower(names(p2veg_subplot_sppx))
           }
@@ -3759,28 +3787,27 @@ DBgetPlots <- function (states = NULL,
         ## Create query for P2VEG_SUBP_STRUCTURE
         vstrfromqry <- paste0(pfromqry, " \nJOIN ", SCHEMA., 
 				vsubpstrnm, " v ON v.PLT_CN = p.", puniqueid)
-        vsubpstr.qry <- paste("SELECT DISTINCT", vsubpstrvars, 
-		                     "\nFROM", vstrfromqry,
-							           "\nWHERE", paste0(evalFilter.veg, stateFilters))
+        vsubpstr.qry <- paste0("SELECT DISTINCT ", vsubpstrvars, 
+		                           "\nFROM ", vstrfromqry,
+							                 "\nWHERE ", paste0(evalFilter.veg, stateFilters))
 
 	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
-          p2veg_subp_structurex <- tryCatch( DBI::dbGetQuery(dbconn, vsubpstr.qry),
+          p2veg_subp_structurex <- tryCatch( 
+            DBI::dbGetQuery(dbconn, vsubpstr.qry),
 			              error=function(e) {
-                    message("P2VEG_SUBP_STRUCTURE query is invalid\n")
                     return(NULL) })
         } else {
-          p2veg_subp_structurex <- tryCatch( sqldf::sqldf(vsubpstr.qry, 
-                                                          stringsAsFactors=FALSE, connection = NULL),
+          p2veg_subp_structurex <- tryCatch( 
+            sqldf::sqldf(vsubpstr.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("P2VEG_SUBP_STRUCTURE query is invalid\n")
                     return(NULL) })
         }
         if (is.null(p2veg_subp_structurex) || nrow(p2veg_subp_structurex) == 0) {
           message("P2VEG_SUBP_STRUCTURE query is invalid\n")
           message(vsubpstr.qry)
-          stop()
         } else {
+          
 	  	    if (!"p2veg_subp_structure" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$p2veg_subp_structure <- vsubpstr.qry
 	        }
@@ -3791,6 +3818,7 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           p2veg_subp_structurex <- p2veg_subp_structurex[paste(PLT_CN, CONDID) %in% pcondID,]
+          
           if (lowernames) {
             names(p2veg_subp_structurex) <- tolower(names(p2veg_subp_structurex))
           }
@@ -3888,24 +3916,27 @@ DBgetPlots <- function (states = NULL,
         invfromqry <- paste0(pfromqry, " \nJOIN ", SCHEMA., 
 				invsubpnm, " v ON v.PLT_CN = p.", puniqueid)
 
-        invsubp.qry <- paste("select distinct", invsubpvars, 
-		                    "\nfrom", invfromqry,
-							"\nwhere", paste0(evalFilter.inv, stateFilters))
+        invsubp.qry <- paste0("SELECT DISTINCT ", invsubpvars, 
+		                         "\nFROM ", invfromqry,
+							               "\nWHERE ", paste0(evalFilter.inv, stateFilters))
 
 	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
-          invasive_subplot_sppx <- tryCatch( DBI::dbGetQuery(dbconn, invsubp.qry),
+          invasive_subplot_sppx <- tryCatch( 
+            DBI::dbGetQuery(dbconn, invsubp.qry),
 			              error=function(e) {
-                    message("INVASIVE_SUBPLOT_SPP query is invalid")
                     return(NULL) })
         } else {
-          invasive_subplot_sppx <- tryCatch( sqldf::sqldf(invsubp.qry, 
-                                      stringsAsFactors=FALSE, connection = NULL),
+          invasive_subplot_sppx <- tryCatch( 
+            sqldf::sqldf(invsubp.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("INVASIVE_SUBPLOT_SPP query is invalid")
                     return(NULL) })
         }
-        if (!is.null(invasive_subplot_sppx) && nrow(invasive_subplot_sppx) != 0) {
+        if (is.null(invasive_subplot_sppx) || nrow(invasive_subplot_sppx) == 0) {
+          message("INVASIVE_SUBPLOT_SPP query is invalid")
+          message(invsubp.qry)
+        } else {
+          
 	  	    if (!"invasive_subplot_spp" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$invasive_subplot_spp <- vsubpstr.qry
 	        }
@@ -3916,6 +3947,7 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           invasive_subplot_sppx <- invasive_subplot_sppx[paste(PLT_CN, CONDID) %in% pcondID,]
+          
           if (lowernames) {
             names(invasive_subplot_sppx) <- tolower(names(invasive_subplot_sppx))
           }
@@ -4030,24 +4062,27 @@ DBgetPlots <- function (states = NULL,
         subpfromqry <- paste0(pfromqry, " \nJOIN ", SCHEMA., 
 				subplotnm, " subp ON subp.PLT_CN = p.", puniqueid)
 
-        subp.qry <- paste("select distinct", subpvars, 
-		                 "\nfrom", subpfromqry,
-						 "\nwhere", paste0(evalFilter, stateFilters))
+        subp.qry <- paste0("SELECT DISTINCT ", subpvars, 
+		                      "\nFROM ", subpfromqry,
+						              "\nWHERE ", paste0(evalFilter, stateFilters))
 
 	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
-          subpx <- tryCatch( DBI::dbGetQuery(dbconn, subp.qry),
+          subpx <- tryCatch( 
+            DBI::dbGetQuery(dbconn, subp.qry),
 			              error=function(e) {
-                    message("SUBPLOT query is invalid\n")
                     return(NULL) })
         } else {
-          subpx <- tryCatch( sqldf::sqldf(subp.qry, 
-                                          stringsAsFactors=FALSE, connection = NULL),
+          subpx <- tryCatch( 
+            sqldf::sqldf(subp.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("SUBPLOT query is invalid\n")
                     return(NULL) })
         }
-        if (!is.null(subpx) && nrow(subpx) != 0) {
+        if (is.null(subpx) || nrow(subpx) == 0) {
+          message("SUBPLOT query is invalid")
+          message(subp.qry)
+        } else {
+          
 	  	    if (!"subplot" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$subplot <- subp.qry
 	        }
@@ -4058,6 +4093,7 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           subpx <- subpx[subpx$PLT_CN %in% pltx$CN,]
+          
           if (lowernames) {
             names(subpx) <- tolower(names(subpx))
           }
@@ -4106,24 +4142,27 @@ DBgetPlots <- function (states = NULL,
         subpcfromqry <- paste0(pfromqry, " \nJOIN ", SCHEMA., 
 				subpcondnm, " subpc ON subpc.PLT_CN = p.", puniqueid)
 
-        subpc.qry <- paste("select", subpcvars, 
-		                  "\nfrom", subpcfromqry,
-						  "\nwhere", paste0(evalFilter, stateFilters))
+        subpc.qry <- paste0("SELECT ", subpcvars, 
+		                        "\nFROM ", subpcfromqry,
+						                "\nWHERE ", paste0(evalFilter, stateFilters))
 
-	    ## Query SQLite database or R object
+	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
-          subpcx <- tryCatch( DBI::dbGetQuery(dbconn, subpc.qry),
+          subpcx <- tryCatch( 
+            DBI::dbGetQuery(dbconn, subpc.qry),
 			              error=function(e) {
-                    message("SUBP_COND query is invalid")
                     return(NULL) })
         } else {
-          subpcx <- tryCatch( sqldf::sqldf(subpc.qry, 
-                           stringsAsFactors=FALSE, connection = NULL),
+          subpcx <- tryCatch( 
+            sqldf::sqldf(subpc.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("SUBP_COND query is invalid")
                     return(NULL) })
         }
-        if(!is.null(subpcx) && nrow(subpcx) != 0){
+        if (is.null(subpcx) || nrow(subpcx) == 0) {
+          message("SUBP_COND query is invalid")
+          message(subpc.qry)
+        } else {
+          
 	  	    if (!"subp_cond" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$subp_cond <- subpc.qry
 	        }
@@ -4134,6 +4173,7 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           subpcx <- subpcx[paste(subpcx$PLT_CN, subpcx$CONDID) %in% pcondID,]
+          
           if (lowernames) {
             names(subpcx) <- tolower(names(subpcx))
           }
@@ -4229,24 +4269,27 @@ DBgetPlots <- function (states = NULL,
         dfromqry <- paste0(pfromqry, " \nJOIN ", SCHEMA., 
 				dwmnm, " d ON (d.PLT_CN = p.", puniqueid, ")")
 
-        dwm.qry <- paste("select distinct", dwmvars, 
-		                "\nfrom", dfromqry,
-						"\nwhere", paste0(evalFilter.dwm, stateFilters))
-
+        dwm.qry <- paste0("SELECT DISTINCT ", dwmvars, 
+		                     "\nFROM ", dfromqry,
+						             "\nWHERE ", paste0(evalFilter.dwm, stateFilters))
+ 
 	      ## Query SQLite database or R object
         if (datsource == "sqlite") {
-          cond_dwm_calcx <- tryCatch( DBI::dbGetQuery(dbconn, dwm.qry),
+          cond_dwm_calcx <- tryCatch( 
+            DBI::dbGetQuery(dbconn, dwm.qry),
 			              error=function(e) {
-                    message("COND_DWM_CALC query is invalid")
                     return(NULL) })
         } else {
-          cond_dwm_calcx <- tryCatch( sqldf::sqldf(dwm.qry, 
-                                                   stringsAsFactors=FALSE, connection = NULL),
+          cond_dwm_calcx <- tryCatch( 
+            sqldf::sqldf(dwm.qry, stringsAsFactors=FALSE, connection = NULL),
 			              error=function(e) {
-                    message("COND_DWM_CALC query is invalid")
                     return(NULL) })
         }
-        if (!is.null(cond_dwm_calcx) && nrow(cond_dwm_calcx) != 0) {		
+        if (is.null(cond_dwm_calcx) || nrow(cond_dwm_calcx) == 0) {
+          message("COND_DWM_CALC query is invalid")
+          message(dwm.qry)
+        } else {
+          
 	  	    if (!"cond_dwm_calc" %in% names(dbqueries[[state]])) {
             dbqueries[[state]]$cond_dwm_calc <- dwm.qry
 	        }
@@ -4257,6 +4300,7 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           cond_dwm_calcx <- cond_dwm_calcx[paste(PLT_CN, CONDID) %in% pcondID,]
+          
           if (lowernames) {
             names(cond_dwm_calcx) <- tolower(names(cond_dwm_calcx))
           }
@@ -4387,13 +4431,15 @@ DBgetPlots <- function (states = NULL,
         if (is.null(otab)) {
           xqry <- paste0("SELECT *",
                          "\nFROM ", othertable, 
-		                 "\nWHERE ", stFilter)
+		                     "\nWHERE ", stFilter)
 
           if (datsource == "sqlite") {
-            otab <- tryCatch( DBI::dbGetQuery(dbconn, xqry),
+            otab <- tryCatch( 
+              DBI::dbGetQuery(dbconn, xqry),
 			              error=function(e) return(NULL))
           } else {
-            otab <- tryCatch( sqldf::sqldf(xqry, stringsAsFactors=FALSE, connection = NULL), 
+            otab <- tryCatch( 
+              sqldf::sqldf(xqry, stringsAsFactors=FALSE, connection = NULL), 
 			              error=function(e) return(NULL))
           }
         }
@@ -4482,29 +4528,32 @@ DBgetPlots <- function (states = NULL,
         }
       }
       if (datsource == "sqlite") {
-        ppsax <- tryCatch( DBI::dbGetQuery(dbconn, ppsaqry),
+        ppsax <- tryCatch( 
+          DBI::dbGetQuery(dbconn, ppsaqry),
                              error=function(e) return(NULL))
       } else {
-        ppsax <- tryCatch( sqldf::sqldf(ppsaqry, 
-                             stringsAsFactors=FALSE, connection = NULL), 
+        ppsax <- tryCatch( 
+          sqldf::sqldf(ppsaqry, stringsAsFactors=FALSE, connection = NULL), 
                              error=function(e) return(NULL))
       }
-      if (is.null(ppsax)) {
+      if (is.null(ppsax) || nrow(ppsax) == 0) {
         message("invalid query for POP_PLOT_STRATUM_ASSGN:")
         message(ppsaqry)
         stop()
-      }
-      if (!is.null(ppsax) && nrow(ppsax) != 0) {
+      } else {
+        
         ppsax <- data.table::setDT(ppsax)
         ppsax[, PLT_CN := as.character(PLT_CN)]
         setkey(ppsax, PLT_CN)
         
         ## Subset overall filters from pltx
         ppsax <- ppsax[ppsax$PLT_CN %in% unique(pltx$CN),]
-        if (lowernames) {
-          names(ppsax) <- tolower(names(ppsax))
-        }
       }
+      
+      if (lowernames) {
+        names(ppsax) <- tolower(names(ppsax))
+      }
+      
       if (returndata) {
         ppsa <- rbind(ppsa, ppsax)
       }

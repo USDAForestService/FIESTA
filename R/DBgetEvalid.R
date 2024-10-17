@@ -595,6 +595,7 @@ DBgetEvalid <- function(states = NULL,
       message("SURVEY table does not exist in database... assuming annual inventory plots")
       #invtype <- "ANNUAL"
     }
+
     if (!is.null(ppsanm)) {
       #invyrnm <- findnm("INVYR", ppsaflds, returnNULL=TRUE) 
       invyrnm <- findnm("INVYR", pltflds, returnNULL=TRUE) 
@@ -622,7 +623,7 @@ DBgetEvalid <- function(states = NULL,
             }
           }
           
-          pinvyrnm <- findnm("INVYR", pltflds)  
+          pinvyrnm <- findnm("INVYR", pltflds) 
           if (!is.null(pinvyrnm)) {     
             invqry <- paste0("SELECT p.statecd, p.invyr, COUNT(*) NBRPLOTS", 
                              "\nFROM ", SCHEMA., plotnm, " p")
@@ -707,7 +708,7 @@ DBgetEvalid <- function(states = NULL,
       } ## End create invyrtab
     }
   } ## End check evalid
-  
+
   ######################################################################################
   ## If evalid was not input
   ###################################################################################### 
@@ -750,13 +751,15 @@ DBgetEvalid <- function(states = NULL,
       }
     } else {
       
-      if (!"INVYR" %in% names(invyrtab)) {
+      statecdnm <- findnm("STATECD", names(invyrtab), returnNULL=TRUE) 
+      invyrnm <- findnm("INVYR", names(invyrtab), returnNULL=TRUE) 
+      if (is.null(statecdnm) || is.null(invyrnm)) {
         stop("INVYR must be in invyrtab")
       }
       if (!is.null(evalEndyr)) {
         invEndyr <- evalEndyr
       } else {
-        invEndyr <- as.list(tapply(invyrtab$INVYR, invyrtab$STATECD, max))
+        invEndyr <- as.list(tapply(invyrtab[[invyrnm]], invyrtab[[statecdnm]], max))
         names(invEndyr) <- pcheck.states(as.numeric(names(invEndyr)), 
                                          statereturn="MEANING")
       }
@@ -774,8 +777,12 @@ DBgetEvalid <- function(states = NULL,
     }  
     
     if (!is.null(invyrtab)) {
+      
+      statecdnm <- findnm("STATECD", names(invyrtab), returnNULL=TRUE) 
+      invyrnm <- findnm("INVYR", names(invyrtab), returnNULL=TRUE) 
+      
       ## Get possible range of inventory years from invyrtab
-      stinvyr.vals <- as.list(by(invyrtab$INVYR, invyrtab$STATECD, range))
+      stinvyr.vals <- as.list(by(invyrtab[[invyrnm]], invyrtab[[statecdnm]], range))
       names(stinvyr.vals) <- pcheck.states(names(stinvyr.vals), "MEANING")
       stinvyr.min <- lapply(stinvyr.vals, '[[', 1)
       stinvyr.max <- lapply(stinvyr.vals, '[[', 2)
@@ -928,7 +935,8 @@ DBgetEvalid <- function(states = NULL,
         if (is.null(evaldt)) {
           return(NULL)
         }
-        
+
+        names(evaldt) <- toupper(names(evaldt))
         if (!"STATECD" %in% names(evaldt)) {
           evaldt[, STATECD := substr(EVALID, nchar(EVALID) - 5, nchar(EVALID)-4)]
           evaldt <- evaldt[evaldt$STATECD %in% as.character(stcdlst),]
