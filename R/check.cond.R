@@ -65,6 +65,9 @@ check.cond <- function(areawt, areawt2,
       byvars <- c(byvars, paste0("pc.", colvar))
     }
   }
+  if (!is.null(colvar) && colvar == "NONE") {
+    colvarnm <- colvar
+  }
 
   ## Final select query
   cdomdatselectqry <- 
