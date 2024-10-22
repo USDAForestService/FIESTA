@@ -1,21 +1,19 @@
 getpopFilterqry <- function(popType, 
                             popFilter,
-                            pfromqry,
-                            plotnm,
                             pltassgnnm,
-                            pltflds, 
-                            pltassgnflds = NULL,
-                            puniqueid, 
-                            pjoinid,
+                            pltassgnflds,
                             pltassgnid,
-                            pltassgn., 
-                            plt.,
+                            plotnm = NULL,
+                            pltflds = NULL, 
+                            puniqueid = NULL, 
+                            pjoinid = NULL,
+                            plt. = NULL,
                             dbconn,
                             datsource,
                             dbTabs,
                             datindb,
                             pltaindb,
-                            selectpvars,
+                            selectpvars = NULL,
                             pltassgnx = NULL,
                             projectid = NULL,
                             schema = NULL,
@@ -38,7 +36,9 @@ getpopFilterqry <- function(popType,
   
   ## 1. Create join for including pltassgnx
   ##################################################################################
+  pltassgn. <- "plta."
   if (!is.null(plotnm)) {
+    pfromqry <- paste0("\nFROM ", plotnm, " p ")
     pjoinqry <- getjoinqry(pltassgnid, pjoinid, pltassgn., plt.)
     pltafromqry <- paste0(pfromqry, 
                           "\n JOIN ", SCHEMA., pltassgnnm, " plta ", pjoinqry)
@@ -62,7 +62,7 @@ getpopFilterqry <- function(popType,
       
       states.qry <- paste0(
         "\nSELECT DISTINCT ", statecda., "statecd",
-        pfromqry,
+        pltafromqry,
         "\nWHERE ", pfilter)
       states <- DBI::dbGetQuery(dbconn, states.qry)[[1]]
      
@@ -84,7 +84,7 @@ getpopFilterqry <- function(popType,
         
           getpltx.qry <- paste0(
             "\nSELECT p.CN, p.STATECD, p.COUNTYCD",
-            pfromqry)
+            pltafromqry)
           pltxtmp <- DBI::dbGetQuery(dbconn, getpltx.qry)
           states <- unique(pltxtmp[[statenm]])
         
@@ -244,27 +244,27 @@ getpopFilterqry <- function(popType,
       } else {
         ejoinqry <- paste0("\n JOIN ", SCHEMA., ppsanm, " ppsa ON (", evalida., "PLT_CN = ", pltassgn., pltassgnid, ")")
       }
-      pfromqry <- paste0(pfromqry, 
-                         ejoinqry)
+      #pfromqry <- paste0(pfromqry, 
+      #                   ejoinqry)
       pltafromqry <- paste0(pltafromqry, 
                             ejoinqry)
       
     } else {
       evalida. <- pltassgn.
-      if (!is.null(plt.)) {
-        ejoinqry <- paste0("\n JOIN ", SCHEMA., pltassgnnm, " plta ON (", evalida., "PLT_CN = ", plt., puniqueid, ")")
-      } else {
-        ejoinqry <- paste0("\n JOIN ", SCHEMA., pltassgnnm, " plta ON (", evalida., "PLT_CN = ", pltassgn., pltassgnid, ")")
-      }
-      pfromqry <- paste0(pfromqry, 
-                         ejoinqry)
+#      if (!is.null(plt.)) {
+#        ejoinqry <- paste0("\n JOIN ", SCHEMA., pltassgnnm, " plta ON (", evalida., "PLT_CN = ", plt., puniqueid, ")")
+#      } else {
+#        ejoinqry <- paste0("\n JOIN ", SCHEMA., pltassgnnm, " plta ON (", evalida., "PLT_CN = ", pltassgn., pltassgnid, ")")
+#      }
+#      pltafromqry <- paste0(pltafromqry, 
+#                            ejoinqry)
     }
    
     ## Check popevalid values in database
     if (chkvalues) {
       evalidqry <- paste0(
         "SELECT DISTINCT ", evalida., evalidnm, 
-        pfromqry,
+        pltafromqry,
         "\nORDER BY ", evalida., evalidnm)
       if (datindb) {      
         evalidvals <- DBI::dbGetQuery(dbconn, evalidqry)[[1]]
@@ -389,7 +389,7 @@ getpopFilterqry <- function(popType,
         designcda. <- ifelse(designcdnm %in% pltflds, plt., pltassgn.)
         designcdqry <- paste0(
           "SELECT DISTINCT ", designcda., designcdnm, 
-          pfromqry,
+          pltafromqry,
           pwhereqry,
           "\nORDER BY ", designcda., designcdnm)
         if (pltaindb) {      
@@ -515,7 +515,7 @@ getpopFilterqry <- function(popType,
       ## Check intensity values in database
       intensity.qry <- paste0(
         "SELECT DISTINCT ", intensitya., intensitynm, 
-        pfromqry,
+        pltafromqry,
         pwhereqry,
         "\nORDER BY ", intensitya., intensitynm)
       if (datindb) {      
@@ -696,7 +696,8 @@ getpopFilterqry <- function(popType,
     #######################################################################
     subqry <- paste0("SELECT ", toString(paste0(plt., groupvars)), 
                      ", MAX(", plt., varCur, ") MAXYR  ",
-                     pfromqry, surveyfromqry)
+                     pltafromqry, 
+                     surveyfromqry)
     if (!is.null(pwhereqry) || pwhereqry != "") {
       subqry <- paste0(subqry, pwhereqry)
     }
@@ -729,17 +730,15 @@ getpopFilterqry <- function(popType,
   ## getdataWITHqry - used for extracting data (if pltassgn not in database)
   ###################################################################################
   
-
   
   if (!is.null(dbconn) && !dbconnopen) {
     DBI::dbDisconnect(dbconn)
   }
-  
+
   returnlst <- list(pltidsqry = pltidsqry,  
                     states = states, invyrs = invyrs, 
                     popwhereqry = pwhereqry,
                     pltselectqry = pltselectqry,
-                    pfromqry = pfromqry,
                     pltafromqry = pltafromqry,
                     nonsamp.pfilter = nonsamp.pfilter,
                     iseval = iseval)
