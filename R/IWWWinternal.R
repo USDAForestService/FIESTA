@@ -1,3 +1,11 @@
+## wwwCheckPlots
+## wwwGetAdjqryVOL - Build queries for plot-level adjustment factors for VOL
+## wwwGetpltcondqry - Build queries for getting plot / cond data.
+## wwwGettreeqry - Build query to get tree data and sum tree-level data.
+## wwwGetcondqry - Build query to get sum condition-level data.
+
+
+
 wwwCheckPlots <- function(popType,
                           popFilter,
                           byeach,
@@ -267,7 +275,7 @@ wwwCheckPlots <- function(popType,
   returnlst <- list(plotcnt = plotcnt,
                     plotcntqry = plotunitcntqry,
                     SAE = SAE,
-                    province_names = province_names,
+                    province_max = province_max,
                     aoiselectqry = aoiselectqry,
                     aoiwhereqry = aoiwhereqry,
                     pltafromqry = pltafromqry,
@@ -286,11 +294,22 @@ wwwCheckPlots <- function(popType,
 
 wwwGetAdjqryVOL <- function(strvar,
                             module = "GB",
-                            pltidsWITH = NULL) {
+                            pltidsWITHqry = NULL) {
   
+  ## DESCRIPTION: Build queries for plot-level adjustment factors for VOL
+  ## If module='GB', build strata-level adjustment factors first.
+  
+  ## Set global variables
+  ACI <- FALSE
+  SCHEMA. <- ""
+  
+  
+  ## Define database queries lists
   dbqueries <- {}
   dbqueriesWITH <- {}
   
+  
+  ## Build WHERE statement for removing nonresponse
   adjwhereqry <- "\nWHERE c.cond_status_cd <> 5"
   if (ACI) {
     adjwhereqry <- paste0(
@@ -298,13 +317,17 @@ wwwGetAdjqryVOL <- function(strvar,
       "\n    AND nf_cond_status_cd is NULL OR nf_cond_status_cd <> 5")
   }
   
+  ## Build FROM statement 
   adjfromqry <- paste0(
     "\nFROM pltids",
-    "\nJOIN plot p ON (p.CN = pltids.CN)",
-    "\nJOIN cond c ON (c.PLT_CN = p.CN)")
+    "\nJOIN plot p ON (p.cn = pltids.cn)",
+    "\nJOIN cond c ON (c.plt_cn = p.cn)")
   
   
+  ## Build SELECT stateement 
   if (module == "GB") {
+    
+    ## If module = GB, divide N by the sum of sampled proportions by strata
     grpbyqry <- paste0("\nGROUP BY pltids.domain_unit, pltids.", strvar)
     adjselectqry <- paste0(
       "\n        COALESCE(COUNT(DISTINCT pltids.cn) / NULLIF(SUM(condprop_unadj),0), 0) AS adj_factor_cond,",
@@ -313,7 +336,7 @@ wwwGetAdjqryVOL <- function(strvar,
       "\n        COALESCE(COUNT(DISTINCT pltids.cn) / NULLIF(SUM(micrprop_unadj),0), 0) AS adj_factor_micr")
     
 
-    ## Get query for calculating strata-level adjustment factors
+    ## Build query for calculating strata-level adjustment factors
     adjqry <- paste0(
       "SELECT pltids.domain_unit, pltids.", strvar, ", ",
       adjselectqry,
@@ -321,39 +344,38 @@ wwwGetAdjqryVOL <- function(strvar,
       adjwhereqry, 
       grpbyqry)
     
-    if (!is.null(pltidsWITH)) {
+    ## Append pltidsWITHqry to strata-level adjustment query
+    if (!is.null(pltidsWITHqry)) {
       adjfactors.qry <- paste0(
-        pltidsWITH,
+        pltidsWITHqry,
         "\n", adjqry)
     }
-    message(adjfactors.qry)    
-    #adjfactors <- DBI::dbGetQuery(dbconn, adjfactors.qry)
-    head(adjfactors)
+    #message(adjfactors.qry)    
     dbqueries$adjfactors <- adjfactors.qry
     
-    ## Get WITH query for calculating strata-level adjustment factors
+    ## Build WITH query for calculating strata-level adjustment factors
     adjWITHqry <- paste0(
       "\nadjfactors AS", 
       "\n(", adjqry, ")")      
-    message(adjWITHqry)    
+    #message(adjWITHqry)    
     
-    if (!is.null(pltidsWITH)) {
+    
+    ## Build query to create plot-level adjustment factors
+    if (!is.null(pltidsWITHqry)) {
       joinqry <- getjoinqry(c("domain_unit", strvar), c("domain_unit", strvar), "adj.", "pltids.")
       pltidsadj.qry <- paste0(
-        pltidsWITH, ", ",
+        pltidsWITHqry, ", ",
         adjWITHqry, 
         "\n----- calculate plot-level adjustment factors",
         "\nSELECT pltids.cn, adj_factor_cond, adj_factor_subp, adj_factor_macr, adj_factor_micr",
         "\n FROM pltids",
         "\n JOIN adjfactors adj ", joinqry)
-      message(pltidsadj.qry)
-      #pltidsadj <- DBI::dbGetQuery(dbconn, pltidsadj.qry)
-      head(pltidsadj)
+      #message(pltidsadj.qry)
       dbqueries$pltidsadj <- pltidsadj.qry
         
         
       pltidsadjWITH.qry <- paste0(
-        pltidsWITH, ", ",
+        pltidsWITHqry, ", ",
         adjWITHqry, ", ",
         "\n----- calculate plot-level adjustment factors",
         "\npltidsadj AS",
@@ -361,12 +383,14 @@ wwwGetAdjqryVOL <- function(strvar,
         "\n FROM pltids",
         "\n JOIN adjfactors adj ", joinqry, ")")
     
-      message(pltidsadjWITH.qry)
+      #message(pltidsadjWITH.qry)
       dbqueriesWITH$pltidsadjWITH <- pltidsadjWITH.qry
     }
     
     
   } else {
+    
+    ## If module != GB, divide 1 by the sum of sampled proportions by plot
     grpbyqry <- paste0("\nGROUP BY pltids.cn")
     adjselectqry <- paste0(
       "\n        COALESCE(1 / NULLIF(SUM(condprop_unadj),0), 0) AS adj_factor_cond,",
@@ -374,6 +398,178 @@ wwwGetAdjqryVOL <- function(strvar,
       "\n        COALESCE(1 / NULLIF(SUM(macrprop_unadj),0), 0) AS adj_factor_macr,",
       "\n        COALESCE(1 / NULLIF(SUM(micrprop_unadj),0), 0) AS adj_factor_micr")
     
+    ## Build query for calculating plot-level adjustment factors
+    adjqry <- paste0(
+      "SELECT pltids.cn,", 
+      adjselectqry,
+      adjfromqry,
+      adjwhereqry, 
+      grpbyqry)
+    
+    
+    ## Build WITH query for calculating plot-level adjustment factors
+    adjWITHqry <- paste0(
+      "\npltidsadj AS", 
+      "\n(", adjqry, ")")      
+    message(adjWITHqry)    
+    
+    
+    ## Append pltidsWITHqry to plot-level adjustment query
+    if (!is.null(pltidsWITHqry)) {
+      pltidsadj.qry <- paste0(
+        pltidsWITHqry, 
+        "\n", adjqry)
+      message(pltidsadj.qry)
+      #pltidsadj <- DBI::dbGetQuery(dbconn, pltidsadj.qry)
+      #head(pltidsadj)
+      dbqueries$pltidsadj <- pltidsadj.qry
+      
+      pltidsadjWITH.qry <- paste0(
+        pltidsWITHqry, ", ",
+        adjWITHqry)
+    }
+    
+    #message(pltidsadjWITH.qry)
+    dbqueriesWITH$pltidsadjWITH <- pltidsadjWITH.qry
+  }
+  
+  ## Return queries
+  return(list(dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH))
+}    
+
+
+
+wwwGetAdjqryCHNG <- function(module = "GB",
+                             strvar,
+                             pltidsWITHqry = NULL) {
+  
+  ## DESCRIPTION: Build queries for plot-level adjustment factors for CHNG
+  ## If module='GB', build strata-level adjustment factors first.
+  
+  ## Set global variables
+  ACI <- FALSE
+  SCHEMA. <- ""
+  
+  
+  ## Define database queries lists
+  dbqueries <- {}
+  dbqueriesWITH <- {}
+  
+  
+  ## Build query to sum subplot proportions
+  subcpropWITHqry <- 
+    "----- sum sampled subplot proportions
+    subpcprop AS 
+    (SELECT c.plt_cn, pcond.plt_cn AS prev_plt_cn, 
+        pcond.condid AS prevcond, c.condid, 
+     SUM(sccm.subptyp_prop_chng * 
+          (CASE WHEN ((sccm.subptyp = 3 AND c.prop_basis = 'MACR') OR
+                      (sccm.subptyp = 1 AND c.prop_basis = 'SUBP'))
+           THEN 1 ELSE 0 END) /4) AS condprop_unadj,
+    SUM(sccm.subptyp_prop_chng * 
+          (CASE WHEN sccm.subptyp = 1 THEN 1 ELSE 0 END) /4) AS subpprop_unadj,
+    SUM(sccm.subptyp_prop_chng * 
+          (CASE WHEN sccm.subptyp = 2 THEN 1 ELSE 0 END) /4) AS micrprop_unadj,
+    SUM(sccm.subptyp_prop_chng * 
+          (CASE WHEN sccm.subptyp = 3 THEN 1 ELSE 0 END) /4) AS macrprop_unadj
+    FROM pltids
+    JOIN PLOT p ON (p.cn = pltids.plt_cn)
+    JOIN PLOT pplot ON (pplot.cn = p.prev_plt_cn)
+    JOIN COND c ON (c.plt_cn = p.cn)
+    JOIN COND pcond ON (pcond.plt_cn = p.prev_plt_cn)
+    JOIN SUBP_COND_CHNG_MTRX sccm ON (sccm.plt_cn = c.plt_cn
+                                      AND sccm.prev_plt_cn = pcond.plt_cn
+                                      AND sccm.condid = c.condid
+                                      AND sccm.prevcond = pcond.condid) 
+    WHERE c.cond_status_cd <> 5
+    AND c.condprop_unadj IS NOT NULL
+    AND ((sccm.subptyp = 3 AND c.prop_basis = 'MACR')
+         OR (sccm.subptyp = 1 AND c.prop_basis = 'SUBP'))
+    AND COALESCE(c.cond_nonsample_reasn_cd, 0) = 0
+    AND COALESCE(pcond.cond_nonsample_reasn_cd, 0) = 0
+    GROUP BY c.plt_cn, pcond)"
+  
+  
+  ## Build FROM statement 
+  adjfromqry <- paste0(
+    "\nFROM pltids",
+    "\nLEFT OUTER JOIN subpcprop c ON (pltids.plt_cn = c.plt_cn)")
+  
+  ## Build SELECT stateement 
+  if (module == "GB") {
+    
+    ## If module = GB, divide N by the sum of sampled proportions by strata
+    grpbyqry <- paste0("\nGROUP BY pltids.domain_unit, pltids.", strvar)
+    adjselectqry <- paste0(
+      "\n        COALESCE(COUNT(DISTINCT pltids.cn) / NULLIF(SUM(condprop_unadj),0), 0) AS adj_factor_cond,",
+      "\n        COALESCE(COUNT(DISTINCT pltids.cn) / NULLIF(SUM(subpprop_unadj),0), 0) AS adj_factor_subp,",
+      "\n        COALESCE(COUNT(DISTINCT pltids.cn) / NULLIF(SUM(macrprop_unadj),0), 0) AS adj_factor_macr,",
+      "\n        COALESCE(COUNT(DISTINCT pltids.cn) / NULLIF(SUM(micrprop_unadj),0), 0) AS adj_factor_micr")
+    
+    
+    ## Build query for calculating strata-level adjustment factors
+    adjqry <- paste0(
+      "SELECT pltids.domain_unit, pltids.", strvar, ", ",
+      adjselectqry,
+      adjfromqry,
+      grpbyqry)
+    
+    ## Append pltidsWITHqry to strata-level adjustment query
+    if (!is.null(pltidsWITHqry)) {
+      adjfactors.qry <- paste0(
+        pltidsWITHqry,
+        "\n", subcpropWITHqry, ", ",
+        "\n", adjqry)
+    }
+    #message(adjfactors.qry)    
+    dbqueries$adjfactors <- adjfactors.qry
+    
+    ## Build WITH query for calculating strata-level adjustment factors
+    adjWITHqry <- paste0(
+      "\nadjfactors AS", 
+      "\n(", adjqry, ")")      
+    #message(adjWITHqry)    
+    
+    
+    ## Build query to create plot-level adjustment factors
+    if (!is.null(pltidsWITHqry)) {
+      joinqry <- getjoinqry(c("domain_unit", strvar), c("domain_unit", strvar), "adj.", "pltids.")
+      pltidsadj.qry <- paste0(
+        pltidsWITHqry, ", ",
+        adjWITHqry, 
+        "\n----- calculate plot-level adjustment factors",
+        "\nSELECT pltids.cn, adj_factor_cond, adj_factor_subp, adj_factor_macr, adj_factor_micr",
+        "\n FROM pltids",
+        "\n JOIN adjfactors adj ", joinqry)
+      #message(pltidsadj.qry)
+      dbqueries$pltidsadj <- pltidsadj.qry
+      
+      
+      pltidsadjWITH.qry <- paste0(
+        pltidsWITHqry, ", ",
+        adjWITHqry, ", ",
+        "\n----- calculate plot-level adjustment factors",
+        "\npltidsadj AS",
+        "\n(SELECT pltids.cn, adj_factor_cond, adj_factor_subp, adj_factor_macr, adj_factor_micr",
+        "\n FROM pltids",
+        "\n JOIN adjfactors adj ", joinqry, ")")
+      
+      #message(pltidsadjWITH.qry)
+      dbqueriesWITH$pltidsadjWITH <- pltidsadjWITH.qry
+    }
+    
+    
+  } else {
+    
+    ## If module != GB, divide 1 by the sum of sampled proportions by plot
+    grpbyqry <- paste0("\nGROUP BY pltids.cn")
+    adjselectqry <- paste0(
+      "\n        COALESCE(1 / NULLIF(SUM(condprop_unadj),0), 0) AS adj_factor_cond,",
+      "\n        COALESCE(1 / NULLIF(SUM(subpprop_unadj),0), 0) AS adj_factor_subp,",
+      "\n        COALESCE(1 / NULLIF(SUM(macrprop_unadj),0), 0) AS adj_factor_macr,",
+      "\n        COALESCE(1 / NULLIF(SUM(micrprop_unadj),0), 0) AS adj_factor_micr")
+    
+    ## Build query for calculating plot-level adjustment factors
     adjqry <- paste0(
       "SELECT pltids.domain_unit, pltids.", strvar, ", ", 
       adjselectqry,
@@ -381,15 +577,18 @@ wwwGetAdjqryVOL <- function(strvar,
       adjwhereqry, 
       grpbyqry)
     
-    ## Get WITH query for calculating strata-level adjustment factors
+    
+    ## Build WITH query for calculating plot-level adjustment factors
     adjWITHqry <- paste0(
       "\npltidsadj AS", 
       "\n(", adjqry, ")")      
     message(adjWITHqry)    
     
-    if (!is.null(pltidsWITH)) {
+    
+    ## Append pltidsWITHqry to plot-level adjustment query
+    if (!is.null(pltidsWITHqry)) {
       pltidsadj.qry <- paste0(
-        pltidsWITH, 
+        pltidsWITHqry, 
         "\n", adjqry)
       message(pltidsadj.qry)
       #pltidsadj <- DBI::dbGetQuery(dbconn, pltidsadj.qry)
@@ -397,28 +596,36 @@ wwwGetAdjqryVOL <- function(strvar,
       dbqueries$pltidsadj <- pltidsadj.qry
       
       pltidsadjWITH.qry <- paste0(
-        pltidsWITH, ", ",
+        pltidsWITHqry, ", ",
         adjWITHqry)
     }
-    message(pltidsadjWITH.qry)
+    
+    #message(pltidsadjWITH.qry)
     dbqueriesWITH$pltidsadjWITH <- pltidsadjWITH.qry
   }
   
+  ## Return queries
   return(list(dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH))
 }    
 
 
-wwwGetpltcondqry <- function(popType = "VOL", pltidsadjWITH.qry = NULL) {
+wwwGetpltcondqry <- function(popType = "VOL", pltidsadjWITHqry = NULL) {
   
-  ###################################################################################
-  ## 1. Define a set of plot-level variables that are necessary to keep for estimation. 
-  ###################################################################################
+  ## DESCRIPTION: Build queries for getting plot / cond data.
+
+  
+  ## Set global variables
   defaultVars <- TRUE
+  SCHEMA. <- ""
+  
+  
+  ## Define plot-level variables 
+  ###############################################################################
   pvars2keep <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT",
                   "PLOT_STATUS_CD", "PLOT_NONSAMPLE_REASN_CD", "INTENSITY", "SUBCYCLE") 
   
   ## Set additional pvars2keep depending on popType
-  if (popType %in% c("GRM", "CHNG", "LULC")) {
+  if (popType %in% c("GRM", "CHNG")) {
     pvars2keep <- unique(c(pvars2keep, c("PREV_PLT_CN", "REMPER")))
   } else if (popType == "P2VEG") {
     pvars2keep <- c(pvars2keep, "P2VEG_SAMPLING_STATUS_CD", "P2VEG_SAMPLING_LEVEL_DETAIL_CD",
@@ -434,61 +641,251 @@ wwwGetpltcondqry <- function(popType = "VOL", pltidsadjWITH.qry = NULL) {
   
   if (defaultVars) {
     #pvars <- c(pvars2keep, pdoms)
-    pvars <- c(pvars2keep, "RDDISTCD", "WATERCD")
+    pvars <- tolower(c(pvars2keep, "RDDISTCD", "WATERCD"))
   } else {
     pvars <- "*"
   }
-  pselectqry <- toString(paste0(plota., pvars))
+  pselectqry <- toString(paste0("p.", pvars))
 
+  
+  ## Define condition-level variables 
+  ###############################################################################
   if (defaultVars) {
-    condvars <-  DBvars.default()$condvarlst
+    condvars <-  tolower(DBvars.default()$condvarlst)
   } else {
     condvars <- "*"
   }
-  cselectqry <- toString(paste0(conda., unique(c(condvars, cvars2keep))))
-  pltcondflds <- unique(c(condvars, cvars2keep, pvars))
+  cselectqry <- toString(paste0("c.", condvars))
+  #pltcondflds <- unique(c(condvars, pvars))
 
-  ## 6.2.	Add FORTYPGRP to SELECT query
+  
+  ## Add FORTYPGRP to SELECT query
   ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
-  ftypqry <- classqry(classcol = "c.FORTYPCD",
+  ftypqry <- classqry(classcol = "c.fortypcd",
                     fromval = ref_fortypgrp$VALUE,
                     toval = ref_fortypgrp$GROUPCD,
-                    classnm = "FORTYPGRPCD")
+                    classnm = "fortypgrpcd")
   cselectqry <- paste0(cselectqry, ", ",
                      "\n ", ftypqry)
-  pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
+  #pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
   
-  ## Build pfromqry
+  
+  
+  ## Build FROM query for pltcondx
   pjoinqry <- getjoinqry("CN", "CN", "p.", "pltids.")
   cjoinqry <- getjoinqry("PLT_CN", "CN", "c.", "p.")
   pcfromqry <- paste0(
     "\n FROM pltids",
     "\n JOIN ", SCHEMA., "plot p ", pjoinqry,
     "\n JOIN ", SCHEMA., "cond c ", cjoinqry)
-  message(pcfromqry)
+  #message(pcfromqry)
 
-  ## Build query for pltcondx
+  
+  ## Append SELECT query and FROM query for pltcondx
   pcqry <- paste0(
     "SELECT ", cselectqry, ", ",
-    "\n", pselectqry, ", 1 AS TOTAL",
+    "\n", pselectqry,
     pcfromqry)
   
-  ## Build query for pltcondx, including pltids WITH query
-  pltcondx.qry <- paste0(
-    pltidsadjWITH.qry,
+  
+  ## Append pltidsWITHqry to plotcondx query
+  pltcondxqry <- paste0(
+    pltidsadjWITHqry,
       "\n", pcqry)
-  message(pltcondx.qry)
+  #message(pltcondx.qry)
   #pltcondx <- DBI::dbGetQuery(dbconn, pltcondx.qry)
 
-  ## Build WITH query for pltcondx, including pltids WITH query
-  pltcondxWITH.qry <- paste0(
-    pltidsadjWITH.qry, ", ",
+  
+  ## build WITH query for pltcondx
+  pltcondxadjWITHqry <- paste0(
+    pltidsadjWITHqry, ", ",
     "\n----- pltcondx",
     "\npltcondx AS",
     "\n(", pcqry, ")")
   
-  return(list(pltcondx.qry = pltcondx.qry, pltcondxWITH.qry = pltcondxWITH.qry))
-
-}
   
+  ## Return queries fo pltcondx
+  return(list(pltcondxqry = pltcondxqry, pltcondxadjWITHqry = pltcondxadjWITHqry))
+}
+
+
+wwwGettreeqry <- function(estvar, 
+                          tfilter = NULL,
+                          pcdomainlst = NULL, 
+                          pcwhereqry = NULL, 
+                          estseed = "none") {
+  
+  
+  ## DESCRIPTION: Build query to get tree data and sum tree-level data.
+  
+  ## Set global variables
+  defaultVars <- TRUE
+  SCHEMA. <- ""
+  
+  
+  ## Check estseed and define name for estvar
+  estvar <- tolower(estvar)
+  estvarlst <- estvar
+  if (estvar == "tpa_unadj") {
+    if (estseed == "add") {
+      treenm <- "count_tpa_tree"
+      seednm <- "count_tpa_seed"
+    } 
+    tsumnm <- "count_tpa"
+  } else {
+    estvarlst <- c(estvar, "tpa_unadj")
+    if (estseed %in% c("only", "add")) {
+      stop("estvar must be equal to tpa_unadj")
+    }
+    tsumnm <- paste0(estvar, "_tpa")
+  }
+  tsumnm <- "estimated_tvalue"
+  
+  
+  
+  ## Build tree WITH qry
+  #########################################################################
+  if (!estseed == "only") {
+    tWITHwhereqry=twhereqry <- NULL
+    
+    #treeflds <- DBI::dbListFields(popconn, "tree")
+    
+    tWITHselectqry <- paste0(
+      "SELECT 'TREE' src, plt_cn, condid, CONDID, SUBP, TREE, ", toString(estvarlst), ",   
+        CASE WHEN dia IS NULL THEN adj_factor_subp
+        WHEN MIN(dia, 5 - 0.001) THEN adj_factor_micr
+        WHEN MIN(dia, 9999 - 0.001) THEN adj_factor_subp
+        ELSE adj_factor_macr END AS tadjfac")
+    
+    tWITHfromqry <- paste0(
+      "\nFROM tree t",
+      "\nJOIN pltidsadj adj ON (adj.cn = t.plt_cn)")
+
+    if (!is.null(tfilter)) {
+      tWITHwhereqry <- paste0("\nWHERE ", tfilter)
+    }
+
+    if (estseed == "add") {
+      
+      sWITHselectqry <- paste0(
+        "SELECT 'SEED' src, plt_cn, condid, CONDID, SUBP, 0, TPA_UNADJ, adj.adj_factor_micr AS tadjfac")
+      
+      sWITHfromqry <- paste0(
+        "\nFROM seedling s",
+        "\nJOIN pltidsadj adj ON (adj.cn = s.plt_cn)")
+      
+      ## Build final tree WITH query
+      treeWITHqry <- paste0(
+        "\n----- get tree data",
+        "\ntdat AS",
+        "\n(", tWITHselectqry,
+        tWITHfromqry,
+        tWITHwhereqry,
+        "\nUNION",
+        sWITHselectqry,
+        sWITHfromqry, ")")
+     
+    } else {
+      
+      ## Build final tree WITH query
+      treeWITHqry <- paste0(
+        "\n----- get tree data",
+        "\ntdat AS",
+        "\n(", tWITHselectqry,
+        tWITHfromqry,
+        tWITHwhereqry, ")")
+    }
+  } else {
+    
+    sWITHselectqry <- paste0(
+      "SELECT 'SEED' src, plt_cn, condid, CONDID, SUBP, TPA_UNADJ, adj.adj_factor_micr AS tadjfac")
+    
+    sWITHfromqry <- paste0(
+      "\nFROM seedling s",
+      "\nJOIN pltidsadj adj ON (adj.cn = s.plt_cn)")
+
+    ## Build final tree WITH query
+    treeWITHqry <- paste0(
+      "\n----- get tree data",
+      "(", sWITHselectqry,
+      sWITHfromqry, ")")
+    
+  }
+  
+  
+  ## Build tree SUM query
+  #########################################################################
+  grpbyvars <- paste0("pc.", c("plt_cn", "condid", pcdomainlst))
+  tselectqry <- paste0(
+    "SELECT ", toString(grpbyvars), ", ")
+
+  tsumselectqry <- paste0(
+    tselectqry, 
+    "ROUND(COALESCE(SUM(", paste(estvarlst, collapse = " * "), " * tadjfac),0), 8) AS ", tsumnm)
+  
+  tfromqry <- paste0(
+    "\nFROM pltcondx pc",
+    "\nLEFT JOIN tdat ON (tdat.plt_cn = pc.plt_cn AND tdat.condid = pc.condid)")
+  
+  ## Build final tree query
+  tqry <- paste0(
+    treeWITHqry,
+    "\n-------------------------------------------",
+    "\n", tsumselectqry,
+    tfromqry,
+    pcwhereqry,
+    "\nGROUP BY ", toString(grpbyvars))
+  #message(tqry)
+  
+  
+  ## Return query, including tree WITH query (tdat) and tree SUM query
+  return(tqry)
+}
+
+
+wwwGetcondqry <- function(pcdomainlst = NULL, 
+                          pcwhereqry = NULL) {
+  
+  ## DESCRIPTION: Build query to get sum condition-level data.
+  
+  ## Set global variables
+  defaultVars <- TRUE
+  SCHEMA. <- ""
+  
+  csumnm <- "estimated_value"
+  
+  ## Get cond SUM qry
+  #########################################################################
+  grpbyvars <- paste0("pc.", c("plt_cn", "condid", pcdomainlst))
+  cselectqry <- paste0(
+    "SELECT ", toString(grpbyvars), ", ")
+  
+  csumselectqry <- paste0(
+    cselectqry, 
+    "SUM(COALESCE(pc.condprop_unadj * CASE pc.prop_basis WHEN 'MACR' THEN adj_factor_macr ELSE adj_factor_subp END, 0)) AS ", csumnm)
+  
+  cfromqry <- paste0(
+    "\nFROM pltidsadj",
+    "\nLEFT JOIN pltcondx pc ON (pc.plt_cn = pltidsadj.cn)")
+  
+  ## Build final tree query
+  cqry <- paste0(
+    "\n-------------------------------------------",
+    "\n", csumselectqry,
+    cfromqry,
+    pcwhereqry,
+    "\nGROUP BY ", toString(grpbyvars))
+  #message(tqry)
+  
+  return(cqry)
+}
+
+
+
+
+
+
+
+
+
 
