@@ -308,49 +308,8 @@ modGBpop <- function(popType = "VOL",
   returnlst <- list(module = "GB")
   
   
-  ## Define function
-  getcombineqry <- function(lut, 
-                            classcols,
-                            fromcols,
-                            tocols,
-                            tab. = "") {
-    ## DESCRIPTION: create classification query for combining strata
-    classify.qry <- {}
-    for (to in 1:length(tocols)) {
-      tocol <- tocols[to]
-      
-      case.qry <- "\n(CASE"
-      for (i in 1:(nrow(lut))) { 
-        luti <- lut[i,]
-        
-        classcolsi <- as.vector(t(luti[, classcols]))
-        fromcolsi <- as.vector(t(luti[, fromcols]))
-        tocolsi <- as.vector(t(luti[, tocol]))
-        
-        ## Build when query
-        when.qry <- paste0("\nWHEN (", tab., classcols[1], " = ", classcolsi[1]) 
-        for (j in 2:length(classcols)) {
-          when.qry <- paste0(when.qry, " AND ", tab., classcols[j], " = ", classcolsi[j])
-        }
-        when.qry <- paste0(when.qry, ")")
-        
-        ## Build then query
-        for (k in 1:length(tocolsi)) {
-          case.qry <- paste0(case.qry, when.qry, " THEN '", tocolsi[k], "'")
-        }  
-      }
-      case.qry <- paste0(case.qry, " END) AS '", tocol, "'")
-      classify.qry <- paste0(classify.qry, case.qry)
-      if (to < length(tocols)) {
-        classify.qry <- paste0(classify.qry, ",")
-      }
-    }
-    return(classify.qry)
-  }
-  
-  
   ## Set global variables
-  strwt=expcondtab=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=sccmx=popevalid <- NULL
+  expcondtab=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=sccmx=popevalid <- NULL
   condid <- "CONDID"
   pvars2keep=unitlevels <- NULL
   pltidsadjindb <- FALSE
@@ -805,8 +764,8 @@ modGBpop <- function(popType = "VOL",
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
-  
 
+  
   ###################################################################################
   ## Check Auxiliary Data
   ###################################################################################
@@ -903,7 +862,7 @@ modGBpop <- function(popType = "VOL",
                        POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
                        adj = adj, ACI = ACI, 
                        plotlst = plotlst,  
-                       pltfromqry = pltfromqry, 
+                       #pltfromqry = pltfromqry, 
                        condid = condid, 
                        areawt = areawt, areawt2 = areawt2,
                        unitvars = unitvars,
@@ -934,6 +893,7 @@ modGBpop <- function(popType = "VOL",
       seedx <- popcheck$seedx
     }
   }
+
   
   if (popType %in% c("CHNG", "GRM")) {
     ###################################################################################

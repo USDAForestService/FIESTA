@@ -40,7 +40,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   
   ## Set global variables
   ONEUNIT=npixels=nonsampplots=strvars=PLOT_STATUS_CD=strwt=testlt1=
-    pixels=unitstrgrplut=vars2combine=STRATASUB=unitlessthan=errtyp <- NULL
+    pixels=unitstrgrplut=vars2combine=unitlessthan=errtyp <- NULL
   gui=pivotstrat <- FALSE
   unitvars <- c(unitvar2, unitvar)
   strunitvars <- c(unitvars)
@@ -117,12 +117,8 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       auxlut <- auxlut[, lapply(.SD, sum, na.rm=TRUE),
                        by=c(unitvars, strvars), .SDcols=sumvars]
       setnames(auxlut, c(unitvars, strvars, sumvars))
-      
-      auxlut <- auxlut[, lapply(.SD, sum, na.rm=TRUE),
-                       by=c(unitvars, strvars), .SDcols=sumvars]
-      setnames(auxlut, c(unitvars, strvars, sumvars))
     }
-    
+
     #setkeyv(auxlut, unitvars)
     strunitvars <- c(unitvars, strvars)
     
@@ -170,7 +166,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   } else if (module %in% c("GB", "PB")) {
     
     ## Add a column to identify one strata class for GB or PB modules
-    message("no strata")
+    #message("no strata")
     strvar <- checknm("ONESTRAT", names(pltx))
     strwtvar <- "strwt"
     pltx[, (strvar) := 1]
@@ -259,7 +255,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     ############################################################################
     if (npixelvar %in% auxnmlst) {
       npixels <- unique(auxlut[, c(unitvar, npixelvar), with=FALSE])
-      auxlut$npixels <- NULL
+      auxlut[[npixelvar]] <- NULL
     }
   }
   
@@ -268,7 +264,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     auxlut[[unitvar]] <- factor(auxlut[[unitvar]], levels = unitlevels)
     setorderv(auxlut, c(unitvar, unitvar2))
   }
-  
+
   ##################################################################################
   ## If more than one unitvar, concatenate into 1 unitvar
   ##################################################################################
@@ -293,10 +289,11 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     auxlut[[unitvar]] <- factor(auxlut[[unitvar]], levels = unitlevels)
     pltx[[unitvar]] <- factor(pltx[[unitvar]], levels=unitlevels)
   }
-  
+
   ## Merge P2POINTCNT to auxlut
   ##################################################
-  if (!is.null(P2POINTCNT) && !"P2POINTCNT" %in% names(auxlut)) {
+  p2pointcntnm <- findnm("P2POINTCNT", names(auxlut), returnNULL = TRUE)
+  if (!is.null(P2POINTCNT) && !is.null(p2pointcntnm)) {
     
     ## Check if class of unitvar in auxlut matches class of unitvar in P2POINTCNT
     tabs <- check.matchclass(P2POINTCNT, auxlut, strunitvars,
@@ -321,7 +318,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     auxlut[[unitvar]] <- factor(auxlut[[unitvar]], levels=unitlevels)
     pltx[[unitvar]] <- factor(pltx[[unitvar]], levels=unitlevels)
   }
-  
+
   ###################################################################################
   ## Check number of plots by unitvar
   ##	 (including partially sampled plots - COND_STATUS_CD=5)
@@ -350,10 +347,20 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   } else {
     minplotnum.strat <- 0
   }
-  pltcnts <- check.pltcnt(pltx=pltx, puniqueid=puniqueid,
-		unitlut=auxlut, unitvars=unitvar, strvars=strvar,
-		stopiferror=FALSE, showwarnings=TRUE, minplotnum.unit=minplotnum.unit,
-		minplotnum.strat=minplotnum.strat)
+  
+  unitlut = copy(auxlut) 
+  #unitvars = unitvar
+  strvars = strvar
+  stopiferror = FALSE
+  showwarnings = TRUE  
+ 
+  
+  pltcnts <- check.pltcnt(pltx = pltx, puniqueid = puniqueid,
+		                      unitlut = auxlut, 
+		                      unitvars = unitvar, strvars = strvar,
+		                      stopiferror = FALSE, showwarnings = TRUE, 
+		                      minplotnum.unit = minplotnum.unit,
+		                      minplotnum.strat = minplotnum.strat)
   auxlut <- pltcnts$unitlut
   errtab <- pltcnts$errtab
   nostrat <- pltcnts$nostrat
@@ -361,9 +368,11 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   ## If unit.action="remove", remove estimation with less than minplotnum.unit plots
   ## If unit.action="keep", return estimation units with less than minplotnum.unit as NA
   unitltmin <- 0
+  
   if (any(auxlut$n.total < minplotnum.unit)) {
-    unitltmin <- unique(errtab[[unitvar]][errtab$n.total < minplotnum.unit])
-    if (length(unitltmin) > 0) {
+    unitltmin <- unique(auxlut[[unitvar]][auxlut$n.total < minplotnum.unit])
+    if (length(unitltmin) == 0) unitltmin <- NULL
+    if (!is.null(unitltmin)) {
       if (unit.action %in% c("remove", "keep")) {
         
         if (unit.action == "remove") {
@@ -380,6 +389,8 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
           
         }
         auxlut <- auxlut[!auxlut[[unitvar]] %in% unitltmin,]
+        unitltmin <- unique(auxlut[[unitvar]][auxlut$n.total < minplotnum.unit])
+        if (length(unitltmin) == 0) unitltmin <- NULL
       }
     }
   }

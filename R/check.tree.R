@@ -1,7 +1,7 @@
 check.tree <- 
   function(gui, treex, seedx = NULL, estseed = "none", 
-           condx = NULL, pltx = NULL, bycond = TRUE, tuniqueid = NULL,  
-           cuniqueid = NULL, condid = "CONDID", puniqueid = NULL, 
+           condx = NULL, pltx = NULL, bycond = TRUE, tuniqueid = "PLT_CN",  
+           cuniqueid = "PLT_CN", condid = "CONDID", puniqueid = NULL, 
            esttype = "TREE", ratiotype = "PERACRE",
 	         estvarn = NULL, estvarn.TPA = TRUE, 
            estvarn.filter = NULL, estvarn.derive = NULL,

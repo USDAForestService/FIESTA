@@ -3,15 +3,13 @@ check.popdataVOL <-
            datindb, pltaindb, 
            pltidsqry,
            pltidsid, pltidvars, 
-           plotnm,
            pdoms2keep = NULL, 
            pltidsadjindb = FALSE, 
            defaultVars = TRUE,
            pltassgnid, 
-           pltassgnx, pltx,
+           pltx, pltassgnx,
            POP_PLOT_STRATUM_ASSGN,
            adj, ACI, plotlst, 
-           pltfromqry, 
            condid = "CONDID", 
            areawt = "CONDPROP_UNADJ", areawt2 = NULL,
            MICRO_BREAKPOINT_DIA = 5, 
@@ -253,7 +251,8 @@ check.popdataVOL <-
     #######################################################################
     cpropvars <- check.PROPvars(condflds,
                                 propvars = unlist(cpropvars))
-    if (!areawt %in% cpropvars) {
+    areawt <- findnm(areawt, cpropvars, returnNULL = TRUE)
+    if (is.null(areawt)) {
       stop("areawt not in dataset: ", areawt)
     }
     propvars <- cpropvars
@@ -281,7 +280,6 @@ check.popdataVOL <-
     pltidsvars <- c(puniqueid, unitvars)
     ## message(pltidsWITH.qry)
     
-
     ## 5.3. Build ADJ query to append adjustment factors to pltids
     #######################################################################
     
@@ -305,7 +303,6 @@ check.popdataVOL <-
     pltidsfromqry <- paste0(
       "\nFROM pltids plta ",
       "\nJOIN ", SCHEMA., condxnm, " c ", pltidsjoinqry)
-    
     
     ## Build ADJqry WHERE statement (i.e., excluding nonresponse)
     adjwhereqry <- NULL
@@ -333,7 +330,7 @@ check.popdataVOL <-
       "\n-------------------------------------------",
       "\n", ADJqry
     )
-    ## message(adjfactors.qry)
+    #message(adjfactors.qry)
     
     ## Run query to calculate adjustment factors
     if (pltaindb) {
@@ -574,8 +571,8 @@ check.popdataVOL <-
     } else {
       returnlst$pltcondx <- "pltcondx"
     }
-    
-    
+   
+   
     ##############################################################################
     ## 8. Build and run queries for other necessary tables (if returndata/savedata = TRUE) 
     ##############################################################################  
@@ -705,7 +702,7 @@ check.popdataVOL <-
       }
       rm(condx)  
       
-      
+
       ## 8.3. Return and/or save tree data (treex / TREE)
       ##################################################################
       if (!is.null(treenm)) {
@@ -742,7 +739,7 @@ check.popdataVOL <-
                           "\n FROM pltids",
                           tfromqry) 
         dbqueries$TREE <- treeqry
-        
+
         ## 8.3.5. Run final tree query, including pltidsqry
         if (datindb) {
           treex <- tryCatch(
@@ -762,11 +759,13 @@ check.popdataVOL <-
           message(treeqry)
           return(NULL)
         }
-        
+
         ## 8.3.6. Return and/or save tree data
         treekey <- c(tuniqueid, condid, tsubp, ttree)
         setkeyv(setDT(treex), treekey)
-        treex <- treex[treex[[tuniqueid]] %in% getdataCNs,]
+        if (!is.null(getdataCNs)) { 
+          treex <- treex[treex[[tuniqueid]] %in% getdataCNs,]
+        }
         
         ## Add to returnlst 
         if (returndata) {
@@ -789,7 +788,7 @@ check.popdataVOL <-
         #rm(treex)
       } 
       
-      
+
       ## 8.4. Return and/or save seedling data (seedx / SEEDLING)
       ##################################################################
       if (!is.null(seednm)) {
@@ -850,7 +849,9 @@ check.popdataVOL <-
         ## 8.4.6. Return and/or save seedling data
         seedkey <- c(suniqueid, scondid, ssubp)
         setkeyv(setDT(seedx), seedkey)
-        seedx <- seedx[seedx[[tuniqueid]] %in% getdataCNs,]
+        if (!is.null(getdataCNs)) {
+          seedx <- seedx[seedx[[tuniqueid]] %in% getdataCNs,]
+        }
         
         ## Add to returnlst 
         if (returndata) {

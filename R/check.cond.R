@@ -1,14 +1,18 @@
-check.cond <- function(areawt, areawt2, 
-                       adj, adjcase, 
-                       cuniqueid, condid, 
+check.cond <- function(areawt, 
+                       areawt2 = NULL, 
+                       adj, 
+                       adjcase, 
+                       cuniqueid = "PLT_CN", 
+                       condid = "CONDID", 
                        rowvar, 
                        colvar, 
                        pcdomainlst = NULL,
-                       popdatindb,
+                       popdatindb = TRUE,
                        popconn = NULL,
                        pltcondx = NULL,
                        pltidsadj = NULL,
                        pltcondxadjWITHqry = NULL,
+                       pltidsid = "PLT_CN",
                        pcwhereqry = NULL,
                        classifyrow = NULL,
                        classifycol = NULL) {
@@ -44,7 +48,7 @@ check.cond <- function(areawt, areawt2,
   if (!is.null(rowvar) && rowvar %in% pcdomainlst) {
     if (!is.null(classifyrow)) {
       cselectqry <- paste0(cselectqry, ", \n",
-                         classifyrow$rowclassqry)
+                           classifyrow$rowclassqry)
       rowvarnm <- classifyrow$rowclassnm
       byvars <- c(byvars, rowvarnm)
     } else {
@@ -52,11 +56,13 @@ check.cond <- function(areawt, areawt2,
       rowvarnm <- rowvar
       byvars <- c(byvars, paste0("pc.", rowvar))
     }
+  } else {
+    rowvarnm <- "NONE"
   }
   if (!is.null(colvar) && colvar != "NONE" && colvar %in% pcdomainlst) {
     if (!is.null(classifycol)) {
       cselectqry <- paste0(cselectqry, ", \n",
-                         classifycol$colclassqry)
+                           classifycol$colclassqry)
       colvarnm <- classifycol$colclassnm
       byvars <- c(byvars, colvarnm)
     } else {
@@ -64,19 +70,23 @@ check.cond <- function(areawt, areawt2,
       colvarnm <- colvar
       byvars <- c(byvars, paste0("pc.", colvar))
     }
+  } else {
+    colvarnm <- "NONE"
   }
+  
   if (!is.null(colvar) && colvar == "NONE") {
     colvarnm <- colvar
   }
-
+  
+  
   ## Final select query
   cdomdatselectqry <- 
     paste0(cselectqry, ", ",
            "\n  ", estvarqry)
   
   ## Build cdomdat FROM query
-  joinqry <- getjoinqry(joinid1 = cuniqueid, joinid2 = cuniqueid,
-                        alias1 = "pltidsadj.", alias2 = "pc.")
+  joinqry <- getjoinqry(joinid1 = cuniqueid, joinid2 = pltidsid,
+                        alias1 = "pc.", alias2 = "pltidsadj.")
   cdomdatfromqry <- 
     paste0("\nFROM pltidsadj",
            "\nLEFT JOIN pltcondx pc ", joinqry)
@@ -87,7 +97,7 @@ check.cond <- function(areawt, areawt2,
            cdomdatfromqry,
            pcwhereqry,
            "\nGROUP BY ", toString(byvars))
-
+  
   #Run query for cdomdat
   if (!popdatindb) {
     cdomdat <- tryCatch(

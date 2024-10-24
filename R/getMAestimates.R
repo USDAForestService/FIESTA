@@ -1,20 +1,36 @@
-getMAestimates <- function(esttype, ratiotype = "PERACRE",
-                           domdatn, domdatd = NULL, uniqueid,
-                           estvarn.name, estvard.name = NULL,
-                           rowvar, colvar, grpvar,
-                           MAmethod, modelselect,
-                           modelselect_bydomain,
-                           prednames, FIA, bootstrap,
-                           pltassgnx, pltassgnid,
-                           unitarea, unitvar, areavar,
-                           unitlut, npixels, npixelvar,
-                           totals, sumunits,
-                           uniquerow, uniquecol,
-                           row.add0, col.add0,
-                           row.orderby, col.orderby) {
+getMAestimates <- function(esttype, 
+                           ratiotype = "PERACRE",
+                           domdatn, 
+                           domdatd = NULL, 
+                           uniqueid,
+                           estvarn.name, 
+                           estvard.name = NULL,
+                           rowvar, 
+                           colvar, grpvar,
+                           MAmethod, 
+                           modelselect,
+                           prednames, 
+                           FIA = TRUE, 
+                           bootstrap = FALSE,
+                           pltassgnx, 
+                           pltassgnid,
+                           unitarea, 
+                           unitvar, 
+                           areavar,
+                           unitlut, 
+                           npixels, 
+                           npixelvar,
+                           totals, 
+                           uniquerow, 
+                           uniquecol,
+                           row.add0 = FALSE, 
+                           col.add0 = FALSE,
+                           row.orderby = NULL, 
+                           col.orderby = NULL) {
   
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
+  modelselect_bydomain <- modelselect
   response <- estvarn.name
   predselectlst <- list()
   
@@ -96,12 +112,17 @@ getMAestimates <- function(esttype, ratiotype = "PERACRE",
                          by=c(unitvar, uniqueid, "TOTAL", prednames), .SDcols=response]
     
     unit_totestlst <- lapply(estunits, MAest.unit, 
-                             dat=domdattot, cuniqueid=uniqueid, 
-                             unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
-                             MAmethod=MAmethod, strvar=NULL, prednames=prednames, 
-                             domain="TOTAL", response=response, npixels=npixels, 
-                             FIA=FIA, modelselect=modelselect_bydomain, getweights=getweights,
-                             var_method=var_method)
+                             dat = domdattot, cuniqueid = uniqueid, 
+                             unitlut = unitlut, unitvar = unitvar, 
+                             esttype = esttype, 
+                             MAmethod = MAmethod, 
+                             strvar = NULL, prednames = prednames, 
+                             domain = "TOTAL", response = response, 
+                             npixels = npixels, 
+                             FIA = FIA, 
+                             modelselect = modelselect_bydomain, 
+                             getweights = getweights,
+                             var_method = var_method)
     unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
     unit_weights <- do.call(rbind, sapply(unit_totestlst, '[', "weights")) 
     unit_weights$areaweights <- unit_weights$weights * sum(unitarea[[areavar]])
@@ -127,12 +148,17 @@ getMAestimates <- function(esttype, ratiotype = "PERACRE",
                          by=c(unitvar, uniqueid, rowvar, prednames), .SDcols=response]
     
     unit_rowestlst <- lapply(estunits, MAest.unit, 
-                             dat=domdattot, cuniqueid=uniqueid, 
-                             unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
-                             MAmethod=MAmethod, strvar=NULL, prednames=prednames, 
-                             domain=rowvar, response=response, npixels=npixels, 
-                             FIA=FIA, modelselect=modelselect_bydomain, getweights=getweights,
-                             var_method=var_method)
+                             dat = domdattot, cuniqueid = uniqueid, 
+                             unitlut = unitlut, unitvar = unitvar, 
+                             esttype = esttype, 
+                             MAmethod = MAmethod, 
+                             strvar = NULL, prednames = prednames, 
+                             domain = rowvar, response=response, 
+                             npixels = npixels, 
+                             FIA = FIA, 
+                             modelselect = modelselect_bydomain, 
+                             getweights = getweights,
+                             var_method = var_method)
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$rowest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
@@ -179,12 +205,10 @@ getMAestimates <- function(esttype, ratiotype = "PERACRE",
       unit_grpest[, c(rowvar, colvar) := tstrsplit(grpvar, "#", fixed=TRUE)]
     }
   }
-  
+
   ###############################################################################
   ## Check add0 and Add area
   ###############################################################################
-  
-  if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit_rowest)) {
     unit_rowest <- add0unit(x=unit_rowest,
                             xvar=rowvar,

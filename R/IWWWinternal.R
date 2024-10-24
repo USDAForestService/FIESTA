@@ -768,7 +768,7 @@ wwwGettreeqry <- function(estvar,
     if (estseed == "add") {
       
       sWITHselectqry <- paste0(
-        "SELECT 'SEED' src, plt_cn, condid, CONDID, SUBP, 0, TPA_UNADJ, adj.adj_factor_micr AS tadjfac")
+        "\nSELECT 'SEED' src, plt_cn, condid, CONDID, SUBP, 0, TPA_UNADJ, adj.adj_factor_micr AS tadjfac")
       
       sWITHfromqry <- paste0(
         "\nFROM seedling s",

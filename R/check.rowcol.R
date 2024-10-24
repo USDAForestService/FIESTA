@@ -398,16 +398,25 @@ check.rowcol <-
             uniquerow <- tryCatch(
                DBI::dbGetQuery(popconn, uniquerow.qry),
                           error=function(e) {
-                            message("invalid uniquerow query...")
                             message(e,"\n")
                           return(NULL)})
- 	          } else {
+            if (is.null(uniquerow)) {
+              message("invalid unique rowvar query...")
+              message(uniquerow.qry)
+              stop()
+            }
+ 	        } else {
             uniquerow <- tryCatch( 
-               sqldf::sqldf(uniquerow.qry, connection = NULL),
+                 sqldf::sqldf(uniquerow.qry, connection = NULL),
                           error=function(e) {
                             message("invalid uniquerow query...")
                             message(e,"\n")
                           return(NULL)})
+            if (is.null(uniquerow)) {
+              message("invalid unique rowvar query...")
+              message(uniquerow.qry)
+              stop()
+            }
           }	
         }  ## end row.orderby != "NONE"
         
@@ -435,16 +444,24 @@ check.rowcol <-
               uniquerow <- tryCatch(
                   DBI::dbGetQuery(popconn, uniquerow.qry)[[1]],
                            error=function(e) {
-                             message("invalid uniquerow query...")
                              message(e,"\n")
                            return(NULL)})
+              if (is.null(uniquerow)) {
+                message("invalid unique rowvar query...")
+                message(uniquerow.qry)
+                stop()
+              }
             } else {
               uniquerow <- tryCatch(
                   sqldf::sqldf(uniquerow.qry)[[1]],
                            error=function(e) {
-                             message("invalid uniquerow query...")
                              message(e,"\n")
                            return(NULL)})
+              if (is.null(uniquerow)) {
+                message("invalid unique rowvar query...")
+                message(uniquerow.qry)
+                stop()
+              }
             }
             
             if (estseed == "add" && rowvar == "DIACL" && is.data.frame(treex)) {
@@ -478,21 +495,23 @@ check.rowcol <-
           uniquex <- tryCatch(
               DBI::dbGetQuery(popconn, uniquex.qry)[[1]],
                       error=function(e) {
-                        message("invalid unique rowvar query...")
                         message(e,"\n")
                       return(NULL)})
           if (is.null(uniquex)) {
+            message("invalid unique rowvar query...")
             message(uniquex.qry)
+            stop()
           }
 		    } else {
           uniquex <- tryCatch(
               sqldf::sqldf(uniquex.qry, connection = NULL)[[1]],
                       error=function(e) {
-                        message("invalid unique row query...")
                         message(e,"\n")
                       return(NULL)})
           if (is.null(uniquex)) {
+            message("invalid unique rowvar query...")
             message(uniquex.qry)
+            stop()
           }
 		    }
         
@@ -569,21 +588,23 @@ check.rowcol <-
             uniquex <- tryCatch(
               DBI::dbGetQuery(popconn, uniquex.qry)[[1]],
               error=function(e) {
-                message("invalid unique rowvar query...")
                 message(e,"\n")
                 return(NULL)})
             if (is.null(uniquex)) {
+              message("invalid unique rowvar query...")
               message(uniquex.qry)
+              stop()
             }
           } else {
             uniquex <- tryCatch(
               sqldf::sqldf(uniquex.qry, connection = NULL)[[1]],
               error=function(e) {
-                message("invalid unique row query...")
                 message(e,"\n")
                 return(NULL)})
             if (is.null(uniquex)) {
+              message("invalid unique rowvar query...")
               message(uniquex.qry)
+              stop()
             }
           }
         }
@@ -623,9 +644,14 @@ check.rowcol <-
                 suniquex <- tryCatch(
                     DBI::dbGetQuery(popconn, suniquex.qry)[[1]],
                             error=function(e) {
-                              message("invalid unique row query...")
                               message(e,"\n")
                             return(NULL)})
+                if (is.null(suniquex)) {
+                  message("invalid unique rowvar query...")
+                  message(suniquex.qry)
+                  stop()
+                }
+                
               } else {
                 suniquex <- tryCatch(
                     sqldf::sqldf(suniquex.qry, connection = NULL)[[1]],
@@ -633,6 +659,11 @@ check.rowcol <-
                               message("invalid unique row query...")
                               message(e,"\n")
                             return(NULL)})
+                if (is.null(suniquex)) {
+                  message("invalid unique rowvar query...")
+                  message(suniquex.qry)
+                  stop()
+                }
               }  
               if (any(is.na(suniquex)) && !keepNA) {
                 suniquex <- suniquex[!is.na(suniquex)]		
@@ -892,7 +923,7 @@ check.rowcol <-
         bypcdom <- TRUE
         colisdb <- isdbc
         colflds <- pltcondflds
-        if (!colisdb) {
+        if (colisdb) {
           coltabnm <- "pltcondx"
         } else {
           coltabnm <- pltcondx
@@ -993,16 +1024,24 @@ check.rowcol <-
             uniquecol <- tryCatch(
               DBI::dbGetQuery(popconn, uniquecol.qry),
               error=function(e) {
-                message("invalid uniquecol query...")
                 message(e,"\n")
                 return(NULL)})
+            if (is.null(uniquecol)) {
+              message("invalid uniquecol query...")
+              message(uniquecol.qry)
+              stop()
+            }
           } else {
             uniquecol <- tryCatch( 
               sqldf::sqldf(uniquecol.qry, connection = NULL),
               error=function(e) {
-                message("invalid uniquecol query...")
                 message(e,"\n")
                 return(NULL)})
+            if (is.null(uniquecol)) {
+              message("invalid uniquecol query...")
+              message(uniquecol.qry)
+              stop()
+            }
           }	
         }  ## end col.orderby != "NONE"
        
@@ -1029,9 +1068,13 @@ check.rowcol <-
               uniquecol <- tryCatch(
                 DBI::dbGetQuery(popconn, uniquecol.qry)[[1]],
                 error=function(e) {
-                  message("invalid uniquecol query...")
                   message(e,"\n")
                   return(NULL)})
+              if (is.null(uniquecol)) {
+                message("invalid uniquecol query...")
+                message(uniquecol.qry)
+                stop()
+              }
             } else {
               uniquecol <- tryCatch(
                 sqldf::sqldf(uniquecol.qry)[[1]],
@@ -1039,6 +1082,11 @@ check.rowcol <-
                   message("invalid uniquecol query...")
                   message(e,"\n")
                   return(NULL)})
+              if (is.null(uniquecol)) {
+                message("invalid uniquecol query...")
+                message(uniquecol.qry)
+                stop()
+              }
             }
             
             if (estseed == "add" && colvar == "DIACL" && is.data.frame(treex)) {
@@ -1072,16 +1120,24 @@ check.rowcol <-
           uniquex <- tryCatch(
             DBI::dbGetQuery(popconn, uniquex.qry)[[1]],
             error=function(e) {
-              message("invalid unique colvar query...")
               message(e,"\n")
               return(NULL)})
+          if (is.null(uniquex)) {
+            message("invalid unique col query...")
+            message(uniquex.qry)
+            stop()
+          }
         } else {
           uniquex <- tryCatch(
             sqldf::sqldf(uniquex.qry, connection = NULL)[[1]],
             error=function(e) {
-              message("invalid unique col query...")
               message(e,"\n")
               return(NULL)})
+          if (is.null(uniquex)) {
+            message("invalid unique col query...")
+            message(uniquex.qry)
+            stop()
+          }
         }
 
         if (!is.null(col.classify)) {
@@ -1155,16 +1211,24 @@ check.rowcol <-
             uniquex <- tryCatch(
               DBI::dbGetQuery(popconn, uniquex.qry)[[1]],
               error=function(e) {
-                message("invalid unique colvar query...")
                 message(e,"\n")
                 return(NULL)})
+            if (is.null(uniquex)) {
+              message("invalid unique colvar query...")
+              message(uniquex.qry)
+              stop()
+            }
           } else {
             uniquex <- tryCatch(
               sqldf::sqldf(uniquex.qry, connection = NULL)[[1]],
               error=function(e) {
-                message("invalid unique col query...")
                 message(e,"\n")
                 return(NULL)})
+            if (is.null(uniquex)) {
+              message("invalid unique colvar query...")
+              message(uniquex.qry)
+              stop()
+            }
           }
         }
        
@@ -1204,16 +1268,25 @@ check.rowcol <-
                 suniquex <- tryCatch(
                   DBI::dbGetQuery(popconn, suniquex.qry)[[1]],
                   error=function(e) {
-                    message("invalid unique col query...")
                     message(e,"\n")
                     return(NULL)})
+                if (is.null(suniquex)) {
+                  message("invalid unique colvar query...")
+                  message(suniquex.qry)
+                  stop()
+                }
+                
               } else {
                 suniquex <- tryCatch(
                   sqldf::sqldf(suniquex.qry, connection = NULL)[[1]],
                   error=function(e) {
-                    message("invalid unique col query...")
                     message(e,"\n")
                     return(NULL)})
+                if (is.null(suniquex)) {
+                  message("invalid unique colvar query...")
+                  message(suniquex.qry)
+                  stop()
+                }
               }  
               if (any(is.na(suniquex)) && !keepNA) {
                 suniquex <- suniquex[!is.na(suniquex)]		
@@ -1637,6 +1710,7 @@ check.rowcol <-
     setkeyv(uniquecol, colvarnew)
     
   } else if (colvar %in% pltcondflds && is.data.frame(pltcondx)) {
+
     if (!is.null(col.orderby) && col.orderby != "NONE") {
       uniquecol <- unique(pltcondx[, c(colvar, col.orderby), with=FALSE])
       setkeyv(uniquecol, col.orderby)

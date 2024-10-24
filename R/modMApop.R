@@ -705,12 +705,12 @@ modMApop <- function(popType="VOL",
   
   
   ## Change names based on data.frame names
-  unitlutcols <- which(names(unitlut) %in% prednames)
-  pltassgnxcols <- which(names(pltassgnx) %in% prednames)
-  dfnames <- colnames(data.frame(unitlut[, unitlutcols, with=FALSE]))
-  names(unitlut)[unitlutcols] <- dfnames
-  names(pltassgnx)[pltassgnxcols] <- dfnames
-  prednames <- dfnames
+  #unitlutcols <- which(names(unitlut) %in% prednames)
+  #pltassgnxcols <- which(names(pltassgnx) %in% prednames)
+  #dfnames <- colnames(data.frame(unitlut[, unitlutcols, with=FALSE]))
+  #names(unitlut)[unitlutcols] <- dfnames
+  #names(pltassgnx)[pltassgnxcols] <- dfnames
+  #prednames <- dfnames
   
   if (popType %in% c("ALL", "CURR", "VOL")) {
     

@@ -453,7 +453,6 @@ check.popdataPLT <-
     popFilterqry <- 
       getpopFilterqry(popType = popType, 
                       popFilter = popFilter, 
-                      pfromqry = pfromqry,
                       plotnm = plotnm,
                       pltassgnnm = pltassgnnm,
                       pltassgnflds = pltassgnflds, 
@@ -461,7 +460,6 @@ check.popdataPLT <-
                       puniqueid = puniqueid, 
                       pjoinid = pjoinid,
                       pltassgnid = pltassgnid,
-                      pltassgn. = pltassgn., 
                       plt. = plt.,
                       selectpvars = selectpvars,
                       dbconn = dbconn,

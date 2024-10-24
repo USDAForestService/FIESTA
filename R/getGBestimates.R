@@ -1,14 +1,28 @@
-getGBestimates <- function(esttype, ratiotype = "PERACRE",
-                           domdatn, domdatd = NULL, uniqueid,
-                           estvarn.name, estvard.name = NULL,
-                           rowvar, colvar, grpvar,
-                           pltassgnx, pltassgnid,
-                           unitarea, unitvar, areavar,
-                           stratalut, strvar,
-                           totals, sumunits, 
-                           uniquerow, uniquecol,
-                           row.add0, col.add0,
-                           row.orderby, col.orderby) {
+getGBestimates <- function(esttype, 
+                           ratiotype = "PERACRE",
+                           domdatn, 
+                           domdatd = NULL, 
+                           uniqueid,
+                           estvarn.name, 
+                           estvard.name = NULL,
+                           rowvar, 
+                           colvar, 
+                           grpvar,
+                           pltassgnx, 
+                           pltassgnid,
+                           unitarea, 
+                           unitvar, 
+                           areavar,
+                           stratalut, 
+                           strvar,
+                           totals, 
+                           sumunits, 
+                           uniquerow, 
+                           uniquecol,
+                           row.add0 = FALSE, 
+                           col.add0 = FALSE,
+                           row.orderby = NULL, 
+                           col.orderby = NULL) {
 
   ## DESCRIPTION: get estimates
   ## esttype
@@ -46,7 +60,7 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
   ## Append TOTAL to domdatn
   domdatn$TOTAL <- 1
 
-  ## Set key to domvar and join to pltassgnx
+  ## Join domdat to pltassgnx using data.table key
   domdatn <- pltassgnx[domdatn]
   if (esttype == "RATIO") {
     domdatd$TOTAL <- 1
@@ -95,7 +109,8 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
     }
   }
 
-  ## Get row estimate  
+  ## Get row estimate
+  if (is.null(rowvar)) rowvar <- "TOTAL"
   if (rowvar != "TOTAL") {
     
     ## Sum numerator to plot, rowvar level
@@ -139,7 +154,8 @@ getGBestimates <- function(esttype, ratiotype = "PERACRE",
   }
 
   ## Get column (and cell) estimate  
-  if (colvar != "NONE") {
+  if (is.null(colvar)) colvar <- "NONE"
+  if ( colvar != "NONE") {
 
     ## Sum numerator to plot, colvar level
     domdatn <- domdatn[!is.na(domdatn[[colvar]]),] 

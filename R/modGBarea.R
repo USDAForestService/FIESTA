@@ -501,15 +501,14 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  #withqry <- pltcondxWITHqry
-  withqry <- dbqueriesWITH$pltidsWITH
+  withqry <- pltcondxWITHqry
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
                  popdatindb = popdatindb,
                  popconn = popconn, SCHEMA. = SCHEMA.,
-                 #pltcondx = pltcondx,
-                 #pltcondflds = pltcondflds,
+                 pltcondx = pltcondx,
+                 pltcondflds = pltcondflds,
                  withqry = withqry,
                  cuniqueid = cuniqueid, condid = condid,
                  rowvar = rowvar, colvar = colvar, 
@@ -544,7 +543,7 @@ modGBarea <- function(GBpopdat,
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
-  
+
   
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
@@ -618,7 +617,7 @@ modGBarea <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
   
-  
+
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################

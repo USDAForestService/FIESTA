@@ -489,6 +489,8 @@ modGBchng <- function(GBpopdat,
                  popType = popType,
                  popdatindb = popdatindb,
                  popconn = popconn, SCHEMA. = SCHEMA.,
+                 #pltcondx = pltcondx,
+                 #pltcondflds = pltcondflds,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
                  withqry = pltcondxWITHqry,
@@ -506,7 +508,7 @@ modGBchng <- function(GBpopdat,
                  #cvars2keep=c("PREV_PLT_CN","REMPER","PROP_BASIS",
 				         #              "COND_STATUS_CD","CONDPROP_UNADJ", 
 							   #              "COND_NONSAMPLE_REASN_CD"),
-                 whereqry = pcwhereqry,
+                 #whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol

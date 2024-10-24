@@ -31,7 +31,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
 	ifelse (landarea == "ALL", "all lands",
 		ifelse (landarea == "TIMBERLAND", "timberland",
   			ifelse (landarea == "CHANGE" & esttype == "LULC", "land changed",
-				ifelse (landarea == "CHANGE", "land with observed change", "")))))
+				  ifelse (landarea == "CHANGE", "land with observed change", "")))))
   landarea2 <- ifelse (landarea == "FOREST", "forestland",
 	ifelse (landarea == "ALL", "allland",
 		ifelse (landarea == "TIMBERLAND", "timberland",
@@ -57,7 +57,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
       title.state <- NULL
       if (!is.null(states))
         title.state <- paste(as.character(states), collapse=" and ")
-      if (!is.null(invyrs)) {
+        if (!is.null(invyrs)) {
         if (is.null(states) && !is.null(names(invyrs)))
           title.state <- paste(as.character(states), collapse=" and ")
         invyrs <- as.numeric(as.character(unlist(invyrs)))
@@ -89,7 +89,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
       title.divideby <- " "
       if (esttype == "PHOTO") {
         title.part1 <- ifelse(tabtype == "PCT", "Estimated percent",
-		paste0("Estimated area, in ", title.unitsn, ", of"))
+		           paste0("Estimated area, in ", title.unitsn, ", of"))
         title.units <- NULL
 
       } else if (esttype %in% c("AREA", "LULC", "P2VEG")) {
@@ -107,26 +107,26 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
       } else if (esttype %in% c("TREE", "RATIO")) {
         #ref_estvar <- FIESTAutils::ref_estvar
         if (is.null(title.unitsn)) {		
-		  unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
+		      unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
           title.unitsn <- ref_units[ref_units$VARIABLE == estvarn, unitcol]
-		  if (estvarn %in% vars2convert && lbs2tons) {
+		    if (estvarn %in% vars2convert && lbs2tons) {
             title.unitsn <- ifelse (metric, "metric tons", "tons")
           }			
         }
         if (esttype == "RATIO") {
           if (is.null(title.unitsd)) {
-		    unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
+		        unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
             title.unitsd <- ref_units[ref_units$VARIABLE == estvarn, unitcol]
-		    if (estvard %in% vars2convert && lbs2tons) {
+		      if (estvard %in% vars2convert && lbs2tons) {
               title.unitsd <- ifelse (metric, "metric tons", "tons")
             }			
           }
         }
         if (is.null(title.estvarn)) {
-          ref_estvarn <- ref_estvar[ref_estvar$ESTVAR == estvarn, ]
-		  if (estvarn %in% estvartw) {
-		    ref_estvarn <- ref_estvarn[ref_estvarn$WOODLAND == woodland, ]
-		  }
+          ref_estvarn <- ref_estvar[tolower(ref_estvar$ESTVAR) == tolower(estvarn), ]
+		      if (estvarn %in% estvartw) {
+		        ref_estvarn <- ref_estvarn[ref_estvarn$WOODLAND == woodland, ]
+		      }
           if (nrow(ref_estvarn) == 0) {
             title.estvarn <- estvarn
           } else if (estseed %in% c("add", "only")) {
@@ -140,17 +140,16 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
             title.estvarn <- ref_estvarn[as.numeric(gfind.max), "ESTTITLE"]
           } else {
             if (!is.null(estvarn.filter)) {
-              gfind.max <- grep(estvarn.filter, ref_estvarn$ESTFILTER)
+              gfind.max <- grep(tolower(estvarn.filter), tolower(ref_estvarn$ESTFILTER))
               ## If the filter is not found in ref_estvar, try splitting
               if (length(gfind.max) == 0) {
-                estfilters <- strsplit(estvarn.filter, "&")[[1]]
+                estfilters <- gsub("\\s", "", tolower(strsplit(estvarn.filter, "&")[[1]]))
                 ## Find matching filter in ref_estvar. If more than 1, uses first.
                 gfind <- sapply(estfilters, function(x, ref_estvarn)
-        			grep(gsub("\\s", "", x), gsub("\\s", "", ref_estvarn$ESTFILTER)),
-				    ref_estvarn)
-				if (any(grepl("DIA<5", gsub(" ", "", names(gfind))))) {
-                  gfind <- gfind[gsub(" ", "", names(gfind)) == "DIA<5"][[1]][1]		
-				}								
+                  grep(x, gsub("\\s", "", tolower(ref_estvarn$ESTFILTER))), ref_estvarn)
+                if (any(grepl("dia<5", names(gfind)))) {
+                  gfind <- gfind[names(gfind) == "dia<5"][[1]][1]		
+                }	
                 if (length(gfind) > 1 && any(lapply(gfind, length) > 0)) {
                   gfind <- gfind[1]
                 }
@@ -203,8 +202,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
 
                   ## Find matching filter in ref_estvar. If more than 1, uses first.
                   gfind <- sapply(estfilters, function(x, ref_estvard)
-        			grep(gsub("\\s", "", x), gsub("\\s", "", ref_estvard$ESTFILTER)),
-				ref_estvard)
+        			    grep(gsub("\\s", "", x), gsub("\\s", "", ref_estvard$ESTFILTER)), ref_estvard)
                   gfind <- table(gfind)
                   gfind.max <- names(gfind)[max(gfind)]
                   if (length(gfind.max) > 1) gfind.max <- gfind.max[1]
@@ -230,7 +228,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
 
       if (!is.null(title.unitsn) && length(title.unitsn) > 0) {
         title.unitsn2 <- ifelse (is.null(divideby), paste0(", in ", title.unitsn),
-		paste0(", in ", divideby, " ", title.unitsn))
+		              paste0(", in ", divideby, " ", title.unitsn))
         title.part1 <- paste0(title.part1, title.unitsn2)
         title.unitsn <- title.unitsn[1]
       }
@@ -238,13 +236,31 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
       ## title.part2
       ####################################################################
       title.rowgrp2 <- if(!is.null(title.rowgrp)) paste(" and", title.rowgrp)
+      if (is.null(rowvar)) rowvar <- "TOTAL"
       if (!is.null(rowvar) && rowvar == "TOTAL") {
         title.part2 <- ""
       } else {
+        if (is.null(title.rowvar)) {
+          title.rowvar <- 
+            ifelse (rowvar %in% tolower(ref_titles[["DOMVARNM"]]),
+                  ref_titles[tolower(ref_titles[["DOMVARNM"]]) == rowvar, "DOMTITLE"],
+                  ifelse (sub("prev_", "", rowvar) %in% tolower(ref_titles[["DOMVARNM"]]),
+                          paste0("Previous ", tolower(ref_titles[tolower(ref_titles[["DOMVARNM"]]) ==
+                                                                   sub("prev_", "", rowvar), "DOMTITLE"])), rowvar))
+        }
         title.part2 <- tolower(paste0("by ", title.rowvar, title.rowgrp2))
         title.part2.row <- tolower(paste0("by ", title.rowvar, title.rowgrp2))
       }
-      if (colvar != "NONE") {
+      if (!is.null(colvar) && colvar != "NONE") {
+        if (is.null(title.colvar)) {
+          title.colvar <- 
+            ifelse (colvar %in% tolower(ref_titles[["DOMVARNM"]]),
+                    ref_titles[tolower(ref_titles[["DOMVARNM"]]) == colvar, "DOMTITLE"],
+                    ifelse (sub("prev_", "", colvar) %in% tolower(ref_titles[["DOMVARNM"]]),
+                            paste0("Previous ", tolower(ref_titles[tolower(ref_titles[["DOMVARNM"]]) ==
+                                                                     sub("prev_", "", colvar), "DOMTITLE"])), colvar))
+        }
+        
         if (esttype == "PHOTO" && length(grep("nratio", phototype)) == 0) {
           title.part2.col <- tolower(paste0("by ", title.colvar))
           title.part2 <- paste("of", title.colvar, "within", title.rowvar)
@@ -257,16 +273,15 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
       ## Add percent sampling error
       if (allin1) {
         title.error <- ifelse(is.null(title.unitsn), "(percent sampling error)",
-		"(percent sampling error),")
+		           "(percent sampling error),")
         if (rowvar == "TOTAL") {
           title.estpse <- paste(title.part1, title.error, title.landarea)
           title.tot <- paste(title.part1, title.error, title.landarea)
         } else {
-          title.estpse <- paste(title.part1, title.error, title.part2,
-			title.landarea)
+          title.estpse <- paste(title.part1, title.error, title.part2, title.landarea)
           title.row <- paste(title.part1, title.error, title.part2, title.landarea)
         }
-        if (colvar != "NONE") {
+        if (!is.null(colvar) && colvar != "NONE") {
           title.row <- paste(title.part1, title.error, title.part2.row, title.landarea)
           title.col <- paste(title.part1, title.error, title.part2.col, title.landarea)
         }
@@ -281,17 +296,16 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
         }
 
         if (rowvar == "TOTAL" ||
-		(colvar == "NONE" && sumunits) ||
- 		(colvar == "NONE" && is.null(dat)) ||
-		(colvar == "NONE" && length(unique(dat[[unitvar]])) == 1)) {
+		            (colvar == "NONE" && sumunits) ||
+ 		            (colvar == "NONE" && is.null(dat)) ||
+		            (colvar == "NONE" && length(unique(dat[[unitvar]])) == 1)) {
 
           if (rowvar == "TOTAL") {
-            title.estpse <- paste(title.part1, "and percent sampling error",
-			 title.landarea)
-          title.tot <- paste(title.part1, title.landarea)
+            title.estpse <- paste(title.part1, "and percent sampling error", title.landarea)
+            title.tot <- paste(title.part1, title.landarea)
           } else {
             title.estpse <- paste(title.part1, "and percent sampling error",
-			title.landarea, title.part2)
+			             title.landarea, title.part2)
             title.row <- paste(title.part1, title.landarea, title.part2.row)
           }
           if (!is.null(title.filter)) {
@@ -304,7 +318,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
 
           title.est <- paste(title.part1, title.landarea, title.part2)
           title.pse <- paste("Percent sampling error of", tolower(title.part1),
-			title.landarea, title.part2)
+			            title.landarea, title.part2)
           title.row <- paste(title.part1, title.landarea, title.part2.row)
           title.col <- paste(title.part1, title.landarea, title.part2.col)
 
@@ -325,14 +339,14 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
         } else {
           title.row <- paste(title.row, title.filter)
         }
-        if (colvar != "NONE") {
+        if (!is.null(colvar) && colvar != "NONE") {
           title.col <- paste(title.col, title.filter)
         }
       }
       if (!is.null(title.unitvar.out)) {
         if (rowvar != "TOTAL")
           title.row <- paste(title.row, title.unitvar.out)
-        if (colvar != "NONE") {
+        if (!is.null(colvar) && colvar != "NONE") {
           title.row <- paste(title.row, title.unitvar.out)
           title.col <- paste(title.col, title.unitvar.out)
         }
@@ -352,7 +366,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
         } else {
           title.row <- paste0(title.row, "; ", title.ref)
         }
-        if (colvar != "NONE") {
+        if (!is.null(colvar) && colvar != "NONE") {
           title.col <- paste0(title.col, "; ", title.ref)
         }
       }
@@ -398,8 +412,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
     } else if (colvar == "NONE") {
       outfn.estpse <- paste0(pretitle, "_", rowvar, "_", landarea2, unitvar2)
     } else {
-      outfn.estpse <- paste0(pretitle, "_", rowvar, "_", colvar, "_", landarea2,
-		unitvar2)
+      outfn.estpse <- paste0(pretitle, "_", rowvar, "_", colvar, "_", landarea2, unitvar2)
     }
   } else {
     outfn.estpse <- outfn
@@ -441,7 +454,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
     titlelst$title.rowvar <- title.rowvar
     titlelst$title.row <- title.row
   }
-  if (colvar != "NONE") {
+  if (!is.null(colvar) && colvar != "NONE") {
     titlelst$title.colvar <- title.colvar
     titlelst$title.col <- title.col
   }

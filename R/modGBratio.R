@@ -584,15 +584,15 @@ modGBratio <- function(GBpopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  #withqry <- pltcondxWITHqry
-  withqry <- dbqueriesWITH$pltidsWITH
+  withqry <- pltcondxWITHqry
+  #withqry <- dbqueriesWITH$pltidsWITH
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
                  popdatindb = popdatindb,
                  popconn = popconn, SCHEMA. = SCHEMA.,
-                 #pltcondx = pltcondx,
-                 #pltcondflds = pltcondflds,
+                 pltcondx = pltcondx,
+                 pltcondflds = pltcondflds,
                  withqry = withqry,
                  estseed = estseed,
                  treex = treex, treeflds = treeflds,

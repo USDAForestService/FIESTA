@@ -98,15 +98,22 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     pltcnt[is.na(pltcnt)] <- 0
     nostrata <- subset(pltcnt, NBRPLOTS > 0 & NBRSTRATA == 0)
     
-    pltcnt$errtyp <- "none"
+    errtab <- copy(unitlut)
+    errtab$errtyp <- "none"
+    
     #pltcnt[pltcnt$n.strata < minplotnum.strat & pltcnt$n.total < minplotnum.unit
 	#	& pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
-    pltcnt[((pltcnt$n.strata < minplotnum.strat & pltcnt$n.total > minplotnum.unit) |
-		      pltcnt$n.total < minplotnum.unit), "errtyp"] <- "warn"
-    pltcnt[pltcnt$n.total < minplotnum.strat & pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
+#    pltcnt[((pltcnt$n.strata < minplotnum.strat & pltcnt$n.total > minplotnum.unit) |
+#		      pltcnt$n.total < minplotnum.unit), "errtyp"] <- "warn"
+#    pltcnt[pltcnt$n.total < minplotnum.strat & pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
+    
+    errtab[((errtab$n.strata < minplotnum.strat & errtab$n.total > minplotnum.unit) |
+              errtab$n.total < minplotnum.unit), "errtyp"] <- "warn"
+    #errtab[errtab$n.total < minplotnum.strat & pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
+    
 
     ## ## Remove NBRSTRATA and merge to unitlut
-    pltcnt[, NBRSTRATA:=NULL]
+#    pltcnt[, NBRSTRATA:=NULL]
     pvars <- pvars[pvars %in% names(unitlut)]
     othervars <- names(unitlut)[!names(unitlut) %in% unique(c(pvars, strunitvars))]
     setcolorder(unitlut, c(unique(c(pvars, strunitvars)), othervars))
@@ -119,13 +126,16 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     pltcnt <- pltx[, list(n.total=.N), by=unitvars]
     setkeyv(pltcnt, unitvars)
 
-    pltcnt$errtyp <- "none"
-    pltcnt[pltcnt$n.total < minplotnum.unit, "errtyp"] <- "warn"
 
     ## ## Remove NBRSTRATA and merge to unitlut
     unitlut <- merge(unitlut, pltcnt[, c(joinvars, "n.total"), with=FALSE],
-		by=joinvars, all.x=TRUE)
+		                    by=joinvars, all.x=TRUE)
     unitlut <- DT_NAto0(unitlut, "n.total")
+    
+    errtab <- copy(unitlut)
+    errtab$errtyp <- "none"
+    errtab[errtab$n.total < minplotnum.unit, "errtyp"] <- "warn"
+    
     pvars <- pvars[pvars %in% names(unitlut)]
     othervars <- names(unitlut)[!names(unitlut) %in% unique(c(pvars, unitvars))]
     setcolorder(unitlut, c(unique(c(pvars, unitvars)), othervars))
@@ -148,12 +158,12 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     ## If savedata, write to file
     ###############################################################
     if (savedata) {
-      write2csv(pltcnt, outfolder=outfolder, outfilenm=outfn, outfn.date=outfn.date,
+      write2csv(errtab, outfolder=outfolder, outfilenm=outfn, outfn.date=outfn.date,
 		        outfn.pre=outfn.pre, overwrite=overwrite)
     }
   }
 
-  returnlst <- list(unitlut=unitlut, errtab=pltcnt)
+  returnlst <- list(unitlut=unitlut, errtab=errtab)
 
   if (!is.null(nostrata) && nrow(nostrata) > 0) {
     returnlst$nostrat <- nostrata
