@@ -77,7 +77,14 @@ check.cond <- function(areawt,
   if (!is.null(colvar) && colvar == "NONE") {
     colvarnm <- colvar
   }
-  
+
+  ## Append classified variables to query
+  if (rowvar != "TOTAL") {
+    totalnm <- findnm("TOTAL", pcdomainlst, returnNULL = TRUE)
+    if (!is.null(totalnm)) {
+      cselectqry <- paste0(cselectqry, ", pc.", totalnm)
+    }
+  }
   
   ## Final select query
   cdomdatselectqry <- 

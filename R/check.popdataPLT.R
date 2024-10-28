@@ -235,7 +235,6 @@ check.popdataPLT <-
       pltidvars <- c(projidvars, pjoinid)
     } 
     
-    
     ###################################################################################
     ## 5. Check input parameters
     ###################################################################################
@@ -450,6 +449,7 @@ check.popdataPLT <-
     } else {
       dbTabs <- dbTables(plot_layer = tabs$plt)
     }
+
     popFilterqry <- 
       getpopFilterqry(popType = popType, 
                       popFilter = popFilter, 
@@ -1089,10 +1089,20 @@ check.popdataPLT <-
     
     
     #############################################################################
-    ## 17. Return data
+    ## 18. Build WITH query defining pltids in population
+    #############################################################################
+    pltidsWITHqry <- paste0(
+      "WITH",
+      "\npltids AS",
+      "\n(", pltidsqry, ")")
+    pltidsa. <- "pltids."
+    
+    
+    #############################################################################
+    ## 19. Return data
     #############################################################################
     returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid,
-                      pltidsqry=pltidsqry, pwhereqry=pwhereqry, pltassgn.=pltassgn.,
+                      pltidsWITHqry=pltidsWITHqry, pwhereqry=pwhereqry, pltassgn.=pltassgn.,
                       pltselectqry=pltselectqry, pfromqry=pfromqry, 
                       pltx=pltx, plotlst=plotlst, pltidsid = pltidsid,
                       projidvars=projidvars, pltidvars=as.vector(pltidvars),

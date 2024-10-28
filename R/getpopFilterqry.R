@@ -723,7 +723,6 @@ getpopFilterqry <- function(popType,
       pltidsqry <- paste0(pltidsqry, pwhereqry)
     }
   }
-
   
   ###################################################################################
   ## 8. Create pltidsqry to use as WITH statement for extracting data (if pltassgn in database)

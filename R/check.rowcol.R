@@ -485,7 +485,7 @@ check.rowcol <-
 		               rowfromqry,
 			             whereqry,
 				           "\nORDER BY ", rowvar)
-        
+
 		    #message("getting unique values for ", rowvar, ":\n", cuniquex.qry, "\n")
 	      if (rowisdb) {
 	        if (!is.null(withqry)) {
@@ -514,7 +514,7 @@ check.rowcol <-
             stop()
           }
 		    }
-        
+
         ## Build query for getting unique rowclass values within population
         if (!is.null(row.classify)) {
           class. <- ifelse (rowvar %in% pltcondflds, "pc.", "t.")
@@ -840,7 +840,7 @@ check.rowcol <-
     }  ## end domlut is null
   } ## end rowvar != "NONE"      
 
-
+  
   ##############################################################
   ## COLUMN VARIABLE
   ##############################################################
@@ -923,7 +923,7 @@ check.rowcol <-
         bypcdom <- TRUE
         colisdb <- isdbc
         colflds <- pltcondflds
-        if (colisdb) {
+        if (!colisdb) {
           coltabnm <- "pltcondx"
         } else {
           coltabnm <- pltcondx
@@ -936,8 +936,7 @@ check.rowcol <-
         ## build column fromqry
         colfromqry <- paste0(
           "\nFROM ", coltabnm, " pc")
-        
-        
+
       } else {
         if (estseed == "only" && colvar %in% seedflds) {
           bytdom <- TRUE
@@ -1103,7 +1102,7 @@ check.rowcol <-
         }  ## end colvar %in% treeflds & estseed in c("add", "only")
         
       } else {   ## !is.null(col.orderby) && col.orderby != "NONE"
-       
+
         ## Build query for getting unique colvar values within population
         uniquex.qry <- 
           paste0("SELECT DISTINCT ", colvar, 

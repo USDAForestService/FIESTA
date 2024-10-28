@@ -482,7 +482,6 @@ datSumTreeDom <- function(tree = NULL,
   ### DO WORK
   ##############################################################################
   ##############################################################################
-  
   sumdat <- 
     datSumTree(tree = tree, seed = seed, 
                cond = cond, plt = plt, 
@@ -510,7 +509,6 @@ datSumTreeDom <- function(tree = NULL,
                pjoinid = pjoinid,
                checkNA = checkNA, 
                returnDT = returnDT)
-  
   tdomtree <- sumdat$treedat
   tsumvarnm <- sumdat$sumvars
   tsumuniqueid <- sumdat$tsumuniqueid
@@ -523,7 +521,7 @@ datSumTreeDom <- function(tree = NULL,
   if (!is.null(classifynmlst[[tdomvar]])) {
     tdomvar <- classifynmlst[[tdomvar]]
   }
-  if (!is.null(classifynmlst[[tdomvar2]])) {
+  if (!is.null(tdomvar2) && !is.null(classifynmlst[[tdomvar2]])) {
     tdomvar2 <- classifynmlst[[tdomvar2]]
   }
 
@@ -628,8 +626,8 @@ datSumTreeDom <- function(tree = NULL,
     tdomvarlst2 <- as.character(tdomvarlst) 
   }
   sumbyvars <- unique(c(tsumuniqueid, pcdomainlst, tdomvarnm))
-  
 
+  
   ## GET tdomvarlst2 or CHECK IF ALL tree domains IN tdomvar2lst ARE INCLUDED IN tdomvar2.
   if (!is.null(tdomvar2)) {
     tdoms2 <- sort(unique(tdomtree[[tdomvar2]]))
@@ -692,7 +690,7 @@ datSumTreeDom <- function(tree = NULL,
         }
       } 
     }
-
+    
     if (pivot) {
       concatvar <- paste0(tdomvar, "_", tdomvar2)
       tdomtree[, (concatvar) := paste0(tdomtree[[tdomvarnm]], "#", tdomtree[[tdomvar2]])] 
@@ -719,16 +717,28 @@ datSumTreeDom <- function(tree = NULL,
   tdomtreef <- tdomtree[, lapply(.SD, sum, na.rm=TRUE), by=sumbyvars, .SDcols=tsumvarnm]
   setkeyv(tdomtreef, tsumuniqueid)
 
-  
   ## Generate tree domain look-up table (tdomvarlut)
   #####################################################################
   nvar <- ifelse(bycond, "NBRCONDS", "NBRPLOTS")
-  tdomvarlut <- tdomtree[, list(sum(get(tsumvarnm), na.rm=TRUE), .N), by=tdomvarnm]
-  names(tdomvarlut) <- c(tdomvarnm, tsumvarnm, nvar)
+  if (length(tsumvarnm) > 1) {
+    tsumnm <- tsumvarnm[length(tsumvarnm)]
+  } else {
+    tsumnm <- tsumvarnm
+  }
+
+  if (!is.null(concatvar)) {
+    tdomvarlut <- tdomtreef[, list(sum(.SD, na.rm=TRUE), .N), by=concatvar, .SDcols = tsumnm]
+    names(tdomvarlut) <- c(concatvar, tsumnm, nvar)
+    tdomvarlut <- tdomvarlut[, (c(tdomvarnm, tdomvar2nm)) := tstrsplit(concatvar, "#", fixed=TRUE)]
+    tdomvarlut[[concatvar]] <- NULL
+  } else {
+    tdomvarlut <- tdomtreef[, list(sum(.SD, na.rm=TRUE), .N), by=tdomvarnm, .SDcols = tsumnm]
+    names(tdomvarlut) <- c(tdomvarnm, tsumnm, nvar)
   
-  if (!is.null(tdomvar2)) {
-    tdomvar2lut <- tdomtree[, list(sum(get(tsumvarnm), na.rm=TRUE), .N), by=tdomvar2nm]
-    names(tdomvar2lut) <- c(tdomvar2nm, tsumvarnm, nvar)
+    if (!is.null(tdomvar2)) {
+      tdomvar2lut <- tdomtreef[, list(sum(.SD, na.rm=TRUE), .N), by=tdomvar2nm, .SDcols = tsumnm]
+      names(tdomvar2lut) <- c(tdomvar2nm, tsumnm, nvar)
+    }
   }
 
   ## Add reference names to tdomvarlut if SPCD

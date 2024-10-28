@@ -660,7 +660,7 @@ datSumTree <- function(tree = NULL,
       tsumuniqueid <- c(tsumuniqueid, condid)
     }
   }
- 
+
   ### Check tsumvarlst
   ###########################################################################
   if (!seedonly) {
@@ -674,7 +674,7 @@ datSumTree <- function(tree = NULL,
       tsumvarlst[tsumvarlst == tuniqueid] <- "TPA_UNADJ"
     }
   }
-  
+
   ## check seed table
   ## Note: to get counts measured, use TPA_UNADJ and TPA = FALSE
   if (addseed) {
@@ -777,7 +777,8 @@ datSumTree <- function(tree = NULL,
                         stopifnull=TRUE, gui=gui)
   
   if (TPA && is.null(tsumvarlst)) {
-    message("TPA must be included in derivation if want to multiply by...")
+    if (!grepl("TPA", tderive, ignore.case = TRUE))
+      message("TPA must be included in derivation if want to multiply by...")
   }
   
   if (TPA) {
@@ -1139,7 +1140,7 @@ datSumTree <- function(tree = NULL,
       message("must include cond and/or plot table for: ", toString(pcdomainlst))
     }
   }
-  
+
   ## Check lbs2tons
   ##########################################################################
   if (!seedonly) {
@@ -1361,13 +1362,13 @@ datSumTree <- function(tree = NULL,
       }	  
     }  ## END getadjplot
     
-print("TEST")    
+    
     ## Build query for select CASE statement to add adjfactors
     ######################################################################################
     adjalias. <- NULL
     if (!seedonly) {
       if ("tadjfac" %in% treeflds) {
-        tadjcase <- "tadjfac"
+        tadjcase <- "t.tadjfac"
       } else if (!is.null(findnm("TPROP_BASIS", treeflds, returnNULL=TRUE))) {
         tadjcase <- paste0(
           "\n      CASE WHEN t.TPROP_BASIS = 'MICR' THEN ", adjalias., adjvarlst[["MICR"]],
@@ -1385,7 +1386,7 @@ print("TEST")
     }
     if (addseed || seedonly) {
       if ("tadjfac" %in% seedflds) {
-        sadjcase <- "tadjfac"
+        sadjcase <- "s.tadjfac"
       } else {
         sadjcase <- paste0("adj.", adjvarlst[["MICR"]], " AS tadjfac")
       }
@@ -1440,12 +1441,12 @@ print("TEST")
     
     ## Add tsumvarlst to tsumvardf				  
     if (TPA) {
-      tpavarnm <- tolower(tpavar)
+      tpavarnm <- tpavar
     } else {
       tpavarnm <- NULL
     } 
-    tsumvarlst <- tolower(tsumvarlst)
-    tpavars <- tolower(tpavars)
+    tsumvarlst <- tsumvarlst
+    tpavars <- tpavars
     if (any(tsumvarlst %in% tpavars)) {
       cntvar <- tsumvarlst[tsumvarlst %in% tpavars]
       cntvarid <- which(tsumvarlst %in% tpavars)
@@ -1697,7 +1698,7 @@ print("TEST")
       tsumvarlst <- unique(c(tsumvarlst, tderive[[i]]))
     }
   }
-  
+
   ### Define name - adding tfilter 
   ###########################################################################
   if (!is.null(tfilter) && getnm) {
@@ -1742,17 +1743,37 @@ print("TEST")
   twithalias <- "tdat"
 
   if (!seedonly) {
-    
     ## Build twithqry
     twithqry <- "SELECT 'TREE' src,"
-    twithSelect <- unique(c(tsumuniqueid, "CONDID", "SUBP", "TREE", tdomainlst,
-                            unique(c(tpavarnm, tsumvardf$TSUMVAR[tsumvardf$TABLE == "TREE" & !tsumvardf$DERIVE]))))
+    twithSelect <- unique(c(tsumuniqueid, "CONDID", "SUBP", "TREE"))
+
+    tvarlst <- unique(c(tdomainlst, tsumvarlst,
+                        tpavarnm, tsumvardf$TSUMVAR[tsumvardf$TABLE == "TREE" & !tsumvardf$DERIVE]))
+    if (addseed) {
+      if (!is.null(tvarlst)) {
+        spcdnm <- findnm("SPCD", tvarlst, returnNULL = TRUE)
+        if (!is.null(spcdnm)) {
+          twithSelect <- c(twithSelect, spcdnm)
+          tvarlst <- tvarlst[tvarlst != spcdnm]
+        }
+        tpanm <- findnm("TPA_UNADJ", tvarlst, returnNULL = TRUE)
+        if (!is.null(tpanm)) {
+          twithSelect <- c(twithSelect, tpanm)
+          tvarlst <- tvarlst[tvarlst != tpanm]
+        }
+      }
+      twithSelect <- unique(c(twithSelect, tvarlst))
+    } else {
+      twithSelect <- unique(c(twithSelect, tvarlst))
+    }
+
     if (!is.null(tderive)) {
       tderivevars <- tderivevars[!tderivevars %in% twithSelect]
       if (length(tderivevars) > 0) {
         twithSelect <- c(twithSelect, tderivevars)
       }
     }
+
     ## Build final select statement for tdat WITH query
     twithqry <- paste(twithqry, toString(paste0(talias., twithSelect)))
 
@@ -1765,12 +1786,11 @@ print("TEST")
                                "\n JOIN pltidsadj adj ", tadjjoinqry)
       }
       twithqry <- paste0(twithqry, ", ", tadjcase)
-    } else {
-      if (!is.null(pltidsWITHqry)) {
-        tjoinqry <- getjoinqry(tuniqueid, pltidsid, talias., "pltids.")
-        twithfromqry <- paste0(twithfromqry,
+    } 
+    if (!is.null(pltidsWITHqry)) {
+      tjoinqry <- getjoinqry(tuniqueid, pltidsid, talias., "pltids.")
+      twithfromqry <- paste0(twithfromqry,
                              "\n JOIN pltids ", tjoinqry)
-      }
     }
     
     ## WHERE statement - Woodland
@@ -1794,35 +1814,44 @@ print("TEST")
     if (addseed) {
       swithalias <- "sdat"
       
+      ## Build swithqry
       nbrvar <- length(tsumvardf$TSUMVAR[tsumvardf$TABLE == "TREE"][
         !tsumvardf$TSUMVAR[tsumvardf$TABLE == "TREE" & !tsumvardf$DERIVE] %in% tpavarnm])  
-      swithqry <- paste0("\n SELECT 'SEED' src, ", 
-                         toString(paste0(salias., unique(c(tsumuniqueid, "CONDID", "SUBP")))))
-      swithqry <- paste0(swithqry, ", 0, ", paste0(salias., "TPA_UNADJ"))
-      if (!is.null(tderive)) {
-        if (length(tderivevars) > 0) {
-          nbrvar <- nbrvar + length(tderivevars)
-        }
+      swithqry <- paste0("\n SELECT 'SEED' src, ") 
+      swithSelect <- unique(c(paste0("s.", tsumuniqueid), "s.CONDID", "s.SUBP", 0))
+
+      spcdnm <- findnm("SPCD", twithSelect, returnNULL = TRUE)
+      if (!is.null(spcdnm)) {
+        swithSelect <- c(swithSelect, spcdnm)
       }
-      if (nbrvar > 0) {
-        swithqry <- paste0(swithqry, ", ", toString(rep('null', nbrvar)))
+      tpanm <- findnm("TPA_UNADJ", twithSelect, returnNULL = TRUE)
+      if (!is.null(tpanm)) {
+        swithSelect <- c(swithSelect, paste0("s.", tpanm))
       }
+      swithqry <- paste0(swithqry, toString(swithSelect))
       
+      nbrvar <- nbrvar + length(tvarlst)
+      if (nbrvar > 0) {
+        swithqry <- paste0(swithqry, ", ", toString(rep("'null'", nbrvar)))
+      }
+
       swithfromqry <- sfromqry
       if (adjtree) {
         sadjjoinqry <- getjoinqry(adjjoinid, cuniqueid, adjalias., salias.)
         if (!adjvar %in% seedflds) {
+          sadjjoinqry <- getjoinqry(adjjoinid, cuniqueid, adjalias., salias.)
           swithfromqry <- paste0(sfromqry,
                                  "\n JOIN pltidsadj adj ", sadjjoinqry)
         }
         swithqry <- paste0(swithqry, ", ", sadjcase)
         
-      } else if (!is.null(pltidsWITHqry)) {
+      } 
+      if (!is.null(pltidsWITHqry)) {
         sjoinqry <- getjoinqry(tuniqueid, pltidsid, salias., "pltids.")
         swithfromqry <- paste0(swithfromqry,
                                "\n JOIN pltids ", sjoinqry)
       }
-      
+
       ## WHERE statement - Woodland
       swithwhereqry <- swhereqry
       if (woodland %in% c("N", "only")) {
@@ -1849,7 +1878,7 @@ print("TEST")
     
     swithalias <- "tdat"
     
-    
+
     ## Build swithqry
     swithqry <- "SELECT 'SEED' src,"
     swithSelect <- unique(c(tsumuniqueid, "CONDID", "SUBP", tdomainlst,
@@ -1873,12 +1902,13 @@ print("TEST")
       }
       swithqry <- paste0(swithqry, ", ", sadjcase)
     }
+
     if (!is.null(pltidsWITHqry)) {
       sjoinqry <- getjoinqry(tuniqueid, pltidsid, salias., "pltids.")
       swithfromqry <- paste0(swithfromqry,
                          "\n JOIN pltids ", sjoinqry)
     }
-
+    
     ## WHERE statement - Woodland
     swithwhereqry <- swhereqry
     if (woodland %in% c("N", "only")) {
@@ -1920,7 +1950,7 @@ print("TEST")
     pltidsWITHqry <- paste0("WITH tdat AS", 
                             "\n(", twithqry, ")")
   }
-  
+
   #################################################################################
   ## Build query for summarizing tree data
   #################################################################################
@@ -2242,10 +2272,10 @@ print("TEST")
     sumtreelst$classifynmlst <- classifynmlst
     
   }
-  
   if (!is.null(meta) && nrow(meta) > 0) {
     sumtreelst$meta <- meta
   }
+ 
   
   return(sumtreelst)
   

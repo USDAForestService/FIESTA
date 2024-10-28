@@ -36,7 +36,6 @@ check.tree <-
     seedonly=addseed <- FALSE
   }
   
-  
   ## Check estvarn.derive
   if (!is.null(estvarn.derive)) {
     if (!all(is.list(estvarn.derive), length(estvarn.derive) == 1, !is.null(names(estvarn.derive)))) {
@@ -47,8 +46,7 @@ check.tree <-
       estvarn <- NULL
     }
   }
-  
-  
+
   if (bytdom) {
     pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
     tdomdata <- 
@@ -95,7 +93,7 @@ check.tree <-
     classifynmlst <- tdomdata$classifynmlst
     tdomvarnm <- tdomdata$tdomvarnm
     tdomvar2nm <- tdomdata$tdomvar2nm
-
+    
     if (pivot) {
       ## Transpose back to rows
 #      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst, tdomvar2),
@@ -170,7 +168,6 @@ check.tree <-
     ###########################################################################
     ### GETS ESTIMATION DATA (DENOMINATOR)
     ###########################################################################
-
 
     ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (DENOMINATOR)
     ############################################################################
@@ -282,6 +279,10 @@ check.tree <-
   }
 
   if (esttype == "RATIO") {
+    
+    if (addseed && length(tsumvard) > 1) {
+      tsumvard <- tsumvard[length(tsumvard)]
+    }
     treedat <- list(tdomdat = tdomdat, 
                     estvarn = estvarn, 
                     estvarn.name = tsumvarn,
@@ -296,6 +297,11 @@ check.tree <-
 		                tdomainlst = tdomainlst,
 		                pcdomainlst = pcdomainlst)
   } else {
+    
+    if (addseed && length(tsumvarn) > 1) {
+      tsumvarn <- tsumvarn[length(tsumvarn)]
+    }
+    
     treedat <- list(tdomdat = tdomdat, 
                     estvar = estvarn, 
                     estvar.name = tsumvarn,

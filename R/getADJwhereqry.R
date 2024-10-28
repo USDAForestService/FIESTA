@@ -1,10 +1,9 @@
 
-getADJwherePLOT <- function(condflds, ACI = FALSE, adjwhereqry = NULL) {
+getADJwherePLOT <- function(condflds, ACI = FALSE, conda.="c.", adjwhereqry = NULL) {
   
   ## Description:
   ## Checks nonresponse filters for plots
-  conda. <- "c."
-  
+
   ## Filter for nonsampled conditions
   ## (COND_STATUS_CD <> 5)
   cstatusnm <- findnm("COND_STATUS_CD", condflds, returnNULL = TRUE)

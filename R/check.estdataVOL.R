@@ -49,7 +49,11 @@ check.estdataVOL <-
   ########################################################
   estseedlst <- c("none", "only", "add")
   estseed <- pcheck.varchar(var2check=estseed, varnm="estseed",
-		             checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
+		             checklst=estseedlst, caption="Seedlings", stopifnull=FALSE)
+  if (is.null(estseed)) {
+    message("estseed must be one of the following: ", toString(estseedlst))
+    stop()
+  }
   if (estseed == "none") {
     seedx <- NULL
   } else {

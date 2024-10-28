@@ -120,7 +120,6 @@
 #' Only used when strata = TRUE. 
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
-#' @param projectid String. A project identifier that is appended to pltassgnx.
 #' @param GBdata R List object. Output data list components from
 #' FIESTA::anGBdata().
 #' @param pltdat R List object. Output data list components from
@@ -274,7 +273,6 @@ modGBpop <- function(popType = "VOL",
                      unit_opts = NULL,
                      strata_opts = NULL, 
                      savedata_opts = NULL, 
-                     projectid = NULL,
                      dsnreadonly = TRUE,
                      GBdata = NULL, 
                      pltdat = NULL, 
@@ -304,7 +302,7 @@ modGBpop <- function(popType = "VOL",
   }
   
   ## Set parameters
-  nonsamp.pfilter=nonsamp.cfilter=schema <- NULL
+  nonsamp.pfilter=nonsamp.cfilter=schema=projectid <- NULL
   returnlst <- list(module = "GB")
   
   
@@ -727,7 +725,7 @@ modGBpop <- function(popType = "VOL",
   pltassgnid <- pltcheck$pltassgnid
   pltassgn. <- pltcheck$pltassgn.
   plotlst <- pltcheck$plotlst
-  pltidsqry <- pltcheck$pltidsqry
+  pltidsWITHqry <- pltcheck$pltidsWITHqry
   pltidsid <- pltcheck$pltidsid
   pltidvars <- pltcheck$pltidvars
   projidvars <- pltcheck$projidvars
@@ -839,6 +837,7 @@ modGBpop <- function(popType = "VOL",
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
   
+  
   ###################################################################################
   ## Check Population Data
   ###################################################################################
@@ -852,8 +851,8 @@ modGBpop <- function(popType = "VOL",
       check.popdataVOL(tabs = popTabs, tabIDs = popTabIDs, 
                        popType = popType, 
                        datindb = datindb, pltaindb = pltaindb, 
-                       pltidsqry = pltidsqry, pltidsid = pltidsid,
-                       pltidvars = pltidvars, 
+                       pltidsWITHqry = pltidsWITHqry, pltidsid = pltidsid,
+                       pltidvars = pltidvars, projidvars = projidvars,
                        pdoms2keep = pdoms2keep, 
                        defaultVars = defaultVars, 
                        pltidsadjindb = pltidsadjindb, 
@@ -899,13 +898,12 @@ modGBpop <- function(popType = "VOL",
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
     ###################################################################################
-    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.popdataCHNG.R")
     areawt <- "SUBPTYP_PROP_CHNG"
     popcheck <- 
       check.popdataCHNG(tabs = popTabs, tabIDs = popTabIDs, 
                         popType = popType, 
                         datindb = datindb, pltaindb = pltaindb, 
-                        pltidsqry = pltidsqry, pltidsid = pltidsid,
+                        pltidsWITHqry = pltidsWITHqry, pltidsid = pltidsid,
                         pltidvars = pltidvars, 
                         pdoms2keep = pdoms2keep,
                         defaultVars = defaultVars,
@@ -956,7 +954,6 @@ modGBpop <- function(popType = "VOL",
   
   if (popType == "P2VEG") {
     #areawt <- "SUBPTYP_PROP_CHNG"
-    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.popdataP2VEG.R")
     popcheck <- 
       check.popdataP2VEG(tabs = popTabs, tabIDs = popTabIDs, 
                          popType = popType, 
@@ -1037,27 +1034,67 @@ modGBpop <- function(popType = "VOL",
     pltcondxkey <- key(pltcondx)
     newcols <- {}
     
-    if (!"LANDSTATUSCD" %in% names(pltcondx)) {
-      ## Add LANDSTATUSCD based on the following lookup table
+    ## Add LANDSTATUSCD based on the following lookup table
+    landstatuscdnm <- findnm("LANDSTATUSCD", pltcondxcols, returnNULL=TRUE)
+    if (is.null(landstatuscdnm)) {
+      condstatusnm <- findnm("COND_STATUS_CD", pltcondxcols, returnNULL=TRUE)
+      reservcdnm <- findnm("RESERVCD", pltcondxcols, returnNULL=TRUE)
+      siteclcdnm <- findnm("SITECLCD", pltcondxcols, returnNULL=TRUE)
+    }
+    if (all(!sapply(c(condstatusnm, reservcdnm, siteclcdnm), is.null))) {
+      lower <- ifelse (condstatusnm == "COND_STATUS_CD", FALSE, TRUE)
+      landstatusnm <- ifelse(lower, "landstatus", "LANDSTATUS")
+      
       LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
                                   LANDSTATUSCD = c(rep(1, 6), rep(2, 2), rep(3, 6), 4),
                                   LANDSTATUSNM = c(rep("Timberland", 6), 
                                                    rep("Other forestland", 2), 
                                                    rep("Reserved productive forestland", 6),
                                                    "Reserved other forestland"))
-      pltcondx$LANDSTATUS <- with(pltcondx, COND_STATUS_CD * 100 + RESERVCD * 10 + SITECLCD)
-      pltcondx <- merge(pltcondx, LANDSTATUSlut, by="LANDSTATUS", all.x=TRUE)
-      pltcondx$LANDSTATUS <- NULL
+      if (lower) names(LANDSTATUSlut) <- tolower(names(LANDSTATUSlut))
+      
+      pltcondx[[landstatusnm]] <- 
+        with(pltcondx, get(condstatusnm) * 100 + get(reservcdnm) * 10 + get(siteclcdnm))
+      pltcondx <- merge(pltcondx, LANDSTATUSlut, by=landstatusnm, all.x=TRUE)
+      pltcondx[[landstatusnm]] <- NULL
       newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
+      if (lower) newcols <- tolower(newcols)
+      
+      if (popType %in% c("CHNG", "GRM")) {
+        prevnm <- ifelse(lower, "prev_", "PREV_")
+        names(LANDSTATUSlut) <- paste0(prevnm, names(LANDSTATUSlut))
+        
+        pltcondx[[paste0(prevnm, landstatusnm)]] <- 
+          with(pltcondx, get(paste0(prevnm, condstatusnm)) * 100 + 
+                 get(paste0(prevnm, reservcdnm)) * 10 + get(paste0(prevnm, siteclcdnm)))
+        pltcondx <- merge(pltcondx, LANDSTATUSlut, by=paste0(prevnm, landstatusnm), all.x=TRUE)
+        pltcondx[[paste0(prevnm, landstatusnm)]] <- NULL
+        newcols <- c(newcols, paste0(prevnm, newcols))
+      }
     }
     
-    if (!"FORTYPGRPCD" %in% names(pltcondx) && "FORTYPCD" %in% names(pltcondx)) {
-      ## Add FORTYPGRPCD to pltcondx if not already in dataset
-      #pltcondx <- addFORTYPGRPCD(pltcondx)
+    ## Add FORTYPGRPCD to pltcondx if not already in dataset
+    fortypgrpnm <- findnm("FORTYPGRPCD", pltcondxcols, returnNULL=TRUE)
+    if (is.null(fortypgrpnm)) {
+      fortypnm <- findnm("FORTYPCD", pltcondxcols, returnNULL=TRUE)
+    }  
+    if (!is.null(fortypnm)) {
+      lower <- ifelse (fortypnm == "FORTYPCD", FALSE, TRUE)
+      
       ref_fortyp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
       names(ref_fortyp) <- c("FORTYPCD", "FORTYPGRPCD")
-      pltcondx <- merge(pltcondx, ref_fortyp, by="FORTYPCD", all.x=TRUE)
-      newcols <- c(newcols, "FORTYPGRPCD")
+      if (lower) names(ref_fortyp) <- tolower(names(ref_fortyp))
+      
+      pltcondx <- merge(pltcondx, ref_fortyp, by=fortypnm, all.x=TRUE)
+      newcols <- c(newcols, ifelse(lower, "fortypgrpcd", "FORTYPGRPCD"))
+
+      if (popType %in% c("CHNG", "GRM")) {
+        prevnm <- ifelse(lower, "prev_", "PREV_")
+        names(ref_fortyp) <- paste0(prevnm, names(ref_fortyp))
+        
+        pltcondx <- merge(pltcondx, ref_fortyp, by=paste0(prevnm, fortypnm), all.x=TRUE)
+        newcols <- c(newcols, ifelse(lower, "prev_fortypgrpcd", "PREV_FORTYPGRPCD"))
+      }  
     }
     
     ## Move new columns to end of table

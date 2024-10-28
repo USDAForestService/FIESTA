@@ -710,6 +710,7 @@ modGBratio <- function(GBpopdat,
     tdomvarlstd <- treedat$tdomvarlstd
   } else {
     estvard <- treedat$estvard
+    estvard.name <- treedat$estvard.name
     tdomvarlstd <- NULL
     estunitsd <- areaunits
   } 
@@ -751,26 +752,9 @@ modGBratio <- function(GBpopdat,
     cdomdat <- conddat$cdomdat
     cdomdatqry <- conddat$cdomdatqry
     estvard.name <- conddat$estnm
-    rowvar <- conddat$rowvar
-    colvar <- conddat$colvar
-    grpvar <- conddat$grpvar
-    
-  } else {
+  } 
   
-    ## If classified rowvar or colvar, get class names
-    if (!is.null(classifynmlst)) {
-      if (!is.null(classifynmlst[[rowvar]])) {
-        rowvar <- classifynmlst[[rowvar]]
-      }
-      if (!is.null(classifynmlst[[colvar]])) {
-        colvar <- classifynmlst[[colvar]]
-      }
-      if (!is.null(grpvar)) {
-        grpvar <- c(rowvar, colvar)
-      }
-    }
-  }
-
+  
   ###############################################################################
   ### Get titles for output tables
   ###############################################################################

@@ -563,12 +563,12 @@ modGBtree <- function(GBpopdat,
   seedx <- estdatVOL$seedx
   seedflds <- estdatVOL$seedflds
   
+  
   ###################################################################################
   ### Check row and column data
   ###################################################################################
   withqry <- pltcondxWITHqry
   #withqry <- dbqueriesWITH$pltidsWITH
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.rowcol.R")
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
@@ -682,7 +682,6 @@ modGBtree <- function(GBpopdat,
   estunits <- treedat$estunits
   treeqry <- treedat$treeqry
   classifynmlst <- treedat$classifynmlst
-  
   
   ## If classified rowvar or colvar, get class names
   if (!is.null(classifynmlst)) {

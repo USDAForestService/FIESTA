@@ -1,8 +1,9 @@
 check.popdataVOL <- 
   function(tabs, tabIDs, popType, 
            datindb, pltaindb, 
-           pltidsqry,
-           pltidsid, pltidvars, 
+           pltidsWITHqry,
+           pltidsid, projidvars = NULL,
+           pltidvars, 
            pdoms2keep = NULL, 
            pltidsadjindb = FALSE, 
            defaultVars = TRUE,
@@ -243,216 +244,27 @@ check.popdataVOL <-
       }	  
     }
     
-    ##############################################################################
-    ## 5. Build query to append adjustment factors to pltids
-    ##############################################################################
-    
-    ## 5.1. Check proportion variables, including area weight 
-    #######################################################################
-    cpropvars <- check.PROPvars(condflds,
-                                propvars = unlist(cpropvars))
-    areawt <- findnm(areawt, cpropvars, returnNULL = TRUE)
-    if (is.null(areawt)) {
-      stop("areawt not in dataset: ", areawt)
-    }
-    propvars <- cpropvars
-    if (popType == "VOL") {
-      tpropvars <- check.PROPvars(condflds, treeflds = treeflds,
-                                  propvars = unlist(tpropvars),
-                                  MICRO_BREAKPOINT_DIA = MICRO_BREAKPOINT_DIA,
-                                  MACRO_BREAKPOINT_DIA = MACRO_BREAKPOINT_DIA)
-      cvars2keep <- unique(c(cvars2keep, tpropvars))
-      propvars <- c(cpropvars, tpropvars)
-      propvars <- propvars[!duplicated(propvars)]
-    }
-    
-    ## Define adjvars
-    adjvars <- unlist(list(COND="ADJ_FACTOR_COND", SUBP="ADJ_FACTOR_SUBP", 
-                           MACR="ADJ_FACTOR_MACR", MICR="ADJ_FACTOR_MICR"))
-    
-    
-    ## 5.2. Build WITH query, defining pltids in population
-    #######################################################################
-    pltidsWITH.qry <- paste0(
-      "WITH",
-      "\npltids AS",
-      "\n(", pltidsqry, ")")
-    pltidsvars <- c(puniqueid, unitvars)
-    ## message(pltidsWITH.qry)
-    
-    ## 5.3. Build ADJ query to append adjustment factors to pltids
-    #######################################################################
-    
-    ## Build ADJqry FROM statement
-    if (!is.null(pltxnm)) {
-      plota. <- "p."
-      pjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
-      cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., plota.)
-      pcfromqry <- paste0(
-        "\n FROM pltids",
-        "\n JOIN ", SCHEMA., pltxnm, " p ", pjoinqry,
-        "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry)
-    } else {
-      cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., pltidsa.)
-      pcfromqry <- paste0(
-        "\n FROM pltids",
-        "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry)
-    }
-    
-    pltidsjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., "plta.")
-    pltidsfromqry <- paste0(
-      "\nFROM pltids plta ",
-      "\nJOIN ", SCHEMA., condxnm, " c ", pltidsjoinqry)
-    
-    ## Build ADJqry WHERE statement (i.e., excluding nonresponse)
-    adjwhereqry <- NULL
-    if (adj != "none") {
-      adjwhereqry <- getADJwherePLOT(condflds)
-    }
-    
-    ## 5.4. Build query for adjustment factors based on popType (ADJqry)
-    ADJqry <- 
-      getADJqry(popType = popType,
-                adj = adj,
-                propvars = propvars,
-                adjfromqry = pcfromqry,
-                pwhereqry = adjwhereqry,
-                pltidsid = pltidsid,
-                pltassgnid = pltassgnid,
-                strunitvars = strunitvars,
-                pltidsa. = "pltids.",
-                propqry = NULL)
-    #message(ADJqry)
-
-    ## 5.5. Build final query for adjustment factors, including pltids WITH query
-    adjfactors.qry <- paste0(
-      pltidsWITH.qry,
-      "\n-------------------------------------------",
-      "\n", ADJqry
-    )
-    #message(adjfactors.qry)
-    
-    ## Run query to calculate adjustment factors
-    if (pltaindb) {
-      adjfactors <- tryCatch(
-        DBI::dbGetQuery(dbconn, adjfactors.qry),
-        error=function(e) {
-          message(e,"\n")
-          return(NULL)})
-    } else {
-      adjfactors <- tryCatch(
-        sqldf::sqldf(adjfactors.qry, connection = NULL),
-        error = function(e) {
-          message(e,"\n")
-          return(NULL) })
-    }
-    if (is.null(adjfactors) || nrow(adjfactors) == 0) {
-      message("invalid adjustment query...")
-      message(adjfactors.qry)
-      return(NULL)
-    }
-    if (adj == "samp") {
-      setkeyv(setDT(adjfactors), strunitvars)
-    } else {
-      setkeyv(setDT(adjfactors), pltidsid)
-    }
-    dbqueries$adjfactors <- adjfactors.qry
-    
-    ## Check adjustment factors
-    #evalid <- 81901
-    #FIADBpop <- getFIADBpop(evalid = evalid, dbconn = FIAconn)$pop_stratum
-    #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
-    #adjfactors <- replacepopfun(adjfactors, FIADBpop)
-    #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
-    
-    
-    ## 5.6. Build WITH query to append adjustment factors to pltids, including ADJ query
-    pltidsadjWITH.qry <- paste0(
-      pltidsWITH.qry, ", ",
-      "\n----- calculate adjustment factors",
-      "\nadjfactors AS ",
-      "\n(", ADJqry, ")")
-    
-    
-    ## 5.7. Build and run final query to append adjustment factors to pltids, including ADJ query
-    adja. <- "adj."
-    adjvars <- sapply(propvars, function(x) {
-      ifelse(grepl("PROP_UNADJ", x), paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)), 
-             ifelse (grepl("prop_unadj", x), paste0("ADJ_FACTOR_", toupper(sub("prop_unadj", "", x))), 
-                     paste0(x, "_ADJ"))) })
-    selectvars <- toString(c(paste0(pltidsa., pltidvars), paste0(adja., adjvars)))
-    
-    if (adj == "samp") {
-      adjjoinqry <- getjoinqry(strunitvars, strunitvars, adja., pltidsa.)
-    } else { ## adj = "plot"
-      adjjoinqry <- getjoinqry(pltidsid, pltidsid, adja., pltidsa.)
-    }
-    
-    ## Build pltidsadjFROM.qry
-    pltidsadjFROM.qry <- paste0(
-      "\nFROM pltids",
-      "\nJOIN adjfactors adj ", adjjoinqry)
-    
-    
-    ## Build pltidsadjqry query
-    pltidsadj.qry <- paste0(
-      pltidsadjWITH.qry,
-      "\n-------------------------------------------",
-      paste0("\nSELECT ", selectvars,
-             pltidsadjFROM.qry)
-    )
-    ## message(pltidsadj.qry)
-    
-    
-    ## Run query to identify plotids, including adjustment factors
-    if (pltaindb) {
-      pltidsadj <- tryCatch(
-        DBI::dbGetQuery(dbconn, pltidsadj.qry),
-        error=function(e) {
-          message(e,"\n")
-          return(NULL)})
-    } else {
-      pltidsadj <- tryCatch(
-        sqldf::sqldf(pltidsadj.qry, connection = NULL),
-        error = function(e) {
-          message(e,"\n")
-          return(NULL) })
-    }
-    if (is.null(pltidsadj) || nrow(pltidsadj) == 0) {
-      message("invalid pltids query...")
-      message(pltidsadj.qry)
-      return(NULL)
-    }
-    setkeyv(setDT(pltidsadj), pltidsid) 
-    dbqueries$pltidsadj <- pltidsadj.qry   
-    
-    
-    ## 5.8. Build WITH query to identify pltids, including adjustment factors
-    if (pltidsadjindb) {
-      pltidsadjWITH.qry <- paste0( 
-        "WITH pltids AS",
-        "\n(SELECT ", toString(c(paste0(pltidsa., pltidsid), adjvars)), 
-        "\n FROM pltidsadj pltids",
-        "\n WHERE projectid = '", projectid, "'",
-        "\n   AND pop_typ = '", popType, "')")
-    } else {
-      pltidsadjWITH.qry <- paste0(
-        pltidsadjWITH.qry, ", ",
-        "\n----- calculate plot-level adjustment factors",
-        "\npltidsadj AS",
-        paste0("\n(SELECT ", toString(c(paste0(pltidsa., pltidsid), adjvars)),
-               "\n FROM pltids",
-               "\n JOIN adjfactors adj ", adjjoinqry), ")")
-    } 
-    dbqueriesWITH$pltidsWITH <- pltidsWITH.qry   
-    dbqueriesWITH$pltidsadjWITH <- pltidsadjWITH.qry   
-    
     
     ##############################################################################
-    ## 6. Get PLOT/COND data, including areawt (pltcondx) 
+    ## 5. Build and run queries for PLOT/COND (pltcondx).
     ##############################################################################
+    pltidsa. <- "pltids."
     
-    ## 6.1. Build SELECT query for pltcondx query, including FORTYPGRP
+    
+    ## 5.1.	Build FROM query for pltcondx query
+    ##################################################################
+    plota. <- "p."
+    conda. <- "c."
+    
+    pjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
+    cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., plota.)
+    pcfromqry <- paste0(
+      "\n FROM pltids",
+      "\n JOIN ", SCHEMA., pltxnm, " p ", pjoinqry,
+      "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry)
+    
+    
+    ## 5.1.	Build SELECT query for pltcondx query
     ##################################################################
     if (defaultVars) {
       pvars <- pdoms2keep
@@ -469,44 +281,39 @@ check.popdataVOL <-
     cselectqry <- toString(paste0(conda., unique(c(condvars, cvars2keep))))
     pltcondflds <- unique(c(condvars, cvars2keep, pvars))
     
-    ## 6.2.	Add FORTYPGRP to SELECT query
-    ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
-    ftypqry <- classqry(classcol = "c.FORTYPCD",
-                        fromval = ref_fortypgrp$VALUE,
-                        toval = ref_fortypgrp$GROUPCD,
-                        classnm = "FORTYPGRPCD")
-    cselectqry <- paste0(cselectqry, ", ",
+    ## 5.2.	Add FORTYPGRP to SELECT query
+    addfortypgrp <- FALSE
+    if (addfortypgrp) {
+      ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
+      ftypqry <- classqry(classcol = "c.FORTYPCD",
+                          fromval = ref_fortypgrp$VALUE,
+                          toval = ref_fortypgrp$GROUPCD,
+                          classnm = "FORTYPGRPCD")
+      cselectqry <- paste0(cselectqry, ", ",
                          "\n ", ftypqry)
-    pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
+      pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
+    }
     
-    ## 6.3. Build query for pltcondx
+    ## 5.3. Build query for pltcondx
     pltcondx.qry <- paste0("SELECT ", cselectqry, ", ",
                            "\n", pselectqry, ", 1 AS TOTAL",
                            pcfromqry)
     dbqueries$pltcondx <- pltcondx.qry
     
-    ## 6.4. Build WITH query for pltcondx, including pltids WITH query
-    pltcondxWITH.qry <- paste0(pltidsWITH.qry, ", ",
+    ## 5.4. Build WITH query for pltcondx, including pltids WITH query
+    pltcondxWITH.qry <- paste0(pltidsWITHqry, ", ",
                                "\n----- pltcondx",
                                "\npltcondx AS",
                                "\n(", pltcondx.qry, ")")
     dbqueriesWITH$pltcondxWITH <- pltcondxWITH.qry
     
-    ## 6.5. Build WITH query for pltcondx, including pltids WITH query, including adjustments
-    pltcondxadjWITH.qry <- paste0(pltidsadjWITH.qry, ", ",
-                                  "\n----- pltcondx",
-                                  "\npltcondx AS",
-                                  "\n(", pltcondx.qry, ")")
-    dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITH.qry
-    
-    
-    ## 6.6. If returndata or savedata, run query for pltcondx
+
+    ## 5.5. If returndata or savedata, run query for pltcondx
     ##################################################################
     if (returndata || savedata) {
       pltcondindb <- FALSE
       
-      pltcondxqry <- paste0("WITH pltids AS ",
-                            "\n(", pltidsqry, ")",
+      pltcondxqry <- paste0(pltidsWITHqry,
                             "\n", pltcondx.qry)
       if (pltaindb) {
         pltcondx <- tryCatch(
@@ -540,7 +347,184 @@ check.popdataVOL <-
       }
     }
     
-    ## 6.7. Build CASE statement for adding adjustment factors to SELECT
+    
+    ##############################################################################
+    ## 6. Build query for adjustment factors and append to pltids
+    ##############################################################################
+    
+    ## 6.1. Check proportion variables, including area weight 
+    #######################################################################
+    cpropvars <- check.PROPvars(condflds,
+                                propvars = unlist(cpropvars))
+    areawt <- findnm(areawt, cpropvars, returnNULL = TRUE)
+    if (is.null(areawt)) {
+      stop("areawt not in dataset: ", areawt)
+    }
+    propvars <- cpropvars
+    if (popType == "VOL") {
+      tpropvars <- check.PROPvars(condflds, treeflds = treeflds,
+                                  propvars = unlist(tpropvars),
+                                  MICRO_BREAKPOINT_DIA = MICRO_BREAKPOINT_DIA,
+                                  MACRO_BREAKPOINT_DIA = MACRO_BREAKPOINT_DIA)
+      cvars2keep <- unique(c(cvars2keep, tpropvars))
+      propvars <- c(cpropvars, tpropvars)
+      propvars <- propvars[!duplicated(propvars)]
+    }
+    
+
+    ## Build ADJqry WHERE statement (i.e., excluding nonresponse)
+    adjwhereqry <- NULL
+    if (adj != "none") {
+      adjwhereqry <- getADJwherePLOT(condflds, conda.="pc.")
+    }
+    
+    
+    ## Build FROM query
+    adjjoinqry <- getjoinqry(cuniqueid, pltidsid, "pc.", pltidsa.)
+    adjfromqry <- paste0("\n FROM pltids",
+                         "\n JOIN pltcondx pc ", adjjoinqry)
+    
+    ## Get getADJqry function 
+    ADJqry <- 
+      getADJqry(popType = popType,
+                adj = adj,
+                propvars = propvars,
+                adjfromqry = adjfromqry,
+                pwhereqry = adjwhereqry,
+                pltidsid = pltidsid,
+                pltassgnid = pltassgnid,
+                strunitvars = unique(c(projidvars, strunitvars)),
+                pltidsa. = "pltids.",
+                propqry = NULL)
+    #message(ADJqry)
+
+    
+    ## Build final query for adjustment factors, including pltids WITH query
+    adjfactors.qry <- paste0(
+      pltcondxWITH.qry, 
+      "\n-------------------------------------------",
+      "\n", ADJqry
+    )
+    #message(adjfactors.qry)
+    
+    ## Run query to calculate adjustment factors
+    if (pltaindb) {
+      adjfactors <- tryCatch(
+        DBI::dbGetQuery(dbconn, adjfactors.qry),
+        error=function(e) {
+          message(e,"\n")
+          return(NULL)})
+    } else {
+      adjfactors <- tryCatch(
+        sqldf::sqldf(adjfactors.qry, connection = NULL),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
+    }
+    
+    if (is.null(adjfactors) || nrow(adjfactors) == 0) {
+      message("invalid adjustment query...")
+      message(adjfactors.qry)
+      return(NULL)
+    }
+    if (adj == "samp") {
+      setkeyv(setDT(adjfactors), strunitvars)
+    } else {
+      setkeyv(setDT(adjfactors), pltidsid)
+    }
+    dbqueries$adjfactors <- adjfactors.qry
+    
+    ## Check adjustment factors
+    #source("C:/_tsf/_GitHub/FIESTAnalysis/R/IEVALIDator_compare.R") 
+    #evalid <- 81901
+    #FIADBpop <- getFIADBpop(evalid = evalid, dbconn = FIAconn)$pop_stratum
+    #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
+    #adjfactors <- replacepopfun(adjfactors, FIADBpop)
+    #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
+    
+    pltcondxadjWITH.qry <- paste0(
+      pltcondxWITH.qry, ", ",
+      "\n----- calculate adjustment factors",
+      "\nadjfactors AS ",
+      "\n(", ADJqry, ")")
+    
+    
+    ## 6.4. Build and run final query to append adjustment factors to pltids, including ADJ query
+    if (adj == "samp") {
+      adja. <- "adj."
+      adjvars <- sapply(propvars, function(x) {
+        ifelse(grepl("PROP_UNADJ", x), paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)), 
+             ifelse (grepl("prop_unadj", x), paste0("ADJ_FACTOR_", toupper(sub("prop_unadj", "", x))), 
+                     paste0(x, "_ADJ"))) })
+      selectvars <- toString(c(paste0(pltidsa., pltidvars), paste0(adja., adjvars)))
+    
+      #if (adj == "samp") {
+        adjjoinqry <- getjoinqry(strunitvars, strunitvars, adja., pltidsa.)
+      #} else { ## adj = "plot"
+      #  adjjoinqry <- getjoinqry(pltidsid, pltidsid, adja., pltidsa.)
+      #}
+    
+      ## Build pltcondxadjFROM.qry
+      pltcondxadjFROM.qry <- paste0(
+        "\nFROM pltids",
+        "\nJOIN adjfactors adj ", adjjoinqry)
+    
+    
+      ## Build pltidsadj.qry
+      pltidsadj.qry <- paste0(
+        pltcondxadjWITH.qry,
+        "\n-------------------------------------------",
+        paste0("\nSELECT ", selectvars,
+               pltcondxadjFROM.qry)
+      )
+      ## message(pltidsadj.qry)
+      
+      
+      ## Build WITH query to identify pltids, including adjustment factors
+      pltcondxadjWITH.qry <- paste0(
+        pltcondxadjWITH.qry, ",",
+        "\n----- calculate plot-level adjustment factors",
+        "\npltidsadj AS ",
+        "\n(SELECT ", selectvars,
+        pltcondxadjFROM.qry, ")")
+    } else {
+      
+      ## Build pltidsadj.qry
+      pltidsadj.qry <- paste0(
+        pltcondxWITH.qry,
+        "\n", ADJqry)
+    }
+    dbqueriesWITH$pltidsWITH <- pltidsWITHqry   
+    dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITH.qry   
+    
+    
+    ## Run query to identify plotids, including adjustment factors
+    if (returndata || savedata) {
+      if (pltaindb) {
+        pltidsadj <- tryCatch(
+          DBI::dbGetQuery(dbconn, pltidsadj.qry),
+          error=function(e) {
+            message(e,"\n")
+            return(NULL)})
+      } else {
+        pltidsadj <- tryCatch(
+          sqldf::sqldf(pltidsadj.qry, connection = NULL),
+          error = function(e) {
+            message(e,"\n")
+            return(NULL) })
+      }
+      if (is.null(pltidsadj) || nrow(pltidsadj) == 0) {
+        message("invalid adjustment query...")
+        message(pltidsadj.qry)
+        return(NULL)
+      }
+      setkeyv(setDT(pltidsadj), cuniqueid) 
+    }
+    dbqueries$pltidsadj <- pltidsadj.qry
+    
+
+   
+    ## 6.5. Build CASE statement for adding adjustment factors to SELECT
     ##################################################################
     if (adj %in% c("samp", "plot")) {
       propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
@@ -559,8 +543,7 @@ check.popdataVOL <-
     ##############################################################################
     ## 7.	Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE. 
     ##############################################################################  
-    returnlst <- append(returnlst, list(pltidsadj = pltidsadj,
-                                        pltcondflds = pltcondflds,
+    returnlst <- append(returnlst, list(pltcondflds = pltcondflds,
                                         cuniqueid = cuniqueid, condid = condid, 
                                         adjfactors = adjfactors,
                                         adjcase = adjcase,
@@ -568,6 +551,7 @@ check.popdataVOL <-
     
     if (returndata || savedata) {
       returnlst$pltcondx <- pltcondx
+      returnlst$pltidsadj = pltidsadj
     } else {
       returnlst$pltcondx <- "pltcondx"
     }
