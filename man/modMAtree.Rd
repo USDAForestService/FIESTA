@@ -9,6 +9,7 @@ modMAtree(
   MAmethod,
   estvar,
   estvar.filter = NULL,
+  estvar.derive = NULL,
   estseed = "none",
   woodland = "Y",
   landarea = "FOREST",
@@ -25,7 +26,6 @@ modMAtree(
   table_opts = NULL,
   title_opts = NULL,
   savedata_opts = NULL,
-  gui = FALSE,
   modelselect_bydomain = FALSE,
   ...
 )
@@ -96,13 +96,13 @@ options.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
-
 \item{modelselect_bydomain}{Logical. If TRUE, modelselection will occur at 
 the domain level as specified by rowvar and/or colvar and not at the level of
 the entire sample.}
 
 \item{...}{Parameters for modMApop() if MApopdat is NULL.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 If FIA=TRUE or unitvar=NULL and colvar=NULL, one data frame is

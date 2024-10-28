@@ -11,10 +11,13 @@ modMApop(
   popFilter = popFilters(),
   pltassgn = NULL,
   pltassgnid = "PLT_CN",
+  datsource = "sqlite",
   dsn = NULL,
+  dbconn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
-  adjplot = TRUE,
+  adj = "plot",
+  defaultVars = TRUE,
   unitvar = NULL,
   unitarea = NULL,
   areavar = "ACRES",
@@ -25,13 +28,14 @@ modMApop(
   returndata = TRUE,
   savedata = FALSE,
   saveobj = FALSE,
+  savepltids = FALSE,
   objnm = "MApopdat",
   unit_opts = NULL,
   savedata_opts = NULL,
+  dsnreadonly = TRUE,
   MAdata = NULL,
   pltdat = NULL,
   auxdat = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -66,8 +70,6 @@ assignments, use identifier for plot (e.g., PLOT_ID).}
 
 \item{areawt}{String. Name of variable for summarizing area weights (e.g.,
 CONDPROP_UNADJ).}
-
-\item{adjplot}{Logical. If TRUE, adjusts for nonresponse at plot-level.}
 
 \item{unitvar}{String. Name of the estimation unit variable in unitarea and
 cond or pltassgn data frame with estimation unit assignment for each plot
@@ -113,9 +115,11 @@ FIESTA::spGetPlots().}
 
 \item{auxdat}{List. Auxiliary data output from FIESTA::spGetAuxiliary().}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
-
 \item{...}{For extendibility.}
+
+\item{adjplot}{Logical. If TRUE, adjusts for nonresponse at plot-level.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with population data for Green-Book estimates.

@@ -25,7 +25,6 @@ modGBratio(
   table_opts = NULL,
   title_opts = NULL,
   savedata_opts = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -81,9 +80,9 @@ options.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
-
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with estimates with percent sampling error for rowvar (and

@@ -20,6 +20,7 @@ DBgetEvalid(
   invyrtab = NULL,
   dbTabs = dbTables(),
   dbconn = NULL,
+  schema = NULL,
   dbconnopen = FALSE,
   returnPOP = FALSE,
   gui = FALSE

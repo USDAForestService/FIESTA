@@ -16,6 +16,7 @@ modSAtree(
   pcfilter = NULL,
   estvar = NULL,
   estvar.filter = NULL,
+  estvar.derive = NULL,
   rowvar = NULL,
   modelselect = FALSE,
   prior = function(x) 1/(sqrt(x) * (1 + x)),
@@ -32,7 +33,6 @@ modSAtree(
   savedata_opts = NULL,
   multest_opts = NULL,
   save4testing = FALSE,
-  gui = FALSE,
   ...
 )
 }
@@ -119,9 +119,9 @@ Only used when multest = TRUE.}
 \item{save4testing}{Logical. If TRUE, saves intermediate steps as R objects
 to outfolder for testing (pdomdat, dunitlut).}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
-
 \item{...}{Parameters for modSApop() if SApopdat is NULL.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 \item{est}{ Data frame. Tree estimates and percent sampling error by

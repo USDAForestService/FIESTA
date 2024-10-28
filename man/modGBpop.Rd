@@ -14,8 +14,6 @@ modGBpop(
   datsource = "sqlite",
   dsn = NULL,
   dbconn = NULL,
-  schema = NULL,
-  schemadev = TRUE,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
   areawt2 = NULL,
@@ -28,19 +26,18 @@ modGBpop(
   stratalut = NULL,
   strvar = "STRATUMCD",
   returndata = TRUE,
-  savepltids = FALSE,
   savedata = FALSE,
   saveobj = FALSE,
+  savepltids = FALSE,
   objnm = "GBpopdat",
   unit_opts = NULL,
   strata_opts = NULL,
   savedata_opts = NULL,
-  projectid = NULL,
+  dsnreadonly = TRUE,
   GBdata = NULL,
   pltdat = NULL,
   stratdat = NULL,
   auxdat = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -112,14 +109,14 @@ plot (Default = 'STRATUMCD').}
 
 \item{returndata}{Logical. If TRUE, returns data objects.}
 
-\item{savepltids}{Logical. If TRUE, saves pltids, including adjustment 
-factors. See savedata_opts for saving options.}
-
 \item{savedata}{Logical. If TRUE, saves data table(s). See savedata_opts 
 for saving options.}
 
 \item{saveobj}{Logical. If TRUE, saves returned list object. See savedata_opts
 for saving options.}
+
+\item{savepltids}{Logical. If TRUE, saves pltids, including adjustment 
+factors. See savedata_opts for saving options.}
 
 \item{objnm}{String. Name of *.rds object.}
 
@@ -130,8 +127,6 @@ Only used when strata = TRUE.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
-
-\item{projectid}{String. A project identifier that is appended to pltassgnx.}
 
 \item{GBdata}{R List object. Output data list components from
 FIESTA::anGBdata().}
@@ -145,9 +140,9 @@ FIESTA::spGetStrata().}
 \item{auxdat}{R List object. Output data list components from
 FIESTA::spGetAuxiliary().}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
-
 \item{...}{For extendibility.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with population data for Green-Book estimates.

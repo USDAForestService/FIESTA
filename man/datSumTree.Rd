@@ -13,7 +13,6 @@ datSumTree(
   subplot = NULL,
   datsource = "obj",
   dsn = NULL,
-  dbconn = NULL,
   tuniqueid = "PLT_CN",
   cuniqueid = "PLT_CN",
   puniqueid = "CN",
@@ -41,12 +40,16 @@ datSumTree(
   tderive = NULL,
   tround = 5,
   pltidsWITHqry = NULL,
+  pltidsid = NULL,
   pcwhereqry = NULL,
   pjoinid = "PLT_CN",
   checkNA = FALSE,
   returnDT = TRUE,
   savedata = FALSE,
-  savedata_opts = NULL
+  savedata_opts = NULL,
+  dbconn = NULL,
+  schema = NULL,
+  dbconnopen = FALSE
 )
 }
 \arguments{
@@ -163,7 +166,7 @@ QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454)
 \item{pcwhereqry}{String. Plot/Condition filter if plot and/or cond table is 
 included.}
 
-\item{pjoinid}{String. Name of unique identifier from pltidsWITHqry.}
+\item{pjoinid}{String. If pltidsWITHqry is not null, the uniqueid in the query.}
 
 \item{checkNA}{Logical. If TRUE, checks if NA values exist in necessary
 variables.}
@@ -173,7 +176,13 @@ returns data.frame object(s).}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
 
-\item{savedata_opts}{List. See help(savedata_options()) for a list
+\item{savedata_opts}{List. See help(savedata_options()) for a list}
+
+\item{dbconn}{Open database connection.}
+
+\item{schema}{String. Name of schema in database.}
+
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'treesum'.}
 

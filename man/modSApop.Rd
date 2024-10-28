@@ -11,10 +11,13 @@ modSApop(
   popFilter = popFilters(),
   pltassgn = NULL,
   pltassgnid = "PLT_CN",
+  datsource = "sqlite",
   dsn = NULL,
+  dbconn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
-  adjplot = TRUE,
+  adj = "plot",
+  defaultVars = TRUE,
   dunitvar = NULL,
   dunitarea = NULL,
   areavar = "ACRES",
@@ -25,9 +28,11 @@ modSApop(
   returndata = TRUE,
   savedata = FALSE,
   saveobj = FALSE,
+  savepltids = FALSE,
   objnm = "SApopdat",
   unit_opts = NULL,
   savedata_opts = NULL,
+  dsnreadonly = TRUE,
   SAdoms = NULL,
   smallbnd = NULL,
   smallbnd.domain = NULL,
@@ -35,7 +40,6 @@ modSApop(
   SAdata = NULL,
   pltdat = NULL,
   auxdat = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -71,8 +75,6 @@ assignments, use identifier for plot (e.g., PLOT_ID).}
 
 \item{areawt}{String. Name of variable for summarizing area weights (e.g.,
 CONDPROP_UNADJ).}
-
-\item{adjplot}{Logical. If TRUE, adjusts for nonresponse at plot-level.}
 
 \item{dunitvar}{String. Name of the domain unit variable in cond, plt, or
 pltassgn with domain unit assignment for each plot.}
@@ -125,9 +127,11 @@ FIESTA::spGetPlots().}
 \item{auxdat}{R List object. Output data list components from
 FIESTA::spGetAuxiliary().}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
-
 \item{...}{For extendibility.}
+
+\item{adjplot}{Logical. If TRUE, adjusts for nonresponse at plot-level.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with population data for Small-Area estimates.
@@ -189,7 +193,7 @@ condition on plot (i.e. accessible nonforest, nonsampled nonforest)\cr
 \tab \tab RESERVCD \tab If landarea=TIMBERLAND. Reserved status.\cr 
 \tab \tab SUBPROP_UNADJ \tab Unadjusted proportion of subplot conditions 
 on each plot. Set SUBPROP_UNADJ=1, if only 1 condition per subplot.\cr 
-\tab \tab MICRPROP_UNADJ \tab If microplot tree attributes. Unadjusted 
+\tab \tab MICRPROP_UNADJ \tab If microplot trfee attributes. Unadjusted 
 proportion of microplot conditions on each plot. Set MICRPROP_UNADJ=1, 
 if only 1 condition per microplot.\cr 
 \tab \tab MACRPROP_UNADJ \tab If macroplot tree attributes. Unadjusted 

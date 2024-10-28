@@ -60,6 +60,7 @@ datSumTreeDom(
   savedata = FALSE,
   savedata_opts = NULL,
   dbconn = NULL,
+  schema = NULL,
   dbconnopen = FALSE
 )
 }
@@ -233,6 +234,8 @@ default = 'tdomsum'.}
 
 \item{dbconn}{Open database connection.}
 
+\item{schema}{String. Name of schema in database.}
+
 \item{dbconnopen}{Logical. If TRUE, keep database connection open.}
 
 \item{bydomainst}{String (vector). Categorical domain variables not in
@@ -333,6 +336,7 @@ datSumTreeDom(tree = FIESTA::WYtree,
 # Sum of Number of Live Trees by Species, Including Seedlings
 datSumTreeDom(cond = WYcond, 
               plt = WYplt, 
+              tree = WYtree,
               seed = WYseed, 
               puniqueid = "CN", 
               bycond = FALSE, 
