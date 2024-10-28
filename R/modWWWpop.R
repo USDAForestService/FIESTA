@@ -93,10 +93,6 @@ modWWWpop <- function(popType = "VOL",
   ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.pltcnt.R")
-  source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\check.auxiliaryWWW.R")
-  source("C:\\_tsf\\_GitHub\\FIESTAutils\\R\\query_functions.R")
-  
   if (!SAE) {
     auxdatGB <- 
       check.auxiliaryWWW(module = "GB",
@@ -133,7 +129,6 @@ modWWWpop <- function(popType = "VOL",
         tocols <- auxdatGB$strvar
       }
       
-      source("C:\\_tsf\\_GitHub\\FIESTAutils\\R\\query_functions.R")
       ## Get select join for new strata variables
       combineqry <- 
         getcombineqry(lut = stratcombinelut,
@@ -199,9 +194,9 @@ modWWWpop <- function(popType = "VOL",
   ###################################################################################
   if (popType %in% c("ALL", "CURR", "VOL")) {
     
+    
     ## Get database queries for adjustment factors
     ##############################################################
-    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\IWWWinternal.R")   
     dbqueriesADJ <- wwwGetAdjqryVOL(module = module,
                                     strvar = strvar,
                                     pltidsWITHqry = pltidsWITHqry)
@@ -220,20 +215,22 @@ modWWWpop <- function(popType = "VOL",
     pltidsadjWITHqry <- dbqueriesADJ$dbqueriesWITH$pltidsadjWITH
     
     
+    
     ## Append pltcond to WITH query including adjustment factors
     ##############################################################
     dbqueriesPC <- wwwGetpltcondqry(popType = "VOL", 
-                                    pltidsadjWITHqry = pltidsadjWITHqry)
+                                    pltidsWITHqry = pltidsadjWITHqry,
+                                    pcwhereqry = NULL)
     names(dbqueriesPC)
-    pltcondxadjWITHqry <- dbqueriesPC$pltcondxadjWITHqry
-    #message(pltcondxadjWITHqry)
+    pltcondxWITHqry <- dbqueriesPC$pltcondxWITHqry
+    message(pltcondxWITHqry)
     
     ## Run query to get pltcondx data
     pltcondx.qry <- dbqueriesPC$pltcondxqry
     #pltcondx <- DBI::dbGetQuery(dbconn, pltcondx.qry)
     #head(pltcondx)
-    
-    
+
+       
     ## Compile queries
     dbqueriesWITH$pltidsadjVOL = pltidsadjWITHqry
     dbqueriesWITH$pltcondxadjVOL = pltcondxadjWITHqry
@@ -247,7 +244,6 @@ modWWWpop <- function(popType = "VOL",
     
     ## Get database queries for adjustment factors
     ##############################################################
-    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\IWWWinternal.R")   
     dbqueriesADJ <- wwwGetAdjqryCHNG(module = module,
                                      strvar = strvar,
                                      pltidsWITHqry = pltidsWITHqry)

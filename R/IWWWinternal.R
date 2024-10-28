@@ -234,7 +234,6 @@ wwwCheckPlots <- function(popType,
     popwhereqry <- datfilter$popwhereqry
     states <- datfilter$states
     invyrs <- datfilter$invyrs
-    
   }  
   
   
@@ -252,7 +251,6 @@ wwwCheckPlots <- function(popType,
       aoiwhereqry <- paste0(popwhereqry, 
                              "\n  AND ", province.filter)
     }
-    
   } else {
     aoiselectqry <- paste0(
       AOI_table_name, " AS domain_unit")
@@ -292,6 +290,7 @@ wwwCheckPlots <- function(popType,
 
 
 
+
 wwwGetAdjqryVOL <- function(strvar,
                             module = "GB",
                             pltidsWITHqry = NULL) {
@@ -320,6 +319,7 @@ wwwGetAdjqryVOL <- function(strvar,
   ## Build FROM statement 
   adjfromqry <- paste0(
     "\nFROM pltids",
+    #"\nJOIN pltcondx pc ON (pc.plt_cn = pltids.cn)")
     "\nJOIN plot p ON (p.cn = pltids.cn)",
     "\nJOIN cond c ON (c.plt_cn = p.cn)")
   
@@ -609,10 +609,12 @@ wwwGetAdjqryCHNG <- function(module = "GB",
 }    
 
 
-wwwGetpltcondqry <- function(popType = "VOL", pltidsadjWITHqry = NULL) {
+wwwGetpltcondqry <- function(popType = "VOL", pltidsWITHqry = NULL,
+                             pcwhereqry = NULL,
+                             addfortypgrp = FALSE) {
   
   ## DESCRIPTION: Build queries for getting plot / cond data.
-
+  
   
   ## Set global variables
   defaultVars <- TRUE
@@ -646,7 +648,7 @@ wwwGetpltcondqry <- function(popType = "VOL", pltidsadjWITHqry = NULL) {
     pvars <- "*"
   }
   pselectqry <- toString(paste0("p.", pvars))
-
+  
   
   ## Define condition-level variables 
   ###############################################################################
@@ -657,16 +659,18 @@ wwwGetpltcondqry <- function(popType = "VOL", pltidsadjWITHqry = NULL) {
   }
   cselectqry <- toString(paste0("c.", condvars))
   #pltcondflds <- unique(c(condvars, pvars))
-
+  
   
   ## Add FORTYPGRP to SELECT query
-  ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
-  ftypqry <- classqry(classcol = "c.fortypcd",
-                    fromval = ref_fortypgrp$VALUE,
-                    toval = ref_fortypgrp$GROUPCD,
-                    classnm = "fortypgrpcd")
-  cselectqry <- paste0(cselectqry, ", ",
-                     "\n ", ftypqry)
+  if (addfortypgrp) {
+    ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
+    ftypqry <- classqry(classcol = "c.fortypcd",
+                        fromval = ref_fortypgrp$VALUE,
+                        toval = ref_fortypgrp$GROUPCD,
+                        classnm = "fortypgrpcd")
+    cselectqry <- paste0(cselectqry, ", ",
+                         "\n ", ftypqry)
+  }
   #pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
   
   
@@ -679,7 +683,7 @@ wwwGetpltcondqry <- function(popType = "VOL", pltidsadjWITHqry = NULL) {
     "\n JOIN ", SCHEMA., "plot p ", pjoinqry,
     "\n JOIN ", SCHEMA., "cond c ", cjoinqry)
   #message(pcfromqry)
-
+  
   
   ## Append SELECT query and FROM query for pltcondx
   pcqry <- paste0(
@@ -687,26 +691,34 @@ wwwGetpltcondqry <- function(popType = "VOL", pltidsadjWITHqry = NULL) {
     "\n", pselectqry,
     pcfromqry)
   
+  ## Add where statement for plot/conditions
+  if (!is.null(pcwhereqry)) {
+    pcqry <- paste0(
+      pcqry, 
+      "\nWHERE ", pcwhereqry)
+  }
+  
   
   ## Append pltidsWITHqry to plotcondx query
   pltcondxqry <- paste0(
-    pltidsadjWITHqry,
-      "\n", pcqry)
+    pltidsWITHqry,
+    "\n", pcqry)
   #message(pltcondx.qry)
   #pltcondx <- DBI::dbGetQuery(dbconn, pltcondx.qry)
-
+  
   
   ## build WITH query for pltcondx
-  pltcondxadjWITHqry <- paste0(
-    pltidsadjWITHqry, ", ",
+  pltcondxWITHqry <- paste0(
+    pltidsWITHqry, ", ",
     "\n----- pltcondx",
     "\npltcondx AS",
     "\n(", pcqry, ")")
   
   
   ## Return queries fo pltcondx
-  return(list(pltcondxqry = pltcondxqry, pltcondxadjWITHqry = pltcondxadjWITHqry))
+  return(list(pltcondxqry = pltcondxqry, pltcondxWITHqry = pltcondxWITHqry))
 }
+
 
 
 wwwGettreeqry <- function(estvar, 
