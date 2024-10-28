@@ -52,18 +52,23 @@ getGBestimates <- function(esttype,
   
   ## Set global variables
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
-  addtotal <- ifelse(rowvar == "TOTAL" || length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
+  addtotal <- ifelse(rowvar %in% c("PREV_TOTAL", "TOTAL") || 
+                       length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
   strunitvars <- c(unitvar, strvar)
   
   message("getting estimates using GB...")
   
   ## Append TOTAL to domdatn
-  domdatn$TOTAL <- 1
-
+  if (addtotal && !"TOTAL" %in% names(domdatn)) {
+    domdatn$TOTAL <- 1
+  }
+  
   ## Join domdat to pltassgnx using data.table key
   domdatn <- pltassgnx[domdatn]
   if (esttype == "RATIO") {
-    domdatd$TOTAL <- 1
+    if (addtotal && !"TOTAL" %in% names(domdatd)) {
+      domdatd$TOTAL <- 1
+    }
     domdatd <- pltassgnx[domdatd]
   }
 

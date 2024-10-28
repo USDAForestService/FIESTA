@@ -403,7 +403,7 @@ modGBchng <- function(GBpopdat,
         stop("invalid database connection")
       }
     }
-    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
+    #pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
     pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
   } else {
     pltcondxWITHqry=pltcondxadjWITHqry <- NULL
@@ -557,7 +557,7 @@ modGBchng <- function(GBpopdat,
                    col.orderby = col.orderby,
                    uniquecol = uniquecol,
                    title.colvar = title.colvar,
-                   pcdomainlst = bydomainlst,
+                   pcdomainlst = unique(c(bydomainlst, "TOTAL")),
                    popdatindb = popdatindb,
                    popconn = popconn,
                    pltcondx = pltcondx,

@@ -27,7 +27,7 @@ check.condCHNG <- function(areawt, areawt2,
   
   ## Add past landarea.filter to WHERE statement
   if (!is.null(landarea.filter)) {
-    landarea.filterCHNG <- gsub("pc.", "ppc.", landarea.filter)
+    landarea.filterCHNG <- gsub("pc.", "pc.PREV_", landarea.filter)
     pcwhereqry <- paste0(pcwhereqry,
                          "\n  AND ", landarea.filterCHNG)
   }
@@ -56,20 +56,37 @@ check.condCHNG <- function(areawt, areawt2,
     estvarqry <- paste0("SUM(COALESCE(", estvarqry, ", 0)) AS ", estnm)
   }
   
+  # if (is.null(pcwhereqry)) {
+  #   pcwhereqry <- paste0(
+  #     "\nWHERE pc.CONDPROP_UNADJ IS NOT NULL",
+  #     "\n    AND ((sccm.SUBPTYP = 3 AND pc.PROP_BASIS = 'MACR') OR 
+  #             (sccm.SUBPTYP = 1 AND pc.PROP_BASIS = 'SUBP'))",
+  #     "\n    AND COALESCE(pc.COND_NONSAMPLE_REASN_CD, 0) = 0",
+  #     "\n    AND COALESCE(ppc.COND_NONSAMPLE_REASN_CD, 0) = 0")
+  # } else {
+  #   pcwhereqry <- paste0(pcwhereqry, 
+  #                        "\n    AND pc.CONDPROP_UNADJ IS NOT NULL",
+  #                        "\n    AND ((sccm.SUBPTYP = 3 AND pc.PROP_BASIS = 'MACR') OR 
+  #                                   (sccm.SUBPTYP = 1 AND pc.PROP_BASIS = 'SUBP'))",
+  #                        "\n    AND COALESCE(pc.COND_NONSAMPLE_REASN_CD, 0) = 0",
+  #                        "\n    AND COALESCE(ppc.COND_NONSAMPLE_REASN_CD, 0) = 0")
+  # }
+  
+  
   if (is.null(pcwhereqry)) {
     pcwhereqry <- paste0(
       "\nWHERE pc.CONDPROP_UNADJ IS NOT NULL",
       "\n    AND ((sccm.SUBPTYP = 3 AND pc.PROP_BASIS = 'MACR') OR 
               (sccm.SUBPTYP = 1 AND pc.PROP_BASIS = 'SUBP'))",
       "\n    AND COALESCE(pc.COND_NONSAMPLE_REASN_CD, 0) = 0",
-      "\n    AND COALESCE(ppc.COND_NONSAMPLE_REASN_CD, 0) = 0")
+      "\n    AND COALESCE(pc.PREV_COND_NONSAMPLE_REASN_CD, 0) = 0")
   } else {
     pcwhereqry <- paste0(pcwhereqry, 
                          "\n    AND pc.CONDPROP_UNADJ IS NOT NULL",
                          "\n    AND ((sccm.SUBPTYP = 3 AND pc.PROP_BASIS = 'MACR') OR 
-              (sccm.SUBPTYP = 1 AND pc.PROP_BASIS = 'SUBP'))",
+                                    (sccm.SUBPTYP = 1 AND pc.PROP_BASIS = 'SUBP'))",
                          "\n    AND COALESCE(pc.COND_NONSAMPLE_REASN_CD, 0) = 0",
-                         "\n    AND COALESCE(ppc.COND_NONSAMPLE_REASN_CD, 0) = 0")
+                         "\n    AND COALESCE(pc.PREV_COND_NONSAMPLE_REASN_CD, 0) = 0")
   }
 
   
@@ -86,7 +103,7 @@ check.condCHNG <- function(areawt, areawt2,
   
   ## Append classified variables to query
   if (!is.null(rowvar) && rowvar %in% pcdomainlst) {
-    
+
     ## If colvar = "NONE"
     if (is.null(colvar) || colvar == "NONE") {
       colvar <- rowvar
@@ -106,15 +123,16 @@ check.condCHNG <- function(areawt, areawt2,
                            classifyrow$rowclassqry)
       rowclassnm <- classifyrow$rowclassnm
       cselectqry <- sub(rowclassnm, paste0("PREV_", rowclassnm), cselectqry)
-      cselectqry <- gsub(paste0("pc.", rowvar), paste0("ppc.", rowvar), cselectqry)
+      #cselectqry <- gsub(paste0("pc.", rowvar), paste0("ppc.", rowvar), cselectqry)
       rowvarnm <- paste0("PREV_", rowclassnm)
       byvars <- c(byvars, rowvarnm)
       setnames(uniquerow, rowclassnm, rowvarnm)
     } else {
-      cselectqry <- paste0(cselectqry, ", ppc.", rowvar, " AS PREV_", rowvar)
+      cselectqry <- paste0(cselectqry, ", pc.PREV_", rowvar)
       rowvarnm <- paste0("PREV_", rowvar)
-      byvars <- c(byvars, rowvarnm)
-      names(uniquerow) <- paste0("PREV_", names(uniquerow))
+      byvars <- c(byvars, paste0("pc.", rowvarnm))
+      if (!is.null(uniquerow))
+        names(uniquerow) <- paste0("PREV_", names(uniquerow))
       #setnames(uniquerow, rowvar, rowvarnm)
     }
   }
@@ -132,6 +150,13 @@ check.condCHNG <- function(areawt, areawt2,
       colvarnm <- colvar
     }
   }
+  
+  ## Append classified variables to query
+  totalnm <- findnm("TOTAL", pcdomainlst, returnNULL = TRUE)
+  if (!is.null(totalnm)) {
+    cselectqry <- paste0(cselectqry, ", pc.", "PREV_", totalnm, ", pc.", totalnm)
+  }
+  
   
   ## Rename rowvar variables with prefix 'PREV_'
   rowvar <- rowvarnm
@@ -153,14 +178,22 @@ check.condCHNG <- function(areawt, areawt2,
     paste0("\nFROM pltidsadj",
            "\nJOIN pltcondx pc ", joinqry)
   
+  # cdomdatfromqry <- 
+  #   paste0(cdomdatfromqry, 
+  #          "\nJOIN pltcondx ppc ON (ppc.PLT_CN = pc.PREV_PLT_CN)",
+  #          "\nJOIN ", sccmnm, " sccm ON (sccm.plt_cn = pc.plt_cn 
+  #                         AND sccm.prev_plt_cn = ppc.plt_cn 
+  #                         AND sccm.condid = pc.condid 
+  #                         AND sccm.prevcond = ppc.condid)")
+
   cdomdatfromqry <- 
     paste0(cdomdatfromqry, 
-           "\nJOIN pltcondx ppc ON (ppc.PLT_CN = pc.PREV_PLT_CN)",
            "\nJOIN ", sccmnm, " sccm ON (sccm.plt_cn = pc.plt_cn 
-                          AND sccm.prev_plt_cn = ppc.plt_cn 
+                          AND sccm.prev_plt_cn = pc.prev_plt_cn 
                           AND sccm.condid = pc.condid 
-                          AND sccm.prevcond = ppc.condid)")
+                          AND sccm.prevcond = pc.prev_condid)")
   
+    
   ## Build cdomdat query
   cdomdat.qry <- 
     paste0(cdomdatselectqry, 

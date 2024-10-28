@@ -1,20 +1,19 @@
-#' @rdname internal_desc
-#' @export
 sumpropCHNGqry <- function(fromqry = NULL,
                            whereqry = NULL,
                            selectvars = NULL,
                            ACI = FALSE,
+                           frompltcondx = FALSE,
                            SCHEMA. = "",
                            suffix = "") {
 					 
-
   ## DESCRIPTION: Summarize sampled subplot condition proportions.
   
   ############################################################
-  ## Assemble from statement
+  ## Assemble FROM statement
   ############################################################
+  conda. = ifelse(frompltcondx, "pc.", "c.")
 
-  if (is.null(fromqry)) {
+  if (!frompltcondx && is.null(fromqry)) {
     
     ## PLOT/COND from query
     pcfromqry <- paste0(
@@ -32,11 +31,10 @@ sumpropCHNGqry <- function(fromqry = NULL,
     
   }
 
-
   ############################################################
-  ## Assemble where statement
+  ## Assemble WHERE statement
   ############################################################
-  if (is.null(whereqry)) {
+  if (!frompltcondx && is.null(whereqry)) {
 
     ## Remove nonsampled conditions
     whereqry <- "\n WHERE c.COND_STATUS_CD <> 5"
@@ -52,38 +50,39 @@ sumpropCHNGqry <- function(fromqry = NULL,
 	         "\n         OR (sccma.SUBTYP = 1 AND c.PROP_BASIS = 'SUBP'))",
 	         "\n   AND COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0",  
 	         "\n   AND COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0")  
-
   }
 
 
   ## Sum condition proportions by subplot
   ############################################################
-  if (!is.null(selectvars)) {
-    selectgrpvars <- paste0(selectvars, ", 
-          c.PLT_CN, pcond.PLT_CN AS PREV_PLT_CN, 
-          pcond.CONDID AS PREVCOND, c.CONDID")
-    grpvars <- paste0(selectvars, ", 
-          c.PLT_CN, pcond.PLT_CN, 
-          pcond.CONDID, c.CONDID")
+  if (!frompltcondx) { 
+    selectgrpvars <- "c.PLT_CN, pcond.PLT_CN AS PREV_PLT_CN, pcond.CONDID AS PREVCOND, c.CONDID"
+    grpvars <- "c.PLT_CN, pcond.PLT_CN, pcond.CONDID, c.CONDID"
+    if (!is.null(selectvars)) {
+      selectgrpvars <- paste0(selectvars, ", ",
+                              selectgrpvars)
+      grpvars <- paste0(selectvars, ", ",
+                        grpvars)
+    }
   } else {
-    selectgrpvars <- "c.PLT_CN, pcond.PLT_CN AS PREV_PLT_CN, 
-          pcond.CONDID AS PREVCOND, c.CONDID"
-    grpvars <- "c.PLT_CN, pcond.PLT_CN, 
-          pcond.CONDID, c.CONDID"
+    selectgrpvars <- "pc.PREV_PLT_CN, pc.PLT_CN, pc.PREV_CONDID, pc.CONDID"
+    if (!is.null(selectvars)) {
+      selectgrpvars <- paste0(selectvars, ", ",
+                              selectgrpvars)
+    }
+    grpvars <- selectgrpvars
   }
-  
   selectqry <- paste0("SELECT ", selectgrpvars, ", 
-          SUM(sccm.SUBPTYP_PROP_CHNG * 
-                  (CASE WHEN ((sccm.SUBPTYP = 3 AND c.PROP_BASIS = 'MACR') OR
-			             (sccm.SUBPTYP = 1 AND c.PROP_BASIS = 'SUBP'))
-			             THEN 1 ELSE 0 END) /4) AS CONDPROP_UNADJ,
-          SUM(sccm.SUBPTYP_PROP_CHNG * 
-                  (CASE WHEN sccm.SUBPTYP = 1 THEN 1 ELSE 0 END) /4) AS SUBPPROP_UNADJ,
-          SUM(sccm.SUBPTYP_PROP_CHNG * 
-                  (CASE WHEN sccm.SUBPTYP = 2 THEN 1 ELSE 0 END) /4) AS MICRPROP_UNADJ,
-          SUM(sccm.SUBPTYP_PROP_CHNG * 
-                  (CASE WHEN sccm.SUBPTYP = 3 THEN 1 ELSE 0 END) /4) AS MACRPROP_UNADJ")
-  
+      SUM(sccm.SUBPTYP_PROP_CHNG * 
+              (CASE WHEN ((sccm.SUBPTYP = 3 AND ", conda., "PROP_BASIS = 'MACR') OR
+			         (sccm.SUBPTYP = 1 AND ", conda., "PROP_BASIS = 'SUBP'))
+			         THEN 1 ELSE 0 END) /4) AS CONDPROP_UNADJ,
+      SUM(sccm.SUBPTYP_PROP_CHNG * 
+              (CASE WHEN sccm.SUBPTYP = 1 THEN 1 ELSE 0 END) /4) AS SUBPPROP_UNADJ,
+      SUM(sccm.SUBPTYP_PROP_CHNG * 
+              (CASE WHEN sccm.SUBPTYP = 2 THEN 1 ELSE 0 END) /4) AS MICRPROP_UNADJ,
+      SUM(sccm.SUBPTYP_PROP_CHNG * 
+              (CASE WHEN sccm.SUBPTYP = 3 THEN 1 ELSE 0 END) /4) AS MACRPROP_UNADJ")
   
   sumpropqry <- paste0(
     selectqry,
@@ -92,7 +91,6 @@ sumpropCHNGqry <- function(fromqry = NULL,
     "\n GROUP BY ", grpvars)
   #message(sumpropqry)
   
- 
   return(sumpropqry)
 }
 
