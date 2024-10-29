@@ -145,9 +145,8 @@ modWWWpop <- function(popType = "VOL",
         aoifromqry,
         aoiwhereqry)
       #message(pltidsqry)
-    } 
+    }
     
-    if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
     unitvar <- auxdatGB$unitvar
     unitvars <- auxdatGB$unitvars
     strvar <- auxdatGB$strvar
@@ -159,7 +158,7 @@ modWWWpop <- function(popType = "VOL",
     strvar <- auxdatGB$strvar
     stratalut <- auxdatGB$auxlut
   } 
- 
+
   auxdat <- 
     check.auxiliaryWWW(module = "MA",
                        pltassgn = pltassgn, 
@@ -215,15 +214,14 @@ modWWWpop <- function(popType = "VOL",
     pltidsadjWITHqry <- dbqueriesADJ$dbqueriesWITH$pltidsadjWITH
     
     
-    
     ## Append pltcond to WITH query including adjustment factors
     ##############################################################
     dbqueriesPC <- wwwGetpltcondqry(popType = "VOL", 
                                     pltidsWITHqry = pltidsadjWITHqry,
                                     pcwhereqry = NULL)
     names(dbqueriesPC)
-    pltcondxWITHqry <- dbqueriesPC$pltcondxWITHqry
-    message(pltcondxWITHqry)
+    pltcondxadjWITHqry <- dbqueriesPC$pltcondxWITHqry
+    #message(pltcondxWITHqry)
     
     ## Run query to get pltcondx data
     pltcondx.qry <- dbqueriesPC$pltcondxqry

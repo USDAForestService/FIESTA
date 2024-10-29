@@ -29,10 +29,17 @@ getpopFilterqry <- function(popType,
   subcycle99 <- FALSE
   pflds <- unique(c(pltassgnflds, pltflds))
   
-  SCHEMA. <- ""
-  if (!is.null(schema)) {
-    SCHEMA. <- paste0(schema, ".")
+  if (!is.null(dbconn)) {
+    if (!DBI::dbIsValid(dbconn)) {
+      stop("database connection is invalid... \n", dbconn)
+    }
+    SCHEMA. <- ""
+    if (!is.null(schema)) {
+      SCHEMA. <- paste0(schema, ".")
+    }
+    dbtables <- DBI::dbListTables(dbconn)
   }
+  
   
   ## 1. Create join for including pltassgnx
   ##################################################################################
@@ -158,8 +165,38 @@ getpopFilterqry <- function(popType,
   ##################################################################################
   iseval=subcycle <- FALSE 
   returnPOP <- ifelse(pltaindb, FALSE, TRUE)
-  evalInfo <- tryCatch( 
-    DBgetEvalid(states = states, 
+  if (!is.null(dbconn) && popFilter$evalCur && 
+      !is.null(findnm("DATAMART_MOST_RECENT_INV", dbtables, returnNULL = TRUE))) {
+
+    if (!is.numeric(states)) {
+      states <- FIESTAutils::pcheck.states(states, statereturn="VALUE")
+    }
+    evalgrps.qry <- 
+      paste0("SELECT eval_grps FROM datamart_most_recent_inv WHERE statecd IN (",
+               toString(states), ")")
+    evalgrps <- DBI::dbGetQuery(dbconn, evalgrps.qry)
+    evalpre <- sapply(evalgrps, substr, 1, nchar(evalgrps) - 2)
+    evalend <- ifelse (popType == "CHNG", "03", "01")
+    popevalid <- paste0(evalpre, evalend)
+
+    ppsanm <- findnm("POP_PLOT_STRATUM_ASSGN", dbtables, returnNULL = TRUE)
+    if (is.null(ppsanm)) {
+      stop("need to include pop_plot_stratum_assgn in database")
+    }
+    ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
+    ppsa. <- "ppsa."
+    
+    ## Get inventory years from pop_plot_stratum_assgn
+    invyrnm <- findnm("INVYR", ppsaflds, returnNULL  = TRUE)
+    if (!is.null(invyrnm)) {
+      invyrs.qry <- paste0("SELECT DISTINCT invyr FROM pop_plot_stratum_assgn 
+                   WHERE evalid IN (", toString(popevalid), ")")
+      invyrs <- sort(DBI::dbGetQuery(dbconn, invyrs.qry)[[1]])
+    }
+
+  } else {
+    evalInfo <- tryCatch( 
+      DBgetEvalid(states = states, 
                 datsource = datsource,
                 invtype = "ANNUAL", 
                 evalid = popFilter$evalid, 
@@ -171,53 +208,50 @@ getpopFilterqry <- function(popType,
                 schema = schema,
                 dbconnopen = TRUE,
                 returnPOP = returnPOP),
-    error = function(e) {
-      message(e,"\n")
-      return(NULL) })
-  if (is.null(evalInfo)) {
-    #message("no data to return")
-    return(NULL)
-  }
-  states <- evalInfo$states
-  invyrs <- evalInfo$invyrs
-  invyrtab <- evalInfo$invyrtab
-  popevalid <- unlist(evalInfo$evalidlist)
-  if (!is.null(popevalid)) {
-    iseval <- TRUE
-    POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
-    PLOT <- evalInfo$PLOT
-    plotnm <- evalInfo$plotnm
-    ppsaflds <- evalInfo$ppsaflds
-    ppsanm <- evalInfo$ppsanm
-    ppsa. <- "ppsa."
-    ppsaindb <- evalInfo$ppsaindb
-  }
+      error = function(e) {
+        message(e,"\n")
+        return(NULL) })
+    if (is.null(evalInfo)) {
+      #message("no data to return")
+      return(NULL)
+    }
+    states <- evalInfo$states
+    invyrs <- evalInfo$invyrs
+    invyrtab <- evalInfo$invyrtab
+    popevalid <- unlist(evalInfo$evalidlist)
+    if (!is.null(popevalid)) {
+      iseval <- TRUE
+      POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
+      PLOT <- evalInfo$PLOT
+      plotnm <- evalInfo$plotnm
+      ppsaflds <- evalInfo$ppsaflds
+      ppsanm <- evalInfo$ppsanm
+      ppsa. <- "ppsa."
+      ppsaindb <- evalInfo$ppsaindb
+    }
 
-  ####################################################################
-  ## 4. Check custom Evaluation data
-  ####################################################################
-  if (!iseval) {
-    evalchk <- tryCatch(
-      customEvalchk(states = popFilter$states, 
+    ####################################################################
+    ## 4. Check custom Evaluation data
+    ####################################################################
+    if (!iseval) {
+      evalchk <- tryCatch(
+        customEvalchk(states = popFilter$states, 
                     measCur = popFilter$measCur, 
                     measEndyr = popFilter$measEndyr, 
                     invyrs = popFilter$invyrs, 
                     measyrs = popFilter$measyrs,
                     invyrtab = invyrtab),
-      error = function(e) {
-        message(e,"\n")
-        return(NULL) })
-    if (!is.null(evalchk)) {
-      #    if (is.null(evalchk)) {
-      #      stop("must specify an evaluation timeframe for data extraction... \n", 
-      #           "...see eval_opts parameter, (e.g., eval_opts=eval_options(Cur=TRUE))")
-      #    }
-      measCur <- evalchk$measCur
-      measEndyr <- evalchk$measEndyr
-      invyrs <- evalchk$invyrs
-      measyears <- evalchk$measyrs
-      invyrlst <- evalchk$invyrlst
-      measyrlst <- evalchk$measyrlst
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
+      if (!is.null(evalchk)) {
+        measCur <- evalchk$measCur
+        measEndyr <- evalchk$measEndyr
+        invyrs <- evalchk$invyrs
+        measyears <- evalchk$measyrs
+        invyrlst <- evalchk$invyrlst
+        measyrlst <- evalchk$measyrlst
+      }
     }
   }
   

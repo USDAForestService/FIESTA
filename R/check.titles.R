@@ -232,7 +232,8 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
         title.part1 <- paste0(title.part1, title.unitsn2)
         title.unitsn <- title.unitsn[1]
       }
-	  
+
+
       ## title.part2
       ####################################################################
       title.rowgrp2 <- if(!is.null(title.rowgrp)) paste(" and", title.rowgrp)

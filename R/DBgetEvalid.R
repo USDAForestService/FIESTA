@@ -501,7 +501,8 @@ DBgetEvalid <- function(states = NULL,
   if (all(is.null(popevalnm) && is.null(popevaltypnm) && is.null(popevalgrpnm))) {
     nopoptables <- TRUE
     
-    state.qry <- paste("SELECT DISTINCT statecd FROM", plotnm)
+    statecdnm <- findnm("STATECD", pltflds)
+    state.qry <- paste("SELECT DISTINCT ", statecdnm, " FROM", plotnm)
     if (indb) {
       stcdlstdb <- tryCatch( 
         DBI::dbGetQuery(dbconn, state.qry)[[1]],
@@ -528,7 +529,7 @@ DBgetEvalid <- function(states = NULL,
   ## Create state filter
   stfilter <- getfilter("STATECD", stcdlst, syntax='sql')
   
-  
+
   ######################################################################################
   ## Generate invyrtab
   ######################################################################################
@@ -601,11 +602,23 @@ DBgetEvalid <- function(states = NULL,
       invyrnm <- findnm("INVYR", pltflds, returnNULL=TRUE) 
       
       ## Check evalids 
+      evalidnm <- findnm("EVALID", ppsaflds, returnNULL=TRUE) 
+      if (is.null(evalidnm)) {
+        stop("EVALID is missing from ", ppsanm)
+      }
       evalid.qry <- paste0(
-        "SELECT DISTINCT evalid", 
+        "SELECT DISTINCT ", evalidnm, 
         "\nFROM ", SCHEMA., ppsanm) 
+
       if (indb) {
-        evalidindb <- DBI::dbGetQuery(dbconn, evalid.qry)[[1]]
+        evalidindb <- tryCatch(
+          DBI::dbGetQuery(dbconn, evalid.qry)[[1]],
+          error = function(e) {
+            message(e,"\n")
+            return(NULL) })
+        if (is.null(evalInfo)) {
+          stop()
+        }
       } else {
         evalidindb <- sqldf::sqldf(evalid.qry, connection=NULL)[[1]]
       }

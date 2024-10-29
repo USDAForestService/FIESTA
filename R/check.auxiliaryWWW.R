@@ -178,7 +178,7 @@ check.auxiliaryWWW <- function(pltassgn,
   ###################################################################################
   ## Collapse strata and/or estimation unit classes if errtab warnings
   ###################################################################################
-  if (!nonresp && any(errtab$errtyp == "warn")) {
+  if (any(errtab$errtyp == "warn")) {
     auxlut <- auxlut[auxlut[[unitvar]] %in% errtab[[unitvar]],]
     if (any(c(getwtvar, npixelvar, strwtvar) %in% names(auxlut))) {
       vars2combine <- unique(c(vars2combine, c(getwtvar, npixelvar, strwtvar)))

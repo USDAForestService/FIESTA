@@ -36,18 +36,17 @@ wwwCheckPlots <- function(popType,
   SAE <- FALSE
 
   ##############################################################################
-  ## 1. Check database connection (dbconn) or dsn and define SCHEMA.
+  ## Check database connection (dbconn) and define schema
   ##############################################################################
   if (!DBI::dbIsValid(dbconn)) {
     stop("dbconn is invalid")
   }
   #dbinfo <- DBI::dbGetInfo(dbconn)
   SCHEMA. <- ifelse (is.null(schema), "", paste0(schema, "."))
-  
 
 
   #################################################################################
-  ## 2. Build from query and set plot parameters
+  ## Check plotnm and get column names and unique identifiers
   #################################################################################
   if (is.null(plotnm)) {
     #pltassgnnm <- "plot_assign_plot_ppsa"
@@ -87,7 +86,7 @@ wwwCheckPlots <- function(popType,
   
 
   ##################################################################################
-  ## 3. Check plot filters for AOI
+  ## 1. Check plot filters for AOI and get where statement for querying pltids
   ##################################################################################
   datfilter <- suppressMessages(
     getpopFilterqry(popType = popType,
@@ -112,7 +111,7 @@ wwwCheckPlots <- function(popType,
   
   
   ######################################################################################
-  ## 4. Get plot counts by domain unit
+  ## 2. Get plot counts by domain unit within the AOI
   ######################################################################################
   pstatuscdnm <- findnm("PLOT_STATUS_CD", pflds, returnNULL=TRUE)
   if (!is.null(pltflds)) {
@@ -146,7 +145,7 @@ wwwCheckPlots <- function(popType,
   
   
   ######################################################################################
-  ## 5. Check number of plots to determine whether to use SAE methods
+  ## 3. Check number of plots to determine whether to use SAE methods
   ######################################################################################
   if (byeach) {
     if (any(plotcnt$NBRPLOTS < minplots)) {
@@ -160,11 +159,14 @@ wwwCheckPlots <- function(popType,
   
   
   ######################################################################################
-  ## 6. If SAE, get province names with max overlap to AOI
+  ## 4. If SAE methods, redefine the extent of the AOI
   ######################################################################################
   if (SAE) {
     message("number of plots are less then ", minplots, "... using SAE methods...")
     
+    
+    ## 4.1. If SAE, get province name(s) with max overlap to AOI
+    ######################################################################################
     domain.filter <- getfilter("domain_unit", AOI_domain_unit_values, syntax = "sql")
   
     if (byeach) {
@@ -210,8 +212,7 @@ wwwCheckPlots <- function(popType,
     popFilter$states <- states 
     
 
-    ##################################################################################
-    ## 7. Check plot filters for AOI plus provinces
+    ## 4.2. Check plot filters for AOI plus provinces
     ##################################################################################
     datfilter <- suppressMessages(
       getpopFilterqry(popType = popType,
@@ -234,13 +235,10 @@ wwwCheckPlots <- function(popType,
     popwhereqry <- datfilter$popwhereqry
     states <- datfilter$states
     invyrs <- datfilter$invyrs
-  }  
   
   
-  ##################################################################################
-  ## 8. Build select query for AOI domain units
-  ##################################################################################
-  if (SAE) {
+    ## 4.3. Build select query for AOI domain units and Ecomap subsections
+    ##################################################################################
     aoiselectqry <- paste0(
       "\n     CASE WHEN ", pfilter, 
       "\n          THEN ", AOI_table_name, " ELSE ecomap_subsection END AS domain_unit")
@@ -251,7 +249,11 @@ wwwCheckPlots <- function(popType,
       aoiwhereqry <- paste0(popwhereqry, 
                              "\n  AND ", province.filter)
     }
+    
   } else {
+    
+    ## 5. Build select query for AOI domain units 
+    ##################################################################################
     aoiselectqry <- paste0(
       AOI_table_name, " AS domain_unit")
     
@@ -260,7 +262,7 @@ wwwCheckPlots <- function(popType,
   
 
   ##################################################################################
-  ## 8. Return data
+  ## Return data
   ##################################################################################
   
   ## Create a list with pltassgn information to pass to modWWWpop
@@ -273,7 +275,6 @@ wwwCheckPlots <- function(popType,
   returnlst <- list(plotcnt = plotcnt,
                     plotcntqry = plotunitcntqry,
                     SAE = SAE,
-                    province_max = province_max,
                     aoiselectqry = aoiselectqry,
                     aoiwhereqry = aoiwhereqry,
                     pltafromqry = pltafromqry,
@@ -284,7 +285,9 @@ wwwCheckPlots <- function(popType,
                     states = states,
                     invyrs = invyrs
                     )
-  
+  if (SAE) {
+    returnlst$province_max <- province_max
+  }
   return(returnlst)
 }
 
