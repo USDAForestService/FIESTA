@@ -167,29 +167,22 @@ wwwCheckPlots <- function(popType,
     
     ## 4.1. If SAE, get province name(s) with max overlap to AOI
     ######################################################################################
-    domain.filter <- getfilter("domain_unit", AOI_domain_unit_values, syntax = "sql")
-  
+    domain.filterPG <- RPostgres::dbQuoteLiteral(conn, getfilter("lyr1.domain_unit", AOI_domain_unit_values, syntax = "sql"))
+    AOI_table_namePG <- RPostgres::dbQuoteLiteral(conn, AOI_table_name)
+
+    
     if (byeach) {
-    
       province_max.qry <- paste0(
-        "SELECT domain_unit, ecomap_province, max(acres_sum)
-        FROM
-        (SELECT domain_unit, ecomap_province, SUM(overlap_area) AS acres_sum",
-        "\nFROM ecomap_province_overlap",
-        "\nWHERE table_name = '", AOI_table_name, "'",
-        "\n  AND ", domain.filter,
-        "\nGROUP BY domain_unit, ecomap_province)",
-        "\nGROUP BY domain_unit")
+        "SELECT domain_unit, ecomap_province, MAX(overlap_area) as max_overlap_area ",
+        "FROM f_province_overlap(", AOI_table_namePG, ", ", domain.filterPG, ") ",
+        "GROUP BY domain_unit, ecomap_province")
+      
     } else {
-    
       province_max.qry <- paste0(
-        "SELECT ecomap_province, max(acres_sum)
-        FROM
-        (SELECT ecomap_province, SUM(overlap_area) AS acres_sum",
-        "\nFROM ecomap_province_overlap",
-        "\nWHERE table_name = '", AOI_table_name, "'",
-        "\n  AND ", domain.filter,
-        "\nGROUP BY ecomap_province)")
+        "SELECT ecomap_province, SUM(overlap_area) as sum_overlap_area ",
+        "\nFROM f_province_overlap(", AOI_table_namePG, ", ", domain.filterPG, ") ", 
+        "\nGROUP BY ecomap_province",
+        "\nORDER BY sum_overlap_area DESC")
     }
   
   
