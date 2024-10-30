@@ -1,7 +1,7 @@
 wwwGetAOI <- function(AOI_table_name,
                       AOI_domain_units,
                       prednames,
-                      pgconn,
+                      dbconn,
                       byeach = TRUE,
                       rastfolder = "rasterlayers",
                       minplots = 50) {
@@ -42,7 +42,7 @@ wwwGetAOI <- function(AOI_table_name,
   
   ## prep ----------------------------------------------------------------------
   
-  domain_unit <- DBI::dbGetQuery(pgconn,
+  domain_unit <- DBI::dbGetQuery(dbconn,
                                  paste0("SELECT domain_unit
                                          FROM ref_boundary
                                          WHERE table_name = '", AOI_table_name, "'"))[[1]]
@@ -65,7 +65,7 @@ wwwGetAOI <- function(AOI_table_name,
                           AOI_table_name = AOI_table_name,
                           AOI_domain_unit_values = AOI_domain_units,
                           minplots = minplots,
-                          dbconn = pgconn,
+                          dbconn = dbconn,
                           pltassgnnm = "plot_assign_plot",
                           plotnm = NULL)
   
@@ -80,21 +80,18 @@ wwwGetAOI <- function(AOI_table_name,
   states <- pltchk$states
   invyrs <- pltchk$invyrs
   SAE <- pltchk$SAE
-  province_max <- pltchk$province_max
-  largebnd.provinces <- unique(province_max$ecomap_province)
+  largebnd.provinces <- unique(pltchk$province_max$ecomap_province)
   aoiselect.qry <- pltchk$aoiselectqry
   aoiwhere.qry <- pltchk$aoiwhereqry
-  prov_dom_lut <- province_max
+  prov_dom_lut <- pltchk$province_max
   
   ## 2. build pltassgn_proj ------------------------------------------------------
-
-  # add popwhereqry to pltassgn
 
   pltidsid <- "CN"
   pltidvars <- c(pltidsid)
   pltidvars <- paste0("plta.", pltidvars)
   prednm.filter <- getfilter("display_name", prednames, syntax = "sql")
-  pred_shortnames <- DBI::dbGetQuery(pgconn,
+  pred_shortnames <- DBI::dbGetQuery(dbconn,
                                      paste0("SELECT short_name
                                              FROM ref_auxiliary
                                              WHERE ", prednm.filter))[[1]]
@@ -131,7 +128,7 @@ wwwGetAOI <- function(AOI_table_name,
                         
   }
   
-  pltassgn_proj <- DBI::dbGetQuery(pgconn, pltassgn.qry)
+  pltassgn_proj <- DBI::dbGetQuery(dbconn, pltassgn.qry)
   
   
   ## 3. get unitarea -----------------------------------------------------------
@@ -158,12 +155,12 @@ wwwGetAOI <- function(AOI_table_name,
     
   }
   
-  unitarea <- DBI::dbGetQuery(pgconn, unitarea_aoi.qry)
+  unitarea <- DBI::dbGetQuery(dbconn, unitarea_aoi.qry)
   
   # if not byeach collapse down
   if (!byeach) {
     if (SAE) {
-      # collapse values for AOI?
+      # collapse values for AOI
       cmb_area_aoi <- colSums(unitarea[unitarea$domain_unit %in% AOI_domain_units, "total_acres", drop = FALSE])
       names(cmb_area_aoi) <- NULL
       tmp <- data.frame(table_name = table_name,
@@ -176,7 +173,7 @@ wwwGetAOI <- function(AOI_table_name,
       cmb_area <- colSums(unitarea[ , "total_acres", drop = FALSE])
       names(cmb_area) <- NULL
       tmp <- data.frame(table_name = table_name,
-                        oneunit = 1,
+                        domain_unit = 1,
                         total_acres = cmb_area)
       unitarea <- tmp
     } 
@@ -184,9 +181,6 @@ wwwGetAOI <- function(AOI_table_name,
   
 
   ## 4. get unitzonal ----------------------------------------------------------
-  
-  # need to likely adjust SA module in FIESTA to filter unitlut down to the appropriate domains
-  # SAest.large line 1089
   
   if (SAE) {
 
@@ -203,8 +197,8 @@ wwwGetAOI <- function(AOI_table_name,
                            "\nFROM ref_auxiliary",
                            "\nWHERE (", aux_layer_filter, ") AND type = 'Categorical'")
     
-    aux_cont <- DBI::dbGetQuery(pgconn, aux_cont_qry)
-    aux_cat <- DBI::dbGetQuery(pgconn, aux_cat_qry)
+    aux_cont <- DBI::dbGetQuery(dbconn, aux_cont_qry)
+    aux_cat <- DBI::dbGetQuery(dbconn, aux_cat_qry)
     
     if (nrow(aux_cont) != 0) {
       rastlst.cont <- paste0(rastfolder, "/", aux_cont$layer_name)
@@ -217,18 +211,9 @@ wwwGetAOI <- function(AOI_table_name,
     if (nrow(aux_cat) != 0) {
       rastlst.cat <- paste0(rastfolder, "/", aux_cat$layer_name)
       rastlst.cat.name <- aux_cat$short_name
-      dunitzonal_nms <- DBI::dbGetQuery(pgconn,
-                                        "SELECT column_name
-                                         FROM information_schema.columns
-                                         WHERE table_name = 'domain_unit_zonal'")
-      # cat_nms.filter <- getfilter('dunitzonal_nms', rastlst.cat.name, syntax = 'R', like = TRUE)
-      
-      # dunitzonal_nms <- DBI::dbGetQuery(pgconn,
-      #                                   "SELECT name
-      #                                    FROM pragma_table_info('domain_unit_zonal')")
-
-      cat_nms.filter <- getfilter('column_name', rastlst.cat.name, syntax = 'R', like = TRUE)
-      zonal_cat_cols <- subset(dunitzonal_nms, eval(parse(text = cat_nms.filter)))[["column_name"]]
+      dunitzonal_nms <- DBI::dbListFields(dbconn, "domain_unit_zonal")
+      zonal_cat_cols <- dunitzonal_nms[grepl(rastlst.cat.name, dunitzonal_nms)]
+    
       zonal_cat_cols_sqlfmt <-  paste0("\"",zonal_cat_cols, "\"")
 
     } else {
@@ -263,16 +248,25 @@ wwwGetAOI <- function(AOI_table_name,
     
   }
   
-  unitzonal_temp <- DBI::dbGetQuery(pgconn, unitzonal_aoi.qry)
+  unitzonal_temp <- DBI::dbGetQuery(dbconn, unitzonal_aoi.qry)
   
-  unitzonal_temp <- merge(unitzonal_temp, province_max[ ,c("domain_unit", "ecomap_province")],
-                          on = "domain_unit",
-                          all.x = TRUE)
-  
-  unitzonal_temp[is.na(unitzonal_temp$ecomap_province), "ecomap_province"] <- 
-    sub("(?<=\\d)([a-zA-Z]+)", "", 
-        unitzonal_temp[is.na(unitzonal_temp$ecomap_province), "domain_unit"],
-        perl = TRUE)
+  if (SAE) {
+    unitzonal_temp$ecomap_province <- NA
+    if (!byeach) {
+      unitzonal_temp[unitzonal_temp$domain_unit %in% AOI_domain_units, "ecomap_province"] <- largebnd.provinces
+    } else {
+      unitzonal_temp <- merge(unitzonal_temp, prov_dom_lut[ ,c("domain_unit", "ecomap_province")],
+                              on = "domain_unit",
+                              all.x = TRUE)
+    }
+    
+    unitzonal_temp[is.na(unitzonal_temp$ecomap_province), "ecomap_province"] <- 
+      sub("(?<=\\d)([a-zA-Z]+)", "", 
+          unitzonal_temp[is.na(unitzonal_temp$ecomap_province), "domain_unit"],
+          perl = TRUE)
+    
+  }
+
 
   
   if (SAE) {
@@ -287,11 +281,16 @@ wwwGetAOI <- function(AOI_table_name,
                                 "\nWHERE table_name = 'ecomap_subsection' AND ",
                                 prov.filter)
       
-      helpers_list <- DBI::dbGetQuery(pgconn, helpers_lst.qry)[[1]]
+      helpers_list <- DBI::dbGetQuery(dbconn, helpers_lst.qry)[[1]]
       helpers.filter <- getfilter("map_unit_symbol", helpers_list, syntax = "sql")
       
-      prov_domain_units <- prov_dom_lut[prov_dom_lut$ecomap_province == largebnd.provinces[i],
-                                        "domain_unit", drop = TRUE]
+      if (!byeach) {
+        prov_domain_units <- AOI_domain_units
+      } else {
+        prov_domain_units <- prov_dom_lut[prov_dom_lut$ecomap_province == largebnd.provinces[i],
+                                          "domain_unit", drop = TRUE]
+      }
+
       aoi.filter <- getfilter(domain_unit, prov_domain_units, syntax = "sql")
       
       # could this be optimized?
@@ -308,17 +307,17 @@ wwwGetAOI <- function(AOI_table_name,
                                         "\n FROM filtered_subsec AS s",
                                         "\n JOIN layer_filt ON ST_Intersects(s.geom, layer_filt.geom)")
       
-      intersecting_subsecs <- DBI::dbGetQuery(pgconn, intersecting_subsec.qry)[[1]]
+      intersecting_subsecs <- DBI::dbGetQuery(dbconn, intersecting_subsec.qry)[[1]]
       intersec_subsecs.filter <- getfilter("map_unit_symbol", intersecting_subsecs, syntax = 'sql')
       
       # load intersecting ecosubsections
-      helpersx <- sf::st_read(pgconn,
+      helpersx <- sf::st_read(dbconn,
                               query = paste0("SELECT * ",
                                              "FROM ecomap_subsections ",
                                              "WHERE ", intersec_subsecs.filter))
       
       # load layer aoi
-      lyrx <- sf::st_read(pgconn,
+      lyrx <- sf::st_read(dbconn,
                           query = paste0("SELECT * ",
                                          "FROM ", table_name, " ",
                                          "WHERE ", aoi.filter))
@@ -353,7 +352,7 @@ wwwGetAOI <- function(AOI_table_name,
       
       
       unitzonal_old <- unitzonal_temp[!unitzonal_temp$domain_unit %in% intersecting_subsecs, ]
-      unitzonal_temp <- rbind(unitzonal_old, data.frame(table_name = "ecomap_subsections", unitzonal_new))
+      unitzonal_temp <- rbind(unitzonal_old, data.frame(table_name = "ecomap_subsection", unitzonal_new))
       
     }
     
@@ -390,7 +389,7 @@ wwwGetAOI <- function(AOI_table_name,
       }
       
       unitzonal <- unitzonal[!(unitzonal$domain_unit %in% AOI_domain_units), , drop = FALSE] |>
-        rbind(cbind(tmp, cmb_zonals_aoi))
+        rbind(cbind(tmp, cmb_zonals_aoi, ecomap_province = largebnd.provinces))
       
     } else {
       

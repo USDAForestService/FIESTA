@@ -128,8 +128,8 @@ wwwCheckPlots <- function(popType,
   
   pltcnt_selectqry <- paste0(
     pltcnt_selectqry, ", ",
-    "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD == 1 THEN 1 ELSE 0 END) AS FOREST,",
-    "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD == 2 THEN 1 ELSE 0 END) AS NONFOREST")
+    "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD = 1 THEN 1 ELSE 0 END) AS FOREST,",
+    "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD = 2 THEN 1 ELSE 0 END) AS NONFOREST")
   
   ## Build query for plot counts
   plotunitcntqry <- paste0(
@@ -148,11 +148,11 @@ wwwCheckPlots <- function(popType,
   ## 3. Check number of plots to determine whether to use SAE methods
   ######################################################################################
   if (byeach) {
-    if (any(plotcnt$NBRPLOTS < minplots)) {
+    if (any(plotcnt$nbrplots < minplots)) {
       SAE <- TRUE
     }
   } else {
-    if (sum(plotcnt$NBRPLOTS) < minplots) {
+    if (sum(plotcnt$nbrplots) < minplots) {
       SAE <- TRUE
     }
   }
@@ -167,8 +167,8 @@ wwwCheckPlots <- function(popType,
     
     ## 4.1. If SAE, get province name(s) with max overlap to AOI
     ######################################################################################
-    domain.filterPG <- RPostgres::dbQuoteLiteral(conn, getfilter("lyr1.domain_unit", AOI_domain_unit_values, syntax = "sql"))
-    AOI_table_namePG <- RPostgres::dbQuoteLiteral(conn, AOI_table_name)
+    domain.filterPG <- RPostgres::dbQuoteLiteral(dbconn, getfilter("lyr1.domain_unit", AOI_domain_unit_values, syntax = "sql"))
+    AOI_table_namePG <- RPostgres::dbQuoteLiteral(dbconn, AOI_table_name)
 
     
     if (byeach) {
@@ -182,7 +182,8 @@ wwwCheckPlots <- function(popType,
         "SELECT ecomap_province, SUM(overlap_area) as sum_overlap_area ",
         "\nFROM f_province_overlap(", AOI_table_namePG, ", ", domain.filterPG, ") ", 
         "\nGROUP BY ecomap_province",
-        "\nORDER BY sum_overlap_area DESC")
+        "\nORDER BY sum_overlap_area DESC",
+        "\nLIMIT 1;")
     }
   
   
