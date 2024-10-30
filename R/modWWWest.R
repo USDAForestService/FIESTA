@@ -1,19 +1,18 @@
 modWWWest <- function(WWWpopdat,
-                      SAE,
                       SApackage = "JoSAE",
                       esttype,
                       landarea,
                       estseed = "none", 
                       ratiotype = "PERACRE",
                       woodland = "Y",
-                      estvarn = NULL, 
-                      estvarn.filter = NULL,
+                      estvar = NULL, 
+                      estvar.filter = NULL,
                       rowvar = NULL, 
                       colvar = NULL, 
                       savedata = FALSE, 
                       table_opts = NULL, 
                       title_opts = NULL, 
-                      savedata_opts = NULL){
+                      outfolder = NULL){
   
   ##################################################################################
   ## DESCRIPTION: 
@@ -417,18 +416,18 @@ modWWWest <- function(WWWpopdat,
     
     if (is.null(estdatGB)) stop()
     GBcols2keep <- c("domain_unit", "NBRPLT.gt0", "total_acres", cols2keep)
-    unit_totest <- estdatGB$unit_totest[, 
+    unit_totestGB <- estdatGB$unit_totest[, 
           c("domain_unit", "NBRPLT.gt0", "total_acres", cols2keep), with=FALSE]
-    setnames(unit_totest, cols2keep, paste0("GB", cols2keep))
-    unit_rowest <- estdatGB$unit_rowest[, 
+    setnames(unit_totestGB, cols2keep, paste0("GB", cols2keep))
+    unit_rowestGB <- estdatGB$unit_rowest[, 
           c("domain_unit", rowvar, title.rowvar, "NBRPLT.gt0", "total_acres", cols2keep), with=FALSE]
-    setnames(unit_rowest, cols2keep, paste0("GB", cols2keep))
-    # unit_colest <- estdatGB$unit_colest[, 
+    setnames(unit_rowestGB, cols2keep, paste0("GB", cols2keep))
+    # unit_colestGB <- estdatGB$unit_colest[, 
     #       c("domain_unit", colvar, title.colvar, "NBRPLT.gt0", "total_acres", cols2keep), with=FALSE], with=FALSE]
-    # setnames(unit_colest, cols2keep, paste0("GB", cols2keep))
-    # unit_grpest <- estdatGB$unit_grpest[, 
+    # setnames(unit_colestGB, cols2keep, paste0("GB", cols2keep))
+    # unit_grpestGB <- estdatGB$unit_grpest[, 
     #       c("domain_unit", rowvar, title.rowvar, colvar, title.colvar, "NBRPLT.gt0", "total_acres", cols2keep), with=FALSE], with=FALSE]
-    # setnames(unit_grpest, cols2keep, paste0("GB", cols2keep))
+    # setnames(unit_grpestGB, cols2keep, paste0("GB", cols2keep))
     
     estdatMA <- 
       getMAestimates(MAmethod = "greg",
@@ -466,8 +465,35 @@ modWWWest <- function(WWWpopdat,
     # setnames(unit_grpestMA, cols2keep, paste0("GREG", cols2keep))
   
 
-    unit_totest <- unit_totest[unit_totestMA]
-    unit_rowest <- unit_rowest[unit_rowestMA]
+    raw_unit_totest <- unit_totestGB[unit_totestMA]
+    raw_unit_rowest <- unit_rowestGB[unit_rowestMA]
+    
+    ## Append total number of plots in by domain_unit to raw_unit_totest
+    raw_unit_totest <- merge(raw_unit_totest, unitlut[,c("domain_unit", "n.total")], by="domain_unit")
+    
+    
+    
+    ## Choose estimator based on the smallest se of the total estimate
+    ###################################################################################
+    if (unit_totestMA$GREGest.se < unit_totestGB$GBest) {
+      unit_totest <- unit_totestMA
+      unit_rowest <- unit_rowestMA
+    } else {
+      unit_totest <- unit_totestGB
+      unit_rowest <- unit_rowestGB
+    }
+  }
+  
+  
+  
+  ## Write files to outfolder
+  ###################################################################################
+  writefiles <- c("unit_totest", "unit_rowest", "raw_unit_totest", "raw_unit_rowest")
+  for (i in 1:length(writefiles)) {
+    write2csv(get(writefiles[i]), 
+              outfolder = outfolder, 
+              outfilenm = writefiles[i], 
+              overwrite = FALSE)
   }
   
   returnlst <- list(unit_totest = unit_totest,
