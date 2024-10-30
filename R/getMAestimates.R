@@ -30,7 +30,7 @@ getMAestimates <- function(esttype,
   
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
-  modelselect_bydomain <- modelselect
+  modelselect_bydomain <- FALSE
   response <- estvarn.name
   predselectlst <- list()
   
