@@ -1,9 +1,9 @@
 ---
 output:
   word_document:
-    reference_docx: anGBtemplate.docx
+    reference_docx: anWWWtemplate.docx
 params:
-  SApopdatlst: ''
+  WWWpopdat: ''
   SApackage: ''
   SAmethod: ''
   AOInm: ''
@@ -20,23 +20,20 @@ params:
 library(data.table)
 library(RColorBrewer)
 
-SApopdatlst <- params$SApopdatlst
+WWWpopdat <- params$SApopdat
 AOInm <- params$AOInm
-pcfilter <- params$pcfilter
-SApackage <- params$SApackage
-SAmethod <- params$SAmethod
 fortypgrpcd <- params$fortypgrpcd
 title.ref <- params$title.ref
-#domain <- params$domain
-totals <- params$totals
+totals = TRUE
 
-SApopdatlst = SApopdatlst 
-SApackage = SApackage
-SAmethod = SAmethod 
-AOInm = AOInm
-title.ref = title.ref
-totals = FALSE
-outfolder = outfolder
+#AOInm = AOInm
+#title.ref = title.ref
+#outfolder = outfolder
+
+states <- WWWpopdat$states
+invyrs <- WWWpopdat$invyrs
+invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
+
 
 ```
 
@@ -48,7 +45,7 @@ na.fill <- "DIR"
 modelselect <- TRUE
 
 # AOInm <- "ecoM332"
-# load("E:/workspace/FIESTA/FIESTA_SA/testfolder4/M332/SApopdatlst.rda")
+# load("E:/workspace/FIESTA/FIESTA_SA/testfolder4/M332/WWWpopdat.rda")
 # pcfilter <- NULL
 # title.ref <- NULL
 # fortypgrpcd <- 200
@@ -61,61 +58,18 @@ if (is.null(title.ref)) {
   title.ref <- AOInm
 }
 
-eval <- TRUE
-if (is.null(SApopdatlst[[1]]$smallbnd)) {
-  eval <- FALSE
-}
 
-smallbnd.domain <- SApopdatlst[[1]]$smallbnd.domain
+aoibnd <- WWWpopdat$AOIbnd
 if (is.null(smallbnd.domain)) {
   smallbnd.domain <- "DOMAIN"
 }
-
-
-## pcfilter
-for (i in 1:length(SApopdatlst)) {
-  if (!is.null(pcfilter) && 'STATECD' %in% names(SApopdatlst$pltcondx)) {
-    pltcondf <- datFilter(SApopdat$pltcondx, xfilter=pcfilter)$xf
-    states <- pcheck.states(unique(pltcondf$STATECD))
-    invyrs <- unique(pltcondf$INVYR)
-  }
-}
-
-## Get all states and inventory years in SApopdatlst 
-states <- {}
-invyrs <- {}
-for (i in 1:length(SApopdatlst)) {
-  if (!is.null(pcfilter) && 'STATECD' %in% names(SApopdatlst[[i]]$pltcondx)) {
-    pltcondf <- datFilter(SApopdatlst[[i]]$pltcondx, xfilter=pcfilter)$xf
-    states <- sort(c(states, pcheck.states(unique(pltcondf$STATECD))))
-    invyrs <- sort(unique(c(invyrs, pltcondf$INVYR)))
-  } else if (!is.null(SApopdatlst[[i]]$states)) {
-    states <- sort(unique(c(states, SApopdatlst[[i]]$states)))
-    invyrs <- sort(unique(c(invyrs, unlist(SApopdatlst[[i]]$invyrs))))
-  }
-}
-
-
-if (is.null(pcfilter)) {
-  title.statesx=title.states <- NULL
-  title.filter <- NULL
-} else {
-  if (length(states) < 3) {
-    title.statesx <- paste(states, collapse=" and ")
-    title.states <- paste0(", ", paste(states, collapse=" and "))
-  } else {
-    title.statesx=title.states <- NULL 
-  }
-  title.filter <- AOInm
-}
-invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
 
 
 if (!eval) {
   intro_text1 <- "" 
                       
   intro_text2 <-
-    paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on area-level small area estimators from the R packages. Data for this report were extracted from the Forest Inventory and Analysis (FIA) database (Burrill et al. 2018).")
+    paste0("Estimates were generated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2023) and are based on area-level small area estimators from the R packages. Data for this report were extracted from the Forest Inventory and Analysis (FIA) database (Burrill et al. 2021).")
 }
 
 ```
@@ -136,9 +90,9 @@ Rocky Mountain Research Station, Forest Inventory and Analysis  | `r format(Sys.
 ```{r smallbnd, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5, eval=eval}
 
 smallbnd <- {}
-for (i in 1:length(SApopdatlst)) {
-  smallbnd <- rbind(smallbnd, SApopdatlst[[i]]$smallbnd)
-  smallbnd.unique <- SApopdatlst[[i]]$smallbnd.unique
+for (i in 1:length(WWWpopdat)) {
+  smallbnd <- rbind(smallbnd, WWWpopdat[[i]]$smallbnd)
+  smallbnd.unique <- WWWpopdat[[i]]$smallbnd.unique
 }  
 
 plot(sf::st_geometry(smallbnd), border="black", main="")
@@ -161,16 +115,16 @@ Figure 1. Small area of interest, `r title.ref``r title.states`, `r invyrs2`.
 
 dunitlut <- {}
 dunitarea <- {}
-for (i in 1:length(SApopdatlst)) {
-  if (!"AOI" %in% names(SApopdatlst[[i]]$dunitlut)) {
-    SApopdatlst[[i]]$dunitarea$AOI <- 1
-    SApopdatlst[[i]]$dunitlut$AOI <- 1
-    SApopdatlst[[i]]$condx$AOI <- 1
+for (i in 1:length(WWWpopdat)) {
+  if (!"AOI" %in% names(WWWpopdat[[i]]$dunitlut)) {
+    WWWpopdat[[i]]$dunitarea$AOI <- 1
+    WWWpopdat[[i]]$dunitlut$AOI <- 1
+    WWWpopdat[[i]]$condx$AOI <- 1
   }
     
-  dunitlut <- rbind(dunitlut, SApopdatlst[[i]]$dunitlut)
-  dunitarea <- rbind(dunitarea, SApopdatlst[[i]]$dunitarea)
-  areavar <- SApopdatlst[[i]]$areavar
+  dunitlut <- rbind(dunitlut, WWWpopdat[[i]]$dunitlut)
+  dunitarea <- rbind(dunitarea, WWWpopdat[[i]]$dunitarea)
+  areavar <- WWWpopdat[[i]]$areavar
 }
 
 
@@ -189,7 +143,7 @@ intro_text1 <- paste0("The total area of ", AOInm, " is ", format(round(totarea)
                       
 
 intro_text2 <-
-paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on area-level small area estimators from the R packages. Data for this report were extracted from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, " (Burrill et al. 2018).")
+paste0("Estimates in this report are generated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2023). The estimates are based on peer-reviewed statistical techniques using FIA data and available auxiliary information (Frescino et al. 2022). Here we present an opportunity for using estimation strategies alternative to FIA’s standard estimation method (Bechtold and Patterson 2005) to accommodate populations with few sample plots and to incorporate more auxiliary information to help reduce variance of the estimates.. Data for this report were extracted from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, " (Burrill et al. 2021).")
 
 ndoms <- nrow(dunitlut)
 figwidth <- ifelse(ndoms < 4, "25%", ifelse(ndoms < 8, "50%", 
@@ -224,7 +178,7 @@ Table 1. Area of forest land by `r tolower(smallbnd.domain)`, `r title.ref``r ti
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
-SAareadat1 <- modSAarea(SApopdatlst = SApopdatlst, 
+SAareadat1 <- modSAarea(WWWpopdat = WWWpopdat, 
                         SApackage = SApackage, 
                         SAmethod = SAmethod, 
                         landarea = "FOREST", 
@@ -339,7 +293,7 @@ Table 2. Net cubic-foot volume of live trees on forest land by `r tolower(smallb
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, include = FALSE}
  
-SAareadat2 <- modSAtree(SApopdatlst = SApopdatlst, 
+SAareadat2 <- modSAtree(WWWpopdat = WWWpopdat, 
                         SApackage = SApackage, 
                         SAmethod = SAmethod, 
                         landarea = "FOREST", 
@@ -442,7 +396,7 @@ Table 3. Square-feet basal area of live trees on forest land by `r tolower(small
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, include = FALSE}
 
-SAareadat3 <- modSAtree(SApopdatlst = SApopdatlst, 
+SAareadat3 <- modSAtree(WWWpopdat = WWWpopdat, 
                        SApackage = SApackage, 
                        SAmethod = SAmethod, 
                        landarea = "FOREST", 
@@ -547,7 +501,7 @@ Table 4. Net board-foot volume of live trees on forest land by `r tolower(smallb
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, include = FALSE}
 
-SAareadat4 <- modSAtree(SApopdatlst = SApopdatlst, 
+SAareadat4 <- modSAtree(WWWpopdat = WWWpopdat, 
                        SApackage = SApackage, 
                        SAmethod = SAmethod, 
                        landarea = "FOREST", 

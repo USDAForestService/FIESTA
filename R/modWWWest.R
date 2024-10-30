@@ -478,9 +478,14 @@ modWWWest <- function(WWWpopdat,
     if (unit_totestMA$GREGest.se < unit_totestGB$GBest) {
       unit_totest <- unit_totestMA
       unit_rowest <- unit_rowestMA
+      
+      WWWpopdat$reportdata$estimator <- "GREG"
+        
     } else {
       unit_totest <- unit_totestGB
       unit_rowest <- unit_rowestGB
+      
+      WWWpopdat$reportdata$estimator <- "Post-stratified"
     }
   }
   
