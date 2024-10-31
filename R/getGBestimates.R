@@ -9,7 +9,6 @@ getGBestimates <- function(esttype,
                            colvar, 
                            grpvar,
                            pltassgnx, 
-                           pltassgnid,
                            unitarea, 
                            unitvar, 
                            areavar,
@@ -35,7 +34,6 @@ getGBestimates <- function(esttype,
   ## colvar
   ## grpvar
   ## pltassgnx
-  ## pltassgnid
   ## unitarea
   ## unitvar
   ## areavar

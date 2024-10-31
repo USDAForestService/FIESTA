@@ -245,7 +245,7 @@ modWWWest <- function(WWWpopdat,
                              tfilter = estvar.filter,
                              pcdomainlst = pcdomainlst,
                              pcwhereqry = pcwhereqry,
-                             estseed = "add")
+                             estseed = estseed)
     #message(treeqry)
     
     ## Append tree query to pltidsWITHqry to get summed condition-level tree data
@@ -255,8 +255,8 @@ modWWWest <- function(WWWpopdat,
     #message(tdomdatqry)
     
     ## Run tdomdatqry
-    tdomdat <- data.table(DBI::dbGetQuery(dbconn, tdomdatqry))
-    setkeyv(tdomdat, c("plt_cn"))
+    domdat <- data.table(DBI::dbGetQuery(dbconn, tdomdatqry))
+    setkeyv(domdat, c("plt_cn"))
     #head(tdomdat)
   }
   
@@ -274,9 +274,13 @@ modWWWest <- function(WWWpopdat,
     #message(cdomdatqry)
     
     ## Run cdomdatqry
-    cdomdat <- data.table(DBI::dbGetQuery(dbconn, cdomdatqry))
-    setkeyv(cdomdat, c("plt_cn"))
+    domdat <- data.table(DBI::dbGetQuery(dbconn, cdomdatqry))
+    setkeyv(domdat, c("plt_cn"))
     #head(cdomdat)
+    
+    if (esttype == "RATIO") {
+      cdomdat <- domdat
+    }
   }
   
   if (esttype == "CHNG") {
@@ -440,66 +444,69 @@ modWWWest <- function(WWWpopdat,
   } else {
     cols2keep <- c("est", "est.se", "pse")
     estdatGB <- 
-      getGBestimates(esttype = esttype,
-                     domdatn = tdomdat,
-                     domdatd = cdomdat,
-                     uniqueid = "plt_cn",
-                     estvarn.name = estvarn.name,
-                     estvard.name = NULL,
-                     rowvar = rowvar, colvar = "NONE", 
-                     #grpvar = NULL,
-                     pltassgnx = pltassgnx,
-                     unitarea = unitarea,
-                     unitvar = unitvar,
-                     areavar = areavar,
-                     stratalut = stratalut,
-                     strvar = strvar,
-                     totals = totals,
-                     sumunits = FALSE,
-                     uniquerow = uniquerow,
-                     uniquecol = uniquecol)
+      getGBestimatesWWW(esttype = esttype,
+                        domdatn = domdat,
+                        domdatd = cdomdat,
+                        uniqueid = "plt_cn",
+                        estvarn.name = estvar.name,
+                        estvard.name = NULL,
+                        rowvar = rowvar, 
+                        colvar = "NONE", 
+                        grpvar = NULL,
+                        pltassgnx = pltassgnx,
+                        unitarea = unitarea,
+                        unitvar = unitvar,
+                        stratalut = stratalut,
+                        strvar = strvar,
+                        uniquerow = uniquerow,
+                        uniquecol = uniquecol)
     
     if (is.null(estdatGB)) stop()
     GBcols2keep <- c("domain_unit", "NBRPLT.gt0", "total_acres", cols2keep)
     unit_totestGB <- estdatGB$unit_totest[, 
           c("domain_unit", "NBRPLT.gt0", "total_acres", cols2keep), with=FALSE]
     setnames(unit_totestGB, cols2keep, paste0("GB", cols2keep))
-    unit_rowestGB <- estdatGB$unit_rowest[, 
-          c("domain_unit", rowvar, title.rowvar, "NBRPLT.gt0", "total_acres", cols2keep), with=FALSE]
-    setnames(unit_rowestGB, cols2keep, paste0("GB", cols2keep))
     
+    if (!is.null(estdatGB$unit_rowest)) {
+      unit_rowestGB <- estdatGB$unit_rowest[, 
+           c("domain_unit", rowvar, title.rowvar, "NBRPLT.gt0", "total_acres", cols2keep), with=FALSE]
+      setnames(unit_rowestGB, cols2keep, paste0("GB", cols2keep))
+    }
+    
+    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\getMAestimatesWWW.R")
     estdatMA <- 
-      getMAestimates(MAmethod = "greg",
-                     esttype = esttype,
-                     domdatn = tdomdat,
-                     domdatd = cdomdat,
-                     uniqueid = "plt_cn",
-                     estvarn.name = estvarn.name,
-                     estvard.name = NULL,
-                     rowvar = rowvar, colvar = "NONE", 
-                     #grpvar = NULL,
-                     pltassgnx = pltassgnx,
-                     unitlut = unitlut,
-                     unitarea = unitarea,
-                     npixels = npixels,
-                     unitvar = unitvar,
-                     areavar = areavar,
-                     prednames = prednames,
-                     totals = totals,
-                     uniquerow = uniquerow,
-                     uniquecol = uniquecol,
-                     modelselect = TRUE)
+      getMAestimatesWWW(MAmethod = "greg",
+                        esttype = esttype,
+                        domdatn = domdat,
+                        domdatd = cdomdat,
+                        uniqueid = "plt_cn",
+                        estvarn.name = estvar.name,
+                        estvard.name = NULL,
+                        rowvar = rowvar, 
+                        colvar = "NONE", 
+                        grpvar = NULL,
+                        pltassgnx = pltassgnx,
+                        unitlut = unitlut,
+                        unitarea = unitarea,
+                        npixels = npixels,
+                        unitvar = unitvar,
+                        prednames = prednames,
+                        uniquerow = uniquerow,
+                        uniquecol = uniquecol,
+                        modelselect = TRUE)
     
     if (is.null(estdatMA)) stop()
     unit_totestMA <- estdatMA$unit_totest[, 
             c("domain_unit", cols2keep), with=FALSE]
     setnames(unit_totestMA, cols2keep, paste0("GREG", cols2keep))
-    unit_rowestMA<- estdatMA$unit_rowest[, 
-            c("domain_unit", rowvar, cols2keep), with=FALSE]
-    setnames(unit_rowestMA, cols2keep, paste0("GREG", cols2keep))
-
     raw_unit_totest <- unit_totestGB[unit_totestMA]
-    raw_unit_rowest <- unit_rowestGB[unit_rowestMA]
+    
+    if (!is.null(estdatMA$unit_rowest)) {
+      unit_rowestMA<- estdatMA$unit_rowest[, 
+              c("domain_unit", rowvar, cols2keep), with=FALSE]
+      setnames(unit_rowestMA, cols2keep, paste0("GREG", cols2keep))
+      raw_unit_rowest <- unit_rowestGB[unit_rowestMA]
+    }
     
     ## Append total number of plots in by domain_unit to raw_unit_totest
     raw_unit_totest <- merge(raw_unit_totest, unitlut[,c("domain_unit", "n.total")], by="domain_unit")

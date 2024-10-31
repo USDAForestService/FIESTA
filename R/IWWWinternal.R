@@ -744,7 +744,7 @@ wwwGettreeqry <- function(estvar,
   } else {
     estvarlst <- c(estvar, "tpa_unadj")
     if (estseed %in% c("only", "add")) {
-      stop("estvar must be equal to tpa_unadj")
+      stop("estvar must be equal to tpa_unadj to include seedlings")
     }
     tsumnm <- paste0(estvar, "_tpa")
   }

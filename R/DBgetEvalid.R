@@ -616,7 +616,7 @@ DBgetEvalid <- function(states = NULL,
           error = function(e) {
             message(e,"\n")
             return(NULL) })
-        if (is.null(evalInfo)) {
+        if (is.null(evalidindb)) {
           stop()
         }
       } else {
