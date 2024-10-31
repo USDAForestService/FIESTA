@@ -9,6 +9,7 @@ modWWWest <- function(WWWpopdat,
                       estvar.filter = NULL,
                       rowvar = NULL, 
                       colvar = NULL, 
+                      dbconn, 
                       savedata = FALSE, 
                       table_opts = NULL, 
                       title_opts = NULL, 
@@ -19,6 +20,7 @@ modWWWest <- function(WWWpopdat,
   ## Generates per-acre or per-tree estimates by domain using ratio estimators
   ##################################################################################
   
+  unit_totest <- unit_rowest <- raw_unit_rowest <- raw_unit_totest <- NULL
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -33,30 +35,10 @@ modWWWest <- function(WWWpopdat,
   }
   
   ## Check parameter lists
-  pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
-                savedata_opts=savedata_opts)
+  pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts)
   
   
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-  
+ 
   ## Set table defaults
   table_defaults_list <- formals(table_options)[-length(formals(table_options))]
   for (i in 1:length(table_defaults_list)) {
@@ -108,12 +90,14 @@ modWWWest <- function(WWWpopdat,
   totals <- TRUE
   returnlst <- list()
   largebnd.unique <- "ecomap_province"
+  unitvar <- "domain_unit"
   
   
   ##################################################################
   ## Get population data from WWWpopdat
   ##################################################################
   SAE <- WWWpopdat$SAE
+  popType <- WWWpopdat$popType
   pltassgnx <- WWWpopdat$pltassgnx
   unitarea <- WWWpopdat$unitarea
   unitlut <- WWWpopdat$unitlut
@@ -140,17 +124,7 @@ modWWWest <- function(WWWpopdat,
   } else if (popType == "CHNG") {
     pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjCHNG
   }
-  
-  
-  rowvar <- "FORTYPCD"
-  landarea <- "FOREST"
-  woodland <- "Y"
-  estseed <- "none" 
-  esttype <- "TREE"
-  ratiotype <- "PERACRE"
-  estvarn <- "TPA_UNADJ"
-  #estvarn <- "volcfnet"
-  estvarn.filter <- "STATUSCD == 1"
+
   
   
   
@@ -267,8 +241,8 @@ modWWWest <- function(WWWpopdat,
     ###############################################################################
 
     ## Get tree query
-    treeqry <- wwwGettreeqry(estvar = estvarn,
-                             tfilter = estvarn.filter,
+    treeqry <- wwwGettreeqry(estvar = estvar,
+                             tfilter = estvar.filter,
                              pcdomainlst = pcdomainlst,
                              pcwhereqry = pcwhereqry,
                              estseed = "add")
@@ -301,7 +275,7 @@ modWWWest <- function(WWWpopdat,
     
     ## Run cdomdatqry
     cdomdat <- data.table(DBI::dbGetQuery(dbconn, cdomdatqry))
-    setkeyv(tdomdat, c("plt_cn"))
+    setkeyv(cdomdat, c("plt_cn"))
     #head(cdomdat)
   }
   
@@ -325,8 +299,8 @@ modWWWest <- function(WWWpopdat,
                    unitvar = unitvar, 
                    rowvar = rowvar, 
                    colvar = "NONE", 
-                   estvarn = estvarn, 
-                   estvarn.filter = estvarn.filter,
+                   estvarn = estvar, 
+                   estvarn.filter = estvar.filter,
                    returntitle = TRUE, 
                    rawdata = TRUE, 
                    states = states, invyrs = invyrs,
@@ -346,8 +320,6 @@ modWWWest <- function(WWWpopdat,
                    landarea = landarea)
   }
   
-  title.est <- alltitlelst$title.est
-  title.pse <- alltitlelst$title.pse
   title.estpse <- alltitlelst$title.estpse
   title.ref <- alltitlelst$title.ref
   title.rowvar <- alltitlelst$title.rowvar
@@ -369,28 +341,101 @@ modWWWest <- function(WWWpopdat,
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
-  estvarn.name <- "estimated_tvalue"
+  estvar.name <- "estimated_tvalue"
   
   if (SAE) {
-    estdatSA <- 
-      getSAestimates(esttype = esttype,
-                     domdat = tdomdat,
-                     SApackage = SApackage,
-                     uniqueid = "plt_cn",
-                     estvar.name = estvarn.name,
-                     rowvar = rowvar, colvar = "NONE", 
-                     grpvar = NULL,
-                     pltassgnx = pltassgnx,
-                     dunitarea = unitarea,
-                     dunitvar = unitvar,
-                     areavar = areavar,
-                     prednames = prednames,
-                     predfac = predfac,
-                     totals = totals,
-                     uniquerow = uniquerow,
-                     uniquecol = uniquecol)
+    
+    SAestimates <- getSAestimatesWWW(esttype = esttype,
+                                     i = 1,
+                                     largebnd.unique = largebnd.unique,
+                                     estvar.name = estvar.name,
+                                     domdat = tdomdat,
+                                     pltassgnx = pltassgnx,
+                                     dunitlut = unitlut,
+                                     dunitvar = unitvar,
+                                     uniqueid = "plt_cn",
+                                     pltassgnid = "plt_cn",
+                                     prednames = prednames,
+                                     rowvar = rowvar,
+                                     SApopdatnm = "out",
+                                     SAdomsDF = NULL,
+                                     smallbnd.dom = "domain_unit",
+                                     SApackage = SApackage,
+                                     SAmethod = SAmethod,
+                                     showsteps = FALSE,
+                                     savesteps = FALSE,
+                                     stepfolder = NULL,
+                                     prior = function(x) 1/(sqrt(x)*(1+x)),
+                                     modelselect = FALSE,
+                                     multest = TRUE,
+                                     SAobjlst = list(),
+                                     estlst = list(),
+                                     pdomdatlst = list(),
+                                     dunitlutlst = list(),
+                                     SAdomvars = NULL,
+                                     SAobjlst_row = list(),
+                                     estlst_row = list(),
+                                     predselectlst.unit = list(),
+                                     predselectlst.area = list(),
+                                     predselectlst.unit_row = list(),
+                                     predselectlst.area_row = list(),
+                                     pdomdatlst_row = list(),
+                                     dunitlutlst_row = list(),
+                                     save4testing = FALSE)
+    
+    if(is.null(SAestimates)) stop()
+    
+    SAobjlst <- SAestimates$SAobjlst
+    estlst <- SAestimates$estlst
+    
+    estdf <- do.call(rbind, estlst)
+    
+    aoi_doms <- unique(pltassgnx[pltassgnx$aoi == 1, "domain_unit"][[1]])
+    
+    estdf$aoi <- ifelse(estdf$DOMAIN %in% aoi_doms, 1, 0)
+    
+    vars <- c("ecomap_province", "total", "DOMAIN", "NBRPLT", "NBRPLT.gt0")
+    estimator_vars <- c("JU.GREG", "JU.GREG.se", "JFH", "JFH.se")
+    estdf <- estdf[estdf$aoi == 1, c(vars, estimator_vars), with = FALSE]
+    raw_unit_totest <- estdf
+    
+    # choose based on which has fewer NA values
+    if(mean(!is.na(estdf$JFH)) >= mean(!is.na(estdf$JU.GREG))) {
+      chosen.est <- c("JFH", "JFH.se")
+      WWWpopdat$reportdata$estimator <- "JFH"
+    } else {
+      chosen.est <- c("JU.GREG", "JU.GREG.se")
+      WWWpopdat$reportdata$estimator <- "JU.GREG"
+    }
+    unit_totest <- estdf[ , c("DOMAIN", chosen.est, "NBRPLT", "NBRPLT.gt0"), with = FALSE]
+    setnames(unit_totest, "NBRPLT", "n.total")
+    setnames(unit_totest, "DOMAIN", "domain_unit")
     
     
+    SAobjlst_row <- SAestimates$SAobjlst_row
+    estlst_row <- SAestimates$estlst_row
+    
+    if(length(estlst_row) != 0) {
+      
+      estdf_row <- do.call(rbind, estlst_row)
+      estdf_row$aoi <- ifelse(estdf_row$DOMAIN %in% aoi_doms, 1, 0)
+    
+      estdf_row <- estdf_row[estdf_row$aoi == 1, c(vars, estimator_vars), with = FALSE]
+      raw_unit_rowest <- estdf_row
+      
+      # choose based on which has fewer NA values
+      if(mean(!is.na(estdf_row$JFH)) >= mean(!is.na(estdf_row$JU.GREG))) {
+        chosen.est <- c("JFH", "JFH.se")
+        WWWpopdat$reportdata$estimator <- "JFH"
+      } else {
+        chosen.est <- c("JU.GREG", "JU.GREG.se")
+        WWWpopdat$reportdata$estimator <- "JU.GREG"
+      }
+      unit_rowest <- estdf_row[ , c("DOMAIN", chosen.est, "NBRPLT", "NBRPLT.gt0"), with = FALSE]
+      setnames(unit_rowest, "NBRPLT", "n.total")
+      setnames(unit_rowest, "DOMAIN", "domain_unit")
+      
+    }
     
   } else {
     cols2keep <- c("est", "est.se", "pse")
@@ -422,12 +467,6 @@ modWWWest <- function(WWWpopdat,
     unit_rowestGB <- estdatGB$unit_rowest[, 
           c("domain_unit", rowvar, title.rowvar, "NBRPLT.gt0", "total_acres", cols2keep), with=FALSE]
     setnames(unit_rowestGB, cols2keep, paste0("GB", cols2keep))
-    # unit_colestGB <- estdatGB$unit_colest[, 
-    #       c("domain_unit", colvar, title.colvar, "NBRPLT.gt0", "total_acres", cols2keep), with=FALSE], with=FALSE]
-    # setnames(unit_colestGB, cols2keep, paste0("GB", cols2keep))
-    # unit_grpestGB <- estdatGB$unit_grpest[, 
-    #       c("domain_unit", rowvar, title.rowvar, colvar, title.colvar, "NBRPLT.gt0", "total_acres", cols2keep), with=FALSE], with=FALSE]
-    # setnames(unit_grpestGB, cols2keep, paste0("GB", cols2keep))
     
     estdatMA <- 
       getMAestimates(MAmethod = "greg",
@@ -450,6 +489,7 @@ modWWWest <- function(WWWpopdat,
                      uniquerow = uniquerow,
                      uniquecol = uniquecol,
                      modelselect = TRUE)
+    
     if (is.null(estdatMA)) stop()
     unit_totestMA <- estdatMA$unit_totest[, 
             c("domain_unit", cols2keep), with=FALSE]
@@ -457,13 +497,6 @@ modWWWest <- function(WWWpopdat,
     unit_rowestMA<- estdatMA$unit_rowest[, 
             c("domain_unit", rowvar, cols2keep), with=FALSE]
     setnames(unit_rowestMA, cols2keep, paste0("GREG", cols2keep))
-    # unit_colestMA <- estdatMA$unit_colest[, 
-    #         c("domain_unit", colvar, cols2keep), with=FALSE]
-    # setnames(unit_colestMA, cols2keep, paste0("GREG", cols2keep))
-    # unit_grpestMA <- estdatMA$unit_grpest[, 
-    #         c("domain_unit", rowvar, colvar, cols2keep), with=FALSE]
-    # setnames(unit_grpestMA, cols2keep, paste0("GREG", cols2keep))
-  
 
     raw_unit_totest <- unit_totestGB[unit_totestMA]
     raw_unit_rowest <- unit_rowestGB[unit_rowestMA]

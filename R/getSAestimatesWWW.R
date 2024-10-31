@@ -31,8 +31,6 @@ getSAestimatesWWW <- function(esttype, i, largebnd.unique,
                            pdomdatlst_row,
                            dunitlutlst_row,
                            save4testing) {
-  
-  
 
   
   dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
@@ -44,7 +42,7 @@ getSAestimatesWWW <- function(esttype, i, largebnd.unique,
   }
   
   ## Join domdat to pltassgnx using data.table key
-  domdat <- pltassgnx[domdat]
+  domdat <- domdat[pltassgnx, on = .(plt_cn)]
   
   ## Append TOTAL to domdat
   domdat$total <- 1
@@ -68,12 +66,9 @@ getSAestimatesWWW <- function(esttype, i, largebnd.unique,
     largebnd.vals <- 1
   }
 
-  prednames <- c("lf2020_elevation", "terrain_ruggedness", "prism_precipitation",      
-                 "prism_temperature_mean", "prism_temperature_min01", 
-                 "lf2022_evh_tree_height", "lf2022_evc_tree_cover", "lf2022_evt_tree_nontree2")
   
    
-  byvars <- unique(c(largebnd.unique, unitvar, "aoi", uniqueid, "total", prednames))
+  byvars <- unique(c(largebnd.unique, dunitvar, "aoi", uniqueid, "total", prednames))
   if (all(c("X", "Y") %in% names(pltassgnx))) {
     byvars <- c(byvars, "X","Y")
   }
@@ -87,26 +82,7 @@ getSAestimatesWWW <- function(esttype, i, largebnd.unique,
   largebnd.vals <- sort(unique(domdattot[[largebnd.unique]]))
   largebnd.vals <- largebnd.vals[table(domdattot[[largebnd.unique]]) > 30]
   
-  source("C:\\_tsf\\_GitHub\\FIESTAutils\\R\\SAest.pbar.R")
-  
-dat = domdattot  
-dunitvar = "domain_unit"
-domain = "total"
-response = estvar.name
-cuniqueid = "plt_cn"
-vars2keep = NULL
-save4testing = FALSE
-multest = TRUE
-dunitlut = unitlut
-modelselect = TRUE
-
-npixels <- dunitlut[, c("domain_unit", "pixel_count")]
-setnames(npixels, "pixel_count", "npixels")
-setnames(dunitlut, "pixel_count", "npixels")
-
-largebnd.val <- "342"
-
-setnames(dunitlut, "domain_unit", "DOMAIN")
+  setnames(dunitlut, "domain_unit", "DOMAIN")
 
 
   dunit_totestlst <- 
@@ -115,13 +91,13 @@ setnames(dunitlut, "domain_unit", "DOMAIN")
         lapply(largebnd.vals, SAest.large, 
                dat = domdattot, 
                cuniqueid = uniqueid, largebnd.unique = largebnd.unique, 
-               dunitlut = unitlut, dunitvar = "DOMAIN", 
-               prednames = prednames, domain = "TOTAL", response = response, 
+               dunitlut = dunitlut, dunitvar = "DOMAIN", 
+               prednames = prednames, domain = "total", response = response, 
                showsteps = showsteps, savesteps = savesteps, 
                stepfolder = stepfolder, prior = prior, 
                modelselect=modelselect, multest=multest,
                SApackage = SApackage, SAmethod = SAmethod, bayes = bayes, 
-               save4testing=FALSE, vars2keep = vars2keep)
+               save4testing=FALSE, vars2keep = "aoi")
       },
       error = function(cond) {
         message("error with estimates of ", response, "...")
@@ -219,7 +195,7 @@ setnames(dunitlut, "domain_unit", "DOMAIN")
           lapply(largebnd.vals, SAest.large, 
                  dat = domdattot, 
                  cuniqueid = uniqueid, largebnd.unique = largebnd.unique, 
-                 dunitlut = unitlut, dunitvar = "DOMAIN",
+                 dunitlut = dunitlut, dunitvar = "DOMAIN",
                  prednames = prednames, domain = rowvar,
                  response = response, 
                  showsteps = showsteps, savesteps = savesteps,

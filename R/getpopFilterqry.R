@@ -171,13 +171,17 @@ getpopFilterqry <- function(popType,
     if (!is.numeric(states)) {
       states <- FIESTAutils::pcheck.states(states, statereturn="VALUE")
     }
+    #states <- c(6,8,16,30,32,41,49,53,56)
     evalgrps.qry <- 
       paste0("SELECT eval_grps FROM datamart_most_recent_inv WHERE statecd IN (",
                toString(states), ")")
-    evalgrps <- DBI::dbGetQuery(dbconn, evalgrps.qry)
-    evalpre <- sapply(evalgrps, substr, 1, nchar(evalgrps) - 2)
+    evalgrps <- DBI::dbGetQuery(dbconn, evalgrps.qry)[[1]]
+    evalpre <- substr(evalgrps, 1, nchar(evalgrps) - 4)
+    evalyr <- substr(evalgrps, nchar(evalgrps) - 1, nchar(evalgrps))
     evalend <- ifelse (popType == "CHNG", "03", "01")
-    popevalid <- paste0(evalpre, evalend)
+    popevalid <- paste0(evalpre, evalyr, evalend)
+    
+    #print(popevalid)
 
     ppsanm <- findnm("POP_PLOT_STRATUM_ASSGN", dbtables, returnNULL = TRUE)
     if (is.null(ppsanm)) {

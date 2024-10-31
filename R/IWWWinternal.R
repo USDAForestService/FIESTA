@@ -760,11 +760,19 @@ wwwGettreeqry <- function(estvar,
     #treeflds <- DBI::dbListFields(popconn, "tree")
     
     tWITHselectqry <- paste0(
-      "SELECT 'TREE' src, plt_cn, condid, CONDID, SUBP, TREE, ", toString(estvarlst), ",   
-        CASE WHEN dia IS NULL THEN adj_factor_subp
-        WHEN MIN(dia, 5 - 0.001) THEN adj_factor_micr
-        WHEN MIN(dia, 9999 - 0.001) THEN adj_factor_subp
-        ELSE adj_factor_macr END AS tadjfac")
+      "SELECT 'TREE' src, plt_cn, condid, SUBP, TREE, ", toString(estvarlst), ",
+      (CASE WHEN dia IS NULL THEN ADJ_FACTOR_SUBP
+           WHEN TPA_UNADJ > 50 THEN ADJ_FACTOR_MICR
+           WHEN TPA_UNADJ > 5 AND TPA_UNADJ < 10 THEN ADJ_FACTOR_SUBP
+           ELSE ADJ_FACTOR_MACR END) AS tadjfac"
+    )
+    
+    # tWITHselectqry <- paste0(
+    #   "SELECT 'TREE' src, plt_cn, condid, CONDID, SUBP, TREE, ", toString(estvarlst), ",   
+    #     CASE WHEN dia IS NULL THEN adj_factor_subp
+    #     WHEN MIN(dia, 5 - 0.001) THEN adj_factor_micr
+    #     WHEN MIN(dia, 9999 - 0.001) THEN adj_factor_subp
+    #     ELSE adj_factor_macr END AS tadjfac")
     
     tWITHfromqry <- paste0(
       "\nFROM tree t",
@@ -777,7 +785,7 @@ wwwGettreeqry <- function(estvar,
     if (estseed == "add") {
       
       sWITHselectqry <- paste0(
-        "\nSELECT 'SEED' src, plt_cn, condid, CONDID, SUBP, 0, TPA_UNADJ, adj.adj_factor_micr AS tadjfac")
+        "\nSELECT 'SEED' src, plt_cn, condid, SUBP, 0, TPA_UNADJ, adj.adj_factor_micr AS tadjfac")
       
       sWITHfromqry <- paste0(
         "\nFROM seedling s",
@@ -830,7 +838,7 @@ wwwGettreeqry <- function(estvar,
 
   tsumselectqry <- paste0(
     tselectqry, 
-    "ROUND(COALESCE(SUM(", paste(estvarlst, collapse = " * "), " * tadjfac),0), 8) AS ", tsumnm)
+    "COALESCE(SUM(", paste(estvarlst, collapse = " * "), " * tadjfac),0) AS ", tsumnm)
   
   tfromqry <- paste0(
     "\nFROM pltcondx pc",

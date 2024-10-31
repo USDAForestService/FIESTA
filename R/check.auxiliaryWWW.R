@@ -35,7 +35,8 @@ check.auxiliaryWWW <- function(pltassgn,
   unitstrgrplut=vars2combine=unitlessthan=errtyp=unitlevels <- NULL
 
   ## Set default parameters
-  puniqueid <- "plt_cn"
+  pltassgnid <- "plt_cn"
+  puniqueid <- pltassgnid
   npixelvar=getwtvar <- "pixel_count"
   stratcombine <- TRUE
   pivotstrat <- FALSE

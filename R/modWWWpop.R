@@ -18,9 +18,11 @@ modWWWpop <- function(popType = "VOL",
   condid <- "condid"
   defaultVars <- TRUE
   areawt <- "condprop_unadj"
+  areavar <- "total_acres"
   ACI <-  FALSE
   areaunits <- "acres"
   unit.action = "remove"
+  unitvar <- "domain_unit"
 
   ## Define database queries lists
   dbqueries <- {}
@@ -38,7 +40,7 @@ modWWWpop <- function(popType = "VOL",
   aoifromqry <- aoiqueries$aoifromqry
   aoiwhereqry <- aoiqueries$aoiwhereqry
   SAE <- aoidata$SAE
-  AOI_table_name <- AOI_table_name
+  AOI_table_name <- aoidata$AOI_table_name
   
   pltassgnid <- aoidata$pltassgnid
   pltidsid <- aoidata$pltidsid
@@ -170,6 +172,9 @@ modWWWpop <- function(popType = "VOL",
     
   if (is.null(auxdat)) return(0)
   pltassgnx <- setDT(auxdat$pltx)
+  
+  print(head(pltassgnx))
+  
   setkeyv(pltassgnx, pltassgnid)
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
@@ -286,6 +291,7 @@ modWWWpop <- function(popType = "VOL",
   ## Build list of data to return
   ###################################################################################
   returnlst <- list(SAE = SAE,
+                    popType = popType,
                     pltassgnx = pltassgnx,  
                     unitarea = unitarea,
                     unitlut = unitlut,

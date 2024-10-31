@@ -98,7 +98,7 @@ wwwGetAOI <- function(AOI_table_name,
 
   if (SAE) {
     
-    pltassgn.qry <- paste0("SELECT ", toString(c(pltidvars, "ecomap_province")), ", ",
+    pltassgn.qry <- paste0("SELECT ", toString(c("plt_cn", "ecomap_province")), ", ",
                            aoiselect.qry, ", ",
                            "\n     CASE WHEN ", pfilter, 
                            "\n          THEN 1 ELSE 0 END AS aoi, ",
@@ -113,7 +113,7 @@ wwwGetAOI <- function(AOI_table_name,
     
   } else {
     
-    pltassgn.qry <- paste0("SELECT ", toString(pltidvars), ", ",
+    pltassgn.qry <- paste0("SELECT ", toString("plt_cn"), ", ",
                            aoiselect.qry, ", ",
                            "\n     1 AS aoi, ",
                            "\n     ", toString(pred_shortnames),
@@ -251,8 +251,8 @@ wwwGetAOI <- function(AOI_table_name,
   unitzonal_temp <- DBI::dbGetQuery(dbconn, unitzonal_aoi.qry)
   
   if (SAE) {
-    unitzonal_temp$ecomap_province <- NA
     if (!byeach) {
+      unitzonal_temp$ecomap_province <- NA
       unitzonal_temp[unitzonal_temp$domain_unit %in% AOI_domain_units, "ecomap_province"] <- largebnd.provinces
     } else {
       unitzonal_temp <- merge(unitzonal_temp, prov_dom_lut[ ,c("domain_unit", "ecomap_province")],
@@ -426,7 +426,7 @@ wwwGetAOI <- function(AOI_table_name,
               SAE = SAE,
               AOI_table_name = AOI_table_name,
               strvar = "lf2022_evt_tree_nontree",
-              pltassgnid = "CN",
+              pltassgnid = "plt_cn",
               pltidsid = pltidsid)
   
   return(out)
