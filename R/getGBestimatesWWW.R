@@ -26,6 +26,8 @@ getGBestimatesWWW <- function(esttype,
   totals <- TRUE
   strunitvars <- c(unitvar, strvar)
   areavar <- "total_acres"
+  row.add0=col.add0 <- FALSE
+  row.orderby=col.orderby=NULL
   
   message("generating post-stratified estimates using FIESTA...")
   

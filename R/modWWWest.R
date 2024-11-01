@@ -1,15 +1,15 @@
 modWWWest <- function(WWWpopdat,
-                      SApackage = "JoSAE",
+                      dbconn, 
                       esttype,
                       landarea,
-                      estseed = "none", 
-                      ratiotype = "PERACRE",
-                      woodland = "Y",
                       estvar = NULL, 
                       estvar.filter = NULL,
                       rowvar = NULL, 
                       colvar = NULL, 
-                      dbconn, 
+                      estseed = "none", 
+                      ratiotype = "PERACRE",
+                      woodland = "Y",
+                      SApackage = "JoSAE",
                       savedata = FALSE, 
                       table_opts = NULL, 
                       title_opts = NULL, 
@@ -249,13 +249,13 @@ modWWWest <- function(WWWpopdat,
     #message(treeqry)
     
     ## Append tree query to pltidsWITHqry to get summed condition-level tree data
-    tdomdatqry <- paste0(
+    domdatqry <- paste0(
       pltidsWITHqry, ", ",
       treeqry)
-    #message(tdomdatqry)
+    #message(domdatqry)
     
-    ## Run tdomdatqry
-    domdat <- data.table(DBI::dbGetQuery(dbconn, tdomdatqry))
+    ## Run domdatqry
+    domdat <- data.table(DBI::dbGetQuery(dbconn, domdatqry))
     setkeyv(domdat, c("plt_cn"))
     #head(tdomdat)
   }
@@ -268,13 +268,13 @@ modWWWest <- function(WWWpopdat,
     #message(condqry)
     
     ## Append cond query to pltidsWITHqry to get summed condprop_adj data
-    cdomdatqry <- paste0(
+    domdatqry <- paste0(
       pltidsWITHqry, 
       condqry)
-    #message(cdomdatqry)
+    #message(domdatqry)
     
-    ## Run cdomdatqry
-    domdat <- data.table(DBI::dbGetQuery(dbconn, cdomdatqry))
+    ## Run domdatqry
+    domdat <- data.table(DBI::dbGetQuery(dbconn, domdatqry))
     setkeyv(domdat, c("plt_cn"))
     #head(cdomdat)
     
@@ -442,6 +442,7 @@ modWWWest <- function(WWWpopdat,
     }
     
   } else {
+    
     cols2keep <- c("est", "est.se", "pse")
     estdatGB <- 
       getGBestimatesWWW(esttype = esttype,
@@ -473,7 +474,6 @@ modWWWest <- function(WWWpopdat,
       setnames(unit_rowestGB, cols2keep, paste0("GB", cols2keep))
     }
     
-    source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\getMAestimatesWWW.R")
     estdatMA <- 
       getMAestimatesWWW(MAmethod = "greg",
                         esttype = esttype,
@@ -543,6 +543,7 @@ modWWWest <- function(WWWpopdat,
   
   returnlst <- list(unit_totest = unit_totest,
                     unit_rowest = unit_rowest,
-                    titlelst = alltitlelst)
+                    titlelst = alltitlelst,
+                    domdatqry = domdatqry)
   return(returnlst)
 }

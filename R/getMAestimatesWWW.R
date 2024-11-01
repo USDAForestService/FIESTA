@@ -31,6 +31,8 @@ getMAestimatesWWW <- function(esttype,
   predselectlst <- list()
   totals <- TRUE
   areavar <- "total_acres"
+  row.add0=col.add0 <- FALSE
+  row.orderby=col.orderby=NULL
   
   
   masemethod <- switch(MAmethod,
