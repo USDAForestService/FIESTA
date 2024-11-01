@@ -51,6 +51,7 @@ modWWWpop <- function(popType = "VOL",
   pltassgn <- data.table(auxdata$pltassgn)
   unitarea <- data.table(auxdata$unitarea)
   auxlut <- data.table(auxdata$unitzonal)
+  reportdata <- aoidata$reportdata
   
   
   ## Query to define pltids
@@ -300,7 +301,8 @@ modWWWpop <- function(popType = "VOL",
                     areavar = areavar,
                     popconn = dbconn,
                     dbqueries = dbqueries,
-                    dbqueriesWITH = dbqueriesWITH)
+                    dbqueriesWITH = dbqueriesWITH,
+                    reportdata = reportdata)
   
   if (!SAE) {
     returnlst <- append(returnlst, 

@@ -1,9 +1,10 @@
-anWWWpop_report <- function(WWWpopdat, 
+anWWWpop_report <- function(WWWpopdat,
+                            WWWest,
+                            dbconn,
                             outfolder = NULL) {
   ## DESCRIPTION: Creates a report using Rmarkdown 
   ## 		Adds a folder named report in the outfolder and copies all 
   ##		components of report into folder.
-
   
   ##################################################################
   ## CHECK PARAMETER INPUTS
@@ -15,7 +16,24 @@ anWWWpop_report <- function(WWWpopdat,
   gui <- FALSE
   addfortypgrp <- FALSE
   
-
+  AOInm <- WWWpopdat$reportdata$AOI_table_name
+  AOI_domain_units <- WWWpopdat$reportdata$AOI_domain_units
+  
+  # create domain_unit_lut
+  ref_domain_unit <- WWWpopdat$reportdata$ref_domain_unit
+  display_dunit_nm <- DBI::dbGetQuery(dbconn,
+                                      paste0("SELECT domain_unit_name
+                                              FROM ref_boundary
+                                              WHERE table_name = ", "'", AOInm, "'"))[[1]]
+  
+  aoi.filt <- getfilter(ref_domain_unit, AOI_domain_units, syntax = 'sql')
+  
+  domain_unit_lut <- DBI::dbGetQuery(dbconn,
+                                     paste0("SELECT ", toString(c(ref_domain_unit, display_dunit_nm)),
+                                            " FROM ", AOInm,
+                                            " WHERE ", aoi.filt))
+                      
+  
   ## Check outfolder 
   outfolder <- pcheck.outfolder(outfolder)
 
@@ -50,10 +68,6 @@ anWWWpop_report <- function(WWWpopdat,
   }
   
   
-  ## Get AOInm
-  AOInm <- WWWpopdat$reportdata$AOI_table_name
-  
-  
   ## Copy files to outfolder
   rmdfn <- file.path(reportfolder, paste0(AOInm, '_report.Rmd'))
   reportnm <- paste0(AOInm, '_report.docx')
@@ -70,7 +84,9 @@ anWWWpop_report <- function(WWWpopdat,
     		input = rmdfn,
     		output_file = reportfn,
     		params = list(WWWpopdat = WWWpopdat, 
-    		              AOInm = AOInm,  
+    		              WWWest = WWWest,
+    		              domain_unit_display_nm = display_dunit_nm,
+    		              domain_unit_lut = domain_unit_lut,
     		              fortypgrpcd = fortypgrpcd),
     		envir = parent.frame()
   	),

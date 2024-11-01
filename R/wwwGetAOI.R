@@ -54,6 +54,7 @@ wwwGetAOI <- function(AOI_table_name,
   table_name.filter <- getfilter("table_name", table_name, syntax = "sql")
   
   strvar <- "lf2022_evt_tree_nontree"
+  largebnd.provinces <- NULL
 
   
   ## 1. check number of plots to determine whether to use SAE ------------------
@@ -182,48 +183,48 @@ wwwGetAOI <- function(AOI_table_name,
 
   ## 4. get unitzonal ----------------------------------------------------------
   
-  if (SAE) {
 
-    rastlst.cont <- rastlst.cont.name <- NULL
-    rastlst.cat <- rastlst.cat.name <- NULL
 
-    aux_layer_filter <- getfilter("short_name", pred_shortnames, syntax = "sql", like = FALSE)
-    
-    aux_cont_qry <- paste0("SELECT short_name, layer_name, type",
-                           "\nFROM ref_auxiliary",
-                           "\nWHERE (", aux_layer_filter, ") AND type = 'Continuous'")
-    
-    aux_cat_qry <- paste0("SELECT short_name, layer_name, type",
-                           "\nFROM ref_auxiliary",
-                           "\nWHERE (", aux_layer_filter, ") AND type = 'Categorical'")
-    
-    aux_cont <- DBI::dbGetQuery(dbconn, aux_cont_qry)
-    aux_cat <- DBI::dbGetQuery(dbconn, aux_cat_qry)
-    
-    if (nrow(aux_cont) != 0) {
-      rastlst.cont <- paste0(rastfolder, "/", aux_cont$layer_name)
-      rastlst.cont.name <- aux_cont$short_name
-    } else {
-      rastlst.cont <- NULL
-      rastlst.cont.name <- NULL
-    }
-    
-    if (nrow(aux_cat) != 0) {
-      rastlst.cat <- paste0(rastfolder, "/", aux_cat$layer_name)
-      rastlst.cat.name <- aux_cat$short_name
-      dunitzonal_nms <- DBI::dbListFields(dbconn, "domain_unit_zonal")
-      zonal_cat_cols <- dunitzonal_nms[grepl(rastlst.cat.name, dunitzonal_nms)]
-    
-      zonal_cat_cols_sqlfmt <-  paste0("\"",zonal_cat_cols, "\"")
+  rastlst.cont <- rastlst.cont.name <- NULL
+  rastlst.cat <- rastlst.cat.name <- NULL
 
-    } else {
-      rastlst.cat <- NULL
-      rastlst.cat.name <- NULL
-      zonal_cat_cols <- NULL
-      zonal_cat_cols_sqlfmt <- NULL
-    }
+  aux_layer_filter <- getfilter("short_name", pred_shortnames, syntax = "sql", like = FALSE)
+  
+  aux_cont_qry <- paste0("SELECT short_name, layer_name, type",
+                         "\nFROM ref_auxiliary",
+                         "\nWHERE (", aux_layer_filter, ") AND type = 'Continuous'")
+  
+  aux_cat_qry <- paste0("SELECT short_name, layer_name, type",
+                         "\nFROM ref_auxiliary",
+                         "\nWHERE (", aux_layer_filter, ") AND type = 'Categorical'")
+  
+  aux_cont <- DBI::dbGetQuery(dbconn, aux_cont_qry)
+  aux_cat <- DBI::dbGetQuery(dbconn, aux_cat_qry)
+  
+  if (nrow(aux_cont) != 0) {
+    rastlst.cont <- paste0(rastfolder, "/", aux_cont$layer_name)
+    rastlst.cont.name <- aux_cont$short_name
+  } else {
+    rastlst.cont <- NULL
+    rastlst.cont.name <- NULL
+  }
+  
+  if (nrow(aux_cat) != 0) {
+    rastlst.cat <- paste0(rastfolder, "/", aux_cat$layer_name)
+    rastlst.cat.name <- aux_cat$short_name
+    dunitzonal_nms <- DBI::dbListFields(dbconn, "domain_unit_zonal")
+    zonal_cat_cols <- dunitzonal_nms[grepl(rastlst.cat.name, dunitzonal_nms)]
+  
+    zonal_cat_cols_sqlfmt <-  paste0("\"",zonal_cat_cols, "\"")
+
+  } else {
+    rastlst.cat <- NULL
+    rastlst.cat.name <- NULL
+    zonal_cat_cols <- NULL
+    zonal_cat_cols_sqlfmt <- NULL
+  }
     
-  }  
+
   
   unitzonal_cols <- c("table_name", "domain_unit", "pixel_count",
                       c(rastlst.cont.name,  zonal_cat_cols_sqlfmt))
@@ -417,6 +418,23 @@ wwwGetAOI <- function(AOI_table_name,
   aoiqueries <- list(aoiselect = aoiselect.qry,
                      aoifromqry = pltafromqry,
                      aoiwhereqry = aoiwhere.qry)
+  
+  allaoi.filter <- getfilter(domain_unit, AOI_domain_units, syntax = 'sql')
+  
+  aoibnd <- sf::st_read(dbconn, 
+                        query = paste0("SELECT * ",
+                                       "FROM ", table_name, " ",
+                                       "WHERE ", allaoi.filter))
+  
+  reportdata <- list(provinces = largebnd.provinces,
+                     states = states,
+                     invyrs = invyrs,
+                     AOI_table_name = AOI_table_name,
+                     AOI_domain_units = AOI_domain_units,
+                     plotcnt = plotcnt,
+                     byeach = byeach,
+                     ref_domain_unit = domain_unit,
+                     aoibnd = aoibnd)
 
   out <- list(auxdata = auxdat,
               prednames = pred_shortnames,
@@ -424,10 +442,12 @@ wwwGetAOI <- function(AOI_table_name,
               aoiqueries = aoiqueries,
               pltidsqry = pltids.qry,
               SAE = SAE,
+              ref_domain_unit = domain_unit,
               AOI_table_name = AOI_table_name,
               strvar = "lf2022_evt_tree_nontree",
               pltassgnid = "plt_cn",
-              pltidsid = pltidsid)
+              pltidsid = pltidsid,
+              reportdata = reportdata)
   
   return(out)
   

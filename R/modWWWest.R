@@ -79,7 +79,6 @@ modWWWest <- function(WWWpopdat,
     colvarnm=title.colvar <- NULL
   title.ref <- NULL
   
-  
   ## Define default parameters
   ################################################################
   estround <- 2
@@ -294,7 +293,7 @@ modWWWest <- function(WWWpopdat,
   ###############################################################################
   if (esttype %in% c("TREE", "RATIO")) {
     alltitlelst <- 
-      check.titles(dat = tdomdat, 
+      check.titles(dat = domdat, 
                    esttype = esttype, 
                    estseed = estseed, 
                    woodland = woodland, 
@@ -353,7 +352,7 @@ modWWWest <- function(WWWpopdat,
                                      i = 1,
                                      largebnd.unique = largebnd.unique,
                                      estvar.name = estvar.name,
-                                     domdat = tdomdat,
+                                     domdat = domdat,
                                      pltassgnx = pltassgnx,
                                      dunitlut = unitlut,
                                      dunitvar = unitvar,
@@ -412,9 +411,7 @@ modWWWest <- function(WWWpopdat,
       WWWpopdat$reportdata$estimator <- "JU.GREG"
     }
     unit_totest <- estdf[ , c("DOMAIN", chosen.est, "NBRPLT", "NBRPLT.gt0"), with = FALSE]
-    setnames(unit_totest, "NBRPLT", "n.total")
-    setnames(unit_totest, "DOMAIN", "domain_unit")
-    
+    names(unit_totest) <- c("domain_unit", "est", "est.se", "n.total", "NBRPLT.gt0")
     
     SAobjlst_row <- SAestimates$SAobjlst_row
     estlst_row <- SAestimates$estlst_row
@@ -544,6 +541,7 @@ modWWWest <- function(WWWpopdat,
   returnlst <- list(unit_totest = unit_totest,
                     unit_rowest = unit_rowest,
                     titlelst = alltitlelst,
-                    domdatqry = domdatqry)
+                    domdatqry = domdatqry,
+                    reportdata = WWWpopdat$reportdata)
   return(returnlst)
 }
