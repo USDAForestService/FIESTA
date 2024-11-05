@@ -46,6 +46,8 @@ check.auxiliaryWWW <- function(pltassgn,
   standardize <- TRUE
   makedummy <- TRUE
   AOI <- TRUE
+  strwtvar <- 'strwt'
+  unitvar2=NULL
   
   
   ## Make factors

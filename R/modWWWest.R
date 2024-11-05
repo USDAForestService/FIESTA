@@ -21,6 +21,7 @@ modWWWest <- function(WWWpopdat,
   ##################################################################################
   
   unit_totest <- unit_rowest <- raw_unit_rowest <- raw_unit_totest <- NULL
+  unit_rowestMA <- unit_rowestGB <- NULL
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -245,7 +246,6 @@ modWWWest <- function(WWWpopdat,
                              pcdomainlst = pcdomainlst,
                              pcwhereqry = pcwhereqry,
                              estseed = estseed)
-    #message(treeqry)
     
     ## Append tree query to pltidsWITHqry to get summed condition-level tree data
     domdatqry <- paste0(
@@ -258,6 +258,7 @@ modWWWest <- function(WWWpopdat,
     setkeyv(domdat, c("plt_cn"))
     #head(tdomdat)
   }
+
   
   if (esttype %in% c("AREA", "RATIO")) {
     
@@ -369,7 +370,7 @@ modWWWest <- function(WWWpopdat,
                                      savesteps = FALSE,
                                      stepfolder = NULL,
                                      prior = function(x) 1/(sqrt(x)*(1+x)),
-                                     modelselect = FALSE,
+                                     modelselect = TRUE,
                                      multest = TRUE,
                                      SAobjlst = list(),
                                      estlst = list(),
@@ -388,6 +389,20 @@ modWWWest <- function(WWWpopdat,
     
     if(is.null(SAestimates)) stop()
     
+    predselectlst.unit <- SAestimates$predselectlst.unit
+    predselectlst.area <- SAestimates$predselectlst.area
+    
+    if (!is.null(predselectlst.unit)) {
+      
+      predselect.unitdf <- do.call(rbind, predselectlst.unit[["out"]])
+      
+    }
+    if (!is.null(predselectlst.area)) {
+      
+      predselect.areadf <- do.call(rbind, predselectlst.area[["out"]])
+      
+    }
+    
     SAobjlst <- SAestimates$SAobjlst
     estlst <- SAestimates$estlst
     
@@ -405,18 +420,35 @@ modWWWest <- function(WWWpopdat,
     # choose based on which has fewer NA values
     if(mean(!is.na(estdf$JFH)) >= mean(!is.na(estdf$JU.GREG))) {
       chosen.est <- c("JFH", "JFH.se")
-      WWWpopdat$reportdata$estimator <- "JFH"
+      WWWpopdat$reportdata$estimator_tot <- "JFH"
+      WWWpopdat$reportdata$preds.used.tot <- predselect.areadf
     } else {
       chosen.est <- c("JU.GREG", "JU.GREG.se")
-      WWWpopdat$reportdata$estimator <- "JU.GREG"
+      WWWpopdat$reportdata$estimator_tot <- "JU.GREG"
+      WWWpopdat$reportdata$preds.used.tot <- predselect.unitdf
     }
+    
     unit_totest <- estdf[ , c("DOMAIN", chosen.est, "NBRPLT", "NBRPLT.gt0"), with = FALSE]
     names(unit_totest) <- c("domain_unit", "est", "est.se", "n.total", "NBRPLT.gt0")
     
     SAobjlst_row <- SAestimates$SAobjlst_row
     estlst_row <- SAestimates$estlst_row
     
-    if(length(estlst_row) != 0) {
+    if(rowvar != "TOTAL") {
+      
+      predselectlst.unit_row <- SAestimates$predselectlst.unit_row
+      predselectlst.area_row <- SAestimates$predselectlst.area_row
+      
+      if (!is.null(predselectlst.unit+row)) {
+        
+        predselect.unitdf_row <- do.call(rbind, predselectlst.unit_row[["out"]])
+        
+      }
+      if (!is.null(predselectlst.area_row)) {
+        
+        predselect.areadf_row <- do.call(rbind, predselectlst.area_row[["out"]])
+        
+      }
       
       estdf_row <- do.call(rbind, estlst_row)
       estdf_row$aoi <- ifelse(estdf_row$DOMAIN %in% aoi_doms, 1, 0)
@@ -427,11 +459,14 @@ modWWWest <- function(WWWpopdat,
       # choose based on which has fewer NA values
       if(mean(!is.na(estdf_row$JFH)) >= mean(!is.na(estdf_row$JU.GREG))) {
         chosen.est <- c("JFH", "JFH.se")
-        WWWpopdat$reportdata$estimator <- "JFH"
+        WWWpopdat$reportdata$estimator_dom <- "JFH"
+        WWWpopdat$reportdata$preds_used_dom <- predselect.areadf_row
       } else {
         chosen.est <- c("JU.GREG", "JU.GREG.se")
-        WWWpopdat$reportdata$estimator <- "JU.GREG"
+        WWWpopdat$reportdata$estimator_dom <- "JU.GREG"
+        WWWpopdat$reportdata$preds_used_dom <- predselect.unitdf_row
       }
+      
       unit_rowest <- estdf_row[ , c("DOMAIN", chosen.est, "NBRPLT", "NBRPLT.gt0"), with = FALSE]
       setnames(unit_rowest, "NBRPLT", "n.total")
       setnames(unit_rowest, "DOMAIN", "domain_unit")
@@ -439,7 +474,7 @@ modWWWest <- function(WWWpopdat,
     }
     
   } else {
-    
+
     cols2keep <- c("est", "est.se", "pse")
     estdatGB <- 
       getGBestimatesWWW(esttype = esttype,
@@ -451,7 +486,7 @@ modWWWest <- function(WWWpopdat,
                         rowvar = rowvar, 
                         colvar = "NONE", 
                         grpvar = NULL,
-                        pltassgnx = pltassgnx,
+                        pltassgnx = pltassgnxGB,
                         unitarea = unitarea,
                         unitvar = unitvar,
                         stratalut = stratalut,
@@ -505,6 +540,8 @@ modWWWest <- function(WWWpopdat,
       raw_unit_rowest <- unit_rowestGB[unit_rowestMA]
     }
     
+    predselect.overall <- estdatMA$predselect.overall
+    
     ## Append total number of plots in by domain_unit to raw_unit_totest
     raw_unit_totest <- merge(raw_unit_totest, unitlut[,c("domain_unit", "n.total")], by="domain_unit")
     
@@ -512,17 +549,19 @@ modWWWest <- function(WWWpopdat,
     
     ## Choose estimator based on the smallest se of the total estimate
     ###################################################################################
-    if (unit_totestMA$GREGest.se < unit_totestGB$GBest) {
+    if (sum(unit_totestMA$GREGest.se <= unit_totestGB$GBest)) {
       unit_totest <- unit_totestMA
       unit_rowest <- unit_rowestMA
       
       WWWpopdat$reportdata$estimator <- "GREG"
+      WWWpopdat$reportdata$preds.used <- predselect.overall
         
     } else {
       unit_totest <- unit_totestGB
       unit_rowest <- unit_rowestGB
       
       WWWpopdat$reportdata$estimator <- "Post-stratified"
+      WWWpopdat$reportdata$preds.used <- "lf2022_evt_tree_nontree"
     }
   }
   

@@ -83,6 +83,7 @@ getSAestimatesWWW <- function(esttype, i, largebnd.unique,
   largebnd.vals <- largebnd.vals[table(domdattot[[largebnd.unique]]) > 30]
   
   setnames(dunitlut, "domain_unit", "DOMAIN")
+  setnames(dunitlut, "pixel_count", "npixels")
 
 
   dunit_totestlst <- 
