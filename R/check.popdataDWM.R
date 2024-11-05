@@ -1,425 +1,1012 @@
-check.popdataDWM <- function(tabs, tabIDs, pltassgnx, pltassgnid,
-     pfromqry, palias, pjoinid, whereqry, 
-     adj, ACI, pltx = NULL, puniqueid = "CN", dsn = NULL, dbconn = NULL,
-     condid = "CONDID", areawt = "CONDPROP_UNADJ",
-     nonsamp.cfilter = NULL, nullcheck = FALSE, pvars2keep = NULL,
-	 cvars2keep = NULL, dwmvars2keep = NULL, gui = FALSE){
-
-  ###################################################################################
-  ## DESCRIPTION: Checks data inputs for DWM estimation
-  ## Define necessary plot and condition-level variables:
-  ## - cond (cvars2keep) - areawt
-  ## - dwm variables (dwmvars2keep)
-  ## Import and check cond, cond_dwm_calc, plt, pltassgn tables
-  ## Merge cond and pltx
-  ## Check condition data
-  ## - Check condid (NA values and duplicate records (cuniqueid, condid)
-  ## - Check for areawt (if not included, add CONDPROP_UNADJ=1
-  ## - Check for COND_STATUS_CD (if not included, add COND_STATUS_CD = PLOT_STATUS_CD with 3=5)
-  ## - Generate table of sampled/nonsampled plots and conditions (if COND_STATUS_CD included)
-  ## - If ACI, add table of sampled/nonsampled nonforest conditions (if NF_COND_STATUS_CD included)
-  ## - IF ACI=FALSE, create ACI.filter="COND_STATUS_CD == 1"
-  ## - Generate and apply cond.nonsample filter for condx ("COND_STATUS_CD != 5")
-  ## - If ACI, add "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
-  ## Check cond_dwm_calc data
-  ## - Import cond_dwm_calc table and check unique identifier (duniqueid)
-  ## - Check for condid in cond_dwm_calc... if no condid, add CONDID=1
-  ## - Check if class of duniqueid matches class of cuniqueid in cond
-  ## - Check if all values of cond_dwm_calc are in cond and subset rows to match cond
-  ## - Check for missing dwmvars2keep and NA values in dwmvars2keep
-  ## Subset variables for pltassgnx, condx, and pltcondx
-  ###################################################################################
-
-  ## Set global variables
-  COND_STATUS_CD=CONDID=CONDPROP_UNADJ=SUBPPROP_UNADJ=MICRPROP_UNADJ=MACRPROP_UNADJ=
-	STATECD=cndnmlst=PROP_BASIS=ACI.filter=condsampcnt=
-	NF_COND_STATUS_CD=condqry=cfromqry=dwmqry=cwdvars2keep <- NULL
-
-  ###################################################################################
-  ## Define necessary plot and condition level variables
-  ###################################################################################
-  cvars2keep <- unique(c(cvars2keep, areawt, "PROP_BASIS"))
-
-  cwdvars2keep <- c("CWD_LPA_UNADJ", "CWD_VOLCF_UNADJ", "CWD_DRYBIO_UNADJ",
-				"CWD_CARBON_UNADJ")
-  fwdvars2keep <- c("FWD_SM_VOLCF_UNADJ", "FWD_SM_DRYBIO_UNADJ", "FWD_SM_CARBON_UNADJ",
-				"FWD_MD_VOLCF_UNADJ", "FWD_MD_DRYBIO_UNADJ", "FWD_MD_CARBON_UNADJ",
-				"FWD_LG_VOLCF_UNADJ", "FWD_LG_DRYBIO_UNADJ", "FWD_LG_CARBON_UNADJ")
-  pilevars2keep <- c("PILE_VOLCF_UNADJ", "PILE_DRYBIO_UNADJ", "PILE_CARBON_UNADJ")
-  duffvars2keep <- c("DUFF_VOLCF_UNADJ", "DUFF_DRYBIO_UNADJ", "DUFF_CARBON_UNADJ")
-  dwmdoms2keep <- c(cwdvars2keep, fwdvars2keep)
-  datindb <- FALSE
-
-  ## Get tables from tabs
-  ########################################################## 
-  cond=cond_dwm_calc <- NULL
-  for (tabnm in names(tabs)) {
-    assign(tabnm, tabs[[tabnm]])
-  }
-  cuniqueid <- tabIDs[["cond"]]
-  duniqueid <- tabIDs[["cond_dwm_calc"]]
-
-
-  ## Check dsn and create queries to get population subset from database
-  ###################################################################################
-  if (!is.null(dbconn) || 
-	(!is.null(dsn) && getext(dsn) %in% c("sqlite", "db", "db3", "sqlite3", "gpkg"))) {
-
-    datindb <- TRUE
-    if (is.null(dbconn)) {
-      dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
-    }
-    tablst <- DBI::dbListTables(dbconn)
-    chk <- TRUE
-    SCHEMA. <- NULL
-    dbqueries <- list()
-
-    ## Create query for cond
-    #########################################
-    if (all(!is.null(cond), is.character(cond), cond %in% tablst)) {
-      #condvars <-  DBvars.default()$condvarlst
-
-      if (is.null(pfromqry)) {
-        cfromqry <- paste0(SCHEMA., cond, " c")
+check.popdataDWM <- 
+  function(tabs, tabIDs, popType, 
+           datindb, pltaindb, 
+           pltidsWITHqry,
+           pltidsid, projidvars = NULL,
+           pltidvars, 
+           pdoms2keep = NULL, 
+           pltidsadjindb = FALSE, 
+           defaultVars = TRUE,
+           pltassgnid, 
+           pltx, pltassgnx,
+           POP_PLOT_STRATUM_ASSGN,
+           adj, ACI, plotlst, 
+           condid = "CONDID", 
+           areawt = "CONDPROP_UNADJ", areawt2 = NULL,
+           MICRO_BREAKPOINT_DIA = 5, 
+           MACRO_BREAKPOINT_DIA = NULL, 
+           unitvars = NULL, 
+           strunitvars = NULL, 
+           nonsamp.cfilter = NULL, 
+           cvars2keep = NULL,
+           dwmvars2keep = NULL,
+           dbconn = NULL, SCHEMA. = "",
+           getdataWITHqry = NULL,
+           getdataCNs = NULL,
+           returndata = FALSE, 
+           savedata = FALSE, 
+           outlst = NULL,
+           gui = FALSE){
+    
+    ##############################################################################
+    ## DESCRIPTION: Checks data inputs for AREA/VOL estimation
+    ## Define variables necessary for estimation:
+    ## - cvars2keep = 'PROP_BASIS'
+    ## Check if data are in a database (datindb) and if dbconn is valid.
+    ## 1.	Get table names used in estimation from tabs.
+    ## - PLOT; COND; 
+    ## - TREE (if popType = 'VOL'); SEEDLING (if popType = 'VOL')
+    ## 2.	Check for necessary variables in tables.
+    ##    cond - (cuniqueid, condid, cvars2keep)
+    ## 3. Build query for adjustment factors and append to pltids
+    ## 4. Build and run queries for PLOT/COND (pltcondx)
+    ## 5. Build CASE statement for adding adjustment factors to SELECT
+    ## 6. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
+    ## 
+    ## 7. Build and run queries for other necessary tables (if returndata/savedata = TRUE)
+    ## 7.1 Return and/or save plot data (pltx / PLOT)
+    ## 7.2 Return and/or save cond data (condx / COND)
+    ## 7.3. Return and/or save cond_dwm_calc data (dwmx / COND_DWM_CALC)
+    ## 
+    ## 8. Check COND_STATUS_CD and generate table with number of conditions
+    ## 8.1. Sampled conditions
+    ## 8.2. Sampled nonforest conditions
+    ## 
+    ## 9. Build FROM statement for estimation queries
+    ## 10. Return data objects
+    ###################################################################################
+    
+    
+    ## Set global variables
+    cond_dwm_calcnm=condsampcnt=areawt2nm=adjcase <- NULL
+    dbqueries=dbqueriesWITH <- list()
+    cpropvars <- list(COND="CONDPROP_UNADJ", SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ")
+    dwmpropvars <- list(CWD="CONDPROP_CWD", FWD_SM="CONDPROP_FWD_SM", FWD_MD="CONDPROP_FWD_MD", FWD_LG="CONDPROP_FWD_LG")
+    diavar <- "DIA"
+    pltcondindb <- datindb
+    
+    
+    ##############################################################################
+    ## Define variables necessary for estimation
+    ##############################################################################
+    cvars2keep <- unique(c(cvars2keep, "PROP_BASIS"))
+    
+    cwdvars2keep <- c("CWD_LPA_UNADJ", "CWD_VOLCF_UNADJ", "CWD_DRYBIO_UNADJ",
+                      "CWD_CARBON_UNADJ")
+    fwdvars2keep <- c("FWD_SM_VOLCF_UNADJ", "FWD_SM_DRYBIO_UNADJ", "FWD_SM_CARBON_UNADJ",
+                      "FWD_MD_VOLCF_UNADJ", "FWD_MD_DRYBIO_UNADJ", "FWD_MD_CARBON_UNADJ",
+                      "FWD_LG_VOLCF_UNADJ", "FWD_LG_DRYBIO_UNADJ", "FWD_LG_CARBON_UNADJ")
+    pilevars2keep <- c("PILE_VOLCF_UNADJ", "PILE_DRYBIO_UNADJ", "PILE_CARBON_UNADJ")
+    duffvars2keep <- c("DUFF_VOLCF_UNADJ", "DUFF_DRYBIO_UNADJ", "DUFF_CARBON_UNADJ")
+    dwmdoms2keep <- c(cwdvars2keep, fwdvars2keep)
+    
+    
+    
+    ##############################################################################
+    ## Check if data are in a database (datindb) and if dbconn is valid
+    ##############################################################################
+    if (datindb) {
+      if (is.null(dbconn) || !DBI::dbIsValid(dbconn)) {
+        message("the database connection is invalid")
+        stop()
       } else {
-        cfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., cond,
-				" c ON (c.", cuniqueid, " = ", palias, ".", pjoinid, ")")
+        dbtablst <- DBI::dbListTables(dbconn)
       }
-#      condqry <- paste("select distinct", toString(paste0("c.", condvars)), 
-#				"from", cfromqry, whereqry)
-      condqry <- paste("select distinct c.* from", cfromqry, whereqry)
-      dbqueries$cond <- condqry   
     }
-
-    ## Create query for dwm
-    #########################################
-    if (all(!is.null(cond_dwm_calc), is.character(cond_dwm_calc), cond_dwm_calc %in% tablst)) {
-      dwmfromqry <- paste0(SCHEMA., cond_dwm_calc)
-      dwmqry <- paste("select distinct * from", dwmfromqry, whereqry)
-    }
-  }
+    
+    ##############################################################################
+    ## 1. Get table names used in estimation from tabs
+    ##############################################################################
+    
+    ## plot table
+    plotnm <- plotlst$tabnm
+    puniqueid <- plotlst$tabid
+    pltx <- plotlst$tabx
+    pltxnm <- ifelse (!is.null(pltx), "pltx", plotnm) 
+    
+    ## cond table
+    condlst <- popTabchk("cond", tabtext = "cond", 
+                         tabs, tabIDs, dbtablst, dbconn, datindb) 
+    condnm <- condlst$tabnm
+    condflds <- condlst$tabflds
+    cuniqueid <- condlst$tabid
+    condx <- condlst$tabx
+    plota. <- "p."
+    conda. <- "c."
+    pltidsa. <- "pltids."
  
-  ###################################################################################
-  ## Import tables
-  ###################################################################################
-  if (is.null(cond)) {
-    stop("must include cond table")
-  }
-  condx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
-           tabnm="cond", caption="cond table?",
-		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE))
-  cond_dwm_calcx <- suppressMessages(pcheck.table(cond_dwm_calc, tab_dsn=dsn, 
-           tabnm="cond_dwm_calc", caption="lulc table?", 
-           nullcheck=nullcheck, tabqry=dwmqry, returnsf=FALSE))
- 
-  ## Define cdoms2keep
-  cdoms2keep <- names(condx)
+    ## cond_dwm_calc table
+    dwmlst <- popTabchk("cond_dwm_calc", tabtext = "cond_dwm_calc", 
+                         tabs, tabIDs, dbtablst, dbconn, datindb) 
+    dwmnm <- dwmlst$tabnm
+    dwmflds <- dwmlst$tabflds
+    dwmid <- dwmlst$tabid
+    dwmx <- dwmlst$tabx
+    dwma. <- "dwm."
 
 
-  ###############################################################################
-  ## Check uniqueids and merge cond with plt
-  ###############################################################################
-  cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", gui=gui,
-		checklst=names(condx), caption="Unique identifier of plot",
-		warn=paste(cuniqueid, "not in cond table"), stopifnull=TRUE)
-  setkeyv(condx, cuniqueid)
-
-  ## Check for NA values in necessary variables in cond table
-  condx.na <- sum(is.na(condx[[cuniqueid]]))
-  if (condx.na > 0) stop("NA values in ", cuniqueid)
-
-  condid <- pcheck.varchar(var2check=condid, varnm="condid", gui=gui,
-		checklst=names(condx), caption="Unique identifier of plot",
-		warn=paste(condid, "not in cond table"), stopifinvalid=FALSE)
-  if (is.null(condid)) {
-    if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
-      condx[, CONDID := 1]
-      condid <- "CONDID"
-    } else {
-      stop("there is more than 1 record per plot... must include valid CONDID")
+    if (is.null(condnm)) {
+      stop("must include cond for estimation")
     }
-  }
-  ## Check for NA values in necessary variables in cond table
-  condx.na <- sum(is.na(condx[[condid]]))
-  if (condx.na > 0) stop("NA values in ", condid)
-
-  ## Check if 1 plot-condition per record in cond
-  ######################################################
-  condid.dupid <- condx[duplicated(condx, by=c(cuniqueid, condid))][[cuniqueid]]
-
-  if (length(condid.dupid) > 0) {
-    msg <- paste("check cuniqueid/condid... duplicate records")
-    if (length(condid.dupid) < 20) print(condid.dupid)
-    stop(msg)
-  }
-  setkeyv(condx, c(cuniqueid, condid))
-
-
-  ## Merge pltx to condx
-  ###################################################################
-  if (!is.null(pltx)) {
-
-    ## Set key
-    setkeyv(pltx, puniqueid)
-
-    ## Subset condition columns
-    cvars <- unique(c(cuniqueid, names(condx)[!names(condx) %in% names(pltx)])) 
-    condx <- condx[, cvars, with=FALSE]
-
-
-    ## Check if class of puniqueid in pltx matches class of puniqueid in condx
-    tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
-    condx <- tabchk$tab1
-    pltx <- tabchk$tab2
-
-    ## Check for matching unique identifiers of condx and pltx
-    condx <- check.matchval(condx, pltx, cuniqueid, puniqueid,
-			tab1txt=paste0("cond-", cuniqueid),
-			tab2txt=paste0("plt-", puniqueid), subsetrows=TRUE)
-
-    nrow.before <- nrow(pltx)
-
-    ## Merge cond to plt (Note: inner join to use only plots with sampled conditions)
-    pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
-    pltcondx <- tryCatch(merge(pltx[, pltcols, with=FALSE], condx,
-				by.x=puniqueid, by.y=cuniqueid),
-     	 	error=function(e) {
-			return(NULL) })
-    if (is.null(pltcondx)) {
-      stop("invalid dataset")
+    if (is.null(dwmnm)) {
+      stop("must include cond_dwm_calc for estimation")
     }
-
-    if ("CN" %in% names(pltcondx) && !"PLT_CN" %in% names(pltcondx)) {
-      setnames(pltcondx, "CN", cuniqueid)
-    }
-    if (!cuniqueid %in% names(pltcondx) && puniqueid %in% names(pltcondx)) {
-      setnames(pltcondx, puniqueid, cuniqueid)
-    }
-    setkeyv(pltcondx, c(cuniqueid, condid))
-
-    nrow.after <- length(unique(pltcondx[[cuniqueid]]))
-    if (nrow.after < nrow.before) {
-      message(abs(nrow.after - nrow.before), " plots were removed from population")
-    }
-  } else {
-    pltcondx <- condx
-
-    ## Check for matching unique identifiers of pltcondx with pltassgnx
-    ## Subset pltx to pltassgnx ids
-    pltcondx <- check.matchval(pltcondx, pltassgnx, cuniqueid, pltassgnid, 
-			tab1txt="cond", tab2txt="pltassgn", subsetrows=TRUE)
-  }
-
-  ###################################################################################
-  ## Check condition data
-  ###################################################################################
-  pltcondnmlst <- names(pltcondx)
-  
-    ## Check for pvars2keep
-  #############################################################################
-  if (!all(pvars2keep %in% pltcondnmlst)) {
-    pvars2keep <- pvars2keep[!pvars2keep %in% pltcondnmlst] 
-    message("variables not in dataset: ", toString(pvars2keep))
-  }
-
-  ## Check for COND_STATUS_CD and create ACI filter
-  #############################################################################
-  if (!"COND_STATUS_CD" %in% pltcondnmlst) {
-    message("COND_STATUS_CD not in dataset.. assuming all sampled conditions")
-    cvars2keep <- cvars2keep[cvars2keep != "COND_STATUS_CD"]
-  }
-
-  #############################################################################
-  ## Generate table of sampled/nonsampled conditions from condx
-  #############################################################################
-  if ("COND_STATUS_CD" %in% pltcondnmlst) {
-    condsampcnt <- pltcondx[, list(NBRCOND=.N), by=COND_STATUS_CD]
-    ref_cond_status_cd <- 
-	FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "COND_STATUS_CD", ]
-
-    condsampcnt <-
-	cbind(COND_STATUS_NM=ref_cond_status_cd[match(condsampcnt$COND_STATUS_CD,
-	ref_cond_status_cd$VALUE), "MEANING"], condsampcnt)
-    setkey(condsampcnt, COND_STATUS_CD)
-
-    if (!ACI) ACI.filter <- "COND_STATUS_CD == 1"
-  } else {
-    condsampcnt <- pltcondx[, list(NBRCOND=.N)]
-  }
-
-  if (ACI) {
-    if ("NF_COND_STATUS_CD" %in% pltcondnmlst) {
-      ref_nf_cond_status_cd <-
-	  FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "NF_COND_STATUS_CD", ]
-      nfcondsampcnt <- pltcondx[, list(NBRCOND=.N), by=NF_COND_STATUS_CD]
-      nfcondsampcnt <-
-	 	cbind(NF_COND_STATUS_NM=ref_nf_cond_status_cd[match(nfcondsampcnt$NF_COND_STATUS_CD,
-		ref_nf_cond_status_cd$VALUE), "MEANING"], nfcondsampcnt)
-      setkey(nfcondsampcnt, NF_COND_STATUS_CD)
-      nfcondsampcnt <- nfcondsampcnt[!is.na(NF_COND_STATUS_CD), ]
-      condsampcnt <- rbindlist(list(condsampcnt, nfcondsampcnt), use.names=FALSE)
-    } else {
-      message("NF_COND_STATUS_CD not in dataset.. assuming all sampled nonforest conditions")
-    }
-  }
-
-  #############################################################################
-  ## Generate and apply nonsamp.cfilter
-  #############################################################################
-  if ((is.null(nonsamp.cfilter) || nonsamp.cfilter == "") && adj != "none") {
-    if ("COND_STATUS_CD" %in% pltcondnmlst) {
-      nonsamp.cfilter <- "COND_STATUS_CD != 5"
-      nonsampn <- sum(pltcondx$COND_STATUS_CD == 5, na.rm=TRUE)
-      if (length(nonsampn) > 0) {
-        message("For FIA estimation, adjustment factors are calculated to account for plots with partial nonresponse.")
-        message("...there are ", nonsampn, " nonsampled forest conditions in the dataset.")
+    if (datindb && !pltaindb) {
+      
+      ## Build cond FROM query
+      if (!is.null(getdataWITHqry) && !is.null(getdataCNs)) {
+        condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
+        condfromqry <- paste0("\n JOIN ", SCHEMA., condnm, " c ", condjoinqry)
+        
+        ## Build cond SELECT query
+        if (defaultVars) {
+          condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
+        } else {
+          condvars <- "*"
+        }
+        condselectqry <- toString(paste0(conda., condvars))
+        
+        ## Build final cond query, including getdataWITHqry
+        condqry <- paste0(getdataWITHqry,
+                          "\n-------------------------------------------",
+                          "\n SELECT ", condselectqry,
+                          "\n FROM pltids",
+                          condfromqry) 
+        dbqueries$COND <- condqry
+        
+        ## Run final cond query, including pltidsqry
+        if (datindb) {
+          condx <- tryCatch(
+            DBI::dbGetQuery(dbconn, condqry),
+            error=function(e) {
+              message(e,"\n")
+              return(NULL)})
+        } else {
+          condx <- tryCatch(
+            sqldf::sqldf(condqry, connection = NULL),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
+        }
+        if (is.null(condx) || nrow(condx) == 0) {
+          message("invalid cond query...")
+          message(condqry)
+          return(NULL)
+        }
+        
+        ## Return and/or save cond data
+        condkey <- c(cuniqueid, condid)
+        setkeyv(setDT(condx), condkey)
+        
+        ## Subset condx to plots in pltassgn
+        if (!is.null(getdataCNs)) {
+          condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
+        }
+        
+        
+        ## Build dwm FROM query
+        dwmjoinqry <- getjoinqry(dwmid, pltidsid, dwma., pltidsa.)
+        dwmfromqry <- paste0("\n JOIN ", SCHEMA., dwmnm, " dwm ", dwmjoinqry)
+        
+        ## Build dwm SELECT query
+        if (defaultVars) {
+          dwmvars <-  dwmflds[dwmflds %in% DBvars.default(isdwm=TRUE)$dwmvarlst]
+        } else {
+          dwmvars <- "*"
+        }
+        dwmselectqry <- toString(paste0(dwma., dwmvars))
+        
+        ## Build final dwm query, including getdataWITHqry
+        dwmqry <- paste0(getdataWITHqry,
+                         "\n-------------------------------------------",
+                         "\n SELECT ", dwmselectqry,
+                         "\n FROM pltids",
+                         dwmfromqry) 
+        dbqueries$COND_DWM_CALC <- dwmqry
+        
+        ## Run final dwmquery, including pltidsqry
+        if (datindb) {
+          dwmx <- tryCatch(
+            DBI::dbGetQuery(dbconn, dwmqry),
+            error=function(e) {
+              message(e,"\n")
+              return(NULL)})
+        } else {
+          dwmx <- tryCatch(
+            sqldf::sqldf(dwmqry, connection = NULL),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
+        }
+        if (is.null(dwmx) || nrow(dwmx) == 0) {
+          message("invalid dwm query...")
+          message(dwmqry)
+          return(NULL)
+        }
+        
+        ## Return and/or save dwm data
+        dwmkey <- c(dwmid, condid)
+        setkeyv(setDT(dwmx), dwmkey)
+        
+        ## Subset dwmx to plots in pltassgn
+        if (!is.null(getdataCNs)) {
+          dwmx <- dwmx[dwmx[[cuniqueid]] %in% getdataCNs,]
+        }
+        
+      } else {
+        assign(condnm, DBI::dbReadTable(dbconn, condnm))
+        assign(dwmnm, DBI::dbReadTable(dbconn, dwmnm))
+      }
+      
+      ## Save data
+      if (savedata) {
+        message("saving COND...")
+        outlst$out_layer <- "COND"
+        if (!append_layer) index.unique.cond <- condkey
+        datExportData(condx, 
+                      savedata_opts = outlst)
+        
+        message("saving COND_DWM_CALC...")
+        outlst$out_layer <- "COND_DWM_CALC"
+        if (!append_layer) index.unique.dwm <- dwmkey
+        datExportData(dwmx, 
+                      savedata_opts = outlst)
+        
       }
     }
-    if (ACI && "NF_COND_STATUS_CD" %in% pltcondnmlst) {
-      nonsamp.cfilter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
-      message("...there are ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE),
-		" nonsampled nonforest conditions in the dataset.")
-      if (!is.null(nonsamp.cfilter)) {
-        nonsamp.cfilter <- paste(nonsamp.cfilter, "&", nonsamp.cfilter.ACI)
-      }
+    
+    ##############################################################################
+    ## 2. Check for necessary variables in tables
+    ##############################################################################
+    condxnm <- ifelse (!is.null(condx), "condx", condnm) 
+    dwmxnm <- ifelse (!is.null(dwmx), "dwmx", dwmnm) 
+    
+    ## cond table
+    ##############################################################################
+    
+    ## Check cuniqueid
+    cuniqueid <- pcheck.varchar(var2check = cuniqueid, varnm = "cuniqueid", gui=gui,
+                                checklst = condflds, caption = "Unique identifier of plot in cond",
+                                warn = paste(cuniqueid, "not in cond"), stopifnull = TRUE)
+    
+    ## Check condid
+    condid <- pcheck.varchar(var2check = condid, varnm = "condid", gui=gui,
+                             checklst = condflds, caption = "Unique identifier of conditions in cond",
+                             warn = paste(condid, "not in cond"), stopifnull = TRUE)
+    
+    ## Check cvars2keep in cond
+    if (!is.null(cvars2keep)) {
+      cvars2keepchk <- unlist(sapply(cvars2keep, findnm, 
+                                     condflds, returnNULL = TRUE))
+      if (length(cvars2keep) < length(cvars2keep)) {
+        message("variables are missing from dataset: ", 
+                toString(cvars2keep[!cvars2keep %in% cvars2keepchk]))
+        return(NULL)
+      } else {
+        cvars2keep <- cvars2keepchk
+      }	  
     }
-  }
-
-  ## Apply nonsamp.cfilter
-  if (!is.null(nonsamp.cfilter) && nonsamp.cfilter != "NONE") {
-    pltcondx <- datFilter(x=pltcondx, xfilter=nonsamp.cfilter,
-		title.filter="nonsamp.cfilter", gui=gui)$xf
-    if (is.null(pltcondx)) {
-      message(paste(nonsamp.cfilter, "removed all records"))
+    
+    
+    ##############################################################################
+    ## 3. Build query for adjustment factors and append to pltids
+    ##############################################################################
+    
+    ## Check proportion variables
+    dwmpropvars <- check.PROPvars(dwmflds,
+                                propvars = unlist(dwmpropvars))
+    cpropvars <- check.PROPvars(condflds,
+                                propvars = unlist(cpropvars))
+    areawt <- findnm(areawt, cpropvars, returnNULL = TRUE)
+    if (is.null(areawt)) {
+      stop("areawt not in dataset: ", areawt)
+    }
+    
+    dwmjoinqry <- getjoinqry(dwmid, pltidsid, "dwm.", pltidsa.)
+    dwmWITHqry <- paste0(
+      pltidsWITHqry, ", ",
+      "\ndwm AS",
+      "\n(SELECT DISTINCT ", toString(c(dwmid, condid, dwmpropvars)),
+      "\n FROM pltids",
+      "\n JOIN ", dwmnm, " dwm ", dwmjoinqry, ")")
+    #message(dwmWITHqry)
+    
+    
+    ## Build ADJqry WHERE statement (i.e., excluding nonresponse)
+    adjwhereqry <- NULL
+    if (adj != "none") {
+      adjwhereqry <- getADJwherePLOT(condflds, conda.="c.")
+    }
+    
+    ## Build FROM query
+    adjjoinqry <- getjoinqry(cuniqueid, pltidsid, "c.", pltidsa.)
+    dwmjoinqry <- getjoinqry(c(cuniqueid, condid), c(cuniqueid, condid), "dwm.", "c.")
+    adjfromqry <- paste0("\n FROM pltids",
+                         "\n JOIN ", condnm, " c ", adjjoinqry,
+                         "\n JOIN dwm ", dwmjoinqry)
+    
+    ## Get getADJqry function 
+    ADJqry <- 
+      getADJqry(popType = popType,
+                adj = adj,
+                propvars = cpropvars,
+                dwmpropvar = dwmpropvars,
+                adjfromqry = adjfromqry,
+                pwhereqry = adjwhereqry,
+                pltidsid = pltidsid,
+                pltassgnid = pltassgnid,
+                strunitvars = unique(c(projidvars, strunitvars)),
+                pltidsa. = "pltids.",
+                propqry = NULL)
+    #message(ADJqry)
+    
+    
+    ## Build final query for adjustment factors, including pltids WITH query
+    adjfactors.qry <- paste0(
+      dwmWITHqry, 
+      "\n-------------------------------------------",
+      "\n", ADJqry)
+    #message(adjfactors.qry)
+    
+    
+    ## Run query to calculate adjustment factors
+    if (pltaindb) {
+      adjfactors <- tryCatch(
+        DBI::dbGetQuery(dbconn, adjfactors.qry),
+        error=function(e) {
+          message(e,"\n")
+          return(NULL)})
+    } else {
+      adjfactors <- tryCatch(
+        sqldf::sqldf(adjfactors.qry, connection = NULL),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
+    }
+    
+    if (is.null(adjfactors) || nrow(adjfactors) == 0) {
+      message("invalid adjustment query...")
+      message(adjfactors.qry)
       return(NULL)
     }
-  }
-
-
-  ###################################################################################
-  ## Check area weight 
-  ###################################################################################
-  ## If areawt not in cond table and only 1 condition per plot,
-  ## 	add areawt and set = 1 (100 percent)
-  if (is.null(areawt) || is.na(areawt) || !areawt %in% pltcondnmlst) {
-    ## If only 1 condition, check CONDPROP_UNADJ
-    if (nrow(pltcondx) == length(unique(pltcondx[[cuniqueid]]))) {
-      message("CONDPROP_UNADJ not in dataset.. assuming CONDPROP_UNADJ = 1")
-      pltcondx[, CONDPROP_UNADJ := 1]
-      areawt <- "CONDPROP_UNADJ"
+    if (adj == "samp") {
+      setkeyv(setDT(adjfactors), strunitvars)
     } else {
-      stop("areawt is invalid...")
+      setkeyv(setDT(adjfactors), pltidsid)
     }
-  }
-  pltcondx[[areawt]] <- check.numeric(pltcondx[[areawt]])
-
-
-
-  ###################################################################################
-  ###################################################################################
-  ## Check cond_dwm_calc
-  ###################################################################################
-  ###################################################################################
-  dwmnmlst <- names(cond_dwm_calcx)
-  dwmpropvars <- dwmnmlst[grepl("CONDPROP", dwmnmlst, ignore.case=TRUE)]
-  dwmvars2keep <- c(dwmvars2keep, dwmpropvars)
-
-  duniqueid <- pcheck.varchar(var2check=duniqueid, varnm="duniqueid", gui=gui,
-		checklst=dwmnmlst, caption="Unique identifier of plot",
-		warn=paste(duniqueid, "not in cond table"), stopifnull=TRUE)
-  setkeyv(cond_dwm_calcx, duniqueid)
-
-  ## Check for NA values in necessary variables in cond_dwm_calc table
-  cond_dwm_calcx.na <- sum(is.na(cond_dwm_calcx[[duniqueid]]))
-  if (cond_dwm_calcx.na > 0) stop("NA values in ", duniqueid)
-
-  condid <- pcheck.varchar(var2check=condid, varnm="condid", gui=gui,
-		checklst=dwmnmlst, caption="Unique identifier of plot",
-		warn=paste(condid, "not in cond table"), stopifinvalid=FALSE)
-  if (is.null(condid)) {
-    if (nrow(cond_dwm_calcx) == length(unique(cond_dwm_calcx[[duniqueid]]))) {
-      cond_dwm_calcx[, CONDID := 1]
-      condid <- "CONDID"
+    dbqueries$adjfactors <- adjfactors.qry
+    
+    ## Check adjustment factors
+    #source("C:/_tsf/_GitHub/FIESTAnalysis/R/IEVALIDator_compare.R") 
+    #evalid <- 81907
+    #FIADBpop <- getFIADBpop(evalid = evalid, dbconn = FIAconn)$pop_stratum
+    #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="07")
+    #adjfactors <- replacepopfun(adjfactors, FIADBpop)
+    #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="07")
+    #popVOL_compare
+    
+    
+    ## Build and run final query to append adjustment factors to pltids, including ADJ query
+    if (adj == "samp") {
+      adja. <- "adj."
+      adjvars <- sapply(cpropvars, function(x) {
+        ifelse(grepl("PROP_UNADJ", x), paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)), 
+               ifelse (grepl("prop_unadj", x), paste0("ADJ_FACTOR_", toupper(sub("prop_unadj", "", x))), 
+                       paste0(x, "_ADJ"))) })
+      dwmadjvars <- sapply(dwmpropvars, function(x) {
+        ifelse(grepl("CONDPROP", x), paste0("ADJ_FACTOR", sub("CONDPROP", "", x)), 
+               ifelse (grepl("condprop", x), paste0("ADJ_FACTOR", toupper(sub("condprop", "", x))), 
+                       paste0(x, "_ADJ"))) })
+      
+      #selectvars <- toString(c(paste0(pltidsa., pltidvars), paste0(adja., adjvars)))
+      selectvars <- toString(c(paste0(pltidsa., pltidsid), paste0(adja., c(adjvars, dwmadjvars))))
+      
+      ## Build WITH query for adjustment factors, including pltids WITH query
+      adjfactorsWITHqry <- paste0(
+        dwmWITHqry, ",",
+        "\n----- calculate strata-level adjustment factors",
+        "\nadjfactors AS",
+        "\n(", ADJqry, ")")
+      #message(adjfactorsWITHqry)
+      
+ 
+      ## Build pltidsadjFROM.qry
+      adjjoinqry <- getjoinqry(strunitvars, strunitvars, adja., pltidsa.)
+      pltidsadjFROM.qry <- paste0(
+        "\nFROM pltids",
+        "\nJOIN adjfactors adj ", adjjoinqry)
+      
+      
+      ## Build pltidsadj.qry
+      pltidsadj.qry <- paste0(
+        adjfactorsWITHqry,
+        "\n-------------------------------------------",
+        paste0("\nSELECT ", selectvars,
+               pltidsadjFROM.qry))
+      ## message(pltidsadj.qry)
+      
+      
+      ## Build WITH query to identify pltids, including adjustment factors
+      pltidsadjWITHqry <- paste0(
+        adjfactorsWITHqry, ",",
+        "\n----- get plot-level adjustment factors",
+        "\npltidsadj AS ",
+        "\n(SELECT ", selectvars,
+        pltidsadjFROM.qry, ")")
+      
     } else {
-      stop("there is more than 1 record per plot... must include valid CONDID")
+      
+      ## Build pltidsadj.qry
+      pltidsadj.qry <- paste0(
+        dwmWITHqry,
+        "\n", ADJqry)
+      
+      ## Build WITH query to identify pltids, including adjustment factors
+      pltidsadjWITHqry <- paste0(
+        dwmWITHqry, ",",
+        "\n----- calculate plot-level adjustment factors",
+        "\n", ADJqry)
+      
     }
-  }
-  ## Check for NA values in necessary variables in cond table
-  cond_dwm_calcx.na <- sum(is.na(cond_dwm_calcx[[condid]]))
-  if (cond_dwm_calcx.na > 0) stop("NA values in ", condid)
-
-  ## Check if 1 plot-condition per record in cond
-  ######################################################
-  condid.dupid <- condx[duplicated(cond_dwm_calcx, by=c(duniqueid, condid))][[duniqueid]]
-
-  if (length(condid.dupid) > 0) {
-    msg <- paste("check cuniqueid/condid... duplicate records")
-    if (length(condid.dupid) < 20) print(condid.dupid)
-    stop(msg)
-  }
-  setkeyv(cond_dwm_calcx, c(duniqueid, condid))
-
-
-  ## Check if class of duniqueid in cond_dwm_calcx matches class of duniqueid in condx
-  tabchk <- check.matchclass(condx, cond_dwm_calcx, cuniqueid, duniqueid)
-  condx <- tabchk$tab1
-  cond_dwm_calcx <- tabchk$tab2
-
-  ## Check for matching unique identifiers of condx and pltx
-  condx <- check.matchval(condx, cond_dwm_calcx, cuniqueid, duniqueid,
-			tab1txt=paste0("cond-", cuniqueid),
-			tab2txt=paste0("cond_dwm_calc-", duniqueid), subsetrows=TRUE)
-
-
-  ## Check for missing dwmvars2keep
-  ######################################################
-  dwmmissvars <- dwmvars2keep[which(!dwmvars2keep %in% dwmnmlst)]
-  if (length(dwmmissvars) > 0) {
-    if (length(dwmmissvars) == length(dwmvars2keep)) {
-      stop("missing all necessary variables from cond_dwm_calc: ", 
-			paste(dwmmissvars, collapse=", "))
+    dbqueriesWITH$pltidsWITH <- pltidsWITHqry   
+    dbqueriesWITH$pltidsadjWITH <- pltidsadjWITHqry   
+    
+    
+    ## Run query to identify plotids, including adjustment factors
+    if (returndata || savedata) {
+      if (pltaindb) {
+        pltidsadj <- tryCatch(
+          DBI::dbGetQuery(dbconn, pltidsadj.qry),
+          error=function(e) {
+            message(e,"\n")
+            return(NULL)})
+      } else {
+        pltidsadj <- tryCatch(
+          sqldf::sqldf(pltidsadj.qry, connection = NULL),
+          error = function(e) {
+            message(e,"\n")
+            return(NULL) })
+      }
+      if (is.null(pltidsadj) || nrow(pltidsadj) == 0) {
+        message("invalid adjustment query...")
+        message(pltidsadj.qry)
+        return(NULL)
+      }
+      setkeyv(setDT(pltidsadj), pltidsid)
+    }
+    dbqueries$pltidsadj <- pltidsadj.qry
+    
+    
+    ##############################################################################
+    ## 4. Build and run queries for PLOT/COND (pltcondx)
+    ##############################################################################
+    pltidsa. <- "pltids."
+    
+    
+    ## Build FROM query for pltcondx query
+    plota. <- "p."
+    conda. <- "c."
+    dwma. <- "dwm."
+    
+    pjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
+    cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., plota.)
+    pcfromqry <- paste0(
+      "\n FROM pltids",
+      "\n JOIN ", SCHEMA., pltxnm, " p ", pjoinqry,
+      "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry)
+    
+    
+    ## Build SELECT query for pltcondx query
+    if (defaultVars) {
+      pvars <- pdoms2keep
     } else {
-      message("missing necessary variables from cond_dwm_calc: ", 
-			paste(dwmmissvars, collapse=", "))
-      dwmvars2keep <- dwmvars2keep[!dwmvars2keep %in% dwmmissvars]
+      pvars <- "*"
+    }
+    pselectqry <- toString(paste0(plota., pvars))
+    
+    if (defaultVars) {
+      condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
+    } else {
+      condvars <- "*"
+    }
+    cselectqry <- toString(c(paste0(conda., unique(c(condvars, cvars2keep)))))
+    pltcondflds <- unique(c(condvars, cvars2keep, pvars))
+    
+    ## Add FORTYPGRP to SELECT query
+    addfortypgrp <- FALSE
+    if (addfortypgrp) {
+      ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
+      ftypqry <- classqry(classcol = "c.FORTYPCD",
+                          fromval = ref_fortypgrp$VALUE,
+                          toval = ref_fortypgrp$GROUPCD,
+                          classnm = "FORTYPGRPCD")
+      cselectqry <- paste0(cselectqry, ", ",
+                         "\n ", ftypqry)
+      pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
+    }
+    
+    ## Build query for pltcondx
+    pltcondx.qry <- paste0("SELECT DISTINCT ", cselectqry, ", ",
+                           "\n", pselectqry, ", 1 AS TOTAL",
+                           pcfromqry)
+    dbqueries$pltcondx <- pltcondx.qry
+    
+    ## Build WITH query for pltcondx, including pltids WITH query
+    pltcondxWITHqry <- paste0(pltidsWITHqry, ", ",
+                               "\n----- pltcondx",
+                               "\npltcondx AS",
+                               "\n(", pltcondx.qry, ")")
+    dbqueriesWITH$pltcondxWITH <- pltcondxWITHqry
+    
+    ## Build WITH query for pltcondx, including pltidsadj WITH query
+    pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
+                               "\n----- pltcondx",
+                               "\npltcondx AS",
+                               "\n(", pltcondx.qry, ")")
+    dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
+    
+
+    ## If returndata or savedata, run query for pltcondx
+    ##################################################################
+    if (returndata || savedata) {
+      pltcondindb <- FALSE
+      
+      pltcondxqry <- paste0(pltidsWITHqry,
+                            "\n", pltcondx.qry)
+      if (pltaindb) {
+        pltcondx <- tryCatch(
+          DBI::dbGetQuery(dbconn, pltcondxqry),
+          error=function(e) {
+            warning(e)
+            return(NULL)})
+      } else {
+        pltcondx <- tryCatch(
+          sqldf::sqldf(pltcondxqry, connection = NULL),
+          error = function(e) {
+            message(e,"\n")
+            return(NULL) })
+      }
+      if (is.null(pltcondx) || nrow(pltcondx) == 0) {
+        message("invalid pltcondx query...")
+        message(pltcondxqry)
+        return(NULL)
+      }
+      ## Set key on data.table
+      pltcondkey <- c(cuniqueid, condid)
+      setkeyv(setDT(pltcondx), pltcondkey)
+      
+      ## Save data
+      if (savedata) {
+        message("saving pltcondx...")
+        outlst$out_layer <- "pltcondx"
+        if (!append_layer) index.unique.pltcondx <- pltcondkey
+        datExportData(pltcondx, 
+                      savedata_opts = outlst)
+      }
+    }
+    
+   
+    ## 5. Build CASE statement for adding adjustment factors to SELECT
+    ##################################################################
+    if (adj %in% c("samp", "plot")) {
+      propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
+      
+      if (is.null(propbasisnm)) {
+        adjcase <- paste0("CASE pc.", propvars['MACR'], " IS NULL", 
+                          " THEN ", adjvars['SUBP'], 
+                          " ELSE ", adjvars['MACR'], " END")
+      } else {
+        adjcase <- paste0("CASE pc.", propbasisnm, 
+                          " WHEN 'MACR' THEN ", adjvars['MACR'], 
+                          " ELSE ", adjvars['SUBP'], " END")
+      }
+    }
+    
+    ##############################################################################
+    ## 6. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
+    ##############################################################################  
+    returnlst <- list(pltcondflds = pltcondflds,
+                      cuniqueid = cuniqueid, 
+                      condid = condid, 
+                      adjfactors = adjfactors,
+                      adjcase = adjcase,
+                      adjvarlst = adjvars,
+                      dwmpropvars = dwmpropvars)
+    
+    if (returndata || savedata) {
+      returnlst$pltcondx <- pltcondx
+    } else {
+      returnlst$pltcondx <- "pltcondx"
+    }
+   
+    ##############################################################################
+    ## 7. Build and run queries for other necessary tables (if returndata/savedata = TRUE) 
+    ##############################################################################  
+    if ((returndata || savedata) && popType == "DWM") {
+      
+      ## 7.1 Return and/or save plot data (pltx / PLOT)
+      ##################################################################
+      
+      if (is.null(pltx)) {
+        ## Build plot FROM query
+        plotjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
+        plotfromqry <- paste0("\n JOIN ", SCHEMA., plotnm, " p ", plotjoinqry)
+        
+        ## Build plot SELECT query
+        pselectqry <- toString(paste0(plota., c(puniqueid, pdoms2keep)))
+        
+        ## Build final plot query, including pltidsqry
+        pltqry <- paste0(getdataWITHqry,
+                         "\n-------------------------------------------",
+                         "\n SELECT ", pselectqry,
+                         "\n FROM pltids",
+                         plotfromqry) 
+        dbqueries$PLOT <- pltqry
+        
+        ## Run final plot query, including pltidsqry
+        if (datindb) {
+          pltx <- tryCatch(
+            DBI::dbGetQuery(dbconn, pltqry),
+            error=function(e) {
+              message(e,"\n")
+              return(NULL)})
+        } else {
+          pltx <- tryCatch(
+            sqldf::sqldf(pltqry, connection = NULL),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
+        }
+        if (is.null(pltx) || nrow(pltx) == 0) {
+          message("invalid plot query...")
+          message(pltqry)
+          return(NULL)
+        }
+      }
+      
+      ## Return and/or save plot data
+      setkeyv(setDT(pltx), puniqueid)
+      if (!is.null(getdataCNs)) {
+        pltx <- pltx[pltx[[puniqueid]] %in% getdataCNs,]
+      }
+      
+      ## Add to returnlst 
+      if (returndata) {
+        returnlst$puniqueid <- puniqueid
+      }
+      ## Save data
+      if (savedata) {
+        message("saving PLOT...")
+        outlst$out_layer <- "PLOT"
+        if (!append_layer) index.unique.plot <- puniqueid
+        datExportData(pltx, 
+                      savedata_opts = outlst)
+      }
+      
+      
+      ## 7.2 Return and/or save cond data (condx / COND)
+      ##################################################################
+      
+      if (is.null(condx)) {
+        
+        ## Build cond FROM query
+        condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
+        condfromqry <- paste0("\n JOIN ", SCHEMA., condnm, " c ", condjoinqry)
+        
+        ## Build cond SELECT query
+        if (defaultVars) {
+          condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
+        } else {
+          condvars <- "*"
+        }
+        condselectqry <- toString(paste0(conda., condvars))
+        
+        ## Build final cond query, including pltidsqry
+        condqry <- paste0(getdataWITHqry,
+                          "\n-------------------------------------------",
+                          "\n SELECT ", condselectqry,
+                          "\n FROM pltids",
+                          condfromqry) 
+        dbqueries$COND <- condqry
+        
+        ## Run final cond query, including pltidsqry
+        if (datindb) {
+          condx <- tryCatch(
+            DBI::dbGetQuery(dbconn, condqry),
+            error=function(e) {
+              message(e,"\n")
+              return(NULL)})
+        } else {
+          condx <- tryCatch(
+            sqldf::sqldf(condqry, connection = NULL),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
+        }
+        if (is.null(condx) || nrow(condx) == 0) {
+          message("invalid cond query...")
+          message(condqry)
+          return(NULL)
+        }
+        
+        ## Return and/or save cond data
+        condkey <- c(cuniqueid, condid)
+        setkeyv(setDT(condx), condkey)
+        if (!is.null(getdataCNs)) {
+          condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
+        }
+      }
+      
+      ## Add to returnlst 
+      if (returndata) {
+        returnlst$cuniqueid <- cuniqueid
+        returnlst$condx <- condx
+      }
+      ## Save data
+      if (savedata) {
+        message("saving COND...")
+        outlst$out_layer <- "COND"
+        if (!append_layer) index.unique.cond <- condkey
+        datExportData(condx, 
+                      savedata_opts = outlst)
+      }
+      rm(condx) 
+    
+      
+      ## 7.3 Return and/or save cond_dwm_calc data (dwmx / COND_DWM_CALC)
+      ##################################################################
+      dwma. <- "dwm."
+      
+      if (is.null(dwmx)) {
+        
+        ## Build cond FROM query
+        dwmjoinqry <- getjoinqry(cuniqueid, pltidsid, dwma., pltidsa.)
+        dwmfromqry <- paste0("\n JOIN ", SCHEMA., dwmnm, " dwm ", dwmjoinqry)
+        
+        ## Build cond SELECT query
+        if (defaultVars) {
+          #dwmvars <-  dwmflds[dwmflds %in% DBvars.default(isdwm=TRUE)$dwmvarlst]
+          dwmvars <- c(dwmid, condid, dwmdoms2keep)
+        } else {
+          dwmvars <- "*"
+        }
+        dwmselectqry <- toString(paste0(dwma., dwmvars))
+        
+        ## Build final cond query, including pltidsqry
+        dwmqry <- paste0(getdataWITHqry,
+                          "\n-------------------------------------------",
+                          "\n SELECT ", dwmselectqry,
+                          "\n FROM pltids",
+                         dwmfromqry) 
+        dbqueries$COND_DWM_CALC <- dwmqry
+        
+        ## Run final cond query, including pltidsqry
+        if (datindb) {
+          dwmx <- tryCatch(
+            DBI::dbGetQuery(dbconn, dwmqry),
+            error=function(e) {
+              message(e,"\n")
+              return(NULL)})
+        } else {
+          dwmx <- tryCatch(
+            sqldf::sqldf(dwmqry, connection = NULL),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
+        }
+        if (is.null(dwmx) || nrow(dwmx) == 0) {
+          message("invalid cond_dwm_calc query...")
+          message(dwmqry)
+          return(NULL)
+        }
+
+        ## Return and/or save cond data
+        dwmkey <- c(dwmid, condid)
+        setkeyv(setDT(dwmx), dwmkey)
+        if (!is.null(getdataCNs)) {
+          dwmx <- dwmx[dwmx[[dwmid]] %in% getdataCNs,]
+        }
+      }
+      
+      ## Add to returnlst 
+      if (returndata) {
+        returnlst$dwmid <- cuniqueid
+        returnlst$dwmx <- dwmx
+      }
+      ## Save data
+      if (savedata) {
+        message("saving COND_DWM_CALC...")
+        outlst$out_layer <- "COND_DWM_CALC"
+        if (!append_layer) index.unique.dwm <- dwmkey
+        datExportData(dwmx, 
+                      savedata_opts = outlst)
+      }
+      rm(dwmx)  
+    }  
+      
+    ##############################################################################
+    ## 8. Check COND_STATUS_CD and generate table with number of conditions
+    ##############################################################################
+    
+    ## condfromqry
+    condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
+    condfromqry <- paste0("\nJOIN ", SCHEMA., condnm, " c ", condjoinqry)
+    
+    ## 8.1. Sampled conditions
+    ##########################################################################
+    condsampcnt <- NULL
+    cstatuschk <- findnm("COND_STATUS_CD", pltcondflds, returnNULL=TRUE)
+    
+    if (is.null(cstatuschk)) {
+      message("COND_STATUS_CD not in dataset.. assuming all conditions are sampled")
+    } else {
+      ref_cond_status_cd <- ref_codes[ref_codes$VARIABLE == "COND_STATUS_CD", ]
+      if (length(cstatuschk) > 1) {
+        cstatuscdnm <- cstatuschk[1]
+      } else {
+        cstatuscdnm <- cstatuschk
+      }  
+      
+      ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
+      if (!pltcondindb) {
+        condsampcnt <- pltcondx[, .N, by=cstatuscdnm]
+        setnames(condsampcnt, "N", "NBRCONDS")
+      } else {
+        condsampcntqry <- paste0("\nSELECT ", cstatuscdnm, ", COUNT(*) AS NBRCONDS",
+                                 "\nFROM pltids",
+                                 condfromqry,
+                                 "\nGROUP BY ", cstatuscdnm,
+                                 "\nORDER BY ", cstatuscdnm)
+        condsampcntqry <- paste0(getdataWITHqry,
+                                 condsampcntqry)
+        
+        if (pltcondindb) {      
+          condsampcnt <- tryCatch(
+            DBI::dbGetQuery(dbconn, condsampcntqry),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
+        } else {
+          condsampcnt <- tryCatch(
+            sqldf::sqldf(condsampcntqry, connection = NULL),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
+        }
+        
+        if (is.null(condsampcnt)) {
+          message("invalid condsampcnt query")
+          message(condsampcntqry)
+        }
+      }
+      if (!is.null(condsampcnt)) {
+        condsampcnt <-
+          cbind(COND_STATUS_NM = ref_cond_status_cd[match(condsampcnt$COND_STATUS_CD,
+                                                          ref_cond_status_cd$VALUE), "MEANING"], condsampcnt)
+        
+        nbrnonsampled <- condsampcnt$NBRCONDS[condsampcnt$COND_STATUS_CD == 5]
+        if (length(nbrnonsampled) > 0) {
+          message("there are ", nbrnonsampled, " nonsampled conditions")
+        }
+      }
     } 
+    
+    ## 8.2. Sampled nonforest conditions
+    ##########################################################################
+    
+    ## If ACI, check NF_PLOT_STATUS_CD and generate table with number of plots
+    ##########################################################################
+    if (ACI) {
+      nfcondsampcnt <- NULL
+      nfcstatuschk <- findnm("NF_COND_STATUS_CD", pltcondflds, returnNULL=TRUE)
+      if (is.null(nfcstatuschk)) {
+        message("NF_COND_STATUS_CD not in dataset.. assuming all ACI nonforest conditions")
+      } else {  
+        ref_nf_cond_status_cd <- ref_codes[ref_codes$VARIABLE == "NF_COND_STATUS_CD", ]
+        if (length(nfcstatuschk) > 1) {
+          nfcstatuscdnm <- nfcstatuschk[1]
+        } else {
+          nfcstatuscdnm <- nfcstatuschk
+        }  
+        
+        if (!pltcondindb) {
+          nfcondsampcnt <- pltcondx[, .N, by=nfcstatuscdnm]
+          setnames(nfcondsampcnt, "N", "NBRCONDS")
+        } else {
+          
+          ## Generate table of sampled/nonsampled conditions (if ACI, nonforest status included)
+          nfcondsampcntqry <- paste0("\nSELECT c.", nfcstatuscdnm, ", COUNT(*) AS NBRCONDS",
+                                     "\nFROM pltids",
+                                     condfromqry,
+                                     "\nGROUP BY ", nfcstatuscdnm,
+                                     "\nORDER BY ", nfcstatuscdnm)
+          nfcondsampcntqry <- paste0(getdataWITHqry,
+                                     nfcondsampcntqry)
+          
+          if (pltcondindb) {      
+            nfcondsampcnt <- tryCatch(
+              DBI::dbGetQuery(dbconn, nfcondsampcntqry),
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
+          } else {
+            nfcondsampcnt <- tryCatch(
+              sqldf::sqldf(nfcondsampcntqry, connection = NULL),
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
+          }
+          if (is.null(nfcondsampcnt)) {
+            message("invalid nfcondsampcnt query")
+            message(nfcondsampcntqry)
+          }
+        }
+        if (!is.null(nfcondsampcnt)) {
+          nfcondsampcnt <- nfcondsampcnt[!is.na(nfcondsampcnt$NF_COND_STATUS_CD), ]
+          if (nrow(nfcondsampcnt) > 0) {
+            nfcondsampcnt <-
+              cbind(NF_COND_STATUS_NM = ref_cond_status_cd[match(nfcondsampcnt$NF_COND_STATUS_CD,
+                                                                 ref_cond_status_cd$VALUE), "MEANING"], nfcondsampcnt)
+            ## Append to condsampcnt
+            if (!is.null(condsampcnt)) {
+              condsampcnt <- rbindlist(list(condsampcnt, nfcondsampcnt), use.names=FALSE)
+            } else {
+              condsampcnt <- nfcondsampcnt
+            }
+            
+            ## Create nonsamp.cfilter
+            if (!is.null(nfcstatuscdnm) && (is.null(nonsamp.cfilter) || nonsamp.cfilter == "")) {
+              nfnonsamp.cfilter <- paste("c.", "NF_COND_STATUS_CD <> 5")
+            }
+            if (!is.null(nonsamp.cfilter)) {
+              nonsamp.cfilter <- paste0(nonsamp.cfilter, " AND ", nfnonsamp.cfilter)
+            } else {
+              nonsamp.cfilter <- nfnonsamp.cfilter
+            }  
+            nbrnfnonsampled <- nfcondsampcnt$NBRCONDS[nfcondsampcnt$NF_COND_STATUS_CD == 5]
+            if (length(nbrnfnonsampled) > 0) {
+              message("there are ", nbrnfnonsampled, " nonsampled nonforest conditions")
+            }
+          }
+        }        
+      }
+    }
+    
+    ## Add condsampcnt to returnlst 
+    if (!is.null(condsampcnt)) {
+      returnlst$condsampcnt <- as.data.frame(condsampcnt)
+    }
+    
+    ## 9. Build FROM statement for estimation queries
+    ######################################################################################
+    if (datindb) {
+      estfromqry <- paste0(
+        "\n FROM ", SCHEMA., plotnm, " p",
+        "\n JOIN ", SCHEMA., condnm, " c ON (", conda., cuniqueid, " = ", plota., puniqueid, ")")
+    } else {
+      estfromqry <- paste0(
+        "\n FROM pltcondf cond")
+    }
+    
+    
+    ## 10. Return data objects
+    ######################################################################################
+    if (!returndata) {
+      
+      if (popType == "VOL") {
+        if (!is.null(treenm)) {
+          returnlst$treex <- treenm
+          returnlst$tuniqueid <- tuniqueid
+        }
+        if (!is.null(seednm)) {
+          returnlst$seedx <- seednm
+          returnlst$suniqueid <- suniqueid
+        }
+      }
+    }
+    returnlst$dbqueries <- dbqueries
+    returnlst$dbqueriesWITH <- dbqueriesWITH
+    returnlst$estfromqry <- estfromqry
+    
+    return(returnlst)
   }
-
-  ## Check for NA values in dwmvars2keep variables
-  dwmvars.na <- sapply(c(duniqueid, condid, dwmvars2keep),
-		function(x, cond_dwm_calcx){ sum(is.na(cond_dwm_calcx[,x, with=FALSE])) }, 
-			cond_dwm_calcx)
-  if (any(dwmvars.na) > 0) {
-    stop(dwmvars.na[dwmvars.na > 0], " NA values in variable: ",
-		paste(names(dwmvars.na[dwmvars.na > 0]), collapse=", "))
-  }
-
-
-  ########################################################################
-  ## Separate and merge tables for estimation
-  ########################################################################
-#  if ("STATECD" %in% pvars2keep) {
-#    pvars2keep <- pvars2keep[pvars2keep != "STATECD"]
-#  }
-  cvars2keep <- cvars2keep[cvars2keep %in% names(pltcondx)]
-  condx <- unique(pltcondx[, c(cuniqueid, condid, cvars2keep), with=FALSE])
-  pltcondx[, (cvars2keep) := NULL]
-
-
-  ## Merge condx to cond_dwm_calcx to get variables for summed condition proportions
-  condx <- merge(condx, cond_dwm_calcx[, c(duniqueid, condid, dwmvars2keep), with=FALSE])
-
-
-  ## Merge condx to cond_dwm_calcx to get variables for summed condition proportions
-  pltcondx <- merge(pltcondx, cond_dwm_calcx[, c(duniqueid, condid, dwmdoms2keep), with=FALSE])
-
-
-  ## Set up list of variables to return
-  ######################################################################################
-  returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
-	condid=condid, condsampcnt=as.data.frame(condsampcnt),
-	ACI.filter=ACI.filter, areawt=areawt, dwmpropvars=dwmpropvars)
-
-
-  return(returnlst)
-}
