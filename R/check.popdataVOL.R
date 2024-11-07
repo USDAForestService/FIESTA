@@ -328,7 +328,7 @@ check.popdataVOL <-
     #adjfactors <- replacepopfun(adjfactors, FIADBpop)
     #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
     
-    
+   
     ## Build and run final query to append adjustment factors to pltids, including ADJ query
     if (adj == "samp") {
       adja. <- "adj."
@@ -542,7 +542,7 @@ check.popdataVOL <-
     if (adj %in% c("samp", "plot")) {
       propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
      
-      if ("COND" %in% names(propvars) && adjvars['COND'] %in% names(pltidsadj)) {
+      if ("COND" %in% names(propvars) && adjvars['COND'] %in% names(adjfactors)) {
         adjcase <- adjvars['COND']
         
       } else if (is.null(propbasisnm)) {
@@ -555,7 +555,7 @@ check.popdataVOL <-
                           " ELSE ", adjvars['SUBP'], " END")
       }
     }
-    
+  
     ##############################################################################
     ## 6. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
     ##############################################################################  
@@ -585,6 +585,7 @@ check.popdataVOL <-
       ##################################################################
       
       if (is.null(pltx) && !is.null(plotnm)) {
+        
         ## Build plot FROM query
         plotjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
         plotfromqry <- paste0("\n JOIN ", SCHEMA., plotnm, " p ", plotjoinqry)

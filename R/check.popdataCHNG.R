@@ -184,18 +184,13 @@ check.popdataCHNG <-
         
         ## Subset condx to plots in pltassgn
         condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
-       
-      } else {
-        assign(condnm, DBI::dbReadTable(dbconn, condnm))
-      }
-      
-      
-      ## Get subp_cond_chng_matrx data
-      if (!is.null(getdataWITHqry) && !is.null(getdataCNs)) {
+        
+        
+        ## Build sccm FROM query
         sccmjoinqry <- getjoinqry(sccmid, pltidsid, sccma., pltidsa.)
         sccmfromqry <- paste0("\n JOIN ", SCHEMA., sccmnm, " c ", sccmjoinqry)
         
-        ## Build cond SELECT query
+        ## Build sccm SELECT query
         if (defaultVars) {
           sccmvars <-  sccmflds[sccmflds %in% DBvars.default()$sccmvarlst]
         } else {
@@ -203,7 +198,7 @@ check.popdataCHNG <-
         }
         sccmselectqry <- toString(paste0(sccma., sccmvars))
         
-        ## Build final cond query, including getdataWITHqry
+        ## Build final sccm query, including getdataWITHqry
         sccmqry <- paste0(getdataWITHqry,
                           "\n-------------------------------------------",
                           "\n SELECT ", sccmselectqry,
@@ -239,9 +234,11 @@ check.popdataCHNG <-
         sccmx <- sccmx[sccmx[[sccmid]] %in% getdataCNs,]
         
       } else {
+        assign(condnm, DBI::dbReadTable(dbconn, condnm))
         assign(sccmnm, DBI::dbReadTable(dbconn, sccmnm))
       }
       
+
       ## Save data
       if (savedata) {
         message("saving SUBP_COND_CHNG_MTRX...")
@@ -630,7 +627,7 @@ check.popdataCHNG <-
     }
     dbqueries$pltidsadj <- pltidsadj.qry
     
-   
+ 
     ##############################################################################
     ## 4. Build and run queries for PLOT/COND (pltcondx).
     ##############################################################################
@@ -753,14 +750,17 @@ check.popdataCHNG <-
                       savedata_opts = outlst)
       }
     }  
-    
+   
   
     ## 5. Build CASE statement for adding adjustment factors to SELECT
     ##################################################################
     if (adj %in% c("samp", "plot")) {
       propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
       
-      if (is.null(propbasisnm)) {
+      if ("COND" %in% names(propvars) && adjvars['COND'] %in% names(adjfactors)) {
+        adjcase <- adjvars['COND']
+        
+      } else if (is.null(propbasisnm)) {
         adjcase <- paste0("\nCASE pc.", propvars['MACR'], " IS NULL", 
                           " THEN ", adjvars['SUBP'], 
                           " ELSE ", adjvars['MACR'], " END")
@@ -784,11 +784,13 @@ check.popdataCHNG <-
     
     if (returndata || savedata) {
       returnlst$pltcondx <- pltcondx
+      returnlst$pltidsadj <- pltidsadj
     } else {
       returnlst$pltcondx <- "pltcondx"
+      returnlst$pltidsadj <- "pltidsadj"
     }
     
-    
+
     ##############################################################################
     ## 7. Build and run queries for other necessary tables (if returndata = TRUE) 
     ##############################################################################  
@@ -797,7 +799,7 @@ check.popdataCHNG <-
       ## 7.1 Return and/or save plot data (pltx / PLOT)
       ##################################################################
       
-      if (is.null(pltx)) {
+      if (is.null(pltx) && !is.null(plotnm)) {
         
         ## Build plot SELECT query
         pselectqry <- toString(paste0(plota., c(puniqueid, pdoms2keep)))
@@ -927,30 +929,29 @@ check.popdataCHNG <-
       }
       rm(condx)  
       
-      
+
       ## 7.3. Return and/or save subplot change data (sccmx / SUBP_COND_CHNG_MTRX)
       ##################################################################
-      if (is.null(sccmnm)) {    
+      if (is.null(sccmx)) {    
 
         ## Build sccm FROM query
         sccmjoinqry <- getjoinqry(sccmid, pltidsid, sccma., pltidsa.)
         sccmfromqry <- paste0(
           "\nJOIN ", SCHEMA., sccmnm, " sccm ", sccmjoinqry)
-        
+       
         ## Build sccm SELECT query
         if (defaultVars) {
           sccmvars <- "*"
         }
         #sccmselectqry <- toString(c(paste0("pltids.", strunitvars), paste0(sccma., sccmvars)))
         sccmselectqry <- toString(paste0(sccma., sccmvars))
-        
+       
         ## Build final sccm query, including pltidsqry
         sccmqry <- paste0(getdataWITHqry,
                           "\n-------------------------------------------",
                           "\n SELECT ", sccmselectqry,
                           "\n FROM pltids",
                           sccmfromqry) 
-        
         
         ## Run final sccm query, including pltidsqry
         if (datindb) {
@@ -972,7 +973,7 @@ check.popdataCHNG <-
           message(sccmqry)
           return(NULL)
         }
-        
+
         ## Return and/or save sccm data
         sccmkey <- c("PLT_CN", "CONDID", "PREV_PLT_CN", "PREVCOND")
         setkeyv(setDT(sccmx), sccmkey)
@@ -1001,7 +1002,7 @@ check.popdataCHNG <-
       }
       rm(sccmx)
       
-      
+     
       ##########################################################################
       ## If popType = 'GRM', get remeasured tree and seed data queries for GRM
       ##    and TREE_GRM_COMPENENT, TREE_GRM_BEGIN and TREE_GRM_MIDPT queries

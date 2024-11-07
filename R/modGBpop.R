@@ -821,7 +821,6 @@ modGBpop <- function(popType = "VOL",
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
 
-
   ###################################################################################
   ## Check Auxiliary Data
   ###################################################################################
@@ -895,7 +894,7 @@ modGBpop <- function(popType = "VOL",
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
   
-  
+ 
   ###################################################################################
   ## Check Population Data
   ###################################################################################
@@ -954,7 +953,6 @@ modGBpop <- function(popType = "VOL",
     }
   }
 
-  
   if (popType %in% c("CHNG", "GRM")) {
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
