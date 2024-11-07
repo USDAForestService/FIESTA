@@ -83,6 +83,7 @@ check.cond <- function(areawt,
     totalnm <- findnm("TOTAL", pcdomainlst, returnNULL = TRUE)
     if (!is.null(totalnm)) {
       cselectqry <- paste0(cselectqry, ", pc.", totalnm)
+      byvars <- c(byvars, paste0("pc.", totalnm))
     }
   }
   

@@ -4,7 +4,8 @@ check.estdata <-
            popdatindb, popconn = NULL, pop_schema = pop_schema,
            pltcondflds, totals,
            pop_fmt = NULL, pop_dsn = NULL, 
-           sumunits = FALSE, landarea = NULL, 
+           sumunits = FALSE, 
+           landarea = NULL, landarea_both = TRUE, 
            ACI = NULL, pcfilter = NULL, 
            T1filter = NULL, T2filter = NULL,
 	         allin1 = FALSE, divideby = NULL, 
@@ -216,6 +217,11 @@ check.estdata <-
 
   ## Add landarea filter to where.qry
   if (!is.null(landarea.filter)) {
+    if (popType == "CHNG" && landarea_both) {
+      landarea.filterCHNG <- gsub("pc.", "pc.PREV_", landarea.filter)
+      landarea.filter <- paste0("(", landarea.filter, 
+                       "\n  AND ", landarea.filterCHNG, ")")
+    }
     if (!is.null(where.qry)) {
       where.qry <- paste0(where.qry,
                         "\n  AND ", landarea.filter)

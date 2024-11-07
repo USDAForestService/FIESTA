@@ -40,7 +40,9 @@
 #' @param landarea String. The sample area filter for estimates ("ALL",
 #' "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
 #' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.
-#' @param pcfilter String. A filter for plot or cond attributes (including
+#' @param landarea_both Logical. If TRUE, both Time 1 and Time 2 measurements 
+#' have the same landarea.
+#' #' @param pcfilter String. A filter for plot or cond attributes (including
 #' pltassgn).  Must be R logical syntax.
 #' @param rowvar String. Name of row domain variable in cond. If only one
 #' domain, rowvar = domain variable. If more than one domain, include colvar.
@@ -226,6 +228,7 @@
 modGBchng <- function(GBpopdat, 
                       chngtype = "total",
                       landarea = "FOREST", 
+                      landarea_both = TRUE,
                       pcfilter = NULL, 
                       rowvar = NULL, 
                       colvar = NULL, 
@@ -392,6 +395,8 @@ modGBchng <- function(GBpopdat,
   areawt <- GBpopdat$areawt
   areawt2 <- GBpopdat$areawt2
   adjcase <- GBpopdat$adjcase
+  pltidsid <- GBpopdat$pjoinid
+  pltassgnid <- GBpopdat$pltassgnid
   
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
@@ -441,7 +446,7 @@ modGBchng <- function(GBpopdat,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
-                  landarea = landarea,
+                  landarea = landarea, landarea_both = landarea_both,
                   ACI = ACI, 
                   pcfilter = pcfilter,
                   T1filter = T1filter, T2filter = T2filter,
@@ -480,7 +485,7 @@ modGBchng <- function(GBpopdat,
   SCHEMA. <- estdat$SCHEMA.
   landarea.filter <- estdat$landarea.filter
 
-  
+ 
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -489,8 +494,6 @@ modGBchng <- function(GBpopdat,
                  popType = popType,
                  popdatindb = popdatindb,
                  popconn = popconn, SCHEMA. = SCHEMA.,
-                 #pltcondx = pltcondx,
-                 #pltcondflds = pltcondflds,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
                  withqry = pltcondxadjWITHqry,
@@ -504,11 +507,6 @@ modGBchng <- function(GBpopdat,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
-                 landarea = landarea, states = states, 
-                 #cvars2keep=c("PREV_PLT_CN","REMPER","PROP_BASIS",
-				         #              "COND_STATUS_CD","CONDPROP_UNADJ", 
-							   #              "COND_NONSAMPLE_REASN_CD"),
-                 #whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -529,15 +527,14 @@ modGBchng <- function(GBpopdat,
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
-  
-  
+
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
     uniquecol <- data.table(unitarea[[unitvar]])
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
- 
+
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################
@@ -550,10 +547,12 @@ modGBchng <- function(GBpopdat,
                    cuniqueid = cuniqueid, 
                    condid = condid,
                    rowvar = rowvar, 
+                   rowvarnm = rowvarnm, 
                    row.orderby = row.orderby,
                    uniquerow = uniquerow,
                    title.rowvar = title.rowvar,
                    colvar = colvar,
+                   colvarnm = colvarnm,
                    col.orderby = col.orderby,
                    uniquecol = uniquecol,
                    title.colvar = title.colvar,
@@ -563,25 +562,26 @@ modGBchng <- function(GBpopdat,
                    pltcondx = pltcondx,
                    sccmx = sccmx,
                    pltidsadj = pltidsadj,
+                   pltidsid = pltidsid,
                    pltcondxadjWITHqry = pltcondxadjWITHqry,
                    pcwhereqry = pcwhereqry,
-                   landarea.filter = landarea.filter,
                    classifyrow = classifyrow,
                    classifycol = classifycol)
   cdomdat <- conddat$cdomdat
   cdomdatqry <- conddat$cdomdatqry
   estnm <- conddat$estnm
   rowvar <- conddat$rowvar
+  colvar <- conddat$colvar
+  rowvarnm <- conddat$rowvarnm
   row.orderby <- conddat$row.orderby
   uniquerow <- conddat$uniquerow
   title.rowvar <- conddat$title.rowvar
-  colvar <- conddat$colvar
+  colvarnm <- conddat$colvarnm
   col.orderby <- conddat$col.orderby
   uniquecol <- conddat$uniquecol
   title.colvar <- conddat$title.colvar
-  uniquecol <- conddat$uniquecol
   grpvar <- conddat$grpvar
-  
+
 
   ###################################################################################
   ### Get titles for output tables
@@ -624,7 +624,7 @@ modGBchng <- function(GBpopdat,
   estdat <- 
     getGBestimates(esttype = esttype,
                    domdatn = cdomdat,
-                   uniqueid = cuniqueid,
+                   uniqueid = pltassgnid,
                    estvarn.name = estnm,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
@@ -649,14 +649,14 @@ modGBchng <- function(GBpopdat,
   rowunit <- estdat$rowunit
   totunit <- estdat$totunit
   unitvar <- estdat$unitvar
-
-
+  
+  
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
   message("getting output...")
   estnm <- "est" 
-
+  
   tabs <- 
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 
@@ -664,7 +664,7 @@ modGBchng <- function(GBpopdat,
                 unit_totest = unit_totest, 
                 unit_rowest = unit_rowest, unit_colest = unit_colest, 
                 unit_grpest = unit_grpest,
-                rowvar = rowvar, colvar = colvar, 
+                rowvar = rowvarnm, colvar = colvarnm, 
                 uniquerow = uniquerow, uniquecol = uniquecol,
                 rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                 rowunit = rowunit, totunit = totunit, 

@@ -2,9 +2,9 @@ check.condCHNG <- function(areawt, areawt2,
                            adj, adjcase, 
                            cuniqueid, condid, 
                            chngtype,
-                           rowvar, row.orderby, 
+                           rowvar, rowvarnm, row.orderby, 
                            uniquerow, title.rowvar,
-                           colvar, col.orderby,
+                           colvar, colvarnm, col.orderby,
                            uniquecol, title.colvar,
                            pcdomainlst = NULL,
                            popdatindb,
@@ -13,8 +13,8 @@ check.condCHNG <- function(areawt, areawt2,
                            sccmx,
                            pltidsadj = NULL,
                            pltcondxadjWITHqry = NULL,
+                           pltidsid = "PLT_CN",
                            pcwhereqry = NULL,
-                           landarea.filter = NULL,
                            classifyrow = NULL,
                            classifycol = NULL) {
   ###################################################################################
@@ -23,15 +23,8 @@ check.condCHNG <- function(areawt, areawt2,
   estnm <- "ESTIMATED_VALUE"
   estvara. <- "sccm."
   sccmnm <- ifelse(popdatindb, sccmx, "sccmx")
-  rowvarnm=colvarnm <- NULL
-  
-  ## Add past landarea.filter to WHERE statement
-  if (!is.null(landarea.filter)) {
-    landarea.filterCHNG <- gsub("pc.", "pc.PREV_", landarea.filter)
-    pcwhereqry <- paste0(pcwhereqry,
-                         "\n  AND ", landarea.filterCHNG)
-  }
-  
+
+
   ## Define select query for estimates
   estvarqry <- paste0(estvara., areawt)
   if (!is.null(areawt2)) {
@@ -107,6 +100,7 @@ check.condCHNG <- function(areawt, areawt2,
     ## If colvar = "NONE"
     if (is.null(colvar) || colvar == "NONE") {
       colvar <- rowvar
+      colvarnm <- rowvarnm
       col.orderby <- row.orderby
       title.colvar <- title.rowvar
       uniquecol <- copy(uniquerow)
@@ -117,7 +111,7 @@ check.condCHNG <- function(areawt, areawt2,
                 c("col.classify", "colclassnm", "colclassqry")
       }
     }
-    
+
     if (!is.null(classifyrow)) {
       cselectqry <- paste0(cselectqry, ", \n",
                            classifyrow$rowclassqry)
@@ -128,15 +122,20 @@ check.condCHNG <- function(areawt, areawt2,
       byvars <- c(byvars, rowvarnm)
       setnames(uniquerow, rowclassnm, rowvarnm)
     } else {
-      cselectqry <- paste0(cselectqry, ", pc.PREV_", rowvar)
-      rowvarnm <- paste0("PREV_", rowvar)
-      byvars <- c(byvars, paste0("pc.", rowvarnm))
+      rowvar <- paste0("PREV_", rowvar)
+      cselectqry <- paste0(cselectqry, ", pc.", rowvar)
+      if (!is.null(rowvarnm)) {
+        rowvarnm <- paste0("PREV_", rowvarnm)
+      } else {
+        rowvarnm <- rowvar
+      }
+      byvars <- c(byvars, paste0("pc.", rowvar))
       if (!is.null(uniquerow))
         names(uniquerow) <- paste0("PREV_", names(uniquerow))
       #setnames(uniquerow, rowvar, rowvarnm)
     }
   }
-    
+
   ## Append classified variables to query
   if (colvar %in% pcdomainlst) {
     if (!is.null(classifycol)) {
@@ -147,7 +146,9 @@ check.condCHNG <- function(areawt, areawt2,
     } else {
       cselectqry <- paste0(cselectqry, ", pc.", colvar)
       byvars <- c(byvars, paste0("pc.", colvar))
-      colvarnm <- colvar
+      if (is.null(colvarnm)) {
+        colvarnm <- colvar
+      }
     }
   }
   
@@ -155,11 +156,11 @@ check.condCHNG <- function(areawt, areawt2,
   totalnm <- findnm("TOTAL", pcdomainlst, returnNULL = TRUE)
   if (!is.null(totalnm)) {
     cselectqry <- paste0(cselectqry, ", pc.", "PREV_", totalnm, ", pc.", totalnm)
+    byvars <- c(byvars, paste0("pc.", "PREV_", totalnm), paste0("pc.", totalnm))
   }
   
-  
+ 
   ## Rename rowvar variables with prefix 'PREV_'
-  rowvar <- rowvarnm
   if (!is.null(row.orderby)) {
     row.orderby <- paste0("PREV_", row.orderby)
   }
@@ -172,8 +173,8 @@ check.condCHNG <- function(areawt, areawt2,
            "\n  ", estvarqry)
   
   ## Build cdomdat FROM query
-  joinqry <- getjoinqry(joinid1 = cuniqueid, joinid2 = cuniqueid,
-                        alias1 = "pltidsadj.", alias2 = "pc.")
+  joinqry <- getjoinqry(joinid1 = cuniqueid, joinid2 = pltidsid,
+                        alias1 = "pc.", alias2 = "pltidsadj.")
   cdomdatfromqry <- 
     paste0("\nFROM pltidsadj",
            "\nJOIN pltcondx pc ", joinqry)
@@ -192,7 +193,6 @@ check.condCHNG <- function(areawt, areawt2,
                           AND sccm.prev_plt_cn = pc.prev_plt_cn 
                           AND sccm.condid = pc.condid 
                           AND sccm.prevcond = pc.prev_condid)")
-  
     
   ## Build cdomdat query
   cdomdat.qry <- 
@@ -232,11 +232,12 @@ check.condCHNG <- function(areawt, areawt2,
   return(list(cdomdat = cdomdat, 
               cdomdatqry = cdomdat.qry,
               estnm = estnm,
-              rowvar = rowvarnm, row.orderby = row.orderby, 
+              rowvar = rowvar, colvar = colvar,
+              rowvarnm = rowvarnm, row.orderby = row.orderby, 
               title.rowvar = title.rowvar, uniquerow = uniquerow,
-              colvar = colvarnm, col.orderby = col.orderby, 
+              colvarnm = colvarnm, col.orderby = col.orderby, 
               title.colvar = title.colvar, uniquecol = uniquecol,
-              grpvar = c(rowvarnm, colvarnm)
+              grpvar = c(rowvar, colvar)
               ))
   
 }

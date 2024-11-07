@@ -8,6 +8,7 @@ modGBchng(
   GBpopdat,
   chngtype = "total",
   landarea = "FOREST",
+  landarea_both = TRUE,
   pcfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
@@ -31,7 +32,9 @@ modGBchng(
 "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.}
 
-\item{pcfilter}{String. A filter for plot or cond attributes (including
+\item{landarea_both}{Logical. If TRUE, both Time 1 and Time 2 measurements 
+have the same landarea.
+#' @param pcfilter String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.}
 
 \item{rowvar}{String. Name of row domain variable in cond. If only one
