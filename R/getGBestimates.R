@@ -8,7 +8,8 @@ getGBestimates <- function(esttype,
                            rowvar, 
                            colvar, 
                            grpvar,
-                           pltassgnx, 
+                           pltassgnx,
+                           pltassgnid,
                            unitarea, 
                            unitvar, 
                            areavar,
@@ -23,31 +24,7 @@ getGBestimates <- function(esttype,
                            row.orderby = NULL, 
                            col.orderby = NULL) {
 
-  ## DESCRIPTION: get estimates
-  ## esttype
-  ## domdatn
-  ## domdatd
-  ## uniqueid
-  ## estvarn.name
-  ## estvard.name
-  ## rowvar
-  ## colvar
-  ## grpvar
-  ## pltassgnx
-  ## unitarea
-  ## unitvar
-  ## areavar
-  ## stratalut
-  ## strvar
-  ## totals
-  ## sumunits
-  ## uniquerow
-  ## uniquecol
-  ## row.add0
-  ## col.add0
-  ## row.orderby
-  ## col.orderby
-  
+
   ## Set global variables
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(rowvar %in% c("PREV_TOTAL", "TOTAL") || 

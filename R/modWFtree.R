@@ -230,12 +230,11 @@
 #' NC: U.S. Department of Agriculture, Forest Service, Southern Research
 #' Station, p.53-77.
 #' @keywords data
-#' @export modWFtree
 modWFtree <- function(WFpopdat, 
                       estvar, 
                       estvar.filter=NULL, 
-                      estseed="none", 
-					  woodland = "Y",
+                      estseed="none",
+                      woodland = "Y",
                       landarea="FOREST", 
                       pcfilter=NULL, 
                       rowvar=NULL, 

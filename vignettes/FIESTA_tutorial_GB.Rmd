@@ -282,7 +282,7 @@ GBpopdat$condsampcnt	# Number of conditions by condition status
 # Strata-level population data, including number of plots and adjustment factors
 GBpopdat$stratalut  
 ## Adjustment factors added to condition-level data
-GBpopdat$condx
+GBpopdat$pltidsadj
 ## Adjustment factors added to tree data
 GBpopdat$treex
 ## Adjustment factors added to seedling data
@@ -358,7 +358,7 @@ GBpopdat.bh <- modGBpop(
 names(GBpopdat.bh)
 
 ## Condition information with adjusted condition proportions for area
-head(GBpopdat.bh$condx)
+head(GBpopdat.bh$pltidsadj)
 
 ## Tree information with tree-level adjustment factors
 head(GBpopdat.bh$treex)
@@ -422,7 +422,7 @@ GBpopdat.bhdist <- modGBpop(
 names(GBpopdat.bhdist)
  
 ## Condition information with adjusted condition proportions for area
-head(GBpopdat.bhdist$condx)
+head(GBpopdat.bhdist$pltidsadj)
 
 ## Tree information with tree-level adjustment factors
 head(GBpopdat.bhdist$treex)

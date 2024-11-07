@@ -250,7 +250,6 @@ modSAarea <- function(SApopdatlst = NULL,
     stop("invalid parameter: ", toString(miss))
   }
   
-  
   ## Check parameter lists
   pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
                 savedata_opts=savedata_opts, multest_opts=multest_opts)
@@ -395,16 +394,23 @@ modSAarea <- function(SApopdatlst = NULL,
   ##########################################################################
   ## Check output parameters 
   ##########################################################################
-  outparams <- check.outparams(esttype=esttype, totals=totals,
-	                             allin1=allin1, estround=estround, pseround=pseround, 
-			                         divideby=divideby, addtitle=addtitle,
-			                         returntitle=returntitle, rawdata=rawdata,
-			                         rawonly=rawonly, savedata=savedata, 
-	                             outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-	                             overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
-			                         outfn.date=outfn.date, append_layer=append_layer, 
-			                         raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
-  
+  outparams <- 
+    check.outparams(esttype = esttype, totals=totals,
+	                  allin1 = allin1, 
+                    estround = estround, pseround = pseround, 
+			              divideby = divideby, 
+			              addtitle = addtitle,
+			              returntitle = returntitle, 
+			              rawdata = rawdata,
+			              rawonly = rawonly, 
+			              savedata = savedata, 
+	                  outfolder = outfolder,
+			              overwrite_dsn = overwrite_dsn, 
+	                  overwrite_layer = overwrite_layer, 
+			              outfn.pre = outfn.pre, outfn.date = outfn.date, 
+			              append_layer = append_layer, 
+			              raw_fmt = raw_fmt, 
+			              raw_dsn = raw_dsn, gui = gui)
   sumunits <- outparams$sumunits
   allin1 <- outparams$allin1
   estround <- outparams$estround
@@ -569,8 +575,8 @@ modSAarea <- function(SApopdatlst = NULL,
     areawt <- SApopdat$areawt
     areawt2 <- SApopdat$areawt2
     adjcase <- SApopdat$adjcase
-    pjoinid <- SApopdat$pjoinid
-    
+    pltidsid <- GBpopdat$pjoinid
+    pltassgnid <- GBpopdat$pltassgnid
 	
     ## check smallbnd.dom
     ########################################################
@@ -624,10 +630,10 @@ modSAarea <- function(SApopdatlst = NULL,
     ########################################
     ## Check area units
     ########################################
-    unitchk <- pcheck.areaunits(unitarea=dunitarea, 
-                                areavar=areavar, 
-                                areaunits=areaunits, 
-                                metric=metric)
+    unitchk <- pcheck.areaunits(unitarea = dunitarea, 
+                                areavar = areavar, 
+                                areaunits = areaunits, 
+                                metric = metric)
     dunitarea <- unitchk$unitarea
     areavar <- unitchk$areavar
     areaunits <- unitchk$outunits
@@ -647,7 +653,7 @@ modSAarea <- function(SApopdatlst = NULL,
                     popdatindb = popdatindb, 
                     popconn = popconn, pop_schema = pop_schema,
                     pltcondflds = pltcondflds,
-                    total = totals,
+                    totals = totals,
                     pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                     sumunits = sumunits, 
                     landarea = landarea,
@@ -665,7 +671,6 @@ modSAarea <- function(SApopdatlst = NULL,
                     append_layer = append_layer, 
                     raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
                     gui = gui)
-    
     if (is.null(estdat)) return(NULL)
     esttype <- estdat$esttype
     sumunits <- estdat$sumunits
@@ -692,7 +697,6 @@ modSAarea <- function(SApopdatlst = NULL,
     ###################################################################################
     ### Check row and column data
     ###################################################################################
-    withqry <- dbqueriesWITH$pltidsWITH
     rowcolinfo <- 
       check.rowcol(esttype = esttype, 
                    popType = popType,
@@ -700,7 +704,7 @@ modSAarea <- function(SApopdatlst = NULL,
                    popconn = popconn, SCHEMA. = SCHEMA.,
                    pltcondx = pltcondx,
                    pltcondflds = pltcondflds,
-                   withqry = withqry,
+                   withqry = pltcondxWITHqry,
                    cuniqueid = cuniqueid, condid = condid,
                    rowvar = rowvar, colvar = colvar, 
                    row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
@@ -712,10 +716,7 @@ modSAarea <- function(SApopdatlst = NULL,
                    rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                    rowgrpord = rowgrpord, title.rowgrp = NULL,
                    landarea = landarea, states = states, 
-                   #cvars2keep = "COND_STATUS_CD",
-                   #whereqry = pcwhereqry,
                    gui = gui)
- 
     uniquerow <- rowcolinfo$uniquerow
     uniquecol <- rowcolinfo$uniquecol
     bydomainlst <- rowcolinfo$domainlst
@@ -757,7 +758,7 @@ modSAarea <- function(SApopdatlst = NULL,
                  condid = condid,
                  rowvar = rowvar, 
                  colvar = colvar, 
-                 pcdomainlst = bydomainlst,
+                 pcdomainlst = unique(c(bydomainlst, "TOTAL")),
                  popdatindb = popdatindb,
                  popconn = popconn,
                  pltcondx = pltcondx,
@@ -774,47 +775,47 @@ modSAarea <- function(SApopdatlst = NULL,
     colvar <- conddat$colvar
     grpvar <- conddat$grpvar
     
+    
     #####################################################################################
     ## GENERATE ESTIMATES
     #####################################################################################
-    
-    SAestimates <- getSAestimates(esttype = esttype, i = i,
-                                 largebnd.unique = largebnd.unique,
-                                 estvar.name = estnm,
-                                 domdat = cdomdat,
-                                 pltassgnx = pltassgnx,
-                                 unitlut = dunitlut,
-                                 unitvar = dunitvar,
-                                 uniqueid = cuniqueid,
-                                 pltassgnid = pltassgnid,
-                                 prednames = prednames,
-                                 rowvar = rowvar,
-                                 SApopdatnm = SApopdatnm,
-                                 SAdomsDF = SAdomsdf,
-                                 smallbnd.dom = smallbnd.dom,
-                                 SApackage = SApackage,
-                                 SAmethod = SAmethod,
-                                 showsteps = showsteps,
-                                 savesteps = savesteps,
-                                 stepfolder = stepfolder,
-                                 prior = prior,
-                                 modelselect = modelselect,
-                                 multest = multest,
-                                 SAobjlst = SAobjlst,
-                                 estlst = estlst,
-                                 pdomdatlst = pdomdatlst,
-                                 dunitlutlst = dunitlutlst,
-                                 SAdomvars = SAdomvars,
-                                 SAobjlst_row = SAobjlst_row,
-                                 estlst_row = estlst_row,
-                                 predselectlst.unit = predselectlst.unit,
-                                 predselectlst.area = predselectlst.area,
-                                 predselectlst.unit_row = predselectlst.unit_row,
-                                 predselectlst.area_row = predselectlst.area_row,
-                                 pdomdatlst_row = pdomdatlst_row,
-                                 dunitlutlst_row = dunitlutlst_row,
-                                 save4testing = save4testing) 
-    
+    SAestimates <- 
+      getSAestimates(esttype = esttype, i = i,
+                     largebnd.unique = largebnd.unique,
+                     estvar.name = estnm,
+                     domdat = cdomdat,
+                     pltassgnx = pltassgnx,
+                     unitlut = dunitlut,
+                     unitvar = dunitvar,
+                     uniqueid = pltassgnid,
+                     pltassgnid = pltassgnid,
+                     prednames = prednames,
+                     rowvar = rowvar,
+                     SApopdatnm = SApopdatnm,
+                     SAdomsDF = SAdomsdf,
+                     smallbnd.dom = smallbnd.dom,
+                     SApackage = SApackage,
+                     SAmethod = SAmethod,
+                     showsteps = showsteps,
+                     savesteps = savesteps,
+                     stepfolder = stepfolder,
+                     prior = prior,
+                     modelselect = modelselect,
+                     multest = multest,
+                     SAobjlst = SAobjlst,
+                     estlst = estlst,
+                     pdomdatlst = pdomdatlst,
+                     dunitlutlst = dunitlutlst,
+                     SAdomvars = SAdomvars,
+                     SAobjlst_row = SAobjlst_row,
+                     estlst_row = estlst_row,
+                     predselectlst.unit = predselectlst.unit,
+                     predselectlst.area = predselectlst.area,
+                     predselectlst.unit_row = predselectlst.unit_row,
+                     predselectlst.area_row = predselectlst.area_row,
+                     pdomdatlst_row = pdomdatlst_row,
+                     dunitlutlst_row = dunitlutlst_row,
+                     save4testing = save4testing) 
     largebnd.unique <-  SAestimates$largebnd.unique
     response <- SAestimates$response
     domdat <- SAestimates$domdat
@@ -1079,32 +1080,33 @@ modSAarea <- function(SApopdatlst = NULL,
   #####################################################################################
   
   title.dunitvar <- ifelse(is.null(title.unitvar), smallbnd.dom, title.unitvar)
-  alltitlelst <- check.titles(esttype=esttype,
-                              estseed=estseed,
-                              woodland=woodland,
-                              sumunits=sumunits,
-                              title.main=title.main,
-                              title.ref=title.ref,
-                              title.rowvar=title.rowvar,
-                              title.rowgrp=title.rowgrp,
-                              title.colvar=title.colvar,
-                              title.unitvar=title.dunitvar,
-                              title.filter=title.filter,
-                              title.unitsn=areaunits,
-                              title.estvarn=title.estvar,
-                              unitvar="DOMAIN",
-                              rowvar=rowvar, colvar=colvar,
-                              estvarn=estvar.name,
-                              estvarn.filter=estvar.filter,
-                              addtitle=addtitle,
-                              returntitle=returntitle,
-                              rawdata=rawdata,
-                              states=states, invyrs=invyrs,
-                              landarea=landarea,
-                              pcfilter=pcfilter,
-                              allin1=allin1,
-                              divideby=divideby,
-                              outfn.pre=outfn.pre)
+  alltitlelst <- 
+    check.titles(esttype = esttype,
+                 estseed = estseed,
+                 woodland = woodland,
+                 sumunits = sumunits,
+                 title.main = title.main,
+                 title.ref = title.ref,
+                 title.rowvar = title.rowvar,
+                 title.rowgrp = title.rowgrp,
+                 title.colvar = title.colvar,
+                 title.unitvar = title.dunitvar,
+                 title.filter = title.filter,
+                 title.unitsn = areaunits,
+                 title.estvarn = title.estvar,
+                 unitvar = "DOMAIN",
+                 rowvar = rowvar, colvar = colvar,
+                 estvarn = estvar.name,
+                 estvarn.filter = estvar.filter,
+                 addtitle = addtitle,
+                 returntitle = returntitle,
+                 rawdata = rawdata,
+                 states = states, invyrs = invyrs,
+                 landarea = landarea,
+                 pcfilter = pcfilter,
+                 allin1 = allin1,
+                 divideby = divideby,
+                 outfn.pre = outfn.pre)
   title.dunitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -1126,23 +1128,34 @@ modSAarea <- function(SApopdatlst = NULL,
   ###################################################################################
   message("getting output...")
   estnm <- "est"
-  tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-                      unitvar="DOMAIN", unit_totest=dunit_totest, 
-                      unit_rowest=dunit_rowest, unit_colest=dunit_colest, 
-                      unit_grpest=dunit_grpest, rowvar=rowvarnm, colvar=colvarnm, 
-                			uniquerow=uniquerow, uniquecol=uniquecol, 
-                      rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
-                      rowunit=rowunit, totunit=totunit, allin1=allin1, 
-                      savedata=savedata, addtitle=addtitle, title.ref=title.ref, 
-                      title.colvar=title.colvar, title.rowvar=title.rowvar, 
-                      title.rowgrp=title.rowgrp, title.unitvar=title.dunitvar, 
-                      title.estpse=title.estpse, title.est=title.est, 
-                      title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, 
-                      outfn.estpse=outfn.estpse2, outfolder=outfolder, 
-                      outfn.date=outfn.date, overwrite=overwrite_layer, 
-                      estnm=estnm, estround=estround, pseround=pseround, 
-                      divideby=divideby, returntitle=returntitle, 
-                      estnull=estnull, psenull=psenull) 
+  tabs <- 
+    est.outtabs(esttype = esttype, 
+                sumunits = sumunits, 
+                areavar = areavar, 
+                unitvar ="DOMAIN", 
+                unit_totest = dunit_totest, 
+                unit_rowest = dunit_rowest, 
+                unit_colest = dunit_colest, 
+                unit_grpest = dunit_grpest, 
+                rowvar = rowvarnm, colvar = colvarnm, 
+                uniquerow = uniquerow, uniquecol = uniquecol, 
+                rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
+                rowunit = rowunit, totunit = totunit, 
+                allin1 = allin1, 
+                savedata = savedata, addtitle = addtitle, 
+                title.ref= title.ref, 
+                title.colvar = title.colvar, title.rowvar = title.rowvar, 
+                title.rowgrp = title.rowgrp, title.unitvar = title.dunitvar, 
+                title.estpse = title.estpse, 
+                title.est = title.est, title.pse = title.pse, 
+                rawdata = rawdata, rawonly = rawonly, 
+                outfn.estpse = outfn.estpse2, outfolder = outfolder, 
+                outfn.date = outfn.date, overwrite = overwrite_layer, 
+                estnm = estnm, 
+                estround = estround, pseround = pseround, 
+                divideby = divideby, 
+                returntitle = returntitle, 
+                estnull = estnull, psenull = psenull) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 

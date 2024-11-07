@@ -517,6 +517,13 @@ datSumTreeDom <- function(tree = NULL,
   tdomainlst <- sumdat$tdomainlst   ## original tree variables
   pcdomainlst <- sumdat$pcdomainlst ## original pc variables
   classifynmlst <- sumdat$classifynmlst
+
+    
+  if (length(tsumvarnm) > 1) {
+    tsumnm=tsumvarnm <- tsumvarnm[length(tsumvarnm)]
+  } else {
+    tsumnm=tsumvarnm <- tsumvarnm
+  }
   
   if (!is.null(classifynmlst[[tdomvar]])) {
     tdomvar <- classifynmlst[[tdomvar]]
@@ -627,7 +634,7 @@ datSumTreeDom <- function(tree = NULL,
   }
   sumbyvars <- unique(c(tsumuniqueid, pcdomainlst, tdomvarnm))
 
-  
+
   ## GET tdomvarlst2 or CHECK IF ALL tree domains IN tdomvar2lst ARE INCLUDED IN tdomvar2.
   if (!is.null(tdomvar2)) {
     tdoms2 <- sort(unique(tdomtree[[tdomvar2]]))
@@ -692,7 +699,7 @@ datSumTreeDom <- function(tree = NULL,
     }
     
     if (pivot) {
-      concatvar <- paste0(tdomvar, "_", tdomvar2)
+      concatvar <- paste0(tdomvar, "#", tdomvar2)
       tdomtree[, (concatvar) := paste0(tdomtree[[tdomvarnm]], "#", tdomtree[[tdomvar2]])] 
       sumbyvars <- unique(c(tsumuniqueid, pcdomainlst, concatvar))
     } else {
@@ -720,16 +727,11 @@ datSumTreeDom <- function(tree = NULL,
   ## Generate tree domain look-up table (tdomvarlut)
   #####################################################################
   nvar <- ifelse(bycond, "NBRCONDS", "NBRPLOTS")
-  if (length(tsumvarnm) > 1) {
-    tsumnm <- tsumvarnm[length(tsumvarnm)]
-  } else {
-    tsumnm <- tsumvarnm
-  }
 
   if (!is.null(concatvar)) {
     tdomvarlut <- tdomtreef[, list(sum(.SD, na.rm=TRUE), .N), by=concatvar, .SDcols = tsumnm]
     names(tdomvarlut) <- c(concatvar, tsumnm, nvar)
-    tdomvarlut <- tdomvarlut[, (c(tdomvarnm, tdomvar2nm)) := tstrsplit(concatvar, "#", fixed=TRUE)]
+    tdomvarlut <- tdomvarlut[, (c(tdomvarnm, tdomvar2nm)) := tstrsplit(get(concatvar), "#", fixed=TRUE)]
     tdomvarlut[[concatvar]] <- NULL
   } else {
     tdomvarlut <- tdomtreef[, list(sum(.SD, na.rm=TRUE), .N), by=tdomvarnm, .SDcols = tsumnm]
@@ -780,17 +782,21 @@ datSumTreeDom <- function(tree = NULL,
     ## If pivot=TRUE, aggregate tree domain data
     ######################################################################## 
     yvar <- ifelse (is.null(tdomvar2), tdomvarnm, concatvar)
-    tdoms <- datPivot(tdomtreef, pvar = tsumvarnm, 
+    tdoms <- datPivot(tdomtreef, pvar = tsumnm, 
                       xvar = c(tsumuniqueid, pcdomainlst), yvar = yvar,
                       pvar.round = tround, returnDT = TRUE)
   	tdoms <- setDT(tdoms)
 
     ## check if tree domain in tdomlst.. if not, create column with all 0 values
     tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% sumbyvars]
-    UNMATCH <- tdomvarlst2[is.na(match(tdomvarlst2, tdomscols))] 
-    if (length(UNMATCH) > 0) {
-      tdoms[, (UNMATCH) := 0]
-      tdomvarlst2 <- c(tdomvarlst2, UNMATCH)
+    if (is.null(concatvar)) {
+      UNMATCH <- tdomvarlst2[is.na(match(tdomvarlst2, tdomscols))] 
+      if (length(UNMATCH) > 0) {
+        tdoms[, (UNMATCH) := 0]
+        tdomvarlst2 <- c(tdomvarlst2, UNMATCH)
+      }
+    } else {
+      tdomvarlst2 <- tdomscols
     }
 
     ## ADD TOTAL OF TREE DOMAINS IN tdomvarlst 
@@ -830,7 +836,7 @@ datSumTreeDom <- function(tree = NULL,
 #    tdomvarlut[[nvar]] <- sapply(tdoms[, tdomvarlst2, with=FALSE], 
 #		function(x) sum(x > 0))
   } 
- 
+
   ## Generate barplot
   if (tdombarplot) {
     ## Frequency

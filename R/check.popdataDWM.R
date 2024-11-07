@@ -102,7 +102,12 @@ check.popdataDWM <-
     plotnm <- plotlst$tabnm
     puniqueid <- plotlst$tabid
     pltx <- plotlst$tabx
-    pltxnm <- ifelse (!is.null(pltx), "pltx", plotnm) 
+    pltflds <- plotlst$tabflds
+    if (is.null(pltx)) {
+      pltxnm <- plotnm
+    } else {
+      pltxnm <- "pltx"
+    }
     
     ## cond table
     condlst <- popTabchk("cond", tabtext = "cond", 

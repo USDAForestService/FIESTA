@@ -231,7 +231,7 @@
 #' @param RS String vector. Name of research station(s) to get public XY
 #' coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
 #' is populated. See FIESTA::ref_statecd for reference to RS and states.
-#' @param datsource String. Source of data ('datamart', 'sqlite').
+#' @param datsource String. Source of data ('datamart', 'sqlite', 'postgres').
 #' @param data_dsn String. If datsource='sqlite', the name of SQLite database
 #' (*.sqlite).
 #' @param dbTabs List. Source of tables needed for estimation based on what
@@ -1908,6 +1908,10 @@ DBgetPlots <- function (states = NULL,
         condx <- unique(pltcondx[, condvarlst2, with=FALSE])
         condx[, PLT_CN := as.character(PLT_CN)]        
         setkey(condx, PLT_CN, CONDID)
+        
+        if ("MACRPROP_UNADJ" %in% names(condx) && !is.numeric(condx$MACRPROP_UNADJ)) {
+          condx$MACRPROP_UNADJ <- as.numeric(condx$MACRPROP_UNADJ)
+        }
       }
 
 	    ## Change names of LON and LAT to LON_PUBLIC and LAT_PUBLIC

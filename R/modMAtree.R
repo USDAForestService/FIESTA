@@ -305,7 +305,7 @@ modMAtree <- function(MApopdat,
   ## Generates model-assisted estimates by domain (and estimation unit)
   ##################################################################################
 
- gui <- FALSE
+  gui <- FALSE
   
   ## If gui.. set variables to NULL
   if (gui) { 
@@ -315,15 +315,13 @@ modMAtree <- function(MApopdat,
   }
   
   ## Set parameters
-  minplotnum <- 10
   esttype <- "TREE"
   popType <- "VOL"
-  parameters <- FALSE
+  rawdata <- TRUE 
   returnlst <- list()
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify<- NULL
-  rawdata <- TRUE 
   
   
   ##################################################################
@@ -415,13 +413,15 @@ modMAtree <- function(MApopdat,
     predselectlst <- list()
   }
 
+  ###################################################################################
+  ## Check data and generate population information 
+  ###################################################################################
   list.items <- c("pltcondx", "cuniqueid", "condid",
                   "treex", "tuniqueid",
                   "unitarea", "unitvar", "unitlut", "npixels",
 		              "npixelvar", "plotsampcnt", "condsampcnt")
 
   MApopdat <- pcheck.object(MApopdat, "MApopdat", list.items=list.items)
-  	
   if (is.null(MApopdat)) return(NULL)	
   pltidsadj <- MApopdat$pltidsadj
   pltcondx <- MApopdat$pltcondx
@@ -460,8 +460,8 @@ modMAtree <- function(MApopdat,
   dbqueries <- MApopdat$dbqueries
   dbqueriesWITH <- MApopdat$dbqueriesWITH
   adjcase <- MApopdat$adjcase
-  pjoinid <- MApopdat$pjoinid
- 
+  pltidsid <- GBpopdat$pjoinid
+  pltassgnid <- GBpopdat$pltassgnid
  
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
@@ -497,6 +497,7 @@ modMAtree <- function(MApopdat,
     pltcondxWITHqry=pltcondxadjWITHqry <- NULL
   }
 
+  
   ########################################
   ## Check area units
   ########################################
@@ -513,30 +514,30 @@ modMAtree <- function(MApopdat,
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype,
-                          popType = popType,
-                          popdatindb = popdatindb,
-                          popconn = popconn, pop_schema = pop_schema,
-                          pltcondflds = pltcondflds,
-                          totals = totals,
-                          pop_fmt=pop_fmt, pop_dsn=pop_dsn,
-                          sumunits = sumunits,
-                          landarea = landarea,
-                          ACI = ACI,
-                          pcfilter = pcfilter,
-                          allin1 = allin1, divideby = divideby,
-                          estround = estround, pseround = pseround,
-                          addtitle = addtitle, returntitle = returntitle,
-                          rawonly = rawonly,
-                          savedata = savedata,
-                          outfolder = outfolder,
-                          overwrite_dsn = overwrite_dsn, 
-                          overwrite_layer = overwrite_layer, 
-                          outfn.pre = outfn.pre, outfn.date = outfn.date, 
-                          append_layer = append_layer, 
-                          raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
-                          gui = gui)
-  
+  estdat <- 
+    check.estdata(esttype = esttype,
+                  popType = popType,
+                  popdatindb = popdatindb,
+                  popconn = popconn, pop_schema = pop_schema,
+                  pltcondflds = pltcondflds,
+                  totals = totals,
+                  pop_fmt=pop_fmt, pop_dsn=pop_dsn,
+                  sumunits = sumunits,
+                  landarea = landarea,
+                  ACI = ACI,
+                  pcfilter = pcfilter,
+                  allin1 = allin1, divideby = divideby,
+                  estround = estround, pseround = pseround,
+                  addtitle = addtitle, returntitle = returntitle,
+                  rawonly = rawonly,
+                  savedata = savedata,
+                  outfolder = outfolder,
+                  overwrite_dsn = overwrite_dsn, 
+                  overwrite_layer = overwrite_layer, 
+                  outfn.pre = outfn.pre, outfn.date = outfn.date, 
+                  append_layer = append_layer, 
+                  raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+                  gui = gui)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   sumunits <- estdat$sumunits
@@ -559,6 +560,7 @@ modMAtree <- function(MApopdat,
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
 
+  
   ###################################################################################
   ## Check parameter inputs and tree filters
   ###################################################################################
@@ -587,7 +589,6 @@ modMAtree <- function(MApopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  #withqry = dbqueriesWITH$pltcondxWITH
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
@@ -634,6 +635,7 @@ modMAtree <- function(MApopdat,
   tdomvar2 <- rowcolinfo$tdomvar2
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
+  #rm(rowcolinfo)
   
   ## if classified columns, create domclassify list for summarizing tree data
   if (any(!is.null(classifyrow), !is.null(classifycol))) {
@@ -657,12 +659,8 @@ modMAtree <- function(MApopdat,
   ### GET ESTIMATION DATA FROM TREE TABLE
   #################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  
-  
-  adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   if (popdatindb) {
     pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
-    pjoinid <- "PLT_CN"
   } else {
     pltidsWITHqry <- NULL
   }
@@ -689,19 +687,17 @@ modMAtree <- function(MApopdat,
                dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
-               pjoinid = pjoinid,
+               pjoinid = pltidsid,
                bytdom = bytdom,
                gui = gui)
   if (is.null(treedat)) stop(NULL) 
   tdomdat <- treedat$tdomdat
-  #estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
   estunits <- treedat$estunits
   treeqry <- treedat$treeqry
   classifynmlst <- treedat$classifynmlst
-  
   
   ## If classified rowvar or colvar, get class names
   if (!is.null(classifynmlst)) {
@@ -720,33 +716,34 @@ modMAtree <- function(MApopdat,
   #################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #################################################################################
-  alltitlelst <- check.titles(dat=tdomdat,
-                              esttype=esttype, 
-                              estseed=estseed,
-                              woodland=woodland,
-                              sumunits=sumunits,
-                              title.main=title.main,
-                              title.ref=title.ref, 
-                              title.rowvar=title.rowvar,
-                              title.rowgrp=title.rowgrp, 
-                              title.colvar=title.colvar,
-                              title.unitvar=title.unitvar, 
-                              title.filter=title.filter,
-                              title.unitsn=estunits, 
-                              title.estvarn=title.estvar, 
-                              unitvar=unitvar,
-                              rowvar=rowvar, colvar=colvar, 
-                              estvarn=estvar.name,
-                              estvarn.filter=estvar.filter, 
-                              addtitle=addtitle,
-                              returntitle=returntitle, 
-                              rawdata=rawdata,
-                              states=states, invyrs=invyrs, 
-                              landarea=landarea,
-                              pcfilter=pcfilter,
-                              allin1=allin1, 
-                              divideby=divideby,
-                              outfn.pre=outfn.pre)
+  alltitlelst <- 
+    check.titles(dat = tdomdat,
+                 esttype = esttype, 
+                 estseed = estseed,
+                 woodland = woodland,
+                 sumunits = sumunits,
+                 title.main = title.main,
+                 title.ref = title.ref, 
+                 title.rowvar = title.rowvar,
+                 title.rowgrp = title.rowgrp, 
+                 title.colvar = title.colvar,
+                 title.unitvar = title.unitvar, 
+                 title.filter = title.filter,
+                 title.unitsn = estunits, 
+                 title.estvarn = title.estvar, 
+                 unitvar = unitvar,
+                 rowvar = owvar, colvar = colvar, 
+                 estvarn = estvar.name,
+                 estvarn.filter = estvar.filter, 
+                 addtitle = addtitle,
+                 returntitle = returntitle, 
+                 rawdata = rawdata,
+                 states = states, invyrs = invyrs, 
+                 landarea = landarea,
+                 pcfilter =pcfilter,
+                 allin1 = allin1, 
+                 divideby = divideby,
+                 outfn.pre = outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -761,10 +758,10 @@ modMAtree <- function(MApopdat,
   ## Append name of package and method to outfile name
   outfn.estpse <- paste0(outfn.estpse, "_modMA_mase", "_", MAmethod) 
 
+  
   #################################################################################
   ## GENERATE ESTIMATES
   #################################################################################
-  
   estdat <- 
     getMAestimates(esttype = esttype,
                    domdatn = tdomdat,
@@ -807,36 +804,56 @@ modMAtree <- function(MApopdat,
   ###############################################################################
   message("getting output...")
   estnm <- "est"
-  tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-                      unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
-                      unit_rowest=unit_rowest, unit_colest=unit_colest,
-                      unit_grpest=unit_grpest, rowvar=rowvarnm, colvar=colvarnm,
-                      uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp,
-                      rowgrpnm=rowgrpnm, rowunit=NULL, totunit=NULL, allin1=allin1,
-                      savedata=savedata, addtitle=addtitle, title.ref=title.ref,
-                      title.colvar=title.colvar, title.rowvar=title.rowvar,
-                      title.rowgrp=title.rowgrp, title.unitvar=title.unitvar,
-                      title.estpse=title.estpse, title.est=title.est,
-                      title.pse=title.pse, rawdata=rawdata, rawonly=rawonly,
-                      outfn.estpse=outfn.estpse, outfolder=outfolder,
-                      outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, 
-                      estround=estround, pseround=pseround, divideby=divideby, 
-                      returntitle=returntitle, estnull=estnull, psenull=psenull, 
-                      raw.keep0=raw.keep0) 
-
+  tabs <- 
+    est.outtabs(esttype = esttype, 
+                sumunits = sumunits, areavar = areavar, 
+                unitvar = unitvar, unitvars = unitvars, 
+                unit_totest = unit_totest, 
+                unit_rowest = unit_rowest, unit_colest = unit_colest, 
+                unit_grpest = unit_grpest,
+                rowvar = rowvarnm, colvar = colvarnm, 
+                uniquerow = uniquerow, uniquecol = uniquecol,
+                rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
+                rowunit = rowunit, totunit = totunit, 
+                allin1 = allin1, 
+                savedata = savedata, addtitle = addtitle, 
+                title.ref = title.ref, 
+                title.rowvar = title.rowvar, title.colvar = title.colvar, 
+                title.rowgrp = title.rowgrp,
+                title.unitvar = title.unitvar, title.estpse = title.estpse, 
+                title.est = title.est, title.pse = title.pse, 
+                rawdata = rawdata, rawonly = rawonly, 
+                outfn.estpse = outfn.estpse, 
+                outfolder = outfolder, outfn.date = outfn.date, 
+                overwrite = overwrite_layer, estnm = estnm, 
+                estround = estround, pseround = pseround, 
+                divideby = divideby, 
+                returntitle = returntitle, 
+                estnull = estnull, psenull = psenull, 
+                raw.keep0 = raw.keep0) 
+  
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
+  if (!row.add0 && any(est2return$Total == "--")) {
+    est2return <- est2return[est2return$Total != "--",]
+  }
   if (!is.null(est2return)) {
-    returnlst$est <- est2return 
+    if (!row.add0 && any(est2return$Total == "--")) {
+      est2return <- est2return[est2return$Total != "--",]
+    }
+    returnlst$est <- setDF(est2return)
   }
   if (!is.null(pse2return)) {
-    returnlst$pse <- pse2return 
+    if (!row.add0 && any(pse2return$Total == "--")) {
+      pse2return <- pse2return[pse2return$Total != "--",]
+    }
+    returnlst$pse <- setDF(pse2return) 
   }
-  if (returntitle) {
+  if(returntitle) {
     returnlst$titlelst <- alltitlelst
   }
-
+  
   if (rawdata) {
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(tdomdat)

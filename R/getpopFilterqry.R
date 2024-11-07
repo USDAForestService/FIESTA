@@ -25,15 +25,16 @@ getpopFilterqry <- function(popType,
   ## pltaindb - if TRUE, the pltassgn table is in the database
   ## ppsaindb - if TRUE, and EVALID is in popFilters, POP_PLOT_STRATUM_ASSGN is in database
   pwhereqry=ewhereqry=nonsamp.pfilter=ppsaflds=PLOT=stcntywhereqry=POP_PLOT_STRATUM_ASSGN <- NULL
+  popevalid=invyrs <- NULL
   syntax <- "SQL"
   subcycle99 <- FALSE
   pflds <- unique(c(pltassgnflds, pltflds))
+  SCHEMA. <- ""
   
   if (!is.null(dbconn)) {
     if (!DBI::dbIsValid(dbconn)) {
       stop("database connection is invalid... \n", dbconn)
     }
-    SCHEMA. <- ""
     if (!is.null(schema)) {
       SCHEMA. <- paste0(schema, ".")
     }
@@ -43,8 +44,10 @@ getpopFilterqry <- function(popType,
   
   ## 1. Create join for including pltassgnx
   ##################################################################################
+  noplt <- TRUE
   pltassgn. <- "plta."
   if (!is.null(plotnm)) {
+    noplt <- FALSE
     pfromqry <- paste0("\nFROM ", plotnm, " p ")
     pjoinqry <- getjoinqry(pltassgnid, pjoinid, pltassgn., plt.)
     pltafromqry <- paste0(pfromqry, 
@@ -61,10 +64,18 @@ getpopFilterqry <- function(popType,
 
   if (is.null(popFilter$evalid) && is.null(states)) {
     if (!is.null(pfilter)) {
-      if (!is.null(plt.)) {
+      if (noplt) {
+        statecda. <- pltassgn.
+        statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
         statecda. <- ifelse(statenm %in% pltassgnflds, pltassgn., plt.)
       } else {
-        statecda. <- pltassgn.
+        statenm <- findnm("STATECD", pltflds, returnNULL=TRUE)
+        if (is.null(statenm)) {
+          statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
+          statecda. <- ifelse(statenm %in% pltassgnflds, pltassgn., plt.)
+        } else {
+          statecda. <- ifelse(statenm %in% pltflds, plt., pltassgn)
+        }
       }
       
       states.qry <- paste0(
@@ -72,21 +83,29 @@ getpopFilterqry <- function(popType,
         pltafromqry,
         "\nWHERE ", pfilter)
       states <- DBI::dbGetQuery(dbconn, states.qry)[[1]]
-     
+
     } else {
-      statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
-      if (!is.null(plt.)) {
-        statecda. <- ifelse(statenm %in% pltassgnflds, pltassgn., plt.)
-      } else {
+
+      if (noplt) {
+        statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
         statecda. <- pltassgn.
+        stfromqry <- paste0("\nFROM ", pltassgnnm)
+      } else {
+        statenm <- findnm("STATECD", pltflds, returnNULL=TRUE)
+        if (is.null(statenm)) {
+          statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
+          statecda. <- ifelse(statenm %in% pltassgnflds, pltassgn., plt.)
+          stfromqry <- paste0("\nFROM ", pltassgnnm)
+        } else {
+          statecda. <- ifelse(statenm %in% pltflds, plt., pltassgn.)
+          stfromqry <- paste0("\nFROM ", plotnm)
+        }
       }
-      
+
       if (is.null(statenm) && datindb) {
         message("STATECD is not in pltassgn...  getting all states in database...")
-      }
-      if (is.null(statenm) && datindb) {
       
-        if (!is.null(plotnm)) {
+        if (!noplt) {
           message("STATECD is not in pltassgn...  extracting plot data for all states in database...")
         
           getpltx.qry <- paste0(
@@ -120,18 +139,24 @@ getpopFilterqry <- function(popType,
         if (pltaindb) {
           getstates.qry <- paste0(
             "\nSELECT DISTINCT ", statenm,
-            "\nFROM ", pltassgnnm)
+            stfromqry)
           states <- DBI::dbGetQuery(dbconn, getstates.qry)[[1]]
         } else {
           states <- unique(pltassgnx[[statenm]])
         }
-        countynm <- findnm("COUNTYCD", pltassgnflds)
-        if (!is.null(plt.)) {
-          countycda. <- ifelse(countynm %in% pltassgnflds, pltassgn., plt.)
-        } else {
-          countycda. <- pltassgn.
-        }
 
+        if (noplt) {
+          countynm <- findnm("COUNTYCD", pltassgnflds, returnNULL=TRUE)
+          countycda. <- pltassgn.
+        } else {
+          countynm <- findnm("COUNTYCD", pltflds, returnNULL=TRUE)
+          if (is.null(countynm)) {
+            countynm <- findnm("COUNTYCD", pltassgnflds, returnNULL=TRUE)
+            countycda. <- ifelse(countynm %in% pltassgnflds, pltassgn., plt.)
+          } else {
+            countycda. <- ifelse(countynm %in% pltflds, plt., pltassgn.)
+          }
+        }
         if (!is.null(countynm)) {
           stcntywhereqry <- NULL
           for (i in 1: length(states)) {
@@ -139,7 +164,7 @@ getpopFilterqry <- function(popType,
             if (pltaindb) {
               getcntycds.qry <- paste0(
                 "\nSELECT DISTINCT ", countynm,
-                "\nFROM ", pltassgnnm,
+                stfromqry,
                 "\nWHERE ", statenm, " = ", stcd)
               cntycds <- DBI::dbGetQuery(dbconn, getcntycds.qry)[[1]]
             } else {
@@ -198,7 +223,9 @@ getpopFilterqry <- function(popType,
       invyrs <- sort(DBI::dbGetQuery(dbconn, invyrs.qry)[[1]])
     }
 
-  } else {
+  } else if (datsource == "obj" || 
+             any(!is.null(popFilter$evalid), popFilter$evalCur, !is.null(popFilter$evalEndyr))) {
+
     evalInfo <- tryCatch( 
       DBgetEvalid(states = states, 
                 datsource = datsource,
@@ -750,7 +777,7 @@ getpopFilterqry <- function(popType,
                         "\n INNER JOIN ",
                         "\n (", subqry, ") pp ", subjoinqry)
   } else {
-    
+
     ## Create pltidsqry
     pltselectqry <- paste0("SELECT ", toString(selectpvars))
     pltidsqry <- paste0(pltselectqry,
@@ -761,12 +788,11 @@ getpopFilterqry <- function(popType,
       pltidsqry <- paste0(pltidsqry, pwhereqry)
     }
   }
-  
+ 
   ###################################################################################
   ## 8. Create pltidsqry to use as WITH statement for extracting data (if pltassgn in database)
   ## getdataWITHqry - used for extracting data (if pltassgn not in database)
   ###################################################################################
-  
   
   if (!is.null(dbconn) && !dbconnopen) {
     DBI::dbDisconnect(dbconn)

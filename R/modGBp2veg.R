@@ -211,7 +211,6 @@
 #' NC: U.S. Department of Agriculture, Forest Service, Southern Research
 #' Station, p.53-77.
 #' @keywords data
-#' @export modGBp2veg
 modGBp2veg <- function(GBpopdat = NULL, 
                        p2vegtype = "str", 
                        peracre = FALSE,

@@ -27,7 +27,8 @@ getMAestimates <- function(esttype,
                            col.orderby = NULL) {
   
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
-  addtotal <- ifelse(rowvar == "TOTAL" || length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
+  addtotal <- ifelse(rowvar %in% c("PREV_TOTAL", "TOTAL") || 
+                       length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
   modelselect_bydomain <- FALSE
   response <- estvarn.name
   predselectlst <- list()
@@ -41,8 +42,21 @@ getMAestimates <- function(esttype,
 
   message("generating estimates using mase::", masemethod, " function...\n")
   
-  domdatn$TOTAL <- 1
+  ## Append TOTAL to domdatn
+  if (addtotal && !"TOTAL" %in% names(domdatn)) {
+    domdatn$TOTAL <- 1
+  }
+  
+  ## Join domdat to pltassgnx using data.table key
   domdatn <- pltassgnx[domdatn]
+  if (esttype == "RATIO") {
+    if (addtotal && !"TOTAL" %in% names(domdatd)) {
+      domdatd$TOTAL <- 1
+    }
+    domdatd <- pltassgnx[domdatd]
+  }
+  
+  ## Get unique estimation unit values
   estunits <- sort(unique(domdatn[[unitvar]]))
   
   predselect.overall <- NULL

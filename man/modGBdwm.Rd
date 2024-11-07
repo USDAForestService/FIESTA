@@ -5,37 +5,26 @@
 \title{Green-Book module - Generate area estimates.}
 \usage{
 modGBdwm(
-  GBpopdat = NULL,
+  GBpopdat,
   dwmtype = "CWD",
   dwmvar = "VOLCF",
   peracre = FALSE,
-  lbs2tons = FALSE,
   landarea = "FOREST",
   pcfilter = NULL,
-  vfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
   sumunits = TRUE,
   returntitle = FALSE,
   savedata = FALSE,
+  newvars_opts = NULL,
   table_opts = NULL,
   title_opts = NULL,
   savedata_opts = NULL,
-  gui = FALSE,
   ...
 )
 }
 \arguments{
 \item{GBpopdat}{List. Population data objects returned from modGBpop().}
-
-\item{dwmtype}{String. Type of dwm estimate ('CWD', 'FWD_LG', "FWD_MD", "FWD_SM").}
-
-\item{dwmvar}{String. Type of dwm estimate ('VOLCF', 'BIOMASS', "CARBON").}
-
-\item{peracre}{Logical. If TRUE, generates per-acre estimates.}
-
-\item{lbs2tons}{Logical. If TRUE, converts biomass or carbon variables from
-pounds to tons. If metric=TRUE, converts to metric tons, else short tons.}
 
 \item{landarea}{String. The sample area filter for estimates ("ALL",
 "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
@@ -43,9 +32,6 @@ pounds to tons. If metric=TRUE, converts to metric tons, else short tons.}
 
 \item{pcfilter}{String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.}
-
-\item{vfilter}{String. A filter for the P2 vegetation table used for
-estimate.  Must be R logical syntax.}
 
 \item{rowvar}{String. Name of row domain variable in cond. If only one
 domain, rowvar = domain variable. If more than one domain, include colvar.
@@ -69,9 +55,9 @@ options.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
-
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with estimates with percent sampling error for rowvar (and
@@ -82,36 +68,42 @@ information.  If savedata=TRUE, all data frames are written to outfolder.
 \item{est}{ Data frame. Area estimates, in area units (e.g., acres), by
 rowvar, colvar (and estimation unit). If sumunits=TRUE or one estimation
 unit and colvar=NULL, or allin1=TRUE, estimates and percent sampling error
-are in one data frame. } \item{pse}{ Data frame. Percent sampling errors
-(Confidence level 68%) for estimates by rowvar and colvar (and estimation
-unit). } \item{titlelst}{ List. If returntitle=TRUE a list with table
-title(s). The list contains one title if est and pse are in the same table
-and two titles if est and pse are in separate tables. Row and column tables
-are also included in list. } \item{raw}{ List. If rawdata=TRUE, a list
-including the processing data used for estimation including: number of plots
-and conditions; stratification information; and 1 to 8 tables with
-calculated values for table cells and totals (See processing data below). }
+are in one data frame. } 
+\item{pse}{ Data frame. Percent sampling errors (Confidence level 68%) 
+for estimates by rowvar and colvar (and estimation unit). } 
+\item{titlelst}{ List. If returntitle=TRUE a list with table title(s). The 
+list contains one title if est and pse are in the same table and two titles 
+if est and pse are in separate tables. Row and column tables are also included 
+in list. } 
+\item{raw}{ List. If rawdata=TRUE, a list including the processing data used 
+for estimation including: number of plots and conditions; stratification 
+information; and 1 to 8 tables with calculated values for table cells and 
+totals (See processing data below). }
 
 Raw data
 
 \item{plotsampcnt}{ Table. Number of plots by plot status (e.g., sampled
-forest on plot, sampled nonforest, nonsampled). } \item{condsampcnt}{ DF.
-Number of conditions by condition status (forest land, nonforest land,
-noncensus water, census water, nonsampled). } \item{unitarea}{ DF. Area by
-estimation unit. } \item{expcondtab}{ DF. Condition-level area expansion
-factors. } \item{domdat}{ DF. Final data table used for estimation. }
+forest on plot, sampled nonforest, nonsampled). } 
+\item{condsampcnt}{ DF. Number of conditions by condition status 
+(forest land, nonforest land, noncensus water, census water, nonsampled). } 
+\item{unitarea}{ DF. Area by estimation unit. } 
+\item{expcondtab}{ DF. Condition-level area expansion factors. } 
+\item{domdat}{ DF. Final data table used for estimation. }
 
 \item{stratdat}{ Data frame. Strata information by estimation unit. }
-\tabular{lll}{ \tab \bold{Variable} \tab \bold{Description} \cr \tab unitvar
-\tab estimation unit \cr \tab strvar \tab stratum value \cr \tab strwtvar
-\tab number of pixels by strata and estimation unit \cr \tab n.strata \tab
-number of plots in strata (after totally nonsampled plots removed) \cr \tab
-n.total \tab number of plots for estimation unit \cr \tab strwt \tab
-proportion of area (or plots) by strata and estimation unit (strata weight)
-\cr \tab CONDPROP_UNADJ_SUM \tab summed condition proportion by strata and
-estimation unit \cr \tab CONDPROP_ADJFAC \tab adjusted condition proportion
-by strata after nonresponse plots removed \cr \tab AREA \tab total area for
-estimation unit \cr \tab CONDPROP_ADJFAC \tab average area \cr }
+\tabular{lll}{ \tab \bold{Variable} \tab \bold{Description} \cr
+\tab unitvar \tab estimation unit \cr \tab strvar \tab stratum value \cr 
+\tab strwtvar \tab number of pixels by strata and estimation unit \cr 
+\tab n.strata \tab number of plots in strata (after totally nonsampled 
+plots removed) \cr 
+\tab n.total \tab number of plots for estimation unit \cr 
+\tab strwt \tab proportion of area (or plots) by strata and estimation 
+unit (strata weight) \cr \tab CONDPROP_UNADJ_SUM \tab summed condition 
+proportion by strata and estimation unit \cr 
+\tab CONDPROP_ADJFAC \tab adjusted condition proportion by strata after 
+nonresponse plots removed \cr 
+\tab AREA \tab total area for estimation unit \cr 
+\tab CONDPROP_ADJFAC \tab average area \cr }
 
 \item{processing data}{ Data frames. Separate data frames containing
 calculated variables used in estimation process. The number of processing
@@ -124,31 +116,40 @@ respectively).  These tables do not included estimate proportions (nhat and
 nhat.var).
 
 The data frames include the following information: \tabular{lll}{ \tab
-\bold{Variable} \tab \bold{Description}\cr \tab nhat \tab estimate
-proportion of land \cr \tab nhat.var \tab variance estimate of estimated
-proportion of land \cr \tab NBRPLT.gt0 \tab Number of non-zero plots used in
-estimates \cr \tab AREA \tab total area for estimation unit \cr \tab est
-\tab estimated area of land nhat*areavar \cr \tab est.var \tab variance
-estimate of estimate acres of land nhat.var*areavar^2 \cr \tab est.se \tab
-standard error of estimated area of land sqrt(est.var) \cr \tab est.cv \tab
-coefficient of variation of estimated area of land est.se/est \cr \tab pse
-\tab percent sampling error of estimate est.cv*100 \cr \tab CI99left \tab
-left tail of 99 percent confidence interval for estimated area \cr \tab
-CI99right \tab right tail of 99 percent confidence interval for estimated
-area \cr \tab CI95left \tab left tail of 95 percent confidence interval for
-estimated area \cr \tab CI95right \tab right tail of 95 percent confidence
-interval for estimated area \cr \tab CI67left \tab left tail of 67 percent
-confidence interval for estimated area \cr \tab CI67right \tab right tail of
-67 percent confidence interval for estimated area \cr } }
+\bold{Variable} \tab \bold{Description}\cr 
+\tab nhat \tab estimate proportion of land \cr 
+\tab nhat.var \tab variance estimate of estimated proportion of land \cr 
+\tab NBRPLT.gt0 \tab Number of non-zero plots used in estimates \cr 
+\tab AREA \tab total area for estimation unit \cr 
+\tab est \tab estimated area of land nhat*areavar \cr 
+\tab est.var \tab variance estimate of estimate acres of land 
+nhat.var*areavar^2 \cr 
+\tab est.se \tab standard error of estimated area of land sqrt(est.var) \cr 
+\tab est.cv \tab coefficient of variation of estimated area of land est.se/est 
+\cr \tab pse \tab percent sampling error of estimate est.cv*100 \cr 
+\tab CI99left \tab left tail of 99 percent confidence interval for 
+estimated area \cr 
+\tab CI99right \tab right tail of 99 percent confidence interval for 
+estimated area \cr 
+\tab CI95left \tab left tail of 95 percent confidence interval for 
+estimated area \cr 
+\tab CI95right \tab right tail of 95 percent confidence interval for 
+estimated area \cr 
+\tab CI67left \tab left tail of 67 percent confidence interval for 
+estimated area \cr 
+\tab CI67right \tab right tail of 67 percent confidence interval for 
+estimated area \cr } }
 
-savedata\cr if savedata=TRUE...\cr tables with estimate and percent standard
-error will be written as *csv files to outfolder.  if rawdata=TRUE, the
-rawdata will be output to the outfolder in a folder named rawdata (if
-raw_fmt="csv") or a database in the outfolder, if (raw_fmt != "csv").
+savedata\cr 
+if savedata=TRUE...\cr 
+tables with estimate and percent standard error will be written as *csv 
+files to outfolder.  if rawdata=TRUE, the rawdata will be output to the 
+outfolder in a folder named rawdata (if raw_fmt="csv") or a database in 
+the outfolder, if (raw_fmt != "csv").
 
-if outfn.pre is not null...\cr a prefix is added to output files if raw_fmt
-= 'csv', prefix is added to file names in rawdata folder if raw_fmt !=
-'csv', prefix is added to dsn name
+if outfn.pre is not null...\cr 
+a prefix is added to output files if raw_fmt = 'csv', prefix is added to 
+file names in rawdata folder if raw_fmt != 'csv', prefix is added to dsn name
 }
 \description{
 Generates area estimates by domain (and estimation unit). Calculations are
@@ -165,24 +166,25 @@ population.
 \details{
 If variables are NULL, then it will prompt user to input variables.
 
-Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
-\bold{Variable} \tab \bold{Description}\cr \tab cond \tab cuniqueid \tab
-Unique identifier for each plot, to link to pltassgn (ex. PLT_CN).\cr \tab
+Necessary variables:\cr 
+\tabular{llll}{ \tab \bold{Data} 
+\tab \bold{Variable} \tab \bold{Description}\cr 
+\tab cond \tab cuniqueid \tab Unique identifier for each plot, to link to pltassgn (ex. PLT_CN).\cr \tab
 \tab CONDID \tab Unique identifier of each condition on plot.  Set CONDID=1,
-if only 1 condition per plot.\cr \tab \tab CONDPROP_UNADJ \tab Unadjusted
-proportion of condition on each plot.  Set CONDPROP_UNADJ=1, if only 1
-condition per plot.\cr \tab \tab COND_STATUS_CD \tab Status of each forested
-condition on plot (i.e. accessible forest, nonforest, water, etc.)\cr \tab
+if only 1 condition per plot.\cr 
+\tab \tab CONDPROP_UNADJ \tab Unadjusted proportion of condition on each plot. Set CONDPROP_UNADJ=1, if only 1
+condition per plot.\cr 
+\tab \tab COND_STATUS_CD \tab Status of each forested condition on plot (i.e. accessible forest, nonforest, water, etc.)\cr \tab
 \tab NF_COND_STATUS_CD \tab If ACI=TRUE. Status of each nonforest condition
-on plot (i.e. accessible nonforest, nonsampled nonforest)\cr \tab \tab
-SITECLCD \tab If landarea=TIMBERLAND. Measure of site productivity.\cr \tab
+on plot (i.e. accessible nonforest, nonsampled nonforest)\cr 
+\tab \tab SITECLCD \tab If landarea=TIMBERLAND. Measure of site productivity.\cr \tab
 \tab RESERVCD \tab If landarea=TIMBERLAND. Reserved status.\cr
 
 \tab pltassgn \tab puniqueid \tab Unique identifier for each plot, to link
-to cond (ex. CN).\cr \tab \tab STATECD \tab Identifies state each plot is
-located in.\cr \tab \tab INVYR \tab Identifies inventory year of each
-plot.\cr \tab \tab PLOT_STATUS_CD \tab Status of each plot (i.e. sampled,
-nonsampled).  If not included, all plots are assumed as sampled.\cr }
+to cond (ex. CN).\cr 
+\tab \tab STATECD \tab Identifies state each plot is located in.\cr \tab \tab INVYR \tab Identifies inventory year of each
+plot.\cr 
+\tab \tab PLOT_STATUS_CD \tab Status of each plot (i.e. sampled, nonsampled). If not included, all plots are assumed as sampled.\cr }
 
 For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
 }
@@ -251,6 +253,39 @@ row.orderby/col.orderby equal to rowvar/colvar. If the descriptive variable
 is the rowvar/colvar in the input table, and the ordering code variable is
 in rowlut/collut, set row.orderby/col.orderby equal to the variable name of
 the code variable in rowlut/collut.
+}
+\examples{
+\donttest{
+GBpopdat <- modGBpop(
+popTabs = list(cond = FIESTA::WYcond,  
+               tree = FIESTA::WYtree,        
+               seed = FIESTA::WYseed),      
+popTabIDs = list(cond = "PLT_CN"),            
+pltassgn = FIESTA::WYpltassgn,  
+pltassgnid = "CN",        
+pjoinid = "PLT_CN",         
+unitarea = FIESTA::WYunitarea,
+unitvar = "ESTN_UNIT",        
+strata = TRUE,           
+stratalut = WYstratalut,    
+strata_opts = strata_options(getwt = TRUE)   
+)
+
+forest_area <- modGBarea(
+GBpopdat = GBpopdat, 
+landarea = "FOREST",  
+sumunits = TRUE,      
+)
+str(forest_area, max.level = 1)
+
+forest_area_by_forest_type <- modGBarea(
+GBpopdat = GBpopdat,        
+landarea = "FOREST",       
+rowvar = "FORTYPCD",        
+sumunits = TRUE            
+)
+str(forest_area_by_forest_type, max.level = 1)
+}
 }
 \references{
 Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.;

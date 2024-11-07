@@ -99,8 +99,12 @@ check.popdataCHNG <-
     plotnm <- plotlst$tabnm
     puniqueid <- plotlst$tabid
     pltx <- plotlst$tabx
-    pltxnm <- ifelse (!is.null(pltx), "pltx", plotnm)
-    plotflds <- plotlst$tabflds
+    pltflds <- plotlst$tabflds
+    if (is.null(pltx)) {
+      pltxnm <- plotnm
+    } else {
+      pltxnm <- "pltx"
+    }
     
     ## cond table
     tabnames <- c("condu", "cond")
@@ -315,9 +319,10 @@ check.popdataCHNG <-
     
     ## plot table
     ##############################################################################
-    prevpltcnnm <- findnm("PREV_PLT_CN", plotflds, returnNULL = TRUE)
+    prevpltcnnm <- findnm("PREV_PLT_CN", pltflds, returnNULL = TRUE)
     if (is.null(prevpltcnnm)) {
       message("need PREV_PLT_CN in plot table for CHNG estimates")
+      stop()
     }
     
     ## cond table

@@ -146,7 +146,7 @@ DBgetXY <- function (states = NULL,
   ## Set global variables
   parameters <- FALSE
   SCHEMA.=invyrtab=evalEndyr=plotnm=ppsanm=ppsanm=pltflds=
-    ppsaflds=pvars=XYdf <- NULL
+    ppsaflds=pvars=XYdf=invyrtab.qry <- NULL
 
 
   ##################################################################
@@ -511,7 +511,6 @@ DBgetXY <- function (states = NULL,
   POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
   PLOT <- evalInfo$PLOT
   plotnm <- evalInfo$plotnm
-  
 
   ####################################################################
   ## Check custom Evaluation data

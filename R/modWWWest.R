@@ -143,6 +143,7 @@ modWWWest <- function(WWWpopdat,
   
   ## Get rowvar data
   ################################################################
+  if (is.null(rowvar)) rowvar <- "NONE"
   if (!is.null(rowvar)) {
     datnmlst <- tolower(sort(unique(ref_codes$VARIABLE)))
     rowvar <- tolower(rowvar)

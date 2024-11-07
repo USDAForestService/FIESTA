@@ -292,9 +292,8 @@ modGBarea <- function(GBpopdat,
   popType <- "CURR"
   nonresp <- FALSE
   substrvar <- NULL
-  parameters <- FALSE
-  returnlst <- list()
   rawdata <- TRUE
+  returnlst <- list()
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder <- NULL
@@ -373,13 +372,14 @@ modGBarea <- function(GBpopdat,
       }
     }
   }
- 
+
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
   list.items <- c("pltcondx", "cuniqueid", "condid", 
-             "unitarea", "unitvar", "stratalut", "strvar",
-             "plotsampcnt", "condsampcnt")
+                  "unitarea", "unitvar", "stratalut", "strvar",
+                  "plotsampcnt", "condsampcnt")
+  
   GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   if (is.null(GBpopdat)) return(NULL)
   pltidsadj <- GBpopdat$pltidsadj
@@ -417,6 +417,8 @@ modGBarea <- function(GBpopdat,
   areawt <- GBpopdat$areawt
   areawt2 <- GBpopdat$areawt2
   adjcase <- GBpopdat$adjcase
+  pltidsid <- GBpopdat$pjoinid
+  pltassgnid <- GBpopdat$pltassgnid
 
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
@@ -501,7 +503,6 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  withqry <- pltcondxWITHqry
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
@@ -509,7 +510,7 @@ modGBarea <- function(GBpopdat,
                  popconn = popconn, SCHEMA. = SCHEMA.,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
-                 withqry = withqry,
+                 withqry = pltcondxWITHqry,
                  cuniqueid = cuniqueid, condid = condid,
                  rowvar = rowvar, colvar = colvar, 
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
@@ -521,8 +522,6 @@ modGBarea <- function(GBpopdat,
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  landarea = landarea, states = states, 
-                 #cvars2keep = "COND_STATUS_CD",
-                 #whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -543,7 +542,6 @@ modGBarea <- function(GBpopdat,
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
-
   
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
@@ -570,6 +568,7 @@ modGBarea <- function(GBpopdat,
                popconn = popconn,
                pltcondx = pltcondx,
                pltidsadj = pltidsadj,
+               pltidsid = pltidsid,
                pltcondxadjWITHqry = pltcondxadjWITHqry,
                pcwhereqry = pcwhereqry,
                classifyrow = classifyrow,
@@ -613,6 +612,7 @@ modGBarea <- function(GBpopdat,
   title.ref <- alltitlelst$title.ref
   outfn.estpse <- alltitlelst$outfn.estpse
   outfn.param <- alltitlelst$outfn.param
+  
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
@@ -624,7 +624,7 @@ modGBarea <- function(GBpopdat,
   estdat <- 
     getGBestimates(esttype = esttype,
                    domdatn = cdomdat,
-                   uniqueid = cuniqueid,
+                   uniqueid = pltassgnid,
                    estvarn.name = estnm,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
@@ -658,6 +658,7 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   message("getting output...")
   estnm <- "est" 
+  
   tabs <- 
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 
@@ -674,12 +675,14 @@ modGBarea <- function(GBpopdat,
 			          title.ref = title.ref, 
 			          title.rowvar = title.rowvar, title.colvar = title.colvar, 
 			          title.rowgrp = title.rowgrp,
- 	              title.unitvar = title.unitvar, title.estpse = title.estpse, 
+ 	              title.unitvar = title.unitvar, 
+			          title.estpse = title.estpse, 
 			          title.est = title.est, title.pse = title.pse, 
 			          rawdata = rawdata, rawonly = rawonly, 
 			          outfn.estpse = outfn.estpse, 
 			          outfolder = outfolder, outfn.date = outfn.date, 
-			          overwrite = overwrite_layer, estnm = estnm, 
+			          overwrite = overwrite_layer, 
+			          estnm = estnm, 
 	              estround = estround, pseround = pseround, 
 			          divideby = divideby, 
 	              returntitle = returntitle, 

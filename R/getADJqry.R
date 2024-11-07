@@ -3,6 +3,7 @@
 getADJqry <- function(popType,
                       adj,
                       propvars,
+                      dwmpropvars = NULL,
                       adjfromqry,
                       pwhereqry,
                       pltidsid,
@@ -44,8 +45,13 @@ getADJqry <- function(popType,
   propvars <- unique(propvars)
   
   if (popType == "DWM") {
-    adjvarlst <- lapply(propvars, 
+    dwmvarlst <- lapply(dwmpropvars, 
                         function(x) paste0("ADJ_FACTOR_", sub("CONDPROP_", "", x)))
+    adjvarlst <- lapply(propvars, 
+                        function(x) paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)))
+    propvars <- c(propvars, dwmpropvars)
+    adjvarlst <- c(adjvarlst, dwmvarlst)
+    
   } else if (popType == "P2VEG") {
     adjvarlst <- list("ADJ_FACTOR_P2VEG_SUBP")
   } else {

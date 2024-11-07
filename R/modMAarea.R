@@ -277,13 +277,11 @@ modMAarea <- function(MApopdat,
   }
   
   ## Set parameters
-  minplotnum <- 10
-  title.rowgrp=NULL
   esttype="AREA"
   popType <- "CURR"
-  parameters <- FALSE
-  returnlst <- list()
+  title.rowgrp=NULL
   rawdata <- TRUE
+  returnlst <- list()
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder <- NULL
@@ -381,13 +379,11 @@ modMAarea <- function(MApopdat,
   ## Check data and generate population information 
   ###################################################################################
   list.items <- c("pltcondx", "cuniqueid", "condid", 
-		"unitarea", "unitvar", "unitlut", "npixels",
-		"npixelvar", "plotsampcnt", "condsampcnt")
+                  "unitarea", "unitvar", "unitlut", "npixels",
+                  "npixelvar", "plotsampcnt", "condsampcnt")
 
   MApopdat <- pcheck.object(MApopdat, "MApopdat", list.items=list.items)
-		
   if (is.null(MApopdat)) return(NULL)
-  
   pltidsadj <- MApopdat$pltidsadj
   pltcondx <- MApopdat$pltcondx
   pltcondflds <- MApopdat$pltcondflds
@@ -421,8 +417,8 @@ modMAarea <- function(MApopdat,
   areawt <- MApopdat$areawt
   areawt2 <- MApopdat$areawt2
   adjcase <- MApopdat$adjcase
-
-  
+  pltidsid <- GBpopdat$pjoinid
+  pltassgnid <- GBpopdat$pltassgnid
  
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
@@ -457,6 +453,7 @@ modMAarea <- function(MApopdat,
     pltcondxWITHqry=pltcondxadjWITHqry <- NULL
   }
 
+  
   ########################################
   ## Check area units
   ########################################
@@ -473,29 +470,30 @@ modMAarea <- function(MApopdat,
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype,
-                          popType = popType,
-                          popdatindb = popdatindb,
-                          popconn = popconn, pop_schema = pop_schema,
-                          pltcondflds = pltcondflds,
-                          totals = totals,
-                          pop_fmt=pop_fmt, pop_dsn=pop_dsn,
-                          sumunits = sumunits,
-                          landarea = landarea,
-                          ACI = ACI,
-                          pcfilter = pcfilter,
-                          allin1 = allin1, divideby = divideby,
-                          estround = estround, pseround = pseround,
-                          addtitle = addtitle, returntitle = returntitle,
-                          rawonly = rawonly,
-                          savedata = savedata,
-                          outfolder = outfolder,
-                          overwrite_dsn = overwrite_dsn, 
-                          overwrite_layer = overwrite_layer, 
-                          outfn.pre = outfn.pre, outfn.date = outfn.date, 
-                          append_layer = append_layer, 
-                          raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
-                          gui = gui)
+  estdat <- 
+    check.estdata(esttype=esttype,
+                  popType = popType,
+                  popdatindb = popdatindb,
+                  popconn = popconn, pop_schema = pop_schema,
+                  pltcondflds = pltcondflds,
+                  totals = totals,
+                  pop_fmt=pop_fmt, pop_dsn=pop_dsn,
+                  sumunits = sumunits,
+                  landarea = landarea,
+                  ACI = ACI,
+                  pcfilter = pcfilter,
+                  allin1 = allin1, divideby = divideby,
+                  estround = estround, pseround = pseround,
+                  addtitle = addtitle, returntitle = returntitle,
+                  rawonly = rawonly,
+                  savedata = savedata,
+                  outfolder = outfolder,
+                  overwrite_dsn = overwrite_dsn, 
+                  overwrite_layer = overwrite_layer, 
+                  outfn.pre = outfn.pre, outfn.date = outfn.date, 
+                  append_layer = append_layer, 
+                  raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+                  gui = gui)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   sumunits <- estdat$sumunits
@@ -541,14 +539,10 @@ modMAarea <- function(MApopdat,
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  landarea = landarea, states = states, 
-                 #cvars2keep = "COND_STATUS_CD",
-                 whereqry = pcwhereqry,
                  gui = gui)
-  
-
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
-  bydomainlst <- rowcolinfo$domainlst
+  domainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
   rowvarnm <- rowcolinfo$rowvarnm
@@ -564,6 +558,7 @@ modMAarea <- function(MApopdat,
   grpvar <- rowcolinfo$grpvar
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
+  #rm(rowcolinfo)
   
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
@@ -582,8 +577,9 @@ modMAarea <- function(MApopdat,
                adjcase = adjcase,
                cuniqueid = cuniqueid, 
                condid = condid,
-               rowvar = rowvar, colvar = colvar,
-               pcdomainlst = bydomainlst,
+               rowvar = rowvar, 
+               colvar = colvar,
+               pcdomainlst = unique(c(bydomainlst, "TOTAL")),
                popdatindb = popdatindb,
                popconn = popconn,
                pltcondx = pltcondx,
@@ -595,19 +591,11 @@ modMAarea <- function(MApopdat,
   cdomdat <- conddat$cdomdat
   cdomdatqry <- conddat$cdomdatqry
   estnm <- conddat$estnm
+  rowvar <- conddat$rowvar
+  colvar <- conddat$colvar
+  grpvar <- conddat$grpvar
   
-  
-  ## If classified rowvar or colvar, get class names
-  if (!is.null(classifyrow)) {
-    rowvar <- classifyrow$rowclassnm
-  }
-  if (!is.null(classifycol)) {
-    colvar <- classifycol$colclassnm
-  }
-  if (!is.null(grpvar)) {
-    grpvar <- c(rowvar, colvar)
-  }
-  
+
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
@@ -693,31 +681,44 @@ modMAarea <- function(MApopdat,
   message("getting output...")
   estnm <- "est"
 
-  tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-                      unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
-                      unit_rowest=unit_rowest, unit_colest=unit_colest,
-                      unit_grpest=unit_grpest, rowvar=rowvarnm, colvar=colvarnm,
-                      uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp,
-                      rowgrpnm=rowgrpnm, rowunit=NULL, totunit=NULL, allin1=allin1,
-                      savedata=savedata, addtitle=addtitle, title.ref=title.ref,
-                      title.colvar=title.colvar, title.rowvar=title.rowvar,
-                      title.rowgrp=title.rowgrp, title.unitvar=title.unitvar,
-                      title.estpse=title.estpse, title.est=title.est,
-                      title.pse=title.pse, rawdata=rawdata, rawonly=rawonly,
-                      outfn.estpse=outfn.estpse, outfolder=outfolder,
-                      outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, 
-                      estround=estround, pseround=pseround, divideby=divideby, 
-                      returntitle=returntitle, estnull=estnull, psenull=psenull, 
-                      raw.keep0=raw.keep0) 
+  tabs <- 
+    est.outtabs(esttype = esttype, 
+                sumunits = sumunits, areavar = areavar, 
+                unitvar = unitvar, unitvars = unitvars, 
+                unit_totest = unit_totest, 
+                unit_rowest = unit_rowest, unit_colest = unit_colest,
+                unit_grpest = unit_grpest, 
+                rowvar = rowvarnm, colvar = colvarnm,
+                uniquerow = uniquerow, uniquecol = uniquecol, 
+                rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
+                rowunit = NULL, totunit = NULL, 
+                allin1 = allin1,
+                savedata = savedata, addtitle = addtitle, 
+                title.ref = title.ref, 
+                title.rowvar=title.rowvar, title.colvar = title.colvar, 
+                title.rowgrp = title.rowgrp,
+                title.unitvar = title.unitvar,
+                title.estpse = title.estpse, 
+                title.est = title.est, title.pse = title.pse, 
+                rawdata = rawdata, rawonly = rawonly,
+                outfn.estpse = outfn.estpse, 
+                outfolder = outfolder, outfn.date = outfn.date, 
+                overwrite = overwrite_layer, 
+                estnm=estnm, 
+                estround = estround, pseround = pseround, 
+                divideby = divideby, 
+                returntitle = returntitle, 
+                estnull = estnull, psenull = psenull, 
+                raw.keep0 = raw.keep0) 
  
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
   if (!is.null(est2return)) {
-    returnlst$est <- est2return
+    returnlst$est <- setDF(est2return)
   } 
   if (!is.null(pse2return)) {
-    returnlst$pse <- pse2return 
+    returnlst$pse <- setDF(pse2return) 
   }
   if (returntitle) {
     returnlst$titlelst <- alltitlelst
@@ -751,13 +752,13 @@ modMAarea <- function(MApopdat,
               out_layer <- outfn.rawtab
             }
             datExportData(rawtab, 
-                  savedata_opts=list(outfolder=rawfolder, 
-                                      out_fmt=raw_fmt, 
-                                      out_dsn=raw_dsn, 
-                                      out_layer=out_layer,
-                                      overwrite_layer=overwrite_layer,
-                                      append_layer=append_layer,
-                                      add_layer=TRUE))
+                  savedata_opts=list(outfolder = rawfolder, 
+                                      out_fmt = raw_fmt, 
+                                      out_dsn = raw_dsn, 
+                                      out_layer = out_layer,
+                                      overwrite_layer = overwrite_layer,
+                                      append_layer = append_layer,
+                                      add_layer = TRUE))
           }
         }
       }

@@ -97,8 +97,12 @@ check.popdataP2VEG <-
   plotnm <- plotlst$tabnm
   puniqueid <- plotlst$tabid
   pltx <- plotlst$tabx
-  pltxnm <- ifelse (!is.null(pltx), "pltx", plotnm) 
-  plotflds <- plotlst$tabflds
+  pltflds <- plotlst$tabflds
+  if (is.null(pltx)) {
+    pltxnm <- plotnm
+  } else {
+    pltxnm <- "pltx"
+  }
   
   ## cond table
   tabnames <- c("condu", "cond")
@@ -586,7 +590,7 @@ check.popdataP2VEG <-
       ## Build where query to remove subplots that didn't sample P2VEG
       p2vegstatus.filter <- paste0(subpa., p2vegstatusnm, " < 3")
       
-      sampmethodnm <- findnm("SAMP_METHOD_CD", plotflds, returnNULL = TRUE)
+      sampmethodnm <- findnm("SAMP_METHOD_CD", pltflds, returnNULL = TRUE)
       if (!is.null(sampmethodnm)) {
         p2vegstatus.filter <- paste0(p2vegstatus.filter,
               "\n    AND ((", plota., sampmethodnm, " = 1 AND ", subpa., p2vegstatusnm, " = 1)",

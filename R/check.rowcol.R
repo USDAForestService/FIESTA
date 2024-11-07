@@ -222,7 +222,7 @@ check.rowcol <-
   if (rowvar != "NONE") {   
     rowuniquex <- NULL
     rowvarnm=rowvarnew <- rowvar
-
+    
     if (!is.null(row.FIAname) && row.FIAname) {
       ## Get FIA reference table for xvar
       xvar.ref <- getRefobject(toupper(rowvar))
@@ -257,7 +257,8 @@ check.rowcol <-
     if (!is.null(rowlut)) {
       if (is.vector(rowlut) && length(rowlut) > 1) {
         rowlut <- data.table(rowlut)
-        setreeflds(rowlut, rowvar)
+        names(rowlut) <- rowvar
+        setkeyv(rowlut, rowvar)
       } else {
         rowlut <- pcheck.table(rowlut, gui=gui, tabnm=rowlut, caption="Row look up?")
       }
@@ -290,7 +291,7 @@ check.rowcol <-
         }
       }
     } else {  ## domlut is null
-      
+
       ## Build fromqry for rowvar 
       ###############################################
       if (rowvar %in% pltcondflds) {
@@ -675,7 +676,7 @@ check.rowcol <-
           rowuniquex <- sort(unique(c(uniquex, suniquex)))
         }
 	      if (row.FIAname || !is.null(rowlut)) {
-	        
+        
           if (!is.null(rowlut) && ncol(rowlut) > 1 && all(names(rowlut) %in% rowflds)) {
             if (is.null(row.orderby) || row.orderby == "NONE") {
               message("row.orderby is not defined... ordering by rowvar")
@@ -888,7 +889,8 @@ check.rowcol <-
     if (!is.null(collut)) {
       if (is.vector(collut) && length(collut) > 1) {
         collut <- data.table(collut)
-        setreeflds(collut, colvar)
+        names(collut) <- colvar
+        setkeyv(collut, colvar)
       } else {
         collut <- pcheck.table(collut, gui=gui, tabnm=collut, caption="Column look up?")
       }
@@ -1467,7 +1469,7 @@ check.rowcol <-
   ## GET DOMAIN. CONCATENATE ROWVAR & COLVAR VARIABLES IF THEY ARE IN THE SAME TABLE.
   ###################################################################################
   if (colvar == "NONE") {
-    if (rowvar %in% treeflds)
+    if (rowvar %in% c(treeflds, seedflds))
       tdomvar <- rowvar
   } else {
     grpvar <- c(rowvar, colvar)
@@ -1478,7 +1480,7 @@ check.rowcol <-
 
     if (esttype %in% c("TREE", "RATIO")) {
       ## If rowvar and colvar both in tree table, concatenate columns for calculation.
-      if (all(c(rowvar, colvar) %in% treeflds)) {
+      if (all(c(rowvar, colvar) %in% c(treeflds, seedflds))) {
         #setkeyv(treex, c(rowvar, colvar))
         tdomvar <- rowvar
         tdomvar2 <- colvar
@@ -1512,7 +1514,7 @@ check.rowcol <-
     if (all(!is.factor(uniquerow[[rowvar]]), row.orderby != "NONE", 
 	         row.orderby %in% names(uniquerow))) {
 	    setorderv(uniquerow, row.orderby, na.last=TRUE)
-	  }
+    }
   } else if (!is.null(uniquerow)) {
     uniquerow <- setDT(uniquerow)
     if (!is.null(row.orderby) && row.orderby != "NONE" && 
@@ -1573,7 +1575,7 @@ check.rowcol <-
               levels(uniquerow[[row.orderby]]) <- c(seedclord, levels(uniquerow[[row.orderby]]))
             }
             uniqueseed <- data.table(seedclord, seedclnm)
-            setreeflds(uniqueseed, c(col.orderby, colvar))
+            setkeyv(uniqueseed, c(col.orderby, colvar))
             uniquerow <- rbindlist(list(uniqueseed, uniquerow))
           }
 		    }
@@ -1745,7 +1747,7 @@ check.rowcol <-
               levels(uniquecol[[col.orderby]]) <- c(seedclord, levels(uniquecol[[col.orderby]]))
             }
             uniqueseed <- data.table(seedclord, seedclnm)
-            setreeflds(uniqueseed, c(col.orderby, colvar))
+            setkeyv(uniqueseed, c(col.orderby, colvar))
             uniquecol <- rbindlist(list(uniqueseed, uniquecol))
           }
         }
@@ -1905,6 +1907,7 @@ check.rowcol <-
       returnlst$classifycol <- classifycol
     }
   }
+
   return(returnlst)
 }
 

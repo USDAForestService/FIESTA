@@ -83,6 +83,7 @@ datLUTspp <- function(x = NULL,
   ## Set global variables
   VALUE=LUTnewvarnm=uniqueval=datnm <- NULL 
   returnlst <- list()
+  
 
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -221,12 +222,12 @@ datLUTspp <- function(x = NULL,
   if (is.null(uniquex) && is.null(x)) {
     message("both uniquex and x are NULL")
     return(NULL)
-  } else if (!is.null(uniquex) && is.null(x)) {
-    if (FIAname) {
-      datnmlst <- sort(unique(ref_codes$VARIABLE))
-    } else if (!is.null(LUTx)) {
-      datnmlst <- names(LUTx)
-    }		
+#  } else if (!is.null(uniquex) && is.null(x)) {
+    #if (FIAname) {
+    #datnmlst <- sort(unique(FIESTAutils::ref_codes$VARIABLE))
+    # } else if (!is.null(LUTx)) {
+    #   datnmlst <- names(LUTx)
+    # }	
   } 
 
   ## Check xvar
@@ -238,7 +239,8 @@ datLUTspp <- function(x = NULL,
   spcdnamelst <- c("COMMON", "SCIENTIFIC", "SYMBOL", "COMMON_SCIENTIFIC")
   spcdname <- pcheck.varchar(spcdname, "spcdname", spcdnamelst, gui=gui,
 		caption="SPCD name type", stopifnull=TRUE, multiple = TRUE)
- 
+  
+  
   ## Check if all species codes in datx are in ref table
   #############################################################
   ref_spp <- FIESTAutils::ref_species[, c("SPCD", "COMMON_NAME", "GENUS", 
@@ -249,7 +251,6 @@ datLUTspp <- function(x = NULL,
     ref_spp$COMMON_SCIENTIFIC <- 
 		paste0(ref_spp$COMMON_NAME, " (", ref_spp$SCIENTIFIC_NAME, ")")
   }
- 
 
   ## Check group
   group <- pcheck.logical(group, varnm="group", title="Variable group?", 
@@ -309,13 +310,13 @@ datLUTspp <- function(x = NULL,
         return(NULL)
 	    }
     } 
-  
+
     ## Subset ref_spp table 
     if (!add0) {
       ref_spp <- ref_spp[ref_spp$SPCD %in% uniquex, ]
     }
   }
-   
+
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
                              first="NO", gui=gui)

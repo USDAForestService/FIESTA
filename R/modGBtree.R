@@ -320,11 +320,9 @@ modGBtree <- function(GBpopdat,
   popType <- "VOL"
   nonresp <- FALSE
   substrvar <- FALSE
-  parameters <- FALSE
-  returnlst <- list()
   rawdata <- TRUE  
-  gui <- FALSE
-  
+  returnlst <- list()
+
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder=domclassify <- NULL
   
@@ -411,6 +409,7 @@ modGBtree <- function(GBpopdat,
 	                "treex", "tuniqueid", 
                   "unitarea", "unitvar", "stratalut", "strvar",
                   "plotsampcnt", "condsampcnt")
+  
   GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   if (is.null(GBpopdat)) return(NULL)
   pltidsadj <- GBpopdat$pltidsadj
@@ -451,8 +450,9 @@ modGBtree <- function(GBpopdat,
   dbqueries <- GBpopdat$dbqueries
   dbqueriesWITH <- GBpopdat$dbqueriesWITH
   adjcase <- GBpopdat$adjcase
-  pjoinid <- GBpopdat$pjoinid
-
+  pltidsid <- GBpopdat$pjoinid
+  pltassgnid <- GBpopdat$pltassgnid
+  
   #adjfactors <- GBpopdat$adjfactors
   #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
   #popVOL_compare
@@ -487,7 +487,6 @@ modGBtree <- function(GBpopdat,
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
-  
 
   ###################################################################################
   ## Check parameter inputs and plot/condition filters
@@ -567,8 +566,6 @@ modGBtree <- function(GBpopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  withqry <- pltcondxWITHqry
-  #withqry <- dbqueriesWITH$pltidsWITH
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
@@ -576,7 +573,7 @@ modGBtree <- function(GBpopdat,
                  popconn = popconn, SCHEMA. = SCHEMA.,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
-                 withqry = withqry,
+                 withqry = pltcondxWITHqry,
                  estseed = estseed,
                  treex = treex, treeflds = treeflds,
                  seedx = seedx, seedflds = seedflds,
@@ -591,8 +588,6 @@ modGBtree <- function(GBpopdat,
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  landarea = landarea, states = states, 
-                 #cvars2keep = "COND_STATUS_CD",
-                 #whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -617,7 +612,6 @@ modGBtree <- function(GBpopdat,
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
-  
 
   ## if classified columns, create domclassify list for summarizing tree data
   if (any(!is.null(classifyrow), !is.null(classifycol))) {
@@ -643,7 +637,6 @@ modGBtree <- function(GBpopdat,
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   if (popdatindb) {
     pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
-    pjoinid <- "PLT_CN"
   } else {
     pltidsWITHqry <- NULL
   }
@@ -670,12 +663,11 @@ modGBtree <- function(GBpopdat,
                dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
-               pjoinid = pjoinid,
+               pjoinid = pltidsid,
                bytdom = bytdom,
                gui = gui)
   if (is.null(treedat)) stop() 
   tdomdat <- treedat$tdomdat
-  #estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
@@ -739,13 +731,14 @@ modGBtree <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
+  
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
   estdat <- 
     getGBestimates(esttype = esttype,
                    domdatn = tdomdat,
-                   uniqueid = cuniqueid,
+                   uniqueid = pltassgnid,
                    estvarn.name = estvar.name,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
@@ -808,7 +801,6 @@ modGBtree <- function(GBpopdat,
   
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
-
 
   if (!row.add0 && any(est2return$Total == "--")) {
     est2return <- est2return[est2return$Total != "--",]

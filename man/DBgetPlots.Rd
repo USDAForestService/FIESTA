@@ -63,7 +63,7 @@ define RS.}
 coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
 is populated. See FIESTA::ref_statecd for reference to RS and states.}
 
-\item{datsource}{String. Source of data ('datamart', 'sqlite').}
+\item{datsource}{String. Source of data ('datamart', 'sqlite', 'postgres').}
 
 \item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).}

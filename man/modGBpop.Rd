@@ -33,6 +33,7 @@ modGBpop(
   unit_opts = NULL,
   strata_opts = NULL,
   savedata_opts = NULL,
+  database_opts = NULL,
   dsnreadonly = TRUE,
   GBdata = NULL,
   pltdat = NULL,
@@ -62,6 +63,8 @@ assignment of estimation unit and/or strata, with one record for each plot.}
 
 \item{pltassgnid}{String vector. One or more variables in pltassgn 
 defining unique plot and will join to plt table.}
+
+\item{datsource}{String. Name of data source ('obj', 'sqlite', 'postgres').}
 
 \item{dsn}{String. Name of database where tree, cond, and plot-level tables
 reside.  The dsn varies by driver. See gdal OGR vector formats
@@ -127,6 +130,9 @@ Only used when strata = TRUE.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
+
+\item{database_opts}{List. See help(database_options()) for a list
+of options. Only used when datsource = 'postgres'.}
 
 \item{GBdata}{R List object. Output data list components from
 FIESTA::anGBdata().}

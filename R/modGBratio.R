@@ -318,7 +318,6 @@ modGBratio <- function(GBpopdat,
   ## DESCRIPTION: 
   ## Generates per-acre or per-tree estimates by domain using ratio estimators
   ##################################################################################
-
   
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
@@ -473,7 +472,9 @@ modGBratio <- function(GBpopdat,
   areawt <- GBpopdat$areawt
   areawt2 <- GBpopdat$areawt2
   adjcase <- GBpopdat$adjcase
-
+  pltidsid <- GBpopdat$pjoinid
+  pltassgnid <- GBpopdat$pltassgnid
+  
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
       if (!is.null(pop_dsn)) {
@@ -495,8 +496,8 @@ modGBratio <- function(GBpopdat,
   ########################################
   ## Check area units
   ########################################
-  unitchk <- pcheck.areaunits(unitarea=unitarea, areavar=areavar, 
-			areaunits=areaunits, metric=metric)
+  unitchk <- pcheck.areaunits(unitarea = unitarea, areavar = areavar, 
+                              areaunits = areaunits, metric = metric)
   unitarea <- unitchk$unitarea
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
@@ -608,8 +609,6 @@ modGBratio <- function(GBpopdat,
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  landarea = landarea, states = states, 
-                 #cvars2keep = "COND_STATUS_CD",
-                 #whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -663,6 +662,7 @@ modGBratio <- function(GBpopdat,
   } else {
     pltidsWITHqry <- NULL
   }
+  
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -678,7 +678,7 @@ modGBratio <- function(GBpopdat,
                estvard = estvard, 
                estvard.filter = estvard.filter, 
                estvard.derive = estvard.derive,
-               esttotn = TRUE, 
+               esttotn = TRUE, esttotd = TRUE,
                tdomvar = tdomvar, tdomvar2 = tdomvar2,
                bydomainlst = domainlst,
                adjtree = adjtree, 
@@ -807,7 +807,7 @@ modGBratio <- function(GBpopdat,
     getGBestimates(esttype = esttype,
                    domdatn = tdomdat,
                    domdatd = cdomdat,
-                   uniqueid = cuniqueid,
+                   uniqueid = pltassgnid,
                    estvarn.name = estvarn.name,
                    estvard.name = estvard.name,
                    rowvar = rowvar, colvar = colvar, 
@@ -826,7 +826,6 @@ modGBratio <- function(GBpopdat,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
                    col.add0 = col.add0)
-  
   if (is.null(estdat)) stop()
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest

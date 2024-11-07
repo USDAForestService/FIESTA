@@ -131,7 +131,7 @@ DBgetEvalid <- function(states = NULL,
   }
   
   ## Set global variables
-  EVAL_GRP_Endyr=evalTypelist=STATECD=EVALID=evaltyp=invyrs <- NULL
+  EVAL_GRP_Endyr=evalTypelist=STATECD=EVALID=evaltyp=invyrs=pltflds=plotnm <- NULL
   
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (gui) {
@@ -172,7 +172,7 @@ DBgetEvalid <- function(states = NULL,
       }
     }
   }
-  
+
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -193,7 +193,7 @@ DBgetEvalid <- function(states = NULL,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  plotnm=surveynm=popevalnm=popevalgrpnm=popevaltypnm=ppsanm <- NULL
+  surveynm=popevalnm=popevalgrpnm=popevaltypnm=ppsanm <- NULL
   returnevalid=ppsaindb <- FALSE
   
   ## Check invtype
@@ -283,20 +283,18 @@ DBgetEvalid <- function(states = NULL,
                                            "RS"])
   rslst[rslst %in% c("NERS", "NCRS")] <- "NRS"
   rslst <- unique(rslst)
-  
-  
+
+
   ######################################################################################
   ## Get database tables - SURVEY, POP_EVAL, POP_EVAL_GRP, POP_EVAL_TYP
   ######################################################################################
   ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
   if (indb) {
-    if (is.null(plotnm)) {
-      if (!is.null(plot_layer) && is.data.frame(plot_layer)) {
-        PLOT <- plot_layer
-        plotnm <- "PLOT"
-      } else {
-        plotnm <- findnm(plot_layer, dbtablst, returnNULL=TRUE)
-      }
+    if (!is.null(plot_layer) && is.data.frame(plot_layer)) {
+      PLOT <- plot_layer
+      plotnm <- "PLOT"
+    } else {
+      plotnm <- findnm(plot_layer, dbtablst, returnNULL=TRUE)
     }	  
     if (is.null(plotnm)) {
       message(plot_layer, " does not exist in database")
@@ -337,6 +335,7 @@ DBgetEvalid <- function(states = NULL,
       ppsaindb <- TRUE
       ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
     }
+    
   } else if (datsource == "datamart") {
     if (!is.null(survey_layer) && is.data.frame(survey_layer)) {
       SURVEY <- survey_layer
@@ -385,6 +384,11 @@ DBgetEvalid <- function(states = NULL,
     
   } else {
     
+    if (!is.null(plot_layer) && is.data.frame(plot_layer)) {
+      PLOT <- plot_layer
+      plotnm <- "PLOT"
+      pltflds <- names(PLOT)
+    }	  
     if (!is.null(survey_layer) && is.data.frame(survey_layer)) {
       SURVEY <- survey_layer
     } else {
@@ -392,27 +396,33 @@ DBgetEvalid <- function(states = NULL,
     }
     if (!is.null(SURVEY)) {
       surveynm <- "SURVEY"
+      names(SURVEY) <- toupper(names(SURVEY))
     }
     POP_EVAL <- pcheck.table(popeval_layer, stopifnull=FALSE, stopifinvalid=FALSE)
     if (!is.null(POP_EVAL)) {
       popevalnm <- "POP_EVAL"
+      names(POP_EVAL) <- toupper(names(POP_EVAL))
     }
     POP_EVAL_GRP <- pcheck.table(popevalgrp_layer, stopifnull=FALSE, stopifinvalid=FALSE)
     if (!is.null(POP_EVAL_GRP)) {
       popevalgrpnm <- "POP_EVAL_GRP"
+      names(POP_EVAL_GRP) <- toupper(names(POP_EVAL_GRP))
     }
     POP_EVAL_TYP <- pcheck.table(popevaltyp_layer, stopifnull=FALSE, stopifinvalid=FALSE)
     if (!is.null(POP_EVAL_TYP)) {
       popevaltypnm <- "POP_EVAL_TYP"
+      names(POP_EVAL_TYP) <- toupper(names(POP_EVAL_TYP))
     }
     PLOT <- pcheck.table(plot_layer, stopifnull=FALSE, stopifinvalid=FALSE)
     if (!is.null(PLOT)) {
       plotnm <- "PLOT"     
+      names(PLOT) <- toupper(names(PLOT))
       pltflds <- names(PLOT)
     }
     POP_PLOT_STRATUM_ASSGN <- pcheck.table(ppsa_layer, stopifnull=FALSE, stopifinvalid=FALSE)
     if (!is.null(POP_PLOT_STRATUM_ASSGN)) {
       ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+      names(POP_PLOT_STRATUM_ASSGN) <- toupper(names(POP_PLOT_STRATUM_ASSGN))
       ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
     }
   }
@@ -501,27 +511,29 @@ DBgetEvalid <- function(states = NULL,
   if (all(is.null(popevalnm) && is.null(popevaltypnm) && is.null(popevalgrpnm))) {
     nopoptables <- TRUE
     
-    statecdnm <- findnm("STATECD", pltflds)
-    state.qry <- paste("SELECT DISTINCT ", statecdnm, " FROM", plotnm)
-    if (indb) {
-      stcdlstdb <- tryCatch( 
-        DBI::dbGetQuery(dbconn, state.qry)[[1]],
-        error = function(e) {
+    if (!is.null(pltflds)) {
+      statecdnm <- findnm("STATECD", pltflds, returnNULL = TRUE)
+      state.qry <- paste("SELECT DISTINCT ", statecdnm, " FROM", plotnm)
+      if (indb) {
+        stcdlstdb <- tryCatch( 
+          DBI::dbGetQuery(dbconn, state.qry)[[1]],
+          error = function(e) {
           return(NULL) })
-    } else {
-      stcdlstdb <- tryCatch( 
-        sqldf::sqldf(state.qry, connection = NULL)[[1]],
-        error = function(e) {
+      } else {
+        stcdlstdb <- tryCatch( 
+          sqldf::sqldf(state.qry, connection = NULL)[[1]],
+          error = function(e) {
           return(NULL) })
-    }  
+      }  
     
-    ## Check if given states are in the database
-    if (!is.null(stcdlstdb)) {
-      if (!all(stcdlst %in% stcdlstdb)) {
-        stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
-        warning("statecds missing in database: ", toString(stcdmiss))
-      } 
-    }		
+      ## Check if given states are in the database
+      if (!is.null(stcdlstdb)) {
+        if (!all(stcdlst %in% stcdlstdb)) {
+          stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
+          warning("statecds missing in database: ", toString(stcdmiss))
+        } 
+      }
+    }
   } else {
     nopoptables <- FALSE
   }
@@ -540,7 +552,7 @@ DBgetEvalid <- function(states = NULL,
     evalidnm <- findnm("EVALID", names(POP_EVAL))
     
     ## Check if evalid is valid
-    if (!all(evalid %in% POP_EVAL$EVALID)) {
+    if (!all(evalid %in% POP_EVAL[[evalidnm]])) {
       etypcd <- substr(evalid, nchar(evalid)-1, nchar(evalid))
       if (any(etypcd == "06")) {
         evalid <- sub("06", "03", evalid)
@@ -846,10 +858,10 @@ DBgetEvalid <- function(states = NULL,
           #		invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
           
           returnlst <- list(states=states, rslst=rslst, 
-                            evalidlist=NULL, 
-                            invtype=invtype, 
-                            invyrtab=invyrtab, 
-                            evalType=evalTypelist)
+                            evalidlist = NULL, 
+                            invtype = invtype, 
+                            invyrtab = invyrtab, 
+                            evalType = evalTypelist)
           
           ## Return population information
           if (!is.null(surveynm)) {
