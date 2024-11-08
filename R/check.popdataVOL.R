@@ -114,6 +114,9 @@ check.popdataVOL <-
     if (is.null(condnm)) {
       stop("must include cond for estimation")
     }
+    
+    ## If pltassgn is not in database but all other tables are in database, 
+    ## we need to load tables to memory and subset for population queries.
     if (datindb && !pltaindb) {
       
       ## Build cond FROM query
@@ -589,132 +592,132 @@ check.popdataVOL <-
       ## 7.1 Return and/or save plot data (pltx / PLOT)
       ##################################################################
       
-      if (is.null(pltx) && !is.null(plotnm)) {
-        
-        ## Build plot FROM query
-        plotjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
-        plotfromqry <- paste0("\n JOIN ", SCHEMA., plotnm, " p ", plotjoinqry)
-        
-        ## Build plot SELECT query
-        pselectqry <- toString(paste0(plota., c(puniqueid, pdoms2keep)))
-        
-        ## Build final plot query, including pltidsqry
-        pltqry <- paste0(getdataWITHqry,
-                         "\n-------------------------------------------",
-                         "\n SELECT ", pselectqry,
-                         "\n FROM pltids",
-                         plotfromqry) 
-        dbqueries$PLOT <- pltqry
-        
-        ## Run final plot query, including pltidsqry
-        if (datindb) {
-          pltx <- tryCatch(
-            DBI::dbGetQuery(dbconn, pltqry),
-            error=function(e) {
-              message(e,"\n")
-              return(NULL)})
-        } else {
-          pltx <- tryCatch(
-            sqldf::sqldf(pltqry, connection = NULL),
-            error = function(e) {
-              message(e,"\n")
-              return(NULL) })
-        }
-        if (is.null(pltx) || nrow(pltx) == 0) {
-          message("invalid plot query...")
-          message(pltqry)
-          return(NULL)
-        }
-      }
-      
-      ## Return and/or save plot data
-      setkeyv(setDT(pltx), puniqueid)
-      if (!is.null(getdataCNs)) {
-        pltx <- pltx[pltx[[puniqueid]] %in% getdataCNs,]
-      }
-      
-      ## Add to returnlst 
-      if (returndata) {
-        returnlst$puniqueid <- puniqueid
-      }
-      ## Save data
-      if (savedata) {
-        message("saving PLOT...")
-        outlst$out_layer <- "PLOT"
-        if (!append_layer) index.unique.plot <- puniqueid
-        datExportData(pltx, 
-                      savedata_opts = outlst)
-      }
-      
-      
-      ## 7.2 Return and/or save cond data (condx / COND)
-      ##################################################################
-      
-      if (is.null(condx)) {
-        
-        ## Build cond FROM query
-        condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
-        condfromqry <- paste0("\n JOIN ", SCHEMA., condnm, " c ", condjoinqry)
-        
-        ## Build cond SELECT query
-        if (defaultVars) {
-          condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
-        } else {
-          condvars <- "*"
-        }
-        condselectqry <- toString(paste0(conda., condvars))
-        
-        ## Build final cond query, including pltidsqry
-        condqry <- paste0(getdataWITHqry,
-                          "\n-------------------------------------------",
-                          "\n SELECT ", condselectqry,
-                          "\n FROM pltids",
-                          condfromqry) 
-        dbqueries$COND <- condqry
-        
-        ## Run final cond query, including pltidsqry
-        if (datindb) {
-          condx <- tryCatch(
-            DBI::dbGetQuery(dbconn, condqry),
-            error=function(e) {
-              message(e,"\n")
-              return(NULL)})
-        } else {
-          condx <- tryCatch(
-            sqldf::sqldf(condqry, connection = NULL),
-            error = function(e) {
-              message(e,"\n")
-              return(NULL) })
-        }
-        if (is.null(condx) || nrow(condx) == 0) {
-          message("invalid cond query...")
-          message(condqry)
-          return(NULL)
-        }
-        
-        ## Return and/or save cond data
-        condkey <- c(cuniqueid, condid)
-        setkeyv(setDT(condx), condkey)
-        if (!is.null(getdataCNs)) {
-          condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
-        }
-      }
-      
-      ## Add to returnlst 
-      if (returndata) {
-        returnlst$cuniqueid <- cuniqueid
-        returnlst$condx <- condx
-      }
-      ## Save data
-      if (savedata) {
-        message("saving COND...")
-        outlst$out_layer <- "COND"
-        if (!append_layer) index.unique.cond <- condkey
-        datExportData(condx, 
-                      savedata_opts = outlst)
-      }
-      rm(condx)  
-      
+      # if (is.null(pltx) && !is.null(plotnm)) {
+      #   
+      #   ## Build plot FROM query
+      #   plotjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
+      #   plotfromqry <- paste0("\n JOIN ", SCHEMA., plotnm, " p ", plotjoinqry)
+      #   
+      #   ## Build plot SELECT query
+      #   pselectqry <- toString(paste0(plota., c(puniqueid, pdoms2keep)))
+      #   
+      #   ## Build final plot query, including pltidsqry
+      #   pltqry <- paste0(getdataWITHqry,
+      #                    "\n-------------------------------------------",
+      #                    "\n SELECT ", pselectqry,
+      #                    "\n FROM pltids",
+      #                    plotfromqry) 
+      #   dbqueries$PLOT <- pltqry
+      #   
+      #   ## Run final plot query, including pltidsqry
+      #   if (datindb) {
+      #     pltx <- tryCatch(
+      #       DBI::dbGetQuery(dbconn, pltqry),
+      #       error=function(e) {
+      #         message(e,"\n")
+      #         return(NULL)})
+      #   } else {
+      #     pltx <- tryCatch(
+      #       sqldf::sqldf(pltqry, connection = NULL),
+      #       error = function(e) {
+      #         message(e,"\n")
+      #         return(NULL) })
+      #   }
+      #   if (is.null(pltx) || nrow(pltx) == 0) {
+      #     message("invalid plot query...")
+      #     message(pltqry)
+      #     return(NULL)
+      #   }
+      # }
+      # 
+      # ## Return and/or save plot data
+      # setkeyv(setDT(pltx), puniqueid)
+      # if (!is.null(getdataCNs)) {
+      #   pltx <- pltx[pltx[[puniqueid]] %in% getdataCNs,]
+      # }
+      # 
+      # ## Add to returnlst 
+      # if (returndata) {
+      #   returnlst$puniqueid <- puniqueid
+      # }
+      # ## Save data
+      # if (savedata) {
+      #   message("saving PLOT...")
+      #   outlst$out_layer <- "PLOT"
+      #   if (!append_layer) index.unique.plot <- puniqueid
+      #   datExportData(pltx, 
+      #                 savedata_opts = outlst)
+      # }
+      # 
+      # 
+      # ## 7.2 Return and/or save cond data (condx / COND)
+      # ##################################################################
+      # 
+      # if (is.null(condx)) {
+      #   
+      #   ## Build cond FROM query
+      #   condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
+      #   condfromqry <- paste0("\n JOIN ", SCHEMA., condnm, " c ", condjoinqry)
+      #   
+      #   ## Build cond SELECT query
+      #   if (defaultVars) {
+      #     condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
+      #   } else {
+      #     condvars <- "*"
+      #   }
+      #   condselectqry <- toString(paste0(conda., condvars))
+      #   
+      #   ## Build final cond query, including pltidsqry
+      #   condqry <- paste0(getdataWITHqry,
+      #                     "\n-------------------------------------------",
+      #                     "\n SELECT ", condselectqry,
+      #                     "\n FROM pltids",
+      #                     condfromqry) 
+      #   dbqueries$COND <- condqry
+      #   
+      #   ## Run final cond query, including pltidsqry
+      #   if (datindb) {
+      #     condx <- tryCatch(
+      #       DBI::dbGetQuery(dbconn, condqry),
+      #       error=function(e) {
+      #         message(e,"\n")
+      #         return(NULL)})
+      #   } else {
+      #     condx <- tryCatch(
+      #       sqldf::sqldf(condqry, connection = NULL),
+      #       error = function(e) {
+      #         message(e,"\n")
+      #         return(NULL) })
+      #   }
+      #   if (is.null(condx) || nrow(condx) == 0) {
+      #     message("invalid cond query...")
+      #     message(condqry)
+      #     return(NULL)
+      #   }
+      #   
+      #   ## Return and/or save cond data
+      #   condkey <- c(cuniqueid, condid)
+      #   setkeyv(setDT(condx), condkey)
+      #   if (!is.null(getdataCNs)) {
+      #     condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
+      #   }
+      # }
+      # 
+      # ## Add to returnlst 
+      # if (returndata) {
+      #   returnlst$cuniqueid <- cuniqueid
+      #   returnlst$condx <- condx
+      # }
+      # ## Save data
+      # if (savedata) {
+      #   message("saving COND...")
+      #   outlst$out_layer <- "COND"
+      #   if (!append_layer) index.unique.cond <- condkey
+      #   datExportData(condx, 
+      #                 savedata_opts = outlst)
+      # }
+      # rm(condx)  
+      # 
 
       ## 7.3. Return and/or save tree data (treex / TREE)
       ##################################################################

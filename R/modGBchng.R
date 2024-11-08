@@ -410,8 +410,10 @@ modGBchng <- function(GBpopdat,
     }
     #pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
     pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
+    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
   } else {
     pltcondxWITHqry=pltcondxadjWITHqry <- NULL
+    pltcondxWITHqry <- NULL
   }
   
 
@@ -485,7 +487,7 @@ modGBchng <- function(GBpopdat,
   SCHEMA. <- estdat$SCHEMA.
   landarea.filter <- estdat$landarea.filter
 
- 
+
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -496,7 +498,7 @@ modGBchng <- function(GBpopdat,
                  popconn = popconn, SCHEMA. = SCHEMA.,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
-                 withqry = pltcondxadjWITHqry,
+                 withqry = pltcondxWITHqry,
                  cuniqueid = cuniqueid, condid = condid,
                  rowvar = rowvar, colvar = colvar, 
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
@@ -616,7 +618,6 @@ modGBchng <- function(GBpopdat,
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
-  
 
   ###################################################################################
   ## GENERATE ESTIMATES

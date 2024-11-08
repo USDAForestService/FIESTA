@@ -489,6 +489,7 @@ modGBratio <- function(GBpopdat,
     pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
     pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
   } else {
+    pltcondxWITHqry <- NULL
     pltcondxWITHqry=pltcondxadjWITHqry <- NULL
   }
   

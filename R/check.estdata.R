@@ -98,6 +98,7 @@ check.estdata <-
   ###########################################################################
   where.qry <- {}
   
+
   ## Check pcfilter (plot and cond filters) and add to where.qry
   ###########################################################################
   pcfilter <- check.logic(pltcondflds, pcfilter, syntax="SQL", filternm="pcfilter")
@@ -346,6 +347,7 @@ check.estdata <-
   returnlst <- list(esttype = esttype, 
                     sumunits = sumunits,
                     totals = totals,
+                    pltcondflds = pltcondflds,
                     landarea = landarea, 
                     allin1 = allin1, 
                     divideby = divideby,

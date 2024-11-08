@@ -715,7 +715,17 @@ DBgetPlots <- function (states = NULL,
   #if (datsource %in% c("sqlite", "gdb")) {
   #  data_dsn <- DBtestSQLite(data_dsn)
   #}
-  if (!is.null(data_dsn)) {
+  
+  if (!is.null(dbconn)) {
+    if (!DBI::dbIsValid(dbconn)) {
+      stop("dbconn is invalid: ")
+    } else {
+      dbtablst <- DBI::dbListTables(dbconn)
+      if (length(dbtablst) == 0) {
+        stop("no data in ", datsource)
+      }
+    }
+  } else if (!is.null(data_dsn)) {
     if (getext(data_dsn) %in% c("sqlite", "db", "db3")) {
       dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
       dbtablst <- DBI::dbListTables(dbconn)
