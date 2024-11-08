@@ -93,6 +93,7 @@ check.popdataVOL <-
     plotnm <- plotlst$tabnm
     puniqueid <- plotlst$tabid
     pltx <- plotlst$tabx
+    pltflds <- plotlst$tabflds
     if (is.null(pltx)) {
       pltxnm <- plotnm
     } else {
@@ -445,7 +446,7 @@ check.popdataVOL <-
       if (defaultVars) {
         pvars <- pdoms2keep
       } else {
-        pvars <- "*"
+        pvars <- pltflds
       }
       pselectqry <- toString(paste0(plota., pvars))
       
@@ -462,11 +463,12 @@ check.popdataVOL <-
     if (defaultVars) {
       condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
     } else {
-      condvars <- "*"
+      condvars <- condflds
     }
-    cselectqry <- toString(paste0(conda., unique(c(condvars, cvars2keep))))
-    pltcondflds <- unique(c(condvars, cvars2keep, pvars))
-    
+    condvars <- unique(c(condvars, cvars2keep))[!unique(c(condvars, cvars2keep)) %in% pvars]
+    cselectqry <- toString(paste0(conda., condvars))
+    pltcondflds <- unique(c(condvars, pvars))
+
     ## Add FORTYPGRP to SELECT query
     if (addfortypgrp) {
       ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
@@ -782,6 +784,11 @@ check.popdataVOL <-
         if (!is.null(getdataCNs)) { 
           treex <- treex[treex[[tuniqueid]] %in% getdataCNs,]
         }
+        
+        treeclcd_rmrsnm <- findnm("TREECLCD_RMRS", names(treex), returnNULL = TRUE)
+        if (!is.null(treeclcd_rmrsnm) && is.character(treex[[treeclcd_rmrsnm]])) {
+          treex[, (treeclcd_rmrsnm) := as.numeric(get(treeclcd_rmrsnm))]
+        } 
         
         ## Add to returnlst 
         if (returndata) {

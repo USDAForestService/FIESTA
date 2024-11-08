@@ -472,7 +472,7 @@ modGBtree <- function(GBpopdat,
     pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
   } else {
     pltcondxWITHqry <- NULL
-    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
+    pltcondxadjWITHqry <- NULL
   }
   
 
@@ -636,11 +636,6 @@ modGBtree <- function(GBpopdat,
   ### Get estimation data from tree table
   ###############################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  if (popdatindb) {
-    pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
-  } else {
-    pltidsWITHqry <- NULL
-  }
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -662,7 +657,7 @@ modGBtree <- function(GBpopdat,
                ACI = ACI,
                domclassify = domclassify,
                dbconn = popconn, schema = pop_schema,
-               pltidsWITHqry = pltidsWITHqry,
+               pltidsWITHqry = pltcondxadjWITHqry,
                pcwhereqry = pcwhereqry,
                pjoinid = pltidsid,
                bytdom = bytdom,
@@ -675,6 +670,10 @@ modGBtree <- function(GBpopdat,
   estunits <- treedat$estunits
   treeqry <- treedat$treeqry
   classifynmlst <- treedat$classifynmlst
+  
+  if (sum(tdomdat[[estvar.name]], na.rm=TRUE) == 0) {
+    stop("invalid estimate... no tree data returned...")
+  }
   
   ## If classified rowvar or colvar, get class names
   if (!is.null(classifynmlst)) {

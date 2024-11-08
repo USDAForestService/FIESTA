@@ -968,39 +968,40 @@ modGBpop <- function(popType = "VOL",
       condstatusnm <- findnm("COND_STATUS_CD", pltcondxcols, returnNULL=TRUE)
       reservcdnm <- findnm("RESERVCD", pltcondxcols, returnNULL=TRUE)
       siteclcdnm <- findnm("SITECLCD", pltcondxcols, returnNULL=TRUE)
-    }
-    if (all(!sapply(c(condstatusnm, reservcdnm, siteclcdnm), is.null))) {
-      lower <- ifelse (condstatusnm == "COND_STATUS_CD", FALSE, TRUE)
-      landstatusnm <- ifelse(lower, "landstatus", "LANDSTATUS")
+    
+      if (all(!sapply(c(condstatusnm, reservcdnm, siteclcdnm), is.null))) {
+        lower <- ifelse (condstatusnm == "COND_STATUS_CD", FALSE, TRUE)
+        landstatusnm <- ifelse(lower, "landstatus", "LANDSTATUS")
       
-      LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
+        LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
                                   LANDSTATUSCD = c(rep(1, 6), rep(2, 2), rep(3, 6), 4),
                                   LANDSTATUSNM = c(rep("Timberland", 6), 
                                                    rep("Other forestland", 2), 
                                                    rep("Reserved productive forestland", 6),
                                                    "Reserved other forestland"))
-      if (lower) names(LANDSTATUSlut) <- tolower(names(LANDSTATUSlut))
+        if (lower) names(LANDSTATUSlut) <- tolower(names(LANDSTATUSlut))
       
-      pltcondx[[landstatusnm]] <- 
-        with(pltcondx, get(condstatusnm) * 100 + get(reservcdnm) * 10 + get(siteclcdnm))
-      pltcondx <- merge(pltcondx, LANDSTATUSlut, by=landstatusnm, all.x=TRUE)
-      pltcondx[[landstatusnm]] <- NULL
-      newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
-      if (lower) newcols <- tolower(newcols)
+        pltcondx[[landstatusnm]] <- 
+          with(pltcondx, get(condstatusnm) * 100 + get(reservcdnm) * 10 + get(siteclcdnm))
+        pltcondx <- merge(pltcondx, LANDSTATUSlut, by=landstatusnm, all.x=TRUE)
+        pltcondx[[landstatusnm]] <- NULL
+        newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
+        if (lower) newcols <- tolower(newcols)
       
-      if (popType %in% c("CHNG", "GRM")) {
-        prevnm <- ifelse(lower, "prev_", "PREV_")
-        names(LANDSTATUSlut) <- paste0(prevnm, names(LANDSTATUSlut))
+        if (popType %in% c("CHNG", "GRM")) {
+          prevnm <- ifelse(lower, "prev_", "PREV_")
+          names(LANDSTATUSlut) <- paste0(prevnm, names(LANDSTATUSlut))
         
-        pltcondx[[paste0(prevnm, landstatusnm)]] <- 
-          with(pltcondx, get(paste0(prevnm, condstatusnm)) * 100 + 
+          pltcondx[[paste0(prevnm, landstatusnm)]] <- 
+            with(pltcondx, get(paste0(prevnm, condstatusnm)) * 100 + 
                  get(paste0(prevnm, reservcdnm)) * 10 + get(paste0(prevnm, siteclcdnm)))
-        pltcondx <- merge(pltcondx, LANDSTATUSlut, by=paste0(prevnm, landstatusnm), all.x=TRUE)
-        pltcondx[[paste0(prevnm, landstatusnm)]] <- NULL
-        newcols <- c(newcols, paste0(prevnm, newcols))
+          pltcondx <- merge(pltcondx, LANDSTATUSlut, by=paste0(prevnm, landstatusnm), all.x=TRUE)
+          pltcondx[[paste0(prevnm, landstatusnm)]] <- NULL
+          newcols <- c(newcols, paste0(prevnm, newcols))
+        }
       }
     }
-  
+ 
     ## Add FORTYPGRPCD to pltcondx if not already in dataset
     fortypgrpnm <- findnm("FORTYPGRPCD", pltcondxcols, returnNULL=TRUE)
 
@@ -1026,7 +1027,7 @@ modGBpop <- function(popType = "VOL",
         }  
       }
     }
-
+    
     ## Move new columns to end of table
     setcolorder(pltcondx, c(pltcondxcols, newcols))
     pltcondflds <- c(pltcondflds, newcols)
