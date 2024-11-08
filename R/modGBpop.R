@@ -354,162 +354,6 @@ modGBpop <- function(popType = "VOL",
   }
 
   
-  
-  # ## Check parameter lists
-  # pcheck.params(input.params, strata_opts=strata_opts, unit_opts=unit_opts, 
-  #               savedata_opts=savedata_opts, database_opts=database_opts)
-  # 
-  # 
-  # ## Set unit defaults
-  # unit_defaults_list <- formals(unit_options)[-length(formals(unit_options))]
-  # 
-  # for (i in 1:length(unit_defaults_list)) {
-  #   assign(names(unit_defaults_list)[[i]], unit_defaults_list[[i]])
-  # }
-  # 
-  # ## Set user-supplied unit values
-  # if (length(unit_opts) > 0) {
-  #   for (i in 1:length(unit_opts)) {
-  #     if (names(unit_opts)[[i]] %in% names(unit_defaults_list)) {
-  #       assign(names(unit_opts)[[i]], unit_opts[[i]])
-  #     } else {
-  #       stop(paste("Invalid parameter: ", names(unit_opts)[[i]]))
-  #     }
-  #   }
-  # }
-  # 
-  # ## Set popFilters defaults
-  # popFilters_defaults_list <- formals(popFilters)[-length(formals(popFilters))]
-  # 
-  # for (i in 1:length(popFilters_defaults_list)) {
-  #   assign(names(popFilters_defaults_list)[[i]], popFilters_defaults_list[[i]])
-  # }
-  # 
-  # ## Set user-supplied popFilters values
-  # popFilter2 <- popFilters_defaults_list
-  # if (length(popFilter) > 0) {
-  #   for (i in 1:length(popFilter)) {
-  #     if (names(popFilter)[[i]] %in% names(popFilters_defaults_list)) {
-  #       popFilter2[[names(popFilter)[[i]]]] <- popFilter[[i]]
-  #     } else {
-  #       stop(paste("Invalid parameter: ", names(popFilter)[[i]]))
-  #     }
-  #   }
-  # }
-  # 
-  # ## Set database defaults
-  # database_defaults_list <- formals(database_options)[-length(formals(database_options))]
-  # 
-  # for (i in 1:length(database_defaults_list)) {
-  #   assign(names(database_defaults_list)[[i]], database_defaults_list[[i]])
-  # }
-  # 
-  # ## Set user-supplied database values
-  # if (length(database_opts) > 0) {
-  #   if (datsource != 'postgres') {
-  #     message("database_options only available for postgres datsource")
-  #   }
-  #   for (i in 1:length(database_opts)) {
-  #     if (names(database_opts)[[i]] %in% names(database_defaults_list)) {
-  #       assign(names(database_opts)[[i]], database_opts[[i]])
-  #     } else {
-  #       stop(paste("Invalid parameter: ", names(database_opts)[[i]]))
-  #     }
-  #   }
-  # }
-  # 
-  # 
-  # ## Set savedata defaults
-  # savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  # 
-  # for (i in 1:length(savedata_defaults_list)) {
-  #   assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  # }
-  # 
-  # ## Set user-supplied savedata values
-  # if (length(savedata_opts) > 0) {
-  #   if (!savedata) {
-  #     message("savedata=FALSE with savedata parameters... no data are saved")
-  #   }
-  #   for (i in 1:length(savedata_opts)) {
-  #     if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-  #       assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-  #     } else {
-  #       stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-  #     }
-  #   }
-  # }
-  # 
-  # ## Set strata defaults
-  # strata_defaults_list <- formals(strata_options)[-length(formals(strata_options))]
-  # 
-  # for (i in 1:length(strata_defaults_list)) {
-  #   assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
-  # }
-  # 
-  # ## Set popTables defaults
-  # popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
-  # 
-  # for (i in 1:length(popTables_defaults_list)) {
-  #   assign(names(popTables_defaults_list)[[i]], popTables_defaults_list[[i]])
-  # }  
-  # 
-  # ## Set popTabIDs defaults
-  # popTableIDs_defaults_list <- formals(popTableIDs)[-length(formals(popTableIDs))]
-  # 
-  # for (i in 1:length(popTableIDs_defaults_list)) {
-  #   if (names(popTableIDs_defaults_list)[[i]] == "cond") {
-  #     assign("cuniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "plt") {
-  #     assign("puniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "tree") {
-  #     assign("tuniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "seed") {
-  #     assign("suniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "vsubpspp") {
-  #     assign("vsppuniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "vsubpstr") {
-  #     assign("vstruniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "invsubp") {
-  #     assign("invuniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "subplot") {
-  #     assign("subpuniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "subp_cond") {
-  #     assign("subcuniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "cond_dwm_calc") {
-  #     assign("dwmuniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "grm") {
-  #     assign("grmuniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "plot_pplot") {
-  #     assign("pplotuniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  #   if (names(popTableIDs_defaults_list)[[i]] == "cond_pcond") {
-  #     assign("pconduniqueid", popTableIDs_defaults_list[[i]])
-  #   }
-  # }
-  # 
-  # ## Set user-supplied strata options
-  # if (length(strata_opts) > 0) {
-  #   for (i in 1:length(strata_opts)) {
-  #     if (names(strata_opts)[[i]] %in% names(strata_defaults_list)) {
-  #       assign(names(strata_opts)[[i]], strata_opts[[i]])
-  #     } else {
-  #       stop(paste("Invalid parameter: ", names(strata_opts)[[i]]))
-  #     }
-  #   }
-  # } 
-  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -531,10 +375,6 @@ modGBpop <- function(popType = "VOL",
     if (out_fmt == "sqlite" && is.null(out_dsn)) {
       out_dsn <- "GBpopdat.db"
     }
-#    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-#                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-#                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-#                            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outlst <- FIESTAutils::pcheck.output(savadata_opts)
     outlst$add_layer <- TRUE
   }
@@ -549,7 +389,7 @@ modGBpop <- function(popType = "VOL",
     }
     #if (append_layer) overwrite_layer <- FALSE
     if (append_layer) message("currently cannot append to object lists")
-    objfn <- FIESTAutils::getoutfn(outfn = objnm, 
+    objfn <- getoutfn(outfn = objnm, 
                       ext = outobj_fmt, 
                       outfolder = outlst$outfolder, 
                       overwrite = outlst$overwrite_layer, 
@@ -950,6 +790,9 @@ modGBpop <- function(popType = "VOL",
       treex <- popcheck$treex
       seedx <- popcheck$seedx
       tuniqueid <- popcheck$tuniqueid
+      if (is.null(treex) && is.null(seedx)) {
+        stop("must include tree data")
+      }
     }
   }
 
@@ -1113,6 +956,7 @@ modGBpop <- function(popType = "VOL",
   ## Add new variables to pltcondx for estimation
   ###################################################################################
   if (returndata || savedata) {
+    
     ## Get order of pltcondx columns
     pltcondxcols <- names(pltcondx)
     pltcondxkey <- key(pltcondx)

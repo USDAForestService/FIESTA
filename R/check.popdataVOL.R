@@ -328,7 +328,12 @@ check.popdataVOL <-
     #adjfactors <- replacepopfun(adjfactors, FIADBpop)
     #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
     
-   
+    adja. <- "adj."
+    adjvars <- sapply(propvars, function(x) {
+      ifelse(grepl("PROP_UNADJ", x), paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)), 
+             ifelse (grepl("prop_unadj", x), paste0("ADJ_FACTOR_", toupper(sub("prop_unadj", "", x))), 
+                     paste0(x, "_ADJ"))) })
+    
     ## Build and run final query to append adjustment factors to pltids, including ADJ query
     if (adj == "samp") {
       adja. <- "adj."

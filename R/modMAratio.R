@@ -358,13 +358,16 @@ modMAratio <- function(MApopdat,
   MApopdat <- pcheck.object(MApopdat, "MApopdat", list.items=list.items)
   if (is.null(MApopdat)) return(NULL)
   condx <- MApopdat$condx
+  pltidsadj <- MApopdat$pltidsadj
   pltcondx <- MApopdat$pltcondx	
+  pltcondflds <- MApopdat$pltcondflds
   treex <- MApopdat$treex
   seedx <- MApopdat$seedx
   if (is.null(treex) && is.null(seedx)) {
     stop("must include tree data for ratio estimates")
   }
   cuniqueid <- MApopdat$cuniqueid
+  pltassgnid <- MApopdat$pltassgnid
   npixels <- MApopdat$npixels
   npixelvar <- MApopdat$npixelvar
   condid <- MApopdat$condid
@@ -385,18 +388,17 @@ modMAratio <- function(MApopdat,
   invyrs <- MApopdat$invyrs
   estvar.area <- MApopdat$estvar.area
   adj <- MApopdat$adj
-  expcondtab <- MApopdat$expcondtab
   pop_fmt <- MApopdat$pop_fmt
   pop_dsn <- MApopdat$pop_dsn
-  pop_schema <- GBpopdat$pop_schema
-  popconn <- GBpopdat$popconn
-  dbqueries <- GBpopdat$dbqueries
-  dbqueriesWITH <- GBpopdat$dbqueriesWITH
-  areawt <- GBpopdat$areawt
-  areawt2 <- GBpopdat$areawt2
-  adjcase <- GBpopdat$adjcase
-  pltidsid <- GBpopdat$pjoinid
-  pltassgnid <- GBpopdat$pltassgnid
+  pop_schema <- MApopdat$pop_schema
+  popconn <- MApopdat$popconn
+  dbqueries <- MApopdat$dbqueries
+  dbqueriesWITH <- MApopdat$dbqueriesWITH
+  areawt <- MApopdat$areawt
+  areawt2 <- MApopdat$areawt2
+  adjcase <- MApopdat$adjcase
+  pltidsid <- MApopdat$pjoinid
+  pltassgnid <- MApopdat$pltassgnid
   
   if (is.null(prednames)) {
     prednames <- MApopdat$prednames
@@ -527,7 +529,6 @@ modMAratio <- function(MApopdat,
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  landarea = landarea, states = states, 
-                 whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -731,7 +732,6 @@ modMAratio <- function(MApopdat,
                    grpvar = grpvar,
                    MAmethod = MAmethod,
                    modelselect = modelselect,
-                   modelselect_bydomain = modelselect_bydomain,
                    prednames = prednames,
                    FIA = FIA,
                    bootstrap = bootstrap,
@@ -741,7 +741,6 @@ modMAratio <- function(MApopdat,
                    areavar = areavar,
                    unitlut = unitlut,
                    npixels = npixels,
-                   npixelvar = npixelvar,
                    totals = totals,
                    sumunits = sumunits,
                    uniquerow = uniquerow,

@@ -460,9 +460,9 @@ modMAtree <- function(MApopdat,
   dbqueries <- MApopdat$dbqueries
   dbqueriesWITH <- MApopdat$dbqueriesWITH
   adjcase <- MApopdat$adjcase
-  pltidsid <- GBpopdat$pjoinid
-  pltassgnid <- GBpopdat$pltassgnid
- 
+  pltidsid <- MApopdat$pjoinid
+  pltassgnid <- MApopdat$pltassgnid
+  
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
       prednames <- MApopdat$prednames
@@ -732,7 +732,7 @@ modMAtree <- function(MApopdat,
                  title.unitsn = estunits, 
                  title.estvarn = title.estvar, 
                  unitvar = unitvar,
-                 rowvar = owvar, colvar = colvar, 
+                 rowvar = rowvar, colvar = colvar, 
                  estvarn = estvar.name,
                  estvarn.filter = estvar.filter, 
                  addtitle = addtitle,
@@ -771,7 +771,6 @@ modMAtree <- function(MApopdat,
                    grpvar = grpvar,
                    MAmethod = MAmethod,
                    modelselect = modelselect,
-                   modelselect_bydomain = modelselect_bydomain,
                    prednames = prednames,
                    FIA = FIA,
                    bootstrap = bootstrap,
@@ -781,15 +780,14 @@ modMAtree <- function(MApopdat,
                    areavar = areavar,
                    unitlut = unitlut,
                    npixels = npixels,
-                   npixelvar = npixelvar,
                    totals = totals,
-                   sumunits = sumunits,
                    uniquerow = uniquerow,
                    uniquecol = uniquecol,
                    row.orderby = row.orderby,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
                    col.add0 = col.add0)
+  
   if (is.null(estdat)) stop()
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest
@@ -799,6 +797,7 @@ modMAtree <- function(MApopdat,
   predselect.overall <- estdat$predselect.overall
   unit_weights <- estdat$unit_weights
  
+  
   ###############################################################################
   ## GENERATE OUTPUT TABLES
   ###############################################################################
@@ -814,7 +813,6 @@ modMAtree <- function(MApopdat,
                 rowvar = rowvarnm, colvar = colvarnm, 
                 uniquerow = uniquerow, uniquecol = uniquecol,
                 rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                rowunit = rowunit, totunit = totunit, 
                 allin1 = allin1, 
                 savedata = savedata, addtitle = addtitle, 
                 title.ref = title.ref, 

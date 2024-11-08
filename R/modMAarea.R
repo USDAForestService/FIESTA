@@ -417,8 +417,8 @@ modMAarea <- function(MApopdat,
   areawt <- MApopdat$areawt
   areawt2 <- MApopdat$areawt2
   adjcase <- MApopdat$adjcase
-  pltidsid <- GBpopdat$pjoinid
-  pltassgnid <- GBpopdat$pltassgnid
+  pltidsid <- MApopdat$pjoinid
+  pltassgnid <- MApopdat$pltassgnid
  
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
@@ -542,7 +542,7 @@ modMAarea <- function(MApopdat,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
-  domainlst <- rowcolinfo$domainlst
+  bydomainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
   rowvarnm <- rowcolinfo$rowvarnm
@@ -584,6 +584,7 @@ modMAarea <- function(MApopdat,
                popconn = popconn,
                pltcondx = pltcondx,
                pltidsadj = pltidsadj,
+               pltidsid = pltidsid,
                pltcondxadjWITHqry = pltcondxadjWITHqry,
                pcwhereqry = pcwhereqry,
                classifyrow = classifyrow,
@@ -634,6 +635,7 @@ modMAarea <- function(MApopdat,
   ## Append name of package and method to outfile name
   outfn.estpse <- paste0(outfn.estpse, "_modMA_mase", "_", MAmethod) 
   
+ 
   #####################################################################################
   ## GENERATE ESTIMATES
   #####################################################################################
@@ -646,7 +648,6 @@ modMAarea <- function(MApopdat,
                    grpvar = grpvar,
                    MAmethod = MAmethod,
                    modelselect = modelselect,
-                   modelselect_bydomain = modelselect_bydomain,
                    prednames = prednames,
                    FIA = FIA,
                    bootstrap = bootstrap,
@@ -656,9 +657,7 @@ modMAarea <- function(MApopdat,
                    areavar = areavar,
                    unitlut = unitlut,
                    npixels = npixels,
-                   npixelvar = npixelvar,
                    totals = totals,
-                   sumunits = sumunits,
                    uniquerow = uniquerow,
                    uniquecol = uniquecol,
                    row.orderby = row.orderby,
