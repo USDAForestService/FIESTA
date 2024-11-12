@@ -354,7 +354,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   stopiferror = FALSE
   showwarnings = TRUE  
  
-  
   pltcnts <- check.pltcnt(pltx = pltx, puniqueid = puniqueid,
 		                      unitlut = auxlut, 
 		                      unitvars = unitvar, strvars = strvar,
@@ -379,13 +378,14 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
           message("removing domains with plots less than ", minplotnum.unit,
                   ": ", toString(unitltmin))
         } else {
+          warntab <- ifelse (module == "GB", "stratwarnlut", "unitwarnlut")
           message("there are ", length(unitltmin), " units with less than minplotnum.unit (", 
                   minplotnum.unit, ") plots:\n", 
                   toString(unitltmin)) 
           message("returning NA values for these units...")
           message("if want to combine units that are less than minplotnum.unit, ",
                   "set unit.action='combine' in unit.opts parameter... ",
-                  "\ncheck returned object, stratwarnlut\n")	
+                  "\ncheck returned object, ", warntab, "\n")	
           
         }
         auxlut <- auxlut[!auxlut[[unitvar]] %in% unitltmin,]
@@ -414,6 +414,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     if (minplotnum.strat > minplotnum.unit) {
       minplotnum.strat <- minplotnum.unit
     }
+
     unitcombine <- ifelse(unit.action == 'combine', TRUE, FALSE)
     collapse <- strat.collapse(stratacnt=auxlut, 
                                pltstratx=pltx, 
@@ -424,7 +425,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
                                stratcombine=stratcombine, 
                                unitcombine=unitcombine, 
                                vars2combine=vars2combine)						 
-
     if ((stratcombine || unitcombine) && !is.null(collapse$unitstrgrplut)) {
 	    message("check strata groups in returned object, stratcombinelut\n")
       unitstrgrplut <- collapse$unitstrgrplut
@@ -623,11 +623,13 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     if (!is.null(getwtvar)) {
       returnlst$getwtvar <- getwtvar
     }
-    if (!is.null(unitstrgrplut)) {
-      returnlst$stratcombinelut <- data.frame(unitstrgrplut, check.names=FALSE)
-    } else if (!is.null(errtab)) {
-	    returnlst$stratwarnlut <- errtab
-	  }
+  }
+
+  if (!is.null(unitstrgrplut)) {
+    returnlst$stratcombinelut <- data.frame(unitstrgrplut, check.names=FALSE)
+  } 
+  if (!is.null(errtab)) {
+	  returnlst$stratwarnlut <- errtab
   }
   #if (length(unitltmin) > 0 &&  unit.action == "keep") {
     returnlst$unitltmin <- unitltmin

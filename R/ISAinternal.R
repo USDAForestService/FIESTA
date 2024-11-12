@@ -7,7 +7,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 		largeishelper=FALSE, polyunion=TRUE, showsteps=TRUE, savesteps=FALSE,
 		stepfolder=NULL, out_fmt="shp", step_dsn=NULL, step.cex=0.8,
 		maxbnd.threshold=0, largebnd.threshold=30, multiSAdoms=TRUE,
-		byeach=FALSE, maxbnd.addtext=TRUE, largebnd.addtext=FALSE, 
+		modelbyeach=FALSE, maxbnd.addtext=TRUE, largebnd.addtext=FALSE, 
 		bayes=FALSE, overwrite=TRUE) {
   ## DESCRIPTION:: Automate selection of helperbnd polygons for modeling.
   ## maxbnd - maximum constraint for modeling extent (e.g., Province)
@@ -33,7 +33,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   }
   
   if (bayes) {
-    multiSAdoms <- FALSE
+    multiSAdoms=modelbyeach <- FALSE
   }
 
   ############################################################################
@@ -168,7 +168,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     maxbnd_max <- merge(maxbndx_intersect, maxbnd_max)
     maxbndxlst <- maxbndxlst[maxbndxlst %in% unique(maxbnd_max[[maxbnd.unique]])]
  
-    if (length(maxbnd.gtthres) > 1 || (nrow(maxbnd_max) > 1 && byeach)) {
+    if (length(maxbnd.gtthres) > 1 || (nrow(maxbnd_max) > 1 && modelbyeach)) {
       message("smallbnd intersects more than 1 maxbnd")
 
 #      if (bayes) {
@@ -181,13 +181,12 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         maxbndx_intdlst <- lapply(maxbndxlst, function(mbnd, maxbndx.intd) {
           maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% mbnd, ]
         }, maxbndx.intd)
-        
-        if (byeach) {
+
+        if (modelbyeach) {
           mbndlst <- maxbnd_max[[maxbnd.unique]]
           sbndlst <- lapply(maxbnd_max[[smallbnd.unique]], 
 					function(x) smallbndx[smallbndx[[smallbnd.unique]] == x,])
           names(sbndlst) <- maxbnd_max[[smallbnd.unique]]
-
         } else {
           mbndlst <- maxbnd.gtthres
           mbndlst <- as.list(mbndlst[mbndlst %in% unique(maxbnd_max[[maxbnd.unique]])])
@@ -357,7 +356,6 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         sbndnm <- paste0(sbndnm, i)
       }
     }
-    SAdomsnmlst[i] <- sbndnm
     nbrdom <- 0
     mbnd <- {}
 
@@ -465,7 +463,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
       ## Select largebnd(s) that intersect more than threshold
       largebnd_select <- largebndx.intd[largebndx.intd[[largebnd.unique]] %in% largebnd.gtthres,]
-      largebndxdlst[[mbnd]] <- largebnd_select
+      largebndxdlst[[sbndnm]] <- largebnd_select
 
 
       ############################################################
@@ -733,21 +731,28 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 #          }
 
     SAdomslst[[i]] <- SAdoms
-    helperbndxlst[[i]] <- helperbndx.tmp
+    helperbndxlst[[sbndnm]] <- helperbndx.tmp
     sbnd$AOI <- NULL
     smallbndxlst[[i]] <- sbnd
+
+    if (modelbyeach) {
+      SAdomsnmlst[i] <- sbndnm
+    } else {
+      SAdomsnmlst[i] <- mbnd
+    }
     
   } ## End while i - sbnd
-
+  
   names(SAdomslst) <- SAdomsnmlst
   names(smallbndxlst) <- SAdomsnmlst
   #names(SAdomslst) <- mbndlst
   #names(smallbndxlst) <- mbndlst
   names(helperbndxlst) <- SAdomsnmlst
   names(largebndxdlst) <- SAdomsnmlst
-  if (!is.null(maxbndx_intdlst)) {
-    names(maxbndx_intdlst) <- SAdomsnmlst
-  }
+  
+#  if (!is.null(maxbndx_intdlst)) {
+#    names(maxbndx_intdlst) <- SAdomsnmlst
+#  }
   
   returnlst <- list(SAdomslst=SAdomslst, helperbndxlst=helperbndxlst,
 				smallbndxlst=smallbndxlst, largebndxlst=largebndxdlst, maxbndxlst=maxbndx_intdlst)

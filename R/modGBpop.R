@@ -1028,6 +1028,28 @@ modGBpop <- function(popType = "VOL",
       }
     }
     
+    ## Add DSTRBGRP to pltcondx if not already in dataset
+    dstrgrpnm <- findnm("DSTRBGRP", pltcondxcols, returnNULL=TRUE)
+    
+    if (is.null(dstrgrpnm)) {
+      dstrbcd1nm <- findnm("DSTRBCD1", pltcondxcols, returnNULL=TRUE)
+      
+      ref_dstrbcd <- ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")]
+      names(ref_dstrbcd) <- c("DSTRBCD1", "DSTRBGRP")
+      if (lower) names(ref_dstrbcd) <- tolower(names(ref_dstrbcd))
+      
+      pltcondx <- merge(pltcondx, ref_dstrbcd, by=dstrbcd1nm, all.x=TRUE)
+      newcols <- c(newcols, ifelse(lower, "dstrbgrp", "DSTRBGRP"))
+      
+      if (popType %in% c("CHNG", "GRM")) {
+        prevnm <- ifelse(lower, "prev_", "PREV_")
+        names(ref_dstrbcd) <- paste0(prevnm, names(ref_dstrbcd))
+        
+        pltcondx <- merge(pltcondx, ref_dstrbcd, by=paste0(prevnm, dstrbcd1nm), all.x=TRUE)
+        newcols <- c(newcols, ifelse(lower, "prev_dstrbgrp", "PREV_DSTRBGRP"))
+      }  
+    }
+    
     ## Move new columns to end of table
     setcolorder(pltcondx, c(pltcondxcols, newcols))
     pltcondflds <- c(pltcondflds, newcols)

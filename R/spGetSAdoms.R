@@ -118,7 +118,9 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @param addstate Logical. If TRUE, appends state attribute to SAdoms.
-#' @param byeach Logical. If TRUE, creates an SAdom for each smallbnd polygon.
+#' @param byeach Logical. If TRUE, an estimate is desired for each smallbnd 
+#' domain. If FALSE, all smallbnd domains are aggregates one SAdom (DOMAIN = 1).
+#' @param modelbyeach Logical. If TRUE, creates an SAdom for each smallbnd polygon.
 #' @param dissolve Logical. If TRUE, aggregates polygons to smallbnd.domain or
 #' smallbnd.unique.
 #' @return \item{SAdomslst}{ List object. Set(s) of model domain units. If
@@ -181,7 +183,8 @@ spGetSAdoms <- function(smallbnd,
                         savedata_opts = NULL, 
                         addstate = FALSE, 
                         dissolve = FALSE,
-                        byeach = FALSE) {
+                        byeach = TRUE,
+                        modelbyeach = FALSE) {
   ##############################################################################
   ## DESCRIPTION
   ## Generates small area domains for input to Small Area Module (modSA*).
@@ -289,10 +292,11 @@ spGetSAdoms <- function(smallbnd,
 
   ## Check byeach
   #############################################################################
+  ## byeach determines whether an estimate is desired by each smallbnd domain
   byeach <- pcheck.logical(byeach, varnm="byeach", 
 		title="By each smallbnd poly?", first="YES", gui=gui) 
-  if (byeach && !multiSAdoms) {
-    multiSAdoms <- TRUE
+  if (!byeach) {
+    multiSAdoms=modelbyeach <- FALSE
   }
 
   ## Check bayes
@@ -357,25 +361,29 @@ spGetSAdoms <- function(smallbnd,
   #############################################################################
   smallbndx <- pcheck.spatial(layer=smallbnd, dsn=smallbnd_dsn, 
                         caption="small boundary", stopifnull=TRUE)
-  smallbndx <- checksf.longlat(smallbndx)
-  if (!all(sf::st_is_valid(smallbndx))) {
-    smallbndx <- sf::st_make_valid(smallbndx, 
-                                 geos_method = 'valid_structure', 
-                                 geos_keep_collapsed = FALSE)
+  smallbndx <- polyfix.sf(smallbndx)
+  if (!byeach) {
+    smallbndx$DOMAIN <- 1
+    smallbndx.domain=smallbnd.unique <- "DOMAIN"
   }
+  
   smallbndx.prj <- sf::st_crs(smallbndx)
   smallbndnmlst <- names(smallbndx)
   smallbnd.unique <- pcheck.varchar(var2check=smallbnd.unique, varnm="smallbnd.unique", 
-		          gui=gui, checklst=smallbndnmlst, caption="Small area attribute", 
-		          warn=paste(smallbnd.unique, "not in smallbnd"), stopifnull=FALSE)
+                                    gui=gui, checklst=smallbndnmlst, caption="Small area attribute", 
+                                    warn=paste(smallbnd.unique, "not in smallbnd"), stopifnull=FALSE)
   if (!is.null(smallbnd.unique)) {
     smallbndnmlst <- smallbndnmlst[smallbndnmlst != smallbnd.unique]
   }
   smallbnd.domain <- pcheck.varchar(var2check=smallbnd.domain, varnm="smallbnd.domain", 
-		          gui=gui, checklst=smallbndnmlst, caption="Small area domain", 
-		          stopifnull=FALSE, stopifinvalid=FALSE)
+                                    gui=gui, checklst=smallbndnmlst, caption="Small area domain", 
+                                    stopifnull=FALSE, stopifinvalid=FALSE)
   if (all(is.null(smallbnd.unique), is.null(smallbnd.domain))) {
-    warning("both smallbnd.unique and smallbnd.domain is null...  adding DOMAIN=1")
+    message("both smallbnd.unique and smallbnd.domain is null...  adding DOMAIN = 1")
+    smallbndx$DOMAIN <- 1
+    smallbnd.unique=smallbnd.domain <- "DOMAIN"
+  } else if (!byeach) {
+    message("aggregating all smallbnd polygons...  adding DOMAIN = 1")
     smallbndx$DOMAIN <- 1
     smallbnd.unique=smallbnd.domain <- "DOMAIN"
   } else if (is.null(smallbnd.unique)) {
@@ -386,14 +394,14 @@ spGetSAdoms <- function(smallbnd,
   if (any(table(smallbndx[[smallbnd.unique]])) > 1) {
     message("smallbnd.unique is not unique")
   }
-
+  
   ## Apply smallbnd.filter
   ####################################################################
   if (!is.null(smallbnd.filter))  {
     smallbndx <- subset(smallbndx, eval(parse(text = smallbnd.filter)))
   }
   smallbnd.cols <- names(smallbndx)
-
+  
   ## Aggregate all fires to one polygon
   if (dissolve) {
     smallbndx$ONEDOM <- 1
@@ -571,10 +579,9 @@ spGetSAdoms <- function(smallbnd,
   #############################################################################
   helperbndx <- pcheck.spatial(layer=helperbnd, dsn=helperbnd_dsn, 
 		caption="helper boundary")
-  if (!all(sf::st_is_valid(helperbndx))) {
-    helperbndx <- sf::st_make_valid(helperbndx)
+  if (!is.null(helperbndx)) {
+    helperbndx <- polyfix.sf(helperbndx)
   }
-  
   if (is.null(largebndx)) {
     largebnd.unique <- suppressWarnings(pcheck.varchar(var2check=largebnd.unique, 
 		checklst=names(helperbndx), stopifinvalid=FALSE))
@@ -672,20 +679,25 @@ spGetSAdoms <- function(smallbnd,
     if (is.null(helperbndx)) {
       stop("invalid helperbnd for autoselection")
     }
-    autoselectlst <- helper.select(smallbndx, smallbnd.unique=smallbnd.unique,
- 		      smallbnd.domain=smallbnd.domain,
- 		      helperbndx=helperbndx, helperbnd.unique=helperbnd.unique, 
- 		      largebndx=largebndx, largebnd.unique=largebnd.unique, 
- 		      maxbndx=maxbndx, maxbnd.unique=maxbnd.unique,
- 		      nbrdom.min=nbrdom.min, 
- 		      maxislarge=maxislarge, largeishelper=largeishelper, 
-		      polyunion=polyunion, 
-		      showsteps=showsteps, savesteps=savesteps, 
-		      stepfolder=stepfolder, step_dsn=step_dsn, 
-		      out_fmt=step_fmt, multiSAdoms=multiSAdoms, byeach=byeach,
-		      maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold, 
-		      maxbnd.addtext=maxbnd.addtext, largebnd.addtext=largebnd.addtext, 
-		      overwrite=overwrite_layer, bayes=bayes)
+    autoselectlst <- 
+      helper.select(smallbndx, 
+                    smallbnd.unique = smallbnd.unique,
+                    smallbnd.domain = smallbnd.domain,
+                    helperbndx = helperbndx, helperbnd.unique = helperbnd.unique,
+                    largebndx = largebndx, largebnd.unique = largebnd.unique,
+                    maxbndx = maxbndx, maxbnd.unique = maxbnd.unique,
+                    nbrdom.min = nbrdom.min,
+                    maxislarge = maxislarge, largeishelper = largeishelper,
+                    polyunion = polyunion,
+                    showsteps = showsteps, savesteps = savesteps,
+                    stepfolder = stepfolder, step_dsn = step_dsn,
+                    out_fmt = step_fmt, 
+                    multiSAdoms = multiSAdoms, modelbyeach = modelbyeach,
+		                maxbnd.threshold = maxbnd.threshold, 
+		                largebnd.threshold = largebnd.threshold, 
+		                maxbnd.addtext = maxbnd.addtext, 
+		                largebnd.addtext = largebnd.addtext, 
+		                overwrite = overwrite_layer, bayes = bayes)
     SAdomslst <- autoselectlst$SAdomslst
     helperbndxlst <- autoselectlst$helperbndxlst
     smallbndxlst <- autoselectlst$smallbndxlst
@@ -734,14 +746,16 @@ spGetSAdoms <- function(smallbnd,
 #    SAdomslst[[i]] <- merge(SAdomslst[[i]], 
 #		sf::st_drop_geometry(smallbndx[, c(smallbnd.unique, smallbnd.domain)]), 
 #		by.x="DOMAIN", by.y=smallbnd.unique, all.x=TRUE)
-    if (!is.null(largebndx)) {
-      SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
+    #if (modelbyeach) {
+      if (!is.null(largebndx)) {
+        SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					largebndx[, largebnd.unique], largest=TRUE))
-    }
-    if (!maxislarge && !is.null(maxbndx)) {
-      SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
-					maxbndx[, maxbnd.unique], largest=TRUE))
-    } 
+      }
+      if (!maxislarge && !is.null(maxbndx)) {
+        SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
+					  maxbndx[, maxbnd.unique], largest=TRUE))
+      } 
+    #}
     if (addstate) {
       ## Check projections (reproject largebndx to projection of helperbndx
       prjdat <- crsCompare(SAdomslst[[i]], stunitco, nolonglat=TRUE)
@@ -812,9 +826,10 @@ spGetSAdoms <- function(smallbnd,
 
   message("Number of model domains generated: ", length(SAdomslst), "\n") 
 
-  returnlst <- list(SAdomlst=SAdomslst, smallbndlst=smallbndxlst, 
-		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain, 
-           largebnd.unique=largebnd.unique)
+  returnlst <- list(SAdomlst = SAdomslst, smallbndlst = smallbndxlst, 
+		                smallbnd.unique = smallbnd.unique, 
+		                smallbnd.domain = smallbnd.domain, 
+		                largebnd.unique = largebnd.unique)
 
   if (addstate) {
     returnlst$stcdlst <- unique(unlist(lapply(SAdomslst, 
@@ -826,7 +841,9 @@ spGetSAdoms <- function(smallbnd,
     returnlst$largebndsf <- 
 		largebndx[largebndx[[largebnd.unique]] %in% returnlst$largebndlst, ]
   }
-
+  returnlst$SAdoms <- do.call(rbind, SAdomslst)
+  rownames(returnlst$SAdoms) <- NULL
+                                                          
   rm(smallbndx)
   rm(helperbndx)
   rm(largebndx)

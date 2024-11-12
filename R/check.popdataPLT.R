@@ -24,10 +24,10 @@ check.popdataPLT <-
     ##		INVYR, MEASYEAR, PLOT_STATUS_CD, RDDISTCD, WATERCD, ELEV, ELEV_PUBLIC,
     ##		ECOSUBCD, CONGCD, INTENSITY, DESIGNCD
     ## Check logical parameters: ACI, strata, stratcombine (if strata=TRUE)
-    ## - If ACI, add NF_PLOT_STATUS_CD to pvars2keep 
+    ## - If ACI, add NF_PLOT_STATUS_CD to pltvars2keep 
     ## - If unit.action='combine', estimation units are combined if less than 10 plots
-    ## - If strata, only 1 auxvar allowed, add to pvars2keep
-    ## - If module = SA or MA-greg, add prednames to pvars2keep
+    ## - If strata, only 1 auxvar allowed, add to pltvars2keep
+    ## - If module = SA or MA-greg, add prednames to pltvars2keep
     ## - If adj="samp", nonsample adjustment factors calculated at strata level
     ## - If adj="plot", nonsample adjustment factors calculated at plot level
     ## Check unit.action ('keep', 'remove', 'combine').
@@ -36,7 +36,7 @@ check.popdataPLT <-
     ## Check corresponding unique identifiers (puniqueid, pltassgnid)
     ## Merge plt, pltassgn tables to check necessary variables
     ## Check plot data
-    ## - Check for missing pvars2keep variables
+    ## - Check for missing pltvars2keep variables
     ## - Check for missing pdoms2keep variables (STATE, INTENSITY, INVYR, DESIGNCD)
     ## - Get state(s) and inventory year(s) (for titles)
     ## - Generate table of sampled/nonsampled plots (if PLOT_STATUS_CD included)
@@ -44,7 +44,7 @@ check.popdataPLT <-
     ## - Generate table of plots by strata, including nonsampled plots (P2POINTCNT)
     ## - If nonresp, generate table of nonsampled plots by strata, substrvar
     ## - Generate and apply nonsamp.pfilter (PLOT_STATUS_CD != 3)
-    ## - Check for NA values in pvars2keep variables
+    ## - Check for NA values in pltvars2keep variables
     ## - If unitvar = NULL, add unitvar=ONEUNIT
     ## Subset variables for pltx and pltassgnx
     ###################################################################################
@@ -64,25 +64,26 @@ check.popdataPLT <-
     ###################################################################################
     ## 1. Define a set of plot-level variables that are necessary to keep for estimation. 
     ###################################################################################
-    pvars2keep <- unique(c(pvars2keep, 
-                           c("STATECD", "UNITCD", "COUNTYCD", "PLOT",
-                             "PLOT_STATUS_CD", "PLOT_NONSAMPLE_REASN_CD", "PSTATUSCD", "INTENSITY",
-                             "SUBCYCLE"))) 
     
-    ## Set additional pvars2keep depending on popType
+    ## Variables to keep in plot table (Note: pvars2keep are variables to keep in pltassgnx)
+    pltvars2keep <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT", "PLOT_STATUS_CD",
+                      "PLOT_NONSAMPLE_REASN_CD", "PSTATUSCD", "INTENSITY",
+                      "SUBCYCLE")
+    
+    ## Set additional pltvars2keep depending on popType
     if (popType %in% c("GRM", "CHNG", "LULC")) {
-      pvars2keep <- unique(c(pvars2keep, c("PREV_PLT_CN", "REMPER")))
+      pltvars2keep <- unique(c(pltvars2keep, c("PREV_PLT_CN", "REMPER")))
     } else if (popType == "P2VEG") {
-      pvars2keep <- c(pvars2keep, "P2VEG_SAMPLING_STATUS_CD", "P2VEG_SAMPLING_LEVEL_DETAIL_CD",
+      pltvars2keep <- c(pltvars2keep, "P2VEG_SAMPLING_STATUS_CD", "P2VEG_SAMPLING_LEVEL_DETAIL_CD",
                       "SAMP_METHOD_CD")
     } else if (popType == "INV") {
-      pvars2keep <- c(pvars2keep, "INVASIVE_SAMPLING_STATUS_CD", "INVASIVE_SPECIMEN_RULE_CD")
+      pltvars2keep <- c(pltvars2keep, "INVASIVE_SAMPLING_STATUS_CD", "INVASIVE_SPECIMEN_RULE_CD")
     }  
     
     ###################################################################################
     ## 2. Define a set of plot-level domain variables used for estimation. 
     ###################################################################################
-    pdoms <- c("INVYR", "MEASYEAR", "RDDISTCD", "WATERCD", "ELEV", 
+    pltdoms <- c("INVYR", "MEASYEAR", "RDDISTCD", "WATERCD", "ELEV", 
                "ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "DESIGNCD", "EMAP_HEX")
     
     ##############################################################################
@@ -223,12 +224,25 @@ check.popdataPLT <-
       }
       pltassgnvars <- pltassgnid
       
+      ## Check pvars2keep
+      if (!is.null(pvars2keep) && length(pvars2keep) > 0) {
+        pvars2keep <- pvars2keep[pvars2keep %in% pltassgnflds]
+        if (length(pvars2keep) > 0) {
+          pltassgnvars <- c(pltassgnvars, pvars2keep)
+        }
+      }
     } else {
       
       ## Build pfromqry using pltassgn table
       pfromqry <- paste0("\nFROM ", SCHEMA., pltassgnnm, " p")
-      pltassgnvars <- c(pltassgnid, pvars2keep)
       
+      ## Check pvars2keep
+      if (!is.null(pvars2keep) && length(pvars2keep) > 0) {
+        pvars2keep <- pvars2keep[!pvars2keep %in% pltassgnflds]
+        if (length(pvars2keep) > 0) {
+          pltassgnvars <- c(pltassgnvars, pvars2keep)
+        }
+      }
     }
 
     ## 4.4. Define select variables (selectpvars)
@@ -274,14 +288,14 @@ check.popdataPLT <-
       message("adj='plot' is not typical for GB modules")
     }
     if (adj != "none") {
-      pvars2keep <- c(pvars2keep, "MACRO_BREAKPOINT_DIA")
+      pltvars2keep <- c(pltvars2keep, "MACRO_BREAKPOINT_DIA")
     }
     
     ## 5.2. Check ACI (if ACI=FALSE, need to filter COND_STATUS_CD == 1)
     ###################################################################################
     ACI <- pcheck.logical(popFilter$ACI, varnm="ACI", title="ACI?", first="NO", gui=gui)
     if (ACI) {
-      pvars2keep <- c(pvars2keep, "NF_SAMPLING_STATUS_CD", "NF_PLOT_STATUS_CD")
+      pltvars2keep <- c(pltvars2keep, "NF_SAMPLING_STATUS_CD", "NF_PLOT_STATUS_CD")
     }
     
     ## 5.3. Check defaultVars
@@ -423,22 +437,22 @@ check.popdataPLT <-
     }
     
    
-    ## 7. Check pvars2keep in pltassgn and pdoms2keep in plt
+    ## 7. Check pltvars2keep in pltassgn and pltdoms2keep in plt
     #######################################################################
-    if (!is.null(pvars2keep)) {
-      if (!is.null(pvars2keep)) {
-        pvars2keepchk <- unlist(sapply(pvars2keep, findnm, pflds, returnNULL = TRUE))
-        if (length(pvars2keepchk) < length(pvars2keep)) {
-          pvars2keepmiss <- pvars2keep[!pvars2keep %in% pvars2keepchk]
+    if (!is.null(pltvars2keep)) {
+      if (!is.null(pltvars2keep)) {
+        pvars2keepchk <- unlist(sapply(pltvars2keep, findnm, pflds, returnNULL = TRUE))
+        if (length(pvars2keepchk) < length(pltvars2keep)) {
+          pvars2keepmiss <- pltvars2keep[!pltvars2keep %in% pvars2keepchk]
           pvars2keepmiss <- pvars2keepmiss[pvars2keepmiss != "PSTATUSCD"]
           if (length(pvars2keepmiss) > 0) {
             message("variables are missing from dataset: ", toString(pvars2keepmiss))
           } else {
-            pvars2keep <- pvars2keepchk
+            pltvars2keep <- pvars2keepchk
           }
           #return(NULL)
         } else {
-          pvars2keep <- pvars2keepchk
+          pltvars2keep <- pvars2keepchk
         }
       }
     }
@@ -446,16 +460,16 @@ check.popdataPLT <-
     ## Get default variables for plot
     if (defaultVars) {
       #pdoms2keep <- DBvars.default()$pltvarlst
-      pdoms2keep <- pdoms
+      pdoms2keep <- pltdoms
       pdoms2keep <- pdoms2keep[pdoms2keep %in% pltflds]
     } else {
       pdoms2keep <- pltflds
     }
     
-    pvars <- unique(c(pvars2keep, pdoms))
+    pvars <- unique(c(pltvars2keep, pltdoms))
     pvars <- pvars[pvars %in% pltflds]
     
-    
+
     ## 8. Write pltassgnx to database 
     ##################################################################################
     if (datindb && !pltaindb && !is.null(dbconn)) {
@@ -520,7 +534,6 @@ check.popdataPLT <-
       POP_PLOT_STRATUM_ASSGN <- popFilterqry$POP_PLOT_STRATUM_ASSGN
       PLOT <- popFilterqry$PLOT
     } 
-
        
     ## 10. Build WITH queries and extract plt
     ##################################################################################
@@ -1043,7 +1056,7 @@ check.popdataPLT <-
     if (length(pltassgnvars) > 0) {
       pltassgnselectvars <- paste0(pltassgn., pltassgnvars)
     }
-    
+   
     ## Build select for pltassgnx
     pltassgn_selectqry <- paste0("SELECT ",
                                  toString(pltassgnselectvars))
@@ -1121,7 +1134,7 @@ check.popdataPLT <-
     }
     
     ## check pdoms2keep  
-    pdoms2keep <- unique(c(pvars2keep, pdoms2keep))
+    pdoms2keep <- unique(c(pltvars2keep, pdoms2keep))
     pdoms2keep <- pdoms2keep[pdoms2keep %in% pltflds]
     
     

@@ -325,10 +325,6 @@ modMApop <- function(popType="VOL",
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", 
                              title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
-  if (!savedata) {
-    message("savedata=FALSE with savedata parameters... no data are saved")
-  }
-  
   ## Check saveobj 
   saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
                             title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
@@ -370,7 +366,8 @@ modMApop <- function(popType="VOL",
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM",
                   "CHNG", "GRM", "GROW", "MORT", "REMV")
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
-                            checklst=evalTyplst, caption="popType", multiple=FALSE, stopifinvalid=FALSE)
+                            checklst=evalTyplst, caption="popType", multiple=FALSE, 
+                            stopifinvalid=FALSE)
   if (is.null(popType)) {
     message("popType is invalid... must be from following list:\n", toString(evalTyplst))
   }
@@ -432,6 +429,8 @@ modMApop <- function(popType="VOL",
       popTabs <- pltdat$tabs
       popTabIDs <- pltdat$tabIDs
       pjoinid <- pltdat$pjoinid
+      spxy <- pltdat$spxy
+      xy.uniqueid <- pltdat$xy.uniqueid
     }
     if (!is.null(auxdat)) {
       list.items <- c("pltassgn", "unitzonal", "unitvar", "prednames", "unitarea")
@@ -473,6 +472,7 @@ modMApop <- function(popType="VOL",
   } else {
     stop("need to include popTabs")
   }
+  
   list.items <- c("cond")
   if (popType == "VOL") {
     list.items <- c(list.items, "tree")
@@ -579,7 +579,7 @@ modMApop <- function(popType="VOL",
   ## Check auxiliary data
   ###################################################################################
   makedummy <- TRUE
-  auxdat <- 
+  auxcheck <- 
     check.auxiliary(module = "MA", 
                     pltx = pltassgnx,
                     puniqueid = pltassgnid, 
@@ -598,15 +598,15 @@ modMApop <- function(popType="VOL",
                     auxtext = "unitlut", 
                     removetext = "unitarea", 
                     AOI = popFilter$AOIonly)
-  pltassgnx <- setDT(auxdat$pltx)
-  unitarea <- auxdat$unitarea
-  unitvar <- auxdat$unitvar
-  unitvars <- auxdat$unitvars
-  unitlut <- auxdat$auxlut
-  prednames <- auxdat$prednames
-  predfac <- auxdat$predfac
-  npixels <- auxdat$npixels
-  unitNA <- auxdat$unitNA
+  pltassgnx <- setDT(auxcheck$pltx)
+  unitarea <- auxcheck$unitarea
+  unitvar <- auxcheck$unitvar
+  unitvars <- auxcheck$unitvars
+  unitlut <- auxcheck$auxlut
+  prednames <- auxcheck$prednames
+  predfac <- auxcheck$predfac
+  npixels <- auxcheck$npixels
+  unitNA <- auxcheck$unitNA
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
   
   
@@ -694,36 +694,37 @@ modMApop <- function(popType="VOL",
       condstatusnm <- findnm("COND_STATUS_CD", pltcondxcols, returnNULL=TRUE)
       reservcdnm <- findnm("RESERVCD", pltcondxcols, returnNULL=TRUE)
       siteclcdnm <- findnm("SITECLCD", pltcondxcols, returnNULL=TRUE)
-    }
-    if (all(!sapply(c(condstatusnm, reservcdnm, siteclcdnm), is.null))) {
-      lower <- ifelse (condstatusnm == "COND_STATUS_CD", FALSE, TRUE)
-      landstatusnm <- ifelse(lower, "landstatus", "LANDSTATUS")
       
-      LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
-                                  LANDSTATUSCD = c(rep(1, 6), rep(2, 2), rep(3, 6), 4),
-                                  LANDSTATUSNM = c(rep("Timberland", 6), 
-                                                   rep("Other forestland", 2), 
-                                                   rep("Reserved productive forestland", 6),
-                                                   "Reserved other forestland"))
-      if (lower) names(LANDSTATUSlut) <- tolower(names(LANDSTATUSlut))
-      
-      pltcondx[[landstatusnm]] <- 
-        with(pltcondx, get(condstatusnm) * 100 + get(reservcdnm) * 10 + get(siteclcdnm))
-      pltcondx <- merge(pltcondx, LANDSTATUSlut, by=landstatusnm, all.x=TRUE)
-      pltcondx[[landstatusnm]] <- NULL
-      newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
-      if (lower) newcols <- tolower(newcols)
-      
-      if (popType %in% c("CHNG", "GRM")) {
-        prevnm <- ifelse(lower, "prev_", "PREV_")
-        names(LANDSTATUSlut) <- paste0(prevnm, names(LANDSTATUSlut))
+      if (all(!sapply(c(condstatusnm, reservcdnm, siteclcdnm), is.null))) {
+        lower <- ifelse (condstatusnm == "COND_STATUS_CD", FALSE, TRUE)
+        landstatusnm <- ifelse(lower, "landstatus", "LANDSTATUS")
         
-        pltcondx[[paste0(prevnm, landstatusnm)]] <- 
-          with(pltcondx, get(paste0(prevnm, condstatusnm)) * 100 + 
-                 get(paste0(prevnm, reservcdnm)) * 10 + get(paste0(prevnm, siteclcdnm)))
-        pltcondx <- merge(pltcondx, LANDSTATUSlut, by=paste0(prevnm, landstatusnm), all.x=TRUE)
-        pltcondx[[paste0(prevnm, landstatusnm)]] <- NULL
-        newcols <- c(newcols, paste0(prevnm, newcols))
+        LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
+                                    LANDSTATUSCD = c(rep(1, 6), rep(2, 2), rep(3, 6), 4),
+                                    LANDSTATUSNM = c(rep("Timberland", 6), 
+                                                     rep("Other forestland", 2), 
+                                                     rep("Reserved productive forestland", 6),
+                                                     "Reserved other forestland"))
+        if (lower) names(LANDSTATUSlut) <- tolower(names(LANDSTATUSlut))
+        
+        pltcondx[[landstatusnm]] <- 
+          with(pltcondx, get(condstatusnm) * 100 + get(reservcdnm) * 10 + get(siteclcdnm))
+        pltcondx <- merge(pltcondx, LANDSTATUSlut, by=landstatusnm, all.x=TRUE)
+        pltcondx[[landstatusnm]] <- NULL
+        newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
+        if (lower) newcols <- tolower(newcols)
+        
+        if (popType %in% c("CHNG", "GRM")) {
+          prevnm <- ifelse(lower, "prev_", "PREV_")
+          names(LANDSTATUSlut) <- paste0(prevnm, names(LANDSTATUSlut))
+          
+          pltcondx[[paste0(prevnm, landstatusnm)]] <- 
+            with(pltcondx, get(paste0(prevnm, condstatusnm)) * 100 + 
+                   get(paste0(prevnm, reservcdnm)) * 10 + get(paste0(prevnm, siteclcdnm)))
+          pltcondx <- merge(pltcondx, LANDSTATUSlut, by=paste0(prevnm, landstatusnm), all.x=TRUE)
+          pltcondx[[paste0(prevnm, landstatusnm)]] <- NULL
+          newcols <- c(newcols, paste0(prevnm, newcols))
+        }
       }
     }
     
@@ -752,6 +753,29 @@ modMApop <- function(popType="VOL",
         }  
       }
     }
+    
+    ## Add DSTRBGRP to pltcondx if not already in dataset
+    dstrgrpnm <- findnm("DSTRBGRP", pltcondxcols, returnNULL=TRUE)
+    
+    if (is.null(dstrgrpnm)) {
+      dstrbcd1nm <- findnm("DSTRBCD1", pltcondxcols, returnNULL=TRUE)
+      
+      ref_dstrbcd <- ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")]
+      names(ref_dstrbcd) <- c("DSTRBCD1", "DSTRBGRP")
+      if (lower) names(ref_dstrbcd) <- tolower(names(ref_dstrbcd))
+      
+      pltcondx <- merge(pltcondx, ref_dstrbcd, by=dstrbcd1nm, all.x=TRUE)
+      newcols <- c(newcols, ifelse(lower, "dstrbgrp", "DSTRBGRP"))
+      
+      if (popType %in% c("CHNG", "GRM")) {
+        prevnm <- ifelse(lower, "prev_", "PREV_")
+        names(ref_dstrbcd) <- paste0(prevnm, names(ref_dstrbcd))
+        
+        pltcondx <- merge(pltcondx, ref_dstrbcd, by=paste0(prevnm, dstrbcd1nm), all.x=TRUE)
+        newcols <- c(newcols, ifelse(lower, "prev_dstrbgrp", "PREV_DSTRBGRP"))
+      }  
+    }
+    
     
     ## Move new columns to end of table
     setcolorder(pltcondx, c(pltcondxcols, newcols))

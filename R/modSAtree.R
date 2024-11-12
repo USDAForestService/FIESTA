@@ -200,8 +200,7 @@ modSAtree <- function(SApopdatlst = NULL,
                       savedata = FALSE, 
                       savesteps = FALSE, 
                       multest = TRUE, 
-                      addSAdomsdf = TRUE, 
-                      SAdomvars = NULL, 
+                      vars2keep = NULL,
                       savemultest = FALSE, 
                       returntitle = FALSE, 
                       table_opts = NULL, 
@@ -228,19 +227,14 @@ modSAtree <- function(SApopdatlst = NULL,
     if (!col.FIAname) col.FIAname <- NULL
   }
 
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=domclassify=
-	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
-	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
-
-
   ## Set parameters
-  title.rowgrp <- NULL
+  esttype <- "TREE"
+  popType <- "VOL"
+  rawdata <- TRUE 
   pvars2keep <- c("DOMAIN", "AOI")
   returnSApopdat <- TRUE
   sumunits=FALSE
   SAdomsdf=multestdf_row <- NULL
-  
   colvar=NULL
   col.FIAname=FALSE
   col.orderby=NULL
@@ -249,14 +243,18 @@ modSAtree <- function(SApopdatlst = NULL,
   rowgrp=FALSE
   rowgrpnm=NULL
   rowgrpord=NULL 
-  showsteps=FALSE
-  sumunits=FALSE
-  
-  returnlst <- list()
-  set.seed(66)
-  esttype="TREE"
-  rawdata <- TRUE
   lt0 <- FALSE
+  addSAdomsdf = FALSE 
+  SAdomvars = NULL
+  returnlst <- list()
+  
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=
+  title.rowvar=title.colvar=title.rowgrp=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
+	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
+
+  ## Set seed
+  set.seed(66)
   
   
   ##################################################################
@@ -448,11 +446,14 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Check multest 
   ########################################################
   multest <- pcheck.logical(multest,
-                            varnm = "multest", 
-                            title = "Multiple estimates?", 
-                            first = "YES",
-                            gui = gui,
-                            stopifnull= TRUE)
+        varnm = "multest", title = "Multiple estimates?", 
+        first = "YES", gui = gui, stopifnull= TRUE)
+  if (multest) {
+    estimatorlst <- c('JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA')
+    multest_fmt <- pcheck.varchar(var2check = estimatorlst, 
+           varnm = "multest_estimators", checklst = estimatorlst, 
+           gui = gui, caption = "Output multest format?", multiple = TRUE) 
+  }
 
   ## Check output for multest 
   ########################################################
@@ -466,10 +467,10 @@ modSAtree <- function(SApopdatlst = NULL,
         multest_outfolder <- pcheck.outfolder(multest_outfolder, gui)
       }
       multest.append <- pcheck.logical(multest.append, varnm="multest.append", 
-		title="Append multest data?", first="NO", gui=gui) 
+		          title="Append multest data?", first="NO", gui=gui) 
 
       multest_fmt <- pcheck.varchar(var2check=multest_fmt, varnm="multest_fmt", 
-		checklst=fmtlst, gui=gui, caption="Output multest format?") 
+		          checklst=fmtlst, gui=gui, caption="Output multest format?") 
 
       if (multest_fmt == "csv") {
         multest_dsn <- NULL
@@ -536,8 +537,9 @@ modSAtree <- function(SApopdatlst = NULL,
     dunitlutlst_row <- NULL
   }
 
+  
   ## Loop through SApopdatlst
-  #############################################
+  ##################################################################################
   dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
   
   for (i in 1:length(SApopdatlst)) {
@@ -594,6 +596,8 @@ modSAtree <- function(SApopdatlst = NULL,
     adjcase <- SApopdat$adjcase
     pltidsid <- GBpopdat$pjoinid
     pltassgnid <- GBpopdat$pltassgnid
+    SAdoms <- SApopdat$SAdoms
+    largebnd.unique <- SApopdat$largebnd.unique
 
     ## check smallbnd.dom
     ########################################################
@@ -707,6 +711,7 @@ modSAtree <- function(SApopdatlst = NULL,
     pcwhereqry <- estdat$where.qry
     SCHEMA. <- estdat$SCHEMA.
     
+    
     ###################################################################################
     ## Check parameter inputs and tree filters
     ###################################################################################
@@ -794,19 +799,18 @@ modSAtree <- function(SApopdatlst = NULL,
     }
 	
 	
-    if (esttype == "TREE") {
-      #################################################################################
-      ### GET ESTIMATION DATA FROM TREE TABLE
-      #################################################################################
-      adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
+    #################################################################################
+    ### GET ESTIMATION DATA FROM TREE TABLE
+    #################################################################################
+    adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
       
-      if (popdatindb) {
-        pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
-        pjoinid <- "PLT_CN"
-      } else {
-        pltidsWITHqry <- NULL
-      }
-      treedat <- 
+    if (popdatindb) {
+      pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
+      pjoinid <- "PLT_CN"
+    } else {
+      pltidsWITHqry <- NULL
+    }
+    treedat <- 
         check.tree(treex = treex, 
                    seedx = seedx, 
                    estseed = estseed,
@@ -832,47 +836,46 @@ modSAtree <- function(SApopdatlst = NULL,
                    pjoinid = pjoinid,
                    bytdom = bytdom,
                    gui = gui)
-      if (is.null(treedat)) stop(NULL) 
-      tdomdat <- treedat$tdomdat
-      #estvar <- treedat$estvar
-      estvar.name <- treedat$estvar.name
-      estvar.filter <- treedat$estvar.filter
-      tdomvarlst <- treedat$tdomvarlst
-      estunits <- treedat$estunits
-      treeqry <- treedat$treeqry
-      classifynmlst <- treedat$classifynmlst
+    if (is.null(treedat)) stop(NULL) 
+    tdomdat <- treedat$tdomdat
+    #estvar <- treedat$estvar
+    estvar.name <- treedat$estvar.name
+    estvar.filter <- treedat$estvar.filter
+    tdomvarlst <- treedat$tdomvarlst
+    estunits <- treedat$estunits
+    treeqry <- treedat$treeqry
+    classifynmlst <- treedat$classifynmlst
       
       
-      ## If classified rowvar or colvar, get class names
-      if (!is.null(classifynmlst)) {
-        if (!is.null(classifynmlst[[rowvar]])) {
-          rowvar <- classifynmlst[[rowvar]]
-        }
-        if (!is.null(classifynmlst[[colvar]])) {
-          colvar <- classifynmlst[[colvar]]
-        }
-        if (!is.null(grpvar)) {
-          grpvar <- c(rowvar, colvar)
-        }
+    ## If classified rowvar or colvar, get class names
+    if (!is.null(classifynmlst)) {
+      if (!is.null(classifynmlst[[rowvar]])) {
+        rowvar <- classifynmlst[[rowvar]]
       }
- 
-      ## Check for matching levels in x and xunique
-      if (!is.null(uniquerow)) {
-        chklevels <- checklevels(x = tdomdat, 
-	                               uniquex = uniquerow,
-							                   xvar = rowvar) 
-	      tdomdat <- chklevels$x
-        uniquerow <- chklevels$uniquex	
+      if (!is.null(classifynmlst[[colvar]])) {
+        colvar <- classifynmlst[[colvar]]
       }
-      if (!is.null(uniquecol)) {
-        chklevels <- checklevels(x = tdomdat, 
-	                               uniquex = uniquecol,
-							                   xvar = colvar) 
-	      tdomdat <- chklevels$x
-        uniquecol <- chklevels$uniquex	
+      if (!is.null(grpvar)) {
+        grpvar <- c(rowvar, colvar)
       }
     }
-	
+ 
+    ## Check for matching levels in x and xunique
+    if (!is.null(uniquerow)) {
+      chklevels <- checklevels(x = tdomdat, 
+	                             uniquex = uniquerow,
+							                 xvar = rowvar) 
+	    tdomdat <- chklevels$x
+      uniquerow <- chklevels$uniquex	
+    }
+    if (!is.null(uniquecol)) {
+      chklevels <- checklevels(x = tdomdat, 
+	                             uniquex = uniquecol,
+							                 xvar = colvar) 
+	     tdomdat <- chklevels$x
+      uniquecol <- chklevels$uniquex	
+    }
+
     ## Generate a uniquecol for estimation units
     if (!sumunits && rowcolinfo$colvar == "NONE") {
       uniquecol <- data.table(dunitarea[[dunitvar]])
@@ -890,8 +893,8 @@ modSAtree <- function(SApopdatlst = NULL,
                      estvar.name = estvar.name,
                      domdat = tdomdat,
                      pltassgnx = pltassgnx,
-                     unitlut = dunitlut,
-                     unitvar = dunitvar,
+                     dunitlut = dunitlut,
+                     dunitvar = dunitvar,
                      uniqueid = pltassgnid,
                      pltassgnid = pltassgnid,
                      prednames = prednames,
@@ -899,6 +902,7 @@ modSAtree <- function(SApopdatlst = NULL,
                      SApopdatnm = SApopdatnm,
                      SAdomsDF = SAdomsdf,
                      smallbnd.dom = smallbnd.dom,
+                     vars2keep = vars2keep,
                      SApackage = SApackage,
                      SAmethod = SAmethod,
                      showsteps = showsteps,
@@ -907,6 +911,7 @@ modSAtree <- function(SApopdatlst = NULL,
                      prior = prior,
                      modelselect = modelselect,
                      multest = multest,
+                     multest_estimators = multest_estimators,
                      SAobjlst = SAobjlst,
                      estlst = estlst,
                      pdomdatlst = pdomdatlst,

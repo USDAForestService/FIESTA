@@ -1,13 +1,14 @@
 getSAestimates <- function(esttype, i, largebnd.unique,
                            estvar.name, domdat,
                            pltassgnx,
-                           unitlut,
-                           unitvar,
+                           dunitlut,
+                           dunitvar,
                            uniqueid, pltassgnid,
                            prednames,
                            rowvar,
                            SApopdatnm,
                            SAdomsDF,
+                           vars2keep = NULL,
                            smallbnd.dom,
                            SApackage,
                            SAmethod,
@@ -17,6 +18,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
                            prior,
                            modelselect,
                            multest,
+                           multest_estimators = 'all',
                            SAobjlst,
                            estlst,
                            pdomdatlst,
@@ -32,9 +34,6 @@ getSAestimates <- function(esttype, i, largebnd.unique,
                            dunitlutlst_row,
                            save4testing) {
   
-  
-
-  
   dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
   response <- estvar.name
   
@@ -43,41 +42,60 @@ getSAestimates <- function(esttype, i, largebnd.unique,
     message("using the following predictors... ", toString(prednames))
   }
   
-  
-  vars2keep <- NULL
   if (!is.null(largebnd.unique)) {
-    if (largebnd.unique %in% names(domdat) && largebnd.unique %in% names(pltassgnx)) {
-      domdat <- merge(pltassgnx, domdat, 
-                      by.x = c(largebnd.unique, pltassgnid, "DOMAIN"), 
-                      by.y = c(largebnd.unique, uniqueid, "DOMAIN"), , all.x=TRUE)
-    } else if (largebnd.unique %in% names(pltassgnx)) {
-      domdat <- merge(pltassgnx, domdat, 
-                      by.x = c(pltassgnid, "DOMAIN"), 
-                      by.y = c(uniqueid, "DOMAIN"), all.x=TRUE)
-    } else if (!is.null(SAdomsdf)) {
-      domdat <- merge(domdat, 
-                      unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
-                      by=smallbnd.dom)
-    } else {
-      domdat$LARGEBND <- 1
-      largebnd.unique <- "LARGEBND"
+    if (!largebnd.unique %in% names(pltassgnx)) {
+      stop("largebnd.unique is not in pltassgn")
     }
- 
-  } else {
-    # domdat <- merge(pltassgnx, domdat, 
-    #                 by.x=c(pltassgnid, "DOMAIN"), 
-    #                 by.y=c(uniqueid, "DOMAIN"), all.x=TRUE)
-    domdat <- merge(pltassgnx, domdat, 
-                    by.x=c(pltassgnid), 
-                    by.y=c(uniqueid), all.x=TRUE)
-    
+    if (largebnd.unique %in% names(domdat) && largebnd.unique %in% names(pltassgnx)) {
+      domdat[[largebnd.unique]] <- NULL
+    }
+  }
+  ## Join domdat to pltassgnx using data.table key
+  domdat <- pltassgnx[domdat]
+    if (is.null(largebnd.unique)) {
     domdat$LARGEBND <- 1
     largebnd.unique <- "LARGEBND"
   }
-  
-  if (pltassgnid != uniqueid) {
-    setnames(domdat, pltassgnid, uniqueid)
+  ## Append TOTAL to domdatn
+  if (!"TOTAL" %in% names(domdat)) {
+    domdat$TOTAL <- 1
   }
+  
+  
+  # if (!is.null(largebnd.unique)) {
+  #   if (largebnd.unique %in% names(domdat) && largebnd.unique %in% names(pltassgnx)) {
+  #     domdat <- merge(pltassgnx, domdat, 
+  #                     by.x = c(largebnd.unique, pltassgnid, "DOMAIN"), 
+  #                     by.y = c(largebnd.unique, uniqueid, "DOMAIN"), , all.x=TRUE)
+  #   } else if (largebnd.unique %in% names(pltassgnx)) {
+  #     domdat <- merge(pltassgnx, domdat, 
+  #                     by.x = c(pltassgnid, "DOMAIN"), 
+  #                     by.y = c(uniqueid, "DOMAIN"), all.x=TRUE)
+  #   } else if (!is.null(SAdomsdf)) {
+  #     domdat <- merge(domdat, 
+  #                     unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
+  #                     by=smallbnd.dom)
+  #   } else {
+  #     domdat$LARGEBND <- 1
+  #     largebnd.unique <- "LARGEBND"
+  #   }
+  # 
+  # } else {
+  #   # domdat <- merge(pltassgnx, domdat, 
+  #   #                 by.x=c(pltassgnid, "DOMAIN"), 
+  #   #                 by.y=c(uniqueid, "DOMAIN"), all.x=TRUE)
+  #   domdat <- merge(pltassgnx, domdat, 
+  #                   by.x=c(pltassgnid), 
+  #                   by.y=c(uniqueid), all.x=TRUE)
+  #   
+  #   domdat$LARGEBND <- 1
+  #   largebnd.unique <- "LARGEBND"
+  # }
+  
+  #if (pltassgnid != uniqueid) {
+  #  setnames(domdat, pltassgnid, uniqueid)
+  #}
+  
   if (SApackage == "spAbundance") {
     bayes <- TRUE
   } else {
@@ -104,19 +122,26 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   largebnd.vals <- sort(unique(domdattot[[largebnd.unique]]))
   largebnd.vals <- largebnd.vals[table(domdattot[[largebnd.unique]]) > 30]
   
+# dat = domdattot
+# cuniqueid = uniqueid 
+# dunitvar = "DOMAIN" 
+# domain = "TOTAL"
+# largebnd.val = largebnd.vals[1]
+#   
   dunit_totestlst <- 
     tryCatch(
       {
         lapply(largebnd.vals, SAest.large, 
                dat = domdattot, 
                cuniqueid = uniqueid, largebnd.unique = largebnd.unique, 
-               dunitlut = unitlut, dunitvar = "DOMAIN", 
+               dunitlut = dunitlut, dunitvar = "DOMAIN", 
                prednames = prednames, domain = "TOTAL", response = response, 
                showsteps = showsteps, savesteps = savesteps, 
                stepfolder = stepfolder, prior = prior, 
-               modelselect=modelselect, multest=multest,
+               modelselect = modelselect, 
+               multest = multest, multest_estimators = multest_estimators,
                SApackage = SApackage, SAmethod = SAmethod, bayes = bayes, 
-               save4testing=FALSE, vars2keep = vars2keep)
+               save4testing = FALSE, vars2keep = vars2keep)
       },
       error = function(cond) {
         message("error with estimates of ", response, "...")
@@ -208,18 +233,25 @@ getSAestimates <- function(esttype, i, largebnd.unique,
       domdattot$AOI <- 1
     }
     
+# dat = domdattot
+# cuniqueid = uniqueid
+# dunitvar = "DOMAIN"
+# domain = rowvar
+# largebnd.val = largebnd.vals[1]
+    
     dunit_rowestlst <-
       tryCatch(
         {
           lapply(largebnd.vals, SAest.large, 
                  dat = domdattot, 
                  cuniqueid = uniqueid, largebnd.unique = largebnd.unique, 
-                 dunitlut = unitlut, dunitvar = "DOMAIN",
+                 dunitlut = dunitlut, dunitvar = "DOMAIN",
                  prednames = prednames, domain = rowvar,
                  response = response, 
                  showsteps = showsteps, savesteps = savesteps,
                  stepfolder = stepfolder, prior = prior, 
-                 modelselect = modelselect, multest = multest, 
+                 modelselect = modelselect, 
+                 multest = multest, multest_estimators = multest_estimators,
                  SApackage = SApackage, SAmethod = SAmethod, bayes = bayes,
                  vars2keep = vars2keep)
         },
