@@ -52,8 +52,6 @@
 #' only one domain, rowvar = domain variable. If more than one domain, include
 #' colvar. If no domain, rowvar = NULL.
 #' @param colvar String. Name of the column domain variable in cond or tree.
-#' @param sumunits Logical. If TRUE, estimation units are summed and returned
-#' in one table.
 #' @param bootstrap Logical. If TRUE, returns bootstrap variance estimates,
 #' otherwise uses Horvitz-Thompson estimator under simple random sampling
 #' without replacement.
@@ -252,7 +250,6 @@ modMAarea <- function(MApopdat,
                       pcfilter = NULL, 
                       rowvar = NULL, 
                       colvar = NULL, 
-                      sumunits = FALSE,
                       bootstrap = FALSE,
                       returntitle = FALSE, 
                       savedata = FALSE, 
@@ -281,6 +278,7 @@ modMAarea <- function(MApopdat,
   popType <- "CURR"
   title.rowgrp=NULL
   rawdata <- TRUE
+  sumunits <- FALSE
   returnlst <- list()
   
   ## Set global variables
@@ -561,13 +559,7 @@ modMAarea <- function(MApopdat,
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
   
-  ## Generate a uniquecol for estimation units
-  if (!sumunits && colvar == "NONE") {
-    uniquecol <- data.table(unitarea[[unitvar]])
-    setnames(uniquecol, unitvar)
-    uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
-  }
-  
+
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################
@@ -590,6 +582,7 @@ modMAarea <- function(MApopdat,
                pcwhereqry = pcwhereqry,
                classifyrow = classifyrow,
                classifycol = classifycol)
+  if (is.null(conddat)) stop(NULL)
   cdomdat <- conddat$cdomdat
   cdomdatqry <- conddat$cdomdatqry
   estnm <- conddat$estnm

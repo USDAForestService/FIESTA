@@ -206,14 +206,10 @@ modSAarea <- function(SApopdatlst = NULL,
     if (!col.FIAname) col.FIAname <- NULL
   }
 
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=
-	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
-	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
-
-  
   ## Set parameters
-  title.rowgrp <- NULL
+  esttype <- "AREA"
+  popType <- "CURR"
+  rawdata <- TRUE 
   pvars2keep <- c("DOMAIN", "AOI")
   returnSApopdat <- TRUE
   sumunits=FALSE
@@ -222,20 +218,23 @@ modSAarea <- function(SApopdatlst = NULL,
   col.FIAname=FALSE
   col.orderby=NULL
   col.add0=FALSE
-  rowlut=NULL
   collut=NULL
   rowgrp=FALSE
   rowgrpnm=NULL
   rowgrpord=NULL 
-  showsteps=FALSE
-  sumunits=FALSE
-
-  returnlst <- list()
-  set.seed(66)
-  esttype = "AREA"
-  rawdata <- TRUE
   lt0 <- FALSE
-
+  addSAdomsdf = FALSE 
+  SAdomvars = NULL
+  returnlst <- list()
+  
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=
+    title.rowvar=title.colvar=title.rowgrp=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
+    JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
+  
+  ## Set seed
+  set.seed(66)
+  
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -335,7 +334,7 @@ modSAarea <- function(SApopdatlst = NULL,
   ##################################################################
   
   ## Check SApackage 
-  SApackagelst <- c("JoSAE", "sae", "hbsae")
+  SApackagelst <- c("JoSAE", "sae", "hbsae", "spAbundance")
   SApackage <- pcheck.varchar(var2check=SApackage, varnm="SApackage", 
                   gui=gui, checklst=SApackagelst, caption="SApackage", 
 		          multiple=FALSE, stopifnull=TRUE)
@@ -401,17 +400,15 @@ modSAarea <- function(SApopdatlst = NULL,
 			              divideby = divideby, 
 			              addtitle = addtitle,
 			              returntitle = returntitle, 
-			              rawdata = rawdata,
-			              rawonly = rawonly, 
+			              rawdata = rawdata, rawonly = rawonly, 
 			              savedata = savedata, 
 	                  outfolder = outfolder,
 			              overwrite_dsn = overwrite_dsn, 
 	                  overwrite_layer = overwrite_layer, 
 			              outfn.pre = outfn.pre, outfn.date = outfn.date, 
 			              append_layer = append_layer, 
-			              raw_fmt = raw_fmt, 
-			              raw_dsn = raw_dsn, gui = gui)
-  sumunits <- outparams$sumunits
+			              raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+			              gui = gui)
   allin1 <- outparams$allin1
   estround <- outparams$estround
   pseround <- outparams$pseround
@@ -433,17 +430,22 @@ modSAarea <- function(SApopdatlst = NULL,
   ## Check multest 
   ########################################################
   multest <- pcheck.logical(multest,
-                            varnm="multest", 
-                            title="Multiple estimates?",
-                            first="YES",
-                            gui=gui,
-                            stopifnull=TRUE)
-
+                            varnm = "multest", title = "Multiple estimates?", 
+                            first = "YES", gui = gui, stopifnull= TRUE)
+  if (multest) {
+    estimatorlst <- c('JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA')
+    estimatorSElst <- c('JU.GREG.se','JU.EBLUP.se','JFH.se','hbsaeU.se','hbsaeA.se')
+    multest_fmt <- pcheck.varchar(var2check = estimatorlst, 
+                                  varnm = "multest_estimators", checklst = estimatorlst, 
+                                  gui = gui, caption = "Output multest format?", multiple = TRUE) 
+    multest_fmt <- sort(c(multest_fmt, estimatorSElst[which(estimatorlst %in% multest_fmt)]))
+  }
+  
   ## Check output for multest 
   ########################################################
   if (savedata || savemultest) {
     fmtlst <- c("sqlite", "sqlite3", "db", "db3", "gpkg", "csv", "gdb")
-
+    
     if (multest) {
       if (is.null(multest_outfolder)) {
         multest_outfolder <- rawfolder
@@ -451,10 +453,10 @@ modSAarea <- function(SApopdatlst = NULL,
         multest_outfolder <- pcheck.outfolder(multest_outfolder, gui)
       }
       multest.append <- pcheck.logical(multest.append, varnm="multest.append", 
-		title="Append multest data?", first="NO", gui=gui) 
-
+                                       title="Append multest data?", first="NO", gui=gui) 
+      
       multest_fmt <- pcheck.varchar(var2check=multest_fmt, varnm="multest_fmt", 
-		checklst=fmtlst, gui=gui, caption="Output multest format?") 
+                                    checklst=fmtlst, gui=gui, caption="Output multest format?") 
       
       if (multest_fmt == "csv") {
         multest_dsn <- NULL
@@ -474,7 +476,8 @@ modSAarea <- function(SApopdatlst = NULL,
   } else {
     stepfolder <- NULL
   }
-
+  
+  
   #####################################################################################
   ## GENERATE ESTIMATES
   #####################################################################################
@@ -521,7 +524,6 @@ modSAarea <- function(SApopdatlst = NULL,
     dunitlutlst_row <- NULL
   }
  
-  
  
   ## Loop through SApopdatlst
   ##############################################################################
@@ -577,7 +579,9 @@ modSAarea <- function(SApopdatlst = NULL,
     adjcase <- SApopdat$adjcase
     pltidsid <- GBpopdat$pjoinid
     pltassgnid <- GBpopdat$pltassgnid
-	
+    SAdoms <- SApopdat$SAdoms
+    largebnd.unique <- SApopdat$largebnd.unique
+    
     ## check smallbnd.dom
     ########################################################
     smallbnd.dom <- "DOMAIN"
@@ -673,7 +677,6 @@ modSAarea <- function(SApopdatlst = NULL,
                     gui = gui)
     if (is.null(estdat)) return(NULL)
     esttype <- estdat$esttype
-    sumunits <- estdat$sumunits
     totals <- estdat$totals
     landarea <- estdat$landarea
     allin1 <- estdat$allin1
@@ -737,12 +740,15 @@ modSAarea <- function(SApopdatlst = NULL,
     classifycol <- rowcolinfo$classifycol
     #rm(rowcolinfo)
     
-    
-    ## Generate a uniquecol for estimation units
-    if (!sumunits && colvar == "NONE") {
-      uniquecol <- data.table(dunitarea[[dunitvar]])
-      setnames(uniquecol, dunitvar)
-      uniquecol[[dunitvar]] <- factor(uniquecol[[dunitvar]])
+    ## if classified columns, create domclassify list for summarizing tree data
+    if (any(!is.null(classifyrow), !is.null(classifycol))) {
+      domclassify <- list()
+      if (!is.null(classifyrow)) {
+        domclassify[[rowvar]] <- classifyrow$row.classify
+      }
+      if (!is.null(classifycol)) {
+        domclassify[[colvar]] <- classifycol$col.classify
+      }
     }
     
     
@@ -785,8 +791,8 @@ modSAarea <- function(SApopdatlst = NULL,
                      estvar.name = estnm,
                      domdat = cdomdat,
                      pltassgnx = pltassgnx,
-                     unitlut = dunitlut,
-                     unitvar = dunitvar,
+                     dunitlut = dunitlut,
+                     dunitvar = dunitvar,
                      uniqueid = pltassgnid,
                      pltassgnid = pltassgnid,
                      prednames = prednames,
@@ -794,6 +800,7 @@ modSAarea <- function(SApopdatlst = NULL,
                      SApopdatnm = SApopdatnm,
                      SAdomsDF = SAdomsdf,
                      smallbnd.dom = smallbnd.dom,
+                     vars2keep = vars2keep,
                      SApackage = SApackage,
                      SAmethod = SAmethod,
                      showsteps = showsteps,
@@ -802,6 +809,7 @@ modSAarea <- function(SApopdatlst = NULL,
                      prior = prior,
                      modelselect = modelselect,
                      multest = multest,
+                     multest_estimators = multest_estimators,
                      SAobjlst = SAobjlst,
                      estlst = estlst,
                      pdomdatlst = pdomdatlst,
@@ -842,14 +850,17 @@ modSAarea <- function(SApopdatlst = NULL,
     estdf$AOI <- 1
   }	
  
+  SAEunit_estimators <- c("all", "saeU", "JU.EBLUP", "JU.EBLUP.se.1", "JU.GREG", "JU.GREG.se", 
+                          "JU.Synth", "hbsaeU", "hbsaeU.se")
+  SAEarea_estimators <- c("all", "saeA", "JFH", "JFH.se", "JA.Synth", "hbsaeA", "hbsaeA.se")
   
-  if (multest || SAmethod == "unit") {
+  if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit") {
     predselect.unitdf <- data.frame(DOMAIN=names(predselectlst.unit), 
 					                          do.call(rbind, predselectlst.unit))
     setnames(predselect.unitdf, "DOMAIN", largebnd.unique)
     predselect.unitdf[is.na(predselect.unitdf)] <- 0
   } 
-  if (multest || SAmethod == "area") {
+  if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area") {
     predselect.areadf <- data.frame(DOMAIN=names(predselectlst.area), 
 					                          do.call(rbind, predselectlst.area))
     setnames(predselect.areadf, "DOMAIN", largebnd.unique)
@@ -894,7 +905,7 @@ modSAarea <- function(SApopdatlst = NULL,
       estdf_row$AOI <- 1
     }	
 
-    if (multest || SAmethod == "unit") {
+    if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit") {
       
       predselect.unitdf_row <- data.frame(DOMAIN=names(predselectlst.unit_row), 
 			                                    do.call(rbind, predselectlst.unit_row))
@@ -902,7 +913,7 @@ modSAarea <- function(SApopdatlst = NULL,
       predselect.unitdf_row[is.na(predselect.unitdf_row)] <- 0
       
     } 
-    if (multest || SAmethod == "area") {
+    if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area") {
       
       predselect.areadf_row <- data.frame(DOMAIN=names(predselectlst.area_row), 
 			                                    do.call(rbind, predselectlst.area_row))

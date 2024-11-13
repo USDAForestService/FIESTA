@@ -416,15 +416,18 @@ modSAtree <- function(SApopdatlst = NULL,
     check.outparams(esttype = esttype, totals = totals, 
                     allin1 = allin1, 
                     estround = estround, pseround = pseround, 
-                    divideby = divideby, addtitle = addtitle,
-                    returntitle = returntitle, rawdata = rawdata,
-                    rawonly = rawonly, savedata = savedata, 
+                    divideby = divideby, 
+                    addtitle = addtitle,
+                    returntitle = returntitle, 
+                    rawdata = rawdata, rawonly = rawonly, 
+                    savedata = savedata, 
                     outfolder = outfolder, 
                     overwrite_dsn = overwrite_dsn, 
                     overwrite_layer = overwrite_layer, 
                     outfn.pre = outfn.pre, outfn.date = outfn.date, 
                     append_layer = append_layer, 
-                    raw_fmt = raw_fmt, raw_dsn = raw_dsn, gui = gui)
+                    raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+                    gui = gui)
   allin1 <- outparams$allin1
   estround <- outparams$estround
   pseround <- outparams$pseround
@@ -453,6 +456,7 @@ modSAtree <- function(SApopdatlst = NULL,
     multest_fmt <- pcheck.varchar(var2check = estimatorlst, 
            varnm = "multest_estimators", checklst = estimatorlst, 
            gui = gui, caption = "Output multest format?", multiple = TRUE) 
+    multest_fmt <- sort(c(multest_fmt, estimatorSElst[which(estimatorlst %in% multest_fmt)]))
   }
 
   ## Check output for multest 
@@ -491,6 +495,7 @@ modSAtree <- function(SApopdatlst = NULL,
     stepfolder <- NULL
   }
 
+  
   #####################################################################################
   ## GENERATE ESTIMATES
   #####################################################################################
@@ -651,8 +656,10 @@ modSAtree <- function(SApopdatlst = NULL,
     ########################################
     ## Check area units
     ########################################
-    unitchk <- pcheck.areaunits(unitarea=dunitarea, areavar=areavar, 
-			                          areaunits=areaunits, metric=metric)
+    unitchk <- pcheck.areaunits(unitarea = dunitarea, 
+                                areavar = areavar, 
+			                          areaunits = areaunits, 
+			                          metric = metric)
     dunitarea <- unitchk$unitarea
     areavar <- unitchk$areavar
     areaunits <- unitchk$outunits
@@ -691,7 +698,6 @@ modSAtree <- function(SApopdatlst = NULL,
                     gui = gui)
     if (is.null(estdat)) return(NULL)
     esttype <- estdat$esttype
-    sumunits <- estdat$sumunits
     totals <- estdat$totals
     landarea <- estdat$landarea
     allin1 <- estdat$allin1
@@ -740,8 +746,6 @@ modSAtree <- function(SApopdatlst = NULL,
     ###################################################################################
     ### Check row and column data
     ###################################################################################
-    if (!sumunits) col.add0 <- TRUE
-    if (!is.null(rowvar) && rowvar == "TOTAL") rowvar <- NULL
     rowcolinfo <- 
       check.rowcol(esttype = esttype, 
                    popType = popType,
@@ -876,13 +880,6 @@ modSAtree <- function(SApopdatlst = NULL,
       uniquecol <- chklevels$uniquex	
     }
 
-    ## Generate a uniquecol for estimation units
-    if (!sumunits && rowcolinfo$colvar == "NONE") {
-      uniquecol <- data.table(dunitarea[[dunitvar]])
-      setnames(uniquecol, dunitvar)
-      uniquecol[[dunitvar]] <- factor(uniquecol[[dunitvar]])
-    }
-    
 
     #####################################################################################
     ## GENERATE ESTIMATES
@@ -953,7 +950,7 @@ modSAtree <- function(SApopdatlst = NULL,
     estdf$AOI <- 1
   }	
 
-  if (multest || SAmethod == "unit") {
+  if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit") {
 
     predselect.unitdf <- data.frame(DOMAIN=names(predselectlst.unit),
                                     do.call(rbind, predselectlst.unit))
@@ -962,7 +959,7 @@ modSAtree <- function(SApopdatlst = NULL,
     predselect.unitdf[is.na(predselect.unitdf)] <- 0
 
   }
-  if (multest || SAmethod == "area") {
+  if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area") {
 
     predselect.areadf <- data.frame(DOMAIN=names(predselectlst.area),
                                     do.call(rbind, predselectlst.area))
@@ -1009,7 +1006,7 @@ modSAtree <- function(SApopdatlst = NULL,
       estdf_row$AOI <- 1
     }	
 
-    if (multest || SAmethod == "unit") {
+    if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit") {
       
       predselect.unitdf_row <- data.frame(DOMAIN=names(predselectlst.unit_row), 
                                           do.call(rbind, predselectlst.unit_row))
@@ -1019,7 +1016,7 @@ modSAtree <- function(SApopdatlst = NULL,
       
     }
     
-    if (multest || SAmethod == "area") {
+    if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area") {
       
       predselect.areadf_row <- data.frame(DOMAIN=names(predselectlst.area_row), 
                                           do.call(rbind, predselectlst.area_row))
