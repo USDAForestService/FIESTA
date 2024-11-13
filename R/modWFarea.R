@@ -212,7 +212,6 @@
 #' NC: U.S. Department of Agriculture, Forest Service, Southern Research
 #' Station, p.53-77.
 #' @keywords data
-#' @export modWFarea
 modWFarea <- function(WFpopdat, 
                       landarea = "FOREST", 
                       pcfilter = NULL, 

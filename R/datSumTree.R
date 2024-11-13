@@ -195,7 +195,7 @@ datSumTree <- function(tree = NULL,
   pltx=treex=seedx=cond.nonsamp.filter=meta=tvars2convert=ssumvarlst=
     cntvar=fname=tderivevars=pltidsnm=domainlst=classifyvars <- NULL
  
-  
+
   ## If gui.. set variables to NULL
   if (gui) ACI=bycond=tuniqueid=puniqueid=cuniqueid=TPA=adjtree=adjsamp=
     savedata=outfolder <- NULL
@@ -393,7 +393,7 @@ datSumTree <- function(tree = NULL,
       seedflds <- DBI::dbListFields(dbconn, seedx)
       seednm <- seedx
     }
-    if (woodland %in% c("N", "only")) {
+    if (woodland %in% c('Y', "N", "only")) {
       if (!seedonly) {
         twoodlandref <- FALSE
         twoodlandnm <- findnm("WOODLAND", treeflds, returnNULL=TRUE)
@@ -447,7 +447,7 @@ datSumTree <- function(tree = NULL,
       seedflds <- names(seedx)
       seednm <- "seedx"
     }
-    if (woodland %in% c("N", "only")) {
+    if (woodland %in% c('Y', "N", "only")) {
       if (!seedonly) {
         twoodlandref <- FALSE
         twoodlandnm <- findnm("WOODLAND", treeflds, returnNULL=TRUE)
@@ -473,7 +473,7 @@ datSumTree <- function(tree = NULL,
     }	
   }  
   
-  if (woodland %in% c("N", "only")) {
+  if (woodland %in% c('Y', "N", "only")) {
     if (!seedonly) {
       if (twoodlandref) {
         wtfromqry <- paste0("\n JOIN ", SCHEMA., ref_sppnm, 
@@ -481,7 +481,7 @@ datSumTree <- function(tree = NULL,
       } else {
         wtfromqry <- NULL
       }
-      if (woodland == "only") {
+      if (woodland %in% c("only", 'Y')) {
         wtwhereqry <- paste(twoodlandnm, "= 'Y'")
       } else if (woodland == "N") {
         wtwhereqry <- paste(twoodlandnm, "= 'N'")
@@ -501,6 +501,7 @@ datSumTree <- function(tree = NULL,
       }
     }
   }
+
   if ((seedonly || addseed) && is.null(seednm)) {
     message("must include seed table")
     return(NULL)
@@ -1794,7 +1795,7 @@ datSumTree <- function(tree = NULL,
     
     ## WHERE statement - Woodland
     twithwhereqry <- twhereqry
-    if (woodland %in% c("N", "only")) {
+    if (woodland %in% c("Y", "N", "only")) {
       twithfromqry <- paste0(twithfromqry, wtfromqry)
       if (is.null(twithwhereqry)) {
         twithwhereqry <- paste0("\n WHERE ", wtwhereqry)
