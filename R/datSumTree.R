@@ -481,8 +481,10 @@ datSumTree <- function(tree = NULL,
       } else {
         wtfromqry <- NULL
       }
-      if (woodland %in% c("only", 'Y')) {
+      if (woodland == "only") {
         wtwhereqry <- paste(twoodlandnm, "= 'Y'")
+      } else if (woodland == 'Y') {
+        wtwhereqry <- paste(twoodlandnm, "IN ('Y' 'N')")
       } else if (woodland == "N") {
         wtwhereqry <- paste(twoodlandnm, "= 'N'")
       }
@@ -495,7 +497,9 @@ datSumTree <- function(tree = NULL,
         wsfromqry <- NULL
       }
       if (woodland == "only") {
-        wswhereqry <- paste(swoodlandnm, "= 'Y'")
+        wtwhereqry <- paste(swoodlandnm, "= 'Y'")
+      } else if (woodland == 'Y') {
+        wtwhereqry <- paste(swoodlandnm, "IN ('Y' 'N')")
       } else if (woodland == "N") {
         wswhereqry <- paste(swoodlandnm, "= 'N'")
       }
