@@ -386,8 +386,8 @@ check.rowcol <-
 		                 rowfromqry,
 					           whereqry,
 					           "\nORDER BY ", toString(c(row.orderby, rowvar)))
-          if (!is.null(pltcondxWITHqry)) {
-            uniquerow.qry <- paste0(pltcondxWITHqry,
+          if (!is.null(withqry)) {
+            uniquerow.qry <- paste0(withqry,
                                     "\n", uniquerow.qry)
           }
 		      rowvartmp <- row.orderby
@@ -435,8 +435,8 @@ check.rowcol <-
                      seedfromqry,
                      whereqry,
                      "\nORDER BY ", toString(c(row.orderby, rowvar)))
-            if (!is.null(pltcondxWITHqry)) {
-              uniquerow.qry <- paste0(pltcondxWITHqry,
+            if (!is.null(withqry)) {
+              uniquerow.qry <- paste0(withqry,
                                       "\n", uniquerow.qry)
             }
 
@@ -620,7 +620,8 @@ check.rowcol <-
           ## Build seedling from query
           if (!is.null(seedx)) {
 
-            if (estseed == "add" && rowvar == "DIA" && (!is.null(row.classify))) {
+            if (estseed == "add" && (rowvar == "DIACL" ||
+                  (rowvar == "DIA" && !is.null(row.classify) && "DIACL" %in% names(row.classify))))  {
               suniquex <- "<1"
               seedflds <- c(seedflds, "DIACL")
             } else {  
@@ -1018,7 +1019,7 @@ check.rowcol <-
           
           #message("getting unique values for ", colvar, ":\n", uniquecol.qry, "\n")
           if (colisdb) {
-            if (!is.null(pwithqry)) {
+            if (!is.null(withqry)) {
               uniquecol.qry <- paste0(withqry, 
                                       "\n", uniquecol.qry)
             }
@@ -1059,8 +1060,8 @@ check.rowcol <-
                      seedfromqry,
                      whereqry,
                      "\nORDER BY ", toString(c(col.orderby, colvar)))
-            if (!is.null(pltcondxWITHqry)) {
-              uniquecol.qry <- paste0(pltcondxWITHqry,
+            if (!is.null(withqry)) {
+              uniquecol.qry <- paste0(withqry,
                                       "\n", uniquecol.qry)
             }
 
@@ -1244,7 +1245,8 @@ check.rowcol <-
           ## Build seedling from query
           if (!is.null(seedx)) {
 
-            if (estseed == "add" && colvar == "DIA" && (!is.null(col.classify))) {
+            if (estseed == "add" && (colvar == "DIACL" ||
+                (colvar == "DIA" && !is.null(col.classify) && "DIACL" %in% names(col.classify)))) {
               suniquex <- "<1"
               seedflds <- c(seedflds, "DIACL")
             } else {  
@@ -1341,10 +1343,10 @@ check.rowcol <-
             if (colvar %in% treeflds) {
               
               if (colvar == "GROWTH_HABIT_CD") {
-                collut <- ref_gcolth_habit
+                collut <- ref_growth_habit
                 colLUTnm <- "GROWTH_HABIT_NM"
                 if (is.data.table(treex)) {
-                  treex <- merge(treex, ref_gcolth_habit, by=colvar, all.x=TRUE)
+                  treex <- merge(treex, ref_growth_habit, by=colvar, all.x=TRUE)
                   collut <- data.table(collut[collut[[colvar]] %in% treex[[colvar]], ])
                 }
                 collut <- collut[, lapply(.SD, makefactor)]
@@ -1738,7 +1740,7 @@ check.rowcol <-
         uniquecol <- unique(treex[,c(colgrpord, colgrpnm, col.orderby, colvar), with=FALSE])
         setkeyv(uniquecol, c(colgrpord, colgrpnm, col.orderby))
         
-        if (estseed == "add" && !is.null(seedf)) {
+        if (estseed == "add" && !is.null(seedx)) {
           if (all(c(colvar, col.orderby) %in% names(seedx)) && colvar == "DIACL") {
             if (is.factor(uniquecol[[colvar]])) {
               levels(uniquecol[[colvar]]) <- c(seedclnm, levels(uniquecol[[colvar]]))

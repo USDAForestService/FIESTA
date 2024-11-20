@@ -322,6 +322,7 @@ modGBtree <- function(GBpopdat,
   substrvar <- FALSE
   rawdata <- TRUE  
   returnlst <- list()
+  TPA <- TRUE
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder=domclassify <- NULL
@@ -498,7 +499,7 @@ modGBtree <- function(GBpopdat,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondflds = pltcondflds,
-                  total = totals,
+                  totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
                   landarea = landarea,
@@ -551,8 +552,6 @@ modGBtree <- function(GBpopdat,
                      tuniqueid = tuniqueid,
                      estseed = estseed,
                      woodland = woodland,
-                     TPA = TPA,
-                     tfilter = tfilter,
                      gui = gui)
   treex <- estdatVOL$treex
   treeflds <- estdatVOL$treeflds

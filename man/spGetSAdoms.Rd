@@ -40,7 +40,8 @@ spGetSAdoms(
   savedata_opts = NULL,
   addstate = FALSE,
   dissolve = FALSE,
-  byeach = FALSE
+  byeach = TRUE,
+  modelbyeach = FALSE
 )
 }
 \arguments{
@@ -161,7 +162,10 @@ of options. Only used when savedata = TRUE.}
 \item{dissolve}{Logical. If TRUE, aggregates polygons to smallbnd.domain or
 smallbnd.unique.}
 
-\item{byeach}{Logical. If TRUE, creates an SAdom for each smallbnd polygon.}
+\item{byeach}{Logical. If TRUE, an estimate is desired for each smallbnd 
+domain. If FALSE, all smallbnd domains are aggregates one SAdom (DOMAIN = 1).}
+
+\item{modelbyeach}{Logical. If TRUE, creates an SAdom for each smallbnd polygon.}
 }
 \value{
 \item{SAdomslst}{ List object. Set(s) of model domain units. If

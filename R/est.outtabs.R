@@ -267,13 +267,13 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         rowtotal <- FALSE
 
       } else {  ##  rowvar != "TOTAL"
+
         ## Get estimates
         estcross <- 
           crosstabx(rowest, rowvar, estnmd, psenm, allin1=allin1,
 		                estnull = estnull, psenull = psenull, 
 		                char.width = char.width,
 		                estround = estround, pseround = pseround)
-
         if (allin1) {
           tottab <- 
             data.frame(TOTAL = "Total", allin1f(totest[[estnmd]],
@@ -342,13 +342,13 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       ## GET TOTAL TABLE
       if (!is.null(unit_totest)) {
         if (allin1) {
-            ## Get table with estimates by unitvar
-             estpsetot <- data.table(unit_totest[[unitvar]],
-			crosstabx(x=unit_totest, unitvar, estnm=estnmd,
-				psenm=psenm, allin1=TRUE, estnull=estnull,
-				psenull=psenull, char.width=char.width,
-				estround=estround, pseround=pseround))
-            setnames(estpsetot, c(title.unitvar, title.yhatpse))
+          ## Get table with estimates by unitvar
+          estpsetot <- data.table(unit_totest[[unitvar]],
+			            crosstabx(x=unit_totest, unitvar, estnm=estnmd,
+				                    psenm=psenm, allin1=TRUE, estnull=estnull,
+				                    psenull=psenull, char.width=char.width,
+				                    estround=estround, pseround=pseround))
+          setnames(estpsetot, c(title.unitvar, title.yhatpse))
         } else {
           ## GET TABLE OF ESTIMATES WITH TITLES
           estpsetot <- data.table(unit_totest[,c(unitvar, estnmd, psenm), with=FALSE])
@@ -376,8 +376,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           totunit <- setDF(totunit)
           if (allin1) {
             totunit <- data.frame(TOTAL="Total", allin1f(totunit[[estnmd]], totunit[[psenm]],
-			estnull=estnull, psenull=psenull, char.width=char.width, estround=estround,
-			pseround=pseround), stringsAsFactors=FALSE)
+			               estnull=estnull, psenull=psenull, char.width=char.width, estround=estround,
+			               pseround=pseround), stringsAsFactors=FALSE)
             setnames(totunit, c(unitvar, title.yhatpse))
           } else {
             totunit <- c("TOTAL", totunit[, c(estnmd, psenm)])
@@ -397,9 +397,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         if (savedata)
           suppressWarnings(
           save1tab(tab=est2return, tab.title=title.estpse,
-			outfn=outfn.estpse, outfolder=outfolder, allin1=allin1,
-			coltitlerow=FALSE, rowtotal=FALSE, addtitle=addtitle,
-			outfn.date=outfn.date, overwrite=overwrite, cols2format=title.yhat))
+			             outfn=outfn.estpse, outfolder=outfolder, allin1=allin1,
+			             coltitlerow=FALSE, rowtotal=FALSE, addtitle=addtitle,
+			             outfn.date=outfn.date, overwrite=overwrite, cols2format=title.yhat))
 
       } else {  ## rowvar != "TOTAL"
 
@@ -417,16 +417,16 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         }
         if (!is.null(unit_totest) && !is.null(uniquecol)) {
           unit_totest <- add0unit(x=unit_totest, xvar=unitvar, uniquex=uniquecol,
-			xvar.add0=TRUE)
+			                            xvar.add0=TRUE)
         }
 
         ## Get table of estimates
         estpsecross <- crossxtab(group.est=unit_rowest, rowvar.est=rowunit,
-			colvar.est=unit_totest, total.est=totunit, rowvar=rowvar,
-			colvar=unitvar, estnm=estnmd, psenm=psenm, allin1=allin1,
-			rowgrp=rowgrp, rowgrpnm=rowgrpnm, title.rnames=title.rnames,
-			estround=estround, pseround=pseround, estnull=estnull,
-			psenull=psenull, char.width=char.width)
+			               colvar.est=unit_totest, total.est=totunit, rowvar=rowvar,
+			               colvar=unitvar, estnm=estnmd, psenm=psenm, allin1=allin1,
+			               rowgrp=rowgrp, rowgrpnm=rowgrpnm, title.rnames=title.rnames,
+			               estround=estround, pseround=pseround, estnull=estnull,
+			               psenull=psenull, char.width=char.width)
 
         if (esttype != "RATIO") {
           if (!is.null(unit_totest)) {
@@ -437,7 +437,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             sumest <- sum(unit_rowest[[estnm]], na.rm=TRUE)
             if (!(sumest < (totest + 100) & sumest > (totest - 100)))
               warning("the total estimate does not match sum of attributes.. difference of ",
-			abs(sumest-totest))
+			                 abs(sumest-totest))
           }
         }
 
@@ -454,9 +454,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
             estpsetab <- data.table(esttab, psetab[[title.yhat.pse]])
             if (is.numeric(estnull)) estpsetab[[title.yhat]] <-
-				as.numeric(estpsetab[[title.yhat]])
+				                    as.numeric(estpsetab[[title.yhat]])
             if (is.numeric(psenull)) estpsetab[[title.yhat.pse]] <-
-				as.numeric(estpsetab[[title.yhat.pse]])
+				                    as.numeric(estpsetab[[title.yhat.pse]])
             names(estpsetab) <- c(title.rnames, title.yhat, title.yhat.pse)
           }
 
@@ -470,10 +470,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
               ## SAVE TO FILE
               suppressWarnings(
               save1tab(tab=estpsetab, tab.title=title.estpse,
-			outfn=outfn.estpse, outfolder=outfolder, allin1=allin1,
-			coltitlerow=FALSE, rowtotal=TRUE, addtitle=addtitle,
-			outfn.date=outfn.date, overwrite=overwrite,
-			charvars=title.rnames, cols2format=title.yhat))
+			                 outfn=outfn.estpse, outfolder=outfolder, allin1=allin1,
+			                 coltitlerow=FALSE, rowtotal=TRUE, addtitle=addtitle,
+			                 outfn.date=outfn.date, overwrite=overwrite,
+			                 charvars=title.rnames, cols2format=title.yhat))
         } else {  # > 1 unit
 
           if (allin1) {
@@ -485,10 +485,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
               ## SAVE TO FILE
               suppressWarnings(
               save1tab(tab=estpsecross, tab.title=title.estpse,
- 				outfn=outfn.estpse, outfolder=outfolder, allin1=TRUE,
-				coltitlerow=FALSE, coltitle=title.unitvar, rowtotal=TRUE,
-				addtitle=addtitle, outfn.date=outfn.date, overwrite=overwrite,
-				charvars=title.rnames))
+ 				               outfn=outfn.estpse, outfolder=outfolder, allin1=TRUE,
+				               coltitlerow=FALSE, coltitle=title.unitvar, rowtotal=TRUE,
+				               addtitle=addtitle, outfn.date=outfn.date, overwrite=overwrite,
+				               charvars=title.rnames))
           } else {
             est2return <- estpsecross$est
             pse2return <- estpsecross$pse
@@ -502,10 +502,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             ## SAVE TO FILE
              suppressWarnings(
               save2tabs(tab1=est2return, tab2=pse2return,
-				tab1.title=title.est, tab2.title=title.pse, outfn.estpse=outfn.estpse,
- 				outfolder=outfolder, coltitlerow=TRUE, coltitle=title.unitvar,
-				addtitle=addtitle, rowtotal=rowtotal, rnames=rnames,
-				outfn.date=outfn.date, overwrite=overwrite))
+				                tab1.title=title.est, tab2.title=title.pse, outfn.estpse=outfn.estpse,
+ 				                outfolder=outfolder, coltitlerow=TRUE, coltitle=title.unitvar,
+				                addtitle=addtitle, rowtotal=rowtotal, rnames=rnames,
+				                outfn.date=outfn.date, overwrite=overwrite))
           }
         }
       }

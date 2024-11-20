@@ -88,7 +88,6 @@
 #' Only used when multest = TRUE.
 #' @param save4testing Logical. If TRUE, saves intermediate steps as R objects
 #' to outfolder for testing (pdomdat, dunitlut).
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modSApop if SApopdat is NULL.
 #' 
 #' @return \item{est}{ Data frame. Tree estimates and percent sampling error by
@@ -228,7 +227,7 @@ modSAarea <- function(SApopdatlst = NULL,
   returnlst <- list()
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=AOI=
     title.rowvar=title.colvar=title.rowgrp=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
     JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
   
@@ -577,8 +576,8 @@ modSAarea <- function(SApopdatlst = NULL,
     areawt <- SApopdat$areawt
     areawt2 <- SApopdat$areawt2
     adjcase <- SApopdat$adjcase
-    pltidsid <- GBpopdat$pjoinid
-    pltassgnid <- GBpopdat$pltassgnid
+    pltidsid <- SApopdat$pjoinid
+    pltassgnid <- SApopdat$pltassgnid
     SAdoms <- SApopdat$SAdoms
     largebnd.unique <- SApopdat$largebnd.unique
     

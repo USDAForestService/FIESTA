@@ -53,7 +53,7 @@
 #' @param subpuniqueid String. Unique identifier of plot in subplot and 
 #' subp_cond table.
 #' @param subpid String. Unique identifier of each subplot.
-#' @param bydomainst String (vector). Categorical domain variables for 
+#' @param bydomainlst String (vector). Categorical domain variables for 
 #' summing tree data by (e.g., SPCD). Variables must be in tree table or 
 #' plt/cond table if tables are provided.
 #' @param tsumvarlst String (vector). Tree-level variable(s) to aggregate
@@ -67,6 +67,10 @@
 #' tdomvar must be 'SPCD' or 'SPGRPCD'.
 #' @param seedonly Logical. If TRUE, seedling counts only. Note: tdomvar
 #' must be 'SPCD' or 'SPGRPCD'.
+#' @param woodland String. ('Y', 'N', 'only') If woodland = 'Y', include  
+#' woodland tree species where measured. If woodland = 'N', only include 
+#' timber species. See FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', 
+#' only include woodland species. If NULL, use whatever is in table.
 #' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 #' respective trees-per-acre variable (see details) to get per-acre
 #' measurements.
@@ -101,6 +105,7 @@
 #' @param tround Number. The number of digits to round to. If NULL, default=5.
 #' @param pltidsWITHqry SQL query. A query identifying plots to sum (e.g., 
 #' 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')
+#' @param pltidsid Sting. Name of unique identifier in pltidsWITHqry.
 #' @param pcwhereqry String. Plot/Condition filter if plot and/or cond table is 
 #' included.
 #' @param pjoinid String. If pltidsWITHqry is not null, the uniqueid in the query.
@@ -390,10 +395,13 @@ datSumTree <- function(tree = NULL,
 
     seedx <- chkdbtab(dbtablst, seed)
     if (!is.null(seedx)) {
+      if (is.null(treex)) {
+        seedonly <- TRUE
+      }
       seedflds <- DBI::dbListFields(dbconn, seedx)
       seednm <- seedx
     }
-    if (woodland %in% c('Y', "N", "only")) {
+    if (!is.null(woodland) && woodland %in% c('Y', "N", "only")) {
       if (!seedonly) {
         twoodlandref <- FALSE
         twoodlandnm <- findnm("WOODLAND", treeflds, returnNULL=TRUE)
@@ -434,7 +442,7 @@ datSumTree <- function(tree = NULL,
       }	  	  
     }	
   } else if (datsource %in% c("obj", "csv")) {
-    
+  
     treex <- pcheck.table(tree, gui=gui, tabnm="tree", caption="Tree table?")
     if (!is.null(treex)) {
       treex <- setDT(int64tochar(treex))
@@ -443,11 +451,14 @@ datSumTree <- function(tree = NULL,
     }
     seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
     if (!is.null(seedx)) {
+      if (is.null(treex)) {
+        seedonly <- TRUE
+      }
       seedx <- setDT(int64tochar(seedx))
       seedflds <- names(seedx)
       seednm <- "seedx"
     }
-    if (woodland %in% c('Y', "N", "only")) {
+    if (!is.null(woodland) && woodland %in% c('Y', "N", "only")) {
       if (!seedonly) {
         twoodlandref <- FALSE
         twoodlandnm <- findnm("WOODLAND", treeflds, returnNULL=TRUE)
@@ -472,8 +483,8 @@ datSumTree <- function(tree = NULL,
       }		
     }	
   }  
-  
-  if (woodland %in% c('Y', "N", "only")) {
+
+  if (!is.null(woodland) && woodland %in% c('Y', "N", "only")) {
     if (!seedonly) {
       if (twoodlandref) {
         wtfromqry <- paste0("\n JOIN ", SCHEMA., ref_sppnm, 
@@ -484,7 +495,7 @@ datSumTree <- function(tree = NULL,
       if (woodland == "only") {
         wtwhereqry <- paste(twoodlandnm, "= 'Y'")
       } else if (woodland == 'Y') {
-        wtwhereqry <- paste(twoodlandnm, "IN ('Y' 'N')")
+        wtwhereqry <- paste(twoodlandnm, "IN ('Y', 'N')")
       } else if (woodland == "N") {
         wtwhereqry <- paste(twoodlandnm, "= 'N'")
       }
@@ -497,9 +508,9 @@ datSumTree <- function(tree = NULL,
         wsfromqry <- NULL
       }
       if (woodland == "only") {
-        wtwhereqry <- paste(swoodlandnm, "= 'Y'")
+        wswhereqry <- paste(swoodlandnm, "= 'Y'")
       } else if (woodland == 'Y') {
-        wtwhereqry <- paste(swoodlandnm, "IN ('Y' 'N')")
+        wswhereqry <- paste(swoodlandnm, "IN ('Y', 'N')")
       } else if (woodland == "N") {
         wswhereqry <- paste(swoodlandnm, "= 'N'")
       }
@@ -513,6 +524,11 @@ datSumTree <- function(tree = NULL,
   if (is.null(treenm)) {
     if (!is.null(seednm)) {
       seedonly <- TRUE
+      
+      treex <- seedx
+      treeflds <- seedflds
+      treenm <- "seedx"
+
     } else {
       message("must include tree table")
       stop()
@@ -717,7 +733,7 @@ datSumTree <- function(tree = NULL,
       }
     }
   }
-  
+
   ## Check domclassify
   ########################################################### 
   if (!is.null(domclassify)) {
@@ -1362,8 +1378,8 @@ datSumTree <- function(tree = NULL,
     ######################################################################################
     adjalias. <- NULL
     if (!seedonly) {
-      if ("tadjfac" %in% treeflds) {
-        tadjcase <- "t.tadjfac"
+      if (adjvar %in% treeflds) {
+        tadjcase <- paste0("t.", adjvar)
       } else if (!is.null(findnm("TPROP_BASIS", treeflds, returnNULL=TRUE))) {
         tadjcase <- paste0(
           "\n      CASE WHEN t.TPROP_BASIS = 'MICR' THEN ", adjalias., adjvarlst[["MICR"]],
@@ -1381,7 +1397,7 @@ datSumTree <- function(tree = NULL,
     }
     if (addseed || seedonly) {
       if ("tadjfac" %in% seedflds) {
-        sadjcase <- "s.tadjfac"
+        sadjcase <- paste0("s.", adjvar)
       } else {
         sadjcase <- paste0("adj.", adjvarlst[["MICR"]], " AS tadjfac")
       }
@@ -1669,7 +1685,7 @@ datSumTree <- function(tree = NULL,
       if (getnm) {
         tsumvardf$NAME <- paste0(tsumvardf$NAME, "_ADJ") 
       }
-      tsumvardf$NEW <- paste0(tsumvardf$NEW, " * tadjfac")
+      tsumvardf$NEW <- paste0(tsumvardf$NEW, " * ", adjvar)
     }   
     
     ## Add a new column to SUM variables
@@ -1739,8 +1755,14 @@ datSumTree <- function(tree = NULL,
   if (!seedonly) {
     ## Build twithqry
     twithqry <- "SELECT 'TREE' src,"
-    twithSelect <- paste0(talias., unique(c(tsumuniqueid, "CONDID", "SUBP", "TREE")))
-
+    twithvars <- c("CONDID", "SUBP", "TREE")
+    twithvarschk <- sapply(twithvars, findnm, treeflds, returnNULL = TRUE)
+    if (all(is.null(twithvarschk))) {
+      twithvars <- NULL
+    } else {
+      twithvars <- unlist(twithvarschk)
+    }
+    twithSelect <- paste0(talias., unique(c(tsumuniqueid, twithvars)))
     tvarlst <- unique(c(tdomainlst, tsumvarlst, tpavarnm))
 
     if (addseed) {
@@ -1752,17 +1774,17 @@ datSumTree <- function(tree = NULL,
           tvarlst <- tvarlst[tvarlst != spcdnm]
         }
         if (!is.null(spcdnm)) {
-          twithSelect <- c(twithSelect, spcdnm)
+          twithSelect <- c(twithSelect, paste0(talias., spcdnm))
         }
         tpanm <- findnm("TPA_UNADJ", tvarlst, returnNULL = TRUE)
         if (!is.null(tpanm)) {
-          twithSelect <- c(twithSelect, tpanm)
+          twithSelect <- c(twithSelect, paste0(talias., tpanm))
           tvarlst <- tvarlst[tvarlst != tpanm]
         }
       }
       twithSelect <- unique(c(twithSelect, tvarlst))
     } else {
-      twithSelect <- unique(c(twithSelect, tvarlst))
+      twithSelect <- unique(c(twithSelect, paste0(talias., tvarlst)))
     }
 
     ## Build final select statement for tdat WITH query
@@ -1780,7 +1802,7 @@ datSumTree <- function(tree = NULL,
     ## Build final select statement for tdat WITH query
     #twithqry <- paste(twithqry, toString(paste0(talias., twithSelect)))
     twithqry <- paste(twithqry, toString(twithSelect))
-    
+
     twithfromqry <- tfromqry
     if (adjtree) {
       adjjoinid <- pjoinid
@@ -1799,7 +1821,7 @@ datSumTree <- function(tree = NULL,
     
     ## WHERE statement - Woodland
     twithwhereqry <- twhereqry
-    if (woodland %in% c("Y", "N", "only")) {
+    if (!is.null(woodland) && woodland %in% c("Y", "N", "only")) {
       twithfromqry <- paste0(twithfromqry, wtfromqry)
       if (is.null(twithwhereqry)) {
         twithwhereqry <- paste0("\n WHERE ", wtwhereqry)
@@ -1812,7 +1834,7 @@ datSumTree <- function(tree = NULL,
     twithqry <- paste0(twithqry,
                        twithfromqry,
                        twithwhereqry)
-    
+
     ## Build WITH query - seedling data (sdat)
     ################################################################
     if (addseed) {
@@ -1824,17 +1846,30 @@ datSumTree <- function(tree = NULL,
       swithqry <- paste0("\n SELECT 'SEED' src, ") 
       swithSelect <- unique(c(paste0("s.", tsumuniqueid), "s.CONDID", "s.SUBP", 0))
 
-      spcdnm <- findnm("SPCD", twithSelect, returnNULL = TRUE)
-      if (!is.null(spcdnm)) {
-        swithSelect <- c(swithSelect, spcdnm)
+      spcdanm <- findnm("t.SPCD", twithSelect, returnNULL = TRUE)
+      if (!is.null(spcdanm)) {
+        swithSelect <- c(swithSelect, paste0(salias., spcdnm))
       }
-      tpanm <- findnm("TPA_UNADJ", twithSelect, returnNULL = TRUE)
-      if (!is.null(tpanm)) {
+      tpaanm <- findnm("t.TPA_UNADJ", twithSelect, returnNULL = TRUE)
+      if (!is.null(tpaanm)) {
         swithSelect <- c(swithSelect, paste0("s.", tpanm))
       }
       swithqry <- paste0(swithqry, toString(swithSelect))
       
-      nbrvar <- nbrvar + length(tvarlst)
+      sdomainlst <- NULL
+      if (!is.null(tdomainlst)) {
+        for (tdomain in tdomainlst) {
+          if (tdomain == "DIACL") {
+            swithqry <- paste0(swithqry, ", '<1' AS DIACL")
+            sdomainlst <- c(sdomainlst, tdomain)
+          } else if (tdomain %in% seedflds && tdomain != "SPCD") {
+            swithqry <- paste0(swithqry, ", s.", tdomain)
+            sdomainlst <- c(sdomainlst, tdomain)
+          }
+        }        
+      }
+      
+      nbrvar <- nbrvar + (length(tvarlst) - length(sdomainlst))
       if (nbrvar > 0) {
         swithqry <- paste0(swithqry, ", ", toString(rep("'null'", nbrvar)))
       }
@@ -1858,7 +1893,7 @@ datSumTree <- function(tree = NULL,
 
       ## WHERE statement - Woodland
       swithwhereqry <- swhereqry
-      if (woodland %in% c("N", "only")) {
+      if (!is.null(woodland) && woodland %in% c("Y", "N", "only")) {
         swithfromqry <- paste(swithfromqry, wsfromqry)
         if (is.null(swithwhereqry)) {
           swithwhereqry <- paste0("\n WHERE ", wswhereqry)
@@ -1918,7 +1953,7 @@ datSumTree <- function(tree = NULL,
     
     ## WHERE statement - Woodland
     swithwhereqry <- swhereqry
-    if (woodland %in% c("N", "only")) {
+    if (!is.null(woodland) && woodland %in% c("N", "only")) {
       swithfromqry <- paste(swithfromqry, wsfromqry)
       if (is.null(swithwhereqry)) {
         swithwhereqry <- paste0("\n WHERE ", wswhereqry)

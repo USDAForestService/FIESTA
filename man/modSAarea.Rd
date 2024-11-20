@@ -102,8 +102,6 @@ Only used when multest = TRUE.}
 to outfolder for testing (pdomdat, dunitlut).}
 
 \item{...}{Parameters for modSApop if SApopdat is NULL.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 \item{est}{ Data frame. Tree estimates and percent sampling error by

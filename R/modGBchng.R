@@ -42,14 +42,18 @@
 #' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.
 #' @param landarea_both Logical. If TRUE, both Time 1 and Time 2 measurements 
 #' have the same landarea.
-#' #' @param pcfilter String. A filter for plot or cond attributes (including
-#' pltassgn).  Must be R logical syntax.
+#' @param pcfilter String. A filter for plot or cond attributes. 
+#' Must be R logical syntax.
 #' @param rowvar String. Name of row domain variable in cond. If only one
 #' domain, rowvar = domain variable. If more than one domain, include colvar.
 #' If no domain, rowvar = NULL.
 #' @param colvar String. Name of column domain variable in cond.
 #' @param sumunits Logical. If TRUE, estimation units are summed and returned
 #' in one table.
+#' @param T1filter String. A filter for plot or cond attributes for T1.
+#' Must be R logical syntax.
+#' @param T2filter String. A filter for plot or cond attributes for T2.  
+#' Must be R logical syntax.
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.

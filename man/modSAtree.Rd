@@ -24,8 +24,7 @@ modSAtree(
   savedata = FALSE,
   savesteps = FALSE,
   multest = TRUE,
-  addSAdomsdf = TRUE,
-  SAdomvars = NULL,
+  vars2keep = NULL,
   savemultest = FALSE,
   returntitle = FALSE,
   table_opts = NULL,
@@ -71,6 +70,10 @@ pltassgn).  Must be R logical syntax.}
 \item{estvar.filter}{String. A tree filter for estimate variable. Must be R
 syntax (e.g., "STATUSCD == 1").}
 
+\item{estvar.derive}{List. A derivation of a tree variable to estimate.
+Must be a named list with one element (e.g., 
+list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.}
+
 \item{rowvar}{String. Name of the row domain variable in cond or tree. If
 only one domain, rowvar = domain variable. If more than one domain, include
 colvar. If no domain, rowvar = NULL.}
@@ -92,12 +95,6 @@ labels whether selected or not for both area- and unit-level models.}
 
 \item{multest}{Logical. If TRUE, returns a data frame of SA estimates using
 both unit-level and area-level estimates.}
-
-\item{addSAdomsdf}{Logical. If TRUE, appends SAdomdf to unit.multest table
-for output.}
-
-\item{SAdomvars}{String vector. List of attributes from SAdoms to include in
-multest output.}
 
 \item{savemultest}{Logical. If TRUE, save table with area- and unit-level
 estimates.}

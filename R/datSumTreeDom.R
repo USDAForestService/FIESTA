@@ -71,10 +71,10 @@
 #' tdomvar must be 'SPCD' or 'SPGRPCD'.
 #' @param seedonly Logical. If TRUE, seedling counts only. Note: tdomvar
 #' must be 'SPCD' or 'SPGRPCD'.
-#' @param woodland String. If woodland = 'Y', include woodland tree species  
-#' where measured. If woodland = 'N', only include timber species. See 
-#' FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
-#' woodland species.
+#' @param woodland String. ('Y', 'N', 'only') If woodland = 'Y', include  
+#' woodland tree species where measured. If woodland = 'N', only include 
+#' timber species. See FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', 
+#' only include woodland species. If NULL, use whatever is in table.
 #' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 #' respective trees-per-acre variable (see details) to get per-acre
 #' measurements.
@@ -107,7 +107,7 @@
 #' in tdomvarlst is calculated and added to output data frame.
 #' @param tdomtotnm String. If tdomtot=TRUE, the variable name for the total
 #' column in output data frame. If NULL, the default will be tdomvar + 'TOT'.
-#' @param bydomainst String (vector). Categorical domain variables not in
+#' @param bydomainlst String (vector). Categorical domain variables not in
 #' tdomvar/tdomvar2. Variables must be in tree table or plt/cond table if tables 
 #' are provided.
 #' @param FIAname Logical. If TRUE, changes names of columns for SPCD and
@@ -308,6 +308,7 @@ datSumTreeDom <- function(tree = NULL,
   ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry <- NULL
   checkNA=cover <- FALSE
+  pltsp = FALSE
 
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
@@ -415,7 +416,7 @@ datSumTreeDom <- function(tree = NULL,
     
   ## Check spcd_name
   if (FIAname && any(c(tdomvar, tdomvar2) == "SPCD")) {
-      pcd_namelst <- c("COMMON", "SCIENTIFIC", "SYMBOL")
+    spcd_namelst <- c("COMMON", "SCIENTIFIC", "SYMBOL")
     spcd_name <- pcheck.varchar(var2check=spcd_name, varnm="spcd_name", 
                     checklst=spcd_namelst, gui=gui, caption="SPCD name type?") 
   }
@@ -486,7 +487,7 @@ datSumTreeDom <- function(tree = NULL,
     datSumTree(tree = tree, seed = seed, 
                cond = cond, plt = plt, 
                subp_cond = subp_cond, subplot = subplot, 
-               datsource = datsource, dsn = dsn, 
+               datsource = datsource, dsn = data_dsn, 
                dbconn = dbconn, schema = schema,
                tuniqueid = tuniqueid, cuniqueid = cuniqueid, puniqueid = puniqueid, 
                bycond = bycond, condid = condid, 
@@ -518,7 +519,6 @@ datSumTreeDom <- function(tree = NULL,
   pcdomainlst <- sumdat$pcdomainlst ## original pc variables
   classifynmlst <- sumdat$classifynmlst
 
-    
   if (length(tsumvarnm) > 1) {
     tsumnm=tsumvarnm <- tsumvarnm[length(tsumvarnm)]
   } else {
@@ -649,8 +649,8 @@ datSumTreeDom <- function(tree = NULL,
         tdomvar2lst <- tdoms2
       }
     } else { 
-      if (any(!tdomvar2lst %in% unique(treex[[tdomvar2]]))) {
-        tdom.miss <- tdomvar2lst[!tdomvar2lst %in% unique(treex[[tdomvar2]])]
+      if (any(!tdomvar2lst %in% unique(tdomtree[[tdomvar2]]))) {
+        tdom.miss <- tdomvar2lst[!tdomvar2lst %in% unique(tdomtree[[tdomvar2]])]
         if (length(tdom.miss) == 1 && addseed && tdom.miss == seedclnm) {
           tdom.miss <- NULL
         }

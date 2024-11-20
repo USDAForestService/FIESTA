@@ -33,9 +33,10 @@ modGBchng(
 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.}
 
 \item{landarea_both}{Logical. If TRUE, both Time 1 and Time 2 measurements 
-have the same landarea.
-#' @param pcfilter String. A filter for plot or cond attributes (including
-pltassgn).  Must be R logical syntax.}
+have the same landarea.}
+
+\item{pcfilter}{String. A filter for plot or cond attributes. 
+Must be R logical syntax.}
 
 \item{rowvar}{String. Name of row domain variable in cond. If only one
 domain, rowvar = domain variable. If more than one domain, include colvar.
@@ -45,6 +46,12 @@ If no domain, rowvar = NULL.}
 
 \item{sumunits}{Logical. If TRUE, estimation units are summed and returned
 in one table.}
+
+\item{T1filter}{String. A filter for plot or cond attributes for T1.
+Must be R logical syntax.}
+
+\item{T2filter}{String. A filter for plot or cond attributes for T2.
+Must be R logical syntax.}
 
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}

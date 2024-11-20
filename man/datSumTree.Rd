@@ -101,6 +101,10 @@ subp_cond table.}
 
 \item{subpid}{String. Unique identifier of each subplot.}
 
+\item{bydomainlst}{String (vector). Categorical domain variables for 
+summing tree data by (e.g., SPCD). Variables must be in tree table or 
+plt/cond table if tables are provided.}
+
 \item{tsumvarlst}{String (vector). Tree-level variable(s) to aggregate
 (e.g., "TPA_UNADJ", "BA"). Use "TPA_UNADJ" for summed tree
 count.}
@@ -115,6 +119,11 @@ tdomvar must be 'SPCD' or 'SPGRPCD'.}
 
 \item{seedonly}{Logical. If TRUE, seedling counts only. Note: tdomvar
 must be 'SPCD' or 'SPGRPCD'.}
+
+\item{woodland}{String. ('Y', 'N', 'only') If woodland = 'Y', include
+woodland tree species where measured. If woodland = 'N', only include 
+timber species. See FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', 
+only include woodland species. If NULL, use whatever is in table.}
 
 \item{TPA}{Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 respective trees-per-acre variable (see details) to get per-acre
@@ -163,6 +172,8 @@ QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454)
 \item{pltidsWITHqry}{SQL query. A query identifying plots to sum (e.g., 
 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')}
 
+\item{pltidsid}{Sting. Name of unique identifier in pltidsWITHqry.}
+
 \item{pcwhereqry}{String. Plot/Condition filter if plot and/or cond table is 
 included.}
 
@@ -185,10 +196,6 @@ returns data.frame object(s).}
 \item{dbconnopen}{Logical. If TRUE, keep database connection open.
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'treesum'.}
-
-\item{bydomainst}{String (vector). Categorical domain variables for 
-summing tree data by (e.g., SPCD). Variables must be in tree table or 
-plt/cond table if tables are provided.}
 }
 \value{
 A list of the following items: \item{treedat}{ Data frame. Plot or

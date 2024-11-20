@@ -63,15 +63,22 @@
 #' file(.csv), layer or spatial layer in dsn, or shapefile(.shp). Plot-level
 #' assignment of estimation unit and/or strata, with one record for each plot.
 #' @param pltassgnid String.
+#' @param datsource String. Name of data source ('obj', 'sqlite', 'postgres').
 #' @param dsn String. Name of database where tree, cond, and plot-level tables
 #' reside.  The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html).
+#' @param dbconn Open database connection.
 #' @param pjoinid String. Join variable in plot to match pltassgnid. Does not
 #' need to be uniqueid. If using most current XY coordinates for plot
 #' assignments, use identifier for plot (e.g., PLOT_ID).
 #' @param areawt String. Name of variable for summarizing area weights (e.g.,
 #' CONDPROP_UNADJ).
-#' @param adjplot Logical. If TRUE, adjusts for nonresponse at plot-level.
+#' @param adj String. How to calculate adjustment factors for nonsampled
+#' (nonresponse) conditions based on summed proportions for by plot ('samp',
+#' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
+#' level; 'plot' - adjustments are calculated at plot-level. Adjustments are
+#' only calculated for annual inventory plots (DESIGNCD=1).
+#' @param defaultVars Logical. If TRUE, a set of default variables are selected.
 #' @param unitvar String. Name of the estimation unit variable in unitarea and
 #' cond or pltassgn data frame with estimation unit assignment for each plot
 #' (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.
@@ -269,12 +276,12 @@ modMApop <- function(popType="VOL",
   
   ## If gui.. set variables to NULL
   if (gui) {
-    areavar=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
+    areavar=cuniqueid=ACI=tuniqueid=savedata=unitvar=projectid <- NULL
   }
   
   ## Set parameters
   adjtree <- FALSE
-  nonsamp.pfilter=nonsamp.cfilter=schema <- NULL
+  nonsamp.pfilter=nonsamp.cfilter=schema=vcondstrx=vcondsppx <- NULL
   returnlst <- list(module = "MA")
   
   ## Set global variables
@@ -335,7 +342,7 @@ modMApop <- function(popType="VOL",
     if (out_fmt == "sqlite" && is.null(out_dsn)) {
       out_dsn <- "GBpopdat.db"
     }
-    outlst <- FIESTAutils::pcheck.output(savadata_opts)
+    outlst <- FIESTAutils::pcheck.output(savedata_opts)
     outlst$add_layer <- TRUE
   }
   
@@ -625,7 +632,7 @@ modMApop <- function(popType="VOL",
                        pltidvars = pltidvars, projidvars = projidvars,
                        pdoms2keep = pdoms2keep,
                        defaultVars = defaultVars,
-                       pltidsadjindb = pltidsadjindb, 
+                       pltidsadjindb = FALSE, 
                        pltassgnid = pltassgnid, 
                        pltassgnx = pltassgnx,
                        POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
@@ -792,7 +799,7 @@ modMApop <- function(popType="VOL",
     
     message("saving pltids...")
     outlst$out_layer <- "pltids"
-    if (!append_layer) index.unique.pltids <- c(projectid, puniqued)
+    if (!append_layer) index.unique.pltids <- c(projectid, puniqueid)
     datExportData(pltidsadj, 
                   savedata_opts = outlst)
   }
@@ -871,29 +878,28 @@ modMApop <- function(popType="VOL",
       rm(pltassgnx)
       rm(unitarea)
 
+      # if (popType %in% c("TREE", "GRM")) {
+      #   message("saving REF_SPECIES...")
+      #   outlst$out_layer <- "REF_SPECIES"
+      #   datExportData(REF_SPECIES,
+      #                 savedata_opts = outlst)
+      # }
       
-      if (popType %in% c("TREE", "GRM")) {
-        message("saving REF_SPECIES...")
-        outlst$out_layer <- "REF_SPECIES"
-        datExportData(REF_SPECIES,
-                      saveadata_opts = outlst)
-      }
       
-      
-      if (!is.null(vcondsppf)) {
+      if (!is.null(vcondsppx)) {
         message("saving vcondsppx...")
         outlst$out_layer <- "vcondsppx"
-        datExportData(vcondsppf, 
+        datExportData(vcondsppx, 
                       savedata_opts = outlst)
-        rm(vcondsppf)
+        rm(vcondsppx)
         # gc()
       }
-      if (!is.null(vcondstrf)) {
+      if (!is.null(vcondstrx)) {
         message("saving vcondstrx...")
         outlst$out_layer <- "vcondstrx"
-        datExportData(vcondstrf, 
+        datExportData(vcondstrx, 
                       savedata_opts = outlst)
-        rm(vcondstrf)
+        rm(vcondstrx)
         # gc()
       }
       

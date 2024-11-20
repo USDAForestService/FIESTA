@@ -11,27 +11,7 @@ check.estdataVOL <-
            gui = FALSE){
 
   ###################################################################################
-  ## DESCRIPTION: Checks data inputs
-  ## Apply plot filter
-  ## - pcfilter (e.g., COUNTY == 3, FORTYPCD == 122)
-  ## Check landarea ("FOREST", "ALL", "TIMBERLAND") and create landarea.filter
-  ## - if landarea = FOREST, "COND_STATUS_CD == 1"
-  ## - if landarea = TIMBERLAND, "SITECLCD %in% c(1:6) & RESERVCD == 0"
-  ## Apply condition filters
-  ## - landarea.filter
-  ## - ACI.filter (e.g., if, ACI=FALSE, COND_STATUS_CD == 1)
-  ## Check output parameters
-  ## - divideby, divides final estimates by (hundred, thousand, million)
-  ## - if sumunits=TRUE, aggregates all estimation units
-  ## - If allin1=TRUE, puts estimate (% sample error) in each cell
-  ## - If savedata=TRUE, saves tables to outfolder
-  ## - If addtitle=TRUE, adds title(s) to saved tables
-  ## - If returntitle, saves title(s) of tables
-  ## - If rawdata=TRUE, generates and saves rawdata variables for estimates
-  ## - If savedata, checks output folder
-  ## - If rawdata, adds a folder named 'rawdata' to outfolder to add raw data
-  ## - estround - round estimate values
-  ## - pseround - round percent standard error values
+  ## DESCRIPTION: Check data tables for VOL estimates
   ###################################################################################
 
   ## Define returnlst

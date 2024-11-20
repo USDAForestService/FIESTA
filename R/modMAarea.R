@@ -63,7 +63,6 @@
 #' @param title_opts List. See help(title_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param modelselect_bydomain Logical. If TRUE, modelselection will occur at 
 #' the domain level as specified by rowvar and/or colvar and not at the level of
 #' the entire sample.
@@ -477,7 +476,6 @@ modMAarea <- function(MApopdat,
                   pltcondflds = pltcondflds,
                   totals = totals,
                   pop_fmt=pop_fmt, pop_dsn=pop_dsn,
-                  sumunits = sumunits,
                   landarea = landarea,
                   ACI = ACI,
                   pcfilter = pcfilter,
@@ -495,7 +493,6 @@ modMAarea <- function(MApopdat,
                   gui = gui)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
-  sumunits <- estdat$sumunits
   totals <- estdat$totals
   landarea <- estdat$landarea
   allin1 <- estdat$allin1

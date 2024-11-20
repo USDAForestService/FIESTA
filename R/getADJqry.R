@@ -8,6 +8,7 @@ getADJqry <- function(popType,
                       pwhereqry,
                       pltidsid,
                       pltassgnid,
+                      cuniqueid = "PLT_CN",
                       strunitvars = NULL,
                       othervars = NULL,
                       pltidsa. = "plotids.",
@@ -61,7 +62,7 @@ getADJqry <- function(popType,
   areawtadj <- adjvarlst[[1]][1]
   popwtadj <- unlist(adjvarlst[!adjvarlst %in% areawtadj])
   
-  
+
   ## 2. Build query to calculate adjustment factors
   ##########################################################################
   

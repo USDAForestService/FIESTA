@@ -49,6 +49,9 @@
 #' 'VOLCFNET').
 #' @param estvar.filter String. A tree-level filter for estvar. Must be R
 #' syntax (e.g., 'STATUSCD == 1').
+#' @param estvar.derive List. A derivation of a tree variable to estimate.
+#' Must be a named list with one element (e.g., 
+#' list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
 #' @param woodland String. If woodland = 'Y', include woodland tree species  
@@ -85,7 +88,6 @@
 #' @param title_opts List. See help(title_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param modelselect_bydomain Logical. If TRUE, modelselection will occur at 
 #' the domain level as specified by rowvar and/or colvar and not at the level of
 #' the entire sample.
@@ -502,7 +504,6 @@ modMAtree <- function(MApopdat,
                   pltcondflds = pltcondflds,
                   totals = totals,
                   pop_fmt=pop_fmt, pop_dsn=pop_dsn,
-                  sumunits = sumunits,
                   landarea = landarea,
                   ACI = ACI,
                   pcfilter = pcfilter,
@@ -520,7 +521,6 @@ modMAtree <- function(MApopdat,
                   gui = gui)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
-  sumunits <- estdat$sumunits
   totals <- estdat$totals
   landarea <- estdat$landarea
   allin1 <- estdat$allin1
@@ -553,8 +553,6 @@ modMAtree <- function(MApopdat,
                      tuniqueid = tuniqueid,
                      estseed = estseed,
                      woodland = woodland,
-                     TPA = TPA,
-                     tfilter = tfilter,
                      gui = gui)
   treex <- estdatVOL$treex
   treeflds <- estdatVOL$treeflds

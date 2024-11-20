@@ -56,9 +56,8 @@ check.popdataVOL <-
     ## 10. Return data objects
     ###################################################################################
     
-    
     ## Set global variables
-    treenm=seednm=condsampcnt=areawt2nm=adjcase <- NULL
+    treenm=seednm=condsampcnt=areawt2nm=adjcase=tadjfac=TPA_UNADJ=dbtablst <- NULL
     dbqueries=dbqueriesWITH <- list()
     cpropvars <- list(COND="CONDPROP_UNADJ", SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ")
     tpropvars <- list(SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ", MICR="MICRPROP_UNADJ")
@@ -115,7 +114,7 @@ check.popdataVOL <-
     if (is.null(condnm)) {
       stop("must include cond for estimation")
     }
-    
+
     ## If pltassgn is not in database but all other tables are in database, 
     ## we need to load tables to memory and subset for population queries.
     if (datindb && !pltaindb) {
@@ -183,7 +182,7 @@ check.popdataVOL <-
                       savedata_opts = outlst)
       }
     }
-    
+
     if (popType == "VOL") {
       
       ## tree table
@@ -193,7 +192,7 @@ check.popdataVOL <-
       treeflds <- treelst$tabflds
       tuniqueid <- treelst$tabid
       treex <- treelst$tabx
-      
+     
       ## seed table
       seedlst <- popTabchk(c("seed", "seedling"), tabtext = "seed",
                            tabs, tabIDs, dbtablst, dbconn, datindb)
@@ -206,7 +205,7 @@ check.popdataVOL <-
         stop("must include tree and/or seed for estimation")
       }
     }
-    
+   
     ##############################################################################
     ## 2. Check for necessary variables in tables
     ##############################################################################
@@ -237,7 +236,6 @@ check.popdataVOL <-
         cvars2keep <- cvars2keepchk
       }	  
     }
-    
     
     ##############################################################################
     ## 3. Build query for adjustment factors and append to pltids
@@ -287,7 +285,7 @@ check.popdataVOL <-
                 pltidsa. = "pltids.",
                 propqry = NULL)
     #message(ADJqry)
-    
+
     
     ## Build final query for adjustment factors, including pltids WITH query
     adjfactors.qry <- paste0(
@@ -337,7 +335,7 @@ check.popdataVOL <-
       ifelse(grepl("PROP_UNADJ", x), paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)), 
              ifelse (grepl("prop_unadj", x), paste0("ADJ_FACTOR_", toupper(sub("prop_unadj", "", x))), 
                      paste0(x, "_ADJ"))) })
-    
+
     ## Build and run final query to append adjustment factors to pltids, including ADJ query
     if (adj == "samp") {
       adja. <- "adj."

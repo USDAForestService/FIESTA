@@ -58,9 +58,15 @@
 #' @param estvarn String. Name of the tree estimate variable (numerator).
 #' @param estvarn.filter String. A tree filter for the estimate variable
 #' (numerator).  Must be R syntax (e.g., "STATUSCD == 1").
+#' @param estvarn.derive List. A derivation of a tree variable to estimate.
+#' (numerator). Must be a named list with one element (e.g., 
+#' list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.
 #' @param estvard String. Name of the tree estimate variable (denominator).
 #' @param estvard.filter String. A tree filter for the estimate variable
 #' (denominator).  Must be R syntax (e.g., "STATUSCD == 1").
+#' @param estvard.derive List. A derivation of a tree variable to estimate.
+#' (denominator). Must be a named list with one element (e.g., 
+#' list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.
 #' @param prednames String vector. Name(s) of predictor variables to include in
 #' model.
 #' @param FIA Logical. If TRUE, the finite population term is removed from
@@ -72,8 +78,6 @@
 #' @param colvar String. Optional. If rowvar != NULL, name of domain variable
 #' to group estvarn and estvard by for columns in table output. Colvar must be included in
 #' an input data frame (i.e., plt, cond, tree).
-#' @param sumunits Logical. If TRUE, estimation units are summed and returned
-#' in one table.
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
@@ -224,13 +228,14 @@ modMAratio <- function(MApopdat,
                        pcfilter = NULL, 
                        estvarn = NULL, 
                        estvarn.filter = NULL, 
+                       estvarn.derive = NULL,
                        estvard = NULL, 
                        estvard.filter = NULL, 
+                       estvard.derive = NULL,
                        prednames = NULL,
                        FIA = TRUE,
                        rowvar = NULL, 
                        colvar = NULL, 
-                       sumunits = FALSE, 
                        returntitle = FALSE, 
                        savedata = FALSE, 
                        table_opts = NULL, 
@@ -262,6 +267,7 @@ modMAratio <- function(MApopdat,
   rowcol.total <- TRUE
   rawdata <- TRUE
   returnlst <- list()
+  sumunits <- FALSE
 
   ## Set global variables
   ONEUNIT=n.total=TOTAL=tdom=estvar.name=
@@ -388,6 +394,7 @@ modMAratio <- function(MApopdat,
   invyrs <- MApopdat$invyrs
   estvar.area <- MApopdat$estvar.area
   adj <- MApopdat$adj
+  popdatindb <- MApopdat$popdatindb
   pop_fmt <- MApopdat$pop_fmt
   pop_dsn <- MApopdat$pop_dsn
   pop_schema <- MApopdat$pop_schema
@@ -415,6 +422,25 @@ modMAratio <- function(MApopdat,
     }
   }
   
+  if (popdatindb) {
+    if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
+      if (!is.null(pop_dsn)) {
+        if (pop_fmt == "sqlite") {
+          popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
+        }
+      } else {
+        stop("invalid database connection")
+      }
+    }
+    #pltcondx <- dbqueries$pltcondx
+    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
+    pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
+  } else {
+    pltcondxWITHqry <- NULL
+    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
+  }
+  
+  
   
   ########################################
   ## Check area units
@@ -438,9 +464,8 @@ modMAratio <- function(MApopdat,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondflds = pltcondflds,
-                  total = totals,
+                  totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
-                  sumunits = sumunits, 
                   landarea = landarea,
                   ACI = ACI, 
                   pcfilter = pcfilter,
@@ -458,7 +483,6 @@ modMAratio <- function(MApopdat,
                   gui = gui)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
-  sumunits <- estdat$sumunits
   totals <- estdat$totals
   landarea <- estdat$landarea
   allin1 <- estdat$allin1
@@ -491,8 +515,6 @@ modMAratio <- function(MApopdat,
                      tuniqueid = tuniqueid,
                      estseed = estseed,
                      woodland = woodland,
-                     TPA = TPA,
-                     tfilter = tfilter,
                      gui = gui)
   treex <- estdatVOL$treex
   treeflds <- estdatVOL$treeflds
@@ -507,14 +529,15 @@ modMAratio <- function(MApopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
+  withqry <- pltcondxWITHqry
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
-                 popdatindb = popdatindb,
+                 popdatindb = FALSE,
                  popconn = popconn, SCHEMA. = SCHEMA.,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
-                 withqry = pltcondxWITHqry,
+                 withqry = withqry,
                  estseed = estseed,
                  treex = treex, treeflds = treeflds,
                  seedx = seedx, seedflds = seedflds,
@@ -742,7 +765,6 @@ modMAratio <- function(MApopdat,
                    unitlut = unitlut,
                    npixels = npixels,
                    totals = totals,
-                   sumunits = sumunits,
                    uniquerow = uniquerow,
                    uniquecol = uniquecol,
                    row.orderby = row.orderby,
@@ -776,7 +798,6 @@ modMAratio <- function(MApopdat,
                 rowvar = rowvarnm, colvar = colvarnm, 
                 uniquerow = uniquerow, uniquecol = uniquecol,
                 rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                rowunit = rowunit, totunit = totunit, 
                 allin1 = allin1, 
                 savedata = savedata, addtitle = addtitle, 
                 title.ref = title.ref, 
@@ -868,12 +889,9 @@ modMAratio <- function(MApopdat,
     returnlst$raw <- rawdat
   }
   
-  if ("STATECD" %in% names(pltcondf)) {
-    returnlst$statecd <- sort(unique(pltcondf$STATECD))
-  }
-  if ("INVYR" %in% names(pltcondf)) {
-    returnlst$invyr <- sort(unique(pltcondf$INVYR))
-  }
+  returnlst$statecd <- sort(pcheck.states(states, statereturn = "VALUE"))
+  returnlst$states <- states
+  returnlst$invyr <- sort(unique(unlist(invyrs)))
   
   return(returnlst)
   

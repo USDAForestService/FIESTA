@@ -328,8 +328,8 @@ spExtractPoly <- function(xyplt,
   
   polyvcolslst <- {}
   if (length(polyvlst) > 1) {
-    spxyext <- spxy
-    mergecols <- names(sf::st_drop_geometry(spxy))
+    spxyext <- sppltx
+    mergecols <- names(sf::st_drop_geometry(sppltx))
   }
   
   for (i in 1:length(polyvlst)) {

@@ -14,7 +14,6 @@ modMAarea(
   pcfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
-  sumunits = FALSE,
   bootstrap = FALSE,
   returntitle = FALSE,
   savedata = FALSE,
@@ -54,9 +53,6 @@ colvar. If no domain, rowvar = NULL.}
 
 \item{colvar}{String. Name of the column domain variable in cond or tree.}
 
-\item{sumunits}{Logical. If TRUE, estimation units are summed and returned
-in one table.}
-
 \item{bootstrap}{Logical. If TRUE, returns bootstrap variance estimates,
 otherwise uses Horvitz-Thompson estimator under simple random sampling
 without replacement.}
@@ -79,8 +75,6 @@ the domain level as specified by rowvar and/or colvar and not at the level of
 the entire sample.}
 
 \item{...}{Parameters for modMApop() if MApopdat is NULL.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 If FIA=TRUE or unitvar=NULL and colvar=NULL, one data frame is

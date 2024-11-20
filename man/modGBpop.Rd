@@ -70,6 +70,8 @@ defining unique plot and will join to plt table.}
 reside.  The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html).}
 
+\item{dbconn}{Open database connection.}
+
 \item{pjoinid}{String vector. Join variable(s) in plot to match pltassgnid.}
 
 \item{areawt}{String. Name of variable in cond for summarizing area 
@@ -147,8 +149,6 @@ FIESTA::spGetStrata().}
 FIESTA::spGetAuxiliary().}
 
 \item{...}{For extendibility.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with population data for Green-Book estimates.

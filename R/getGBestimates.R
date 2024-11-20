@@ -26,7 +26,8 @@ getGBestimates <- function(esttype,
 
 
   ## Set global variables
-  unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
+  unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=
+    strwt=n.total=n.strata=ONEUNIT <- NULL
   addtotal <- ifelse(rowvar %in% c("PREV_TOTAL", "TOTAL") || 
                        length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
   strunitvars <- c(unitvar, strvar)
@@ -351,9 +352,9 @@ getGBestimates <- function(esttype,
     ## CALCULATE UNIT TOTALS FOR ROWVAR
     domdatnsum <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-                 by = c(strunitvars2, uniqueid, rowvar), .SDcols=estvar.name]
+                 by = c(strunitvars2, uniqueid, rowvar), .SDcols=estvarn.name]
     rowunit <- 
-      GBest.pbar(sumyn = estvar.name, 
+      GBest.pbar(sumyn = estvarn.name, 
                  ysum = domdatnsum,
                  uniqueid = uniqueid, 
                  stratalut = stratalut2,
@@ -386,9 +387,9 @@ getGBestimates <- function(esttype,
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
     domdatnsum <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-                 by = c(strunitvars2, uniqueid, "TOTAL"), .SDcols=estvar.name]
+                 by = c(strunitvars2, uniqueid, "TOTAL"), .SDcols=estvarn.name]
     totunit <- 
-      GBest.pbar(sumyn = estvar.name, 
+      GBest.pbar(sumyn = estvarn.name, 
                  ysum = domdatnsum,
                  uniqueid = uniqueid, 
                  stratalut = stratalut2,

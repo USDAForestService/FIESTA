@@ -51,14 +51,14 @@ check.popdataPLT <-
     
     ## Set global variables
     ##################################################################################
-    plotsampcnt=nonresplut=pfromqry=pltassgnqry=unitareaqry=auxlutqry=
+    plotsampcnt=nonresplut=pfromqry=pltassgnqry=unitareaqry=auxlutqry=MATCH=
       pwhereqry=pltx=pltassgnx=popwhereqry=pstratvars=getdataWITHqry=getdataCNs <- NULL
     
     datindb=pltaindb=unitindb=stratindb=subcycle99 <- FALSE
     unitvars <- unique(c(unitvar2, unitvar))
     pltassgnvars <- unique(c(projectid, pltassgnid, unitvars)) 
     SCHEMA. <- ""
-    P2POINTCNT=POP_PLOT_STRATUM_ASSGN=PLOT=pstatuscdnm<- NULL
+    P2POINTCNT=POP_PLOT_STRATUM_ASSGN=PLOT=pstatuscdnm <- NULL
     
    
     ###################################################################################
@@ -376,7 +376,10 @@ check.popdataPLT <-
       unitvar=unitvars <- "ONEUNIT"
       nbrunits <- 1
       punit.vals <- 1
+      pltassgnx$ONEUNIT <- 1
+      pltassgnflds <- c(pltassgnflds, "ONEUNIT")
     }
+
     pltassgnvars <- unique(c(pltassgnvars, unitvars))
     adjbyvars <- unitvars
     unitvarsa. <- ifelse(all(unitvars %in% pltassgnflds), pltassgn., plt.)
@@ -416,7 +419,24 @@ check.popdataPLT <-
         }
       }
     } else {
-      strvar <- NULL
+      
+      if (is.null(auxlut)) {
+        if (unitvar == "ONEUNIT") {
+          auxlut <- data.frame(ONEUNIT = 1)
+        } else {
+          auxlut <- unique(pltassgnx[, c(unitvar2, unitvar), with=FALSE])
+          names(auxlut) <- c(unitvar2, unitvar)
+        }
+      }
+      strvar <- "ONESTRAT"
+      strata <- TRUE
+      
+      auxlut$ONESTRAT <- 1
+      auxlut$strwt <- 1
+      pltassgnx$ONESTRAT <- 1
+      pltassgnvars <- c(pltassgnvars, "ONESTRAT")
+      pltassgnflds <- c(pltassgnflds, "ONESTRAT")
+      selectpvars <- c(selectpvars, "ONESTRAT")
     }
    
     ## 6.3. Check prednames in plot/pltassgn.
@@ -480,11 +500,11 @@ check.popdataPLT <-
         pltassgnnm <- checknm("pltassgn", dbtablst)
         if (!identical(pltassgnid, pjoinid)) index <- pjoinid
         write2sqlite(pltassgnx[, pltassgnvars, with=FALSE], 
-                     dbconn = dbconn, out_name = pltassgnm, index = index)
+                     dbconn = dbconn, out_name = pltassgnnm, index = index)
         pltaindb <- TRUE
       }
     }
-    
+
     ##################################################################################
     ## 9. Check popFilters and create pltidsqry
     ##################################################################################
@@ -504,6 +524,7 @@ check.popdataPLT <-
                       pjoinid = pjoinid,
                       pltassgnid = pltassgnid,
                       plt. = plt.,
+                      pltassgnvars = pltassgnvars,
                       selectpvars = selectpvars,
                       dbconn = dbconn,
                       schema = schema,
@@ -521,20 +542,20 @@ check.popdataPLT <-
     pltidsqry <- popFilterqry$pltidsqry
     pwhereqry <- popFilterqry$pwhereqry
     pltselectqry <- popFilterqry$pltselectqry
+    pltassgnvars <- popFilterqry$pltassgnvars
     pfromqry <- popFilterqry$pfromqry
     pltafromqry <- popFilterqry$pltafromqry
     states <- popFilterqry$states
     invyrs <- popFilterqry$invyrs
     nonsamp.pfilter <- popFilterqry$nonsamp.pfilter
     iseval <- popFilterqry$iseval
-    
     if (iseval) {
       popevalid <- popFilterqry$popevalid
       ppsanm <- popFilterqry$ppsanm
       POP_PLOT_STRATUM_ASSGN <- popFilterqry$POP_PLOT_STRATUM_ASSGN
       PLOT <- popFilterqry$PLOT
     } 
-       
+
     ## 10. Build WITH queries and extract plt
     ##################################################################################
     
@@ -678,7 +699,7 @@ check.popdataPLT <-
         }        
       }
     }
- 
+
     ##################################################################################
     ## 12. Get estimation unit(s) (unitvars) values
     ##################################################################################
@@ -891,7 +912,7 @@ check.popdataPLT <-
       unitareax <- unitareax[, sum(.SD, na.rm=TRUE), by=c(unitvars, vars2keep), .SDcols=areavar]
       setnames(unitareax, "V1", areavar)
     }	
-    
+
     ######################################################################################
     ## 14. Check auxiliary data in auxlut.
     ######################################################################################
@@ -899,6 +920,7 @@ check.popdataPLT <-
     
     auxvars <- unique(c(strvar, prednames))
     auxtabnm <- ifelse(strata, "stratalut", "auxlut")
+    
     if (!is.null(auxvars)) {
       if (is.null(auxlut)) {
         if (strata) {
@@ -954,10 +976,14 @@ check.popdataPLT <-
           
         }
       }
-      
+
       ## Aggregate area to ONEUNIT
       if (any(unitvars == "ONEUNIT")) {
-        auxlutx$ONEUNIT <- 1
+        if (is.null(auxlutx)) {
+          auxlutx <- data.frame(ONEUNIT = 1)
+        } else {
+          auxlutx$ONEUNIT <- 1
+        }
       }
 
       if (strata) {
@@ -1049,6 +1075,41 @@ check.popdataPLT <-
     }
 
     ######################################################################################
+    ## 16. Get plot counts by estimation unit
+    ######################################################################################
+    
+    ## Build select for plot counts
+    if (any(unitvars == "ONEUNIT")) {
+      pltcnt_grpbyvars <- "ONEUNIT"
+      pltcnt_selectqry <- paste0(
+        "\nSELECT 1 AS ONEUNIT, COUNT(*) NBRPLOTS")
+    } else {
+      pltcnt_grpbyvars <- paste0(pltassgn., unitvars)
+      pltcnt_selectqry <- paste0(
+        "\nSELECT ", toString(pltcnt_grpbyvars), ", COUNT(*) NBRPLOTS")
+    }
+    
+    
+    if (!is.null(pstatuscdnm)) {    
+      pltcnt_selectqry <- paste0(pltcnt_selectqry, ", ",
+                                 "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD == 1 THEN 1 ELSE 0 END) AS FOREST,",
+                                 "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD == 2 THEN 1 ELSE 0 END) AS NONFOREST")
+    }  
+    
+    ## Build query for plot counts
+    plotunitcntqry <- paste0(pltcnt_selectqry, 
+                             pltafromqry, 
+                             pwhereqry,
+                             "\nGROUP BY ", toString(pltcnt_grpbyvars),
+                             "\nORDER BY ", toString(pltcnt_grpbyvars))
+    if (pltaindb) {      
+      plotunitcnt <- DBI::dbGetQuery(dbconn, plotunitcntqry)
+    } else {
+      plotunitcnt <- sqldf::sqldf(plotunitcntqry, connection = NULL)
+    }
+    
+    
+    ######################################################################################
     ## 15. Query pltassgnx using popfilters and import pltassgnx
     ######################################################################################
     ppsaselectvars <- {}
@@ -1087,44 +1148,9 @@ check.popdataPLT <-
       pltassgnx <- setDT(pltassgnx)
     }
     setkeyv(pltassgnx, pltassgnid)
-    
-   
-    ######################################################################################
-    ## 16. Get plot counts by estimation unit
-    ######################################################################################
-    
-    ## Build select for plot counts
-    if (any(unitvars == "ONEUNIT")) {
-      pltcnt_grpbyvars <- "ONEUNIT"
-      pltcnt_selectqry <- paste0(
-        "\nSELECT 1 AS ONEUNIT, COUNT(*) NBRPLOTS")
-    } else {
-      pltcnt_grpbyvars <- paste0(pltassgn., unitvars)
-      pltcnt_selectqry <- paste0(
-        "\nSELECT ", toString(pltcnt_grpbyvars), ", COUNT(*) NBRPLOTS")
-    }
-    
-  
-    if (!is.null(pstatuscdnm)) {    
-      pltcnt_selectqry <- paste0(pltcnt_selectqry, ", ",
-                                 "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD == 1 THEN 1 ELSE 0 END) AS FOREST,",
-                                 "\n  SUM(CASE WHEN ", pstatuscda., "PLOT_STATUS_CD == 2 THEN 1 ELSE 0 END) AS NONFOREST")
-    }  
-    
-    
-    ## Build query for plot counts
-    plotunitcntqry <- paste0(pltcnt_selectqry, 
-                             pltafromqry, 
-                             pwhereqry,
-                             "\nGROUP BY ", toString(pltcnt_grpbyvars),
-                             "\nORDER BY ", toString(pltcnt_grpbyvars))
-    if (pltaindb) {      
-      plotunitcnt <- DBI::dbGetQuery(dbconn, plotunitcntqry)
-    } else {
-      plotunitcnt <- sqldf::sqldf(plotunitcntqry, connection = NULL)
-    }
 
     ## Subset pltx to plots in pltassgn
+    ######################################################################################
     if (!pltaindb) {
       getdataCNs <- pltx[[puniqueid]]
       
@@ -1147,7 +1173,7 @@ check.popdataPLT <-
       "\n(", pltidsqry, ")")
     pltidsa. <- "pltids."
     
-  
+
     #############################################################################
     ## 19. Return data
     #############################################################################

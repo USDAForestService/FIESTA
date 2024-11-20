@@ -1003,8 +1003,6 @@ datlut <- datLUTclass(
 WYtree2 <- datlut$xLUT
 
 ## Species and diameter class
-source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTree.R")
-source("C:\\_tsf\\_GitHub\\tfrescino\\FIESTAdev\\R\\datSumTreeDom.R")
 treedomDIACNTs <- datSumTreeDom(
                     tree = WYtree2, 
                     cond = WYcond, 

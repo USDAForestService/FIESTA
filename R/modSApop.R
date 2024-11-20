@@ -206,13 +206,11 @@ modSApop <- function(popType = "VOL",
                      returndata = TRUE,
                      savedata = FALSE, 
                      saveobj = FALSE, 
-                     savepltids = FALSE,
                      objnm = "SApopdat", 
                      unit_opts = list(minplotnum.unit = 2,
                                       unit.action = "remove"), 
                      savedata_opts = NULL, 
                      database_opts = NULL,
-                     dsnreadonly = TRUE,
                      SAdoms = NULL, 
                      smallbnd = NULL, 
                      smallbnd.domain = NULL, 
@@ -242,7 +240,7 @@ modSApop <- function(popType = "VOL",
   ## Set parameters
   adjtree <- FALSE
   returnSApopdat <- FALSE
-  nonsamp.pfilter=nonsamp.cfilter=schema <- NULL 
+  nonsamp.pfilter=nonsamp.cfilter=schema=vcondstrx=vcondsppx <- NULL 
   returnlst <- list(module = "SA")
   
   ## Set global variables
@@ -250,6 +248,8 @@ modSApop <- function(popType = "VOL",
   condid <- "CONDID"
   areawt2 <- NULL
   pvars2keep <- NULL
+  savepltids <- FALSE
+  dsnreadonly <- FALSE
  
 
   ##################################################################
@@ -1032,31 +1032,31 @@ modSApop <- function(popType = "VOL",
                     savedata_opts = outlst)
       
       rm(pltassgnx)
-      rm(unitarea)
+      rm(dunitarea)
       
       
       if (popType %in% c("TREE", "GRM")) {
         message("saving REF_SPECIES...")
         outlst$out_layer <- "REF_SPECIES"
         datExportData(REF_SPECIES,
-                      saveadata_opts = outlst)
+                      savedata_opts = outlst)
       }
       
       
-      if (!is.null(vcondsppf)) {
+      if (!is.null(vcondsppx)) {
         message("saving vcondsppx...")
         outlst$out_layer <- "vcondsppx"
-        datExportData(vcondsppf, 
+        datExportData(vcondsppx, 
                       savedata_opts = outlst)
-        rm(vcondsppf)
+        rm(vcondsppx)
         # gc()
       }
-      if (!is.null(vcondstrf)) {
+      if (!is.null(vcondstrx)) {
         message("saving vcondstrx...")
         outlst$out_layer <- "vcondstrx"
-        datExportData(vcondstrf, 
+        datExportData(vcondstrx, 
                       savedata_opts = outlst)
-        rm(vcondstrf)
+        rm(vcondstrx)
       }
       
     } else if (datindb) {

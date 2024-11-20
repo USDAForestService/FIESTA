@@ -53,10 +53,18 @@ pltassgn).  Must be R logical syntax.}
 \item{estvarn.filter}{String. A tree filter for the estimate variable
 (numerator).  Must be R syntax (e.g., "STATUSCD == 1").}
 
+\item{estvarn.derive}{List. A derivation of a tree variable to estimate.
+(numerator). Must be a named list with one element (e.g., 
+list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.}
+
 \item{estvard}{String. Name of the tree estimate variable (denominator).}
 
 \item{estvard.filter}{String. A tree filter for the estimate variable
 (denominator).  Must be R syntax (e.g., "STATUSCD == 1").}
+
+\item{estvard.derive}{List. A derivation of a tree variable to estimate.
+(denominator). Must be a named list with one element (e.g., 
+list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.}
 
 \item{rowvar}{String. Name of the row domain variable in cond or tree. If
 only one domain, rowvar = domain variable. If more than one domain, include

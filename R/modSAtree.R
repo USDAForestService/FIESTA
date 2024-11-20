@@ -65,6 +65,9 @@
 #' @param estvar String. Name of the tree estimate variable.
 #' @param estvar.filter String. A tree filter for estimate variable. Must be R
 #' syntax (e.g., "STATUSCD == 1").
+#' @param estvar.derive List. A derivation of a tree variable to estimate.
+#' Must be a named list with one element (e.g., 
+#' list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.
 #' @param rowvar String. Name of the row domain variable in cond or tree. If
 #' only one domain, rowvar = domain variable. If more than one domain, include
 #' colvar. If no domain, rowvar = NULL.
@@ -80,10 +83,6 @@
 #' labels whether selected or not for both area- and unit-level models.
 #' @param multest Logical. If TRUE, returns a data frame of SA estimates using
 #' both unit-level and area-level estimates.
-#' @param addSAdomsdf Logical. If TRUE, appends SAdomdf to unit.multest table
-#' for output.
-#' @param SAdomvars String vector. List of attributes from SAdoms to include in
-#' multest output.
 #' @param savemultest Logical. If TRUE, save table with area- and unit-level
 #' estimates.
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
@@ -251,7 +250,8 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=
   title.rowvar=title.colvar=title.rowgrp=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
-	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
+	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var=
+  SAEarea_estimators=SAEunit_estimators<- NULL
 
   ## Set seed
   set.seed(66)
@@ -453,6 +453,7 @@ modSAtree <- function(SApopdatlst = NULL,
         first = "YES", gui = gui, stopifnull= TRUE)
   if (multest) {
     estimatorlst <- c('JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA')
+    estimatorSElst <- c('JU.GREG.se','JU.EBLUP.se','JFH.se','hbsaeU.se','hbsaeA.se')
     multest_fmt <- pcheck.varchar(var2check = estimatorlst, 
            varnm = "multest_estimators", checklst = estimatorlst, 
            gui = gui, caption = "Output multest format?", multiple = TRUE) 
@@ -599,8 +600,8 @@ modSAtree <- function(SApopdatlst = NULL,
     dbqueries <- SApopdat$dbqueries
     dbqueriesWITH <- SApopdat$dbqueriesWITH
     adjcase <- SApopdat$adjcase
-    pltidsid <- GBpopdat$pjoinid
-    pltassgnid <- GBpopdat$pltassgnid
+    pltidsid <- SApopdat$pjoinid
+    pltassgnid <- SApopdat$pltassgnid
     SAdoms <- SApopdat$SAdoms
     largebnd.unique <- SApopdat$largebnd.unique
 
@@ -730,8 +731,6 @@ modSAtree <- function(SApopdatlst = NULL,
                        tuniqueid = tuniqueid,
                        estseed = estseed,
                        woodland = woodland,
-                       TPA = TPA,
-                       tfilter = tfilter,
                        gui = gui)
     treex <- estdatVOL$treex
     treeflds <- estdatVOL$treeflds
@@ -775,6 +774,7 @@ modSAtree <- function(SApopdatlst = NULL,
     rowvar <- rowcolinfo$rowvar
     colvar <- rowcolinfo$colvar
     rowvarnm <- rowcolinfo$rowvarnm
+    colvarnm <- rowcolinfo$colvarnm
     row.orderby <- rowcolinfo$row.orderby
     col.orderby <- rowcolinfo$col.orderby
     row.add0 <- rowcolinfo$row.add0
@@ -1488,7 +1488,7 @@ modSAtree <- function(SApopdatlst = NULL,
   if (save4testing) {
     message("saving object for testing")
 
-    returnlst$pdomdat <- pdomdat
+    returnlst$domdat <- domdat
     returnlst$dunitlut <- dunitlut
     returnlst$cuniqueid <- cuniqueid
   }

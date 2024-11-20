@@ -13,9 +13,11 @@ getpopFilterqry <- function(popType,
                             dbTabs,
                             datindb,
                             pltaindb,
+                            pltassgnvars,
                             selectpvars = NULL,
                             pltassgnx = NULL,
                             projectid = NULL,
+                            adj = "samp",
                             schema = NULL,
                             chkvalues = FALSE,
                             dbconnopen = TRUE) {
@@ -41,7 +43,7 @@ getpopFilterqry <- function(popType,
     dbtables <- DBI::dbListTables(dbconn)
   }
   
-  
+ 
   ## 1. Create join for including pltassgnx
   ##################################################################################
   noplt <- TRUE
@@ -74,7 +76,7 @@ getpopFilterqry <- function(popType,
           statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
           statecda. <- ifelse(statenm %in% pltassgnflds, pltassgn., plt.)
         } else {
-          statecda. <- ifelse(statenm %in% pltflds, plt., pltassgn)
+          statecda. <- ifelse(statenm %in% pltflds, plt., pltassgn.)
         }
       }
       
@@ -371,7 +373,7 @@ getpopFilterqry <- function(popType,
                               "\n  AND ", stwhereqry)
         }
       }
-    } else if (!is.null(stcntywhereqry)) {
+    } else if (!is.null(stcntywhereqry) && !noplt) {
       if (is.null(pwhereqry)) {
         pwhereqry <- paste0("\n WHERE ", stcntywhereqry)
       } else {
@@ -398,6 +400,9 @@ getpopFilterqry <- function(popType,
           pwhereqry <- paste0(pwhereqry, 
                               "\n  AND ", subcycle.filter)
         }
+        if (subcyclea. == pltassgn.) {
+          pltassgnvars <- c(pltassgnvars, subcyclenm)
+        }
       }
     }
     
@@ -418,6 +423,9 @@ getpopFilterqry <- function(popType,
           pwhereqry <- paste0(pwhereqry, 
                               "\n  AND ", remper.filter)
         }	
+        if (rempera. == pltassgn.) {
+          pltassgnvars <- c(pltassgnvars, rempernm)
+        }
       }
     }
     
@@ -438,6 +446,9 @@ getpopFilterqry <- function(popType,
           pwhereqry <- paste0(pwhereqry, 
                               "\n AND ", p2vegstatus.filter)
         }	
+        if (p2vegstatusa. == pltassgn.) {
+          pltassgnvars <- c(pltassgnvars, p2vegstatusnm)
+        }
       }
     }
     
@@ -513,6 +524,9 @@ getpopFilterqry <- function(popType,
       } else {
         pwhereqry <- paste(paste(pwhereqry, invyr.filter, sep=" AND "))
       }
+      if (invyra. == pltassgn.) {
+        pltassgnvars <- c(pltassgnvars, invyrnm)
+      }
     }
     
   } else if (!is.null(popFilter$measyrs)) {
@@ -557,6 +571,9 @@ getpopFilterqry <- function(popType,
       } else {
         pwhereqry <- paste(paste(pwhereqry, measyears.filter, sep=" AND "))
       }
+      if (measyr. == pltassgn.) {
+        pltassgnvars <- c(pltassgnvars, measyrnm)
+      }
     }
     
     ## Add pwhereqry to pltidsqry
@@ -586,7 +603,7 @@ getpopFilterqry <- function(popType,
       if (datindb) {      
         intensityvals <- DBI::dbGetQuery(dbconn, intensity.qry)[[1]]
       } else {
-        intensityvals <- sqldf::sqldf(intensityqry, connection = NULL)[[1]]
+        intensityvals <- sqldf::sqldf(intensity.qry, connection = NULL)[[1]]
       }
       intensitymiss <- intensity[!intensity %in% intensityvals]
       if (any(!intensity %in% intensityvals)) {
@@ -602,6 +619,9 @@ getpopFilterqry <- function(popType,
     } else {
       pwhereqry <- paste0(pwhereqry, 
                           "\n  AND ", iwhere.qry)
+    }
+    if (intensitya. == pltassgn.) {
+      pltassgnvars <- c(pltassgnvars, intensitynm)
     }
   }
   
@@ -625,6 +645,9 @@ getpopFilterqry <- function(popType,
       nonsamp.pfilter <- paste0(pstatuscda., "PLOT_STATUS_CD != 3")
       message("removing nonsampled forest plots...")
     }
+    if (pstatuscda. == pltassgn.) {
+      pltassgnvars <- c(pltassgnvars, pstatuscdnm)
+    }
   } 
   
   ## If ACI, check NF_PLOT_STATUS_CD and generate table with number of plots
@@ -646,6 +669,9 @@ getpopFilterqry <- function(popType,
       if (!is.null(nfpstatuscdnm) && (is.null(nonsamp.pfilter) || nonsamp.pfilter == "")) {
         nfpstatuscda. <- ifelse(nfpstatuscdnm %in% pltflds, plt., pltassgn.)
         nfnonsamp.pfilter <- paste(nfpstatuscda., "NF_PLOT_STATUS_CD != 3")
+      }
+      if (nfpstatuscda. == pltassgn.) {
+        pltassgnvars <- c(pltassgnvars, nfpstatuscdnm)
       }
       if (!is.null(nonsamp.pfilter)) {
         nonsamp.pfilter <- paste0(nonsamp.pfilter, " AND ", nfnonsamp.pfilter)
@@ -713,6 +739,11 @@ getpopFilterqry <- function(popType,
   if (popFilter$measCur) {
     surveyfromqry <- NULL
     varCur <- "INVYR"
+    varCurnm <- findnm(varCur, pflds, returnNULL = TRUE)
+    if (is.null(varCurnm)) {
+      message("the ", varCur, " field does not exist in data set...")
+      return(NULL)
+    }
     
     ## Check SURVEY table
     if (!is.null(dbconn)) {
@@ -727,7 +758,7 @@ getpopFilterqry <- function(popType,
     if (!is.null(measEndyr)) {
       if (chkvalues) {
         yrlst.qry <- paste0(
-          "SELECT DISTINCT ", varCur, 
+          "SELECT DISTINCT ", varCurnm, 
           "\nFROM ", SCHEMA., plotnm, 
           "\nORDER BY ", varCur)
         pltyrs <- DBI::dbGetQuery(dbconn, yrlst.qry)
@@ -737,11 +768,15 @@ getpopFilterqry <- function(popType,
           return(NULL)
         }
       }
-      Endyr.filter <- paste0(plt., varCur, " <= ", measEndyr)
+      varCura. <- ifelse(varCur %in% pltflds, plt., pltassgn.)
+      Endyr.filter <- paste0(varCura., varCur, " <= ", measEndyr)
       if (is.null(pwhereqry)) {
         pwhereqry <- Endyr.filter
       } else {
         pwhereqry <- paste(paste(pwhereqry, Endyr.filter, sep="\n   AND "))
+      }
+      if (varCura. == pltassgn.) {
+        pltassgnvars <- c(pltassgnvars, varCurnm)
       }
     }
 
@@ -821,6 +856,7 @@ getpopFilterqry <- function(popType,
     returnlst$pfilter <- pfilter
   }
   returnlst$pwhereqry <- pwhereqry
+  returnlst$pltassgnvars <- pltassgnvars
   
   return(returnlst)
 }

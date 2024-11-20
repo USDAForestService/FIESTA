@@ -24,7 +24,7 @@ check.tree <-
   ###################################################################################
 
   ## Set global variables
-  tdomvarlstn=estunitsd <- NULL  
+  tdomvarlstn=estunitsd=variable=tsumvard <- NULL  
 
   if (estseed == "only") {
     seedonly <- TRUE
@@ -93,7 +93,7 @@ check.tree <-
     classifynmlst <- tdomdata$classifynmlst
     tdomvarnm <- tdomdata$tdomvarnm
     tdomvar2nm <- tdomdata$tdomvar2nm
-    
+   
     if (pivot) {
       ## Transpose back to rows
 #      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst, tdomvar2),
@@ -101,7 +101,11 @@ check.tree <-
       tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst),
                                tvars = tdomvarlstn, na.rm = FALSE)
       if (!is.null(tdomvar2)) {
-        tdomdat <- data.table(tdomdat, tdomdat[, tstrsplit(variable, "#", fixed=TRUE)])
+        if ("variable" %in% names(tdomdat)) {
+          tdomdat <- data.table(tdomdat, tdomdat[, tstrsplit(variable, "#", fixed=TRUE)])
+        } else {
+          tdomdat <- data.table(tdomdat, tdomdat[, tstrsplit(get(tdomvar2), "#", fixed=TRUE)])
+        }
         setnames(tdomdat, c("V1", "V2", "value"), c(tdomvarnm, tdomvar2nm, tsumvarn))
         tdomdat$variable <- NULL
       } else {
@@ -212,7 +216,7 @@ check.tree <-
       tsumvard <- tdomdata$tsumvarnm
       tdomvarlstd <- tdomdata$tdomlst
       estunitsd <- tdomdata$estunits
-      
+
       if (!pivot) {
         tdomdatd <- tdomdatd[!is.na(tdomdatd[[tdomvar]]),]
       }

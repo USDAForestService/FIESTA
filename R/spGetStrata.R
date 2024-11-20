@@ -67,7 +67,6 @@
 #' of options. Only used when savedata = TRUE.  
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
 #' include in dunitlut output and extract to pltassgn points.
-#' @param gui Logical. If gui, user is prompted for parameters.
 #'
 #' @return \item{pltassgn}{ Data frame. Input xyplt data with extracted
 #' estimation unit and strata values appended. } \item{unitarea}{ Data frame.
@@ -174,7 +173,7 @@ spGetStrata <- function(xyplt,
                         vars2keep = NULL){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
   gui <- FALSE
 
   if (gui) {uniqueid=stratclip=unitarea <- NULL}

@@ -57,9 +57,15 @@
 #' @param estvarn String. Name of the tree estimate variable (numerator).
 #' @param estvarn.filter String. A tree filter for the estimate variable
 #' (numerator).  Must be R syntax (e.g., "STATUSCD == 1").
+#' @param estvarn.derive List. A derivation of a tree variable to estimate.
+#' (numerator). Must be a named list with one element (e.g., 
+#' list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.
 #' @param estvard String. Name of the tree estimate variable (denominator).
 #' @param estvard.filter String. A tree filter for the estimate variable
 #' (denominator).  Must be R syntax (e.g., "STATUSCD == 1").
+#' @param estvard.derive List. A derivation of a tree variable to estimate.
+#' (denominator). Must be a named list with one element (e.g., 
+#' list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.
 #' @param rowvar String. Name of the row domain variable in cond or tree. If
 #' only one domain, rowvar = domain variable. If more than one domain, include
 #' colvar. If no domain, rowvar = NULL.
@@ -517,7 +523,7 @@ modGBratio <- function(GBpopdat,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondflds = pltcondflds,
-                  total = totals,
+                  totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
                   landarea = landarea,
@@ -556,7 +562,7 @@ modGBratio <- function(GBpopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
-  
+
   
   ###################################################################################
   ## Check parameter inputs and tree filters
@@ -570,8 +576,6 @@ modGBratio <- function(GBpopdat,
                      tuniqueid = tuniqueid,
                      estseed = estseed,
                      woodland = woodland,
-                     TPA = TPA,
-                     tfilter = tfilter,
                      gui = gui)
   treex <- estdatVOL$treex
   treeflds <- estdatVOL$treeflds
@@ -747,6 +751,7 @@ modGBratio <- function(GBpopdat,
                  pltcondx = pltcondx,
                  pltidsadj = pltidsadj,
                  pltcondxadjWITHqry = pltcondxadjWITHqry,
+                 pltidsid = pltidsid,
                  pcwhereqry = pcwhereqry,
                  classifyrow = classifyrow,
                  classifycol = classifycol)

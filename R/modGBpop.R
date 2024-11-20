@@ -79,6 +79,7 @@
 #' @param dsn String. Name of database where tree, cond, and plot-level tables
 #' reside.  The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html).
+#' @param dbconn Open database connection.
 #' @param pjoinid String vector. Join variable(s) in plot to match pltassgnid.
 #' @param areawt String. Name of variable in cond for summarizing area 
 #' weights (e.g., CONDPROP_UNADJ).
@@ -131,7 +132,6 @@
 #' FIESTA::spGetStrata().
 #' @param auxdat R List object. Output data list components from
 #' FIESTA::spGetAuxiliary().
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ... For extendibility.
 #' @return A list with population data for Green-Book estimates.
 #' 
@@ -734,7 +734,7 @@ modGBpop <- function(popType = "VOL",
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
   
- 
+
   ###################################################################################
   ## Check Population Data
   ###################################################################################
@@ -896,7 +896,11 @@ modGBpop <- function(popType = "VOL",
     ACI.filter <- popcheck$ACI.filter
     adjcase <- popcheck$adjcase
     varadjP2VEG <- popcheck$varadjP2VEG
+
+    vcondsppx <- popcheck$vcondsppx
+    vcondstrx <- popcheck$vcondstrx
     
+        
     if (returndata) {
       #pltx <- popcheck$pltx
       #condx <- popcheck$condx
@@ -904,6 +908,9 @@ modGBpop <- function(popType = "VOL",
       subp_condx <- popcheck$subp_condx
       p2veg_subp_structure <- popcheck$p2veg_subp_structure
       p2veg_subplot_spp <- popcheck$p2veg_subplot_spp
+      
+      vcondsppx <- popcheck$vcondsppx
+      vcondstrx <- popcheck$vcondstrx
     }
   }
   
@@ -1064,7 +1071,7 @@ modGBpop <- function(popType = "VOL",
     
     message("saving pltids...")
     outlst$out_layer <- "pltids"
-    if (!append_layer) index.unique.pltids <- c(projectid, puniqued)
+    if (!append_layer) index.unique.pltids <- c(projectid, puniqueid)
     datExportData(pltidsadj, 
                   savedata_opts = outlst)
   }
@@ -1116,8 +1123,8 @@ modGBpop <- function(popType = "VOL",
     returnlst$evalid <- popevalid
   }
   if (popType == "P2VEG") {
-    returnlst$vcondsppx <- vcondsppf
-    returnlst$vcondstrx <- vcondstrf
+    returnlst$vcondsppx <- vcondsppx
+    returnlst$vcondstrx <- vcondstrx
     returnlst$varadjP2VEG <- varadjP2VEG
     
     subplotx <- popcheck$subplotx
@@ -1175,28 +1182,28 @@ modGBpop <- function(popType = "VOL",
       rm(stratalut)
       # gc()
       
-      if (popType %in% c("TREE", "GRM")) {
-        message("saving REF_SPECIES...")
-        outlst$out_layer <- "REF_SPECIES"
-        datExportData(REF_SPECIES,
-                      saveadata_opts = outlst)
-      }
+      # if (popType %in% c("TREE", "GRM")) {
+      #   message("saving REF_SPECIES...")
+      #   outlst$out_layer <- "REF_SPECIES"
+      #   datExportData(REF_SPECIES,
+      #                 savedata_opts = outlst)
+      # }
       
       
-      if (!is.null(vcondsppf)) {
+      if (!is.null(vcondsppx)) {
         message("saving vcondsppx...")
         outlst$out_layer <- "vcondsppx"
-        datExportData(vcondsppf, 
+        datExportData(vcondsppx, 
                       savedata_opts = outlst)
-        rm(vcondsppf)
+        rm(vcondsppx)
         # gc()
       }
-      if (!is.null(vcondstrf)) {
+      if (!is.null(vcondstrx)) {
         message("saving vcondstrx...")
         outlst$out_layer <- "vcondstrx"
-        datExportData(vcondstrf, 
+        datExportData(vcondstrx, 
                       savedata_opts = outlst)
-        rm(vcondstrf)
+        rm(vcondstrx)
         # gc()
       }
       

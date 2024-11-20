@@ -200,7 +200,7 @@ check.estdata <-
         stop(paste("missing variables for TIMBERLAND landarea filter:",
 		                paste(landcols.miss, collapse=", ")))
       }
-      landarea.filter <- "pc.SITECLCD IN(1:6) AND pc.RESERVCD = 0"
+      landarea.filter <- "pc.SITECLCD IN(1,2,3,4,5,6) AND pc.RESERVCD = 0"
       # if (popType %in% c("CHNG", "GRM")) {
       #   landarea.filterCHNG <- gsub("pc.", "ppc.", landarea.filter)
       #   landarea.filter <- paste0(landarea.filter, " AND ", landarea.filterCHNG)

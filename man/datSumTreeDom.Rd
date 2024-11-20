@@ -125,10 +125,10 @@ tdomvar must be 'SPCD' or 'SPGRPCD'.}
 \item{seedonly}{Logical. If TRUE, seedling counts only. Note: tdomvar
 must be 'SPCD' or 'SPGRPCD'.}
 
-\item{woodland}{String. If woodland = 'Y', include woodland tree species
-where measured. If woodland = 'N', only include timber species. See 
-FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
-woodland species.}
+\item{woodland}{String. ('Y', 'N', 'only') If woodland = 'Y', include
+woodland tree species where measured. If woodland = 'N', only include 
+timber species. See FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', 
+only include woodland species. If NULL, use whatever is in table.}
 
 \item{TPA}{Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
 respective trees-per-acre variable (see details) to get per-acre
@@ -174,6 +174,10 @@ in tdomvarlst is calculated and added to output data frame.}
 
 \item{tdomtotnm}{String. If tdomtot=TRUE, the variable name for the total
 column in output data frame. If NULL, the default will be tdomvar + 'TOT'.}
+
+\item{bydomainlst}{String (vector). Categorical domain variables not in
+tdomvar/tdomvar2. Variables must be in tree table or plt/cond table if tables 
+are provided.}
 
 \item{FIAname}{Logical. If TRUE, changes names of columns for SPCD and
 SPGRPCD from code to FIA names.}
@@ -237,10 +241,6 @@ default = 'tdomsum'.}
 \item{schema}{String. Name of schema in database.}
 
 \item{dbconnopen}{Logical. If TRUE, keep database connection open.}
-
-\item{bydomainst}{String (vector). Categorical domain variables not in
-tdomvar/tdomvar2. Variables must be in tree table or plt/cond table if tables 
-are provided.}
 }
 \value{
 tdomdata - a list of the following objects:

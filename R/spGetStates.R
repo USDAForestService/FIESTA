@@ -54,6 +54,9 @@ spGetStates <- function(bnd_layer,
   ## Get states that intersect a boundary. If RS != NULL, boundary is
   ## clipped to RS states.
   ##############################################################################
+  
+  ## Set global variables
+  PLOT_STATUS_CD <- NULL
 
   ##################################################################
   ## CHECK PARAMETER NAMES

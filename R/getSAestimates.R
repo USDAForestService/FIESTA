@@ -36,6 +36,8 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   
   dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
   response <- estvar.name
+  addSAdomsdf <- FALSE
+  SAdomsdf <- NULL
   
   if (i == 1) {
     message("getting estimates for ", response, "...")
@@ -108,7 +110,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
     largebnd.vals <- 1
   }
   
-  byvars <- unique(c(vars2keep, largebnd.unique, unitvar, "AOI", uniqueid, "TOTAL", prednames))
+  byvars <- unique(c(vars2keep, largebnd.unique, dunitvar, "AOI", uniqueid, "TOTAL", prednames))
   if (all(c("X", "Y") %in% names(pltassgnx))) {
     byvars <- c(byvars, "X","Y")
   }
@@ -222,12 +224,12 @@ getSAestimates <- function(esttype, i, largebnd.unique,
     
     domdat <- domdat[!is.na(domdat[[rowvar]]),] 
     domdattot <- setDT(domdat)[ ,lapply(.SD, sum, na.rm=TRUE), 
-                                by=c(largebnd.unique, unitvar, uniqueid, rowvar, prednames)
+                                by=c(largebnd.unique, dunitvar, uniqueid, rowvar, prednames)
                                 , .SDcols=response]
     
     if (!"DOMAIN" %in% names(domdattot)) {
-      domdattot$DOMAIN <- domdattot[[unitvar]]
-      domdattot[[unitvar]] <- NULL
+      domdattot$DOMAIN <- domdattot[[dunitvar]]
+      domdattot[[dunitvar]] <- NULL
     }
     if (!"AOI" %in% names(domdattot)) {
       domdattot$AOI <- 1

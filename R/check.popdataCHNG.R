@@ -65,7 +65,7 @@ check.popdataCHNG <-
     ###################################################################################
     
     ## Set global variables
-    grmx=beginx=midptx <- NULL
+    grmx=beginx=midptx=SUBPTYP_PROP_ADJ=SUBPTYP_PROP_CHNG=ADJ_FACTOR_COND <- NULL
     dbqueries=dbqueriesWITH <- list()
     cpropvars <- list(COND="CONDPROP_UNADJ", SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ")
     tpropvars <- list(SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ", MICR="MICRPROP_UNADJ")
@@ -1110,7 +1110,7 @@ check.popdataCHNG <-
         }
         
         ## Build grm FROM query
-        grmjoinqry <- getjoinqry(grmtrecn, trecnnm, grma., treea.)
+        grmjoinqry <- getjoinqry(grmtrecn, treecnnm, grma., treea.)
         grmfromqry <- paste0(tfromqry, 
                              "\n LEFT JOIN ", SCHEMA., grmnm, " grm ", grmjoinqry)
         
@@ -1121,7 +1121,7 @@ check.popdataCHNG <-
         } else {
           grmvars <- "*"
         }
-        grmselectqry <- toString(paste0("grm.", unique(c(grmuniqueid, grmvars))))
+        grmselectqry <- toString(paste0("grm.", unique(c(grmid, grmvars))))
         
         ## Build final grm query, including pltidsqry
         grmqry <- paste0(pltidsWITHqry,
@@ -1186,14 +1186,14 @@ check.popdataCHNG <-
         }
         
         ## Build begin FROM query
-        beginjoinqry <- getjoinqry(begintrecn, trecnnm, begina., treea.)
+        beginjoinqry <- getjoinqry(begintrecn, treecnnm, begina., treea.)
         beginfromqry <- paste0(tfromqry, 
                                "\n LEFT JOIN ", SCHEMA., beginnm, " begin ", beginjoinqry)
         
         
         ## Build begin SELECT query
         beginvars <- "*"
-        beginselectqry <- toString(paste0(begina., unique(c(grmuniqueid, beginvars))))
+        beginselectqry <- toString(paste0(begina., unique(c(grmid, beginvars))))
         
         ## Build final begin query, including pltidsqry
         ###################################################
@@ -1263,7 +1263,7 @@ check.popdataCHNG <-
         
         ## Build midpt SELECT query
         midptvars <- "*"
-        midptselectqry <- toString(paste0(midpta., unique(c(grmuniqueid, midptvars))))
+        midptselectqry <- toString(paste0(midpta., unique(c(grmid, midptvars))))
         
         ## Build final midpt query, including pltidsqry
         midptqry <- paste0(pltidsWITHqry,
@@ -1291,7 +1291,7 @@ check.popdataCHNG <-
         }
         if (is.null(midptx)) {
           message(midptqry)
-          retrun(NULL)
+          return(NULL)
         }
         
         ## Return and/or save midpt data

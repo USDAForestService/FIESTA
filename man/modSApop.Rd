@@ -28,11 +28,10 @@ modSApop(
   returndata = TRUE,
   savedata = FALSE,
   saveobj = FALSE,
-  savepltids = FALSE,
   objnm = "SApopdat",
-  unit_opts = NULL,
+  unit_opts = list(minplotnum.unit = 2, unit.action = "remove"),
   savedata_opts = NULL,
-  dsnreadonly = TRUE,
+  database_opts = NULL,
   SAdoms = NULL,
   smallbnd = NULL,
   smallbnd.domain = NULL,
@@ -107,6 +106,9 @@ in model. Names will change in output depending on number of categories.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options.}
+
+\item{database_opts}{List. See help(database_options()) for a list
+of options. Only used when datsource = 'postgres'.}
 
 \item{SAdoms}{sf object. SA domains with attributes for joining.}
 

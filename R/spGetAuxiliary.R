@@ -91,7 +91,6 @@
 #' of options. Only used when savedata = TRUE.  
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
 #' include in unitzonal output and extract to pltassgn points.
-#' @param gui Logical. If gui, user is prompted for parameters.
 #'
 #' @return \item{pltassgn}{ sf object. xyplt data with extracted values from
 #' rastlst*. } \item{unitzonal}{ Data frame. Number of pixels and zonal
@@ -230,7 +229,8 @@ spGetAuxiliary <- function(xyplt = NULL,
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
 
   ## Set global variables
-  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat=AOI <- NULL
+  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat=
+    AOI=PLOT_STATUS_CD <- NULL
   badrast <- {}
   
   ##################################################################

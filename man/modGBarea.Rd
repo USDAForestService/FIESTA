@@ -13,7 +13,6 @@ modGBarea(
   sumunits = TRUE,
   returntitle = FALSE,
   savedata = FALSE,
-  newvars_opts = NULL,
   table_opts = NULL,
   title_opts = NULL,
   savedata_opts = NULL,
@@ -53,8 +52,6 @@ options.}
 of options. Only used when savedata = TRUE.}
 
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with estimates with percent sampling error for rowvar (and
