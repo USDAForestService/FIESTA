@@ -1032,17 +1032,17 @@ spGetAuxiliary <- function(xyplt = NULL,
     unitzonal$UNITVAR <- NULL
 
     ## set classs of unitvar
-    if (class(unitarea[[unitvar]]) != "numeric" && unitvarclass == "numeric") {
+    if (!is.numeric(unitarea[[unitvar]]) && unitvarclass == "numeric") {
       unitarea[[unitvar]] <- as.numeric(unitarea[[unitvar]])
     }
-    if (class(unitzonal[[unitvar]]) != "numeric" && unitvarclass == "numeric") {
+    if (!is.numeric(unitzonal[[unitvar]]) && unitvarclass == "numeric") {
       unitzonal[[unitvar]] <- as.numeric(unitzonal[[unitvar]])
     }
     ## set classs of unitvar2
-    if (class(unitarea[[unitvar2]]) != "numeric" && unitvar2class == "numeric") {
+    if (!is.numeric(unitarea[[unitvar2]]) && unitvar2class == "numeric") {
       unitarea[[unitvar2]] <- as.numeric(unitarea[[unitvar2]])
     }
-    if (class(unitzonal[[unitvar2]]) != "numeric" && unitvar2class == "numeric") {
+    if (!is.numeric(unitzonal[[unitvar2]]) && unitvar2class == "numeric") {
       unitzonal[[unitvar2]] <- as.numeric(unitzonal[[unitvar2]])
     }
   }	   

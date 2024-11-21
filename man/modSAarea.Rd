@@ -193,15 +193,6 @@ SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
                      prednames = c("dem", "tcc", "tpi", "tnt"),
                      predfac = "tnt")
 
-# Fit a unit level EBLUP with `JoSAE`
-modSAarea(SApopdatlst = SApopdat,
-          SApackage = "JoSAE",
-          SAmethod = "unit") 
-          
-# Fit an area level Fay-Herriot hierarchical Bayesian model with `hbsae`
-modSAarea(SApopdatlst = SApopdat,
-          SApackage = "hbsae",
-          SAmethod = "area") 
 
 # Fit an area level Fay-Herriot EBLUP with `sae`, while using Elastic Net
 # variable selection
