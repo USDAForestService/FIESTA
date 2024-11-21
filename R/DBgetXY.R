@@ -146,7 +146,7 @@ DBgetXY <- function (states = NULL,
   ## Set global variables
   parameters <- FALSE
   SCHEMA.=invyrtab=evalEndyr=plotnm=ppsanm=ppsanm=pltflds=
-    ppsaflds=pvars=XYdf <- NULL
+    ppsaflds=pvars=XYdf=invyrtab.qry <- NULL
 
 
   ##################################################################
@@ -287,8 +287,10 @@ DBgetXY <- function (states = NULL,
         stop("no data in ", xy_datsource)
       }
     }
-  
-
+    if (is.null(xy_datsource) && !is.null(datsource)) {
+      xy_datsource <- datsource
+    }
+    
     ## Check xy database
     ####################################################################
     if (all(list(class(xy), class(plot_layer)) == "character") && 
@@ -301,6 +303,7 @@ DBgetXY <- function (states = NULL,
     } else {
       xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
     }
+
 
     ###########################################################################
     ## Check plot database (if xyisplot = FALSE)
@@ -508,7 +511,6 @@ DBgetXY <- function (states = NULL,
   POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
   PLOT <- evalInfo$PLOT
   plotnm <- evalInfo$plotnm
-  
 
   ####################################################################
   ## Check custom Evaluation data
@@ -662,14 +664,16 @@ DBgetXY <- function (states = NULL,
   ## Check XYdf variables
   ####################################################################
   xyvars <- unique(c(XYvarlst, pvars2keep))
-  if (!all(xyvars %in% xyflds)) {
-    xypmiss <- xyvars[!xyvars %in% xyflds]
+  
+  xyvarschk <- unlist(sapply(xyvars, findnm, xyflds, returnNULL = TRUE))
+  if (length(xyvarschk) < length(xyvars)) {
+    xypmiss <- xyvars[!xyvars %in% names(xyvarschk)]
     if (length(xypmiss) > 0) {
       pvars2keep <- xypmiss
     } else {
       pvars2keep <- NULL
     }
-    xyvars <- xyvars[!xyvars %in% xypmiss]
+    xyvars <- xyvarschk
   } else {
     pvars2keep <- NULL
   }
@@ -724,6 +728,8 @@ DBgetXY <- function (states = NULL,
       if (is.null(pjoinid)) {
         if (xyjoinid == "PLT_CN" && "CN" %in% pltflds) {
           pjoinid <- "CN"
+        } else if (xyjoinid == "plt_cn" && "cn" %in% pltflds) {
+          pjoinid <- "cn"
         } else {
           stop("pjoinid is invalid")
         }
@@ -731,18 +737,28 @@ DBgetXY <- function (states = NULL,
     }
 
     if (!is.null(pvars2keep)) {
-      pmiss <- pvars2keep[!pvars2keep %in% xyflds]
-      if (any(pmiss %in% XYvarlst)) {
-        xymiss <- pmiss[pmiss %in% XYvarlst]
-        if (length(xymiss) > 0) {
-          if (all(c("LON", "LAT") %in% xymiss) && all(c("LON_PUBLIC", "LAT_PUBLIC") %in% xyflds)) {
-            xyvars <- c(xyvars[!xyvars %in% c("LON", "LAT")], "LON_PUBLIC", "LAT_PUBLIC")
-            xymiss <- xymiss[!xymiss %in% c("LON", "LAT")]
-            xvar <- "LON_PUBLIC"
-            yvar <- "LAT_PUBLIC"
-          }
+      pvars2keepchk <- unlist(sapply(pvars2keep, findnm, xyflds, returnNULL = TRUE))
+      if (length(pvars2keepchk) < length(pvars2keep)) {
+        pmiss <- pvars2keep[!pvars2keep %in% names(pvars2keepchk)]
+        pmisschk <- unlist(sapply(pmiss, findnm, XYvarlst, returnNULL = TRUE))
+        if (!is.null(pmisschk)) {
+          xymiss <- pmisschk
+          
           if (length(xymiss) > 0) {
-            stop("missing essential variables: ", toString(xymiss))
+            if (all(c("LON", "LAT") %in% xymiss) && all(c("LON_PUBLIC", "LAT_PUBLIC") %in% xyflds)) {
+              xyvars <- c(xyvars[!xyvars %in% c("LON", "LAT")], "LON_PUBLIC", "LAT_PUBLIC")
+              xymiss <- xymiss[!xymiss %in% c("LON", "LAT")]
+              xvar <- "LON_PUBLIC"
+              yvar <- "LAT_PUBLIC"
+            } else if (all(c("LON", "LAT") %in% xymiss) && all(c("lon_public", "lat_public") %in% xyflds)) {
+              xyvars <- c(xyvars[!xyvars %in% c("lon", "lat")], "lon_public", "lat_public")
+              xymiss <- xymiss[!xymiss %in% c("LON", "LAT")]
+              xvar <- "lon_public"
+              yvar <- "lat_public"
+            }
+            if (length(xymiss) > 0) {
+              stop("missing essential variables: ", toString(xymiss))
+            }
           }
         } else {
           message("missing plot variables: ", toString(pmiss))
@@ -835,12 +851,13 @@ DBgetXY <- function (states = NULL,
           pltflds <- DBI::dbListFields(dbconn, plotnm)     
 	  
 	        ## Check for indices
-          if (evalCur || measCur) {  	  
-            chk <- checkidx(dbconn, plotnm, c("STATECD", "UNITCD", "COUNTYCD", "PLOT"))
+          if (evalCur || measCur) { 
+            pltindx <- sapply(c("STATECD", "UNITCD", "COUNTYCD", "PLOT"), findnm, pltflds, returnNULL = TRUE)
+            chk <- checkidx(dbconn, plotnm, pltindx)
             if (is.null(chk)) {
               message("to speed query... add an index to the plot table")
               message("createidx(dbconn, '", plotnm, 
-                 "', c('STATECD', 'UNITCD', 'COUNTYCD', 'PLOT'))")
+                 "', c('statecd', 'unitcd', 'countycd', 'plot'))")
 	          }
           }
         }
@@ -894,12 +911,14 @@ DBgetXY <- function (states = NULL,
     }
 
     ## Check plot variables
-    ########################################################	
-    if (!all(pvars2keep %in% pltflds)) {
-      pmiss <- pvars2keep[!pvars2keep %in% pltflds]
-	  
-      if (any(pmiss %in% XYvarlst)) {
-        xymiss <- pmiss[pmiss %in% XYvarlst]
+    ########################################################
+    pvars2keepchk <- unlist(sapply(pvars2keep, findnm, xyflds, returnNULL = TRUE))
+    if (length(pvars2keepchk) < length(pvars2keep)) {
+      pmiss <- pvars2keep[!pvars2keep %in% names(pvars2keepchk)]
+
+      pmisschk <- unlist(sapply(pmiss, findnm, XYvarlst, returnNULL = TRUE))
+      if (!is.null(pmisschk)) {
+        xymiss <- pmisschk
         if (length(xymiss) > 0) {
           stop("missing essential variables: ", toString(xymiss))
         } else {
@@ -1177,7 +1196,7 @@ DBgetXY <- function (states = NULL,
 		                         Type = Type) 
 	  }
   }
-  
+ 
   ##################################################################################
   ##################################################################################
   ## Generate queries
@@ -1221,7 +1240,7 @@ DBgetXY <- function (states = NULL,
     message(xycoords.qry)
     stop()
   }
-  
+
   if (nrow(xyx) > length(unique(xyx[[xy.uniqueid]]))) {
     xyx <- unique(xyx)
   }
@@ -1231,6 +1250,10 @@ DBgetXY <- function (states = NULL,
     setnames(xyx, "CN", "PLT_CN")
     xy.uniqueid <- "PLT_CN"
     xyjoinid <- "PLT_CN"
+  } else if ("cn" %in% names(xyx) && !"plt_cn" %in% names(xyx)) {
+    setnames(xyx, "cn", "plt_cn")
+    xy.uniqueid <- "plt_cn"
+    xyjoinid <- "plt_cn"
   }
 
   ## Remove KNOWN plots that are no longer in inventory
@@ -1239,11 +1262,17 @@ DBgetXY <- function (states = NULL,
   }
    
   if (all(c("STATECD", "UNITCD", "COUNTYCD", "PLOT") %in% names(xyx))) {
-    xyx[["PLOT_ID"]] <- paste0("ID", 
+    xyx[["PLOT_ID"]] <- paste0("PID", 
 		formatC(xyx$STATECD, width=2, digits=2, flag=0), 
           	formatC(xyx$UNITCD, width=2, digits=2, flag=0),
           	formatC(xyx$COUNTYCD, width=3, digits=3, flag=0),
           	formatC(xyx$PLOT, width=5, digits=5, flag=0)) 
+  } else if (all(c("statecd", "unitcd", "countycd", "plot") %in% names(xyx))) {
+    xyx[["plot_id"]] <- paste0("pid", 
+            formatC(xyx$statecd, width=2, digits=2, flag=0), 
+            formatC(xyx$unitcd, width=2, digits=2, flag=0),
+            formatC(xyx$countycd, width=3, digits=3, flag=0),
+            formatC(xyx$plot, width=5, digits=5, flag=0)) 
   }
 
   ## Change names of X/Y variables to *_PUBLIC

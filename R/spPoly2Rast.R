@@ -11,8 +11,8 @@
 #' formats (https://www.gdal.org/ogr_formats.html). Optional if polyv is sf
 #' object.
 #' @param polyv.att String. Name of attribute in polyv to rasterize.
-#' @param polyv.lut Data frame. Lookup table of codes, if polyv.att is
-#' character or want to group codes. The lookup table must be data.frame  
+#' @param polyv.lut Data frame. Lookup table of values, if polyv.att is
+#' character or want to group values. The lookup table must be data.frame  
 #' including polyv.att and another column with classes.
 #' @param rastfn.template String. Full path name of raster to use as template
 #' for new raster.
@@ -61,7 +61,7 @@
 #' 
 #' # Turn polygon into raster
 #' # Note: raster values must be numeric, therefore names were changed to
-#' # numeric codes based on lookup table produced from the following code.                      
+#' # numeric values based on lookup table produced from the following code.                      
 #' new_rast <- spPoly2Rast(polyv = WYbhdistfn,
 #'                         polyv.att = "DISTRICTNA",
 #'                         outfolder = tempdir())
@@ -110,10 +110,10 @@ spPoly2Rast <- function(polyv,
   
   ## Check validate
   if (validate) {
-    clippolyvx <- sf::st_make_valid(clippolyvx, 
-                                    geos_method = 'valid_structure', 
-                                    geos_keep_collapsed = FALSE)
-    clippolyvx <- sf::st_cast(clippolyvx)
+    polyvx <- sf::st_make_valid(polyvx, 
+                                geos_method = 'valid_structure', 
+                                geos_keep_collapsed = FALSE)
+    polyvx <- sf::st_cast(polyvx)
   }
 
   ## Check polyv.att
@@ -124,12 +124,12 @@ spPoly2Rast <- function(polyv,
 
   if (is.character(polyvx[[polyv.att]])) {
     if (is.null(polyv.lut)) {
-      message("creating lookup table of codes")
+      message("creating lookup table of valuess")
 
       NAME <- sort(unique(polyvx[[polyv.att]]))
-      CODE <- seq(1:length(NAME))
-      polyv.lut <- data.frame(NAME, CODE, stringsAsFactors=FALSE)
-      names(polyv.lut) <- c(polyv.att, "CODE")
+      VALUE <- seq(1:length(NAME))
+      polyv.lut <- data.frame(NAME, VALUE, stringsAsFactors=FALSE)
+      names(polyv.lut) <- c(polyv.att, "VALUE")
     }
   }
   if (!is.null(polyv.lut)) {

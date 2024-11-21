@@ -13,8 +13,10 @@ modGBratio(
   pcfilter = NULL,
   estvarn = NULL,
   estvarn.filter = NULL,
+  estvarn.derive = NULL,
   estvard = NULL,
   estvard.filter = NULL,
+  estvard.derive = NULL,
   rowvar = NULL,
   colvar = NULL,
   sumunits = TRUE,
@@ -23,7 +25,6 @@ modGBratio(
   table_opts = NULL,
   title_opts = NULL,
   savedata_opts = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -52,10 +53,18 @@ pltassgn).  Must be R logical syntax.}
 \item{estvarn.filter}{String. A tree filter for the estimate variable
 (numerator).  Must be R syntax (e.g., "STATUSCD == 1").}
 
+\item{estvarn.derive}{List. A derivation of a tree variable to estimate.
+(numerator). Must be a named list with one element (e.g., 
+list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.}
+
 \item{estvard}{String. Name of the tree estimate variable (denominator).}
 
 \item{estvard.filter}{String. A tree filter for the estimate variable
 (denominator).  Must be R syntax (e.g., "STATUSCD == 1").}
+
+\item{estvard.derive}{List. A derivation of a tree variable to estimate.
+(denominator). Must be a named list with one element (e.g., 
+list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.}
 
 \item{rowvar}{String. Name of the row domain variable in cond or tree. If
 only one domain, rowvar = domain variable. If more than one domain, include
@@ -78,8 +87,6 @@ options.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
 }

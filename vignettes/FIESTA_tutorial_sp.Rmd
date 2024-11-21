@@ -144,10 +144,8 @@ demfn <- system.file("extdata",
                      package = "FIESTA")
 
 
-# Other spatial layers used for examples, extracted using the geodata package, gadm function.
-# County-level boundaries for USA and subset for Wyoming (Note: must have internet connection)
-USAco <- geodata::gadm(country = "USA", level = 2, path=tempdir())    
-WYco <- USAco[USAco$NAME_1 == "Wyoming",]
+# County-level boundaries for USA and subset for Wyoming
+WYco <- stunitco[stunitco$STATENM == "Wyoming",]
 
 ```
 
@@ -392,9 +390,9 @@ We can now check and display `WYbighorn_co` with labels.
 
 ```{r}
 head(WYbhco)
-plot(sf::st_geometry(WYbhco['NAME_2']), col = sf::sf.colors(nrow(WYbhco)))
+plot(sf::st_geometry(WYbhco['COUNTYCD']), col = sf::sf.colors(nrow(WYbhco)))
 coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(WYbhco)))
-text(coords[,"X"], coords[,"Y"], WYbhco[["NAME_2"]])
+text(coords[,"X"], coords[,"Y"], WYbhco[["COUNTYCD"]])
 ```
 
 </details>
@@ -815,7 +813,3 @@ rasterfile
 
 </details>
 
-```{r, include = FALSE}
-# deletes raster data
-unlink("gadm36_USA_2_sp.rds")
-```

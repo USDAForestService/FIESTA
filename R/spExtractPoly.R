@@ -42,7 +42,6 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'polyext'.
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ncores Integer. Number of cores to use for extracting values. 
 #'
 #' @return \item{pltdat}{ SpatialPointsDataFrame object or data frame. Input
@@ -113,8 +112,7 @@ spExtractPoly <- function(xyplt,
                           exportsp = FALSE, 
                           exportNA = FALSE, 
                           spMakeSpatial_opts = NULL,
-                          savedata_opts = NULL, 
-                          gui = FALSE,
+                          savedata_opts = NULL,
                           ncores = NULL){
   ######################################################################################
   ## DESCRIPTION: 
@@ -126,6 +124,7 @@ spExtractPoly <- function(xyplt,
   #########################################################################################
   
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
+  gui <- FALSE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
   if (gui) showext=savedata=exportsp <- NULL
 
@@ -229,7 +228,7 @@ spExtractPoly <- function(xyplt,
   polyvlst <- lapply(polyvlst, 
 		function(layer, polyv_dsn, gui) pcheck.spatial(layer, dsn=polyv_dsn, gui=gui),
  		polyv_dsn, gui)
- 
+
   ## Check polyvarlst
   if (!is.null(polyvarlst)) {
     if (is.list(polyvarlst)) {
@@ -248,11 +247,16 @@ spExtractPoly <- function(xyplt,
   } 
  
   if (!is.null(polyvarnmlst)) {
-    if (length(polyvarlst) != length(polyvarnmlst))
-      stop("the length of polyvarnmlst must correspond with the length of polyvarlst") 
-    if (!is.list(polyvarnmlst)) 
-      polyvarnmlst <- as.list(polyvarnmlst)
-    
+    if (is.list(polyvarnmlst)) {
+      if (length(polyvarnmlst) != length(polyvarlst))
+        stop("the length of polyvarlst must correspond with the length of polyvlst") 
+    } else {
+      if (length(polyvlst) > 1) {
+        stop("polyvarnmlst must be a list corresponding to the length of polyvlst") 
+      } else {  
+        polyvarnmlst <- list(polyvarnmlst)
+      }
+    }
   } else {
     polyvarnmlst <- polyvarlst
   }
@@ -321,6 +325,13 @@ spExtractPoly <- function(xyplt,
   ### DO THE WORK
   ########################################################################
   NAlst <- list()
+  
+  polyvcolslst <- {}
+  if (length(polyvlst) > 1) {
+    spxyext <- sppltx
+    mergecols <- names(sf::st_drop_geometry(sppltx))
+  }
+  
   for (i in 1:length(polyvlst)) {
     polyv <- polyvlst[[i]]
     polyvnm <- names(polyvlst)[i]
@@ -408,27 +419,27 @@ spExtractPoly <- function(xyplt,
       
       # rbindlist not perfectly compatible with sf so need to set as 
       # data.frame and then sf class
-      spxyext_dt <- data.table::rbindlist(st_join_lst)
-      spxyext <- sf::st_as_sf(data.table::setDF(spxyext_dt))
+      spxypoly_dt <- data.table::rbindlist(st_join_lst)
+      spxypoly <- sf::st_as_sf(data.table::setDF(spxypoly_dt))
       parallel::stopCluster(cl)
     } else {
-      spxyext <- sf::st_join(sppltx, polyv)
-      spxyext <- spxyext[!duplicated(spxyext[[xy.uniqueid]]), ]
+      spxypoly <- sf::st_join(sppltx, polyv)
+      spxypoly <- spxypoly[!duplicated(spxypoly[[xy.uniqueid]]), ]
     }
 
     ## Set polyvarnm
     ########################################################  
-    #names(spxyext)[names(spxyext) %in% polyvars] <- polyvarnm 
+    #names(spxypoly)[names(spxypoly) %in% polyvars] <- polyvarnm 
 
     ## Check points outside poly
     ########################################################  
-    #sppltout <- sppltx[!sppltx[[xy.uniqueid]] %in% spxyext[[xy.uniqueid]],]
+    #sppltout <- sppltx[!sppltx[[xy.uniqueid]] %in% spxypoly[[xy.uniqueid]],]
 
     ## Check null values
     ######################################################## 
     geocol <- attr(polyv, "sf_column")
     polyvcols <- names(polyv)[names(polyv) != geocol]
-    sppltout <- spxyext[apply(sf::st_drop_geometry(spxyext[, polyvcols]), 1, 
+    sppltout <- spxypoly[apply(sf::st_drop_geometry(spxypoly[, polyvcols]), 1, 
 				function(x) all(is.na(x))),]
     nulln <- nrow(sppltout)
 
@@ -451,11 +462,19 @@ spExtractPoly <- function(xyplt,
                               add_layer=TRUE))
     }
  
-    if (!keepNA) {
-      ## Subset points inside boundary
-      spxyext <- spxyext[!apply(sf::st_drop_geometry(spxyext[, polyvcols]), 1, 
-		function(x) all(is.na(x))),]
+    if (i > 1) {
+      spxyext <- merge(spxyext, sf::st_drop_geometry(spxypoly), by=mergecols)
+      polyvcolslst <- c(polyvcolslst, polyvcols)
+    } else {
+      spxyext <- spxypoly
+      polyvcolslst <- polyvcols
     }
+  }
+  
+  if (!keepNA) {
+    ## Subset points inside boundary
+    spxyext <- spxyext[!apply(sf::st_drop_geometry(spxyext[, polyvcolslst]), 1, 
+                                function(x) all(is.na(x))),]
   }
 
   if (savedata) {

@@ -22,7 +22,7 @@
 #' warnings.
 #' @param dsn String. Data source name of database with x.
 #' @param dbconn Open database connection.
-#' @param dbconnopen Logica. If TRUE, keep database connection open.
+#' @param dbconnopen Logical. If TRUE, keep database connection open.
 #' @param dbwrite Logical. If TRUE, write class column to database table x.
 #' @param dbreturn Logical. If TRUE, return table with class column.
 #' @param overwrite Logical. If TRUE, and the class name already exists 
@@ -57,12 +57,11 @@ datLUTspp <- function(x = NULL,
                       spcdname = "COMMON",
                       add0 = FALSE, 
                       stopifmiss = FALSE, 
-                      xtxt = NULL,
-					  dsn = NULL,
+                      xtxt = NULL,dsn = NULL,
                       dbconn = NULL,
                       dbconnopen = FALSE,
-					  dbwrite = FALSE,
-				      dbreturn = TRUE, 
+                      dbwrite = FALSE,
+                      dbreturn = TRUE, 
                       overwrite = TRUE,
                       savedata = FALSE, 
                       savedata_opts = NULL, 
@@ -82,8 +81,9 @@ datLUTspp <- function(x = NULL,
     Filters <- rbind(Filters, csv=c("Comma-delimited files (*.csv)", "*.csv"))
 
   ## Set global variables
-  VALUE=LUTnewvarnm=uniqueval <- NULL 
+  VALUE=LUTnewvarnm=uniqueval=datnm <- NULL 
   returnlst <- list()
+  
 
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -145,22 +145,22 @@ datLUTspp <- function(x = NULL,
   } 
   if (isdb) {
     tablst <- DBI::dbListTables(dbconn)
-	if (length(tablst) == 0) {
-	  message("no tables in database")
-	  return(NULL)
-	}
-	
-  	datnm <- chkdbtab(tablst, x)
-	if (is.null(datnm)) { 
-	  if ("data.frame" %in% class(x)) {
-	    isdb <- FALSE
-		datx <- x
-	  } else {
+	  if (length(tablst) == 0) {
+	    message("no tables in database")
 	    return(NULL)
 	  }
-	}
+	
+  	datnm <- chkdbtab(tablst, x)
+	  if (is.null(datnm)) { 
+	    if ("data.frame" %in% class(x)) {
+	      isdb <- FALSE
+		  datx <- x
+	    } else {
+	      return(NULL)
+	    }
+	  }
   }
- 
+
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -170,46 +170,66 @@ datLUTspp <- function(x = NULL,
   if (isdb) {
     datnmlst <- DBI::dbListFields(dbconn, datnm)
 	
-	## Check dbwrite 
+	  ## Check dbwrite 
     dbwrite <- pcheck.logical(dbwrite, 
 	                          varnm = "dbwrite", 
 	                          title = "Write to database?", 
                               first = "NO", gui=gui)
 
-	## Check dbreturn 
+	  ## Check dbreturn 
     dbreturn <- pcheck.logical(dbreturn, 
 	                           varnm = "dbreturn", 
 	                           title = "Return data from database?", 
                                first="NO", gui=gui)
 	
-	if (dbreturn) {
+	  if (dbreturn) {
       datx <- pcheck.table(datnm, conn=dbconn, gui=gui, 
                        caption="Data table?", returnDT=TRUE)
-	  if (is.null(datx)) {
+	    if (is.null(datx)) {
         message("invalid x")
-	    return(NULL)
+	      return(NULL)
       }
 
-	  datidx <- checkidx(dbconn, datnm)
-	  if (!is.null(datidx) && !is.na(datidx$cols)) {
-	    datx.idx <- strsplit(datidx$cols, "\\,")[[1]]
-		if (all(datx.idx %in% datnmlst)) {
-		  datkey <- datx.idx
-		} else {
-		  datkey <- datx.idx[datx.idx %in% datnmlst]
-		}
+	    datidx <- checkidx(dbconn, datnm)
+	    if (!is.null(datidx) && !is.na(datidx$cols)) {
+	      datx.idx <- strsplit(datidx$cols, "\\,")[[1]]
+		    if (all(datx.idx %in% datnmlst)) {
+		      datkey <- datx.idx
+		    } else {
+		      datkey <- datx.idx[datx.idx %in% datnmlst]
+		    }
+	    }
 	  }
-	}
 
   } else {
     datx <- pcheck.table(x, gui=gui, 
-                       caption="Data table?", returnDT=TRUE)
-    issf <- ifelse ("sf" %in% class(datx), TRUE, FALSE)
-    if (issf) datx <- data.table(datx) 
-    datnmlst <- names(datx) 
-	datkey <- key(datx)
+                         caption="Data table?", returnDT=TRUE)
+    if (is.null(datx)) {
+      if (is.character(x) && length(x) > 1) {
+        datnmlst <- x
+      }
+    } else {  
+      
+      issf <- ifelse ("sf" %in% class(datx), TRUE, FALSE)
+      if (issf) datx <- data.table(datx) 
+      datnmlst <- names(datx) 
+      datkey <- key(datx)
+    }
   }   
- 
+
+  ## Check uniquex
+  #############################################################
+  if (is.null(uniquex) && is.null(x)) {
+    message("both uniquex and x are NULL")
+    return(NULL)
+#  } else if (!is.null(uniquex) && is.null(x)) {
+    #if (FIAname) {
+    #datnmlst <- sort(unique(FIESTAutils::ref_codes$VARIABLE))
+    # } else if (!is.null(LUTx)) {
+    #   datnmlst <- names(LUTx)
+    # }	
+  } 
+
   ## Check xvar
   #############################################################
   xvar <- "SPCD"
@@ -219,7 +239,8 @@ datLUTspp <- function(x = NULL,
   spcdnamelst <- c("COMMON", "SCIENTIFIC", "SYMBOL", "COMMON_SCIENTIFIC")
   spcdname <- pcheck.varchar(spcdname, "spcdname", spcdnamelst, gui=gui,
 		caption="SPCD name type", stopifnull=TRUE, multiple = TRUE)
- 
+  
+  
   ## Check if all species codes in datx are in ref table
   #############################################################
   ref_spp <- FIESTAutils::ref_species[, c("SPCD", "COMMON_NAME", "GENUS", 
@@ -230,7 +251,6 @@ datLUTspp <- function(x = NULL,
     ref_spp$COMMON_SCIENTIFIC <- 
 		paste0(ref_spp$COMMON_NAME, " (", ref_spp$SCIENTIFIC_NAME, ")")
   }
- 
 
   ## Check group
   group <- pcheck.logical(group, varnm="group", title="Variable group?", 
@@ -239,7 +259,7 @@ datLUTspp <- function(x = NULL,
   ## Check add0 
   add0 <- pcheck.logical(add0, varnm="add0", title="Add 0 values to missing codes?", 
                              first="NO", gui=gui)
- 
+
   ## Get unique values from data table
   if (isdb && !dbreturn) {
     uniqueval.qry <- paste("SELECT DISTINCT", xvar, "FROM", datnm,
@@ -247,55 +267,56 @@ datLUTspp <- function(x = NULL,
     uniqueval <- na.omit(DBI::dbGetQuery(dbconn, uniqueval.qry))[[1]]
   } else if (!is.null(datx)) {
     if (!is.numeric(datx[[xvar]])) {
-	  #message("xvar must be a numeric vector in x")
-	  uniqueval <- sort(unique(as.numeric(as.character(datx[[xvar]]))))
+	    #message("xvar must be a numeric vector in x")
+	    uniqueval <- sort(unique(as.numeric(as.character(datx[[xvar]]))))
     } else {
       #uniquex <- sort(unique(na.omit(datx[[xvar]])))
       uniqueval <- sort(unique(datx[[xvar]]))
     }
   }
-  if (length(uniqueval) == 0) {
-    message("no values exist in data for ", xvar)
-  }
-  
+  #if (length(uniqueval) == 0) {
+  #  message("no values exist in data for ", xvar)
+  #}
+
   ## Check if all values in uniquex are in dataset
   if (!is.null(uniquex)) {
- 	if (!all(uniquex %in% uniqueval)) {
-	  missval <- uniquex[!uniquex %in% uniqueval]
-      if (length(missval) > 0) {
-		if (!all(is.na(missval))) {
-		  message("uniquex values missing: ", toString(missval)) 
+    if (!is.null(uniqueval)) {
+ 	    if (!all(uniquex %in% uniqueval)) {
+	      missval <- uniquex[!uniquex %in% uniqueval]
+        if (length(missval) > 0) {
+		      if (!all(is.na(missval))) {
+		        message("uniquex values missing: ", toString(missval)) 
+          } else {
+            uniqueval <- c(uniqueval, NA)
+          }			
         } else {
-          uniqueval <- c(uniqueval, NA)
-        }			
-      } else {
-		message("no uniquex in x... returning NULL")
-		return(NULL)
-	  } 
-	  uniquex <- uniquex[uniquex %in% uniqueval]
+		      message("no uniquex in x... returning NULL")
+		      return(NULL)
+        } 
+ 	    }
+	    uniquex <- uniquex[uniquex %in% uniqueval]
 	  
-	  if (add0 && (length(uniquex) < length(uniqueval))) {
+	    if (add0 && (length(uniquex) < length(uniqueval))) {
         message("add0 = TRUE and uniquex less than uniqueval... using all values")
+	    }
 	  }
-	}
-  } else {
-	uniquex <- uniqueval
-  }
-	  
-  ## Check if all values in dataset are in ref_species
-  if (!all(uniquex %in% unique(ref_spp$SPCD))) {
-    missval <- uniquex[!uniquex %in% unique(ref_spp$SPCD)]
-    if (!all(is.na(missval))) {
-      warning("missing values in ref_species: ", toString(missval))
-      return(NULL)
-	}
-  } 
   
-  ## Subset ref_spp table 
-  if (!add0) {
-    ref_spp <- ref_spp[ref_spp$SPCD %in% uniquex, ]
+
+    ## Check if all values in dataset are in ref_species
+    if (!all(uniquex %in% unique(ref_spp$SPCD))) {
+      missval <- uniquex[!uniquex %in% unique(ref_spp$SPCD)]
+      if (!all(is.na(missval))) {
+        warning("missing values in ref_species: ", toString(missval))
+        return(NULL)
+	    }
+    } 
+
+    ## Subset ref_spp table 
+    if (!add0) {
+      ref_spp <- ref_spp[ref_spp$SPCD %in% uniquex, ]
+    }
   }
-   
+
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
                              first="NO", gui=gui)
@@ -317,7 +338,7 @@ datLUTspp <- function(x = NULL,
       out_layer <- "datlut"
     }
   }
-  
+
   ############################################################################
   ## DO THE WORK 
   ############################################################################
@@ -326,11 +347,10 @@ datLUTspp <- function(x = NULL,
   for (name in spcdname) {
     LUTnewvar <- c(LUTnewvar, 
 	        ifelse(name == "COMMON_SCIENTIFIC", "COMMON_SCIENTIFIC",
-			ifelse(name == "COMMON", "COMMON_NAME", 
-			ifelse(name == "SCIENTIFIC", "SCIENTIFIC_NAME", "SPECIES_SYMBOL"))))
+			        ifelse(name == "COMMON", "COMMON_NAME", 
+			            ifelse(name == "SCIENTIFIC", "SCIENTIFIC_NAME", "SPECIES_SYMBOL"))))
   }
   lutvars <- c("SPCD", LUTnewvar)
-
 
   ## Get grpvar
   #############################################################
@@ -366,7 +386,7 @@ datLUTspp <- function(x = NULL,
   for (newvar in LUTnewvar) {
     if (any(duplicated(LUTx[[newvar]]))) {
       dups <- unique(LUTx[[newvar]][duplicated(LUTx[[newvar]])])
-      message("duplicated values exist in data:\n", toString(dups))
+      message("duplicated values exist in species ref:\n", toString(dups))
 
       for (dup in dups) {
         duprows <- which(LUTx[[newvar]] == dup)
@@ -378,7 +398,7 @@ datLUTspp <- function(x = NULL,
           if (is.factor(LUTx[[newvar]])) {
             levels(LUTx[[newvar]]) <- c(levels(LUTx[[newvar]]), newnm)
           }
-		}
+		    }
       }
     }
   }
@@ -389,7 +409,7 @@ datLUTspp <- function(x = NULL,
   ## Classify xvar column
   if (isdb && dbwrite) {
     for (lutvar in lutvars) {
-	  if (lutvar != xvar) {
+	    if (lutvar != xvar) {
         dbcl <- dbclass(dbconn, 
 	             tabnm = datnm,
 			     classcol = xvar, 
@@ -398,14 +418,14 @@ datLUTspp <- function(x = NULL,
 			     classnm = lutvar,
 			     overwrite = overwrite
 			     )
-		if (lutvar %in% spcdname && is.null(dbcl)) {
-		  return(NULL)
-		}
-	  }
-	}	
+		    if (lutvar %in% spcdname && is.null(dbcl)) {
+		      return(NULL)
+		    }
+	    }
+	  }	
   } 
    
-  if (!isdb || dbreturn && !is.null(datx)) {
+  if ((!isdb || dbreturn) && !is.null(datx)) {
     ## Check if class of xvar in datx matches class of xvar in LUTx
     tabs <- check.matchclass(datx, LUTx, xvar, LUTvar, 
 		tab1txt=xtxt, tab2txt=LUTvar)
@@ -464,11 +484,11 @@ datLUTspp <- function(x = NULL,
       LUTx <- rbind(LUTx, as.list(LUTxrow))
     }
   }  
-          
+         
   ## Return list
   ########################################################
   if ((!isdb || dbreturn) && !is.null(datx)) {
-	returnlst$xLUT <- xLUT
+	  returnlst$xLUT <- xLUT
   } else {
     returnlst$xLUT <- datnm
   }

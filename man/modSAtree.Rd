@@ -16,6 +16,7 @@ modSAtree(
   pcfilter = NULL,
   estvar = NULL,
   estvar.filter = NULL,
+  estvar.derive = NULL,
   rowvar = NULL,
   modelselect = FALSE,
   prior = function(x) 1/(sqrt(x) * (1 + x)),
@@ -23,8 +24,6 @@ modSAtree(
   savedata = FALSE,
   savesteps = FALSE,
   multest = TRUE,
-  addSAdomsdf = TRUE,
-  SAdomvars = NULL,
   savemultest = FALSE,
   returntitle = FALSE,
   table_opts = NULL,
@@ -32,7 +31,6 @@ modSAtree(
   savedata_opts = NULL,
   multest_opts = NULL,
   save4testing = FALSE,
-  gui = FALSE,
   ...
 )
 }
@@ -71,6 +69,10 @@ pltassgn).  Must be R logical syntax.}
 \item{estvar.filter}{String. A tree filter for estimate variable. Must be R
 syntax (e.g., "STATUSCD == 1").}
 
+\item{estvar.derive}{List. A derivation of a tree variable to estimate.
+Must be a named list with one element (e.g., 
+list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.}
+
 \item{rowvar}{String. Name of the row domain variable in cond or tree. If
 only one domain, rowvar = domain variable. If more than one domain, include
 colvar. If no domain, rowvar = NULL.}
@@ -93,12 +95,6 @@ labels whether selected or not for both area- and unit-level models.}
 \item{multest}{Logical. If TRUE, returns a data frame of SA estimates using
 both unit-level and area-level estimates.}
 
-\item{addSAdomsdf}{Logical. If TRUE, appends SAdomdf to unit.multest table
-for output.}
-
-\item{SAdomvars}{String vector. List of attributes from SAdoms to include in
-multest output.}
-
 \item{savemultest}{Logical. If TRUE, save table with area- and unit-level
 estimates.}
 
@@ -118,8 +114,6 @@ Only used when multest = TRUE.}
 
 \item{save4testing}{Logical. If TRUE, saves intermediate steps as R objects
 to outfolder for testing (pdomdat, dunitlut).}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modSApop() if SApopdat is NULL.}
 }
@@ -229,16 +223,7 @@ modSAtree(SApopdatlst = SApopdat,
           SAmethod = "unit",           
           landarea = "FOREST",      
           estvar = "VOLCFNET",         
-          estvar.filter = "STATUSCD == 1")   
-          
-# Use a unit level EBLUP to estimate basal area of live trees (at least 5
-# inches diameter) 
-modSAtree(SApopdatlst = SApopdat,    
-          SApackage = "JoSAE",        
-          SAmethod = "unit",         
-          landarea = "FOREST",      
-          estvar = "BA",              
-          estvar.filter = "STATUSCD == 1")  
+          estvar.filter = "STATUSCD = 1")   
 }
 }
 \references{

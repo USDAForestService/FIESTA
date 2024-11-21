@@ -219,7 +219,7 @@ Now that we've created our population dataset, we can move on to estimation.
 <details>
   <summary>View Example</summary>
 
-In this example, we look at estimating the area of forest land in Wyoming from 2011 to 2013 summed to the population unit (`sumunit = TRUE`) with the generalized regression estimator (`MAmethod = "greg"`). `FIESTA` returns raw data for area of forest land, Wyoming, 2011-2013 (sum estimation units). 
+In this example, we look at estimating the area of forest land in Wyoming from 2011 to 2013 with the generalized regression estimator (`MAmethod = "greg"`). `FIESTA` returns raw data for area of forest land, Wyoming, 2011-2013 (sum estimation units). 
 
 ```{r}
 area1 <- modMAarea(

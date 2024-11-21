@@ -11,7 +11,9 @@ modGBpop(
   popFilter = popFilters(),
   pltassgn = NULL,
   pltassgnid = "PLT_CN",
+  datsource = "sqlite",
   dsn = NULL,
+  dbconn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
   areawt2 = NULL,
@@ -30,12 +32,11 @@ modGBpop(
   unit_opts = NULL,
   strata_opts = NULL,
   savedata_opts = NULL,
+  database_opts = NULL,
   GBdata = NULL,
   pltdat = NULL,
   stratdat = NULL,
   auxdat = NULL,
-  keepadjvars = FALSE,
-  gui = FALSE,
   ...
 )
 }
@@ -58,22 +59,25 @@ list of options.}
 file(.csv), layer or spatial layer in dsn, or shapefile(.shp). Plot-level
 assignment of estimation unit and/or strata, with one record for each plot.}
 
-\item{pltassgnid}{String.}
+\item{pltassgnid}{String vector. One or more variables in pltassgn 
+defining unique plot and will join to plt table.}
+
+\item{datsource}{String. Name of data source ('obj', 'sqlite', 'postgres').}
 
 \item{dsn}{String. Name of database where tree, cond, and plot-level tables
 reside.  The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html).}
 
-\item{pjoinid}{String. Join variable in plot to match pltassgnid. Does not
-need to be uniqueid. If using most current XY coordinates for plot
-assignments, use identifier for plot (e.g., PLOT_ID).}
+\item{dbconn}{Open database connection.}
+
+\item{pjoinid}{String vector. Join variable(s) in plot to match pltassgnid.}
 
 \item{areawt}{String. Name of variable in cond for summarizing area 
 weights (e.g., CONDPROP_UNADJ).}
 
-\item{areawt2}{String. An equation to multiply to areawt for estimation. 
-All variables in equation must be in cond.
-weights (e.g., CONDPROP_UNADJ).}
+\item{areawt2}{String. An equation to multiply to the adjusted areawt for
+estimation. All variables in equation must be in cond.
+(e.g., '1000 + SICOND * 3 + BALIVE * 4').}
 
 \item{adj}{String. How to calculate adjustment factors for nonsampled
 (nonresponse) conditions based on summed proportions for by plot ('samp',
@@ -108,9 +112,11 @@ plot (Default = 'STRATUMCD').}
 
 \item{returndata}{Logical. If TRUE, returns data objects.}
 
-\item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
+\item{savedata}{Logical. If TRUE, saves data table(s). See savedata_opts 
+for saving options.}
 
-\item{saveobj}{Logical. If TRUE, saves returned list object to outfolder.}
+\item{saveobj}{Logical. If TRUE, saves returned list object. See savedata_opts
+for saving options.}
 
 \item{objnm}{String. Name of *.rds object.}
 
@@ -121,6 +127,9 @@ Only used when strata = TRUE.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
+
+\item{database_opts}{List. See help(database_options()) for a list
+of options. Only used when datsource = 'postgres'.}
 
 \item{GBdata}{R List object. Output data list components from
 FIESTA::anGBdata().}
@@ -133,11 +142,6 @@ FIESTA::spGetStrata().}
 
 \item{auxdat}{R List object. Output data list components from
 FIESTA::spGetAuxiliary().}
-
-\item{keepadjvars}{Logical. If TRUE, keep adjustment factors from 
-pop_stratum table in FIA database.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{For extendibility.}
 }

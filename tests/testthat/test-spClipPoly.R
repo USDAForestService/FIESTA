@@ -20,7 +20,9 @@ test_that("Clip polygon works as expected", {
   subset_district <- WYbhdist[WYbhdist$DISTRICTNU == "01",]
 
   # Run Clipped Function
-  clipped <- spClipPoly(polyv = WYbh, clippolyv = subset_district, areacalc = TRUE)
+  suppressWarnings(
+    clipped <- spClipPoly(polyv = WYbh, clippolyv = subset_district, areacalc = TRUE)
+    )
 
   # Check Original Acres
   # (If this changes than the expected clip may not be accurate)

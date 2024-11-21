@@ -282,7 +282,7 @@ GBpopdat$condsampcnt	# Number of conditions by condition status
 # Strata-level population data, including number of plots and adjustment factors
 GBpopdat$stratalut  
 ## Adjustment factors added to condition-level data
-GBpopdat$condx
+GBpopdat$pltidsadj
 ## Adjustment factors added to tree data
 GBpopdat$treex
 ## Adjustment factors added to seedling data
@@ -358,7 +358,7 @@ GBpopdat.bh <- modGBpop(
 names(GBpopdat.bh)
 
 ## Condition information with adjusted condition proportions for area
-head(GBpopdat.bh$condx)
+head(GBpopdat.bh$pltidsadj)
 
 ## Tree information with tree-level adjustment factors
 head(GBpopdat.bh$treex)
@@ -422,7 +422,7 @@ GBpopdat.bhdist <- modGBpop(
 names(GBpopdat.bhdist)
  
 ## Condition information with adjusted condition proportions for area
-head(GBpopdat.bhdist$condx)
+head(GBpopdat.bhdist$pltidsadj)
 
 ## Tree information with tree-level adjustment factors
 head(GBpopdat.bhdist$treex)
@@ -1418,7 +1418,7 @@ head(tree2.4$est)
 Finally, we add seedlings to Example 8:
 
 ```{r}
- 
+
 ## Number of live trees by species group and diameter class (DIACL), add seedlings
 tree2.5 <- modGBtree(
     GBpopdat = GBpopdat.bh,      # pop - population calculations
@@ -1432,8 +1432,7 @@ tree2.5 <- modGBtree(
     returntitle = TRUE,          # out - return title information
     table_opts = table_options(
       row.FIAname = TRUE,          # est - row domain names
-      allin1 = TRUE                # out - return output with est(pse)
-      )
+      allin1 = TRUE)               # out - return output with est(pse)
     )
 
 ```
@@ -1471,8 +1470,7 @@ tree3.1 <- modGBtree(
     returntitle = TRUE,          # out - return title information
     table_opts = table_options(
       row.FIAname = TRUE,          # est - row domain names
-      allin1 = TRUE                # out - return output with est(pse)
-      )
+      allin1 = TRUE)               # out - return output with est(pse)
     )
 
 ```
@@ -1552,6 +1550,7 @@ Parameters defined in the following examples are organized by category: populati
 We generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY):
 
 ```{r}
+
 ## Return raw data and titles
 ## Total net cubic-foot volume of live trees (at least 5 inches diameter), Wyoming, 2011-2013 
 ratio1.1 <- modGBratio(
@@ -1704,8 +1703,8 @@ titlelst
 
 
 ## List output files in outfolder
-list.files(outfolder, pattern = "WY_ratio")
-list.files(paste0(outfolder, "/rawdata"), pattern = "WY_ratio")
+#list.files(outfolder, pattern = "WY_ratio")
+#list.files(paste0(outfolder, "/rawdata"), pattern = "WY_ratio")
 
 ```
 
@@ -2054,6 +2053,7 @@ If you want to exclude post-stratification (i.e., simple random sample, Horvitz-
   <summary>View Code</summary>
 
 ```{r}
+
 ## Get population data for Wyoming estimates, with no post-stratification
 GBpopdat.strat <- modGBpop(
   popTabs = popTables(
@@ -2083,6 +2083,7 @@ GBpopdat.nostrat <- modGBpop(
     unitvar = "ESTN_UNIT",       # name of estimation unit
     strata = FALSE               # if using post-stratification
     )
+
 ```
 
 ```{r}

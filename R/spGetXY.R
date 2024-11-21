@@ -451,6 +451,7 @@ spGetXY <- function(bnd,
 #    }
 
   } else {
+
     xydat <- DBgetXY(states = stcds,
                      xy_datsource = xy_datsource,
                      xy_dsn = xy_dsn,

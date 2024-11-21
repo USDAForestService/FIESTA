@@ -5,7 +5,7 @@
 \alias{ref_titles}
 \title{Reference table - Variable titles.}
 \format{
-An object of class \code{data.frame} with 69 rows and 2 columns.
+An object of class \code{data.frame} with 70 rows and 2 columns.
 }
 \source{
 Comma-delimited file.

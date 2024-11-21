@@ -529,12 +529,12 @@ treesum2[treesum2$CN == 40404758010690,]
   <summary>View Example</summary>
 
 ```{r}
+
 treesumdat3 <- datSumTree(
                   tree = WYtree, 
                   plt = WYplt, 
-                  tsumvarlst = c("DIA", "HT"),
-                  TPA = FALSE, 
-                  tfun = mean, 
+                  tderive = list(MEAN_DIA = 'AVG(DIA)', MEAN_HT = 'AVG(HT)'),
+                  TPA = FALSE,
                   tfilter = "STATUSCD == 1", 
                   bycond = FALSE, 
                   tround = 2
@@ -549,7 +549,7 @@ testplt
 mean(testplt[testplt$STATUSCD == 1, "DIA"], na.rm=TRUE)
 mean(testplt[testplt$STATUSCD == 1, "HT"], na.rm=TRUE)
 
-treesum3[treesum3$CN == 40404758010690,]
+treesum3[treesum3$PLT_CN == 40404758010690,]
 ```
 
 </details>
@@ -587,6 +587,7 @@ treesumdat4b <- datSumTree(
                   tree = WYtree, 
                   plt = WYplt, 
                   cond = WYcond, 
+                  tderive = list(MEAN_DIA = 'AVG(DIA)'),
                   tsumvarlst = "VOLCFNET",
                   tfilter = "STATUSCD == 1", 
                   bycond = FALSE, 
@@ -906,14 +907,12 @@ treedomCNTs <- datSumTreeDom(
                 addseed = TRUE, 
                 presence = TRUE, 
                 proportion = TRUE, 
-                cover = TRUE, 
                 tdombarplot = TRUE
                 )
 
 names(treedomCNTs)
 tdomdat.pres <- treedomCNTs$tdomdat.pres
 tdomdat.prop <- treedomCNTs$tdomdat.prop
-tdomdat.cov <- treedomCNTs$tdomdat.cov
 
 cn=40404742010690
 tdomdat.tree[tdomdat.tree$CN == cn,]
@@ -921,7 +920,7 @@ tdomdat.seed[tdomdat.seed$CN == cn,]
 tdomdat.treeseed[tdomdat.treeseed$CN == cn,]
 tdomdat.pres[tdomdat.pres$CN == cn,]
 tdomdat.prop[tdomdat.prop$CN == cn,]
-tdomdat.cov[tdomdat.cov$CN == cn,]
+
 ```
 
 </details>

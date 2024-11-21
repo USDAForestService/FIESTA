@@ -30,6 +30,12 @@
 #' layer in database. Subplot condition-level data (SUBP_COND). 
 #' @param dwm_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Down wood material data (COND_DWM_CALC)
+#' @param cwd_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Down wood material, coarse woody debris data 
+#' (DWM_COARSE_WOODY_DEBRIS)
+#' @param fwd_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Down wood material, fine woody debris data 
+#' (DWM_FINE_WOODY_DEBRIS)
 #' @param sccm_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Subplot-level change matrix data
 #' (SUBP_COND_CHNG_MTRX). 
@@ -83,10 +89,12 @@ dbTables <- function(plot_layer = "PLOT",
                      subplot_layer = "SUBPLOT",
                      subpcond_layer = "SUBP_COND",
                      dwm_layer = "COND_DWM_CALC",
+                     cwd_layer = "DWM_COARSE_WOODY_DEBRIS",
+                     fwd_layer = "DWM_FINE_WOODY_DEBRIS",
                      sccm_layer = "SUBP_COND_CHNG_MTRX",
                      grm_layer = "TREE_GRM_COMPONENT",
-					 grmb_layer = "TREE_GRM_BEGIN",
-					 grmm_layer = "TREE_GRM_MIDPT",
+					           grmb_layer = "TREE_GRM_BEGIN",
+					           grmm_layer = "TREE_GRM_MIDPT",
                      survey_layer = "SURVEY",
                      popeval_layer = "POP_EVAL",
                      popevalgrp_layer = "POP_EVAL_GRP",

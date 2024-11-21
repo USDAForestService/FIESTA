@@ -43,6 +43,7 @@ spAlignRast <- function(ref_rastfn,
   ## raster is used or a given boundary extent.
   ############################################################################
   out_fmt <- "GTiff"
+  gui <- FALSE
   
   
   ##################################################################
@@ -296,9 +297,9 @@ spAlignRast <- function(ref_rastfn,
       outvrtfn <- file.path(outfolder, "temp.vrt")
       
       ## Use warp to resample to same pixel size and extent
-      warp(rastfn, dst_filename = outvrtfn, t_srs = t_srs, cl_arg = cl_arg_vrt)
+      gdalraster::warp(rastfn, dst_filename = outvrtfn, t_srs = t_srs, cl_arg = cl_arg_vrt)
 
-      ds <- new(GDALRaster, outvrtfn, read_only = FALSE)
+      ds <- new(gdalraster::GDALRaster, outvrtfn, read_only = FALSE)
       ds$setDescription(band = 1, desc = outrastnm)
       #ds$getDescription(band = 1)
       
@@ -317,10 +318,10 @@ spAlignRast <- function(ref_rastfn,
     } else {
     
       ## Use warp to resample to same pixel size and extent
-      warp(rastfn, dst_filename = outrastfn, t_srs = t_srs, cl_arg = cl_arg)
+      gdalraster::warp(rastfn, dst_filename = outrastfn, t_srs = t_srs, cl_arg = cl_arg)
     }
     
-    ds <- new(GDALRaster, stacktiffn, read_only = FALSE)
+    ds <- new(gdalraster::GDALRaster, stacktiffn, read_only = FALSE)
     ds$getDescription(band = 1)
     
     outrastlst <- c(outrastlst, outrastfn)
@@ -329,11 +330,11 @@ spAlignRast <- function(ref_rastfn,
   ## Stack rasters to a Virtual Raster 
   if (makestack) {
     stackvrtfn <- file.path(outfolder, "stack.vrt")
-    buildVRT(stackvrtfn, outrastlst, cl_arg = "-separate")
+    gdalraster::buildVRT(stackvrtfn, outrastlst, cl_arg = "-separate")
 
     ## Create a geoTiff from a virtual raster
     stacktiffn <- file.path(outfolder, "stack.tif")
-    translate(stackvrtfn, stacktiffn)
+    gdalraster::translate(stackvrtfn, stacktiffn)
     #rasterInfo(stacktiffn)
     
     file.remove(stackvrtfn)

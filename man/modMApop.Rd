@@ -11,10 +11,13 @@ modMApop(
   popFilter = popFilters(),
   pltassgn = NULL,
   pltassgnid = "PLT_CN",
+  datsource = "sqlite",
   dsn = NULL,
+  dbconn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
-  adjplot = TRUE,
+  adj = "plot",
+  defaultVars = TRUE,
   unitvar = NULL,
   unitarea = NULL,
   areavar = "ACRES",
@@ -28,10 +31,10 @@ modMApop(
   objnm = "MApopdat",
   unit_opts = NULL,
   savedata_opts = NULL,
+  database_opts = NULL,
   MAdata = NULL,
   pltdat = NULL,
   auxdat = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -56,9 +59,13 @@ assignment of estimation unit and/or strata, with one record for each plot.}
 
 \item{pltassgnid}{String.}
 
+\item{datsource}{String. Name of data source ('obj', 'sqlite', 'postgres').}
+
 \item{dsn}{String. Name of database where tree, cond, and plot-level tables
 reside.  The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html).}
+
+\item{dbconn}{Open database connection.}
 
 \item{pjoinid}{String. Join variable in plot to match pltassgnid. Does not
 need to be uniqueid. If using most current XY coordinates for plot
@@ -67,7 +74,13 @@ assignments, use identifier for plot (e.g., PLOT_ID).}
 \item{areawt}{String. Name of variable for summarizing area weights (e.g.,
 CONDPROP_UNADJ).}
 
-\item{adjplot}{Logical. If TRUE, adjusts for nonresponse at plot-level.}
+\item{adj}{String. How to calculate adjustment factors for nonsampled
+(nonresponse) conditions based on summed proportions for by plot ('samp',
+'plot', 'none').  'samp' - adjustments are calculated at strata/estimation unit
+level; 'plot' - adjustments are calculated at plot-level. Adjustments are
+only calculated for annual inventory plots (DESIGNCD=1).}
+
+\item{defaultVars}{Logical. If TRUE, a set of default variables are selected.}
 
 \item{unitvar}{String. Name of the estimation unit variable in unitarea and
 cond or pltassgn data frame with estimation unit assignment for each plot
@@ -106,14 +119,15 @@ categorical). Names will change in output depending on number of categories.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
+\item{database_opts}{List. See help(database_options()) for a list
+of options. Only used when datsource = 'postgres'.}
+
 \item{MAdata}{List. Data output from FIESTA::MAdata().}
 
 \item{pltdat}{R List object. Output data list components from
 FIESTA::spGetPlots().}
 
 \item{auxdat}{List. Auxiliary data output from FIESTA::spGetAuxiliary().}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{For extendibility.}
 }

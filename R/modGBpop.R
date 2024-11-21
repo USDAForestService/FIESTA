@@ -73,18 +73,19 @@
 #' @param pltassgn DF/DT, Optional. R object, sf R object, comma-delimited
 #' file(.csv), layer or spatial layer in dsn, or shapefile(.shp). Plot-level
 #' assignment of estimation unit and/or strata, with one record for each plot.
-#' @param pltassgnid String.
+#' @param pltassgnid String vector. One or more variables in pltassgn 
+#' defining unique plot and will join to plt table.
+#' @param datsource String. Name of data source ('obj', 'sqlite', 'postgres').
 #' @param dsn String. Name of database where tree, cond, and plot-level tables
 #' reside.  The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html).
-#' @param pjoinid String. Join variable in plot to match pltassgnid. Does not
-#' need to be uniqueid. If using most current XY coordinates for plot
-#' assignments, use identifier for plot (e.g., PLOT_ID).
+#' @param dbconn Open database connection.
+#' @param pjoinid String vector. Join variable(s) in plot to match pltassgnid.
 #' @param areawt String. Name of variable in cond for summarizing area 
 #' weights (e.g., CONDPROP_UNADJ).
-#' @param areawt2 String. An equation to multiply to areawt for estimation. 
-#' All variables in equation must be in cond.
-#' weights (e.g., CONDPROP_UNADJ).
+#' @param areawt2 String. An equation to multiply to the adjusted areawt for
+#' estimation. All variables in equation must be in cond.
+#' (e.g., '1000 + SICOND * 3 + BALIVE * 4').
 #' @param adj String. How to calculate adjustment factors for nonsampled
 #' (nonresponse) conditions based on summed proportions for by plot ('samp',
 #' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
@@ -109,12 +110,16 @@
 #' stratalut and cond or pltassgn data frame with stratum assignment for each
 #' plot (Default = 'STRATUMCD').
 #' @param returndata Logical. If TRUE, returns data objects.
-#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
-#' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
+#' @param savedata Logical. If TRUE, saves data table(s). See savedata_opts 
+#' for saving options.
+#' @param saveobj Logical. If TRUE, saves returned list object. See savedata_opts
+#' for saving options.
 #' @param objnm String. Name of *.rds object.
 #' @param unit_opts List. See help(unit_options()) for a list of options.
 #' @param strata_opts List. See help(strata_options()) for a list of options.
 #' Only used when strata = TRUE. 
+#' @param database_opts List. See help(database_options()) for a list
+#' of options. Only used when datsource = 'postgres'.  
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @param GBdata R List object. Output data list components from
@@ -125,9 +130,6 @@
 #' FIESTA::spGetStrata().
 #' @param auxdat R List object. Output data list components from
 #' FIESTA::spGetAuxiliary().
-#' @param keepadjvars Logical. If TRUE, keep adjustment factors from 
-#' pop_stratum table in FIA database.
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ... For extendibility.
 #' @return A list with population data for Green-Book estimates.
 #' 
@@ -250,7 +252,9 @@ modGBpop <- function(popType = "VOL",
                      popFilter = popFilters(),
                      pltassgn = NULL,
                      pltassgnid = "PLT_CN",
+                     datsource = "sqlite",
                      dsn = NULL, 
+                     dbconn = NULL,
                      pjoinid = "CN", 
                      areawt = "CONDPROP_UNADJ", 
                      areawt2 = NULL,
@@ -269,14 +273,13 @@ modGBpop <- function(popType = "VOL",
                      unit_opts = NULL,
                      strata_opts = NULL, 
                      savedata_opts = NULL, 
+                     database_opts = NULL,
                      GBdata = NULL, 
                      pltdat = NULL, 
                      stratdat = NULL, 
-                     auxdat = NULL,
-                     keepadjvars = FALSE,
-                     gui = FALSE, 
+                     auxdat = NULL, 
                      ...){
-
+  
   ##################################################################################
   ## DESCRIPTION:
   ## Generates population data 'on-the-fly', including strata weights, number
@@ -288,30 +291,26 @@ modGBpop <- function(popType = "VOL",
   ## - calculates adjustment factors for nonresponse and appends an adjustment
   ##   variable to condition and tree data.
   ##################################################################################
-
+  
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0) gui <- TRUE
-
+  #if (nargs() == 0) gui <- TRUE
+  gui <- FALSE
+  
   ## If gui.. set variables to NULL
   if (gui) {
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   }
   
   ## Set parameters
-  adjtree <- FALSE
-  nonsamp.pfilter=nonsamp.cfilter <- NULL
-  #nonsamp.vfilter.fixed <- FALSE
-  poponly <- FALSE
-  if (returndata) {
-    returnlst <- list(module = "GB")
-  }
+  nonsamp.pfilter=nonsamp.cfilter=schema=projectid <- NULL
+  returnlst <- list(module = "GB")
+  
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
-    treef=seedf=grmf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=
-    sccmx=cond_pcondx=lulcx=popevalid <- NULL
+  expcondtab=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=sccmx=popevalid <- NULL
   condid <- "CONDID"
   pvars2keep=unitlevels <- NULL
+  pltidsadjindb=savepltids=dsnreadonly <- FALSE
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -326,149 +325,45 @@ modGBpop <- function(popType = "VOL",
   }
   
   ## Check parameter lists
-  pcheck.params(input.params, strata_opts=strata_opts, unit_opts=unit_opts, 
-                savedata_opts=savedata_opts)
+  pcheck.params(input.params = input.params,
+                strata_opts = strata_opts, unit_opts = unit_opts, 
+                savedata_opts = savedata_opts, database_opts = database_opts)
+ 
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         popFilter = popFilter,
+                         unit_opts = unit_opts, 
+                         strata_opts = strata_opts,
+                         savedata_opts = savedata_opts,
+                         database_opts = database_opts))
+  savedata_opts <- optslst$savedata_opts  
+  unit_opts <- optslst$unit_opts  
+  strata_opts <- optslst$strata_opts  
+  database_opts <- optslst$database_opts  
+  popFilter <- optslst$popFilter
   
-  
-  ## Set unit defaults
-  unit_defaults_list <- formals(unit_options)[-length(formals(unit_options))]
-  
-  for (i in 1:length(unit_defaults_list)) {
-    assign(names(unit_defaults_list)[[i]], unit_defaults_list[[i]])
+  for (i in 1:length(unit_opts)) {
+    assign(names(unit_opts)[[i]], unit_opts[[i]])
   }
-  
-  ## Set user-supplied unit values
-  if (length(unit_opts) > 0) {
-    for (i in 1:length(unit_opts)) {
-      if (names(unit_opts)[[i]] %in% names(unit_defaults_list)) {
-        assign(names(unit_opts)[[i]], unit_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(unit_opts)[[i]]))
-      }
-    }
+  for (i in 1:length(strata_opts)) {
+    assign(names(strata_opts)[[i]], strata_opts[[i]])
   }
-  
-  ## Set popFilters defaults
-  popFilters_defaults_list <- formals(popFilters)[-length(formals(popFilters))]
-  
-  for (i in 1:length(popFilters_defaults_list)) {
-    assign(names(popFilters_defaults_list)[[i]], popFilters_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied popFilters values
-  popFilter2 <- popFilters_defaults_list
-  if (length(popFilter) > 0) {
-    for (i in 1:length(popFilter)) {
-      if (names(popFilter)[[i]] %in% names(popFilters_defaults_list)) {
-        popFilter2[[names(popFilter)[[i]]]] <- popFilter[[i]]
-      } else {
-        stop(paste("Invalid parameter: ", names(popFilter)[[i]]))
-      }
-    }
-  }
-  
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-  
-  ## Set strata defaults
-  strata_defaults_list <- formals(strata_options)[-length(formals(strata_options))]
-  
-  for (i in 1:length(strata_defaults_list)) {
-    assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
-  }
-  
-  ## Set popTables defaults
-  popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
-  
-  for (i in 1:length(popTables_defaults_list)) {
-    assign(names(popTables_defaults_list)[[i]], popTables_defaults_list[[i]])
-  }  
-  
-  ## Set popTabIDs defaults
-  popTableIDs_defaults_list <- formals(popTableIDs)[-length(formals(popTableIDs))]
-  
-  for (i in 1:length(popTableIDs_defaults_list)) {
-    if (names(popTableIDs_defaults_list)[[i]] == "cond") {
-      assign("cuniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "plt") {
-      assign("puniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "tree") {
-      assign("tuniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "seed") {
-      assign("suniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "vsubpspp") {
-      assign("vsppuniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "vsubpstr") {
-      assign("vstruniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "invsubp") {
-      assign("invuniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "subplot") {
-      assign("subpuniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "subp_cond") {
-      assign("subcuniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "cond_dwm_calc") {
-      assign("dwmuniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "grm") {
-      assign("grmuniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "plot_pplot") {
-      assign("pplotuniqueid", popTableIDs_defaults_list[[i]])
-    }
-    if (names(popTableIDs_defaults_list)[[i]] == "cond_pcond") {
-      assign("pconduniqueid", popTableIDs_defaults_list[[i]])
-    }
-  }
-  
-  ## Set user-supplied strata values
-  if (length(strata_opts) > 0) {
-    for (i in 1:length(strata_opts)) {
-      if (names(strata_opts)[[i]] %in% names(strata_defaults_list)) {
-        assign(names(strata_opts)[[i]], strata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(strata_opts)[[i]]))
-      }
-    }
-  } 
+
   
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
   
   ## Check savedata 
-  savedata <- pcheck.logical(savedata, varnm="savedata", 
-                             title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+  savedata <- FIESTAutils::pcheck.logical(savedata, varnm="savedata", 
+                  title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+  if (!savedata) {
+    message("savedata=FALSE with savedata parameters... no data are saved")
+  }
   
   ## Check saveobj 
-  saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
-                            title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+  saveobj <- FIESTAutils::pcheck.logical(saveobj, varnm="saveobj", 
+                title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
   
   ## Check output
   ########################################################
@@ -476,33 +371,28 @@ modGBpop <- function(popType = "VOL",
     if (out_fmt == "sqlite" && is.null(out_dsn)) {
       out_dsn <- "GBpopdat.db"
     }
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-                            add_layer=add_layer, append_layer=append_layer, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
+    outlst <- FIESTAutils::pcheck.output(savedata_opts)
+    outlst$add_layer <- TRUE
   }
   
   if (saveobj) {
     outobj_fmtlst <- c('rds', 'rda')
-    outobj_fmt <- pcheck.varchar(var2check=outobj_fmt, varnm="outobj_fmt", 
-                                 gui=gui, checklst=outobj_fmtlst, caption="outobj_fmt", 
-                                 multiple=FALSE, stopifnull=TRUE)
-    
+    outobj_fmt <- FIESTAutils::pcheck.varchar(var2check = outobj_fmt, varnm="outobj_fmt", 
+                      gui=gui, checklst = outobj_fmtlst, caption="outobj_fmt", 
+                      multiple = FALSE, stopifnull = TRUE)
     if (is.null(objnm)) {
       objnm <- "GBpopdat"
     }
     #if (append_layer) overwrite_layer <- FALSE
     if (append_layer) message("currently cannot append to object lists")
-    objfn <- getoutfn(outfn=objnm, ext=outobj_fmt, outfolder=outfolder, 
-                      overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
+    objfn <- getoutfn(outfn = objnm, 
+                      ext = outobj_fmt, 
+                      outfolder = outlst$outfolder, 
+                      overwrite = outlst$overwrite_layer, 
+                      outfn.pre = outlst$outfn.pre, 
+                      outfn.date = outlst$outfn.date)
   }
+  
   
   ## Check popType
   ########################################################
@@ -510,10 +400,14 @@ modGBpop <- function(popType = "VOL",
   DWM_types <- c("CWD", "FWD_SM", "FWD_LG", "DUFF")
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", 
                   "CHNG", "GRM", "GROW", "MORT", "REMV")
-  popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
-                            checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
-  popevalid <- as.character(popFilter2$evalid)
+  popType <- FIESTAutils::pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
+                checklst=evalTyplst, caption="popType", multiple=FALSE, stopifinvalid=FALSE)
+  if (is.null(popType)) {
+    message("popType is invalid... must be from following list:\n", toString(evalTyplst))
+  }
+  popevalid <- popFilter$evalid
   if (!is.null(popevalid)) {
+    popevalid <- as.character(popevalid)
     substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
       formatC(FIESTAutils::ref_popType[FIESTAutils::ref_popType$popType %in% popType, "EVAL_TYP_CD"], 
               width=2, flag="0")
@@ -529,7 +423,7 @@ modGBpop <- function(popType = "VOL",
   ###################################################################################
   if (!is.null(GBdata)) {
     list.items <- c("tabs", "unitarea")
-    GBdata <- pcheck.object(GBdata, "GBdata", list.items=list.items)
+    GBdata <- FIESTAutils::pcheck.object(GBdata, "GBdata", list.items=list.items)
     #bnd <- GBdata$bnd
     popTabs <- GBdata$tabs
     popTabIDs <- GBdata$tabIDs
@@ -542,6 +436,7 @@ modGBpop <- function(popType = "VOL",
     predfac <- GBdata$predfac
     puniqueid <- GBdata$puniqueid
     pjoinid <- GBdata$pjoinid
+    states <- GBdata$states
     
     if (is.null(unitvar)) {
       unitvar <- GBdata$unitvar
@@ -569,9 +464,12 @@ modGBpop <- function(popType = "VOL",
         pivot <- FALSE
       }
     }
+    popFilter$states <- states
+    
   } else {
     ## Extract list objects
     if (!is.null(pltdat)) {
+      datsource <- "obj"
       tabnames <- if (sum(names(pltdat$tabs) %in% names(popTables())) == 0) {
         stop("no tables exist in pltdat")
       }			  
@@ -581,7 +479,7 @@ modGBpop <- function(popType = "VOL",
     }
     if (!is.null(stratdat)) {
       list.items <- c("pltassgn", "unitarea", "unitvar")
-      stratdat <- pcheck.object(stratdat, "stratdat", list.items=list.items)
+      stratdat <- FIESTAutils::pcheck.object(stratdat, "stratdat", list.items=list.items)
       bndx <- stratdat$bndx
       pltassgn <- stratdat$pltassgn
       pltassgnid <- stratdat$pltassgnid
@@ -610,7 +508,7 @@ modGBpop <- function(popType = "VOL",
     } else if (!is.null(auxdat)) {
       list.items <- c("pltassgn", "unitzonal", "unitvar", "predfac", 
                       "pltassgnid", "unitarea", "areavar")
-      auxdat <- pcheck.object(auxdat, "auxdat", list.items=list.items)
+      auxdat <- FIESTAutils::pcheck.object(auxdat, "auxdat", list.items=list.items)
       pltassgn <- auxdat$pltassgn
       pltassgnid <- auxdat$pltassgnid
       stratalut <- auxdat$unitzonal
@@ -630,52 +528,49 @@ modGBpop <- function(popType = "VOL",
         } 
         pivot <- TRUE
       }
+      #    } else {
+      #      strwtvar <- "strwt" 
+      #      if (!is.null(stratalut)) {
+      #        byunitvars <- c(unitvar, unitvar2)
+      #        if ("AOI" %in% names(unitzonal)) {
+      #          byunitvars <- c(byunitvars, "AOI")
+      #        }
+      #        stratalut <- strat.pivot(unitzonal, unitvars=byunitvars, 
+      #                                 strvar, strwtvar=strwtvar)
+      #        pivot <- FALSE
+      #      }
     }
   } 
   
-  ## Set user-supplied popTable values 
-  popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
-  if (length(popTabs) > 0) {
-    for (i in 1:length(popTabs)) {
-      if (names(popTabs)[[i]] %in% names(popTables_defaults_list)) {
-        assign(names(popTabs)[[i]], popTabs[[i]])
-      } else {
-        message(paste("Invalid parameter: ", names(popTabs)[[i]]))
-      }
-    }
-  } else {
-    stop("need to include popTabs")
-  }
-  list.items <- {}
+  # ## Set user-supplied popTable values 
+  # popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
+  # if (length(popTabs) > 0) {
+  #   for (i in 1:length(popTabs)) {
+  #     if (names(popTabs)[[i]] %in% names(popTables_defaults_list)) {
+  #       assign(names(popTabs)[[i]], popTabs[[i]])
+  #     } else {
+  #       message(paste("Invalid parameter: ", names(popTabs)[[i]]))
+  #     }
+  #   }
+  # } else {
+  #   stop("need to include popTabs")
+  # }
+  list.items <- c("cond")
   if (popType == "VOL") {
-    list.items <- c(list.items, "cond", "tree")
+    list.items <- c(list.items, "tree")
   }
   if (popType == "P2VEG") {
-    list.items <- c(list.items, "cond", "subplot", "subp_cond")
-    if (all(is.null(findnm("vsubpstr", names(popTabs), returnNULL=TRUE)), 
-            is.null(findnm("p2veg_subp_structure", names(popTabs), returnNULL=TRUE)))) {
-      message("need subp_cond_chng_mtrx table")
-      stop()
-    }	 
+    list.items <- c(list.items, "vsubpstr", "subplot", "subp_cond")
   }
   if (popType == "DWM") {
-    if (all(is.null(findnm("dwm", names(popTabs), returnNULL=TRUE)), 
-            is.null(findnm("cond_dwm_calc", names(popTabs), returnNULL=TRUE)))) {
-      message("need cond_dwm_calc table")
-      stop()
-    }	 
+    list.items <- c(list.items, "cond_dwm_calc")
   }
   if (popType == "CHNG") {
-    if (all(is.null(findnm("sccm", names(popTabs), returnNULL=TRUE)), 
-            is.null(findnm("subp_cond_chng_mtrx", names(popTabs), returnNULL=TRUE)))) {
-      message("need subp_cond_chng_mtrx table")
-      stop()
-    }	 
+    list.items <- c(list.items, "sccm")
   }
   
   ## Check popTabs
-  popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items, stopifnull=TRUE)
-  
+  popTabs <- FIESTAutils::pcheck.object(popTabs, "popTabs", list.items=list.items, stopifnull=TRUE)
   
   ## Set user-supplied popTabIDs values
   ### Check for invalid parameters first
@@ -691,32 +586,45 @@ modGBpop <- function(popType = "VOL",
       popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]
     }
   }
-  
+
   ###################################################################################
   ## CHECK PLOT PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
   ## Remove nonsampled plots (if nonsamp.pfilter != "NONE")
   ## Applies plot filters
   ###################################################################################
-  pltcheck <- check.popdataPLT(dsn=dsn, tabs=popTabs, tabIDs=popTabIDs, 
-                               pltassgn=pltassgn, pltassgnid=pltassgnid, pjoinid=pjoinid, 
-                               module="GB", popType=popType, popevalid=popevalid, adj=adj,
-                               popFilter=popFilter2, nonsamp.pfilter=nonsamp.pfilter, 
-                               unitarea=unitarea, areavar=areavar, unitvar=unitvar, 
-                               unitvar2=unitvar2, areaunits=areaunits, unit.action=unit.action, 
-                               strata=strata, stratalut=stratalut, strvar=strvar, pivot=pivot,
-                               pvars2keep=pvars2keep, defaultVars=defaultVars, unitlevels=unitlevels)
-  if (is.null(pltcheck)) return(NULL)
+  pltcheck <- 
+    check.popdataPLT(dsn = dsn, dbconn = dbconn, schema = schema,
+                     datsource = datsource, 
+                     returndata = returndata,
+                     tabs = popTabs, tabIDs = popTabIDs, 
+                     pltassgn = pltassgn, 
+                     pltassgnid = pltassgnid, pjoinid = pjoinid, 
+                     module = "GB", popType = popType, 
+                     popevalid = popevalid, adj = adj,
+                     popFilter = popFilter, 
+                     nonsamp.pfilter = nonsamp.pfilter, 
+                     unitarea = unitarea, areavar = areavar, 
+                     unitvar = unitvar, unitvar2 = unitvar2, 
+                     areaunits = areaunits, 
+                     unit.action = unit.action, 
+                     strata = strata, auxlut = stratalut, strvar = strvar, 
+                     pivot = pivot,
+                     pvars2keep = pvars2keep, defaultVars = defaultVars, 
+                     unitlevels = unit_opts$unitlevels,
+                     projectid = projectid,
+                     database_opts = database_opts)
+  if (is.null(pltcheck)) return(0)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
-  pltvars <- pltcheck$pvars
-  pfromqry <- pltcheck$pfromqry
-  palias <- pltcheck$palias
-  pjoinid <- pltcheck$pjoinid
-  whereqry <- pltcheck$whereqry
+  pltassgn. <- pltcheck$pltassgn.
+  plotlst <- pltcheck$plotlst
+  pltidsWITHqry <- pltcheck$pltidsWITHqry
+  pltidsid <- pltcheck$pltidsid
+  pltidvars <- pltcheck$pltidvars
+  projidvars <- pltcheck$projidvars
+  pdoms2keep <- pltcheck$pdoms2keep
   ACI <- pltcheck$ACI
-  pltx <- pltcheck$pltx
-  puniqueid <- pltcheck$puniqueid
   unitvar <- pltcheck$unitvar
   unitvar2 <- pltcheck$unitvar2
   unitarea <- pltcheck$unitarea
@@ -726,135 +634,31 @@ modGBpop <- function(popType = "VOL",
   unitlevels <- unitlevels
   stratcombine <- pltcheck$stratcombine
   strata <- pltcheck$strata
-  stratalut <- pltcheck$stratalut
+  auxlut <- pltcheck$stratalut
   strvar <- pltcheck$strvar
   P2POINTCNT <- pltcheck$P2POINTCNT 
   plotsampcnt <- pltcheck$plotsampcnt
   states <- pltcheck$states
   invyrs <- pltcheck$invyrs
   dbconn <- pltcheck$dbconn
-
+  SCHEMA. <- pltcheck$SCHEMA.
+  pltaindb <- pltcheck$pltaindb
+  datindb <- pltcheck$datindb
+  POP_PLOT_STRATUM_ASSGN <- pltcheck$POP_PLOT_STRATUM_ASSGN
+  pltselectqry <- pltcheck$pltselectqry
+  pltfromqry <- pltcheck$pltfromqry
+  pwhereqry <- pltcheck$pwhereqry
+  plotunitcnt <- pltcheck$plotunitcnt
+  getdataWITHqry <- pltcheck$getdataWITHqry
+  getdataCNs <- pltcheck$getdataCNs
+  returndata <- pltcheck$returndata
+  
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
 
-  if (popType %in% c("ALL", "CURR", "VOL")) {
-    ###################################################################################
-    ## Check parameters and data for popType AREA/VOL
-    ###################################################################################
-    popcheck <- check.popdataVOL(gui=gui, 
-          tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
-          pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
-          whereqry=whereqry, adj=adj, ACI=ACI, 
-          pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
-          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
-          areawt=areawt, areawt2=areawt2, pvars2keep=pvars2keep,
-		  defaultVars = defaultVars)
-    if (is.null(popcheck)) return(NULL)
-    condx <- popcheck$condx
-    pltcondx <- popcheck$pltcondx
-    treef <- popcheck$treef
-    seedf <- popcheck$seedf
-    cuniqueid <- popcheck$cuniqueid
-    condid <- popcheck$condid
-    tuniqueid <- popcheck$tuniqueid
-    ACI.filter <- popcheck$ACI.filter
-    condsampcnt <- popcheck$condsampcnt
-    areawt <- popcheck$areawt
-    areawt2 <- popcheck$areawt2
-    tpropvars <- popcheck$tpropvars
-	
-	adjvars <- c("ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
-  }
-
-  if (popType %in% c("CHNG", "GRM")) {
-    ###################################################################################
-    ## Check parameters and data for popType AREA/VOL
-    ###################################################################################
-    popcheck <- check.popdataCHNG(gui=gui, popType=popType,
-          tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
-          pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
-          whereqry=whereqry, adj=adj, ACI=ACI, 
-          pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
-          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
-          cvars2keep="REMPER", pvars2keep=pvars2keep,
-		  defaultVars = defaultVars, pltvars = pltvars)
-    if (is.null(popcheck)) return(NULL)
-    condx <- popcheck$sccm_condx
-    sccmx <- popcheck$sccmx
-    treef <- popcheck$treef
-    grmf <- popcheck$grmf
-    beginf <- popcheck$beginf
-    midptf <- popcheck$midptf
-    pltcondx <- popcheck$pltcondx
-    cuniqueid <- popcheck$cuniqueid
-    condid <- popcheck$condid
-    tuniqueid <- popcheck$tuniqueid
-    ACI.filter <- popcheck$ACI.filter
-    condsampcnt <- popcheck$condsampcnt
-    areawt <- popcheck$areawt
-    tpropvars <- popcheck$tpropvars
-	
-	adjvars <- c("ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
-   }
-
-  if (popType == "P2VEG") {
-    popcheck <- check.popdataP2VEG(gui=gui, 
-          tabs=popTabs, tabIDs=popTabIDs, 
-		  pltassgnx=pltassgnx, pltassgnid=pltassgnid,
-          pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
-          whereqry=whereqry, adj=adj, ACI=ACI, 
-          pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn, 
-          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
-		  pvars2keep=pvars2keep)
-    pltcondx <- popcheck$pltcondx
-    pltassgnx <- popcheck$pltassgnx
-    pltassgnid <- popcheck$pltassgnid
-    condx <- popcheck$condx
-    vcondx <- popcheck$vcondx
-    vcondsppf <- popcheck$vcondsppf
-    vcondstrf <- popcheck$vcondstrf
-    ACI.filter <- popcheck$ACI.filter
-    condsampcnt <- popcheck$condsampcnt
-    areawt <- popcheck$areawt
-    vareawt <- popcheck$vareawt
-    vuniqueid <- popcheck$vcondstrid
-
-	adjvars <- c("ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR", "ADJ_FACTOR_P2VEG_SUBP")
-   }
-
-  if (popType == "DWM") {
-    popcheck <- check.popdataDWM(gui=gui, 
-          tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
-          pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, 
-          whereqry=whereqry, adj=adj, ACI=ACI, 
-          pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
-          condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, 
-		  pvars2keep=pvars2keep)
-    condx <- popcheck$condx
-    pltcondx <- popcheck$pltcondx
-    cuniqueid <- popcheck$cuniqueid
-    condid <- popcheck$condid
-    tuniqueid <- popcheck$tuniqueid
-    ACI.filter <- popcheck$ACI.filter
-    condsampcnt <- popcheck$condsampcnt
-    areawt <- popcheck$areawt
-    dwmpropvars <- popcheck$dwmpropvars
-  }
-
-#  if (popType %in% c("GRM", "CHNG", "LULC")) {
-#    sccmx <- popcheck$sccmx
-#    condx <- popcheck$sccm_condx
-#    cond_pcondx <- popcheck$cond_pcondx
-#    tpropvars <- list(SUBP="SUBPPROP_UNADJ", MICR="MICRPROP_UNADJ", MACR="MACRPROP_UNADJ")
-#  }
-
-#  if (popType == "LULC") {
-#    lulcx <- popcheck$lulcx
-#  }
-
   ###################################################################################
-  ## CHECK STRATA
+  ## Check Auxiliary Data
   ###################################################################################
   ## If strata=TRUE, check strata variables and number of plots by estimation unit
   ## - if < 2 plots, an error occurs, must collapse plots.
@@ -863,527 +667,509 @@ modGBpop <- function(popType = "VOL",
   ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
-  auxdat <- check.auxiliary(pltx = pltassgnx, 
-                            puniqueid = pltassgnid,
-							unitvar = unitvar, 
-							unitvar2 = unitvar2,
-							unitarea = unitarea, 
-							areavar = areavar,
-							minplotnum.unit = minplotnum.unit, 
-							unit.action = unit.action,
-							unitlevels = unitlevels,
-							strata = strata, 
-							auxlut = stratalut, 
-							strvar = strvar,
-							stratcombine = stratcombine, 
-							minplotnum.strat = minplotnum.strat,
-							removeifnostrata = TRUE, 
-							getwt = getwt,
-							getwtvar = getwtvar, 
-							strwtvar = strwtvar, 
-							P2POINTCNT = P2POINTCNT,
-							auxtext = "stratalut",
-							AOI = popFilter2$AOIonly,
-							keepadjvars = keepadjvars,
-							adjvars = adjvars)
+  auxdat <- 
+    check.auxiliary(pltx = pltassgnx, 
+                    puniqueid = pltassgnid,
+                    unitvar = unitvar, 
+                    unitvar2 = unitvar2,
+                    unitarea = unitarea, 
+                    areavar = areavar,
+                    minplotnum.unit = unit_opts$minplotnum.unit, 
+                    unit.action = unit.action,
+                    unitlevels = unitlevels,
+                    strata = strata, 
+                    auxlut = auxlut, 
+                    strvar = strvar,
+                    stratcombine = strata_opts$stratcombine, 
+                    minplotnum.strat = strata_opts$minplotnum.strat,
+                    removeifnostrata = TRUE, 
+                    getwt = strata_opts$getwt,
+                    getwtvar = strata_opts$getwtvar, 
+                    strwtvar = strata_opts$strwtvar, 
+                    P2POINTCNT = P2POINTCNT,
+                    auxtext = "stratalut",
+                    AOI = popFilter$AOIonly)
+  if (is.null(auxdat)) return(0)
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
+  
+  stratcombinelut <- auxdat$stratcombinelut
+  if (!is.null(stratcombinelut)) {
+    classcols <- c(unitvar2, unitvar, strvar)
+    if (!is.null(auxdat$unitltmin)) {
+      fromcols <- c(unitvar2, unitvar, strvar)
+      tocols <- c(auxdat$unitvar, auxdat$strvar)
+    } else {
+      fromcols <- strvar
+      tocols <- auxdat$strvar
+    }
+    
+    ## Get select join for new strata variables
+    combineqry <- 
+      getcombineqry(lut = stratcombinelut,
+                    classcols = classcols,
+                    fromcols = fromcols,
+                    tocols = tocols,
+                    tab. = pltassgn.)
+    
+    pltidsqry <- paste0(
+      pltselectqry, ", ",
+      combineqry,
+      pltfromqry,
+      pwhereqry)
+    
+  }  
   unitvar <- auxdat$unitvar
   unitvars <- auxdat$unitvars
   strvar <- auxdat$strvar
   strwtvar <- auxdat$strwtvar
   stratcombinelut <- auxdat$stratcombinelut
-  stratwarnlut <- auxdat$stratwarnlut
+  unitltmin <- auxdat$unitltmin
+  
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
-  strunitvars <- c(unitvar, strvar)
-
-  ###################################################################################
-  ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
-  ## Calculates adjustment factors for area and trees by strata (and estimation unit)
-  ##		to account for nonsampled plots and conditions.
-  ## Creates an adjusted condition proportion by merging strata-level adjustment
-  ##		factors to cond and dividing CONDPROP_UNADJ by adjustment factor.
-  ###################################################################################
-  ## Returns:
-  ##  1. Summed proportions (*PROP_UNADJ_SUM) and adjustment factors (*PROP_ADJFAC)  
-  ##     by strata and estunit (*PROP_UNADJ_SUM / n.strata)
-  ##  2. Adjusted condition proportion (CONDPROP_ADJ) appended to condx
-  ###################################################################################
- 
-  ## Merge plot strata info to condx
-  if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
-  condx <- condx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
-
-  ## If more than one unitvar, 
-  ## split the concatenated unitvar variable to keep original columns
-  if (unitvar != "unitnew" && !is.null(unitvar2)) {
-    condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
-  }
-  if ("MACRPROP_UNADJ" %in% names(condx) && is.character(condx$MACRPROP_UNADJ)) {
-    condx$MACRPROP_UNADJ <- as.numeric(condx$MACRPROP_UNADJ)
-  }
-  
-  if (adj == "none") {
-    setkeyv(condx, c(cuniqueid, condid))
-    areawtnm <- areawt
-
-  } else {
-    if (adj == "samp") {
-      message("calculating adjustment factors...")
-    }      
-
-    if (popType %in% c("ALL", "VOL", "CURR")) {
-       
-      adjfacdata <- getadjfactorVOL(adj=adj, 
-                        condx = condx, 
-                        treex = treef, 
-                        seedx = seedf, 
-                        cuniqueid = cuniqueid, 
-                        condid = condid,
-                        unitlut = stratalut, 
-                        unitvars = unitvar,
-                        strvars = strvar,
-                        unitarea = unitarea,
-                        areavar = areavar, 
-                        areawt = areawt,
-						            keepadjvars = keepadjvars,
-						            adjvars = adjvars
-                        )
-      condx <- adjfacdata$condx
-      treef <- adjfacdata$treex
-      seedf <- adjfacdata$seedx
-      areaadj <- adjfacdata$areaadj
-      varadjlst <- adjfacdata$varadjlst
-      areawtnm <- adjfacdata$areawtnm
-      stratalut <- adjfacdata$unitlut
-      expcondtab <- adjfacdata$expcondtab
-    }
-
-    if (popType %in% c("CHNG", "GRM")) {
-      adjfacdata <- getadjfactorVOL(adj=adj, 
-                        condx = condx, 
-                        #treex = treef, 
-                        #seedx = seedf, 
-                        cuniqueid = cuniqueid, 
-                        condid = condid,
-                        unitlut = stratalut, 
-                        unitvars = unitvar,
-                        strvars = strvar,
-                        unitarea = unitarea,
-                        areavar = areavar, 
-                        areawt = areawt,
-                        keepadjvars = keepadjvars,
-                        adjvars = adjvars
-                        )
-      condx <- adjfacdata$condx
-      areaadj <- adjfacdata$areaadj
-      varadjlst <- adjfacdata$varadjlst
-      areawtnm <- adjfacdata$areawtnm
-      stratalut <- adjfacdata$unitlut
-      expcondtab <- adjfacdata$expcondtab
-
-      strunitvars <- key(stratalut)
-      if (is.null(key(sccmx))) setkeyv(sccmx, c(cuniqueid, condid))
-      sccmx <- sccmx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
-      setkeyv(sccmx, strunitvars)
-      sccmx <- sccmx[stratalut[,c(strunitvars, areaadj), with=FALSE]]
-      sccmx$SUBPTYP_PROP_ADJ <- sccmx$SUBPTYP_PROP_CHNG * sccmx[[areaadj]]
-      areawtnm <- "SUBPTYP_PROP_ADJ"
-	  
-      ## If more than one unitvar, 
-      ## split the concatenated unitvar variable to keep original columns
-      if (!is.null(unitvar2)) {
-        sccmx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
-      }
-    }
-
-    if (popType == "DWM") {
-      adjfacdata <- getadjfactorDWM(adj=adj, 
-                        condx = condx, 
-                        cuniqueid = cuniqueid, 
-                        condid = condid,
-                        unitlut = stratalut, 
-                        unitvars = unitvar,
-                        strvars = strvar,
-                        unitarea = unitarea,
-                        areavar = areavar, 
-                        areawt = areawt,
-                        dwmpropvars = dwmpropvars
-                        )
-      condx <- adjfacdata$condx
-      varadjlst <- adjfacdata$varadjlst
-      areawtnm <- adjfacdata$areawtnm
-      stratalut <- adjfacdata$unitlut
-      expcondtab <- adjfacdata$expcondtab
-    }
+  strunitvars <- c(unitvars, strvar)
   
 
-    if (popType == "P2VEG") {
-      if (is.null(key(vcondx))) setkeyv(vcondx, c(cuniqueid, condid))
-      vcondx <- vcondx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
-
-      ## If more than one unitvar, 
-      ## split the concatenated unitvar variable to keep original columns
-      if (!is.null(unitvar2)) {
-        vcondx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+  ###################################################################################
+  ## Check Population Data
+  ###################################################################################
+  if (popType %in% c("ALL", "CURR", "VOL")) {
+    ###################################################################################
+    ## Check parameters and data for popType AREA/VOL
+    ###################################################################################
+    areawt <- "CONDPROP_UNADJ"
+    popcheck <- 
+      check.popdataVOL(tabs = popTabs, tabIDs = popTabIDs, 
+                       popType = popType, 
+                       datindb = datindb, pltaindb = pltaindb, 
+                       pltidsWITHqry = pltidsWITHqry, 
+                       pltidsid = pltidsid,
+                       pltidvars = pltidvars, projidvars = projidvars,
+                       pdoms2keep = pdoms2keep, 
+                       defaultVars = defaultVars, 
+                       pltidsadjindb = pltidsadjindb, 
+                       pltassgnid = pltassgnid, 
+                       pltassgnx = pltassgnx,
+                       POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
+                       adj = adj, ACI = ACI, 
+                       plotlst = plotlst,  
+                       #pltfromqry = pltfromqry, 
+                       condid = condid, 
+                       areawt = areawt, areawt2 = areawt2,
+                       unitvars = unitvars,
+                       strunitvars = strunitvars, 
+                       nonsamp.cfilter = nonsamp.cfilter, 
+                       dbconn = dbconn, SCHEMA. = SCHEMA., 
+                       getdataWITHqry = getdataWITHqry,
+                       getdataCNs = getdataCNs,
+                       returndata = returndata,
+                       savedata = savedata, 
+                       outlst = outlst)
+    if (is.null(popcheck)) return(0)
+    pltidsadj <- popcheck$pltidsadj
+    pltcondx <- popcheck$pltcondx
+    pltcondflds <- popcheck$pltcondflds
+    cuniqueid <- popcheck$cuniqueid
+    condid <- popcheck$condid
+    adjfactors <- popcheck$adjfactors
+    adjvarlst <- popcheck$adjvarlst
+    condsampcnt <- popcheck$condsampcnt
+    dbqueries <- popcheck$dbqueries
+    dbqueriesWITH <- popcheck$dbqueriesWITH
+    estfromqry <- popcheck$estfromqry
+    adjcase <- popcheck$adjcase
+    pjoinid <- popcheck$pjoinid
+    
+    if (popType == "VOL") {
+      treex <- popcheck$treex
+      seedx <- popcheck$seedx
+      tuniqueid <- popcheck$tuniqueid
+      if (is.null(treex) && is.null(seedx)) {
+        stop("must include tree data")
       }
-      adjfacdata <- getadjfactorVOL(adj=adj, 
-                        condx = condx, 
-                        cuniqueid = cuniqueid, 
-                        condid = condid,
-                        unitlut = stratalut, 
-                        unitvars = unitvar,
-                        strvars = strvar,
-                        unitarea = unitarea,
-                        areavar = areavar, 
-                        areawt = areawt
-                        )
-      condx <- adjfacdata$condx
-      stratalut1 <- adjfacdata$unitlut
-      areawtnm <- adjfacdata$areawtnm
-      varadjlst1 <- adjfacdata$varadjlst
-
-      adjfacdataP2VEG <- getadjfactorP2VEG(adj=adj, 
-                        condx = vcondx, 
-                        cuniqueid = cuniqueid, 
-                        condid = condid,
-                        vcondsppx = vcondsppf,
-                        vcondstrx = vcondstrf, 
-                        vuniqueid = vuniqueid, 
-                        unitlut = stratalut, 
-                        unitvars = unitvar,
-                        strvars = strvar,
-                        unitarea = unitarea,
-                        areavar = areavar, 
-                        areawt = vareawt
-                        )
-      stratalut2 <- adjfacdataP2VEG$unitlut
-      vcondsppf <- adjfacdataP2VEG$vcondsppx
-      vcondstrf <- adjfacdataP2VEG$vcondstrx
-      varadjP2VEG <- adjfacdataP2VEG$varadjlst
-
-      stratalut <- merge(stratalut1, stratalut2[, c(key(stratalut2), varadjP2VEG), with=FALSE])
     }
   }
 
-  ###################################################################################
-  ## Return population data objects
-  ###################################################################################
-
-  if (!is.null(areawt2)) {
-    if (!is.numeric(condx[[areawt2]])) {
-      stop("areawt2 is invalid")
+  if (popType %in% c("CHNG", "GRM")) {
+    ###################################################################################
+    ## Check parameters and data for popType AREA/VOL
+    ###################################################################################
+    areawt <- "SUBPTYP_PROP_CHNG"
+    popcheck <- 
+      check.popdataCHNG(tabs = popTabs, tabIDs = popTabIDs, 
+                        popType = popType, 
+                        datindb = datindb, pltaindb = pltaindb, 
+                        pltidsWITHqry = pltidsWITHqry, pltidsid = pltidsid,
+                        pltidvars = pltidvars, 
+                        pdoms2keep = pdoms2keep,
+                        defaultVars = defaultVars,
+                        pltidsadjindb = pltidsadjindb, 
+                        pltassgnid = pltassgnid, 
+                        pltassgnx = pltassgnx,
+                        POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
+                        adj = adj, ACI = ACI, 
+                        plotlst = plotlst, 
+                        pwhereqry = pwhereqry, 
+                        pltfromqry = pltfromqry,
+                        condid = condid, 
+                        areawt = areawt, areawt2 = areawt2,
+                        unitvars = unitvars,
+                        strunitvars = strunitvars,
+                        nonsamp.cfilter = nonsamp.cfilter, 
+                        dbconn = dbconn, SCHEMA. = SCHEMA., 
+                        getdataWITHqry = getdataWITHqry,
+                        getdataCNs = getdataCNs,
+                        returndata = returndata,
+                        savedata = savedata, 
+                        outlst = outlst)
+    if (is.null(popcheck)) return(0)
+    pltidsadj <- popcheck$pltidsadj
+    pltcondx <- popcheck$pltcondx
+    pltcondflds <- popcheck$pltcondflds
+    cuniqueid <- popcheck$cuniqueid
+    condid <- popcheck$condid
+    adjfactors <- popcheck$adjfactors
+    adjvarlst <- popcheck$adjvarlst
+    condsampcnt <- popcheck$condsampcnt
+    dbqueries <- popcheck$dbqueries
+    dbqueriesWITH <- popcheck$dbqueriesWITH
+    ACI.filter <- popcheck$ACI.filter
+    adjcase <- popcheck$adjcase
+    sccmx <- popcheck$sccmx
+    
+    if (returndata) {
+      if (popType == "GRM") {
+        treex <- popcheck$treex
+        tuniqueid <- popcheck$tuniqueid
+        grmx <- popcheck$grmx
+        beginx <- popcheck$beginx
+        midptx <- popcheck$midptx
+      }
     }
-    condx$areawt <- condx[[areawtnm]] * condx[[areawt2]]
-    areawtnm <- "areawt"
-  } 
-
-  if (is.null(key(unitarea))) {
-    setkeyv(unitarea, unitvars)
   }
-  setorderv(stratalut, c(unitvars, strvar))
+  
+  if (popType == "P2VEG") {
+    #areawt <- "SUBPTYP_PROP_CHNG"
+    popcheck <- 
+      check.popdataP2VEG(tabs = popTabs, tabIDs = popTabIDs, 
+                         popType = popType, 
+                         datindb = datindb, pltaindb = pltaindb, 
+                         pltidsWITHqry = pltidsWITHqry, pltidsid = pltidsid,
+                         pltidvars = pltidvars, 
+                         pdoms2keep = pdoms2keep,
+                         defaultVars = defaultVars,
+                         pltidsadjindb = pltidsadjindb, 
+                         pltassgnid = pltassgnid, 
+                         pltassgnx = pltassgnx,
+                         POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
+                         adj = adj, ACI = ACI, 
+                         plotlst = plotlst, 
+                         pwhereqry = pwhereqry, 
+                         pltfromqry = pltfromqry,
+                         condid = condid, 
+                         areawt = areawt, areawt2 = areawt2,
+                         unitvars = unitvars,
+                         strunitvars = strunitvars,
+                         nonsamp.cfilter = nonsamp.cfilter, 
+                         dbconn = dbconn, SCHEMA. = SCHEMA., 
+                         getdataWITHqry = getdataWITHqry,
+                         getdataCNs = getdataCNs,
+                         returndata = returndata,
+                         savedata = savedata, 
+                         outlst = outlst)
+    if (is.null(popcheck)) return(0)
+    pltidsadj <- popcheck$pltidsadj
+    pltcondx <- popcheck$pltcondx
+    pltcondflds <- popcheck$pltcondflds
+    cuniqueid <- popcheck$cuniqueid
+    condid <- popcheck$condid
+    adjfactors <- popcheck$adjfactors
+    adjvarlst <- popcheck$adjvarlst
+    condsampcnt <- popcheck$condsampcnt
+    dbqueries <- popcheck$dbqueries
+    dbqueriesWITH <- popcheck$dbqueriesWITH
+    ACI.filter <- popcheck$ACI.filter
+    adjcase <- popcheck$adjcase
+    varadjP2VEG <- popcheck$varadjP2VEG
 
+    vcondsppx <- popcheck$vcondsppx
+    vcondstrx <- popcheck$vcondstrx
+    
+        
+    if (returndata) {
+      #pltx <- popcheck$pltx
+      #condx <- popcheck$condx
+      subplotx <- popcheck$subplotx
+      subp_condx <- popcheck$subp_condx
+      p2veg_subp_structure <- popcheck$p2veg_subp_structure
+      p2veg_subplot_spp <- popcheck$p2veg_subplot_spp
+      
+      vcondsppx <- popcheck$vcondsppx
+      vcondstrx <- popcheck$vcondstrx
+    }
+  }
+  
 
   ###################################################################################
   ## Add new variables to pltcondx for estimation
   ###################################################################################
-  ## Get order of pltcondx columns
-  pltcondxcols <- names(pltcondx)
-  newcols <- {}
-  
-  if (!"LANDSTATUSCD" %in% names(pltcondx)) {
+  if (returndata || savedata) {
+    
+    ## Get order of pltcondx columns
+    pltcondxcols <- names(pltcondx)
+    pltcondxkey <- key(pltcondx)
+    newcols <- {}
+    
     ## Add LANDSTATUSCD based on the following lookup table
-    LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
-                    LANDSTATUSCD = c(rep(1, 6), rep(2, 2), rep(3, 6), 4),
-                    LANDSTATUSNM = c(rep("Timberland", 6), 
-                                     rep("Other forestland", 2), 
-                                     rep("Reserved productive forestland", 6),
-                                         "Reserved other forestland"))
-    pltcondx$LANDSTATUS <- with(pltcondx, COND_STATUS_CD * 100 + RESERVCD * 10 + SITECLCD)
-    pltcondx <- merge(pltcondx, LANDSTATUSlut, by="LANDSTATUS", all.x=TRUE)
-    pltcondx$LANDSTATUS <- NULL
-    newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
-  }
-
-  if (!"FORTYPGRPCD" %in% names(pltcondx) && "FORTYPCD" %in% names(pltcondx)) {
+    landstatuscdnm <- findnm("LANDSTATUSCD", pltcondxcols, returnNULL=TRUE)
+    if (is.null(landstatuscdnm)) {
+      condstatusnm <- findnm("COND_STATUS_CD", pltcondxcols, returnNULL=TRUE)
+      reservcdnm <- findnm("RESERVCD", pltcondxcols, returnNULL=TRUE)
+      siteclcdnm <- findnm("SITECLCD", pltcondxcols, returnNULL=TRUE)
+    
+      if (all(!sapply(c(condstatusnm, reservcdnm, siteclcdnm), is.null))) {
+        lower <- ifelse (condstatusnm == "COND_STATUS_CD", FALSE, TRUE)
+        landstatusnm <- ifelse(lower, "landstatus", "LANDSTATUS")
+      
+        LANDSTATUSlut <- data.frame(LANDSTATUS = c(101:108, 111:117),
+                                  LANDSTATUSCD = c(rep(1, 6), rep(2, 2), rep(3, 6), 4),
+                                  LANDSTATUSNM = c(rep("Timberland", 6), 
+                                                   rep("Other forestland", 2), 
+                                                   rep("Reserved productive forestland", 6),
+                                                   "Reserved other forestland"))
+        if (lower) names(LANDSTATUSlut) <- tolower(names(LANDSTATUSlut))
+      
+        pltcondx[[landstatusnm]] <- 
+          with(pltcondx, get(condstatusnm) * 100 + get(reservcdnm) * 10 + get(siteclcdnm))
+        pltcondx <- merge(pltcondx, LANDSTATUSlut, by=landstatusnm, all.x=TRUE)
+        pltcondx[[landstatusnm]] <- NULL
+        newcols <- c("LANDSTATUSCD", "LANDSTATUSNM")
+        if (lower) newcols <- tolower(newcols)
+      
+        if (popType %in% c("CHNG", "GRM")) {
+          prevnm <- ifelse(lower, "prev_", "PREV_")
+          names(LANDSTATUSlut) <- paste0(prevnm, names(LANDSTATUSlut))
+        
+          pltcondx[[paste0(prevnm, landstatusnm)]] <- 
+            with(pltcondx, get(paste0(prevnm, condstatusnm)) * 100 + 
+                 get(paste0(prevnm, reservcdnm)) * 10 + get(paste0(prevnm, siteclcdnm)))
+          pltcondx <- merge(pltcondx, LANDSTATUSlut, by=paste0(prevnm, landstatusnm), all.x=TRUE)
+          pltcondx[[paste0(prevnm, landstatusnm)]] <- NULL
+          newcols <- c(newcols, paste0(prevnm, newcols))
+        }
+      }
+    }
+ 
     ## Add FORTYPGRPCD to pltcondx if not already in dataset
-    #pltcondx <- addFORTYPGRPCD(pltcondx)
-    ref_fortyp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
-    names(ref_fortyp) <- c("FORTYPCD", "FORTYPGRPCD")
-    pltcondx <- merge(pltcondx, ref_fortyp, by="FORTYPCD", all.x=TRUE)
-    newcols <- c(newcols, "FORTYPGRPCD")
+    fortypgrpnm <- findnm("FORTYPGRPCD", pltcondxcols, returnNULL=TRUE)
+
+    if (is.null(fortypgrpnm)) {
+      fortypnm <- findnm("FORTYPCD", pltcondxcols, returnNULL=TRUE)
+     
+      if (!is.null(fortypnm)) {
+        lower <- ifelse (fortypnm == "FORTYPCD", FALSE, TRUE)
+      
+        ref_fortyp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
+        names(ref_fortyp) <- c("FORTYPCD", "FORTYPGRPCD")
+        if (lower) names(ref_fortyp) <- tolower(names(ref_fortyp))
+      
+        pltcondx <- merge(pltcondx, ref_fortyp, by=fortypnm, all.x=TRUE)
+        newcols <- c(newcols, ifelse(lower, "fortypgrpcd", "FORTYPGRPCD"))
+
+        if (popType %in% c("CHNG", "GRM")) {
+          prevnm <- ifelse(lower, "prev_", "PREV_")
+          names(ref_fortyp) <- paste0(prevnm, names(ref_fortyp))
+        
+          pltcondx <- merge(pltcondx, ref_fortyp, by=paste0(prevnm, fortypnm), all.x=TRUE)
+          newcols <- c(newcols, ifelse(lower, "prev_fortypgrpcd", "PREV_FORTYPGRPCD"))
+        }  
+      }
+    }
+    
+    ## Add DSTRBGRP to pltcondx if not already in dataset
+    dstrgrpnm <- findnm("DSTRBGRP", pltcondxcols, returnNULL=TRUE)
+    
+    if (is.null(dstrgrpnm)) {
+      dstrbcd1nm <- findnm("DSTRBCD1", pltcondxcols, returnNULL=TRUE)
+      
+      ref_dstrbcd <- ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")]
+      names(ref_dstrbcd) <- c("DSTRBCD1", "DSTRBGRP")
+      if (lower) names(ref_dstrbcd) <- tolower(names(ref_dstrbcd))
+      
+      pltcondx <- merge(pltcondx, ref_dstrbcd, by=dstrbcd1nm, all.x=TRUE)
+      newcols <- c(newcols, ifelse(lower, "dstrbgrp", "DSTRBGRP"))
+      
+      if (popType %in% c("CHNG", "GRM")) {
+        prevnm <- ifelse(lower, "prev_", "PREV_")
+        names(ref_dstrbcd) <- paste0(prevnm, names(ref_dstrbcd))
+        
+        pltcondx <- merge(pltcondx, ref_dstrbcd, by=paste0(prevnm, dstrbcd1nm), all.x=TRUE)
+        newcols <- c(newcols, ifelse(lower, "prev_dstrbgrp", "PREV_DSTRBGRP"))
+      }  
+    }
+    
+    ## Move new columns to end of table
+    setcolorder(pltcondx, c(pltcondxcols, newcols))
+    pltcondflds <- c(pltcondflds, newcols)
+    setkeyv(pltcondx, pltcondxkey)
   }
-
-  if (!"DSTRBGRP" %in% names(pltcondx) && "DSTRBCD1" %in% names(pltcondx)) {
-    ## Add FORTYPGRPCD to pltcondx if not already in dataset
-    #pltcondx <- addFORTYPGRPCD(pltcondx)
-    ref_dstrbcd <- ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")]
-    names(ref_dstrbcd) <- c("DSTRBCD1", "DSTRBGRP")
-    pltcondx <- merge(pltcondx, ref_dstrbcd, by="DSTRBCD1", all.x=TRUE)
-    newcols <- c(newcols, "DSTRBGRP")
+  
+  ## Save pltids, including adjustment factors
+  if (savepltids) {
+    ## Add PROJECTID to pltassgnx
+    if (!is.null(projectid)) {
+      pltidsadj$PROJECTID <- projectid
+    }
+    
+    message("saving pltids...")
+    outlst$out_layer <- "pltids"
+    if (!append_layer) index.unique.pltids <- c(projectid, puniqueid)
+    datExportData(pltidsadj, 
+                  savedata_opts = outlst)
   }
-
-  ## Move new columns to end of table
-  setcolorder(pltcondx, c(pltcondxcols, newcols))
-
 
   ## Build list of data to return
   ###################################################################################
-  if (returndata) {
-    returnlst$popType <- popType
-    if (!is.null(bndx)) {
-      returnlst$bndx <- bndx
+  returnlst$popType <- popType
+  if (!is.null(bndx)) {
+    returnlst$bndx <- bndx
+  }
+  returnlst <- append(returnlst, list(
+    pltidsadj = pltidsadj,
+    pltcondx = pltcondx, 
+    pltcondflds = pltcondflds, pjoinid = pjoinid,
+    cuniqueid = cuniqueid, condid = condid, 
+    ACI = ACI,
+    areawt = areawt, areawt2 = areawt2, adjcase = adjcase,
+    dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH,
+    pltassgnx = pltassgnx,
+    pltassgnid = pltassgnid,
+    unitarea = unitarea, 
+    areavar = areavar, areaunits = areaunits, 
+    unitvar = unitvar, unitvars = unitvars, 
+    unitltmin = unitltmin,
+    strata = strata, stratalut = stratalut, 
+    strvar = strvar, strwtvar = strwtvar, 
+    plotsampcnt = plotsampcnt, condsampcnt = condsampcnt, 
+    states = states, invyrs = invyrs, 
+    adj = adj, P2POINTCNT = P2POINTCNT,
+    plotunitcnt = plotunitcnt))
+  
+  if (popType == "VOL") {
+    if (!is.null(treex)) {
+      returnlst$treex <- treex
+      returnlst$tuniqueid <- tuniqueid
+      #returnlst$adjtree <- adjtree
     }
- 
-    returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
-            cuniqueid=cuniqueid, condid=condid, ACI=ACI, 
-			ACI.filter=ACI.filter, 
-			pltassgnx=pltassgnx, pltassgnid=pltassgnid,
-            unitarea=unitarea, areavar=areavar, 
-            areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, 
-            strata=strata, stratalut=data.table(stratalut), 
-            strvar=strvar, strwtvar=strwtvar, expcondtab=expcondtab, 
-            plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-            states=states, invyrs=invyrs, estvar.area=areawtnm, 
-            adj=adj, P2POINTCNT=P2POINTCNT))
-
-    if (popType == "VOL") {
-      if (!is.null(treef)) {
-        returnlst$treex <- treef
-        returnlst$tuniqueid <- tuniqueid
-        returnlst$adjtree <- adjtree
-      }
-      if (!is.null(seedf)) {
-        returnlst$seedx <- seedf
-      }
-    }
-
-    if (strata) {
-      if (!is.null(stratcombinelut)) {
-        returnlst$stratcombinelut <- stratcombinelut
-      } else if (!is.null(stratwarnlut)) {
-	    returnlst$stratwarnlut <- stratwarnlut
-	  }
-    }
-    if (!is.null(evalid)) {
-      returnlst$evalid <- evalid
-    }
-    if (popType == "P2VEG") {
-      returnlst$vcondsppx <- vcondsppf
-      returnlst$vcondstrx <- vcondstrf
-      returnlst$varadjP2VEG <- varadjP2VEG
-    }
-    if (popType %in% c("CHNG")) {
-      returnlst$sccmx <- sccmx
-    }
-    if (popType %in% c("GRM")) {
-      returnlst$treex <- popcheck$treef
-      returnlst$grmx <- popcheck$grmf
-      returnlst$beginx <- popcheck$beginf
-      returnlst$midptx <- popcheck$midptf
+    if (!is.null(seedx)) {
+      returnlst$seedx <- seedx
     }
   }
-
-
+  
+  if (strata) {
+    if (!is.null(stratcombinelut)) {
+      returnlst$stratcombinelut <- setDF(stratcombinelut)
+    }
+  }
+  if (!is.null(popevalid)) {
+    returnlst$evalid <- popevalid
+  }
+  if (popType == "P2VEG") {
+    returnlst$vcondsppx <- vcondsppx
+    returnlst$vcondstrx <- vcondstrx
+    returnlst$varadjP2VEG <- varadjP2VEG
+    
+    subplotx <- popcheck$subplotx
+    subp_condx <- popcheck$subp_condx
+    p2veg_subp_structure <- popcheck$p2veg_subp_structure
+    p2veg_subplot_spp <- popcheck$p2veg_subplot_spp
+    
+  }
+  if (popType %in% c("CHNG")) {
+    returnlst$sccmx <- sccmx
+  }
+  if (popType %in% c("GRM")) {
+    returnlst$treex <- popcheck$treef
+    returnlst$grmx <- popcheck$grmf
+    returnlst$beginx <- popcheck$beginf
+    returnlst$midptx <- popcheck$midptf
+  }
+  
+  if (adj != "none") {
+    returnlst$adjfactors <- adjfactors
+    returnlst$adjvarlst <- adjvarlst
+  }
+  
+  
   ## Save data frames
   ##################################################################
-  if (savedata) {
-#    if (out_fmt == "sqlite") {
-#      returnlst$pop_fmt <- "sqlite"
-#      returnlst$pop_dsn <- file.path(outfolder, out_dsn)
-#    }
-    message("saving condx...")
-    datExportData(condx, 
-          savedata_opts=list(outfolder = outfolder, 
-                             out_fmt = out_fmt, 
-		                 out_dsn = out_dsn, 
-		                 out_layer = "condx",
-		                 outfn.pre = outfn.pre, 
-		                 outfn.date = outfn.date, 
-		                 overwrite_layer = overwrite_layer,
-		                 append_layer = append_layer,
-		                 add_layer = TRUE))
- 
-    message("saving pltcondx...")
-    datExportData(pltcondx, 
-          savedata_opts=list(outfolder = outfolder, 
-                             out_fmt = out_fmt, 
-		                 out_dsn = out_dsn, 
-		                 out_layer = "pltcondx",
-		                 outfn.pre = outfn.pre, 
-		                 outfn.date = outfn.date, 
-		                 overwrite_layer = overwrite_layer,
-		                 append_layer = append_layer,
-		                 add_layer = TRUE))
-    rm(condx)
-    rm(pltcondx)
-    # gc()
-
-    if (popType %in% c("CHNG") && !is.null(sccmx)) {
-      message("saving sccmx...")
-      datExportData(sccmx, 
-          savedata_opts=list(outfolder = outfolder, 
-                             out_fmt = out_fmt, 
-		                 out_dsn = out_dsn, 
-		                 out_layer = "sccmx",
-		                 outfn.pre = outfn.pre, 
-		                 outfn.date = outfn.date, 
-		                 overwrite_layer = overwrite_layer,
-		                 append_layer = append_layer,
-		                 add_layer = TRUE))
-      rm(sccmx)
+  if (returndata) {
+    returnlst$popdatindb <- FALSE
+  } else {
+    returnlst$popdatindb <- TRUE
+    
+    if (savedata) {
+      if (outlst$out_fmt == "sqlite") {
+        returnlst$pop_fmt <- "sqlite"
+        returnlst$pop_dsn <- file.path(outlst$outfolder, outlst$out_dsn)
+        returnlst$pop_schema <- NULL
+      }
+      
+      message("saving pltassgnx...")
+      outlst$out_layer <- "pltassgn"
+      datExportData(pltassgnx, 
+                    savedata_opts = outlst)
+      
+      message("saving unitarea...")
+      outlst$out_layer <- "unitarea"
+      datExportData(unitarea, 
+                    savedata_opts = outlst)
+      
+      message("saving stratalut...")
+      outlst$out_layer <- "stratalut"
+      datExportData(stratalut, 
+                    savedata_opts = outlst)
+      rm(pltassgnx)
+      rm(unitarea)
+      rm(stratalut)
       # gc()
-    }
-
-    if (!is.null(treef)) {
-      message("saving treex...")
-      datExportData(treef, 
-          savedata_opts=list(outfolder = outfolder, 
-                             out_fmt = out_fmt, 
-		                 out_dsn = out_dsn, 
-		                 out_layer = "treex",
-		                 outfn.pre = outfn.pre, 
-		                 outfn.date = outfn.date, 
-		                 overwrite_layer = overwrite_layer,
-		                 append_layer = append_layer,
-		                 add_layer = TRUE))
-      rm(treef)
-      # gc()
-    }
-    if (!is.null(seedf)) {
-      message("saving seedx...")
-      datExportData(seedf, 
-          savedata_opts=list(outfolder = outfolder, 
-                             out_fmt = out_fmt, 
-		                 out_dsn = out_dsn, 
-		                 out_layer ="seedx",
-		                 outfn.pre = outfn.pre, 
-		                 outfn.date = outfn.date, 
-		                 overwrite_layer = overwrite_layer,
-		                 append_layer = append_layer,
-		                 add_layer = TRUE))
-      rm(seedf)
-      # gc()
-    }
-    if (!is.null(vcondsppf)) {
-      message("saving vcondsppx...")
-      datExportData(vcondsppf, 
-          savedata_opts=list(outfolder = outfolder, 
-                             out_fmt = out_fmt, 
-		                 out_dsn = out_dsn, 
-		                 out_layer = "vcondsppx",
-		                 outfn.pre = outfn.pre, 
-		                 outfn.date = outfn.date, 
-		                 overwrite_layer = overwrite_layer,
-		                 append_layer = append_layer,
-		                 add_layer = TRUE))
-      rm(vcondsppf)
-      # gc()
-    }
-    if (!is.null(vcondstrf)) {
-      message("saving vcondstrx...")
-      datExportData(vcondstrf, 
-          savedata_opts=list(outfolder = outfolder, 
-                             out_fmt = out_fmt, 
-		                 out_dsn = out_dsn, 
-		                 out_layer = "vcondstrx",
-		                 outfn.pre = outfn.pre, 
-		                 outfn.date = outfn.date, 
-		                 overwrite_layer = overwrite_layer,
-		                 append_layer = append_layer,
-		                 add_layer = TRUE))
-      rm(vcondstrf)
-      # gc()
-    }
-    if (popType == "GRM" && !is.null(grmf) && !poponly) {
-      message("saving grmx...")
-      if (!is.null(popcheck$grmf)) {
-        datExportData(popcheck$grmf, 
-            savedata_opts=list(outfolder = outfolder, 
-                               out_fmt = out_fmt, 
-		                   out_dsn = out_dsn, 
-		                   out_layer = "grmx",
-		                   outfn.pre = outfn.pre, 
-		                   outfn.date = outfn.date, 
-		                   overwrite_layer = overwrite_layer,
-		                   append_layer = append_layer,
-		                   add_layer = TRUE))
-        rm(grmf)
+      
+      # if (popType %in% c("TREE", "GRM")) {
+      #   message("saving REF_SPECIES...")
+      #   outlst$out_layer <- "REF_SPECIES"
+      #   datExportData(REF_SPECIES,
+      #                 savedata_opts = outlst)
+      # }
+      
+      
+      if (!is.null(vcondsppx)) {
+        message("saving vcondsppx...")
+        outlst$out_layer <- "vcondsppx"
+        datExportData(vcondsppx, 
+                      savedata_opts = outlst)
+        rm(vcondsppx)
         # gc()
       }
-      if (!is.null(popcheck$beginf)) {
-        message("saving beginx...")
-        datExportData(popcheck$beginf, 
-            savedata_opts=list(outfolder = outfolder, 
-                              out_fmt = out_fmt, 
-		                  out_dsn = out_dsn, 
-		                  out_layer = "beginx",
-		                  outfn.pre = outfn.pre, 
-		                  outfn.date = outfn.date, 
-		                  overwrite_layer = overwrite_layer,
-		                  append_layer = append_layer,
-		                  add_layer = TRUE))
-        rm(beginf)
+      if (!is.null(vcondstrx)) {
+        message("saving vcondstrx...")
+        outlst$out_layer <- "vcondstrx"
+        datExportData(vcondstrx, 
+                      savedata_opts = outlst)
+        rm(vcondstrx)
         # gc()
       }
-      if (!is.null(popcheck$midptf)) {
-        message("saving midptx...")
-        datExportData(popcheck$midptf, 
-            savedata_opts=list(outfolder = outfolder, 
-                               out_fmt = out_fmt, 
-		                   out_dsn = out_dsn, 
-		                   out_layer = "midptx",
-		                   outfn.pre = outfn.pre, 
-		                   outfn.date = outfn.date, 
-		                   overwrite_layer = overwrite_layer,
-		                   append_layer = append_layer,
-		                   add_layer = TRUE))
-        rm(midptf)
-        # gc()
-      }
+      
+    } else if (datindb) {
+      
+      returnlst$pop_fmt <- datsource
+      returnlst$pop_dsn <- dsn
+      returnlst$pop_schema <- schema
+      returnlst$popconn <- dbconn
     }
-
-    message("saving pltassgnx...")
-    datExportData(pltassgnx, 
-          savedata_opts=list(outfolder = outfolder, 
-                             out_fmt = out_fmt, 
-		                 out_dsn = out_dsn, 
-		                 out_layer = "pltassgn",
-		                 outfn.pre = outfn.pre, 
-		                 outfn.date = outfn.date, 
-		                 overwrite_layer = overwrite_layer,
-		                 append_layer = append_layer,
-		                 add_layer = TRUE))
-    message("saving unitarea...")
-    datExportData(unitarea, 
-          savedata_opts=list(outfolder = outfolder, 
-                             out_fmt = out_fmt, 
-		                 out_dsn = out_dsn, 
-		                 out_layer = "unitarea",
-		                 outfn.pre = outfn.pre, 
-		                 outfn.date = outfn.date, 
-		                 overwrite_layer = overwrite_layer,
-		                 append_layer = append_layer,
-		                 add_layer = TRUE))
-    message("saving stratalut...")
-    datExportData(stratalut, 
-          savedata_opts=list(outfolder = outfolder, 
-                             out_fmt = out_fmt, 
-		                 out_dsn = out_dsn, 
-		                 out_layer = "stratalut",
-		                 outfn.pre = outfn.pre, 
-		                 outfn.date = outfn.date, 
-		                 overwrite_layer = overwrite_layer,
-		                 append_layer = append_layer,
-		                 add_layer = TRUE))
-    rm(pltassgnx)
-    rm(unitarea)
-    rm(stratalut)
-    # gc()
   }
-
-
+  
+  
   ## Save list object
   ##################################################################
   if (saveobj) {
@@ -1397,17 +1183,10 @@ modGBpop <- function(popType = "VOL",
       message("invalid object name... must end in: ", toString(c("rds", "rda")))
     } 
   } 
-
+  
+  
   rm(popcheck)
-  # gc()
 
-  if (!is.null(dbconn)) {
-    DBI::dbDisconnect(dbconn)
-  }
-
-  if (returndata) {
-    return(returnlst)
-  } else {
-    return(invisible())
-  }
+  
+  return(returnlst)
 }

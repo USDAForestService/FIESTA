@@ -55,7 +55,6 @@
 #' @param title_opts List. See help(title_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modGBpop() if GBpopdat is NULL.
 #' @return A list with estimates with percent sampling error for rowvar (and
 #' colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
@@ -265,7 +264,6 @@ modGBarea <- function(GBpopdat,
                       table_opts = NULL, 
                       title_opts = NULL, 
                       savedata_opts = NULL, 
-                      gui = FALSE, 
                       ...){
 
   ###################################################################################
@@ -275,9 +273,8 @@ modGBarea <- function(GBpopdat,
 
   
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(GBpopdat)) {
-    gui <- TRUE
-  } 
+  #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
+  gui <- FALSE 
   
   ## If gui.. set variables to NULL
   if (gui) { 
@@ -290,11 +287,11 @@ modGBarea <- function(GBpopdat,
   
   ## INITIALIZE SETTINGS
   esttype <- "AREA" 
+  popType <- "CURR"
   nonresp <- FALSE
   substrvar <- NULL
-  parameters <- FALSE
-  returnlst <- list()
   rawdata <- TRUE
+  returnlst <- list()
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder <- NULL
@@ -374,20 +371,22 @@ modGBarea <- function(GBpopdat,
     }
   }
 
-  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
-  "ACI.filter", "unitarea", "unitvar", "stratalut", "strvar",
-  "plotsampcnt", "condsampcnt")
+  list.items <- c("pltcondx", "cuniqueid", "condid", 
+                  "unitarea", "unitvar", "stratalut", "strvar",
+                  "plotsampcnt", "condsampcnt")
+  
   GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   if (is.null(GBpopdat)) return(NULL)
-  condx <- GBpopdat$condx
+  pltidsadj <- GBpopdat$pltidsadj
   pltcondx <- GBpopdat$pltcondx
+  pltcondflds <- GBpopdat$pltcondflds
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
-  ACI.filter <- GBpopdat$ACI.filter
+  ACI <- GBpopdat$ACI
+  pltassgnx <- GBpopdat$pltassgnx
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
   areaunits <- GBpopdat$areaunits
@@ -401,15 +400,40 @@ modGBarea <- function(GBpopdat,
   condsampcnt <- GBpopdat$condsampcnt
   states <- GBpopdat$states
   invyrs <- GBpopdat$invyrs
-  estvar.name <- GBpopdat$estvar.area
   stratcombinelut <- GBpopdat$stratcombinelut
   strwtvar <- GBpopdat$strwtvar
+  adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
   strata <- GBpopdat$strata
+  popdatindb <- GBpopdat$popdatindb
   pop_fmt <- GBpopdat$pop_fmt
   pop_dsn <- GBpopdat$pop_dsn
+  pop_schema <- GBpopdat$pop_schema
+  popconn <- GBpopdat$popconn
+  dbqueries <- GBpopdat$dbqueries
+  dbqueriesWITH <- GBpopdat$dbqueriesWITH
+  areawt <- GBpopdat$areawt
+  areawt2 <- GBpopdat$areawt2
+  adjcase <- GBpopdat$adjcase
+  pltidsid <- GBpopdat$pjoinid
+  pltassgnid <- GBpopdat$pltassgnid
 
-
+  if (popdatindb) {
+    if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
+      if (!is.null(pop_dsn)) {
+        if (pop_fmt == "sqlite") {
+          popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
+        }
+      } else {
+        stop("invalid database connection")
+      }
+    }
+    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
+    pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
+  } else {
+    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
+  }
+  
   ########################################
   ## Check area units
   ########################################
@@ -424,65 +448,81 @@ modGBarea <- function(GBpopdat,
   }
 
   ###################################################################################
-  ## Check parameters and apply plot and condition filters
+  ## Check parameter inputs and plot/condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pop_fmt=pop_fmt, pop_dsn=pop_dsn, 
-        pltcondf=pltcondx, cuniqueid=cuniqueid, condid=condid, 
-				sumunits=sumunits, totals=totals, landarea=landarea, 
-				ACI.filter=ACI.filter, pcfilter=pcfilter, 
-				allin1=allin1, estround=estround, pseround=pseround, 
-				divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-        rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
-        outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-        overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
-        outfn.date=outfn.date, append_layer=append_layer, 
-        raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+  estdat <- 
+    check.estdata(esttype = esttype, 
+                  popType = popType,
+                  popdatindb = popdatindb, 
+                  popconn = popconn, pop_schema = pop_schema,
+                  pltcondflds = pltcondflds,
+                  totals = totals,
+                  pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
+                  sumunits = sumunits, 
+                  landarea = landarea,
+                  ACI = ACI, 
+                  pcfilter = pcfilter,
+                  allin1 = allin1, divideby = divideby,
+                  estround = estround, pseround = pseround,
+                  addtitle = addtitle, returntitle = returntitle, 
+                  rawonly = rawonly, 
+                  savedata = savedata, 
+                  outfolder = outfolder, 
+                  overwrite_dsn = overwrite_dsn, 
+                  overwrite_layer = overwrite_layer, 
+                  outfn.pre = outfn.pre, outfn.date = outfn.date, 
+                  append_layer = append_layer, 
+                  raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+                  gui = gui)
   if (is.null(estdat)) return(NULL)
-  pltcondf <- estdat$pltcondf
-  cuniqueid <- estdat$cuniqueid
+  esttype <- estdat$esttype
   sumunits <- estdat$sumunits
   totals <- estdat$totals
   landarea <- estdat$landarea
   allin1 <- estdat$allin1
+  divideby <- estdat$divideby
   estround <- estdat$estround
   pseround <- estdat$pseround
-  divideby <- estdat$divideby
   addtitle <- estdat$addtitle
   returntitle <- estdat$returntitle
-  rawdata <- estdat$rawdata
   rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
   overwrite_layer <- estdat$overwrite_layer
+  append_layer = estdat$append_layer
+  rawfolder <- estdat$rawfolder
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
-  rawfolder <- estdat$rawfolder
+  pcwhereqry <- estdat$where.qry
+  SCHEMA. <- estdat$SCHEMA.
 
-  if ("STATECD" %in% names(pltcondf)) {
-    states <- pcheck.states(sort(unique(pltcondf$STATECD)))
-  }
-  if ("INVYR" %in% names(pltcondf)) {
-    invyr <- sort(unique(pltcondf$INVYR))
-  }
 
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
-                  condf=pltcondf, cuniqueid=cuniqueid, 
-                  rowvar=rowvar, colvar=colvar, 
-                  row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
-                  row.orderby=row.orderby, col.orderby=col.orderby, 
-                  row.add0=row.add0, col.add0=col.add0, 
-                  title.rowvar=title.rowvar, title.colvar=title.colvar, 
-                  rowlut=rowlut, collut=collut, 
-                  rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-                  landarea=landarea, states=states,
-                  cvars2keep="COND_STATUS_CD")
-  condf <- rowcolinfo$condf
+  rowcolinfo <- 
+    check.rowcol(esttype = esttype, 
+                 popType = popType,
+                 popdatindb = popdatindb,
+                 popconn = popconn, SCHEMA. = SCHEMA.,
+                 pltcondx = pltcondx,
+                 pltcondflds = pltcondflds,
+                 withqry = pltcondxWITHqry,
+                 cuniqueid = cuniqueid, condid = condid,
+                 rowvar = rowvar, colvar = colvar, 
+                 row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
+                 row.orderby = row.orderby, col.orderby = col.orderby, 
+                 row.add0 = row.add0, col.add0 = col.add0, 
+                 row.classify = row.classify, col.classify = col.classify,
+                 title.rowvar = title.rowvar, title.colvar = title.colvar, 
+                 rowlut = rowlut, collut = collut, 
+                 rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
+                 rowgrpord = rowgrpord, title.rowgrp = NULL,
+                 landarea = landarea, states = states, 
+                 gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
-  domainlst <- rowcolinfo$domainlst
+  bydomainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
   rowvarnm <- rowcolinfo$rowvarnm
@@ -496,34 +536,72 @@ modGBarea <- function(GBpopdat,
   rowgrpnm <- rowcolinfo$rowgrpnm
   title.rowgrp <- rowcolinfo$title.rowgrp
   grpvar <- rowcolinfo$grpvar
-  rm(rowcolinfo)
- 
+  classifyrow <- rowcolinfo$classifyrow
+  classifycol <- rowcolinfo$classifycol
+  #rm(rowcolinfo)
+  
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
     uniquecol <- data.table(unitarea[[unitvar]])
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-
-  ## Merge filtered condition data (condf) to all conditions (condx)
+ 
+  
   ###################################################################################
-  setkeyv(condx, c(cuniqueid, condid))
-  setkeyv(condf, c(cuniqueid, condid))
-  cdomdat <- condx[condf]
+  ### Get condition-level domain data
+  ###################################################################################
+  conddat <- 
+    check.cond(areawt = areawt,
+               areawt2 = areawt2,
+               adj = adj,
+               adjcase = adjcase,
+               cuniqueid = cuniqueid, 
+               condid = condid,
+               rowvar = rowvar, 
+               colvar = colvar, 
+               pcdomainlst = unique(c(bydomainlst, "TOTAL")),
+               popdatindb = popdatindb,
+               popconn = popconn,
+               pltcondx = pltcondx,
+               pltidsadj = pltidsadj,
+               pltidsid = pltidsid,
+               pltcondxadjWITHqry = pltcondxadjWITHqry,
+               pcwhereqry = pcwhereqry,
+               classifyrow = classifyrow,
+               classifycol = classifycol)
+  if (is.null(conddat)) stop(NULL)
+  cdomdat <- conddat$cdomdat
+  cdomdatqry <- conddat$cdomdatqry
+  estnm <- conddat$estnm
+  rowvar <- conddat$rowvar
+  colvar <- conddat$colvar
+  grpvar <- conddat$grpvar
+
 
   ###################################################################################
   ### Get titles for output tables
   ###################################################################################
-  alltitlelst <- check.titles(dat=cdomdat, esttype=esttype, 
-                  sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
-                  title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
-                  title.colvar=title.colvar, title.unitvar=title.unitvar, 
-                  title.filter=title.filter, title.unitsn=areaunits, 
-                  unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
-                  addtitle=addtitle, returntitle=returntitle, 
-                  rawdata=rawdata, states=states, invyrs=invyrs, 
-                  landarea=landarea, pcfilter=pcfilter, 
-                  allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
+  alltitlelst <- 
+    check.titles(dat = cdomdat, esttype = esttype, 
+                 sumunits = sumunits, 
+                 title.main = title.main, 
+                 title.ref = title.ref, 
+                 title.rowvar = title.rowvar, 
+                 title.rowgrp = title.rowgrp, 
+                 title.colvar = title.colvar, 
+                 title.unitvar = title.unitvar, 
+                 title.filter = title.filter, 
+                 title.unitsn = areaunits, 
+                 unitvar = unitvar, 
+                 rowvar = rowvar, colvar=colvar, 
+                 addtitle = addtitle, 
+                 returntitle = returntitle, 
+                 rawdata = rawdata, 
+                 states = states, invyrs = invyrs, 
+                 landarea = landarea, pcfilter = pcfilter, 
+                 allin1 = allin1, divideby = divideby, 
+                 outfn.pre = outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -531,6 +609,7 @@ modGBarea <- function(GBpopdat,
   title.ref <- alltitlelst$title.ref
   outfn.estpse <- alltitlelst$outfn.estpse
   outfn.param <- alltitlelst$outfn.param
+  
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
@@ -538,240 +617,74 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
-  unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
-  addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
-  #estvar.name <- estvar 
-  stratalut <- setDT(stratalut)
-
-  message("getting estimates using GB...")
-#  if (addtotal) {
-    ## Get total estimate and merge area	
-    cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
-    unit_totest <- GBest.pbar(sumyn = estvar.name, 
-                              ysum = cdomdattot,
-                              uniqueid = cuniqueid, 
-                              stratalut = stratalut,
-                              unitvar = unitvar, 
-                              strvar = strvar, 
-                              domain = "TOTAL")
-    tabs <- check.matchclass(unitarea, unit_totest, unitvar)
-    unitarea <- tabs$tab1
-    unit_totest <- tabs$tab2
-    setkeyv(unit_totest, unitvar)     
-    unit_totest <- unit_totest[unitarea, nomatch=0]
-
-    if (totals) {
-      unit_totest <- getpse(unit_totest, areavar=areavar, esttype=esttype)
-    } else {
-      unit_totest <- getpse(unit_totest, esttype=esttype)
-    } 
-#  }
-
-  ## Get row estimate  
-  if (rowvar != "TOTAL") {
-    cdomdat <- cdomdat[!is.na(cdomdat[[rowvar]]),] 	
-    cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
-    unit_rowest <- GBest.pbar(sumyn = estvar.name, 
-                              ysum = cdomdatsum,
-                              uniqueid = cuniqueid, 
-                              stratalut = stratalut,
-                              unitvar = unitvar, 
-                              strvar = strvar, 
-                              domain = rowvar)
-  }
-
-  ## Get column (and cell) estimate  
-  if (colvar != "NONE") {
-    cdomdat <- cdomdat[!is.na(cdomdat[[colvar]]),] 	
-    cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
-    unit_colest <- GBest.pbar(sumyn = estvar.name, 
-                              ysum = cdomdatsum, 
-                              uniqueid = cuniqueid, 
-                              stratalut = stratalut,
-                              unitvar = unitvar, 
-                              strvar = strvar, 
-                              domain = colvar)
-
-    cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
-    unit_grpest <- GBest.pbar(sumyn = estvar.name, 
-                              ysum = cdomdatsum,
-                              uniqueid = cuniqueid, 
-                              stratalut = stratalut,
-                              unitvar = unitvar, 
-                              strvar = strvar, 
-                              domain = grpvar)
-  }
-
-  ###################################################################################
-  ## Check add0 and Add area
-  ###################################################################################
-  if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
-  if (!is.null(unit_rowest)) {
-    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, 
-                            uniquex=uniquerow, unitvar=unitvar, 
-                            xvar.add0=row.add0)
-    tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
-    unitarea <- tabs$tab1
-    unit_rowest <- tabs$tab2
-
-    if (!is.null(row.orderby) && row.orderby != "NONE") {
-      setorderv(unit_rowest, c(row.orderby))
-    }
-    setkeyv(unit_rowest, unitvar)
-    unit_rowest <- unit_rowest[unitarea, nomatch=0]
-
-    if (totals) {
-      unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
-    } else {
-      unit_rowest <- getpse(unit_rowest, esttype=esttype)
-    }      
-    setkeyv(unit_rowest, c(unitvar, rowvar))
-  }
-
-  if (!is.null(unit_colest)) {
-    unit_colest <- add0unit(x=unit_colest, xvar=colvar, 
-                            uniquex=uniquecol,unitvar=unitvar, 
-                            xvar.add0=col.add0)
-    tabs <- check.matchclass(unitarea, unit_colest, unitvar)
-    unitarea <- tabs$tab1
-    unit_colest <- tabs$tab2
-
-    if (!is.null(col.orderby) && col.orderby != "NONE") {
-      setorderv(unit_colest, c(col.orderby))
-    }
-    setkeyv(unit_colest, unitvar)
-    unit_colest <- unit_colest[unitarea, nomatch=0]
-
-    if (totals) {
-      unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
-    } else {
-      unit_colest <- getpse(unit_colest, esttype=esttype)
-    }      
-    setkeyv(unit_colest, c(unitvar, colvar))
-  }
-
-  if (!is.null(unit_grpest)) {
-   unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, 
-                            uniquex=uniquerow, unitvar=unitvar, 
-                            xvar.add0=row.add0, xvar2=colvar, 
-                            uniquex2=uniquecol, xvar2.add0=col.add0)
-    tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
-    unitarea <- tabs$tab1
-    unit_grpest <- tabs$tab2 
-
-    if (!is.null(row.orderby) && row.orderby != "NONE") {
-      if (!is.null(col.orderby) && col.orderby != "NONE") {
-        setorderv(unit_grpest, c(row.orderby, col.orderby))
-      } else {
-        setorderv(unit_grpest, c(row.orderby))
-      }         
-    } else if (!is.null(col.orderby) && col.orderby != "NONE") {
-      setorderv(unit_grpest, c(col.orderby))
-    }         
-    setkeyv(unit_grpest, unitvar)
-    unit_grpest <- unit_grpest[unitarea, nomatch=0]
-
-    if (totals) {
-      unit_grpest <- getpse(unit_grpest, areavar=areavar, esttype=esttype)
-    } else {
-      unit_grpest <- getpse(unit_grpest, esttype=esttype)
-    }      
-    setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
-  }
-
-  ###################################################################################
-  ## Get row and column totals for units if sumunits=FALSE
-  ###################################################################################
-  ## For sumunits=FALSE, get estimation unit totals
-  if (!sumunits && (length(unique(unitarea[[unitvar]])) > 1 && !is.null(grpvar))) {
-
-    ## AGGREGATE UNIT stratalut FOR ROWVAR and GRAND TOTAL
-    stratalut2 <- data.table(stratalut, ONEUNIT=1)
-    strunitvars2 <- c("ONEUNIT", strvar)
-    stratalut2 <- stratalut2[, lapply(.SD, sum, na.rm=TRUE), 
-		by=strunitvars2, .SDcols=c(strwtvar, "n.strata")]
-    stratalut2[, strwt:=prop.table(get(strwtvar)), by="ONEUNIT"]
-    stratalut2[, n.total := sum(n.strata)]
-    setkeyv(stratalut2, strunitvars2)
-
-    unitarea2 <- data.table(unitarea, ONEUNIT=1)
-    unitarea2 <- unitarea2[, lapply(.SD, sum, na.rm=TRUE), by="ONEUNIT", 
-		.SDcols=areavar]
-    setkey(unitarea2, "ONEUNIT")
-
-    cdomdat[, ONEUNIT := 1]
-
-    ## CALCULATE UNIT TOTALS FOR ROWVAR
-    cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars2, cuniqueid, rowvar), .SDcols=estvar.name]
-    rowunit <- GBest.pbar(sumyn = estvar.name, 
-                          ysum = cdomdatsum,
-                          uniqueid = cuniqueid, 
-                          stratalut = stratalut2,
-                          unitvar = "ONEUNIT", 
-                          strvar = strvar, 
-                          domain = rowvar)
-    rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
-		unitvar="ONEUNIT", xvar.add0=row.add0)
-    tabs <- check.matchclass(unitarea2, rowunit, "ONEUNIT")
-    unitarea2 <- tabs$tab1
-    rowunit <- tabs$tab2
-    setkeyv(rowunit, "ONEUNIT")
-    rowunit <- rowunit[unitarea2, nomatch=0]
-    if (totals) {
-      rowunit <- getpse(rowunit, areavar=areavar, esttype=esttype)
-    } else {
-      rowunit <- getpse(rowunit, esttype=esttype)
-    }      
-    setkeyv(rowunit, c("ONEUNIT", rowvar))
-
-    ## CALCULATE GRAND TOTAL FOR ALL UNITS
-    cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars2, cuniqueid, "TOTAL"), .SDcols=estvar.name]
-    totunit <- GBest.pbar(sumyn = estvar.name, 
-                          ysum = cdomdatsum,
-                          uniqueid = cuniqueid, 
-                          stratalut = stratalut2,
-                          unitvar = "ONEUNIT", 
-                          strvar = strvar, 
-                          domain = "TOTAL")
-    tabs <- check.matchclass(unitarea2, totunit, "ONEUNIT")
-    unitarea2 <- tabs$tab1
-    totunit <- tabs$tab2
-    setkeyv(totunit, "ONEUNIT")
-    totunit <- totunit[unitarea2, nomatch=0]
-    if (totals) {
-      totunit <- getpse(totunit, areavar=areavar, esttype=esttype)
-    } else {
-      totunit <- getpse(totunit, esttype=esttype)
-    }      
-  }          
+  estdat <- 
+    getGBestimates(esttype = esttype,
+                   domdatn = cdomdat,
+                   uniqueid = pltassgnid,
+                   estvarn.name = estnm,
+                   rowvar = rowvar, colvar = colvar, 
+                   grpvar = grpvar,
+                   pltassgnx = pltassgnx,
+                   unitarea = unitarea,
+                   unitvar = unitvar,
+                   areavar = areavar,
+                   stratalut = stratalut,
+                   strvar = strvar,
+                   strwtvar = strwtvar,
+                   totals = totals,
+                   sumunits = sumunits,
+                   uniquerow = uniquerow,
+                   uniquecol = uniquecol,
+                   row.orderby = row.orderby,
+                   col.orderby = col.orderby,
+                   row.add0 = row.add0,
+                   col.add0 = col.add0)
+ 
+  if (is.null(estdat)) stop()
+  unit_totest <- estdat$unit_totest
+  unit_rowest <- estdat$unit_rowest
+  unit_colest <- estdat$unit_colest
+  unit_grpest <- estdat$unit_grpest
+  rowunit <- estdat$rowunit
+  totunit <- estdat$totunit
+  unitvar <- estdat$unitvar
+  
 
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
   message("getting output...")
   estnm <- "est" 
-  tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	        unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
-	        unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
- 	        rowvar=rowvarnm, colvar=colvarnm, uniquerow=uniquerow, uniquecol=uniquecol,
- 	        rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
-	        allin1=allin1, savedata=savedata, addtitle=addtitle, 
-			title.ref=title.ref, title.colvar=title.colvar, 
-			title.rowvar=title.rowvar, title.rowgrp=title.rowgrp,
- 	        title.unitvar=title.unitvar, title.estpse=title.estpse, 
-			title.est=title.est, title.pse=title.pse, 
-			rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
-			outfolder=outfolder, outfn.date=outfn.date, 
-			overwrite=overwrite_layer, estnm=estnm, 
-	        estround=estround, pseround=pseround, divideby=divideby, 
-	        returntitle=returntitle, estnull=estnull, psenull=psenull, 
-			raw.keep0=raw.keep0) 
+  
+  tabs <- 
+    est.outtabs(esttype = esttype, 
+                sumunits = sumunits, areavar = areavar, 
+	              unitvar = unitvar, unitvars = unitvars, 
+                unit_totest = unit_totest, 
+	              unit_rowest = unit_rowest, unit_colest = unit_colest, 
+                unit_grpest = unit_grpest,
+ 	              rowvar = rowvarnm, colvar = colvarnm, 
+                uniquerow = uniquerow, uniquecol = uniquecol,
+ 	              rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
+                rowunit = rowunit, totunit = totunit, 
+	              allin1 = allin1, 
+                savedata = savedata, addtitle = addtitle, 
+			          title.ref = title.ref, 
+			          title.rowvar = title.rowvar, title.colvar = title.colvar, 
+			          title.rowgrp = title.rowgrp,
+ 	              title.unitvar = title.unitvar, 
+			          title.estpse = title.estpse, 
+			          title.est = title.est, title.pse = title.pse, 
+			          rawdata = rawdata, rawonly = rawonly, 
+			          outfn.estpse = outfn.estpse, 
+			          outfolder = outfolder, outfn.date = outfn.date, 
+			          overwrite = overwrite_layer, 
+			          estnm = estnm, 
+	              estround = estround, pseround = pseround, 
+			          divideby = divideby, 
+	              returntitle = returntitle, 
+			          estnull = estnull, psenull = psenull, 
+			          raw.keep0 = raw.keep0) 
 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
@@ -792,15 +705,16 @@ modGBarea <- function(GBpopdat,
     NBRPLTtot <- stratalut[stratalut[[unitvar]] %in% UNITStot, list(NBRPLT = sum(n.strata, na.rm=TRUE)), 
 	                  by=unitvars]
 
-	if ("unit_totest" %in% names(tabs$rawdat)) {
-	  tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
-	}
-	if (sumunits && "totest" %in% names(tabs$rawdat)) {
-	  tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
-	}
+	  if ("unit_totest" %in% names(tabs$rawdat)) {
+	    tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
+	  }
+	  if (sumunits && "totest" %in% names(tabs$rawdat)) {
+	    tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
+	  }
 
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(cdomdat)
+    rawdat$domdatqry <- cdomdatqry
     if (savedata) {
       if (!is.null(title.estpse)) {
         title.raw <- paste(title.estpse, title.ref)
@@ -821,30 +735,29 @@ modGBarea <- function(GBpopdat,
             out_layer <- outfn.rawtab
           }
           datExportData(rawtab, 
-                savedata_opts=list(outfolder=rawfolder, 
-                                    out_fmt=raw_fmt, 
-                                    out_dsn=raw_dsn, 
-                                    out_layer=out_layer,
-                                    overwrite_layer=overwrite_layer,
-                                    append_layer=append_layer,
-                                    add_layer=TRUE))
+                savedata_opts = list(outfolder = rawfolder, 
+                                     out_fmt = raw_fmt, 
+                                     out_dsn = raw_dsn, 
+                                     out_layer = out_layer,
+                                     overwrite_layer = overwrite_layer,
+                                     append_layer = append_layer,
+                                     add_layer = TRUE))
         }
       }
     }
     rawdat$module <- "GB"
     rawdat$esttype <- esttype
+    rawdat$popType <- popType
     rawdat$GBmethod <- ifelse(strata, "PS", "HT")
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
     rawdat$areaunits <- areaunits
     returnlst$raw <- rawdat
   }
-  if ("STATECD" %in% names(pltcondf)) {
-    returnlst$statecd <- sort(unique(pltcondf$STATECD))
-  }
-  if ("INVYR" %in% names(pltcondf)) {
-    returnlst$invyr <- sort(unique(pltcondf$INVYR))
-  }
-    
+  returnlst$statecd <- sort(pcheck.states(states, statereturn = "VALUE"))
+  returnlst$states <- states
+  returnlst$invyr <- sort(unique(unlist(invyrs)))
+
+
   return(returnlst)
 }

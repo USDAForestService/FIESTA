@@ -1,0 +1,247 @@
+---
+output:
+  word_document:
+    reference_docx: anWWWtemplate.docx
+params:
+  WWWpopdat: ''
+  WWWest: ''
+  domain_unit_display_nm: ''
+  domain_unit_lut: ''
+  fortypgrpcd: ''
+---
+
+
+```{r Params, echo=FALSE, warning=FALSE, message=FALSE}
+ 
+library(data.table)
+library(RColorBrewer)
+
+WWWpopdat <- params$WWWpopdat
+AOInm <- WWWpopdat$reportdata$AOI_table_name
+AOI_domain_units <- WWWpopdat$reportdata$AOI_domain_units
+fortypgrpcd <- params$fortypgrpcd
+title.ref <- params$title.ref
+byeach <- WWWpopdat$reportdata$byeach
+WWWest <- params$WWWest
+domain_unit_display_nm <- params$domain_unit_display_nm
+domain_unit_lut <- params$domain_unit_lut
+estimator <- WWWest$reportdata$estimator
+ref_domain_unit <- WWWpopdat$reportdata$ref_domain_unit
+
+states <- WWWpopdat$reportdata$states
+statenms <- FIESTA::ref_statecd[FIESTA::ref_statecd$VALUE %in% states, "MEANING"]
+invyrs <- WWWpopdat$reportdata$invyrs
+invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
+
+
+```
+
+
+```{r Data_Inputs, echo=FALSE, warning=FALSE, message=FALSE}
+
+digits <- c(0,4,4,0,0,2)
+na.fill <- "DIR"
+title.ref <- AOInm
+aoibnd <- WWWpopdat$reportdata$aoibnd
+
+titlelst <- WWWest$titlelst
+
+unitlut <- WWWpopdat$unitlut
+unitlut <- unitlut[unitlut$DOMAIN %in% AOI_domain_units, ]
+unitarea <- WWWpopdat$unitarea
+unitarea <- unitarea[unitarea$domain_unit %in% AOI_domain_units,]
+
+dominfo <- merge(unitlut[, c("DOMAIN", "n.total")], 
+                unitarea, by.x=c("DOMAIN"), by.y = "domain_unit")
+
+nbrdoms <- nrow(dominfo)
+totarea <- sum(dominfo[, "total_acres"])
+```
+
+
+---
+title: "Forest Resource Report:  \n`r AOInm`,  \n`r invyrs2`"
+---
+
+-----  
+
+&nbsp;  
+
+Rocky Mountain Research Station, Forest Inventory and Analysis  | `r format(Sys.time(), "%B %Y")`
+
+&nbsp;  
+
+```{r smallbnd, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+plot(aoibnd[ ,c(domain_unit_display_nm, "geom")], border="black", main="", graticule=TRUE, key.pos = 4, 
+     pal = brewer.pal(n = nbrdoms, name = "Greys"))
+
+```
+Figure 1. Small area of interest.
+
+&nbsp;  
+
+
+----- 
+
+
+# Summary
+
+&nbsp;  
+
+```{r Summary_Info, echo=FALSE, include=FALSE}
+
+intro_text1 <- paste0("The total area of ", AOInm, " is ", format(round(totarea), big.mark=","), 
+        " acres with ", nbrdoms, " unique small areas. The area intersects the following states: ",
+        toString(statenms), ".") 
+                      
+
+intro_text2 <-
+paste0("Estimates in this report are generated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2023). The estimates are based on peer-reviewed statistical techniques using FIA data and available auxiliary information (Frescino et al. 2022). Here we present an opportunity for using estimation strategies alternative to FIA’s standard estimation method (Bechtold and Patterson 2005) to accommodate populations with few sample plots and to incorporate more auxiliary information to help reduce variance of the estimates.. Data for this report were extracted from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, " (Burrill et al. 2021).")
+
+figwidth <- ifelse(nbrdoms < 4, "25%", ifelse(nbrdoms < 8, "50%", 
+                   ifelse(nbrdoms < 12, "75%", "100%")))
+
+```
+
+
+`r intro_text1`
+
+&nbsp;  
+
+`r intro_text2`
+
+&nbsp;   
+
+# Methods
+
+say what estimator was used and which predictors were used
+
+
+&nbsp;  
+
+```{r, echo = FALSE, include = FALSE}
+est1.title <- paste0(titlelst$title.tot, ifelse(byeach, ", by domain unit", ""), ", with standard errors")
+```
+
+
+-----  
+
+# EST1 - `r est1.title`.
+
+-----  
+
+&nbsp;  
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+est1 <- WWWest$unit_totest
+est1 <- merge(est1, unitarea[ , c("domain_unit", "total_acres")], by = "domain_unit")
+est1 <- merge(est1, domain_unit_lut, by.x = "domain_unit", by.y = ref_domain_unit)
+
+```  
+
+```{r est1, echo = FALSE, fig.align = 'center'}
+table.cols <- c(domain_unit_display_nm, "est", "est.se", "n.total", "NBRPLT.gt0", "total_acres")
+tabest <- est1[ ,table.cols, with = FALSE]
+names(tabest) <- c(domain_unit_display_nm, "Estimate", "Standard Error", "n.total", "n.gt0", "Total Acres")
+knitr::kable(tabest,
+             "simple", align=c("lrrrrr"), digits=digits,
+             format.args=list(big.mark = ",")) 
+```
+
+&nbsp; 
+
+Table 1. `r est1.title` using `r estimator`. Total acres, number of plots (n.total), and number of plots greater than zero (n.gt0) are also included. 
+
+
+&nbsp; 
+
+
+```{r EST1_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+if (nrow(est1) < 5) {
+  datBarplot(x=est1, xvar=domain_unit_display_nm, yvar="est", horiz=FALSE,
+           errbars=TRUE, sevar="est.se", ylab = titlelst$title.yvar)
+} else {
+    datBarplot(x=est1, xvar=domain_unit_display_nm, yvar="est", horiz=TRUE,
+           errbars=TRUE, sevar="est.se", ylab = titlelst$title.yvar)
+}
+```
+
+Figure 1. `r est1.title` using `r estimator`
+
+
+&nbsp;    
+
+
+```{r est1_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+
+## Merge estimate to smallbnd
+aoibnd <- merge(aoibnd, est1, by=domain_unit_display_nm)
+brks <- seq(min(aoibnd$est), max(aoibnd$est), length.out = nbrdoms + 1)
+
+plot(aoibnd[ , c("est", "geom"), with = FALSE], key.pos=4, axes=TRUE, key.width=lcm(1.3), 
+ 	graticule=TRUE, key.length=1.0, breaks = brks,
+ 	#pal = palette(brewer.pal(n=nbrdoms, name="Greens")),
+  border="black", lwd=.5, main="")
+
+
+```
+
+Figure 2. Chloropleth Map of `r est1.title` using `r estimator`
+
+
+\newpage    
+
+&nbsp;  
+
+# References
+
+&nbsp;  
+
+Breidenbach, Johannes 2018. JoSAE: Unit-Level and Area-Level Small Area Estimation. R package version 0.3.0. https://CRAN.R-project.org/package=JoSAE.
+  
+&nbsp;
+
+Burrill, E.A., Wilson, A.M., Turner, J.A., Pugh, S.A., Menlove, J., Christiansen, G., Conkling, B.L., Winnie, D., 2018. Forest Inventory and Analysis Database [WWW Document]. St Paul MN US Dep. Agric. For. Serv. North. Res. Stn. URL http://apps.fs.fed.us/fiadb-downloads/datamart.html (accessed 3.6.21).
+
+&nbsp; 
+
+Frescino, Tracey S.; Patterson, Paul L.; Moisen, Gretchen G.; Toney, Chris; Freeman, Elizabeth A. 2018. FIESTA: A Forest Inventory Estimation and Analysis R Package. USDA Forest Service, Rocky Mountain Research Station, 507 25th street, Ogden, UT, USA.
+
+# Appendix
+
+```{r, echo = FALSE}
+if (WWWpopdat$SAE) {
+  showsae <- TRUE
+} else {
+  showsae <- FALSE
+
+}
+
+
+```
+
+```{r, echo = FALSE, include = showsae, results = 'asis'}
+cat("Small area estimators are needed for areas where there are too few sample plots to produce a reliable estimate using only the data within the population. For small area techniques, we ‘borrow strength’ from similar areas outside the area of interest and generate a model using both sample data and auxiliary data from the larger area (Rao and Molina 2015). This gives us an adequate sample for generating estimation within the small area. We use the hierarchical framework of the USDA Forest Service Ecological Units (ECOMAP; Cleland et al. 2007) to define our large areas and representative sample data for informing our small areas. \n\n\n In this report, we used small area estimators from the JoSAE (Breidenbach 2018) R package, including Area- and Unit-level empirical best linear unbiased prediction (EBLUP) and modified generalized regression estimators. We generated estimates for all estimators and chose the estimator with the lowest standard error for the total to use in this report. \n\n\n The auxiliary data used for the small area estimators are listed in Table 1. All auxiliary data were preprocessed and resampled to 90 meters using the gdalraster (Toney 2024) R package.")
+```
+
+```{r, echo = FALSE, include = !showsae}
+"The auxiliary data used for the small area estimators are listed in Table 1. All auxiliary data were preprocessed and resampled to 90 meters using the gdalraster (Toney 2024) R package. Post-stratification is one of the simplest forms of model-assisted estimation and is the standard estimator used by FIA. Post-stratification is used to increase the precision of estimates by subdividing plots withing the population (i.e., area of interest) into categories based on a categorical auxiliary data layer. Estimates and estimated variances are based on a weighted mean from each category. Model-assisted techniques offer opportunities for using more auxiliary data information in a regression estimator formula (McConville et al. 2020). For model-assisted techniques, we depend on the relationship between the variable of interest and the auxiliary data within the population. In this report, we used the FIA post-stratified estimator from the FIESTA (Frescino et al. 2023) R package and the Generalized Regression Estimator (GREG) from the mase (McConville et al. 2018) R package. We generated estimates for both estimators and chose the estimator with the lowest standard error for the total to use in this report. The auxiliary data used for the GREG estimator are listed in Table 1. All auxiliary data were preprocessed and resampled to 90 meters using the gdalraster (Toney 2024) R package."
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

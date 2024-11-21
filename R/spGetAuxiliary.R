@@ -91,7 +91,6 @@
 #' of options. Only used when savedata = TRUE.  
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
 #' include in unitzonal output and extract to pltassgn points.
-#' @param gui Logical. If gui, user is prompted for parameters.
 #'
 #' @return \item{pltassgn}{ sf object. xyplt data with extracted values from
 #' rastlst*. } \item{unitzonal}{ Data frame. Number of pixels and zonal
@@ -203,8 +202,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                            exportNA = FALSE, 
                            spMakeSpatial_opts = NULL,
                            savedata_opts = NULL, 
-                           vars2keep = NULL, 
-                           gui = FALSE) {
+                           vars2keep = NULL) {
 
   ##################################################################################
   ## DESCRIPTION: Get data extraction and zonal statistics for Model-assisted or
@@ -216,7 +214,7 @@ spGetAuxiliary <- function(xyplt = NULL,
   ## 5) Extract point values and get zonal statistics from categorical raster layers
   ## 6) Get total acres from unit_layer (if areacalc=TRUE)
   ##################################################################################
-
+  gui <- FALSE
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -231,7 +229,8 @@ spGetAuxiliary <- function(xyplt = NULL,
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
 
   ## Set global variables
-  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat=AOI <- NULL
+  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat=
+    AOI=PLOT_STATUS_CD <- NULL
   badrast <- {}
   
   ##################################################################
@@ -568,7 +567,7 @@ spGetAuxiliary <- function(xyplt = NULL,
   polyvarlst <- unique(c(unitvar2, unitvar, vars2keep))
   polyvarlstchk <- polyvarlst[!polyvarlst %in% names(sppltx)]
 
-  if (extract) {
+  if (extract && length(polyvarlstchk) > 0) {
     if (length(polyvarlstchk) == length(polyvarlst)) { 
       ## Extract values of polygon layer to points
       extpoly <- tryCatch(
@@ -590,7 +589,7 @@ spGetAuxiliary <- function(xyplt = NULL,
       rm(extpoly)
       # gc()
     } else {
-      message(unitvar, " already in spplt... not extracting from unit_layer")
+      message(unitvar, " already in spplt...")
     }
   
     ## Check if the name of unitvar and/or unitvar changed (duplicated)
@@ -618,22 +617,35 @@ spGetAuxiliary <- function(xyplt = NULL,
   } 
 
   ## If unitvar2 is not null, make one variable for zonal and area calculations
+  unitvarclass <- "character"
   if (!is.null(unitvar2)) {
+    unitvar2class <- "character"
     unitvar_old <- unitvar
-    unitlayerx$UNITVAR <- paste0(unitlayerx[[unitvar2]], "#", unitlayerx[[unitvar]]) 
-    unitvar <- "UNITVAR"
-    polyvarlst <- c("UNITVAR", vars2keep)
+    if (is.numeric(unitlayerx[[unitvar]])) {
+      unitvarclass <- "numeric"
+      digits <- max(nchar(unitlayerx[[unitvar]]))
+      unitlayerx$UNITVAR <- paste0(unitlayerx[[unitvar2]], "#", 
+              formatC(unitlayerx[[unitvar]], width=digits, digits=digits, flag=0))
+    } else {
+      unitlayerx$UNITVAR <- paste0(unitlayerx[[unitvar2]], "#", unitlayerx[[unitvar]])
+    }
+    if (is.numeric(unitlayerx[[unitvar2]])) {
+      unitvar2class <- "numeric"
+    }
+    unitvar <- "UNITVAR"		
   }
+  
 
   #############################################################################
   ## 2) Set up outputs - unitzonal, prednames, inputdf, zonalnames
   #############################################################################
-  unitzonal <- data.table(unique(sf::st_drop_geometry(unitlayerx[, polyvarlst,
+  unitzonal <- data.table(unique(sf::st_drop_geometry(unitlayerx[, unitvar,
  		                             drop=FALSE])))
   setkeyv(unitzonal, unitvar)
   prednames <- {}
   inputdf <- {}
   zonalnames <- {}
+
   
   if (extract && addN) {
     ## Get plot counts by domain unit
@@ -992,7 +1004,7 @@ spGetAuxiliary <- function(xyplt = NULL,
   ## Check if any auxiliary data included. If no return estimation unit info only
   noaux <- ifelse (is.null(rastlst.contfn) && is.null(rastlst.catfn), TRUE, FALSE) 
 
-  
+
   ###################################################################################
   ## Get totacres from domain polygons (if areacalc = TRUE)
   ###################################################################################
@@ -1004,10 +1016,6 @@ spGetAuxiliary <- function(xyplt = NULL,
     names(unitarea) <- c(unitvar, vars2keep, areavar)
   }
 
-  if (extract) {
-    pltassgn <- sf::st_drop_geometry(sppltx)
-    spxy <- sppltx
-  }
 
   ## If unitvar2 is not null, split back into 2 columns
   if (!is.null(unitvar2)) {
@@ -1015,15 +1023,48 @@ spGetAuxiliary <- function(xyplt = NULL,
     
     unitarea <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",unitarea$UNITVAR), "#") )) ), unitarea)
     setnames(unitarea, c("X1", "X2"), c(unitvar2, unitvar))
-
+    unitarea$UNITVAR <- NULL
+    
     #unitarea$UNITVAR <- NULL
     
     unitzonal <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",unitzonal$UNITVAR), "#") )) ), unitzonal)
     setnames(unitzonal, c("X1", "X2"), c(unitvar2, unitvar))
     unitzonal$UNITVAR <- NULL
+
+    ## set classs of unitvar
+    if (!is.numeric(unitarea[[unitvar]]) && unitvarclass == "numeric") {
+      unitarea[[unitvar]] <- as.numeric(unitarea[[unitvar]])
+    }
+    if (!is.numeric(unitzonal[[unitvar]]) && unitvarclass == "numeric") {
+      unitzonal[[unitvar]] <- as.numeric(unitzonal[[unitvar]])
+    }
+    ## set classs of unitvar2
+    if (!is.numeric(unitarea[[unitvar2]]) && unitvar2class == "numeric") {
+      unitarea[[unitvar2]] <- as.numeric(unitarea[[unitvar2]])
+    }
+    if (!is.numeric(unitzonal[[unitvar2]]) && unitvar2class == "numeric") {
+      unitzonal[[unitvar2]] <- as.numeric(unitzonal[[unitvar2]])
+    }
   }	   
 
- 
+  ## Append P1POINTCNT based on pltassgn
+  unitvars <- c(unitvar2, unitvar)
+  setkeyv(setDT(unitzonal), unitvars)
+  
+  
+  if (extract) {
+    pltassgn <- sf::st_drop_geometry(sppltx)
+    setkeyv(setDT(pltassgn), unitvars)
+    spxy <- sppltx
+    
+    P1POINTCNT <- setDT(pltassgn)[, list(P1POINTCNT=.N), by=unitvars]
+    unitzonal <- unitzonal[P1POINTCNT]
+    if ("PLOT_STATUS_CD" %in% names(pltassgn)) {
+      P1POINTCNTFOR <- pltassgn[PLOT_STATUS_CD == 1, list(P1POINTCNTFOR=.N), by=unitvars]
+      unitzonal <- unitzonal[P1POINTCNTFOR]
+    }
+  }
+  
   ## Write data frames to CSV files
   #######################################
   if (savedata) {
@@ -1062,16 +1103,16 @@ spGetAuxiliary <- function(xyplt = NULL,
   }
 
   if (extract) {
-    returnlst$pltassgn <- pltassgn
+    returnlst$pltassgn <- data.frame(pltassgn)
     returnlst$pltassgnid <- uniqueid
   }
 
   if (areacalc) {
-    returnlst$unitarea <- unitarea
+    returnlst$unitarea <- data.frame(unitarea)
     returnlst$areavar <- areavar
   }
   if (!noaux) {
-    returnlst$unitzonal <- setDF(unitzonal)
+    returnlst$unitzonal <- data.frame(unitzonal)
     returnlst$inputdf <- inputdf
     returnlst$prednames <- unique(prednames)
     returnlst$zonalnames <- unique(zonalnames)

@@ -234,6 +234,7 @@ spClassifyRast <- function(rastfn,
     minmax <- ds$getMinMax(band=1, approx_ok=FALSE)
     rast.min <- minmax[1]
     rast.max <- minmax[2]
+    ds$close
 
 
     histdf <- data.frame(

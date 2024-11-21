@@ -8,6 +8,7 @@ modGBtree(
   GBpopdat,
   estvar,
   estvar.filter = NULL,
+  estvar.derive = NULL,
   estseed = "none",
   woodland = "Y",
   landarea = "FOREST",
@@ -20,7 +21,6 @@ modGBtree(
   table_opts = NULL,
   title_opts = NULL,
   savedata_opts = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -33,6 +33,10 @@ FIESTA::modGBpop().}
 
 \item{estvar.filter}{String. A tree-level filter for estvar. Must be R
 syntax (e.g., 'STATUSCD == 1').}
+
+\item{estvar.derive}{List. A derivation of a tree variable to estimate.
+Must be a named list with one element (e.g., 
+list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.}
 
 \item{estseed}{String. Use seedling data only or add to tree data. Seedling
 estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').}
@@ -73,8 +77,6 @@ options.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
 }

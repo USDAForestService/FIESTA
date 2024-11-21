@@ -40,6 +40,7 @@ DBgetPlots(
   stateFilter = NULL,
   allFilter = NULL,
   alltFilter = NULL,
+  lowernames = FALSE,
   returndata = TRUE,
   savedata = FALSE,
   exportsp = FALSE,
@@ -62,7 +63,7 @@ define RS.}
 coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
 is populated. See FIESTA::ref_statecd for reference to RS and states.}
 
-\item{datsource}{String. Source of data ('datamart', 'sqlite').}
+\item{datsource}{String. Source of data ('datamart', 'sqlite', 'postgres').}
 
 \item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).}
@@ -166,6 +167,8 @@ states in query. The expression must be R syntax (e.g., 'PLOT_STATUS_CD ==
 \item{alltFilter}{String. If istree=TRUE, an overall filter for tree data in
 all states (e.g., only Whitebark pine trees - 'SPCD == 101'). Note: returns
 only plots with trees included in filter.}
+
+\item{lowernames}{Logical. If TRUE, output data with lowercase variables.}
 
 \item{returndata}{Logical. If TRUE, returns data objects.}
 
@@ -399,7 +402,7 @@ forest types on plot.\cr
 type groups on plot.\cr 
 \tab CCLIVEPLT - Percent live canopy cover of condition aggregated to plot-level 
 (LIVE_CANOPY_CVR_PCT * CONDPROP_UNADJ).\cr 
-\tab PLOT_ID - Unique Identifier for a plot ('ID' + STATECD(2) + UNITCD(2) + 
+\tab PLOT_ID - Unique Identifier for a plot ('PID' + STATECD(2) + UNITCD(2) + 
 COUNTYCD(3) + PLOT(5)).  This variable can be used to identify multiple records 
 for each measurement of plot.\cr }
 

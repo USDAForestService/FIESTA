@@ -28,7 +28,6 @@ modSAarea(
   savedata_opts = NULL,
   multest_opts = NULL,
   save4testing = FALSE,
-  gui = FALSE,
   ...
 )
 }
@@ -100,9 +99,7 @@ of options. Only used when savedata = TRUE.}
 Only used when multest = TRUE.}
 
 \item{save4testing}{Logical. If TRUE, saves intermediate steps as R objects
-to outfolder for testing (pdomdat, dunitlut).}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
+to outfolder for testing (domdat, dunitlut).}
 
 \item{...}{Parameters for modSApop if SApopdat is NULL.}
 }
@@ -196,15 +193,6 @@ SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
                      prednames = c("dem", "tcc", "tpi", "tnt"),
                      predfac = "tnt")
 
-# Fit a unit level EBLUP with `JoSAE`
-modSAarea(SApopdatlst = SApopdat,
-          SApackage = "JoSAE",
-          SAmethod = "unit") 
-          
-# Fit an area level Fay-Herriot hierarchical Bayesian model with `hbsae`
-modSAarea(SApopdatlst = SApopdat,
-          SApackage = "hbsae",
-          SAmethod = "area") 
 
 # Fit an area level Fay-Herriot EBLUP with `sae`, while using Elastic Net
 # variable selection

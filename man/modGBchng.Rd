@@ -8,17 +8,18 @@ modGBchng(
   GBpopdat,
   chngtype = "total",
   landarea = "FOREST",
+  landarea_both = TRUE,
   pcfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
   sumunits = TRUE,
+  T1filter = NULL,
+  T2filter = NULL,
   returntitle = FALSE,
   savedata = FALSE,
   table_opts = NULL,
   title_opts = NULL,
   savedata_opts = NULL,
-  cdomdat = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -31,8 +32,11 @@ modGBchng(
 "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.}
 
-\item{pcfilter}{String. A filter for plot or cond attributes (including
-pltassgn).  Must be R logical syntax.}
+\item{landarea_both}{Logical. If TRUE, both Time 1 and Time 2 measurements 
+have the same landarea.}
+
+\item{pcfilter}{String. A filter for plot or cond attributes. 
+Must be R logical syntax.}
 
 \item{rowvar}{String. Name of row domain variable in cond. If only one
 domain, rowvar = domain variable. If more than one domain, include colvar.
@@ -42,6 +46,12 @@ If no domain, rowvar = NULL.}
 
 \item{sumunits}{Logical. If TRUE, estimation units are summed and returned
 in one table.}
+
+\item{T1filter}{String. A filter for plot or cond attributes for T1.
+Must be R logical syntax.}
+
+\item{T2filter}{String. A filter for plot or cond attributes for T2.
+Must be R logical syntax.}
 
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}
@@ -55,10 +65,6 @@ options.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
-
-\item{cdomdat}{Data.frame of condition-domain data. Output from modGBchng().}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
 }

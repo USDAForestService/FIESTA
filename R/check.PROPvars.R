@@ -14,12 +14,17 @@ check.PROPvars <- function(condflds, treeflds = NULL,
   }
   
   ## Check for missing propvars
-  missprop <- propvars[!propvars %in% condflds]
-  if (length(missprop) > 0) {
+  propchk <- unlist(sapply(propvars, findnm, condflds, returnNULL = TRUE))
+  if (is.null(propchk)) {
+    message("there are no propvars in dataset: ", toString(propvars))
+    stop()
+  } else if (length(propchk) < length(propvars)) {
+    missprop <- propvars[!propvars %in% names(propchk)]
     message("propvars not in cond table: ", toString(missprop))
+  } else {
+    propvars <- propchk
   }
-  propvars <- propvars[propvars %in% condflds]
- 
+
   ## Check for missing diavar
   if (!is.null(treeflds)) {
     micro_breakpointnm <- findnm("MICRO_BREAKPOINT_DIA", condflds, returnNULL=TRUE)

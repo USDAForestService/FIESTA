@@ -32,8 +32,8 @@ object.}
 
 \item{polyv.att}{String. Name of attribute in polyv to rasterize.}
 
-\item{polyv.lut}{Data frame. Lookup table of codes, if polyv.att is
-character or want to group codes. The lookup table must be data.frame  
+\item{polyv.lut}{Data frame. Lookup table of values, if polyv.att is
+character or want to group values. The lookup table must be data.frame  
 including polyv.att and another column with classes.}
 
 \item{rastfn.template}{String. Full path name of raster to use as template
@@ -95,7 +95,7 @@ WYbhdistfn <- system.file("extdata",
 
 # Turn polygon into raster
 # Note: raster values must be numeric, therefore names were changed to
-# numeric codes based on lookup table produced from the following code.                      
+# numeric values based on lookup table produced from the following code.                      
 new_rast <- spPoly2Rast(polyv = WYbhdistfn,
                         polyv.att = "DISTRICTNA",
                         outfolder = tempdir())

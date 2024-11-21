@@ -11,10 +11,13 @@ modSApop(
   popFilter = popFilters(),
   pltassgn = NULL,
   pltassgnid = "PLT_CN",
+  datsource = "sqlite",
   dsn = NULL,
+  dbconn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
-  adjplot = TRUE,
+  adj = "plot",
+  defaultVars = TRUE,
   dunitvar = NULL,
   dunitarea = NULL,
   areavar = "ACRES",
@@ -26,8 +29,9 @@ modSApop(
   savedata = FALSE,
   saveobj = FALSE,
   objnm = "SApopdat",
-  unit_opts = NULL,
+  unit_opts = list(minplotnum.unit = 2, unit.action = "remove"),
   savedata_opts = NULL,
+  database_opts = NULL,
   SAdoms = NULL,
   smallbnd = NULL,
   smallbnd.domain = NULL,
@@ -35,7 +39,6 @@ modSApop(
   SAdata = NULL,
   pltdat = NULL,
   auxdat = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -61,9 +64,13 @@ and/or strata. Optional.}
 
 \item{pltassgnid}{String. Unique identifier of plot in pltassgn.}
 
-\item{dsn}{String. Name of database where tree, cond, and pltassgn tables
+\item{datsource}{String. Name of data source ('obj', 'sqlite', 'postgres').}
+
+\item{dsn}{String. Name of database where tree, cond, and plot-level tables
 reside.  The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html).}
+
+\item{dbconn}{Open database connection.}
 
 \item{pjoinid}{String. Join variable in plot to match pltassgnid. Does not
 need to be uniqueid. If using most current XY coordinates for plot
@@ -72,7 +79,12 @@ assignments, use identifier for plot (e.g., PLOT_ID).}
 \item{areawt}{String. Name of variable for summarizing area weights (e.g.,
 CONDPROP_UNADJ).}
 
-\item{adjplot}{Logical. If TRUE, adjusts for nonresponse at plot-level.}
+\item{adj}{String. How to calculate adjustment factors for nonsampled
+(nonresponse) conditions based on summed proportions for by plot ('samp',
+'none'). 'plot' - adjustments are calculated at plot-level. Adjustments are
+only calculated for annual inventory plots (DESIGNCD=1).}
+
+\item{defaultVars}{Logical. If TRUE, a set of default variables are selected.}
 
 \item{dunitvar}{String. Name of the domain unit variable in cond, plt, or
 pltassgn with domain unit assignment for each plot.}
@@ -106,6 +118,9 @@ in model. Names will change in output depending on number of categories.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options.}
 
+\item{database_opts}{List. See help(database_options()) for a list
+of options. Only used when datsource = 'postgres'.}
+
 \item{SAdoms}{sf object. SA domains with attributes for joining.}
 
 \item{smallbnd}{sf object. small bound.}
@@ -125,8 +140,6 @@ FIESTA::spGetPlots().}
 \item{auxdat}{R List object. Output data list components from
 FIESTA::spGetAuxiliary().}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
-
 \item{...}{For extendibility.}
 }
 \value{
@@ -135,7 +148,7 @@ A list with population data for Small-Area estimates.
 \item{SAdomsdf}{ Data frame. Attribute table from SAdoms spatial layer.
 Includes DOMAIN and AOI attributes. DOMAIN represents modeling domains.  AOI
 identifies the small area of interest. } 
-\item{condx}{ Data frame. Condition-level data with condition proportions, 
+\item{pltidsadj}{ Data frame. Condition-level data with condition proportions, 
 domain and predictor assignments, and adjusted condition proportions, 
 if adjplot = TRUE. } 
 \item{pltcondx}{ Data frame. Plot/Condition data used for estimation. }
@@ -189,7 +202,7 @@ condition on plot (i.e. accessible nonforest, nonsampled nonforest)\cr
 \tab \tab RESERVCD \tab If landarea=TIMBERLAND. Reserved status.\cr 
 \tab \tab SUBPROP_UNADJ \tab Unadjusted proportion of subplot conditions 
 on each plot. Set SUBPROP_UNADJ=1, if only 1 condition per subplot.\cr 
-\tab \tab MICRPROP_UNADJ \tab If microplot tree attributes. Unadjusted 
+\tab \tab MICRPROP_UNADJ \tab If microplot trfee attributes. Unadjusted 
 proportion of microplot conditions on each plot. Set MICRPROP_UNADJ=1, 
 if only 1 condition per microplot.\cr 
 \tab \tab MACRPROP_UNADJ \tab If macroplot tree attributes. Unadjusted 

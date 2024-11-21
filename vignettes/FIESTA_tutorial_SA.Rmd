@@ -398,7 +398,7 @@ We will set our estimate variable and filter now. We set `estvar` to `"VOLCFNET"
 
 ```{r}
 estvar <- "VOLCFNET"
-live_trees <- "STATUSCD == 1"
+live_trees <- "STATUSCD = 1"
 ```
 
 #### Example 7: Total net cubic-foot volume of live trees (at least 5 inches diameter) 
@@ -461,7 +461,7 @@ tree2$est
 
 </details>
 
-#### Example 9: Basal area of live trees (at least 5 inches diameter), unit EBLUP from `JoSAE`
+#### Example 9: Above Ground Dry Biomass of live trees on forest land (at least 5 inches diameter), unit EBLUP from `JoSAE`
 
 <details>
   <summary>View Example</summary>
@@ -475,7 +475,7 @@ tree3 <- modSAtree(
     SApackage = "JoSAE",         # est - character string of the R package to do the estimation
     SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
     landarea = "FOREST",         # est - forest land filter
-    estvar = "BA",               # est - net cubic-foot volume
+    estvar = "DRYBIO_AG",               # est - net cubic-foot volume
     estvar.filter = live_trees,  # est - live trees only
     returntitle = TRUE
     )
@@ -495,12 +495,12 @@ tree3$titlelst
 
 </details>
 
-#### Example 10: Basal area of live trees (at least 5 inches diameter), area EBLUP from `sae`
+#### Example 10: Above Ground Dry Biomass of live trees on forest land (at least 5 inches diameter), area EBLUP from `sae`
 
 <details>
   <summary>View Example</summary>
 
-Now, we can of course fit a different model to estimate basal area. In this case, we choose to use dem to predict basal area with an area-level EBLUP from the `sae` package. 
+Now, we can of course fit a different model to estimate basal area. In this case, we choose to use dem to predict dry above ground biomass with an area-level EBLUP from the `sae` package. 
 
 ```{r}
 tree4 <- modSAtree(
@@ -509,7 +509,7 @@ tree4 <- modSAtree(
     SApackage = "sae",         # est - character string of the R package to do the estimation
     SAmethod = "area",           # est - method of small area estimation. Either "unit" or "area"  
     landarea = "FOREST",         # est - forest land filter
-    estvar = "BA",               # est - net cubic-foot volume
+    estvar = "DRYBIO_AG",               # est - net cubic-foot volume
     estvar.filter = live_trees,  # est - live trees only
     returntitle = TRUE
     )
@@ -521,70 +521,6 @@ Now we can take a look at our estimates.
 tree4$est
 ```
 
-</details>
-
-#### Example 11: Basal area of live trees (at least 5 inches diameter), saving to an outfolder
-
-<details>
-  <summary>View Example</summary>
-
-One may want to easily save `FIESTA` output to your computer, rather than just having it live in the R environment. `FIESTA` makes this easy with the use of the `savedata` and `savedata_opts` arguments. If `savedata = TRUE`, by default the output will be saved to your working directory, but we can set an `outfolder` in `savedata_opts` to choose where the data should be saved. There are many other `savedata_opts`, and these can be seen by looking at the help file for the `savedata_options` function (use `help(savedata_options)` with `FIESTA` loaded in your R environment). 
-
-```{r}
-tree5 <- modSAtree(
-    SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
-    prednames = all_preds,       # est - character vector of predictors to be used in the model
-    SApackage = "JoSAE",         # est - character string of the R package to do the estimation
-    SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
-    landarea = "FOREST",         # est - forest land filter
-    estvar = "BA",               # est - net cubic-foot volume
-    estvar.filter = live_trees,  # est - live trees only
-    savedata = TRUE,
-    savedata_opts = savedata_options(
-      outfolder = outfolder
-    )
-    )
-```
-
-</details>
-
-#### Example 12: Basal area of live trees (at least 5 inches diameter), HB model
-
-<details>
-  <summary>View Example</summary>
-
-We can also of course use a different model to predict basal area, and in this case we use a HB unit level model from `hbsae`. We also save to an outfolder again, this time giving a file name prefix with the `outfn.pre` arguement. 
-
-```{r}
-tree6 <- modSAtree(
-    SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
-    prednames = all_preds,       # est - character vector of predictors to be used in the model
-    SApackage = "hbsae",         # est - character string of the R package to do the estimation
-    SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
-    landarea = "FOREST",         # est - forest land filter
-    estvar = "BA",               # est - net cubic-foot volume
-    estvar.filter = live_trees,  # est - live trees only
-    savedata = TRUE,
-    savedata_opts = savedata_options(
-      outfolder = outfolder,
-      outfn.pre = "HB_unit"
-    )
-    )
-```
-
-We can see the files in the outfolder here:
-
-```{r}
-list.files(outfolder, pattern = "HB")
-```
-
-And the estimates here:
-
-```{r}
-tree6$est
-```
-
-</details>
 
 ## References
 

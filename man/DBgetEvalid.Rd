@@ -20,6 +20,7 @@ DBgetEvalid(
   invyrtab = NULL,
   dbTabs = dbTables(),
   dbconn = NULL,
+  schema = NULL,
   dbconnopen = FALSE,
   returnPOP = FALSE,
   gui = FALSE
@@ -71,6 +72,8 @@ and invtype.}
 See help(dbTables) for a list of options.}
 
 \item{dbconn}{Open database connection.}
+
+\item{schema}{String. Schema in database where tables are.}
 
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 

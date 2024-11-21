@@ -67,7 +67,6 @@
 #' of options. Only used when savedata = TRUE.  
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
 #' include in dunitlut output and extract to pltassgn points.
-#' @param gui Logical. If gui, user is prompted for parameters.
 #'
 #' @return \item{pltassgn}{ Data frame. Input xyplt data with extracted
 #' estimation unit and strata values appended. } \item{unitarea}{ Data frame.
@@ -171,11 +170,11 @@ spGetStrata <- function(xyplt,
                         exportNA = FALSE, 
                         spMakeSpatial_opts = NULL,
                         savedata_opts = NULL, 
-                        vars2keep = NULL, 
-                        gui = FALSE){
+                        vars2keep = NULL){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  gui <- FALSE
 
   if (gui) {uniqueid=stratclip=unitarea <- NULL}
 
@@ -358,7 +357,7 @@ spGetStrata <- function(xyplt,
   ##################################################################
   ## DO WORK
   ##################################################################
-  unitarea=stratalut <- NULL
+  unitarea=stratalut=PLOT_STATUS_CD <- NULL
 
   ## Check unit_layer
   unitlayerx <- pcheck.spatial(layer=unit_layer, dsn=unit_dsn, gui=gui, 
@@ -508,9 +507,21 @@ spGetStrata <- function(xyplt,
       } 
       
       ## If unitvar2 is not null, make one variable for zonal and area calculations
+      unitvarclass <- "character"
       if (!is.null(unitvar2)) {
+        unitvar2class <- "character"
         unitvar_old <- unitvar
-        unitlayerprj$UNITVAR <- paste0(unitlayerprj[[unitvar2]], "#", unitlayerprj[[unitvar]]) 
+        if (is.numeric(unitlayerprj[[unitvar]])) {
+          unitvarclass <- "numeric"
+          digits <- max(nchar(unitlayerprj[[unitvar]]))
+          unitlayerprj$UNITVAR <- paste0(unitlayerprj[[unitvar2]], "#", 
+              formatC(unitlayerprj[[unitvar]], width=digits, digits=digits, flag=0))
+        } else {
+          unitlayerprj$UNITVAR <- paste0(unitlayerprj[[unitvar2]], "#", unitlayerprj[[unitvar]])
+        }
+        if (is.numeric(unitlayerprj[[unitvar2]])) {
+          unitvar2class <- "numeric"
+        }
         unitvar <- "UNITVAR"		
       }
 
@@ -618,8 +629,36 @@ spGetStrata <- function(xyplt,
 	  stratalut <- data.frame(unname( t(data.frame( strsplit(sub("\\|","/",stratalut$UNITVAR), "#") )) ), stratalut)
 	  setnames(stratalut, c("X1", "X2"), c(unitvar2, unitvar))
 	  stratalut$UNITVAR <- NULL
+	  
+	  ## set classs of unitvar
+	  if (class(unitarea[[unitvar]]) != "numeric" && unitvarclass == "numeric") {
+	    unitarea[[unitvar]] <- as.numeric(unitarea[[unitvar]])
+	  }
+	  if (class(stratalut[[unitvar]]) != "numeric" && unitvarclass == "numeric") {
+	    stratalut[[unitvar]] <- as.numeric(stratalut[[unitvar]])
+	  }
+	  ## set classs of unitvar2
+	  if (class(unitarea[[unitvar2]]) != "numeric" && unitvar2class == "numeric") {
+	    unitarea[[unitvar2]] <- as.numeric(unitarea[[unitvar2]])
+	  }
+	  if (class(stratalut[[unitvar2]]) != "numeric" && unitvar2class == "numeric") {
+	    stratalut[[unitvar2]] <- as.numeric(stratalut[[unitvar2]])
+	  }
   }	   
   spxy <- sppltx[, sppltx.names]
+  
+  
+  ## Append P1POINTCNT based on pltassgn
+  strunitvars <- c(unitvar2, unitvar, strvar)
+  setkeyv(setDT(pltassgn), strunitvars)
+  setkeyv(setDT(stratalut), strunitvars)
+  P1POINTCNT <- setDT(pltassgn)[, list(P1POINTCNT=.N), by=strunitvars]
+  stratalut <- stratalut[P1POINTCNT]
+  if ("PLOT_STATUS_CD" %in% names(pltassgn)) {
+    P1POINTCNTFOR <- pltassgn[PLOT_STATUS_CD == 1, list(P1POINTCNTFOR=.N), by=strunitvars]
+    stratalut <- stratalut[P1POINTCNTFOR]
+  }
+  
   
   if (savedata) {
     
@@ -644,6 +683,7 @@ spGetStrata <- function(xyplt,
     datExportData(stratalut,                   
                   savedata_opts = outlst)
   }
+  
   
   returnlst <- list(bnd=unitlayerx, pltassgn=setDF(pltassgn), 
 		  pltassgnid=uniqueid, unitarea=setDF(unitarea), 

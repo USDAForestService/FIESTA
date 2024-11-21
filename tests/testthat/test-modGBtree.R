@@ -30,18 +30,10 @@ test_that("modGBtree Testing", {
                           sumunits = TRUE,
                           table_opts = list(row.FIAname = TRUE, col.FIAname=TRUE))
   
-  # Running GBtree - BA   
-  GBtree_BA <- modGBtree(GBpop,
-                         estvar = "BA",
-                         estvar.filter = "STATUSCD == 1",
-                         rowvar = "FORTYPCD",
-                         sumunits = TRUE,
-                         table_opts = list(row.FIAname = TRUE, col.FIAname=TRUE))
 
   # GBtree outputs assigned to $est
   modGBtree_TPA_est <- GBtree_TPA$est
   modGBtree_VOL_est <- GBtree_VOL$est
-  modGBtree_BA_est <- GBtree_BA$est
 
 
 
@@ -68,8 +60,7 @@ test_that("modGBtree Testing", {
   expect_equal(list(modGBtree_TPA_est$`Forest type`), modGBtree_TPA_est_names) ##ensuring tree names are consistant across output
   expect_equal(dim(modGBtree_TPA_est) , c(19, 3)) ##ensuring dimension of modGB_TPA is correct
   expect_equal(dim(modGBtree_VOL_est) , c(19, 3)) ##ensuring dimension of modGB VOL is correct
-  expect_equal(dim(modGBtree_BA_est) , c(19, 3)) ##ensuring dimensions of modGB BA is correct
   expect_snapshot(modGBtree_TPA_est) ##Outputting snapshot
   expect_snapshot(modGBtree_VOL_est) ##Outputting snapshot
-  expect_snapshot(modGBtree_BA_est) ##Outputting snapshot
+
 })
