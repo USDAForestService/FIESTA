@@ -251,6 +251,8 @@ modSAtree <- function(SApopdatlst = NULL,
   title.rowvar=title.colvar=title.rowgrp=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
 	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var=
   SAEarea_estimators=SAEunit_estimators<- NULL
+  
+  predselect.areadf <- predselect.unitdf <- NULL
 
   ## Set seed
   set.seed(66)
@@ -812,6 +814,7 @@ modSAtree <- function(SApopdatlst = NULL,
       pjoinid <- "PLT_CN"
     } else {
       pltidsWITHqry <- NULL
+      pjoinid <- NULL
     }
     treedat <- 
         check.tree(treex = treex, 

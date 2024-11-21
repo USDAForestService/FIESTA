@@ -42,7 +42,7 @@ datSumTree(
   pltidsWITHqry = NULL,
   pltidsid = NULL,
   pcwhereqry = NULL,
-  pjoinid = "PLT_CN",
+  pjoinid = "CN",
   checkNA = FALSE,
   returnDT = TRUE,
   savedata = FALSE,

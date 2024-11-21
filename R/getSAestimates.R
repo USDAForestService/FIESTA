@@ -54,8 +54,9 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   }
   ## Join domdat to pltassgnx using data.table key
   domdat <- pltassgnx[domdat]
-    if (is.null(largebnd.unique)) {
+  if (is.null(largebnd.unique)) {
     domdat$LARGEBND <- 1
+    dunitlut$LARGEBND <- 1
     largebnd.unique <- "LARGEBND"
   }
   ## Append TOTAL to domdatn
