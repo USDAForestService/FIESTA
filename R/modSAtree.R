@@ -96,7 +96,6 @@
 #' Only used when multest = TRUE.
 #' @param save4testing Logical. If TRUE, saves intermediate steps as R objects
 #' to outfolder for testing (pdomdat, dunitlut).
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modSApop() if SApopdat is NULL.
 #' 
 #' @return \item{est}{ Data frame. Tree estimates and percent sampling error by
@@ -199,7 +198,6 @@ modSAtree <- function(SApopdatlst = NULL,
                       savedata = FALSE, 
                       savesteps = FALSE, 
                       multest = TRUE, 
-                      vars2keep = NULL,
                       savemultest = FALSE, 
                       returntitle = FALSE, 
                       table_opts = NULL, 
@@ -230,7 +228,7 @@ modSAtree <- function(SApopdatlst = NULL,
   esttype <- "TREE"
   popType <- "VOL"
   rawdata <- TRUE 
-  pvars2keep <- c("DOMAIN", "AOI")
+  vars2keep <- c("DOMAIN", "AOI")
   returnSApopdat <- TRUE
   sumunits=FALSE
   SAdomsdf=multestdf_row <- NULL
@@ -246,9 +244,10 @@ modSAtree <- function(SApopdatlst = NULL,
   addSAdomsdf = FALSE 
   SAdomvars = NULL
   returnlst <- list()
+  showsteps <- FALSE
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=AOI=
   title.rowvar=title.colvar=title.rowgrp=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
 	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var=
   SAEarea_estimators=SAEunit_estimators<- NULL

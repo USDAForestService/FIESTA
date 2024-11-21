@@ -28,13 +28,11 @@ modGBpop(
   returndata = TRUE,
   savedata = FALSE,
   saveobj = FALSE,
-  savepltids = FALSE,
   objnm = "GBpopdat",
   unit_opts = NULL,
   strata_opts = NULL,
   savedata_opts = NULL,
   database_opts = NULL,
-  dsnreadonly = TRUE,
   GBdata = NULL,
   pltdat = NULL,
   stratdat = NULL,
@@ -119,9 +117,6 @@ for saving options.}
 
 \item{saveobj}{Logical. If TRUE, saves returned list object. See savedata_opts
 for saving options.}
-
-\item{savepltids}{Logical. If TRUE, saves pltids, including adjustment 
-factors. See savedata_opts for saving options.}
 
 \item{objnm}{String. Name of *.rds object.}
 

@@ -1,5 +1,3 @@
-#' @rdname internal_desc
-#' @export
 sumpropP2VEGqry <- function(fromqry = NULL,
                             whereqry = NULL,
                             selectvars = NULL,

@@ -356,8 +356,8 @@ modMAratio <- function(MApopdat,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
-                  "ACI.filter", "unitarea", "unitvar", "unitlut", "npixels",
+  list.items <- c("pltcondx", "cuniqueid", "condid", 
+                  "unitarea", "unitvar", "unitlut", "npixels",
                   "npixelvar", "plotsampcnt", "condsampcnt")
   
   
@@ -378,7 +378,8 @@ modMAratio <- function(MApopdat,
   npixelvar <- MApopdat$npixelvar
   condid <- MApopdat$condid
   tuniqueid <- MApopdat$tuniqueid
-  ACI.filter <- MApopdat$ACI.filter
+  ACI <- MApopdat$ACI
+  pltassgnx <- MApopdat$pltassgnx
   unitarea <- MApopdat$unitarea
   areavar <- MApopdat$areavar
   areaunits <- MApopdat$areaunits
@@ -688,6 +689,7 @@ modMAratio <- function(MApopdat,
                  popconn = popconn,
                  pltcondx = pltcondx,
                  pltidsadj = pltidsadj,
+                 pltidsid = pltidsid,
                  pltcondxadjWITHqry = pltcondxadjWITHqry,
                  pcwhereqry = pcwhereqry,
                  classifyrow = classifyrow,
@@ -749,8 +751,9 @@ modMAratio <- function(MApopdat,
   estdat <- 
     getMAestimates(esttype = esttype,
                    domdatn = tdomdat,
+                   domdatd = cdomdat,
                    uniqueid = pltassgnid,
-                   estvarn.name = estvar.name,
+                   estvarn.name = estvarn.name,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
                    MAmethod = MAmethod,

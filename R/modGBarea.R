@@ -434,7 +434,6 @@ modGBarea <- function(GBpopdat,
     pltcondxWITHqry=pltcondxadjWITHqry <- NULL
   }
   
-
   ########################################
   ## Check area units
   ########################################
@@ -547,7 +546,7 @@ modGBarea <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-  
+ 
   
   ###################################################################################
   ### Get condition-level domain data
@@ -614,7 +613,6 @@ modGBarea <- function(GBpopdat,
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
-  
 
   ###################################################################################
   ## GENERATE ESTIMATES
@@ -632,6 +630,7 @@ modGBarea <- function(GBpopdat,
                    areavar = areavar,
                    stratalut = stratalut,
                    strvar = strvar,
+                   strwtvar = strwtvar,
                    totals = totals,
                    sumunits = sumunits,
                    uniquerow = uniquerow,

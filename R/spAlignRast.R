@@ -334,7 +334,7 @@ spAlignRast <- function(ref_rastfn,
 
     ## Create a geoTiff from a virtual raster
     stacktiffn <- file.path(outfolder, "stack.tif")
-    translate(stackvrtfn, stacktiffn)
+    gdalraster::translate(stackvrtfn, stacktiffn)
     #rasterInfo(stacktiffn)
     
     file.remove(stackvrtfn)

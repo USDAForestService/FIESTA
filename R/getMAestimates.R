@@ -36,6 +36,7 @@ getMAestimates <- function(esttype,
   masemethod <- switch(MAmethod,
                        PS = "postStrat",
                        greg = "greg",
+                       gregRatio = "gregRatio",
                        gregEN = "gregElasticNet",
                        ratio = "ratioEstimator",
                        ht = "horvitzThompson")

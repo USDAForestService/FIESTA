@@ -9,12 +9,10 @@ test_that("modMAratio testing", {
                                unitzonal = FIESTA::WYunitzonal,
                                prednames = c("dem", "tcc", "tpi", "tnt"),
                                predfac = "tnt")
-  
   mod1 <- modMAratio(MApopdat,
                      estvarn = "VOLCFNET",
                      estvarn.filter = "STATUSCD == 1",
                      rowvar = "STDSZCD",
-                     sumunits = TRUE,
                      prednames = c("dem", "tcc", "tpi"))
   
   expect_snapshot(mod1$est)

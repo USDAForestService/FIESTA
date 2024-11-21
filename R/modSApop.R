@@ -66,12 +66,21 @@
 #' reside.  The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html).
 #' @param pltassgnid String. Unique identifier of plot in pltassgn.
+#' @param datsource String. Name of data source ('obj', 'sqlite', 'postgres').
+#' @param dsn String. Name of database where tree, cond, and plot-level tables
+#' reside.  The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html).
+#' @param dbconn Open database connection.
 #' @param pjoinid String. Join variable in plot to match pltassgnid. Does not
 #' need to be uniqueid. If using most current XY coordinates for plot
 #' assignments, use identifier for plot (e.g., PLOT_ID).
 #' @param areawt String. Name of variable for summarizing area weights (e.g.,
 #' CONDPROP_UNADJ).
-#' @param adjplot Logical. If TRUE, adjusts for nonresponse at plot-level.
+#' @param adj String. How to calculate adjustment factors for nonsampled
+#' (nonresponse) conditions based on summed proportions for by plot ('samp',
+#' 'none'). 'plot' - adjustments are calculated at plot-level. Adjustments are
+#' only calculated for annual inventory plots (DESIGNCD=1).
+#' @param defaultVars Logical. If TRUE, a set of default variables are selected.
 #' @param dunitvar String. Name of the domain unit variable in cond, plt, or
 #' pltassgn with domain unit assignment for each plot.
 #' @param dunitarea Numeric or DF. Total area by domain unit.
@@ -99,14 +108,13 @@
 #' FIESTA::spGetPlots().
 #' @param auxdat R List object. Output data list components from
 #' FIESTA::spGetAuxiliary().
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ... For extendibility. 
 #' @return A list with population data for Small-Area estimates.
 #' 
 #' \item{SAdomsdf}{ Data frame. Attribute table from SAdoms spatial layer.
 #' Includes DOMAIN and AOI attributes. DOMAIN represents modeling domains.  AOI
 #' identifies the small area of interest. } 
-#' \item{condx}{ Data frame. Condition-level data with condition proportions, 
+#' \item{pltidsadj}{ Data frame. Condition-level data with condition proportions, 
 #' domain and predictor assignments, and adjusted condition proportions, 
 #' if adjplot = TRUE. } 
 #' \item{pltcondx}{ Data frame. Plot/Condition data used for estimation. }
@@ -234,7 +242,7 @@ modSApop <- function(popType = "VOL",
 
   ## If gui.. set variables to NULL
   if (gui) {
-    areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
+    areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar=projectid <- NULL
   }
   
   ## Set parameters
@@ -248,9 +256,7 @@ modSApop <- function(popType = "VOL",
   condid <- "CONDID"
   areawt2 <- NULL
   pvars2keep <- NULL
-  savepltids <- FALSE
-  dsnreadonly <- FALSE
- 
+  pltidsadjindb=savepltids=dsnreadonly <- FALSE
 
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -308,7 +314,7 @@ modSApop <- function(popType = "VOL",
     if (out_fmt == "sqlite" && is.null(out_dsn)) {
       out_dsn <- "GBpopdat.db"
     }
-    outlst <- FIESTAutils::pcheck.output(savadata_opts)
+    outlst <- FIESTAutils::pcheck.output(savedata_opts)
     outlst$add_layer <- TRUE
   }
   
@@ -387,7 +393,7 @@ modSApop <- function(popType = "VOL",
 		            toString(prednames[!prednames %in% SAdata$prednames]))
     }
     if (is.null(predfac)) {
-      predfac <- MAdata$predfac
+      predfac <- SAdata$predfac
     }
     predfac <- predfac[predfac %in% prednames]
     
@@ -647,7 +653,7 @@ modSApop <- function(popType = "VOL",
                        plotlst = plotlst,  
                        condid = condid, 
                        areawt = areawt, areawt2 = areawt2,
-                       unitvars = unitvars,
+                       unitvars = dunitvars,
                        nonsamp.cfilter = nonsamp.cfilter,
                        dbconn = dbconn, SCHEMA. = SCHEMA.,
                        getdataWITHqry = getdataWITHqry,
@@ -861,7 +867,7 @@ modSApop <- function(popType = "VOL",
   if (savepltids) {
     message("saving pltids...")
     outlst$out_layer <- "pltids"
-    if (!append_layer) index.unique.pltids <- c(projectid, puniqued)
+    if (!append_layer) index.unique.pltids <- c(projectid, puniqueid)
     datExportData(pltidsadj, savedata_opts = outlst)
   }
   
@@ -928,7 +934,7 @@ modSApop <- function(popType = "VOL",
   ## Save data frames
   ##################################################################
   if (savedata) {
-    datExportData(condx, 
+    datExportData(pltidsadj, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
@@ -949,8 +955,8 @@ modSApop <- function(popType = "VOL",
                               append_layer=append_layer,
                               add_layer=TRUE))
 
-    if (!is.null(treef)) {
-      datExportData(treef, 
+    if (!is.null(treex)) {
+      datExportData(treex, 
             savedata_opts=list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
@@ -961,8 +967,8 @@ modSApop <- function(popType = "VOL",
                                 append_layer=append_layer,
                                 add_layer=TRUE))
     }
-    if (!is.null(seedf)) {
-      datExportData(seedf, 
+    if (!is.null(seedx)) {
+      datExportData(seedx, 
             savedata_opts=list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
@@ -1035,12 +1041,12 @@ modSApop <- function(popType = "VOL",
       rm(dunitarea)
       
       
-      if (popType %in% c("TREE", "GRM")) {
-        message("saving REF_SPECIES...")
-        outlst$out_layer <- "REF_SPECIES"
-        datExportData(REF_SPECIES,
-                      savedata_opts = outlst)
-      }
+      # if (popType %in% c("TREE", "GRM")) {
+      #   message("saving REF_SPECIES...")
+      #   outlst$out_layer <- "REF_SPECIES"
+      #   datExportData(REF_SPECIES,
+      #                 savedata_opts = outlst)
+      # }
       
       
       if (!is.null(vcondsppx)) {

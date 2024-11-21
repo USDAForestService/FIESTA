@@ -281,7 +281,7 @@ modMAarea <- function(MApopdat,
   returnlst <- list()
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder <- NULL
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder=domclassify <- NULL
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -593,7 +593,6 @@ modMAarea <- function(MApopdat,
   #####################################################################################
   alltitlelst <- 
     check.titles(dat = cdomdat, esttype = esttype, 
-                 sumunits = sumunits, 
                  title.main = title.main, 
                  title.ref = title.ref, 
                  title.rowvar = title.rowvar, 

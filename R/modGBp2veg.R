@@ -627,7 +627,6 @@ modGBp2veg <- function(GBpopdat = NULL,
   if (esttype == "RATIO") {
     conddat <- 
       check.cond(areawt = areawt,
-                 areawt2 = areawt2,
                  adj = adj,
                  adjcase = adjcase,
                  cuniqueid = cuniqueid, 
@@ -703,6 +702,7 @@ modGBp2veg <- function(GBpopdat = NULL,
                    areavar = areavar,
                    stratalut = stratalut,
                    strvar = strvar,
+                   strwtvar = strwtvar,
                    totals = totals,
                    sumunits = sumunits,
                    uniquerow = uniquerow,
@@ -797,7 +797,6 @@ modGBp2veg <- function(GBpopdat = NULL,
     rawdat$estvarn.filter <- estvarn.filter
     if (esttype == "RATIO") {
       rawdat$estvard <- estvard.name
-      rawdat$estvard.filter <- estvard.filter
     }
     if (savedata) {
       if (!is.null(title.estpse)) {
@@ -835,11 +834,7 @@ modGBp2veg <- function(GBpopdat = NULL,
     rawdat$GBmethod <- ifelse(strata, "PS", "HT")
     rawdat$estvarn <- estvarn.name
     rawdat$estvarn.filter <- estvarn.filter
-    if (!is.null(rawdat$estvarn.derive)) rawdat$estvarn.derive <- estvarn.derive
-    
-    if (!is.null(estvard)) rawdat$estvard <- estvard.name
-    if (!is.null(estvard.filter)) rawdat$estvard.filter <- estvard.filter
-    if (!is.null(rawdat$estvard.derive)) rawdat$estvard.derive <- estvard.derive
+
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
     if (esttype == "RATIO") {

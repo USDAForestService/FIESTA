@@ -61,6 +61,7 @@
 #' @param dbTabs List of database tables the user would like returned.
 #'  See help(dbTables) for a list of options.
 #' @param dbconn Open database connection.
+#' @param schema String. Schema in database where tables are.
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed.
 #' @param returnPOP Logical. If TRUE, returns pop tables (SURVEY, 
 #' POP_PLOT_STRATUM_ASSGN) as R objects instead of table names, if in db.

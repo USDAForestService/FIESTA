@@ -1,5 +1,3 @@
-#' @rdname internal_desc
-#' @export
 sumpropSUBPqry <- function(fromqry = NULL,
                            whereqry = NULL,
                            selectvars = NULL,

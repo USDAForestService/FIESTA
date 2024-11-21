@@ -28,12 +28,10 @@ modMApop(
   returndata = TRUE,
   savedata = FALSE,
   saveobj = FALSE,
-  savepltids = FALSE,
   objnm = "MApopdat",
   unit_opts = NULL,
   savedata_opts = NULL,
   database_opts = NULL,
-  dsnreadonly = TRUE,
   MAdata = NULL,
   pltdat = NULL,
   auxdat = NULL,
@@ -78,7 +76,7 @@ CONDPROP_UNADJ).}
 
 \item{adj}{String. How to calculate adjustment factors for nonsampled
 (nonresponse) conditions based on summed proportions for by plot ('samp',
-'plot').  'samp' - adjustments are calculated at strata/estimation unit
+'plot', 'none').  'samp' - adjustments are calculated at strata/estimation unit
 level; 'plot' - adjustments are calculated at plot-level. Adjustments are
 only calculated for annual inventory plots (DESIGNCD=1).}
 
@@ -132,8 +130,6 @@ FIESTA::spGetPlots().}
 \item{auxdat}{List. Auxiliary data output from FIESTA::spGetAuxiliary().}
 
 \item{...}{For extendibility.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with population data for Green-Book estimates.

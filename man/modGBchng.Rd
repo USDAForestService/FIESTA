@@ -67,8 +67,6 @@ options.}
 of options. Only used when savedata = TRUE.}
 
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with estimates with percent sampling error for rowvar (and

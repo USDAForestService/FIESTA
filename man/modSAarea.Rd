@@ -99,7 +99,7 @@ of options. Only used when savedata = TRUE.}
 Only used when multest = TRUE.}
 
 \item{save4testing}{Logical. If TRUE, saves intermediate steps as R objects
-to outfolder for testing (pdomdat, dunitlut).}
+to outfolder for testing (domdat, dunitlut).}
 
 \item{...}{Parameters for modSApop if SApopdat is NULL.}
 }

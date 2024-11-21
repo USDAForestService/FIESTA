@@ -75,7 +75,7 @@
 #' CONDPROP_UNADJ).
 #' @param adj String. How to calculate adjustment factors for nonsampled
 #' (nonresponse) conditions based on summed proportions for by plot ('samp',
-#' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
+#' 'plot', 'none').  'samp' - adjustments are calculated at strata/estimation unit
 #' level; 'plot' - adjustments are calculated at plot-level. Adjustments are
 #' only calculated for annual inventory plots (DESIGNCD=1).
 #' @param defaultVars Logical. If TRUE, a set of default variables are selected.
@@ -109,7 +109,6 @@
 #' @param pltdat R List object. Output data list components from
 #' FIESTA::spGetPlots().
 #' @param auxdat List. Auxiliary data output from FIESTA::spGetAuxiliary().
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ... For extendibility.
 #' @return A list with population data for Green-Book estimates.
 #' 
@@ -248,12 +247,10 @@ modMApop <- function(popType="VOL",
                      returndata = TRUE,
                      savedata = FALSE, 
                      saveobj = FALSE, 
-                     savepltids = FALSE,
                      objnm = "MApopdat", 
                      unit_opts = NULL, 
                      savedata_opts = NULL, 
                      database_opts = NULL,
-                     dsnreadonly = TRUE,
                      MAdata = NULL, 
                      pltdat = NULL, 
                      auxdat = NULL,
@@ -290,6 +287,7 @@ modMApop <- function(popType="VOL",
   condid <- "CONDID"
   areawt2 <- NULL
   pvars2keep <- NULL
+  pltidsadjindb=savepltids=dsnreadonly <- FALSE
   
   
   ##################################################################

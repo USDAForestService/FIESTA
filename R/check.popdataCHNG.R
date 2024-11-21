@@ -1238,7 +1238,7 @@ check.popdataCHNG <-
           message("saving TREE_GRM_BEGIN...")
           outlst$out_layer <- "TREE_GRM_BEGIN"
           if (!append_layer) index.unique.tree_grm_begin <- beginkey
-          atExportData(beginx, 
+          datExportData(beginx, 
                        savedata_opts = outlst)
         }
         rm(beginx)

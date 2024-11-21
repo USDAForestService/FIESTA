@@ -62,7 +62,6 @@
 #' @param title_opts List. See help(title_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modGBpop() if GBpopdat is NULL.
 #' @return A list with estimates with percent sampling error for rowvar (and
 #' colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
@@ -639,6 +638,7 @@ modGBchng <- function(GBpopdat,
                    areavar = areavar,
                    stratalut = stratalut,
                    strvar = strvar,
+                   strwtvar = strwtvar,
                    totals = totals,
                    sumunits = sumunits,
                    uniquerow = uniquerow,

@@ -357,7 +357,7 @@ spGetStrata <- function(xyplt,
   ##################################################################
   ## DO WORK
   ##################################################################
-  unitarea=stratalut <- NULL
+  unitarea=stratalut=PLOT_STATUS_CD <- NULL
 
   ## Check unit_layer
   unitlayerx <- pcheck.spatial(layer=unit_layer, dsn=unit_dsn, gui=gui, 

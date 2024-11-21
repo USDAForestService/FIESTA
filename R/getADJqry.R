@@ -1,5 +1,3 @@
-#' @rdname internal_desc
-#' @export
 getADJqry <- function(popType,
                       adj,
                       propvars,

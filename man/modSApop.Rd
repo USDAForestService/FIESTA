@@ -64,9 +64,13 @@ and/or strata. Optional.}
 
 \item{pltassgnid}{String. Unique identifier of plot in pltassgn.}
 
-\item{dsn}{String. Name of database where tree, cond, and pltassgn tables
+\item{datsource}{String. Name of data source ('obj', 'sqlite', 'postgres').}
+
+\item{dsn}{String. Name of database where tree, cond, and plot-level tables
 reside.  The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html).}
+
+\item{dbconn}{Open database connection.}
 
 \item{pjoinid}{String. Join variable in plot to match pltassgnid. Does not
 need to be uniqueid. If using most current XY coordinates for plot
@@ -74,6 +78,13 @@ assignments, use identifier for plot (e.g., PLOT_ID).}
 
 \item{areawt}{String. Name of variable for summarizing area weights (e.g.,
 CONDPROP_UNADJ).}
+
+\item{adj}{String. How to calculate adjustment factors for nonsampled
+(nonresponse) conditions based on summed proportions for by plot ('samp',
+'none'). 'plot' - adjustments are calculated at plot-level. Adjustments are
+only calculated for annual inventory plots (DESIGNCD=1).}
+
+\item{defaultVars}{Logical. If TRUE, a set of default variables are selected.}
 
 \item{dunitvar}{String. Name of the domain unit variable in cond, plt, or
 pltassgn with domain unit assignment for each plot.}
@@ -130,10 +141,6 @@ FIESTA::spGetPlots().}
 FIESTA::spGetAuxiliary().}
 
 \item{...}{For extendibility.}
-
-\item{adjplot}{Logical. If TRUE, adjusts for nonresponse at plot-level.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with population data for Small-Area estimates.
@@ -141,7 +148,7 @@ A list with population data for Small-Area estimates.
 \item{SAdomsdf}{ Data frame. Attribute table from SAdoms spatial layer.
 Includes DOMAIN and AOI attributes. DOMAIN represents modeling domains.  AOI
 identifies the small area of interest. } 
-\item{condx}{ Data frame. Condition-level data with condition proportions, 
+\item{pltidsadj}{ Data frame. Condition-level data with condition proportions, 
 domain and predictor assignments, and adjusted condition proportions, 
 if adjplot = TRUE. } 
 \item{pltcondx}{ Data frame. Plot/Condition data used for estimation. }

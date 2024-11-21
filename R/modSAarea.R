@@ -87,7 +87,7 @@
 #' @param multest_opts List. See help(multest_options()) for a list of options.
 #' Only used when multest = TRUE.
 #' @param save4testing Logical. If TRUE, saves intermediate steps as R objects
-#' to outfolder for testing (pdomdat, dunitlut).
+#' to outfolder for testing (domdat, dunitlut).
 #' @param ...  Parameters for modSApop if SApopdat is NULL.
 #' 
 #' @return \item{est}{ Data frame. Tree estimates and percent sampling error by
@@ -209,7 +209,7 @@ modSAarea <- function(SApopdatlst = NULL,
   esttype <- "AREA"
   popType <- "CURR"
   rawdata <- TRUE 
-  pvars2keep <- c("DOMAIN", "AOI")
+  vars2keep <- c("DOMAIN", "AOI")
   returnSApopdat <- TRUE
   sumunits=FALSE
   SAdomsdf=multestdf_row <- NULL
@@ -225,6 +225,7 @@ modSAarea <- function(SApopdatlst = NULL,
   addSAdomsdf = FALSE 
   SAdomvars = NULL
   returnlst <- list()
+  showsteps <- FALSE
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=AOI=
@@ -768,6 +769,7 @@ modSAarea <- function(SApopdatlst = NULL,
                  popconn = popconn,
                  pltcondx = pltcondx,
                  pltidsadj = pltidsadj,
+                 pltidsid = pltidsid,
                  pltcondxadjWITHqry = pltcondxadjWITHqry,
                  pcwhereqry = pcwhereqry,
                  classifyrow = classifyrow,
@@ -1088,34 +1090,25 @@ modSAarea <- function(SApopdatlst = NULL,
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
-  
   title.dunitvar <- ifelse(is.null(title.unitvar), smallbnd.dom, title.unitvar)
   alltitlelst <- 
-    check.titles(esttype = esttype,
-                 estseed = estseed,
-                 woodland = woodland,
-                 sumunits = sumunits,
-                 title.main = title.main,
-                 title.ref = title.ref,
-                 title.rowvar = title.rowvar,
-                 title.rowgrp = title.rowgrp,
-                 title.colvar = title.colvar,
-                 title.unitvar = title.dunitvar,
-                 title.filter = title.filter,
-                 title.unitsn = areaunits,
-                 title.estvarn = title.estvar,
-                 unitvar = "DOMAIN",
-                 rowvar = rowvar, colvar = colvar,
-                 estvarn = estvar.name,
-                 estvarn.filter = estvar.filter,
-                 addtitle = addtitle,
-                 returntitle = returntitle,
-                 rawdata = rawdata,
-                 states = states, invyrs = invyrs,
-                 landarea = landarea,
-                 pcfilter = pcfilter,
-                 allin1 = allin1,
-                 divideby = divideby,
+    check.titles(dat = cdomdat, esttype = esttype, 
+                 title.main = title.main, 
+                 title.ref = title.ref, 
+                 title.rowvar = title.rowvar, 
+                 title.rowgrp = title.rowgrp, 
+                 title.colvar = title.colvar, 
+                 title.unitvar = title.unitvar, 
+                 title.filter = title.filter, 
+                 title.unitsn = areaunits, 
+                 unitvar = dunitvar, 
+                 rowvar = rowvar, colvar=colvar, 
+                 addtitle = addtitle, 
+                 returntitle = returntitle, 
+                 rawdata = rawdata, 
+                 states = states, invyrs = invyrs, 
+                 landarea = landarea, pcfilter = pcfilter, 
+                 allin1 = allin1, divideby = divideby, 
                  outfn.pre = outfn.pre)
   title.dunitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
@@ -1378,7 +1371,7 @@ modSAarea <- function(SApopdatlst = NULL,
   if (save4testing) {
     message("saving object for testing")
 
-    returnlst$pdomdat <- pdomdat
+    returnlst$domdat <- domdat
     returnlst$dunitlut <- dunitlut
     returnlst$cuniqueid <- cuniqueid
   }

@@ -73,6 +73,8 @@ See help(dbTables) for a list of options.}
 
 \item{dbconn}{Open database connection.}
 
+\item{schema}{String. Schema in database where tables are.}
+
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 
 \item{returnPOP}{Logical. If TRUE, returns pop tables (SURVEY, 

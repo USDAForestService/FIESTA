@@ -110,8 +110,6 @@
 #' stratalut and cond or pltassgn data frame with stratum assignment for each
 #' plot (Default = 'STRATUMCD').
 #' @param returndata Logical. If TRUE, returns data objects.
-#' @param savepltids Logical. If TRUE, saves pltids, including adjustment 
-#' factors. See savedata_opts for saving options.
 #' @param savedata Logical. If TRUE, saves data table(s). See savedata_opts 
 #' for saving options.
 #' @param saveobj Logical. If TRUE, saves returned list object. See savedata_opts
@@ -271,13 +269,11 @@ modGBpop <- function(popType = "VOL",
                      returndata = TRUE, 
                      savedata = FALSE,
                      saveobj = FALSE, 
-                     savepltids = FALSE,
                      objnm = "GBpopdat",
                      unit_opts = NULL,
                      strata_opts = NULL, 
                      savedata_opts = NULL, 
                      database_opts = NULL,
-                     dsnreadonly = TRUE,
                      GBdata = NULL, 
                      pltdat = NULL, 
                      stratdat = NULL, 
@@ -314,7 +310,7 @@ modGBpop <- function(popType = "VOL",
   expcondtab=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=sccmx=popevalid <- NULL
   condid <- "CONDID"
   pvars2keep=unitlevels <- NULL
-  pltidsadjindb <- FALSE
+  pltidsadjindb=savepltids=dsnreadonly <- FALSE
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -375,7 +371,7 @@ modGBpop <- function(popType = "VOL",
     if (out_fmt == "sqlite" && is.null(out_dsn)) {
       out_dsn <- "GBpopdat.db"
     }
-    outlst <- FIESTAutils::pcheck.output(savadata_opts)
+    outlst <- FIESTAutils::pcheck.output(savedata_opts)
     outlst$add_layer <- TRUE
   }
   
@@ -914,49 +910,6 @@ modGBpop <- function(popType = "VOL",
     }
   }
   
-  if (popType == "DWM") {
-    areawt <- "CONDPROP_UNADJ"
-    popcheck <- 
-      check.popdataDWM(tabs = popTabs, tabIDs = popTabIDs, 
-                       popType = popType, 
-                       datindb = datindb, pltaindb = pltaindb, 
-                       pltidsWITHqry = pltidsWITHqry, pltidsid = pltidsid,
-                       pltidvars = pltidvars, projidvars = projidvars,
-                       pdoms2keep = pdoms2keep, 
-                       defaultVars = defaultVars, 
-                       pltidsadjindb = pltidsadjindb, 
-                       pltassgnid = pltassgnid, 
-                       pltassgnx = pltassgnx,
-                       POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
-                       adj = adj, ACI = ACI, 
-                       plotlst = plotlst,  
-                       #pltfromqry = pltfromqry, 
-                       condid = condid, 
-                       areawt = areawt, areawt2 = areawt2,
-                       unitvars = unitvars,
-                       strunitvars = strunitvars, 
-                       nonsamp.cfilter = nonsamp.cfilter, 
-                       dbconn = dbconn, SCHEMA. = SCHEMA., 
-                       getdataWITHqry = getdataWITHqry,
-                       getdataCNs = getdataCNs,
-                       returndata = returndata,
-                       savedata = savedata, 
-                       outlst = outlst)
-    if (is.null(popcheck)) return(0)
-    pltidsadj <- popcheck$pltidsadj
-    pltcondx <- popcheck$pltcondx
-    pltcondflds <- popcheck$pltcondflds
-    cuniqueid <- popcheck$cuniqueid
-    condid <- popcheck$condid
-    adjfactors <- popcheck$adjfactors
-    adjvarlst <- popcheck$adjvarlst
-    condsampcnt <- popcheck$condsampcnt
-    dbqueries <- popcheck$dbqueries
-    dbqueriesWITH <- popcheck$dbqueriesWITH
-    estfromqry <- popcheck$estfromqry
-    adjcase <- popcheck$adjcase
-    dwmpropvars <- popcheck$dwmpropvars
-  }
 
   ###################################################################################
   ## Add new variables to pltcondx for estimation

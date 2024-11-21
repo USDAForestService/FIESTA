@@ -1764,7 +1764,7 @@ datSumTree <- function(tree = NULL,
     }
     twithSelect <- paste0(talias., unique(c(tsumuniqueid, twithvars)))
     tvarlst <- unique(c(tdomainlst, tsumvarlst, tpavarnm))
-
+    
     if (addseed) {
       if (!is.null(tvarlst)) {
         spcdnm <- findnm("SPCD", tvarlst, returnNULL = TRUE)
@@ -1784,7 +1784,9 @@ datSumTree <- function(tree = NULL,
       }
       twithSelect <- unique(c(twithSelect, tvarlst))
     } else {
-      twithSelect <- unique(c(twithSelect, paste0(talias., tvarlst)))
+      if (!is.null(tvarlst)) {
+        twithSelect <- unique(c(twithSelect, paste0(talias., tvarlst)))
+      }
     }
 
     ## Build final select statement for tdat WITH query

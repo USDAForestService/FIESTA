@@ -950,13 +950,13 @@ check.popdataP2VEG <-
   if (returndata || savedata) {
     if (datindb) {
       pltidsadj <- tryCatch(
-        DBI::dbGetQuery(dbconn, pltidsadjP2VEG.qry),
+        DBI::dbGetQuery(dbconn, pltidsadj.qry),
         error=function(e) {
           message(e,"\n")
           return(NULL)})
     } else {
       pltidsadj <- tryCatch(
-        sqldf::sqldf(pltidsadjP2VEG.qry, connection = NULL),
+        sqldf::sqldf(pltidsadj.qry, connection = NULL),
         error = function(e) {
           message(e,"\n")
           return(NULL) })
