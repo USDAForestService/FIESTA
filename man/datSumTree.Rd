@@ -236,6 +236,7 @@ table and NULL values will be output as 0.
 \examples{
 # Aggregate LIVE_CANOPY_CVR_PCT to plot
 treesum <- datSumTree(tree = FIESTA::WYtree,
+                      pjoinid = "PLT_CN",
                       tsumvarlst = "TPA_UNADJ")$treedat
 
 # Check results
