@@ -989,7 +989,7 @@ datSumTree <- function(tree = NULL,
       condnm <- cond
       grpby. <- "pc."
       pltidsid <- pjoinid
-     
+
       condflds.qry <- paste0(
         pltidsWITHqry,
         "\nSELECT * FROM ", SCHEMA., condnm, " LIMIT 0"
@@ -1014,7 +1014,7 @@ datSumTree <- function(tree = NULL,
       } else {
         condflds <- names(condfldsdf)
       }
-      
+
     } else {
       condx <- chkdbtab(dbtablst, cond)
       if (!is.null(condx)) {
@@ -1137,6 +1137,10 @@ datSumTree <- function(tree = NULL,
       }
     }
   } else {
+    
+    if (getadjplot) {
+      stop("must include cond to calculate adjustments")
+    }
 
     if (!is.null(pltidsWITHqry)) {
       grpby. <- "pltids."
@@ -1361,7 +1365,6 @@ datSumTree <- function(tree = NULL,
                     pltassgnid = pltassgnid,
                     pltidsa. = "c.")
         #message(ADJqry)
-      
       
         ## Build final query for adjustment factors, including pltids WITH query
         pltidsWITHqry <- paste0(
@@ -1811,7 +1814,7 @@ datSumTree <- function(tree = NULL,
 
     twithfromqry <- tfromqry
     if (adjtree) {
-      adjjoinid <- pjoinid
+      adjjoinid <- pltidsid
       if (!adjvar %in% treeflds) {
         tadjjoinqry <- getjoinqry(adjjoinid, cuniqueid, adjalias., talias.)
         twithfromqry <- paste0(tfromqry,
