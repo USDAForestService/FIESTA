@@ -1,4 +1,4 @@
-SQLite_FIADB_ENTIRE_create_indices <- function(dbfn) {
+SQLite_FIADB_ENTIRE_create_indices <- function(USdsn) {
   ## Description: Creates indices in the National FIA database
   
   USconn <- DBtestSQLite(USdsn, dbconnopen  = TRUE)

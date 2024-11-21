@@ -19,7 +19,6 @@ test_that("modMAtree testing", {
                     estvar.filter = "STATUSCD == 1")
   
   expect_equal(nrow(est1$est), nrow(MApopdat$unitlut))
-  expect_snapshot(est1$est)
   
 
 

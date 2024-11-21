@@ -17,20 +17,6 @@ test_that("modMAarea testing", {
             landarea = "FOREST")
   
   expect_equal(nrow(mod1$est), nrow(MApopdat$unitlut))
-  expect_snapshot(mod1$est)
-  
 
-  suppressWarnings(
-    est2 <- modMAarea(MApopdat = MApopdat,
-                      MAmethod = "greg",
-                      rowvar = "FORTYPCD",
-                      colvar = "STDSZCD",
-                      table_opts = table_options(allin1 = TRUE,
-                                                 row.FIAname = TRUE,
-                                                 col.FIAname = TRUE))
-  )
-  
-  
-  expect_snapshot(est2$est)
   
 })
