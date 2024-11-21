@@ -223,16 +223,7 @@ modSAtree(SApopdatlst = SApopdat,
           SAmethod = "unit",           
           landarea = "FOREST",      
           estvar = "VOLCFNET",         
-          estvar.filter = "STATUSCD == 1")   
-          
-# Use a unit level EBLUP to estimate basal area of live trees (at least 5
-# inches diameter) 
-modSAtree(SApopdatlst = SApopdat,    
-          SApackage = "JoSAE",        
-          SAmethod = "unit",         
-          landarea = "FOREST",      
-          estvar = "BA",              
-          estvar.filter = "STATUSCD == 1")  
+          estvar.filter = "STATUSCD = 1")   
 }
 }
 \references{
