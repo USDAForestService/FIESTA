@@ -179,7 +179,7 @@ datSumTree <- function(tree = NULL,
                        pltidsWITHqry = NULL,
                        pltidsid = NULL,
                        pcwhereqry = NULL,
-                       pjoinid = "PLT_CN",
+                       pjoinid = "CN",
                        checkNA = FALSE, 
                        returnDT = TRUE,
                        savedata = FALSE, 
@@ -559,20 +559,24 @@ datSumTree <- function(tree = NULL,
   condinWITHqry <- FALSE
   if (!is.null(pltidsWITHqry)) {
     if (!all(grepl("WITH", pltidsWITHqry))) {
-      message("must include WITH in pltidsWITHqry...")
-      message("e.g. \nWITH",
-              "\npltids AS", 
-              "\nSELECT CN FROM plt",
-              "\nWHERE countycd = 1")
-      stop()
-    }
-    if (!all(grepl("pltids", pltidsWITHqry))) {
-      message("must include pltids in pltidsWITHqry...")
-      message("e.g. \nWITH",
-              "\npltids AS", 
-              "\nSELECT CN FROM plt",
-              "\nWHERE countycd = 1")
-      stop()
+      pltidsWITHqry <- paste0("WITH pltids AS",
+                              "\n(", pltidsWITHqry, ")")
+      
+#      message("must include WITH in pltidsWITHqry...")
+#      message("e.g. \nWITH",
+#              "\npltids AS", 
+#              "\n(SELECT CN FROM plt",
+#              "\nWHERE countycd = 1)")
+#      stop()
+    } else {
+      if (!all(grepl("pltids", pltidsWITHqry))) {
+        message("must include pltids in pltidsWITHqry...")
+        message("e.g. \nWITH",
+                "\npltids AS", 
+                "\n(SELECT CN FROM plt",
+                "\nWHERE countycd = 1)")
+        stop()
+      }
     }
     ## Check pjoinid
     if (!all(sapply(pjoinid, grepl, pltidsWITHqry))) {
@@ -1134,9 +1138,9 @@ datSumTree <- function(tree = NULL,
     }
   } else {
 
-    #if (!is.null(pltidsWITHqry)) {
-    #  grpby. <- "pltids."
-    #}
+    if (!is.null(pltidsWITHqry)) {
+      grpby. <- "pltids."
+    }
   }
 
   ## Check pcdomainlst
