@@ -5,6 +5,8 @@
     Output
         ONEUNIT npixels      dem      slp    asp_cos    asp_sin   fornf.1   fornf.2
       1       1   72020 2619.931 9.032759 0.04057068 0.05596592 0.7260344 0.2739656
+        P1POINTCNT P1POINTCNTFOR
+      1         56            37
 
 ---
 

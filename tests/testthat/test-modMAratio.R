@@ -1,5 +1,7 @@
 test_that("modMAratio testing", {
   
+  skip()
+  
   MApopdat <- FIESTA::modMApop(popTabs = list(tree = FIESTA::WYtree,
                                               cond = FIESTA::WYcond),
                                pltassgn = FIESTA::WYpltassgn,

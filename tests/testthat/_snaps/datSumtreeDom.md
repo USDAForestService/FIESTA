@@ -3,50 +3,56 @@
     Code
       datBA_varlut
     Output
-         SPCD                 COMMON_NAME     SPCDNM       BA_TPA NBRPLOTS
-      1    19               subalpine fir  BA_LIVE19 7.465687e+03      217
-      2    65                Utah juniper  BA_LIVE65 2.209716e+03       20
-      3    66      Rocky Mountain juniper  BA_LIVE66 1.364357e+03       65
-      4    93            Engelmann spruce  BA_LIVE93 6.338590e+03      185
-      5    96                 blue spruce  BA_LIVE96 7.334475e+01        3
-      6   101              whitebark pine BA_LIVE101 1.616618e+03       90
-      7   106 common or two-needle pinyon BA_LIVE106 4.570194e+00        1
-      8   108              lodgepole pine BA_LIVE108 1.106807e+04      232
-      9   113                 limber pine BA_LIVE113 6.601861e+02       70
-      10  122              ponderosa pine BA_LIVE122 3.885423e+03       86
-      11  202                 Douglas-fir BA_LIVE202 3.345905e+03       95
-      12  313                    boxelder BA_LIVE313 2.761876e+01        2
-      13  375                 paper birch BA_LIVE375 5.887593e-01        1
-      14  475  curlleaf mountain-mahogany BA_LIVE475 8.472780e+00        2
-      15  544                   green ash BA_LIVE544 3.091347e+01        2
-      16  745           plains cottonwood BA_LIVE745 2.263776e+02        3
-      17  746               quaking aspen BA_LIVE746 1.241932e+03       63
-      18  749       narrowleaf cottonwood BA_LIVE749 1.668582e+02        4
-      19  823                     bur oak BA_LIVE823 1.804395e+02       12
+              SPCDNM BA_TPA_live NBRPLOTS
+              <char>       <num>    <int>
+       1: BA_LIVE066     1355.60       65
+       2: BA_LIVE113      658.24       69
+       3: BA_LIVE108    11041.65      232
+       4: BA_LIVE122     3885.45       86
+       5: BA_LIVE202     3345.93       95
+       6: BA_LIVE746     1241.96       63
+       7: BA_LIVE019     7418.88      217
+       8: BA_LIVE093     6306.60      185
+       9: BA_LIVE NA        0.00       42
+      10: BA_LIVE065     2209.71       20
+      11: BA_LIVE745      226.37        3
+      12: BA_LIVE823      180.43       12
+      13: BA_LIVE375        0.59        1
+      14: BA_LIVE101     1616.61       90
+      15: BA_LIVE096       73.35        3
+      16: BA_LIVE749      166.86        4
+      17: BA_LIVE475        8.48        2
+      18: BA_LIVE313       27.62        2
+      19: BA_LIVE544       30.92        2
+      20: BA_LIVE106        4.57        1
+              SPCDNM BA_TPA_live NBRPLOTS
 
 ---
 
     Code
       datVOL_varlut
     Output
-         SPCD                 COMMON_NAME           SPCDNM VOLCFNET_TPA NBRPLOTS
-      1    19               subalpine fir  VOLCFNET_LIVE19  122077.4206      217
-      2    65                Utah juniper  VOLCFNET_LIVE65       0.0000       20
-      3    66      Rocky Mountain juniper  VOLCFNET_LIVE66       0.0000       65
-      4    93            Engelmann spruce  VOLCFNET_LIVE93  141017.2823      185
-      5    96                 blue spruce  VOLCFNET_LIVE96    2012.4413        3
-      6   101              whitebark pine VOLCFNET_LIVE101   19228.5413       90
-      7   106 common or two-needle pinyon VOLCFNET_LIVE106       0.0000        1
-      8   108              lodgepole pine VOLCFNET_LIVE108  203965.5817      232
-      9   113                 limber pine VOLCFNET_LIVE113    6709.8713       70
-      10  122              ponderosa pine VOLCFNET_LIVE122   64952.8992       86
-      11  202                 Douglas-fir VOLCFNET_LIVE202   63196.3430       95
-      12  313                    boxelder VOLCFNET_LIVE313     213.4243        2
-      13  375                 paper birch VOLCFNET_LIVE375       0.0000        1
-      14  475  curlleaf mountain-mahogany VOLCFNET_LIVE475       0.0000        2
-      15  544                   green ash VOLCFNET_LIVE544     372.5535        2
-      16  745           plains cottonwood VOLCFNET_LIVE745    5159.3045        3
-      17  746               quaking aspen VOLCFNET_LIVE746   15245.0330       63
-      18  749       narrowleaf cottonwood VOLCFNET_LIVE749    2717.9292        4
-      19  823                     bur oak VOLCFNET_LIVE823    1416.1509       12
+                    SPCDNM VOLCFNET_TPA_live NBRPLOTS
+                    <char>             <num>    <int>
+       1: VOLCFNET_LIVE066              0.00       65
+       2: VOLCFNET_LIVE113           6699.66       69
+       3: VOLCFNET_LIVE108         203784.54      232
+       4: VOLCFNET_LIVE122          64952.88       86
+       5: VOLCFNET_LIVE202          63196.33       95
+       6: VOLCFNET_LIVE746          15245.03       63
+       7: VOLCFNET_LIVE019         121517.15      217
+       8: VOLCFNET_LIVE093         140401.87      185
+       9: VOLCFNET_LIVE NA              0.00       42
+      10: VOLCFNET_LIVE065              0.00       20
+      11: VOLCFNET_LIVE745           5159.30        3
+      12: VOLCFNET_LIVE823           1416.15       12
+      13: VOLCFNET_LIVE375              0.00        1
+      14: VOLCFNET_LIVE101          19228.57       90
+      15: VOLCFNET_LIVE096           2012.45        3
+      16: VOLCFNET_LIVE749           2717.93        4
+      17: VOLCFNET_LIVE475              0.00        2
+      18: VOLCFNET_LIVE313            213.42        2
+      19: VOLCFNET_LIVE544            372.56        2
+      20: VOLCFNET_LIVE106              0.00        1
+                    SPCDNM VOLCFNET_TPA_live NBRPLOTS
 

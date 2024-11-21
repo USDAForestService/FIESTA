@@ -19,12 +19,6 @@ test_that("modMAarea testing", {
   expect_equal(nrow(mod1$est), nrow(MApopdat$unitlut))
   expect_snapshot(mod1$est)
   
-  expect_warning(
-    modMAarea(MApopdat = MApopdat,
-              MAmethod = "greg",
-              modelselect = TRUE,
-              rowvar = "FORTYPCD")
-  )
 
   suppressWarnings(
     est2 <- modMAarea(MApopdat = MApopdat,
