@@ -421,7 +421,7 @@ datSumTreeDom <- function(tree = NULL,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
                datSum_opts = datSum_opts,
-               tabIDs = list(puniqueid = puniqueid),
+               tabIDs = tabIDs,
                database_opts = database_opts)
   tdomtree <- sumdat$treedat
   tsumvarnm <- sumdat$sumvars
