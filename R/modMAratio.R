@@ -634,6 +634,7 @@ modMAratio <- function(MApopdat,
                dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
+               pltidsid = pltidsid,
                bytdom = bytdom,
                gui = gui)
   if (is.null(treedat)) return(NULL) 

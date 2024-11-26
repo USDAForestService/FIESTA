@@ -31,6 +31,15 @@ FIESTAutils::popTables
 #' @export
 FIESTAutils::popTableIDs
 
+#' @export
+FIESTAutils::tableIDs
+
+#' @export
+FIESTAutils::database_options
+
+#' @export
+FIESTAutils::datSum_options
+
 
 #' @export
 FIESTAutils::DBcreateSQLite

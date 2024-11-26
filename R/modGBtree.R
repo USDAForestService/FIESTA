@@ -658,7 +658,7 @@ modGBtree <- function(GBpopdat,
                dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltcondxadjWITHqry,
                pcwhereqry = pcwhereqry,
-               pjoinid = pltidsid,
+               pltidsid = pltidsid,
                bytdom = bytdom,
                gui = gui)
   if (is.null(treedat)) stop() 

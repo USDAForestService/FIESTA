@@ -650,7 +650,7 @@ modMAtree <- function(MApopdat,
                dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
-               pjoinid = pltidsid,
+               pltidsid = pltidsid,
                bytdom = bytdom,
                gui = gui)
   if (is.null(treedat)) stop(NULL) 

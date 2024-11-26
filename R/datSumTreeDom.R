@@ -49,46 +49,25 @@
 #' Subplot-level table to used to calculate adjustment factors, to remove 
 #' nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.
 #' @param datsource String. Source of data ('obj', 'csv', 'sqlite', 'gdb').
-#' @param data_dsn String. If datsource='sqlite', the name of SQLite database
+#' @param dbconn Open database connection.
+#' @param dsn String. If datsource='sqlite', the name of SQLite database
 #' (*.sqlite).
-#' @param tuniqueid String. Unique identifier of the tree table.  If including
-#' seedling table, this should be the same for seed.
-#' @param cuniqueid String. Unique identifier of the cond table if cond is NOT
-#' NULL.
-#' @param puniqueid String. Unique identifier of the plt table if plt is NOT
-#' NULL.
 #' @param bycond Logical. If TRUE, data are aggregated to the condition level
 #' (by: uniqueid, CONDID). If FALSE, data are aggregated to the plot level (by:
 #' uniqueid).
-#' @param condid String. Unique identifier for conditions.
 #' @param bysubp Logical. If TRUE, data are aggregated to the subplot level.
-#' @param subpuniqueid String. Unique identifier of plot in subplot and 
-#' subp_cond table.
-#' @param subpid String. Unique identifier of each subplot.
 #' @param tsumvar String. Name of the variable to aggregate (e.g., "BA"). For
 #' summing number of trees, use tsumvar="TPA_UNADJ" with tfun=sum.
-#' @param addseed Logical. If TRUE, add seedling counts to tree counts. Note:
-#' tdomvar must be 'SPCD' or 'SPGRPCD'.
-#' @param seedonly Logical. If TRUE, seedling counts only. Note: tdomvar
-#' must be 'SPCD' or 'SPGRPCD'.
+#' @param seedlings String. ('Y', 'N', 'only') If seedlings = 'Y', add
+#' seedlings to summary ('TPA_UNADJ' %in% tsumvarlst). If seedlings = 'N',
+#' do not add seedlings. If seedlings = 'only', only include seedlings.
 #' @param woodland String. ('Y', 'N', 'only') If woodland = 'Y', include  
 #' woodland tree species where measured. If woodland = 'N', only include 
 #' timber species. See FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', 
 #' only include woodland species. If NULL, use whatever is in table.
-#' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
-#' respective trees-per-acre variable (see details) to get per-acre
-#' measurements.
-#' @param ACI Logical. If TRUE, if ACI (All Condition Inventory) plots exist,
-#' any trees on these plots will be included in summary. If FALSE, you must
-#' include condition table.
 #' @param tfilter String. A filter to subset the tree data before aggregating
 #' (e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is
 #' prompted.  Use tfilter="NONE" if no filters.
-#' @param lbs2tons Logical. If TRUE, converts biomass or carbon variables from
-#' pounds to tons (1 pound = 0.0005 short tons). 
-#' @param metric Logical. If TRUE, converts response to metric units based on
-#' FIESTA::ref_conversion, if tsumvar is in FIESTAutils::ref_units. Note: if TPA,
-#' TPA is converted to trees per hectare (TPH: 1/ tpavar * 0.4046860).
 #' @param tdomvar String. The tree domain (tdom) variable used to aggregate by
 #' (e.g., "SPCD", "SPGRPCD").
 #' @param tdomvarlst String (vector). List of specific tree domains of tdomvar
@@ -122,35 +101,26 @@
 #' be output with tree domain data as proportions of total tsumvar.
 #' @param getadjplot Logical. If TRUE, adjustments are calculated for
 #' nonsampled conditions on plot.
-#' @param adjtree Logical. If TRUE, trees are individually adjusted by
-#' adjustment factors.  Adjustment factors must be included in tree table (see
-#' adjvar).
-#' @param adjvar String. If adjtree=TRUE, the name of the variable to use for
-#' multiplying by adjustment (e.g., tadjfac).
-#' @param adjTPA Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1
-#' (annual inventory), if using less than 4 subplots. If using only 1 sublot
-#' for estimate, adjTPA=4. The default is 1.
 #' @param domclassify List. List for classifying domain variables in bydomainlst
 #' (e.g., DIA = c(10,20,30)).
 #' @param tderive List. List of derivative to add to output data (e.g., 
 #' list(MEAN_DIA = 'AVG(DIA)', SDI = 'POWER(DIA / 10, 1.605)', 
 #' QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454))'))
-#' @param tround Number. The number of digits to round to. If NULL, default=6.
-#' @param NAto0 Logical. If TRUE, convert NA values to 0.
 #' @param pltidsWITHqry SQL query. A query identifying plots to sum (e.g., 
 #' 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')
 #' @param pcwhereqry String. Plot/Condition filter if plot and/or cond table is 
 #' included.
-#' @param pjoinid String. Name of unique identifier from pltidsWITHqry.
-#' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
-#' returns data.frame object(s).
 #' @param savedata Logical. If TRUE, saves data to outfolder.
+#' @param tabIDs List of unique IDs corresponding to the tables. See
+#' See help(tableIDs) for a list of options.
+#' @param datSum_opts List. Options for summarizing tree data, such as TPA,
+#' rounding, and adjusting TPA. See help(datSum_options()) for a list of 
+#' options. 
+#' @param database_opts List. Options for database, such as schema and 
+#' password. See help(database_options()) for a list of options.  
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'tdomsum'. 
-#' @param dbconn Open database connection.
-#' @param schema String. Name of schema in database.
-#' @param dbconnopen Logical. If TRUE, keep database connection open.
 #' 
 #' @return tdomdata - a list of the following objects:
 #' 
@@ -185,43 +155,32 @@
 #' \donttest{
 #' # Sum of Live Basal Area Per Acre by Species
 #' datSumTreeDom(tree = FIESTA::WYtree, 
-#'               cond = FIESTA::WYcond, 
-#'               plt = FIESTA::WYplt, 
-#'               puniqueid = "CN", 
 #'               bycond = FALSE, 
 #'               tsumvar = "BA", 
-#'               TPA = TRUE, 
 #'               tdomtot = TRUE, 
 #'               tdomtotnm = "BA_LIVE", 
 #'               tdomprefix = "BA_LIVE", 
-#'               tround = 2, 
-#'               tfilter = "STATUSCD==1")
+#'               tfilter = "STATUSCD==1",
+#'               datSum_options(tround = 2))
 #'               
 #' # Sum of Number of Live Trees by Species
-#' datSumTreeDom(tree = FIESTA::WYtree, 
-#'               cond = FIESTA::WYcond, 
+#' datSumTreeDom(tree = FIESTA::WYtree,
 #'               plt = FIESTA::WYplt, 
-#'               puniqueid = "CN", 
 #'               bycond = FALSE, 
 #'               tsumvar = "PLT_CN", 
-#'               TPA = TRUE, 
 #'               tdomtot = TRUE, 
 #'               tdomprefix = "CNT", 
-#'               tround = 0, 
-#'               tfilter = "STATUSCD==1")
+#'               tfilter = "STATUSCD==1",
+#'               datSum_options = list(tround = 0))
 #'               
 #' # Sum of Number of Live Trees by Species, Including Seedlings
-#' datSumTreeDom(cond = WYcond, 
-#'               plt = WYplt, 
-#'               tree = WYtree,
+#' datSumTreeDom(tree = WYtree,
 #'               seed = WYseed, 
-#'               puniqueid = "CN", 
 #'               bycond = FALSE, 
 #'               tsumvar = "PLT_CN", 
-#'               TPA = TRUE, 
 #'               tdomtot = TRUE, 
 #'               tdomprefix = "CNT", 
-#'               tround = 0)
+#'               datSum_options = list(tround = 0)
 #' }
 #' @export datSumTreeDom
 datSumTreeDom <- function(tree = NULL, 
@@ -231,24 +190,14 @@ datSumTreeDom <- function(tree = NULL,
                           subp_cond = NULL,
                           subplot = NULL, 
                           datsource = "obj", 
-                          data_dsn = NULL, 
-                          tuniqueid = "PLT_CN", 
-                          cuniqueid = "PLT_CN", 
-                          puniqueid = "CN", 
+                          dbconn = NULL,
+                          dsn = NULL, 
                           bycond = FALSE, 
-                          condid = "CONDID", 
                           bysubp = FALSE, 
-                          subpuniqueid = "PLT_CN",
-                          subpid = "SUBP", 
                           tsumvar = NULL, 
-                          addseed = FALSE, 
-                          seedonly = FALSE,
+                          seedlings = "N", 
                           woodland = 'Y',
-                          TPA = TRUE, 
-                          ACI = FALSE, 
                           tfilter = NULL, 
-                          lbs2tons = TRUE, 
-                          metric = FALSE, 
                           tdomvar = "SPCD", 
                           tdomvarlst = NULL, 
                           tdomvar2 = NULL, 
@@ -264,22 +213,15 @@ datSumTreeDom <- function(tree = NULL,
                           presence = FALSE, 
                           proportion = FALSE, 
                           getadjplot = FALSE, 
-                          adjtree = FALSE, 
-                          adjvar = "tadjfac", 
-                          adjTPA = 1,
                           domclassify = NULL,
                           tderive = NULL,
-                          tround = 5, 
-                          NAto0 = TRUE,
                           pltidsWITHqry = NULL,
                           pcwhereqry = NULL,
-                          pjoinid = "PLT_CN",
-                          returnDT = TRUE,
                           savedata = FALSE,
-                          savedata_opts = NULL,
-                          dbconn = NULL,
-                          schema = NULL, 
-                          dbconnopen = FALSE){
+                          tabIDs = tableIDs(),
+                          datSum_opts = datSum_options(),
+                          database_opts = NULL,
+                          savedata_opts = NULL) {
   
   ####################################################################################
   ## DESCRIPTION: Aggregates tree domain data (ex. species) to condition or plot level  
@@ -307,9 +249,11 @@ datSumTreeDom <- function(tree = NULL,
   ref_units <- FIESTAutils::ref_units
   ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry <- NULL
-  checkNA=cover <- FALSE
+  cover <- FALSE
   pltsp = FALSE
-
+  checkNA = FALSE
+  returnDT = TRUE
+  
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
 	tdombarplot=FIAname=addseed=proportion=presence=tdomtot=adjtree=tmp <- NULL
@@ -336,7 +280,6 @@ datSumTreeDom <- function(tree = NULL,
 	             "FREMVBFSL", "FREMVCFAL")
   tpavars <- c("TPA_UNADJ", "TPAMORT_UNADJ", "TPAGROW_UNADJ", "TPAREMV_UNADJ")
   propvar <- "CONDPROP_UNADJ"
-  tsumvar.not <- c(condid)
 
   
   ##################################################################
@@ -352,42 +295,24 @@ datSumTreeDom <- function(tree = NULL,
   }
   
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
+  pcheck.params(input.params, savedata_opts = savedata_opts, 
+                datSum_opts = datSum_opts)
   
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-  
-  
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+    savedata_opts = savedata_opts))
+  savedata_opts <- optslst$savedata_opts  
+
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
   bydomainlst <- unique(c(tdomvar, tdomvar2, bydomainlst))
-  
+
   ### Check tsumvar 
   ###########################################################  
   notdomdat <- ifelse(is.null(tsumvar) && presence, TRUE, FALSE)
   if (is.null(tsumvar)) {
-    if (presence) tsumvar <- tuniqueid
-  } else if (tsumvar %in% tsumvar.not) {
-    stop("tsumvar is invalid")
+    if (presence) tsumvar <- "TPA_UNADJ"
   } else if (tsumvar == "PLT_CN") {
     tsumvar <- "TPA_UNADJ"
   } else if (!is.null(tderive)) {
@@ -399,7 +324,6 @@ datSumTreeDom <- function(tree = NULL,
         stop()
       }
     }
-    
     if (!is.null(tsumvar) && !is.null(tderive)) {
       message("both tsumvar and tderive are populated... only 1 sum variable allowed")
       stop("")
@@ -447,12 +371,6 @@ datSumTreeDom <- function(tree = NULL,
   tdombarplot <- pcheck.logical(tdombarplot, varnm="tdombarplot", 
                                 title="Barplot of tdomains?", first="NO", gui=gui)
   
-  ## Check tround
-  if (is.null(tround) || !is.numeric(tround) || (tround %% 1 != 0)) {
-    warning("tround is invalid.. rounding to 4 digits")
-    tround <- 4
-  }
-  
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
                              first="NO", gui=gui)
@@ -487,29 +405,24 @@ datSumTreeDom <- function(tree = NULL,
     datSumTree(tree = tree, seed = seed, 
                cond = cond, plt = plt, 
                subp_cond = subp_cond, subplot = subplot, 
-               datsource = datsource, dsn = data_dsn, 
-               dbconn = dbconn, schema = schema,
-               tuniqueid = tuniqueid, cuniqueid = cuniqueid, puniqueid = puniqueid, 
-               bycond = bycond, condid = condid, 
-               bysubp = bysubp, subpuniqueid = subpuniqueid, subpid = subpid,
+               datsource = datsource, 
+               dsn = dsn, 
+               dbconn = dbconn, 
+               bycond = bycond, 
+               bysubp = bysubp, 
                bydomainlst = bydomainlst,
                tsumvarlst = tsumvar, 
-               addseed = addseed, seedonly = seedonly,
+               seedlings = seedlings,
                woodland = woodland,
-               TPA = TPA, ACI = ACI, 
                tfilter = tfilter, 
-               lbs2tons = lbs2tons, metric = metric, 
                getadjplot = getadjplot, 
-               adjtree = adjtree, 
-               adjvar = adjvar,
-               adjTPA = adjTPA, 
-               domclassify = domclassify, tderive = tderive,
-               tround = tround,
+               domclassify = domclassify, 
+               tderive = tderive,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
-               pjoinid = pjoinid,
-               checkNA = checkNA, 
-               returnDT = returnDT)
+               datSum_opts = datSum_opts,
+               tabIDs = list(puniqueid = puniqueid),
+               database_opts = database_opts)
   tdomtree <- sumdat$treedat
   tsumvarnm <- sumdat$sumvars
   tsumuniqueid <- sumdat$tsumuniqueid
@@ -518,6 +431,7 @@ datSumTreeDom <- function(tree = NULL,
   tdomainlst <- sumdat$tdomainlst   ## original tree variables
   pcdomainlst <- sumdat$pcdomainlst ## original pc variables
   classifynmlst <- sumdat$classifynmlst
+  tround <- sumdat$tround
 
   if (length(tsumvarnm) > 1) {
     tsumnm=tsumvarnm <- tsumvarnm[length(tsumvarnm)]
@@ -597,7 +511,7 @@ datSumTreeDom <- function(tree = NULL,
   #####################################################################
   ## If tdomvar2 exists, concatenate the columns to one column (if pivot=TRUE)
   ## treex is the tree table after filtered tree domains
-  flag <- ifelse(NAto0, "0", "")
+  flag <- ifelse(datSum_opts$NAto0, "0", "")
   if (FIAname) {
     if (tdomvar == "SPCD") {
       tdomdata <- datLUTspp(x = tdomtree, spcdname = spcd_name)
@@ -1187,7 +1101,7 @@ datSumTreeDom <- function(tree = NULL,
   }
   tdomdata$treeqry <- treeqry
   
-  if (!is.null(dbconn) && dbconnopen) {
+  if (!is.null(dbconn) && database_opts$dbconnopen) {
     DBI::dbDisconnect(dbconn)
   }
  

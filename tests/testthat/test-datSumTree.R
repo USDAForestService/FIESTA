@@ -9,8 +9,8 @@ test_that("datSumTree Aboveground Biomass w/out Extrapolation", {
                       pjoinid = "PLT_CN",
                       tsumvarlst = "DRYBIO_AG", ##tsumvarlst == tree-level variables to aggregate: in this case it is aboveground biomass
                       lbs2tons = FALSE, ##if TRUE converts biomass or carbon variables from lbs to tons
-                      TPA = FALSE, ##Trees per acre - 
-                      tfilter = "STATUSCD == 1") ## Set to alive trees
+                      tfilter = "STATUSCD == 1",
+                      datSum_opts = list(TPA = FALSE)) ## Set to alive trees
 
   treedat_nonTPA <- test1$treedat
   # Using datSumTree for one plot
@@ -28,11 +28,9 @@ test_that("datSumTree Aboveground Biomass w/out Extrapolation", {
 
   # Using datSumTree - TPA
   test2 <- datSumTree(WYtree, 
-                      pjoinid = "PLT_CN",
                       tsumvarlst = "DRYBIO_AG", 
-                      lbs2tons = FALSE,
-                      TPA = TRUE, 
-                      tfilter = "STATUSCD == 1")
+                      tfilter = "STATUSCD == 1",
+                      datSum_opts = list(lbs2tons = FALSE, TPA = TRUE))
 
   treedat_TPA <- test2$treedat
 

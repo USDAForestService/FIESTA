@@ -14,6 +14,9 @@
 \alias{popFilters}
 \alias{popTables}
 \alias{popTableIDs}
+\alias{tableIDs}
+\alias{database_options}
+\alias{datSum_options}
 \alias{DBcreateSQLite}
 \alias{DBtestPostgreSQL}
 \alias{DBtestSQLite}
@@ -26,6 +29,6 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{FIESTAutils}{\code{\link[FIESTAutils]{datExportData}}, \code{\link[FIESTAutils:internal_desc]{DBcreateSQLite}}, \code{\link[FIESTAutils]{DBtestPostgreSQL}}, \code{\link[FIESTAutils]{DBtestSQLite}}, \code{\link[FIESTAutils]{eval_options}}, \code{\link[FIESTAutils]{multest_options}}, \code{\link[FIESTAutils]{popFilters}}, \code{\link[FIESTAutils]{popTableIDs}}, \code{\link[FIESTAutils]{popTables}}, \code{\link[FIESTAutils]{savedata_options}}, \code{\link[FIESTAutils]{spMakeSpatial_options}}, \code{\link[FIESTAutils]{strata_options}}, \code{\link[FIESTAutils]{table_options}}, \code{\link[FIESTAutils]{title_options}}, \code{\link[FIESTAutils]{unit_options}}, \code{\link[FIESTAutils]{xy_options}}}
+  \item{FIESTAutils}{\code{\link[FIESTAutils]{database_options}}, \code{\link[FIESTAutils]{datExportData}}, \code{\link[FIESTAutils]{datSum_options}}, \code{\link[FIESTAutils:internal_desc]{DBcreateSQLite}}, \code{\link[FIESTAutils]{DBtestPostgreSQL}}, \code{\link[FIESTAutils]{DBtestSQLite}}, \code{\link[FIESTAutils]{eval_options}}, \code{\link[FIESTAutils]{multest_options}}, \code{\link[FIESTAutils]{popFilters}}, \code{\link[FIESTAutils]{popTableIDs}}, \code{\link[FIESTAutils]{popTables}}, \code{\link[FIESTAutils]{savedata_options}}, \code{\link[FIESTAutils]{spMakeSpatial_options}}, \code{\link[FIESTAutils]{strata_options}}, \code{\link[FIESTAutils]{table_options}}, \code{\link[FIESTAutils]{tableIDs}}, \code{\link[FIESTAutils]{title_options}}, \code{\link[FIESTAutils]{unit_options}}, \code{\link[FIESTAutils]{xy_options}}}
 }}
 

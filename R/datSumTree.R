@@ -38,21 +38,14 @@
 #' nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional. If 
 #' included the aggregated tree data are joined to subplot before returning.
 #' @param datsource String. Source of data ('obj', 'csv', 'sqlite', 'gdb').
+#' @param dbconn Open database connection.
 #' @param dsn String. If datsource='sqlite', the name of SQLite database
 #' (*.sqlite).
-#' @param tuniqueid String. Unique identifier of plt in tree table.
-#' @param cuniqueid String. Unique identifier of plt in cond table if cond is
-#' NOT NULL.
-#' @param puniqueid String. Unique identifier of plt table if plt is NOT NULL.
 #' @param bycond Logical. If TRUE, the data are aggregated to the condition
 #' level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
 #' level (by: puniqueid). If bysubp = TRUE and bycond = TRUE, data are 
-#' aggregated by subpuniqueid, subpid, condid.
-#' @param condid String. Unique identifier for conditions.
+#' aggregated by subplotid, subpid, condid.
 #' @param bysubp Logical. If TRUE, data are aggregated to the subplot level.
-#' @param subpuniqueid String. Unique identifier of plot in subplot and 
-#' subp_cond table.
-#' @param subpid String. Unique identifier of each subplot.
 #' @param bydomainlst String (vector). Categorical domain variables for 
 #' summing tree data by (e.g., SPCD). Variables must be in tree table or 
 #' plt/cond table if tables are provided.
@@ -63,63 +56,37 @@
 #' aggregate (e.g., "TPALIVE", "BALIVE"). This list must have the same number
 #' of variables as tsumvarlst and be in respective order. If NULL, the default
 #' names will be tsumvar_SUM (e.g., "TPA_UNADJ_SUM", "BA_SUM").
-#' @param addseed Logical. If TRUE, add seedling counts to tree counts. Note:
-#' tdomvar must be 'SPCD' or 'SPGRPCD'.
-#' @param seedonly Logical. If TRUE, seedling counts only. Note: tdomvar
-#' must be 'SPCD' or 'SPGRPCD'.
+#' @param seedlings String. ('Y', 'N', 'only') If seedlings = 'Y', add
+#' seedlings to summary ('TPA_UNADJ' %in% tsumvarlst). If seedlings = 'N',
+#' do not add seedlings. If seedlings = 'only', only include seedlings.
 #' @param woodland String. ('Y', 'N', 'only') If woodland = 'Y', include  
 #' woodland tree species where measured. If woodland = 'N', only include 
 #' timber species. See FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', 
 #' only include woodland species. If NULL, use whatever is in table.
-#' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
-#' respective trees-per-acre variable (see details) to get per-acre
-#' measurements.
-#' @param ACI Logical. If TRUE, if ACI (All Condition Inventory) plots exist,
-#' any trees on these plots will be included in summary. If FALSE, you must
-#' include condition table.
 #' @param tfilter String. Filter to subset the tree data before aggregating
 #' (e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is
 #' prompted.  Use tfilter="NONE" if no filters.
-#' @param lbs2tons Logical. If TRUE, converts biomass or carbon variables from
-#' pounds to tons (1 pound = 0.0005 short tons). If metric=TRUE, converts to  
-#' metric tons, else short tons.
-#' @param metric Logical. If TRUE, converts response to metric units based on
-#' ref_conversion, if any variable in tsumvarlst is in
-#' FIESTAutils::ref_estvar.  Note: if TPA, TPA is converted to trees per hectare
-#' (TPH: (1/ tpavar * 0.4046860)).
 #' @param getadjplot Logical. If TRUE, and adj='plot', adjfactors are 
 #' calculated for nonsampled conditions at plot-level.
-#' @param adjtree Logical. If TRUE, trees are individually adjusted by
-#' adjustment factors.  Adjustment factors must be included in tree table (see
-#' adjvar).
-#' @param adjvar String. If adjtree=TRUE, the name of the variable to use for
-#' multiplying by adjustment (e.g., tadjfac).
-#' @param adjTPA Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1
-#' (annual inventory), if using less than 4 subplots. If using only 1 subplot
-#' for estimate, adjTPA=4. The default is 1.
 #' @param domclassify List. List for classifying domain variables in bydomainlst
 #' (e.g., DIA = c(10,20,30)).
-#' @param tderive List. List of derivative to add to output data (e.g., 
-#' list(MEAN_DIA = 'AVG(DIA)', SDI = 'POWER(DIA / 10, 1.605)', 
+#' @param tderive List. List of derivative from tree table to add to output data  
+#' (e.g., list(MEAN_DIA = 'AVG(DIA)', SDI = 'POWER(DIA / 10, 1.605)', 
 #' QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454))'))
-#' @param tround Number. The number of digits to round to. If NULL, default=5.
 #' @param pltidsWITHqry SQL query. A query identifying plots to sum (e.g., 
 #' 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')
 #' @param pltidsid Sting. Name of unique identifier in pltidsWITHqry.
 #' @param pcwhereqry String. Plot/Condition filter if plot and/or cond table is 
 #' included.
-#' @param pjoinid String. If pltidsWITHqry is not null, the uniqueid in the query.
-#' @param checkNA Logical. If TRUE, checks if NA values exist in necessary
-#' variables.
-#' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
-#' returns data.frame object(s).
 #' @param savedata Logical. If TRUE, saves data to outfolder.
+#' @param tabIDs List of unique IDs corresponding to the tables. See
+#' See help(tableIDs) for a list of options.
+#' @param datSum_opts List. Options for summarizing tree data, such as TPA,
+#' rounding, and adjusting TPA. See help(datSum_options()) for a list of 
+#' options. 
+#' @param database_opts List. Options for database, such as schema and 
+#' password. See help(database_options()) for a list of options.  
 #' @param savedata_opts List. See help(savedata_options()) for a list
-#' @param dbconn Open database connection.
-#' @param schema String. Name of schema in database.
-#' @param dbconnopen Logical. If TRUE, keep database connection open.
-#' of options. Only used when savedata = TRUE. If out_layer = NULL,
-#' default = 'treesum'. 
 #' 
 #' @return A list of the following items: \item{treedat}{ Data frame. Plot or
 #' condition-level table with aggregated tree attributes. } \item{sumvars}{
@@ -135,7 +102,6 @@
 #' @examples
 #' # Aggregate LIVE_CANOPY_CVR_PCT to plot
 #' treesum <- datSumTree(tree = FIESTA::WYtree,
-#'                       pjoinid = "PLT_CN",
 #'                       tsumvarlst = "TPA_UNADJ")$treedat
 #' 
 #' # Check results
@@ -147,47 +113,31 @@ datSumTree <- function(tree = NULL,
                        seed = NULL, 
                        cond = NULL,
                        plt = NULL, 
-                       subp_cond = NULL,  
-                       subplot = NULL, 
+                       subp_cond = NULL,
+                       subplot = NULL,
                        datsource = "obj", 
-                       dsn = NULL, 
-                       tuniqueid = "PLT_CN", 
-                       cuniqueid = "PLT_CN", 
-                       puniqueid = "CN", 
+                       dbconn = NULL,
+                       dsn = NULL,
                        bycond = FALSE, 
-                       condid = "CONDID", 
                        bysubp = FALSE, 
-                       subpuniqueid = "PLT_CN",
-                       subpid = "SUBP",
                        bydomainlst = NULL,
                        tsumvarlst = NULL, 
                        tsumvarnmlst = NULL, 
-                       addseed = FALSE, 
-                       seedonly = FALSE,
+                       seedlings = "N", 
                        woodland = "Y",
-                       TPA = TRUE,  
-                       ACI = FALSE, 
                        tfilter = NULL, 
-                       lbs2tons = TRUE, 
-                       metric = FALSE, 
-                       getadjplot = FALSE, 
-                       adjtree = FALSE, 
-                       adjvar = "tadjfac",
-                       adjTPA = 1, 
                        domclassify = NULL,
                        tderive = NULL,
-                       tround = 5,
+                       getadjplot = FALSE,
                        pltidsWITHqry = NULL,
                        pltidsid = NULL,
                        pcwhereqry = NULL,
-                       pjoinid = "CN",
-                       checkNA = FALSE, 
-                       returnDT = TRUE,
                        savedata = FALSE, 
-                       savedata_opts = NULL,
-                       dbconn = NULL,
-                       schema = NULL, 
-                       dbconnopen = FALSE) {
+                       tabIDs = tableIDs(),
+                       datSum_opts = datSum_options(),
+                       database_opts = NULL,
+                       savedata_opts = NULL) {
+  
   ####################################################################################
   ## DESCRIPTION: Aggregates tree variable(s) to plot(/cond)-level, 
   ##        using specified tree filters (ex. live trees only)
@@ -197,28 +147,30 @@ datSumTree <- function(tree = NULL,
   #gui <- ifelse(nargs() == 0, TRUE, FALSE)
   gui <- FALSE
   
+  ## If gui.. set variables to NULL
+  #if (gui) ACI=bycond=tuniqueid=puniqueid=cuniqueid=TPA=adjtree=adjsamp=
+  #    savedata=outfolder <- NULL
+  
   ## Set global variables  
   pltx=treex=seedx=cond.nonsamp.filter=meta=tvars2convert=ssumvarlst=
-    cntvar=fname=tderivevars=pltidsnm=domainlst=classifyvars <- NULL
- 
+    cntvar=fname=tderivevars=pltidsnm=domainlst=classifyvars=propvars <- NULL
 
-  ## If gui.. set variables to NULL
-  if (gui) ACI=bycond=tuniqueid=puniqueid=cuniqueid=TPA=adjtree=adjsamp=
-    savedata=outfolder <- NULL
- 
   #ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry=pcfromqry=pcselectvars=tpavarnm=pcdomainlst <- NULL
 
   datindb <- FALSE
   pltassgnid <- "PLT_CN"
-  pltidsid <- pjoinid
   NAto0 <- TRUE
   SCHEMA. <- ""
- 
+  checkNA = FALSE
+  returnDT = TRUE
+  seedonly=addseed <- FALSE
+
   ## Query alias.
   talias. <- "t."
   salias. <- "s."
   
+    
   ## For documentation
   # subplot Dataframe or comma-delimited file (*.csv). If getadjplot=TRUE, 
   # The subplot-level table with SUBP_STATUS_CD variable for calculating
@@ -226,14 +178,14 @@ datSumTree <- function(tree = NULL,
   adjvarlst <- unlist(list(COND="ADJ_FACTOR_COND", SUBP="ADJ_FACTOR_SUBP", 
                            MICR="ADJ_FACTOR_MICR", MACR="ADJ_FACTOR_MACR"))
   
-  ## SET VARIABLE LISTS
+  ## Define variable lists
   biovars <- c("DRYBIO_BOLE", "DRYBIO_STUMP", "DRYBIO_BG", "DRYBIO_SAWLOG", 
                "DRYBIO_AG", "DRYBIO_STEM", "DRYBIO_STEM_BARK", "DRYBIO_STUMP_BARK", 
                "DRYBIO_BOLE_BARK", "DRYBIO_BRANCH", "DRYBIO_FOLIAGE", "DRYBIO_SAWLOG_BARK",
                "DRYBIOT", "DRYBIOM", "DRYBIOTB", "JBIOTOT")
   carbvars <- c("CARBON_BG", "CARBON_AG")
   
-  ## SET VARIABLES TO CONVERT (from pounds to short tons.. * 0.0005)
+  ## Define variables to convert (from pounds to short tons.. * 0.0005)
   vars2convert <- c(biovars, carbvars, paste(biovars, "TPA", sep="_"), paste(carbvars, "TPA", sep="_"))
   
   timberonly <- FIESTAutils::ref_units[FIESTAutils::ref_units$WOODLAND == "N", "VARIABLE"]
@@ -262,34 +214,37 @@ datSumTree <- function(tree = NULL,
   }
   
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
-  
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  
-  for (i in seq_along(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  pcheck.params(input.params, savedata_opts = savedata_opts, 
+                datSum_opts = datSum_opts,
+                database_opts = database_opts)
+
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+    savedata_opts = savedata_opts,
+    database_opts = database_opts,
+    datSum_opts = datSum_opts,
+    tabIDs = tabIDs))
+  savedata_opts <- optslst$savedata_opts  
+  database_opts <- optslst$database_opts  
+  datSum_opts <- optslst$datSum_opts
+  tabIDs <- optslst$tabIDs
+
+  for (i in 1:length(datSum_opts)) {
+    assign(names(datSum_opts)[[i]], datSum_opts[[i]])
   }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in seq_along(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
+
+  ## Check savedata 
+  savedata <- FIESTAutils::pcheck.logical(savedata, varnm="savedata", 
+                  title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+  if (savedata) {
+    outlst <- FIESTAutils::pcheck.output(savedata_opts)
   }
- 
-  ##################################################################
-  ## CHECK PARAMETER INPUTS
-  ##################################################################
+
+  ###############################################################################
+  ## 1. Check datsource or database connection
+  ###############################################################################
   noplt=nocond <- TRUE
-  pltsp <- FALSE
+  pltsp=pg <- FALSE
   
   ## Check dbconn
   ########################################################
@@ -297,11 +252,17 @@ datSumTree <- function(tree = NULL,
     if (!DBI::dbIsValid(dbconn)) {
       stop("invalid database dbconnection") 
     }
+    
+    # indicator for whether dbconn is for a postgresql database
+    pg <- ifelse(!is.null(dbconn),
+                 ifelse(attr(class(dbconn), "package") == "RPostgres", TRUE, FALSE),
+                 FALSE)
+    
     datindb <- TRUE
   } else {  
     
     ## Check datsource
-    datsourcelst <- c("obj", "csv", "sqlite", "gdb")
+    datsourcelst <- c("obj", "csv", "sqlite", "gdb", "postgres")
     datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
                                 checklst=datsourcelst, gui=gui, caption="Data source?") 
     if (is.null(datsource)) {
@@ -317,7 +278,6 @@ datSumTree <- function(tree = NULL,
         stop("datsource is invalid")
       }
     }
-    
     ## Check dsn
     if (datsource == "sqlite") {
       if (!is.null(dsn)) {
@@ -332,7 +292,15 @@ datSumTree <- function(tree = NULL,
         stop("datsource = 'sqlite' and dsn is NULL")
       }
     } 
-    if (!is.null(schema)) {
+    if (datsource == "postgres") {
+      dbconn <- DBtestPostgreSQL(dbname = database_opts$dbname,
+                                 host = database_opts$host,
+                                 port = database_opts$port,
+                                 user = database_opts$user,
+                                 password = database_opts$password,
+                                 dbconnopen = TRUE)
+    }
+    if (!is.null(database_opts$schema)) {
       SCHEMA. <- paste0(schema, ".")
     }
   }
@@ -341,59 +309,66 @@ datSumTree <- function(tree = NULL,
   }
   
   
+  ###############################################################################
+  ## 2. Check parameters
+  ###############################################################################
+  
   ## Check bycond
-  ###########################################################################
   bycond <- pcheck.logical(bycond, varnm="bycond", title="By condition?", 
                            first="YES", gui=gui, stopifnull=TRUE)
   
   ## Check bysubp
-  ###########################################################################
   bysubp <- pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
                            first="YES", gui=gui, stopifnull=TRUE)
   
-  
   ## Check getadjplot
-  ###########################################################  
   getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
                                title="Get plot adjustment?", first="NO", gui=gui)
-  
+
   ## Check adjtree
   adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Adjust trees", 
                             first="NO", gui=gui)
   if (getadjplot) adjtree <- TRUE
   
   
-  ## Check addseed
-  addseed <- pcheck.logical(addseed, varnm="addseed", title="Add seeds?", 
-                            first="NO", gui=gui)
+  ## Check seedlings
+  seedlingslst <- c("Y", "N", "only")
+  seedlings <- pcheck.varchar(var2check=seedlings, varnm="seedlings", 
+                             checklst=seedlingslst, gui=gui, caption="add seedlings?") 
+  if (seedlings == "Y") {
+    addseed <- TRUE
+  } else if (seedlings == "only") {
+    seedonly <- TRUE
+  }
   
-  ## Check seedonly
-  seedonly <- pcheck.logical(seedonly, varnm="seedonly", title="Seed only?", 
-                             first="NO", gui=gui)
+  ## Check PROP names and build query for calculating adjustment factors
+  if (getadjplot) {
+    if (seedonly) {
+      propvars <- "MICRPROP_UNADJ"
+    } else {
+      propvars <- c("CONDPROP_UNADJ", "SUBPPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ")
+    }
+  }
   
   ## Check woodland
   woodlandlst <- c("Y", "N", "only")
   woodland <- pcheck.varchar(var2check=woodland, varnm="woodland", 
                              checklst=woodlandlst, gui=gui, caption="Woodland?") 
   
-  if (addseed && seedonly) {
-    stop("cannot set both addseed and seedonly to TRUE")
-  }
   
-  ## Check tree, seedling tables
+  ###############################################################################
+  ## 3. Check tree, seedling tables
   ## If woodland in('N','only'), check for ref_species table to determine
   ## which species are woodland.
-  ###########################################################################
-  treenm=seednm=dbname=ref_sppnm=woodlandnm <- NULL
+  ###############################################################################
+  treenm=seednm=ref_sppnm=woodlandnm=wtwhereqry=wtfromqry=wswhereqry=wsfromqry <- NULL
   
   if (!is.null(dbconn)) {
-    
     treex <- chkdbtab(dbtablst, tree)
     if (!is.null(treex)) {
       treeflds <- DBI::dbListFields(dbconn, treex)
       treenm <- treex
     }
-
     seedx <- chkdbtab(dbtablst, seed)
     if (!is.null(seedx)) {
       if (is.null(treex)) {
@@ -443,12 +418,17 @@ datSumTree <- function(tree = NULL,
       }	  	  
     }	
   } else if (datsource %in% c("obj", "csv")) {
-  
     treex <- pcheck.table(tree, gui=gui, tabnm="tree", caption="Tree table?")
     if (!is.null(treex)) {
       treex <- setDT(int64tochar(treex))
       treeflds <- names(treex)
       treenm <- "treex"
+    } else {
+      if (is.character(tree)) {
+        if (!is.null(dsn)) {
+          stop("set datsource if data in a database")
+        }
+      }
     }
     seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
     if (!is.null(seedx)) {
@@ -459,7 +439,10 @@ datSumTree <- function(tree = NULL,
       seedflds <- names(seedx)
       seednm <- "seedx"
     }
-    if (!is.null(woodland) && woodland %in% c('Y', "N", "only")) {
+    
+    ## If excluding woodland ('N') or including only woodland ('only')),
+    ## include ref_species table 
+    if (!is.null(woodland) && woodland %in% c("N", "only")) {
       if (!seedonly) {
         twoodlandref <- FALSE
         twoodlandnm <- findnm("WOODLAND", treeflds, returnNULL=TRUE)
@@ -484,19 +467,18 @@ datSumTree <- function(tree = NULL,
       }		
     }	
   }  
-
-  if (!is.null(woodland) && woodland %in% c('Y', "N", "only")) {
+  
+  ## If excluding woodland ('N') or including only woodland ('only')),
+  ## define FROM statement and WHERE statement
+  ###############################################################################
+  if (!is.null(woodland) && woodland %in% c("N", "only")) {
     if (!seedonly) {
       if (twoodlandref) {
         wtfromqry <- paste0("\n JOIN ", SCHEMA., ref_sppnm, 
                             " ref ON (ref.", refspcdnm, " = ", talias., tspcdnm, ")")
-      } else {
-        wtfromqry <- NULL
       }
       if (woodland == "only") {
         wtwhereqry <- paste(twoodlandnm, "= 'Y'")
-      } else if (woodland == 'Y') {
-        wtwhereqry <- paste(twoodlandnm, "IN ('Y', 'N')")
       } else if (woodland == "N") {
         wtwhereqry <- paste(twoodlandnm, "= 'N'")
       }
@@ -510,14 +492,14 @@ datSumTree <- function(tree = NULL,
       }
       if (woodland == "only") {
         wswhereqry <- paste(swoodlandnm, "= 'Y'")
-      } else if (woodland == 'Y') {
-        wswhereqry <- paste(swoodlandnm, "IN ('Y', 'N')")
       } else if (woodland == "N") {
         wswhereqry <- paste(swoodlandnm, "= 'N'")
       }
     }
   }
 
+  ## Check seedling 
+  ###############################################################################
   if ((seedonly || addseed) && is.null(seednm)) {
     message("must include seed table")
     return(NULL)
@@ -525,51 +507,50 @@ datSumTree <- function(tree = NULL,
   if (is.null(treenm)) {
     if (!is.null(seednm)) {
       seedonly <- TRUE
-      
       treex <- seedx
       treeflds <- seedflds
       treenm <- "seedx"
-
     } else {
       message("must include tree table")
       stop()
     }
   }
   
-  # indicator for whether dbconn is for a postgresql database
-  pg <- ifelse(!is.null(dbconn),
-               ifelse(attr(class(dbconn), "package") == "RPostgres", TRUE, FALSE),
-               FALSE)
+  # # indicator for whether dbconn is for a postgresql database
+  # pg <- ifelse(!is.null(dbconn),
+  #              ifelse(attr(class(dbconn), "package") == "RPostgres", TRUE, FALSE),
+  #              FALSE)
+  # 
+  # if (pg) {
+  #   all_dbtabs <- list(tree, seed, cond, plt, subp_cond, subplot)
+  #   for (nm in seq_along(all_dbtabs)) {
+  #     if (!is.null(all_dbtabs[[nm]])) {
+  #       all_dbtabs[[nm]] <- paste0("\"", all_dbtabs[[nm]], "\"")
+  #     }
+  #   }
+  #   treenm <- all_dbtabs[[1]]
+  #   seednm <- all_dbtabs[[2]]
+  #   condnm <- all_dbtabs[[3]]
+  #   pltnm <- all_dbtabs[[4]]
+  #   subp_condnm <- all_dbtabs[[5]]
+  #   subplotnm <- all_dbtabs[[6]]
+  # }
   
-  if (pg) {
-    all_dbtabs <- list(tree, seed, cond, plt, subp_cond, subplot)
-    for (nm in seq_along(all_dbtabs)) {
-      if (!is.null(all_dbtabs[[nm]])) {
-        all_dbtabs[[nm]] <- paste0("\"", all_dbtabs[[nm]], "\"")
-      }
-    }
-    treenm <- all_dbtabs[[1]]
-    seednm <- all_dbtabs[[2]]
-    condnm <- all_dbtabs[[3]]
-    pltnm <- all_dbtabs[[4]]
-    subp_condnm <- all_dbtabs[[5]]
-    subplotnm <- all_dbtabs[[6]]
-  }
   
-  ## Check pltidsWITHqry
+  ###############################################################################
+  ## 4. Check pltidsWITHqry and pltidsid
+  ###############################################################################
+
+  ## Check for condition table in WITH queries
   condinWITHqry <- FALSE
   if (!is.null(pltidsWITHqry)) {
+    
     if (!all(grepl("WITH", pltidsWITHqry))) {
       pltidsWITHqry <- paste0("WITH pltids AS",
                               "\n(", pltidsWITHqry, ")")
-      
-#      message("must include WITH in pltidsWITHqry...")
-#      message("e.g. \nWITH",
-#              "\npltids AS", 
-#              "\n(SELECT CN FROM plt",
-#              "\nWHERE countycd = 1)")
-#      stop()
     } else {
+      chk <- check.logic.vars("pltids", pltidsWITHqry, returnVars=TRUE)
+      if (!check.logic.vars("pltids", pltidsWITHqry, returnVars=TRUE))
       if (!all(grepl("pltids", pltidsWITHqry))) {
         message("must include pltids in pltidsWITHqry...")
         message("e.g. \nWITH",
@@ -579,28 +560,30 @@ datSumTree <- function(tree = NULL,
         stop()
       }
     }
-    ## Check pjoinid
-    if (!all(sapply(pjoinid, grepl, pltidsWITHqry))) {
-      stop("pjoinid (", toString(pjoinid), ") not in pltidsWITHqry: \n", pltidsWITHqry)
+    ## Check pltidsid... make sure the variable is in the pltidsWITHqry
+    chk <- check.logic.vars(pltidsid, pltidsWITHqry)
+    if (!chk) {
+      stop("invalid pltidsid... make sure it is in pltidsWITHqry")
     }
-    pltidsid <- pjoinid
-    
+
     ## Set name of pltids and alias path
     pltidsnm <- "pltids"
     pltidsa. <- "pltids."
     
-    
     ## check if cond in pltidsWITHqry
-    if (!is.null(cond) && grepl(cond, pltidsWITHqry)) {
+    if (!is.null(cond) && is.character(cond) && 
+        check.logic.vars(cond, pltidsWITHqry, ignore.case=TRUE)) {
       condinWITHqry <- TRUE
     }
   }
 
-  ## Check unique identifiers and set unique keys if R objects
-  ###########################################################################
+  ###############################################################################
+  ## 5. Check unique identifiers and set unique keys if R objects
+  ###############################################################################
   
   ## Check tuniqueid
   if (!seedonly) {
+    tuniqueid <- tabIDs[["tree"]]
     tuniqueid <- pcheck.varchar(var2check = tuniqueid, varnm = "tuniqueid", 	
                                 checklst = treeflds, caption = "UniqueID variable - tree", 
                                 warn = paste(tuniqueid, "not in tree table"), stopifnull = TRUE)
@@ -612,6 +595,8 @@ datSumTree <- function(tree = NULL,
       }
     }
     if (bysubp) {
+      subplotid <- tabIDs[["subplot"]]
+      subpid <- tabIDs[["subpid"]]
       if (!subpid %in% treeflds) {
         stop(subpid, " not in tree")
       }
@@ -623,6 +608,7 @@ datSumTree <- function(tree = NULL,
       tsumuniqueid <- c(tsumuniqueid, subpid)
     }
     if (bycond) {
+      condid <- tabIDs[["condid"]]
       condidchk <- findnm(condid, treeflds, returnNULL = TRUE)
       if (is.null(condidchk)) {
         message(condid, " not in tree... assuming only 1 condition")
@@ -647,20 +633,24 @@ datSumTree <- function(tree = NULL,
       tsumuniqueid <- c(tsumuniqueid, condid)
     }
   }
-  
+
   if (seedonly) {
+    tuniqueid <- tabIDs[["seedling"]]
     tuniqueid <- pcheck.varchar(var2check = tuniqueid, varnm = "tuniqueid", 	
                                 checklst = seedflds, caption="UniqueID variable - seed", 
                                 warn = paste(tuniqueid, "not in seed table", stopifnull = TRUE))
     tsumuniqueid <- tuniqueid
     
     if (bysubp) {
+      subplotid <- tabIDs[["subplot"]]
+      subpid <- tabIDs[["subpid"]]
       if (!subpid %in% seedflds) {
         stop("bycond=TRUE but ", subpid, " is not in seed table") 
       }
       tsumuniqueid <- c(tsumuniqueid, subpid)
     }
     if (bycond) {
+      condid <- tabIDs[["condid"]]
       condidchk <- findnm(condid, seedflds, returnNULL=TRUE)
       if (is.null(condidchk)) {
         message(condid, " not in seed... assuming only 1 condition")
@@ -676,8 +666,9 @@ datSumTree <- function(tree = NULL,
     }
   }
 
-  ### Check tsumvarlst
-  ###########################################################################
+  ###############################################################################
+  ### 6. Check tsumvarlst
+  ###############################################################################
   if (!seedonly) {
     tsumvarlst <- pcheck.varchar(var2check = tsumvarlst, varnm = "tsumvarlst", 
                                  checklst = treeflds, caption = "Aggregate variable(s)", 
@@ -690,7 +681,7 @@ datSumTree <- function(tree = NULL,
     }
   }
 
-  ## check seed table
+  ## Check seed table
   ## Note: to get counts measured, use TPA_UNADJ and TPA = FALSE
   if (addseed) {
     if (!is.null(tsumvarlst) && is.null(findnm("TPA_UNADJ", tsumvarlst, returnNULL = TRUE))) {	  
@@ -698,7 +689,9 @@ datSumTree <- function(tree = NULL,
     } 
   }
   
-  ## Get name for summed tree variable(s)
+  ###############################################################################
+  ## 7. Get names for summed tree variable(s)
+  ###############################################################################
   getnm <- FALSE
   if (is.null(tsumvarnmlst)) {
     getnm <- TRUE
@@ -720,8 +713,10 @@ datSumTree <- function(tree = NULL,
     }
   } 
 
-  ## Check tderive
-  ###########################################################  
+  ###############################################################################
+  ## 8. Check tderive
+  ## Check if variables in tderive are in treeflds and get identify them for query.
+  ###############################################################################
   if (!is.null(tderive)) {
     if (!is.list(tderive) || is.null(names(tderive))) {
       stop(paste0("tderive must be a named list object...\n",
@@ -739,8 +734,9 @@ datSumTree <- function(tree = NULL,
     }
   }
 
-  ## Check domclassify
-  ########################################################### 
+  ###############################################################################
+  ## 9. Check domclassify
+  ###############################################################################
   if (!is.null(domclassify)) {
     classifynmlst <- vector(mode = "list", length = length(domclassify))
     names(classifynmlst) <- names(domclassify)
@@ -761,7 +757,9 @@ datSumTree <- function(tree = NULL,
     } 
   }
   
-  ## Check bydomainlst
+  ###############################################################################
+  ## 10. Check bydomainlst
+  ###############################################################################
   tdomainlst <- NULL
   domainlst <- bydomainlst
   if (!is.null(bydomainlst)) {
@@ -777,8 +775,10 @@ datSumTree <- function(tree = NULL,
       }
     }
   }
-  
-  ## Get classifyvars
+
+  ###############################################################################
+  ## 11. Get variables to classify from domainlst or domclassify list
+  ###############################################################################
   sclassifyvars <- NULL
   tclassifyvars <- classifyvars[classifyvars %in% tdomainlst]
   pcclassifyvars <- classifyvars[classifyvars %in% pcdomainlst]
@@ -786,8 +786,9 @@ datSumTree <- function(tree = NULL,
     sclassifyvars <- classifyvars[classifyvars %in% seedflds]
   }
 
-  ## CHECK TPA and tsumvars
-  ###########################################################  
+  ###############################################################################
+  ## 12. Check TPA and tree summary variables (tsumvarlst)
+  ###############################################################################
   TPA <- pcheck.logical(TPA, varnm="TPA", title="Calculate TPA?", first="NO", 
                         stopifnull=TRUE, gui=gui)
   
@@ -842,8 +843,9 @@ datSumTree <- function(tree = NULL,
     }
   }
 
-  ## Check plt/cond table
-  ###########################################################################
+  ###############################################################################
+  ## 13. Check plot, subplot, and condition tables
+  ###############################################################################
   condnm=plotnm=condflds=pltflds <- NULL
   
   if (bysubp) {
@@ -879,9 +881,10 @@ datSumTree <- function(tree = NULL,
     }
     
     ## Check unique identifiers
-    subpuniqueid <- cuniqueid
-    subpids <- c(subpuniqueid, subpid)
-    
+    subplotid <- tabIDs[[subplot]]
+    subpid <- tabIDs[["subpid"]]
+    subpids <- c(subplotid, subpid)
+
     ## Check subpids
     if (!is.null(subp_condnm)) {
       if (!all(subpids %in% subpcflds)) {
@@ -912,9 +915,8 @@ datSumTree <- function(tree = NULL,
       pltidsid <- "PLT_CN"
       
     } else {
-      #pltidsid <- pjoinid
-      
-      subpjoinqry <- getjoinqry(subpuniqueid, pjoinid, "subp.", pltidsa.)
+
+      subpjoinqry <- getjoinqry(subplotid, pltidsid, "subp.", pltidsa.)
       if (bycond && !is.null(subp_condnm)) {
         subpfromqry <- paste0("\n FROM ", SCHEMA., subp_condnm, " subp",
                             "\n JOIN ", pltidsnm, " pltids ", subpjoinqry)
@@ -932,12 +934,11 @@ datSumTree <- function(tree = NULL,
                                 "\n(SELECT PLT_CN, SUBP",
                                 subpfromqry, ")")
       }
-
       ## Set name of pltids and alias path
       #subplotnm <- "pltidsSUBP"
     }
-    if (is.null(subp_condnm) || is.null(subplotnm)) {
-      stop("must include subplot and subp_condtables to calculate adjustment factors")
+    if (getadjplot && is.null(subp_condnm) || is.null(subplotnm)) {
+      stop("must include subplot and subp_cond tables to calculate adjustment factors")
     } 
 
     ## Set alias path for group by unique identifier
@@ -968,7 +969,6 @@ datSumTree <- function(tree = NULL,
       pltidsid <- "PLT_CN"
       pltidsa. <- "pltids."
     } else {
-      pltidsid <- pjoinid
       pltidsa. <- "pltids."
     }
     
@@ -979,6 +979,7 @@ datSumTree <- function(tree = NULL,
 
   ## Check cond table
   if (!is.null(cond)) {
+    
     if (is.data.frame(cond)) {
       condx <- pcheck.table(cond, gui=gui, tabnm="cond", caption="Condition table?")
       if (!is.null(condx)) {
@@ -986,10 +987,9 @@ datSumTree <- function(tree = NULL,
         condflds <- names(condx)
         condnm <- "condx"
       }
-    } else if (!is.null(pltidsWITHqry) && grepl(cond, pltidsWITHqry)) {
+    } else if (!is.null(pltidsWITHqry) && check.logic.vars(cond, pltidsWITHqry)) {
       condnm <- cond
       grpby. <- "pc."
-      pltidsid <- pjoinid
 
       condflds.qry <- paste0(
         pltidsWITHqry,
@@ -1026,6 +1026,9 @@ datSumTree <- function(tree = NULL,
 
     ## Check uniqueids
     if (!is.null(condflds)) {
+      cuniqueid <- tabIDs[["cond"]]
+      condid <- tabIDs[["condid"]]
+      cvars <- c(cuniqueid, condid, propvars)
       conda. <- "c."
       cuniqueidchk <- findnm(cuniqueid, condflds, returnNULL = TRUE)
       if (is.null(cuniqueidchk)) {
@@ -1048,6 +1051,24 @@ datSumTree <- function(tree = NULL,
     
     ## list of plot and cond fields
     pcflds <- c(pltflds, condflds)
+    
+    
+    ## Check pcdomainlst
+    if (!is.null(pcdomainlst) && length(pcdomainlst) > 0) {
+      if (!is.null(pcflds)) {
+        missdom <- pcdomainlst[!pcdomainlst %in% pcflds]
+        if (length(missdom) > 0) {
+          message("variables in bydomainlst are not in dataset: ", toString(missdom))
+        }
+        pcdomainlst <- pcdomainlst[pcdomainlst %in% condflds]
+        
+        cvars <- unique(c(cvars, pcdomainlst))
+        
+      } else {
+        message("must include cond and/or plot table for: ", toString(pcdomainlst))
+      }
+    }
+    
 
     ## Check pcwhereqry
     if (!is.null(pcwhereqry)) {
@@ -1056,6 +1077,8 @@ datSumTree <- function(tree = NULL,
       } else {
         pcwhereqry <- check.logic(pcflds, pcwhereqry)
         pcwhereqry <- RtoSQL(pcwhereqry)
+        chkvars <- check.logic.vars(pcflds, pcwhereqry, returnVars = TRUE)
+        cvars <- c(cvars, chkvars)
         
         if (!(startsWith(gsub(" ", "", pcwhereqry), "\nWHERE"))) {
           if (startsWith(gsub(" ", "", pcwhereqry), "WHERE")) {
@@ -1085,6 +1108,7 @@ datSumTree <- function(tree = NULL,
         } else {
           pcwhereqry <- "\n WHERE pc.COND_STATUS_CD = 1"
         }
+        cvars <- unique(c(cvars, cond_status_cdnm))
       }
     }
 
@@ -1096,9 +1120,9 @@ datSumTree <- function(tree = NULL,
                               "\n FROM ", SCHEMA., condnm, ")")
       pltidsnm <- "pltids"
       pltidsa. <- "pltids."
-      pjoinid=pltidsid <- cuniqueid
+      pltidsid <- cuniqueid
     }
-    
+
     if (!condinWITHqry) {
       pltidsnm <- "pltids"
       pltidsa. <- "pltids."
@@ -1107,8 +1131,9 @@ datSumTree <- function(tree = NULL,
       cjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
       
       if (!is.null(pltx)) {
-        condfldsqry <- paste0("c.", condflds)
-        pltflds <- pltflds[!pltflds %in% c(condflds, "CN")]
+        puniqueid <- tabIDs[["plt"]]
+        condfldsqry <- paste0("c.", cvars)
+        pltflds <- pltflds[!pltflds %in% c(cvars, puniqueid)]
         
         if (length(pltflds) > 0) {
           pltfldsqry <- paste0("p.", pltflds)
@@ -1121,7 +1146,8 @@ datSumTree <- function(tree = NULL,
                             "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry,
                             "\n JOIN ", SCHEMA., plotnm, " p ", pjoinqry)
       } else {
-        pltcondfldsqry <- toString(paste0("c.", condflds))
+        #pltcondfldsqry <- toString(paste0("c.", condflds))
+        pltcondfldsqry <- toString(paste0("c.", cvars))
         pcfromqry <- paste0(pcfromqry, 
                             "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry)
       }
@@ -1147,20 +1173,7 @@ datSumTree <- function(tree = NULL,
       grpby. <- "pltids."
     }
   }
-
-  ## Check pcdomainlst
-  if (!is.null(pcdomainlst) || length(pcdomainlst) > 0) {
-    if (!is.null(pcflds)) {
-      missdom <- pcdomainlst[!pcdomainlst %in% pcflds]
-      if (length(missdom) > 0) {
-        message("variables in bydomainlst are not in dataset: ", toString(missdom))
-      }
-      pcdomainlst <- pcdomainlst[pcdomainlst %in% condflds]
-    } else {
-      message("must include cond and/or plot table for: ", toString(pcdomainlst))
-    }
-  }
-
+  
   ## Check lbs2tons
   ##########################################################################
   if (!seedonly) {
@@ -1191,7 +1204,7 @@ datSumTree <- function(tree = NULL,
   ## If 'tadjfac' is not in treeflds, check if getadjplot = TRUE or pltidsWITHqry is not NULL
   if (adjtree) {
     if (!seedonly) {
-      if (!adjvar %in% treeflds) {
+      if (!datSum_opts$adjvar %in% treeflds) {
         if (is.null(condnm) && is.null(pltidsWITHqry)) {
           if (bysubp) {
             msg <- paste0("must include cond, subplot, subp_cond tables or pltidsWITHqry or ", adjvar, " in tree table when adj != 'none'")
@@ -1200,7 +1213,7 @@ datSumTree <- function(tree = NULL,
           }
           stop(msg)
         } else {
-          if (!is.null(pltidsWITHqry) && grepl("pltidsadj", pltidsWITHqry)) {
+          if (!is.null(pltidsWITHqry) && check.logic.vars("pltidsadj", pltidsWITHqry)) {
             getadjplot <- FALSE
           } else {
             getadjplot <- TRUE
@@ -1231,12 +1244,12 @@ datSumTree <- function(tree = NULL,
     }
   }
   
-  ## CHECK tround
-  if (is.null(tround) || !is.numeric(tround)) {
+  ## Check tround
+  if (is.null(tround) || !is.numeric(tround) || (tround %% 1 != 0)) {
     warning("tround is invalid.. rounding to 5 digits")
     tround <- 5
   }
-  
+
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
                              first="NO", gui=gui)
@@ -1289,20 +1302,16 @@ datSumTree <- function(tree = NULL,
   ##########################################################################
   if (adjtree) {
     
+    
     if (getadjplot) {
-      
-      ## Check PROP names and build query for calculating adjustment factors
-      if (seedonly) {
-        propvars <- "MICRPROP_UNADJ"
-      } else {
-        propvars <- c("CONDPROP_UNADJ", "SUBPPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ")
-      }
+      adjjoinid <- cuniqueid
       
       ## Build WHERE query to filter nonsampled plots
       pcADJwhereqry <- getADJwherePLOT(condflds)
       
       
       if (bysubp) {
+        adjjoinid <- subplotid
         
         ## Build WHERE query for removing nonsampled subplots 
         subpwhereqry <- getADJwhereSUBP(subplotflds, adjwhereqry = pcADJwhereqry)
@@ -1310,11 +1319,11 @@ datSumTree <- function(tree = NULL,
         ## Build FROM query including subplot and subp_cond
         subpa. <- "subp."
         subpca. <- "subpc."
-        subpjoinqry <- getjoinqry(subpuniqueid, pltidsid, subpa., pltidsa.)
+        subpjoinqry <- getjoinqry(subplotid, pltidsid, subpa., pltidsa.)
         subpfromqry <- paste0(
           pcfromqry,                    
           "\n JOIN ", SCHEMA., subplotnm, " subp ", subpjoinqry,
-          "\n JOIN ", SCHEMA., subp_condnm, " subpc ON (", subpca., subpuniqueid, " = ", conda., cuniqueid, 
+          "\n JOIN ", SCHEMA., subp_condnm, " subpc ON (", subpca., subplotid, " = ", conda., cuniqueid, 
           " AND ", subpca., condid, " = ", conda., condid, 
           " AND ", subpca., subpid, " = ", subpa., subpid, ")")
         
@@ -1332,7 +1341,7 @@ datSumTree <- function(tree = NULL,
                     propvars = propvars,
                     adjfromqry = "\n FROM subpcprop c",
                     pwhereqry = NULL,
-                    pltidsid = pltidsid,
+                    pltidsid = subplotid,
                     pltassgnid = c(pltassgnid, subpid),
                     pltidsa. = "c.")
         #message(ADJqrySUBP)
@@ -1362,7 +1371,7 @@ datSumTree <- function(tree = NULL,
                     propvars = propvars,
                     adjfromqry = pcfromqry,
                     pwhereqry = pcADJwhereqry,
-                    pltidsid = pltidsid,
+                    pltidsid = cuniqueid,
                     pltassgnid = pltassgnid,
                     pltidsa. = "c.")
         #message(ADJqry)
@@ -1410,39 +1419,41 @@ datSumTree <- function(tree = NULL,
         sadjcase <- paste0("adj.", adjvarlst[["MICR"]], " AS tadjfac")
       }
     }
-  }	else {
+#  }	else {
     
-    if (bysubp && bycond) {
-      
-      ## Build FROM query including subplot and subp_cond
-      subpa. <- "subp."
-      subpca. <- "subpc."
-      subpjoinqry <- getjoinqry(subpid, pltidsid, subpa., pltidsa.)
-      subpfromqry <- paste0(
-        pcfromqry,                    
-        "\n JOIN ", SCHEMA., subplotnm, " subp ", subpjoinqry,
-        "\n JOIN ", SCHEMA., subp_condnm, " subpc ON (", subpca., subpid, " = ", conda., cuniqueid, 
-        " AND ", subpca., condid, " = ", conda., condid, 
-        " AND ", subpca., subpid, " = ", subpa., subpid, ")")
-      
-      
-      ## First, get query for summarizing subplot sampled proportions
-      sumpropqry <- sumpropSUBPqry(fromqry = subpfromqry, 
-                                   whereqry = NULL,
-                                   ACI = ACI,
-                                   selectvars = NULL,
-                                   SCHEMA. = SCHEMA.)
-      
-      ## Build final query for adjustment factors, including pltids WITH query
-      pltidsWITHqry <- paste0(
-        pltidsWITHqry, ", ",
-        "\n----- sum sampled subplot proportions",
-        "\nsubpcprop AS ",
-        "\n(", sumpropqry, ")")
-      #message(pltidsWITHqry)
-      
-      pltidsnm <- "subpcprop"
-    }
+    
+    
+  #   
+  #   if (bysubp) {
+  #     
+  #     ## Build FROM query including subplot and subp_cond
+  #     subpa. <- "subp."
+  #     subpca. <- "subpc."
+  #     subpjoinqry <- getjoinqry(subpid, pltidsid, subpa., pltidsa.)
+  #     subpfromqry <- paste0(
+  #       pcfromqry,                    
+  #       "\n JOIN ", SCHEMA., subplotnm, " subp ", subpjoinqry,
+  #       "\n JOIN ", SCHEMA., subp_condnm, " subpc ON (", subpca., subpid, " = ", conda., cuniqueid, 
+  #       " AND ", subpca., condid, " = ", conda., condid, 
+  #       " AND ", subpca., subpid, " = ", subpa., subpid, ")")
+  #     
+  #     ## First, get query for summarizing subplot sampled proportions
+  #     sumpropqry <- sumpropSUBPqry(fromqry = subpfromqry, 
+  #                                  whereqry = NULL,
+  #                                  ACI = ACI,
+  #                                  selectvars = NULL,
+  #                                  SCHEMA. = SCHEMA.)
+  #     
+  #     ## Build final query for adjustment factors, including pltids WITH query
+  #     pltidsWITHqry <- paste0(
+  #       pltidsWITHqry, ", ",
+  #       "\n----- sum sampled subplot proportions",
+  #       "\nsubpcprop AS ",
+  #       "\n(", sumpropqry, ")")
+  #     #message(pltidsWITHqry)
+  #     
+  #     pltidsnm <- "subpcprop"
+  #   }
   }  
 
   #############################################################################
@@ -1730,28 +1741,20 @@ datSumTree <- function(tree = NULL,
     }
   }
   
-  ## Round variables
+  ## SELECT variables
   ###########################################################################
-  if (!is.null(tround)) {
-    ## Add a new column with SELECT statement
-    tsumvardf$SELECT <- paste0("\n  ROUND(", tsumvardf$SELECT, ", ", tround, ") AS ", 
-                               tsumvardf$NAME)
-  } else {
-    tsumvardf$SELECT <- paste0(tsumvardf$SELECT, " AS ", tsumvardf$NAME)
-  }
+  tsumvardf$SELECT <- paste0(tsumvardf$SELECT, " AS ", tsumvardf$NAME)
   
   if (addseed) {
-    if (!is.null(tround)) {
-      tsumvardf$SELECT[tsumvardf$TABLE == "TREE"] <- 
-        paste0("\n  ROUND(COALESCE(SUM(CASE WHEN src = 'TREE' THEN ", 
-               tsumvardf$NEW[tsumvardf$TABLE == "TREE"], " ELSE 0 END),0),", tround, ")",
+    tsumvardf$SELECT[tsumvardf$TABLE == "TREE"] <- 
+        paste0("\n  COALESCE(SUM(CASE WHEN src = 'TREE' THEN ", 
+               tsumvardf$NEW[tsumvardf$TABLE == "TREE"], " ELSE 0 END),0)",
                " AS ", tsumvardf$NAME[tsumvardf$TABLE == "TREE"])
       
-      tsumvardf$SELECT[tsumvardf$TABLE == "SEED"] <- 
-        paste0("\n  ROUND(COALESCE(SUM(CASE WHEN src = 'SEED' THEN ", 
-               tsumvardf$NEW[tsumvardf$TABLE == "SEED"], " ELSE 0 END),0),", tround, ")",
+    tsumvardf$SELECT[tsumvardf$TABLE == "SEED"] <- 
+        paste0("\n  COALESCE(SUM(CASE WHEN src = 'SEED' THEN ", 
+               tsumvardf$NEW[tsumvardf$TABLE == "SEED"], " ELSE 0 END),0)",
                " AS ", tsumvardf$NAME[tsumvardf$TABLE == "SEED"])
-    }    
   }
  
   #################################################################################
@@ -1815,7 +1818,6 @@ datSumTree <- function(tree = NULL,
 
     twithfromqry <- tfromqry
     if (adjtree) {
-      adjjoinid <- pltidsid
       if (!adjvar %in% treeflds) {
         tadjjoinqry <- getjoinqry(adjjoinid, cuniqueid, adjalias., talias.)
         twithfromqry <- paste0(tfromqry,
@@ -1831,7 +1833,7 @@ datSumTree <- function(tree = NULL,
     
     ## WHERE statement - Woodland
     twithwhereqry <- twhereqry
-    if (!is.null(woodland) && woodland %in% c("Y", "N", "only")) {
+    if (!is.null(woodland) && woodland %in% c("N", "only")) {
       twithfromqry <- paste0(twithfromqry, wtfromqry)
       if (is.null(twithwhereqry)) {
         twithwhereqry <- paste0("\n WHERE ", wtwhereqry)
@@ -1946,7 +1948,7 @@ datSumTree <- function(tree = NULL,
 
     swithfromqry <- sfromqry
     if (adjtree) {
-      adjjoinid <- pjoinid
+      adjjoinid <- pltidsid
       if (!adjvar %in% seedflds) {
         sadjjoinqry <- getjoinqry(adjjoinid, cuniqueid, adjalias., salias.)
         swithfromqry <- paste0(sfromqry,
@@ -1986,7 +1988,7 @@ datSumTree <- function(tree = NULL,
       uniqueid <- pltidsid
     }
     if (bysubp) {
-      uniqueid <- c(uniqueid, subpid)
+      uniqueid <- unique(c(uniqueid, subpids))
     }
     if (bycond) {
       uniqueid <- c(uniqueid, condid)
@@ -1997,7 +1999,7 @@ datSumTree <- function(tree = NULL,
                             "\n(", twithqry, ")")
     
   } else {
-    uniqueid <- pltidsid
+    uniqueid <- tuniqueid
     grpby. <- "tdat."
     pltidsWITHqry <- paste0("WITH tdat AS", 
                             "\n(", twithqry, ")")
@@ -2015,9 +2017,9 @@ datSumTree <- function(tree = NULL,
     if (!is.null(condnm)) {
       conda. <- "pc."
       if (bycond) {
-        cjoinid <- getjoinqry(c(cuniqueid, condid), c(subpuniqueid, condid), "pc.", subpa.)
+        cjoinid <- getjoinqry(c(cuniqueid, condid), c(subplotid, condid), "pc.", subpa.)
       } else {
-        cjoinid <- getjoinqry(cuniqueid, subpuniqueid, "pc.", subpa.)
+        cjoinid <- getjoinqry(cuniqueid, subplotid, "pc.", subpa.)
       }
       tfromqry <- paste0(tfromqry, 
                          "\nJOIN ", SCHEMA., condnm, " pc ", cjoinid)
@@ -2223,6 +2225,7 @@ datSumTree <- function(tree = NULL,
     message(tree.qry)
     stop()
   }
+  
 
   uniqueidchk <- unlist(sapply(uniqueid, findnm, names(sumdat), returnNULL = TRUE))
   if (length(uniqueidchk) < length(uniqueid)) {
@@ -2231,6 +2234,12 @@ datSumTree <- function(tree = NULL,
     stop()
   }
   setkeyv(setDT(sumdat), uniqueidchk)
+
+  ## Round digits
+  if (!is.null(tround)) {
+    tcols <- tsumvardf$NAME
+    sumdat[, (tcols) := round(.SD, tround), .SDcols=tcols]
+  }
   
   
   ## Get metadata
@@ -2330,7 +2339,8 @@ datSumTree <- function(tree = NULL,
   if (!is.null(meta) && nrow(meta) > 0) {
     sumtreelst$meta <- meta
   }
- 
+  sumtreelst$tround <- tround
+  
   return(sumtreelst)
   
 } 

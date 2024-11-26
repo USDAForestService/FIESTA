@@ -9,30 +9,26 @@ test_that("datSumTreeDom Testing", {
     tree = WYtree, 
     cond = WYcond, 
     plt = WYplt, 
-    puniqueid = "CN", 
     bycond = FALSE, 
     tsumvar = "BA", 
-    TPA = TRUE, 
     tdomtot = TRUE, 
     tdomtotnm = "BA_LIVE", 
     tdomprefix = "BA_LIVE", 
-    tround = 2, 
-    tfilter = "STATUSCD==1"
+    tfilter = "STATUSCD==1",
+    datSum_opts = list(TPA = TRUE, tround = 2)
   )
   
   treedomVOL <- datSumTreeDom( ##For Volume
     tree = WYtree, 
     cond = WYcond, 
     plt = WYplt, 
-    puniqueid = "CN", 
     bycond = FALSE, 
     tsumvar = "VOLCFNET", 
-    TPA = TRUE, 
     tdomtot = TRUE, 
     tdomtotnm = "VOLCFNET_LIVE", 
     tdomprefix = "VOLCFNET_LIVE", 
-    tround = 2, 
-    tfilter = "STATUSCD==1"
+    tfilter = "STATUSCD==1",
+    datSum_opts = list(TPA = TRUE, tround = 2)
   )
   
   datBA_varlut <- treedomBA$tdomvarlut

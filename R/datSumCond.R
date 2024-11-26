@@ -10,7 +10,8 @@
 #' @param cond Data frame or comma-delimited file (*.csv). Condition-level
 #' table with aggregate variable and CONDPROP_UNADJ.
 #' @param datsource String. Source of data ('obj', 'csv', 'sqlite', 'gdb').
-#' @param data_dsn String. If datsource='sqlite', the name of SQLite database
+#' @param dbconn Open database connection.
+#' @param dsn String. If datsource='sqlite', the name of SQLite database
 #' (*.sqlite).
 #' @param plt Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
 #' database file. Plot-level table to join the aggregated tree data to (if
@@ -21,14 +22,10 @@
 #' @param subplot Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
 #' Subplot-level table to used to calculate adjustment factors, to remove 
 #' nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional.
-#' @param cuniqueid String. Unique identifier of cond (default = "PLT_CN").
-#' @param puniqueid String. Unique identifier of plt (default = "CN").
-#' @param condid String. Unique identifier for conditions.
 #' @param bycond Logical. If TRUE, the data are aggregated to the condition
 #' level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
 #' level (by: puniqueid). 
 #' @param bysubp Logical. If TRUE, data are aggregated to the subplot level.
-#' @param subpid String. Unique identifier of each subplot.
 #' @param csumvar String. One or more variable names to sum to plot level.
 #' @param csumvarnm String. Name of the resulting aggregated plot-level
 #' variable(s).  Default = csumvar + '_PLT'.
@@ -38,17 +35,13 @@
 #' nonsampled conditions on plot.
 #' @param adjcond Logical. If TRUE, csumvar condition variables are adjusted
 #' for nonsampled conditions by plot.
-#' @param NAto0 Logical. If TRUE, convert NA values to 0.
 #' @param cround Number. The number of digits to round to. If NULL, default=5.
-#' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
-#' returns data.frame object(s).
 #' @param savedata Logical. If TRUE, saves data to outfolder.
+#' @param tabIDs List of unique IDs corresponding to the tables. See
+#' See help(tableIDs) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'condsum'.
-#' @param dbconn Open database connection.
-#' @param dbconnopen Logical. If TRUE, keep database connection open. 
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' 
 #' @return A list of the following items: \item{condsum}{ Data frame.
 #' Plot-level table with aggregated condition attribute. } \item{cfilter}{
@@ -69,29 +62,22 @@
 #' @export datSumCond
 datSumCond <- function(cond = NULL, 
                        datsource = "obj", 
-                       data_dsn = NULL, 
+                       dbconn = NULL,
+                       dsn = NULL, 
                        plt = NULL, 
                        subp_cond = NULL,  
                        subplot = NULL, 
-                       cuniqueid = "PLT_CN",
-                       puniqueid = "CN", 
-                       condid = "CONDID", 
                        bycond = FALSE,                        
                        bysubp = FALSE, 
-                       subpid = "SUBP", 
                        csumvar = NULL, 
                        csumvarnm = NULL, 
                        cfilter = NULL, 
                        getadjplot = FALSE,
                        adjcond = FALSE, 
-                       NAto0 = FALSE, 
                        cround = 5, 
-                       returnDT = TRUE,
                        savedata = FALSE, 
-                       savedata_opts = NULL,
-                          dbconn = NULL,
-                          dbconnopen = FALSE,
-                       gui = FALSE){
+                       tabIDs = tableIDs(),
+                       savedata_opts = NULL){
   
   #####################################################################################
   ## DESCRIPTION: Aggregates CONDPROP_UNADJ variable or other continuous condition 
@@ -101,7 +87,8 @@ datSumCond <- function(cond = NULL,
   #####################################################################################
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  gui <- FALSE
 
   ## If gui.. set variables to NULL
   if(gui){ puniqueid=cuniqueid=csumvarnm=savedata <- NULL }
@@ -109,7 +96,9 @@ datSumCond <- function(cond = NULL,
   ## Set global variables
   CONDPROP_ADJ=CONDPROP_UNADJ=NF_COND_STATUS_CD <- NULL
   ACI <- FALSE
-
+  checkNA = FALSE
+  returnDT = TRUE
+  
 
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -159,8 +148,8 @@ datSumCond <- function(cond = NULL,
   datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
   if (is.null(datsource)) {
-    if (!is.null(data_dsn) && file.exists(data_dsn)) {
-      dsn.ext <- getext(data_dsn)
+    if (!is.null(dsn) && file.exists(dsn)) {
+      dsn.ext <- getext(dsn)
       if (!is.na(dsn.ext) && dsn.ext != "") {
         datsource <- ifelse(dsn.ext == "gdb", "gdb", 
 		ifelse(dsn.ext %in% c("db", "db3", "sqlite", "sqlite3"), "sqlite", 
@@ -173,11 +162,12 @@ datSumCond <- function(cond = NULL,
   }
 
   ## Check cond table
-  condx <- pcheck.table(cond, tab_dsn=data_dsn, caption="Condition table?", 
+  condx <- pcheck.table(cond, tab_dsn=dsn, caption="Condition table?", 
 			stopifnull=TRUE)
 
   ## Check cuniqueid
   condnmlst <- names(condx)
+  cuniqueid <- tabIDs[["cond"]]
   cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
 	checklst=condnmlst, caption="UniqueID variable - cond", 
 	warn="cuniqueid not in cond table", stopifnull=TRUE)
@@ -187,6 +177,7 @@ datSumCond <- function(cond = NULL,
 
 
   ## Check condid in tree table and setkey to tuniqueid, condid
+  condid <- tabIDs[["condid"]]
   condid <- pcheck.varchar(var2check=condid, varnm="condid", 
 		checklst=names(condx), caption="cond ID - tree", 
 		warn=paste(condid, "not in tree table"))
@@ -226,11 +217,13 @@ datSumCond <- function(cond = NULL,
 
 
   if (bysubp) {
-    subpuniqueid <- "PLT_CN"
-    subpids <- c(subpuniqueid, subpid)
+    subplotid <- tabIDs[["subplot"]]
+    subpid <- tabIDs[["subpid"]]
+    subplotid <- "PLT_CN"
+    subpids <- c(subplotid, subpid)
 
     ## Check subplot
-    subplotx <- pcheck.table(subplot, tab_dsn=data_dsn, tabnm="subplot", gui=gui, 
+    subplotx <- pcheck.table(subplot, tab_dsn=dsn, tabnm="subplot", gui=gui, 
 			caption="Subplot table?")
   
     ## Check subpid
@@ -242,7 +235,7 @@ datSumCond <- function(cond = NULL,
     }
 
     ## Check subplot
-    subpcondx <- pcheck.table(subp_cond, tab_dsn=data_dsn, tabnm="subp_cond", gui=gui, 
+    subpcondx <- pcheck.table(subp_cond, tab_dsn=dsn, tabnm="subp_cond", gui=gui, 
 			caption="Subp_cond table?", stopifnull=TRUE)
     if (!all(subpids %in% names(subpcondx))) {
       stop("uniqueids not in subp_cond: ", toString(subpids))
@@ -251,17 +244,17 @@ datSumCond <- function(cond = NULL,
 
     ## Check unique ids and set keys
     if (bycond) {
-      csumuniqueid <- c(subpuniqueid, subpid, condid)
+      csumuniqueid <- c(subplotid, subpid, condid)
       setkeyv(subpcondx, csumuniqueid)           
     } else {
-      csumuniqueid <- c(subpuniqueid, subpid)
+      csumuniqueid <- c(subplotid, subpid)
     }
 
     ## Set pltx to NULL   
     pltx <- NULL
   } else {
 
-    pltx <- pcheck.table(plt, tab_dsn=data_dsn, gui=gui, tabnm="plt", 
+    pltx <- pcheck.table(plt, tab_dsn=dsn, gui=gui, tabnm="plt", 
 			caption="Plot table?")
   }
 
@@ -362,16 +355,16 @@ datSumCond <- function(cond = NULL,
       subpcx <- subpsamp(cond = condx, 
                          subp_cond = subpcondx, 
                          subplot = subplotx, 
-                         subpuniqueid = subpuniqueid, 
+                         subpuniqueid = subplotid, 
                          subpid = subpid)
 
       adjfacdata <- getadjfactorPLOT(condx = subpcx, 
-		                          cuniqueid = c(subpuniqueid, subpid), 
+		                          cuniqueid = c(subplotid, subpid), 
                                      areawt = csumvar)
       subpcx <- adjfacdata$condx
       mergecols <- unique(c(cuniqueid, condid, names(condx)[!names(condx) %in% names(subpcx)]))
       condx <- merge(condx[, mergecols, with=FALSE], subpcx, 
-                     by.x=c(cuniqueid, condid), by.y=c(subpuniqueid, condid))
+                     by.x=c(cuniqueid, condid), by.y=c(subplotid, condid))
       
 
     } else {

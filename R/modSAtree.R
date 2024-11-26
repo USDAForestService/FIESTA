@@ -830,7 +830,7 @@ modSAtree <- function(SApopdatlst = NULL,
                    dbconn = popconn, schema = pop_schema,
                    pltidsWITHqry = pltidsWITHqry,
                    pcwhereqry = pcwhereqry,
-                   pjoinid = pjoinid,
+                   pltidsid = pltidsid,
                    bytdom = bytdom,
                    gui = gui)
     if (is.null(treedat)) stop(NULL) 

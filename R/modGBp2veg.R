@@ -601,9 +601,8 @@ modGBp2veg <- function(GBpopdat = NULL,
                dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltcondxadjWITHqry,
                pcwhereqry = pcwhereqry,
-               pjoinid = pltidsid,
-               bytdom = bytdom,
-               gui = gui)
+               pltidsid = pltidsid,
+               bytdom = bytdom)
   if (is.null(p2vegdat)) return(NULL) 
   vdomdat <- p2vegdat$tdomdat
   p2vegqry <- p2vegdat$treeqry

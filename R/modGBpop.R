@@ -332,6 +332,8 @@ modGBpop <- function(popType = "VOL",
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
                          popFilter = popFilter,
+                         popTabs = popTabs,
+                         popTabIDs = popTabIDs,
                          unit_opts = unit_opts, 
                          strata_opts = strata_opts,
                          savedata_opts = savedata_opts,
@@ -341,6 +343,8 @@ modGBpop <- function(popType = "VOL",
   strata_opts <- optslst$strata_opts  
   database_opts <- optslst$database_opts  
   popFilter <- optslst$popFilter
+  popTabs <- optslst$popTabs
+  popTabIDs <- optslst$popTabIDs
   
   for (i in 1:length(unit_opts)) {
     assign(names(unit_opts)[[i]], unit_opts[[i]])

@@ -17,7 +17,7 @@ check.tree <-
            domclassify = NULL, 
            dbconn = NULL, schema = NULL,
            pltidsWITHqry = NULL, pcwhereqry = NULL,
-           pjoinid = NULL) {
+           pltidsid = NULL) {
 
   ###################################################################################
   ### GETS ESTIMATION DATA FROM TREE TABLE
@@ -27,13 +27,11 @@ check.tree <-
   tdomvarlstn=estunitsd=variable=tsumvard <- NULL  
 
   if (estseed == "only") {
-    seedonly <- TRUE
-    addseed <- FALSE
+    seedlings <- "only"
   } else if (estseed == "add") {
-    addseed <- TRUE
-    seedonly <- FALSE
+    seedlings <- "Y"
   } else {
-    seedonly=addseed <- FALSE
+    seedlings <- "N"
   }
   
   ## Check estvarn.derive
@@ -50,34 +48,34 @@ check.tree <-
   if (bytdom) {
     pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
     tdomdata <- 
-      datSumTreeDom(tree = treex, seed = seedx, 
-                    cond = condx, plt = pltx, 
-                    tuniqueid = tuniqueid, 
-                    cuniqueid = cuniqueid, puniqueid = puniqueid, 
-                    bycond = bycond, condid = condid,
+      datSumTreeDom(tree = treex, 
+                    seed = seedx, 
+                    cond = condx, 
+                    plt = pltx, 
+                    bycond = bycond,
                     tsumvar = estvarn, 
-                    TPA = estvarn.TPA,
                     tdomtot = esttotn, 
                     tdomtotnm = estvarn.name, 
                     tfilter = estvarn.filter,
-                    tdomvar = tdomvar, tdomvar2 = tdomvar2, 
+                    tdomvar = tdomvar, 
+                    tdomvar2 = tdomvar2, 
                     bydomainlst = bydomainlst,
-                    adjtree = adjtree,
-                    adjvar = adjvar, 
-                    adjTPA = adjTPA, 
                     pivot = pivot, 
-                    metric = metric,
-                    addseed = addseed, 
-                    seedonly = seedonly, 
+                    seedlings = seedlings, 
                     woodland = woodland,
-                    ACI = ACI,
                     tderive = estvarn.derive,
                     domclassify = domclassify,
-                    tround = 8,
-                    dbconn = dbconn, schema = schema,
                     pltidsWITHqry = pltidsWITHqry,
                     pcwhereqry = pcwhereqry,
-                    pjoinid = pjoinid)
+                    dbconn = dbconn,
+                    datSum_opts = datSum_options(adjtree = adjtree,
+                                                 adjvar = adjvar,
+                                                 adjTPA = adjTPA,
+                                                 TPA = estvarn.TPA,
+                                                 metric = metric,
+                                                 ACI = ACI),
+                    tabIDs = list(plt = puniqueid),
+                    database_opts = database_options(schema = schema))
 
     if (is.null(tdomdata)) return(NULL)
     tdomdat <- data.table(tdomdata$tdomdat)
@@ -113,34 +111,34 @@ check.tree <-
       }
     }
   } else {  
-    
+ 
     ## Get summed tree data
     treedata <- 
-      datSumTree(tree = treex, seed = seedx, 
-                 cond = condx, plt = pltx, 
-                 tuniqueid = tuniqueid, 
-                 cuniqueid = cuniqueid, puniqueid = puniqueid, 
-                 bycond = bycond, condid = condid,
+      datSumTree(tree = treex, 
+                 seed = seedx, 
+                 cond = condx, 
+                 plt = pltx, 
+                 bycond = bycond, 
                  tsumvarlst = estvarn, 
                  tsumvarnmlst = estvarn.name, 
-                 TPA = estvarn.TPA,
                  tfilter = estvarn.filter,
                  bydomainlst = bydomainlst,
-                 adjtree = adjtree, 
-                 adjvar = adjvar, 
-                 adjTPA = adjTPA,
-                 metric = metric, 
-                 addseed = addseed, 
-                 seedonly = seedonly, 
+                 seedlings = seedlings, 
                  woodland = woodland,
-                 ACI = ACI,
                  tderive = estvarn.derive,
                  domclassify = domclassify,
-                 tround = 8,
-                 dbconn = dbconn, schema = schema,
                  pltidsWITHqry = pltidsWITHqry,
                  pcwhereqry = pcwhereqry,
-                 pjoinid = pjoinid)
+                 dbconn = dbconn,
+                 datSum_opts = datSum_options(adjtree = adjtree,
+                                              adjvar = adjvar,
+                                              adjTPA = adjTPA,
+                                              TPA = estvarn.TPA,
+                                              metric = metric,
+                                              ACI = ACI),
+                 tabIDs = list(plt = puniqueid),
+                 database_opts = database_options(schema = schema))
+
     if (is.null(treedata)) return(NULL)
     tdomdat <- treedata$treedat
     tsumvarn <- treedata$sumvars
@@ -178,33 +176,34 @@ check.tree <-
     if (bytdom) {
       pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
       tdomdata <- 
-        datSumTreeDom(tree = treex, seed = seedx, 
-                      cond = condx, plt = pltx, 
-                      tuniqueid = tuniqueid, 
-                      cuniqueid = cuniqueid, puniqueid = puniqueid, 
-                      bycond = bycond, condid = condid,
+        datSumTreeDom(tree = treex, 
+                      seed = seedx, 
+                      cond = condx, 
+                      plt = pltx, 
+                      bycond = bycond,
                       tsumvar = estvarn, 
-                      TPA = estvarn.TPA,
                       tdomtot = esttotd, 
                       tdomtotnm = estvard.name, 
                       tfilter = estvard.filter,
-                      tdomvar = tdomvar, tdomvar2 = tdomvar2, 
+                      tdomvar = tdomvar, 
+                      tdomvar2 = tdomvar2, 
                       bydomainlst = bydomainlst,
-                      adjtree = adjtree,
-                      adjvar = adjvar, 
-                      adjTPA = adjTPA, 
                       pivot = pivot, 
-                      metric = metric,
-                      addseed = addseed, 
-                      seedonly = seedonly, 
+                      seedlings = seedlings, 
                       woodland = woodland,
                       tderive = estvard.derive,
                       domclassify = domclassify,
-                      tround = 8,
-                      dbconn = dbconn, schema = schema,
+                      dbconn = dbconn, 
                       pltidsWITHqry = pltidsWITHqry,
                       pcwhereqry = pcwhereqry,
-                      pjoinid = pjoinid)
+                      datSum_opts = datSum_options(adjtree = adjtree,
+                                                   adjvar = adjvar,
+                                                   adjTPA = adjTPA,
+                                                   TPA = estvarn.TPA,
+                                                   metric = metric,
+                                                   ACI = ACI),
+                      tabIDs = list(plt = puniqueid),
+                      database_opts = database_options(schema = schema))
       
       if (is.null(tdomdata)) {
         message("invalid denominator... returning null")
@@ -235,30 +234,30 @@ check.tree <-
 
       ## Get summed tree data
       treedata <- 
-        datSumTree(tree = treex, seed = seedx, 
-                   cond = condx, plt = pltx, 
-                   tuniqueid = tuniqueid, 
-                   cuniqueid = cuniqueid, puniqueid = puniqueid, 
-                   bycond = bycond, condid = condid,
+        datSumTree(tree = treex, 
+                   seed = seedx, 
+                   cond = condx, 
+                   plt = pltx, 
+                   bycond = bycond, 
                    tsumvarlst = estvard, 
                    tsumvarnmlst = estvard.name, 
-                   TPA = estvarn.TPA,
                    tfilter = estvard.filter,
                    bydomainlst = bydomainlst,
-                   adjtree = adjtree, 
-                   adjvar = adjvar, 
-                   adjTPA = adjTPA,
-                   metric = metric, 
-                   addseed = addseed, 
-                   seedonly = seedonly, 
+                   seedlings = seedlings, 
                    woodland = woodland,
                    tderive = estvard.derive,
                    domclassify = domclassify,
-                   tround = 8,
-                   dbconn = dbconn, schema = schema,
+                   dbconn = dbconn, 
                    pltidsWITHqry = pltidsWITHqry,
                    pcwhereqry = pcwhereqry,
-                   pjoinid = pjoinid)
+                   datSum_opts = datSum_options(adjtree = adjtree,
+                                                adjvar = adjvar,
+                                                adjTPA = adjTPA,
+                                                TPA = estvarn.TPA,
+                                                metric = metric,
+                                                ACI = ACI),
+                   tabIDs = list(plt = puniqueid),
+                   database_opts = database_options(schema = schema))
       if (is.null(treedata)) {
         message("invalid denominator... returning null")
         return(NULL)
@@ -284,7 +283,7 @@ check.tree <-
 
   if (esttype == "RATIO") {
     
-    if (addseed && length(tsumvard) > 1) {
+    if (seedlings == "Y" && length(tsumvard) > 1) {
       tsumvard <- tsumvard[length(tsumvard)]
     }
     treedat <- list(tdomdat = tdomdat, 
@@ -302,7 +301,7 @@ check.tree <-
 		                pcdomainlst = pcdomainlst)
   } else {
     
-    if (addseed && length(tsumvarn) > 1) {
+    if (seedlings == "Y" && length(tsumvarn) > 1) {
       tsumvarn <- tsumvarn[length(tsumvarn)]
     }
     
