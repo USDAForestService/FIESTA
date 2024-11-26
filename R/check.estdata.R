@@ -2,7 +2,7 @@ check.estdata <-
   function(esttype,
            popType, 
            popdatindb, popconn = NULL, pop_schema = pop_schema,
-           pltcondflds, totals,
+           pltcondx, totals,
            pop_fmt = NULL, pop_dsn = NULL, 
            sumunits = FALSE, 
            landarea = NULL, landarea_both = TRUE, 
@@ -92,6 +92,14 @@ check.estdata <-
     if (!is.null(pop_schema)) {
       SCHEMA. <- paste0(pop_schema, ".")
     }
+  }
+  
+  ## Get table fields
+  ###########################################################################
+  if (popdatindb && is.character(pltcondx)) {
+    pltcondflds <- DBI::dbGetFields(popconn, pltcondx)
+  } else {
+    pltcondflds <- names(pltcondx)
   }
 
   ## Build where statement with plot/condition filters

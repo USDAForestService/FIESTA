@@ -343,7 +343,6 @@ modGBp2veg <- function(GBpopdat = NULL,
   popType <- GBpopdat$popType
   pltidsadj <- GBpopdat$pltidsadj
   pltcondx <- GBpopdat$pltcondx
-  pltcondflds <- GBpopdat$pltcondflds
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
   ACI <- GBpopdat$ACI
@@ -435,7 +434,7 @@ modGBp2veg <- function(GBpopdat = NULL,
                   popType = popType,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
-                  pltcondflds = pltcondflds,
+                  pltcondx = pltcondx,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
@@ -475,6 +474,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
+  pltcondflds <- estdat$pltcondflds
   
   
   ###################################################################################

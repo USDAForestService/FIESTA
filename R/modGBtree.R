@@ -49,7 +49,7 @@
 #' @param GBpopdat List. Population data objects returned from
 #' FIESTA::modGBpop().
 #' @param estvar String. Name of the tree-level estimate variable (e.g.,
-#' 'VOLCFNET').
+#' 'VOLCFNET'). If estvar.derive, estvar is the list name.
 #' @param estvar.filter String. A tree-level filter for estvar. Must be R
 #' syntax (e.g., 'STATUSCD == 1').
 #' @param estvar.derive List. A derivation of a tree variable to estimate.
@@ -415,7 +415,6 @@ modGBtree <- function(GBpopdat,
   if (is.null(GBpopdat)) return(NULL)
   pltidsadj <- GBpopdat$pltidsadj
   pltcondx <- GBpopdat$pltcondx
-  pltcondflds <- GBpopdat$pltcondflds
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
   treex <- GBpopdat$treex
@@ -498,7 +497,7 @@ modGBtree <- function(GBpopdat,
                   popType = popType,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
-                  pltcondflds = pltcondflds,
+                  pltcondx = pltcondx,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
@@ -538,6 +537,7 @@ modGBtree <- function(GBpopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
+  pltcondflds <- estdat$pltcondflds
   
   
   ###################################################################################

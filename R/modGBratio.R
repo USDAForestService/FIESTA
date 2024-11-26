@@ -439,7 +439,6 @@ modGBratio <- function(GBpopdat,
   if (is.null(GBpopdat)) return(NULL)
   pltidsadj <- GBpopdat$pltidsadj
   pltcondx <- GBpopdat$pltcondx
-  pltcondflds <- GBpopdat$pltcondflds
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
   treex <- GBpopdat$treex
@@ -521,7 +520,7 @@ modGBratio <- function(GBpopdat,
                   popType = popType,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
-                  pltcondflds = pltcondflds,
+                  pltcondx = pltcondx,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
@@ -561,7 +560,8 @@ modGBratio <- function(GBpopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
-
+  pltcondflds <- estdat$pltcondflds
+  
   
   ###################################################################################
   ## Check parameter inputs and tree filters

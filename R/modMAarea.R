@@ -383,7 +383,6 @@ modMAarea <- function(MApopdat,
   if (is.null(MApopdat)) return(NULL)
   pltidsadj <- MApopdat$pltidsadj
   pltcondx <- MApopdat$pltcondx
-  pltcondflds <- MApopdat$pltcondflds
   cuniqueid <- MApopdat$cuniqueid
   pltassgnid <- MApopdat$pltassgnid
   condid <- MApopdat$condid
@@ -473,7 +472,7 @@ modMAarea <- function(MApopdat,
                   popType = popType,
                   popdatindb = popdatindb,
                   popconn = popconn, pop_schema = pop_schema,
-                  pltcondflds = pltcondflds,
+                  pltcondx = pltcondx,
                   totals = totals,
                   pop_fmt=pop_fmt, pop_dsn=pop_dsn,
                   landarea = landarea,
@@ -511,7 +510,8 @@ modMAarea <- function(MApopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
-
+  pltcondflds <- estdat$pltcondflds
+  
 
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf

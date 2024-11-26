@@ -366,7 +366,6 @@ modMAratio <- function(MApopdat,
   condx <- MApopdat$condx
   pltidsadj <- MApopdat$pltidsadj
   pltcondx <- MApopdat$pltcondx	
-  pltcondflds <- MApopdat$pltcondflds
   treex <- MApopdat$treex
   seedx <- MApopdat$seedx
   if (is.null(treex) && is.null(seedx)) {
@@ -464,7 +463,7 @@ modMAratio <- function(MApopdat,
                   popType = popType,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
-                  pltcondflds = pltcondflds,
+                  pltcondx = pltcondx,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   landarea = landarea,
@@ -502,6 +501,7 @@ modMAratio <- function(MApopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
+  pltcondflds <- estdat$pltcondflds
   
   
   ###################################################################################

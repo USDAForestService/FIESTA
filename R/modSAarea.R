@@ -539,7 +539,6 @@ modSAarea <- function(SApopdatlst = NULL,
     SAdomsdf <- SApopdat$SAdomsdf
     pltidsadj <- SApopdat$pltidsadj
     pltcondx <- SApopdat$pltcondx
-    pltcondflds <- SApopdat$pltcondflds
     cuniqueid <- SApopdat$cuniqueid
     pltassgnid <- SApopdat$pltassgnid
     condid <- SApopdat$condid
@@ -647,7 +646,7 @@ modSAarea <- function(SApopdatlst = NULL,
                     popType = popType,
                     popdatindb = popdatindb, 
                     popconn = popconn, pop_schema = pop_schema,
-                    pltcondflds = pltcondflds,
+                    pltcondx = pltcondx,
                     totals = totals,
                     pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                     sumunits = sumunits, 
@@ -686,7 +685,8 @@ modSAarea <- function(SApopdatlst = NULL,
     raw_dsn <- estdat$raw_dsn
     pcwhereqry <- estdat$where.qry
     SCHEMA. <- estdat$SCHEMA.
-
+    pltcondflds <- estdat$pltcondflds
+    
     
     ###################################################################################
     ### Check row and column data

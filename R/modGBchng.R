@@ -364,7 +364,6 @@ modGBchng <- function(GBpopdat,
   pltidsadj <- GBpopdat$pltidsadj
   sccmx <- GBpopdat$sccmx
   pltcondx <- GBpopdat$pltcondx
-  pltcondflds <- GBpopdat$pltcondflds
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
   ACI <- GBpopdat$ACI
@@ -447,7 +446,7 @@ modGBchng <- function(GBpopdat,
                   popType = popType,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
-                  pltcondflds = pltcondflds,
+                  pltcondx = pltcondx,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
@@ -489,7 +488,8 @@ modGBchng <- function(GBpopdat,
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   landarea.filter <- estdat$landarea.filter
-
+  pltcondflds <- estdat$pltcondflds
+  
 
   ###################################################################################
   ### Check row and column data
