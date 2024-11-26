@@ -536,7 +536,7 @@ datSumTree <- function(tree = NULL,
   #   subplotnm <- all_dbtabs[[6]]
   # }
   
-  
+
   ###############################################################################
   ## 4. Check pltidsWITHqry and pltidsid
   ###############################################################################
@@ -756,7 +756,7 @@ datSumTree <- function(tree = NULL,
       bydomainlst <- c(bydomainlst, classifymiss)
     } 
   }
-  
+
   ###############################################################################
   ## 10. Check bydomainlst
   ###############################################################################
@@ -772,6 +772,8 @@ datSumTree <- function(tree = NULL,
       if (any(bydomainlst %in% treeflds)) {
         tdomainlst <- bydomainlst[bydomainlst %in% treeflds]
         pcdomainlst <- bydomainlst[!bydomainlst %in% tdomainlst]
+      } else {
+        pcdomainlst <- bydomainlst
       }
     }
   }
@@ -1743,7 +1745,7 @@ datSumTree <- function(tree = NULL,
   
   ## SELECT variables
   ###########################################################################
-  tsumvardf$SELECT <- paste0(tsumvardf$SELECT, " AS ", tsumvardf$NAME)
+  tsumvardf$SELECT <- paste0("\n  ", tsumvardf$SELECT, " AS ", tsumvardf$NAME)
   
   if (addseed) {
     tsumvardf$SELECT[tsumvardf$TABLE == "TREE"] <- 

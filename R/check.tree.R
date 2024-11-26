@@ -111,7 +111,7 @@ check.tree <-
       }
     }
   } else {  
- 
+
     ## Get summed tree data
     treedata <- 
       datSumTree(tree = treex, 
