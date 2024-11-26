@@ -672,7 +672,7 @@ datSumTree <- function(tree = NULL,
   if (!seedonly) {
     tsumvarlst <- pcheck.varchar(var2check = tsumvarlst, varnm = "tsumvarlst", 
                                  checklst = treeflds, caption = "Aggregate variable(s)", 
-                                 multiple = TRUE, stopifnull = FALSE)
+                                 multiple = TRUE, stopifnull = FALSE, stopifinvalid = FALSE)
     if (is.null(tsumvarlst) && is.null(tderive)) {
       stop("must include tsumvarlst or tderive variables")
     }
@@ -715,22 +715,20 @@ datSumTree <- function(tree = NULL,
 
   ###############################################################################
   ## 8. Check tderive
-  ## Check if variables in tderive are in treeflds and get identify them for query.
+  ## Check if variables in tderive are in treeflds and identify them for query.
   ###############################################################################
   if (!is.null(tderive)) {
     if (!is.list(tderive) || is.null(names(tderive))) {
       stop(paste0("tderive must be a named list object...\n",
                   "e.g., tderive = list(SDI = '(POWER(DIA / 10, 1.605)) * TPA_UNADJ')"))
     } 
-    if (!seedonly) {
-      tderivevars  <- lapply(tderive, 
-                             function(.td) treeflds[sapply(treeflds, function(.tf) grepl(.tf, .td))])
-      tderive_invalid <- names(tderivevars)[(lapply(tderivevars, length) == 0)]
-      if (length(tderive_invalid) > 0) {
-        stop(paste0("the following variables listed in tderive do not exist in tree data: \n", tderive_invalid))
-      } else {
-        tderivevars <- unique(unlist(tderivevars, use.names = FALSE))
-      }
+    tderivevars <- lapply(tderive, function(x,varlst) 
+      {check.logic.vars(statement=x, varlst=varlst, ignore.case=TRUE, returnVars=TRUE)}, varlst=treeflds)
+    tderive_invalid <- names(tderivevars)[(lapply(tderivevars, length) == 0)]
+    if (length(tderive_invalid) > 0) {
+      stop(paste0("the following variables listed in tderive do not exist in tree data: \n", tderive_invalid))
+    } else {
+      tderivevars <- unique(unlist(tderivevars, use.names = FALSE))
     }
   }
 
@@ -1563,7 +1561,6 @@ datSumTree <- function(tree = NULL,
       }			
     }
     
-
     ### Convert variables from pound to tons if lbs2tons=TRUE
     ########################################################################### 
     if (any(tsumvarlst %in% vars2convert)) {
@@ -1777,7 +1774,8 @@ datSumTree <- function(tree = NULL,
     }
     twithSelect <- paste0(talias., unique(c(tsumuniqueid, twithvars)))
     tvarlst <- unique(c(tdomainlst, tsumvarlst, tpavarnm))
-    
+    alltvarlst <- unique(c(tsumuniqueid, twithvars, tvarlst))
+      
     if (addseed) {
       if (!is.null(tvarlst)) {
         spcdnm <- findnm("SPCD", tvarlst, returnNULL = TRUE)
@@ -1795,7 +1793,7 @@ datSumTree <- function(tree = NULL,
           tvarlst <- tvarlst[tvarlst != tpanm]
         }
       }
-      twithSelect <- unique(c(twithSelect, tvarlst))
+      twithSelect <- unique(c(twithSelect, paste0(talias., tvarlst)))
     } else {
       if (!is.null(tvarlst)) {
         twithSelect <- unique(c(twithSelect, paste0(talias., tvarlst)))
@@ -1806,12 +1804,13 @@ datSumTree <- function(tree = NULL,
     #twithqry <- paste(twithqry, toString(paste0(talias., twithSelect)))
 
     if (!is.null(tderive)) {
-      tderivevars <- tderivevars[!tderivevars %in% twithSelect]
+      tderivevars <- tderivevars[!tderivevars %in% alltvarlst]
       
       if (length(tderivevars) > 0) {
         #twithSelect <- c(paste0(talias., twithSelect), tderivevars)
         twithSelect <- c(twithSelect, paste0(talias., tderivevars))
       }
+      alltvarlst <- unique(c(alltvarlst, tderivevars))
     }
 
     ## Build final select statement for tdat WITH query
@@ -1859,14 +1858,17 @@ datSumTree <- function(tree = NULL,
         !tsumvardf$TSUMVAR[tsumvardf$TABLE == "TREE" & !tsumvardf$DERIVE] %in% tpavarnm])  
       swithqry <- paste0("\n SELECT 'SEED' src, ") 
       swithSelect <- unique(c(paste0("s.", tsumuniqueid), "s.CONDID", "s.SUBP", 0))
+      allsvarlst <- c(tsumuniqueid, "CONDID", "SUBP", 0)
 
       spcdanm <- findnm("t.SPCD", twithSelect, returnNULL = TRUE)
       if (!is.null(spcdanm)) {
         swithSelect <- c(swithSelect, paste0(salias., spcdnm))
+        allsvarlst <- c(allsvarlst, spcdnm)
       }
       tpaanm <- findnm("t.TPA_UNADJ", twithSelect, returnNULL = TRUE)
       if (!is.null(tpaanm)) {
         swithSelect <- c(swithSelect, paste0("s.", tpanm))
+        allsvarlst <- c(allsvarlst, tpanm)
       }
       swithqry <- paste0(swithqry, toString(swithSelect))
       
@@ -1882,8 +1884,10 @@ datSumTree <- function(tree = NULL,
           }
         }        
       }
-      
-      nbrvar <- nbrvar + (length(tvarlst) - length(sdomainlst))
+      allsvarlst <- c(allsvarlst, sdomainlst)
+
+      #nbrvar <- nbrvar + (length(tvarlst) - length(sdomainlst))
+      nbrvar <- length(alltvarlst) - length(allsvarlst)
       if (nbrvar > 0) {
         swithqry <- paste0(swithqry, ", ", toString(rep("'null'", nbrvar)))
       }
@@ -2322,12 +2326,14 @@ datSumTree <- function(tree = NULL,
   sumtreelst <- list(treedat = sumdat, 
                      sumvars = tsumvardf$NAME, 
                      tsumuniqueid = tsumuniqueid,
-                     domainlst = domainlst,
                      treeqry = tree.qry)
   #sumtreelst$estunits <- estunits
   if (!is.null(tfilter)) {
     sumtreelst$tfilter <- tfilter
   }
+  #if (!is.null(domainlst)) {
+  #  sumtreelst$domainlst <- domainlst
+  #}
   if (!is.null(tdomainlst)) {
     sumtreelst$tdomainlst <- tdomainlst
   }
@@ -2336,13 +2342,14 @@ datSumTree <- function(tree = NULL,
   }
   if (!is.null(domclassify)) {
     sumtreelst$classifynmlst <- classifynmlst
-    
+  }
+  if (!is.null(tround)) {
+    sumtreelst$tround <- tround
   }
   if (!is.null(meta) && nrow(meta) > 0) {
     sumtreelst$meta <- meta
   }
-  sumtreelst$tround <- tround
-  
+
   return(sumtreelst)
   
 } 
