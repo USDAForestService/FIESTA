@@ -300,8 +300,10 @@ datSumTreeDom <- function(tree = NULL,
   
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-    savedata_opts = savedata_opts))
-  savedata_opts <- optslst$savedata_opts  
+                         savedata_opts = savedata_opts,
+                         datSum_opts = datSum_opts))
+  savedata_opts <- optslst$savedata_opts 
+  datSum_opts <- optslst$datSum_opts
 
   ##################################################################
   ## CHECK PARAMETER INPUTS
@@ -344,6 +346,11 @@ datSumTreeDom <- function(tree = NULL,
     spcd_name <- pcheck.varchar(var2check=spcd_name, varnm="spcd_name", 
                     checklst=spcd_namelst, gui=gui, caption="SPCD name type?") 
   }
+  
+  ## Check checkNA
+  NAto0 <- pcheck.logical(datSum_opts$NAto0, varnm="NAto0", title="Convert NA to 0?", 
+                          first="YES", gui=gui)
+  if (is.null(NAto0)) NAto0 <- FALSE
   
   ## Check pivot
   pivot <- pcheck.logical(pivot, varnm="pivot", title="Pivot columns?", 

@@ -98,6 +98,7 @@ datSumCond <- function(cond = NULL,
   ACI <- FALSE
   checkNA = FALSE
   returnDT = TRUE
+  NAto0 <- TRUE
   
 
   ##################################################################
@@ -260,6 +261,7 @@ datSumCond <- function(cond = NULL,
 
   if (!is.null(pltx)) {
     noplt <- FALSE
+    puniqueid <- tabIDs[["plt"]]
 
     ## Remove totally nonsampled plots
     if ("PLOT_STATUS_CD" %in% names(pltx)) {
@@ -277,8 +279,8 @@ datSumCond <- function(cond = NULL,
     pltnmlst <- names(pltx)
     nmlst <- names(pltx)
     puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", 
-		checklst=pltnmlst, caption="UniqueID variable - plt", 
-		warn="puniqueid not in plot table", stopifnull=TRUE)
+		                   checklst=pltnmlst, caption="UniqueID variable - plt", 
+		                   warn="puniqueid not in plot table", stopifnull=TRUE)
 
     ## Check that the values of cuniqueid in condx are all in puniqueid in pltx
     check.matchval(condx, pltx, cuniqueid, puniqueid)

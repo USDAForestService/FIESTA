@@ -495,7 +495,7 @@ treesumdat2 <- datSumTree(
                   tsumvarlst = c("BA", "VOLCFNET"),
                   tfilter = "STATUSCD == 1", 
                   bycond = FALSE, 
-                  datSum_opts - list(TPA = TRUE, tround = 2)
+                  datSum_opts = list(TPA = TRUE, tround = 2)
                   )
 
 names(treesumdat2)
@@ -870,7 +870,7 @@ treedomCNTs <- datSumTreeDom(tree = WYtree,
                              tfilter = "STATUSCD==1",
 		                         seedlings = "Y", 
 		                         proportion = TRUE,
-		                         datSumt_opts = list(tround = 0))
+		                         datSum_opts = list(tround = 0))
 names(treedomCNTs)
 tdomdat.pres <- treedomCNTs$tdomdat.pres
 tdomdat.prop <- treedomCNTs$tdomdat.prop

@@ -160,7 +160,6 @@ datSumTree <- function(tree = NULL,
 
   datindb <- FALSE
   pltassgnid <- "PLT_CN"
-  NAto0 <- TRUE
   SCHEMA. <- ""
   checkNA = FALSE
   returnDT = TRUE
@@ -170,7 +169,7 @@ datSumTree <- function(tree = NULL,
   talias. <- "t."
   salias. <- "s."
   
-    
+   
   ## For documentation
   # subplot Dataframe or comma-delimited file (*.csv). If getadjplot=TRUE, 
   # The subplot-level table with SUBP_STATUS_CD variable for calculating
@@ -220,10 +219,10 @@ datSumTree <- function(tree = NULL,
 
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-    savedata_opts = savedata_opts,
-    database_opts = database_opts,
-    datSum_opts = datSum_opts,
-    tabIDs = tabIDs))
+                         savedata_opts = savedata_opts,
+                         database_opts = database_opts,
+                         datSum_opts = datSum_opts,
+                         tabIDs = tabIDs))
   savedata_opts <- optslst$savedata_opts  
   database_opts <- optslst$database_opts  
   datSum_opts <- optslst$datSum_opts
@@ -354,6 +353,11 @@ datSumTree <- function(tree = NULL,
   woodlandlst <- c("Y", "N", "only")
   woodland <- pcheck.varchar(var2check=woodland, varnm="woodland", 
                              checklst=woodlandlst, gui=gui, caption="Woodland?") 
+  
+  ## Check checkNA
+  NAto0 <- pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
+                          first="YES", gui=gui)
+  if (is.null(NAto0)) NAto0 <- FALSE
   
   
   ###############################################################################
