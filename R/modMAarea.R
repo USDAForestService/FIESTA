@@ -625,7 +625,7 @@ modMAarea <- function(MApopdat,
   ## Append name of package and method to outfile name
   outfn.estpse <- paste0(outfn.estpse, "_modMA_mase", "_", MAmethod) 
   
- 
+
   #####################################################################################
   ## GENERATE ESTIMATES
   #####################################################################################

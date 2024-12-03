@@ -326,8 +326,10 @@ modGBpop <- function(popType = "VOL",
   
   ## Check parameter lists
   pcheck.params(input.params = input.params,
-                strata_opts = strata_opts, unit_opts = unit_opts, 
-                savedata_opts = savedata_opts, database_opts = database_opts)
+                strata_opts = strata_opts, 
+                unit_opts = unit_opts, 
+                savedata_opts = savedata_opts, 
+                database_opts = database_opts)
  
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
@@ -352,7 +354,10 @@ modGBpop <- function(popType = "VOL",
   for (i in 1:length(strata_opts)) {
     assign(names(strata_opts)[[i]], strata_opts[[i]])
   }
-
+  for (i in 1:length(savedata_opts)) {
+    assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+  }
+  
   
   ##################################################################
   ## CHECK PARAMETER INPUTS

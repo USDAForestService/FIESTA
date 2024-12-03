@@ -277,10 +277,10 @@ modSApop <- function(popType = "VOL",
   
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-    popFilter = popFilter,
-    unit_opts = unit_opts, 
-    savedata_opts = savedata_opts,
-    database_opts = database_opts))
+                         popFilter = popFilter,
+                         unit_opts = unit_opts, 
+                         savedata_opts = savedata_opts,
+                         database_opts = database_opts))
   savedata_opts <- optslst$savedata_opts  
   unit_opts <- optslst$unit_opts  
   database_opts <- optslst$database_opts  
@@ -288,6 +288,9 @@ modSApop <- function(popType = "VOL",
   
   for (i in 1:length(unit_opts)) {
     assign(names(unit_opts)[[i]], unit_opts[[i]])
+  }
+  for (i in 1:length(savedata_opts)) {
+    assign(names(savedata_opts)[[i]], savedata_opts[[i]])
   }
   
   

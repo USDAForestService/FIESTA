@@ -29,7 +29,7 @@ modGBtree(
 FIESTA::modGBpop().}
 
 \item{estvar}{String. Name of the tree-level estimate variable (e.g.,
-'VOLCFNET').}
+'VOLCFNET'). If estvar.derive, estvar is the list name.}
 
 \item{estvar.filter}{String. A tree-level filter for estvar. Must be R
 syntax (e.g., 'STATUSCD == 1').}
