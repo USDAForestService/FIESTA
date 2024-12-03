@@ -300,7 +300,7 @@ datSumTree <- function(tree = NULL,
                                  dbconnopen = TRUE)
     }
     if (!is.null(database_opts$schema)) {
-      SCHEMA. <- paste0(schema, ".")
+      SCHEMA. <- paste0(database_opts$schema, ".")
     }
   }
   if (datindb) {
@@ -1208,13 +1208,16 @@ datSumTree <- function(tree = NULL,
   ## if adjtree = TRUE, first check if 'tadjfac' is in treeflds
   ## If 'tadjfac' is not in treeflds, check if getadjplot = TRUE or pltidsWITHqry is not NULL
   if (adjtree) {
+    adjvar <- datSum_opts$adjvar
     if (!seedonly) {
-      if (!datSum_opts$adjvar %in% treeflds) {
+      if (!adjvar %in% treeflds) {
         if (is.null(condnm) && is.null(pltidsWITHqry)) {
           if (bysubp) {
-            msg <- paste0("must include cond, subplot, subp_cond tables or pltidsWITHqry or ", adjvar, " in tree table when adj != 'none'")
+            msg <- paste0("must include cond, subplot, subp_cond tables or pltidsWITHqry or ", 
+                          adjvar, " in tree table when adj != 'none'")
           } else {
-            msg <- paste0("must include cond or pltidsWITHqry or ", adjvar, " in tree table when adj != 'none'")
+            msg <- paste0("must include cond or pltidsWITHqry or ", 
+                          adjvar, " in tree table when adj != 'none'")
           }
           stop(msg)
         } else {

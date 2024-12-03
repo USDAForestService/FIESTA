@@ -97,7 +97,7 @@ check.estdata <-
   ## Get table fields
   ###########################################################################
   if (popdatindb && is.character(pltcondx)) {
-    pltcondflds <- DBI::dbGetFields(popconn, pltcondx)
+    pltcondflds <- DBI::dbListFields(popconn, pltcondx)
   } else {
     pltcondflds <- names(pltcondx)
   }
