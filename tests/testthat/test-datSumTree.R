@@ -6,11 +6,9 @@ test_that("datSumTree Aboveground Biomass w/out Extrapolation", {
 
   # Using datSumTree - nonTPA  
   test1 <- datSumTree(tree = FIESTA::WYtree, ##
-                      pjoinid = "PLT_CN",
                       tsumvarlst = "DRYBIO_AG", ##tsumvarlst == tree-level variables to aggregate: in this case it is aboveground biomass
-                      lbs2tons = FALSE, ##if TRUE converts biomass or carbon variables from lbs to tons
                       tfilter = "STATUSCD == 1",
-                      datSum_opts = list(TPA = FALSE)) ## Set to alive trees
+                      datSum_opts = list(TPA = FALSE, lbs2tons = FALSE)) ## Set to alive trees
 
   treedat_nonTPA <- test1$treedat
   # Using datSumTree for one plot

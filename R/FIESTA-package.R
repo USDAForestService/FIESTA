@@ -43,7 +43,6 @@
 #' 
 #' @name FIESTA-package
 #' @aliases FIESTA-package FIESTA
-#' @docType package
 #' @author Tracey S. Frescino Maintainer: Tracey S. Frescino
 #' @references
 #' 
@@ -62,7 +61,7 @@
 #' North. Res. Stn.  URL http://apps.fs.fed.us/fiadb-downloads/datamart.html
 #' (accessed 3.6.21).
 #' @keywords package
-NULL
+"_PACKAGE"
 
 
 #' FIA data. Plot assignment data from FIA public database.
