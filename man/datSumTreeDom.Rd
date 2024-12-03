@@ -242,15 +242,6 @@ used for mapping tree domain distributions.
 }
 \examples{
 \donttest{
-# Sum of Live Basal Area Per Acre by Species
-datSumTreeDom(tree = FIESTA::WYtree, 
-              bycond = FALSE, 
-              tsumvar = "BA", 
-              tdomtot = TRUE, 
-              tdomtotnm = "BA_LIVE", 
-              tdomprefix = "BA_LIVE", 
-              tfilter = "STATUSCD==1",
-              datSum_options(tround = 2))
               
 # Sum of Number of Live Trees by Species
 datSumTreeDom(tree = FIESTA::WYtree,
@@ -260,7 +251,7 @@ datSumTreeDom(tree = FIESTA::WYtree,
               tdomtot = TRUE, 
               tdomprefix = "CNT", 
               tfilter = "STATUSCD==1",
-              datSum_options = list(tround = 0))
+              datSum_opts = list(tround = 0))
               
 # Sum of Number of Live Trees by Species, Including Seedlings
 datSumTreeDom(tree = WYtree,
@@ -269,7 +260,7 @@ datSumTreeDom(tree = WYtree,
               tsumvar = "PLT_CN", 
               tdomtot = TRUE, 
               tdomprefix = "CNT", 
-              datSum_options = list(tround = 0)
+              datSum_opts = list(tround = 0))
 }
 }
 \author{

@@ -631,17 +631,17 @@ spGetStrata <- function(xyplt,
 	  stratalut$UNITVAR <- NULL
 	  
 	  ## set classs of unitvar
-	  if (class(unitarea[[unitvar]]) != "numeric" && unitvarclass == "numeric") {
+	  if (!is.numeric(unitarea[[unitvar]]) && unitvarclass == "numeric") {
 	    unitarea[[unitvar]] <- as.numeric(unitarea[[unitvar]])
 	  }
-	  if (class(stratalut[[unitvar]]) != "numeric" && unitvarclass == "numeric") {
+	  if (!is.numeric(stratalut[[unitvar]]) && unitvarclass == "numeric") {
 	    stratalut[[unitvar]] <- as.numeric(stratalut[[unitvar]])
 	  }
 	  ## set classs of unitvar2
-	  if (class(unitarea[[unitvar2]]) != "numeric" && unitvar2class == "numeric") {
+	  if (!is.numeric(unitarea[[unitvar2]]) && unitvar2class == "numeric") {
 	    unitarea[[unitvar2]] <- as.numeric(unitarea[[unitvar2]])
 	  }
-	  if (class(stratalut[[unitvar2]]) != "numeric" && unitvar2class == "numeric") {
+	  if (!is.numeric(stratalut[[unitvar2]]) && unitvar2class == "numeric") {
 	    stratalut[[unitvar2]] <- as.numeric(stratalut[[unitvar2]])
 	  }
   }	   
