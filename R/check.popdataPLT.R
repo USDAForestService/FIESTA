@@ -1115,9 +1115,9 @@ check.popdataPLT <-
     ppsaselectvars <- {}
     pltassgnvars <- pltassgnvars[pltassgnvars %in% pltassgnflds]
     if (length(pltassgnvars) > 0) {
-      pltassgnselectvars <- paste0(pltassgn., pltassgnvars)
+      pltassgnselectvars <- paste0(pltassgn., sQuote(pltassgnvars, FALSE))
     }
-   
+
     ## Build select for pltassgnx
     pltassgn_selectqry <- paste0("SELECT ",
                                  toString(pltassgnselectvars))
@@ -1131,18 +1131,18 @@ check.popdataPLT <-
       pltassgnx <- tryCatch(
         DBI::dbGetQuery(dbconn, pltassgnxqry),
         error=function(e) {
-          message("invalid pltassgn query...")
           message(e,"\n")
           return(NULL)})
     } else {
       pltassgnx <- tryCatch(
         sqldf::sqldf(pltassgnxqry, connection = NULL),
         error=function(e) {
-          message("invalid pltassgn query...")
           message(e,"\n")
           return(NULL)})
     }
     if (is.null(pltassgnx)) {
+      message("invalid pltassgn query...")
+      message(pltassgnxqry)
       return(NULL)
     } else {
       pltassgnx <- setDT(pltassgnx)

@@ -33,6 +33,15 @@ getMAestimates <- function(esttype,
   response <- estvarn.name
   predselectlst <- list()
   
+  
+  ## Check column names
+  prednames <- names(data.frame(matrix(NA,1,length(prednames), 
+                                       dimnames=list(rownames=NULL, colnames=prednames))))
+  pltassgnx <- data.table(pltassgnx, check.names = TRUE)
+  unitarea <- data.table(unitarea, check.names = TRUE)
+  unitlut <- data.table(unitlut, check.names = TRUE)
+  
+  
   masemethod <- switch(MAmethod,
                        PS = "postStrat",
                        greg = "greg",
@@ -61,6 +70,8 @@ getMAestimates <- function(esttype,
   estunits <- sort(unique(domdatn[[unitvar]]))
   
   predselect.overall <- NULL
+  
+  
   if (masemethod == "greg" && modelselect == T) {
     
     # want to do variable selection on plot level data...
@@ -83,8 +94,9 @@ getMAestimates <- function(esttype,
     xpop_npix[ ,2:ncol(xpop)] <- lapply(xpop_npix[ ,2:ncol(xpop)], function(x) xpop_npix[["npixels"]] * x)
     # sum those values
     xpop_totals <- colSums(xpop_npix[ ,2:ncol(xpop)])
+    
     # format xpop for mase input
-    xpop_totals <- data.frame(as.list(xpop_totals))
+    xpop_totals <- data.frame(as.list(xpop_totals), check.names=FALSE)
     
     N <- sum(npixels[["npixels"]])
     xpop_means <- xpop_totals/N
@@ -92,13 +104,10 @@ getMAestimates <- function(esttype,
     # since we want to do modelselection + get the coefficients, just use MAest.greg
     coefs_select <- MAest.greg(y = y,
                                N = N,
-                               x_sample = setDF(xsample),
-                               x_pop = xpop_means,
+                               x_sample = data.frame(xsample),
+                               x_pop = data.frame(xpop_means),
                                modelselect = TRUE)
-    
-    
     predselect.overall <- coefs_select$predselect
-    
     prednames <- names(predselect.overall[ ,(!is.na(predselect.overall))[1,], with = F])
     message(paste0("Predictors ", "[", paste0(prednames, collapse = ", "), "]", " were chosen in model selection.\n"))
     
@@ -118,7 +127,7 @@ getMAestimates <- function(esttype,
       var_method <- "LinHTSRS"
     }
   }
-  
+ 
   if (addtotal) {
     
     domdattot <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
