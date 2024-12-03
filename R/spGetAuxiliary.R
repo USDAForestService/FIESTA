@@ -1103,16 +1103,16 @@ spGetAuxiliary <- function(xyplt = NULL,
   }
 
   if (extract) {
-    returnlst$pltassgn <- data.frame(pltassgn)
+    returnlst$pltassgn <- data.frame(pltassgn, check.names = FALSE)
     returnlst$pltassgnid <- uniqueid
   }
 
   if (areacalc) {
-    returnlst$unitarea <- data.frame(unitarea)
+    returnlst$unitarea <- data.frame(unitarea, check.names = FALSE)
     returnlst$areavar <- areavar
   }
   if (!noaux) {
-    returnlst$unitzonal <- data.frame(unitzonal)
+    returnlst$unitzonal <- data.frame(unitzonal, check.names = FALSE)
     returnlst$inputdf <- inputdf
     returnlst$prednames <- unique(prednames)
     returnlst$zonalnames <- unique(zonalnames)
