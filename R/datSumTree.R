@@ -481,7 +481,7 @@ datSumTree <- function(tree = NULL,
         wtwhereqry <- paste(twoodlandnm, "= 'Y'")
       } else if (woodland == "N") {
         wtwhereqry <- paste(twoodlandnm, "= 'N'")
-      }
+      } 
     }
     if (seedonly || addseed) {
       if (swoodlandref) {
@@ -494,9 +494,10 @@ datSumTree <- function(tree = NULL,
         wswhereqry <- paste(swoodlandnm, "= 'Y'")
       } else if (woodland == "N") {
         wswhereqry <- paste(swoodlandnm, "= 'N'")
-      }
+      } 
     }
   }
+
 
   ## Check seedling 
   ###############################################################################
@@ -1388,9 +1389,8 @@ datSumTree <- function(tree = NULL,
       if (addseed || seedonly) {
         sadjcase <- paste0("adj.", adjvarlst[["MICR"]])
       }	  
-    }  ## END getadjplot
-    
-    
+    } ## END getadjplot
+
     ## Build query for select CASE statement to add adjfactors
     ######################################################################################
     adjalias. <- NULL
@@ -1775,7 +1775,7 @@ datSumTree <- function(tree = NULL,
     twithSelect <- paste0(talias., unique(c(tsumuniqueid, twithvars)))
     tvarlst <- unique(c(tdomainlst, tsumvarlst, tpavarnm))
     alltvarlst <- unique(c(tsumuniqueid, twithvars, tvarlst))
-      
+    
     if (addseed) {
       if (!is.null(tvarlst)) {
         spcdnm <- findnm("SPCD", tvarlst, returnNULL = TRUE)
@@ -1793,12 +1793,15 @@ datSumTree <- function(tree = NULL,
           tvarlst <- tvarlst[tvarlst != tpanm]
         }
       }
-      twithSelect <- unique(c(twithSelect, paste0(talias., tvarlst)))
+      if (length(tvarlst) != 0) {
+        twithSelect <- unique(c(twithSelect, paste0(talias., tvarlst)))
+      }
     } else {
       if (!is.null(tvarlst)) {
         twithSelect <- unique(c(twithSelect, paste0(talias., tvarlst)))
       }
     }
+
 
     ## Build final select statement for tdat WITH query
     #twithqry <- paste(twithqry, toString(paste0(talias., twithSelect)))
@@ -1911,7 +1914,7 @@ datSumTree <- function(tree = NULL,
 
       ## WHERE statement - Woodland
       swithwhereqry <- swhereqry
-      if (!is.null(woodland) && woodland %in% c("Y", "N", "only")) {
+      if (!is.null(woodland) && woodland %in% c("N", "only")) {
         swithfromqry <- paste(swithfromqry, wsfromqry)
         if (is.null(swithwhereqry)) {
           swithwhereqry <- paste0("\n WHERE ", wswhereqry)
