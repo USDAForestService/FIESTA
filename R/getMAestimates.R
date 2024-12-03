@@ -27,8 +27,9 @@ getMAestimates <- function(esttype,
                            col.orderby = NULL) {
   
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
-  addtotal <- ifelse(rowvar %in% c("PREV_TOTAL", "TOTAL") || 
-                       length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
+#  addtotal <- ifelse(rowvar %in% c("PREV_TOTAL", "TOTAL") || 
+#                       length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
+  addtotal <- TRUE
   modelselect_bydomain <- FALSE
   response <- estvarn.name
   predselectlst <- list()
@@ -127,12 +128,11 @@ getMAestimates <- function(esttype,
       var_method <- "LinHTSRS"
     }
   }
- 
+
   if (addtotal) {
     
     domdattot <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
                          by=c(unitvar, uniqueid, "TOTAL", prednames), .SDcols=response]
-    
     unit_totestlst <- lapply(estunits, MAest.unit, 
                              dat = domdattot, cuniqueid = uniqueid, 
                              unitlut = unitlut, unitvar = unitvar, 
@@ -183,7 +183,7 @@ getMAestimates <- function(esttype,
                              var_method = var_method)
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
-      predselectlst$rowest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
+      predselectlst$rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "predselect"))
     }
     
     if (colvar != "NONE") {

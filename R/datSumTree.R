@@ -675,12 +675,30 @@ datSumTree <- function(tree = NULL,
   ### 6. Check tsumvarlst
   ###############################################################################
   if (!seedonly) {
-    tsumvarlst <- pcheck.varchar(var2check = tsumvarlst, varnm = "tsumvarlst", 
+    tsumvarchklst <- pcheck.varchar(var2check = tsumvarlst, varnm = "tsumvarlst", 
                                  checklst = treeflds, caption = "Aggregate variable(s)", 
                                  multiple = TRUE, stopifnull = FALSE, stopifinvalid = FALSE)
-    if (is.null(tsumvarlst) && is.null(tderive)) {
-      stop("must include tsumvarlst or tderive variables")
+    if (is.null(tsumvarchklst) || length(tsumvarchklst) < length(tsumvarlst)) {
+      BAchk <- findnm("BA", tsumvarlst, returnNULL = TRUE)
+      if (!is.null(BAchk) && is.null(findnm("BA", tsumvarchklst, returnNULL = TRUE))) {
+        BAderivechk <- findnm("BA", names(tderive), returnNULL = TRUE)
+        if (is.null(BAderivechk)) {
+          if (!is.null(tderive)) {
+            tderive[["BA"]] <- "SUM(power(dia, 2) * 0.005454 * tpa_unadj)"
+          } else {
+            tderive <- list(BA = "SUM(power(dia, 2) * 0.005454 * tpa_unadj)")
+          }
+          tsumvarlst <- tsumvarlst[tsumvarlst != BAderivechk]
+          if (length(tsumvarlst) == 0) tsumvarlst <- NULL
+        }
+      }
+    } else {
+      tsumvarlst <- tsumvarchklst
     }
+    
+    if (is.null(tsumvarchklst) && is.null(tderive)) {
+      stop("must include tsumvarlst or tderive variables")
+    } 
     if (!is.null(tsumvarlst) && any(tsumvarlst == tuniqueid)) {
       tsumvarlst[tsumvarlst == tuniqueid] <- "TPA_UNADJ"
     }
@@ -693,7 +711,7 @@ datSumTree <- function(tree = NULL,
       stop("tsumvarlst must include TPA_UNADJ for seedonly or addseed")
     } 
   }
-  
+
   ###############################################################################
   ## 7. Get names for summed tree variable(s)
   ###############################################################################
@@ -765,11 +783,13 @@ datSumTree <- function(tree = NULL,
   ###############################################################################
   tdomainlst <- NULL
   domainlst <- bydomainlst
-  if (!is.null(bydomainlst)) {
+  if (!is.null(domainlst)) {
     if (seedonly) {
       if (any(bydomainlst %in% seedflds)) {
         tdomainlst <- bydomainlst[bydomainlst %in% seedflds]
         pcdomainlst <- bydomainlst[!bydomainlst %in% tdomainlst]
+      } else {
+        pcdomainlst <- bydomainlst
       }
     } else {
       if (any(bydomainlst %in% treeflds)) {

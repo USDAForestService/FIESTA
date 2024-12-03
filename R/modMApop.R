@@ -738,7 +738,7 @@ modMApop <- function(popType="VOL",
     
     ## Add FORTYPGRPCD to pltcondx if not already in dataset
     fortypgrpnm <- findnm("FORTYPGRPCD", pltcondxcols, returnNULL=TRUE)
-    
+
     if (is.null(fortypgrpnm)) {
       fortypnm <- findnm("FORTYPCD", pltcondxcols, returnNULL=TRUE)
       

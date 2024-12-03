@@ -616,7 +616,6 @@ modMAtree <- function(MApopdat,
       domclassify[[colvar]] <- classifycol$col.classify
     }
   }
-  
 
   #################################################################################
   ### GET ESTIMATION DATA FROM TREE TABLE
@@ -627,6 +626,7 @@ modMAtree <- function(MApopdat,
   } else {
     pltidsWITHqry <- NULL
   }
+
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 

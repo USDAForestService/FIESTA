@@ -3471,7 +3471,7 @@ DBgetPlots <- function (states = NULL,
         }
 	    }
 	  }
-	
+
     ##############################################################
     ## Seedling data (SEEDLING)
     ##############################################################
@@ -3480,18 +3480,28 @@ DBgetPlots <- function (states = NULL,
       	"## STATUS: Getting seed data from SEEDLING (", stabbr, ") ...", "\n")
 
       if (datsource == "sqlite") {
-        seednm <- chkdbtab(dbtablst, seed_layer)
+        seednm <- findnm(seed_layer, dbtablst, returnNULL = TRUE)
         if (is.null(seednm)) {
-          stest <- dbtablst[grepl("seed", dbtablst)]
+          stest <- findnm("seed", dbtablst, returnNULL = TRUE)
           if (length(stest) == 1) {
             seednm <- stest
-
-            ## Get seedling fields
             seedflds <- DBI::dbListFields(dbconn, seednm)
           } else {
-            message("there is no seedling table in database")
-            isseed <- FALSE 
-            seednm <- NULL
+            if (length(stest) == 1) {
+              seednm <- stest
+              seedflds <- DBI::dbListFields(dbconn, seednm)
+              
+            } else {
+              stest <- findnm("seedling", dbtablst, returnNULL = TRUE)
+              if (length(stest) == 1) {
+                seednm <- stest
+                seedflds <- DBI::dbListFields(dbconn, seednm)
+              } else {
+                message("there is no seedling table in database")
+                isseed <- FALSE 
+                seednm <- NULL
+              }
+            }
           }
         } else {
           seedflds <- DBI::dbListFields(dbconn, seednm)
