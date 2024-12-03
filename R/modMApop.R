@@ -309,10 +309,10 @@ modMApop <- function(popType="VOL",
   
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-    popFilter = popFilter,
-    unit_opts = unit_opts, 
-    savedata_opts = savedata_opts,
-    database_opts = database_opts))
+                         popFilter = popFilter,
+                         unit_opts = unit_opts, 
+                         savedata_opts = savedata_opts,
+                         database_opts = database_opts))
   savedata_opts <- optslst$savedata_opts  
   unit_opts <- optslst$unit_opts  
   database_opts <- optslst$database_opts  
@@ -321,7 +321,10 @@ modMApop <- function(popType="VOL",
   for (i in 1:length(unit_opts)) {
     assign(names(unit_opts)[[i]], unit_opts[[i]])
   }
-
+  for (i in 1:length(savedata_opts)) {
+    assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+  }
+  
   
   ##################################################################
   ## CHECK PARAMETER INPUTS
@@ -355,12 +358,12 @@ modMApop <- function(popType="VOL",
     }
     #if (append_layer) overwrite_layer <- FALSE
     if (append_layer) message("currently cannot append to object lists")
-    objfn <- getoutfn(outfn=objnm,
-                      ext=outobj_fmt,
-                      outfolder=outfolder, 
-                      overwrite=overwrite_layer,
-                      outfn.pre=outfn.pre,
-                      outfn.date=outfn.date)
+    objfn <- getoutfn(outfn = objnm,
+                      ext = outobj_fmt,
+                      outfolder = outfolder, 
+                      overwrite = overwrite_layer,
+                      outfn.pre = outfn.pre,
+                      outfn.date = outfn.date)
   }
   
   

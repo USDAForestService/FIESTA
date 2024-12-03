@@ -685,12 +685,14 @@ spGetStrata <- function(xyplt,
   }
   
   
-  returnlst <- list(bnd=unitlayerx, pltassgn=setDF(pltassgn), 
-		  pltassgnid=uniqueid, unitarea=setDF(unitarea), 
-		  unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-		  areaunits=areaunits,
-		  stratalut=setDF(stratalut), strvar=strvar, 
-		  getwt=FALSE, strwtvar="strwt")
+  returnlst <- list(bnd = unitlayerx, 
+                    pltassgn = data.frame(pltassgn, check.names = FALSE), 
+		                pltassgnid = uniqueid, 
+		                unitarea = data.frame(unitarea, check.names = FALSE), 
+		                unitvar = unitvar, unitvar2 = unitvar2, 
+		                areavar = areavar, areaunits = areaunits,
+		                stratalut = data.frame(stratalut, check.names = FALSE), 
+		                strvar = strvar, getwt = FALSE, strwtvar = "strwt")
 
   ## Returnxy
   if (returnxy) {
