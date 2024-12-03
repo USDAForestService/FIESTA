@@ -1389,7 +1389,9 @@ datSumTree <- function(tree = NULL,
       if (addseed || seedonly) {
         sadjcase <- paste0("adj.", adjvarlst[["MICR"]])
       }	  
-    } ## END getadjplot
+    } else { ## END getadjplot
+      adjjoinid <- cuniqueid
+    }
 
     ## Build query for select CASE statement to add adjfactors
     ######################################################################################
