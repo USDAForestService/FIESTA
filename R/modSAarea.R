@@ -64,8 +64,8 @@
 #' @param prior Function. A prior function to use for hbsae models.
 #' @param na.fill String. An estimate to fill in for NA values (i.e., when 
 #' model is unstable or no predictors are selected). Choose from the following 
-#' list that does not include SApackage used ('NONE', 'DIR', 'JoSAE', 'sae', 
-#' 'hbsae'). DIR is suggested value for no NA values. 
+#' list that does not include SApackage used ('NONE', 'DIR', 'JU.GREG', 
+#' 'JU.EBLUP','JFH','hbsaeU','hbsaeA'). DIR is suggested value to fill NA values. 
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param savesteps Logical. Saves graphs of predictors and response with
 #' labels whether selected or not for both area- and unit-level models.
@@ -75,8 +75,6 @@
 #' for output.
 #' @param SAdomvars String vector. List of attributes from SAdoms to include in
 #' multest output.
-#' @param savemultest Logical. If TRUE, save table with area- and unit-level
-#' estimates.
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param table_opts List. See help(table_options()) for a list of
@@ -169,12 +167,11 @@ modSAarea <- function(SApopdatlst = NULL,
                       multest = TRUE, 
                       addSAdomsdf = TRUE, 
                       SAdomvars = NULL, 
-                      savemultest = FALSE, 
                       returntitle = FALSE, 
                       table_opts = NULL, 
                       title_opts = NULL, 
-                      savedata_opts = NULL, 
-                      multest_opts = NULL,
+                      savedata_opts = savedata_options(), 
+                      multest_opts = multest_options(),
                       save4testing = FALSE,
                       ...){
 
@@ -217,11 +214,16 @@ modSAarea <- function(SApopdatlst = NULL,
   SAdomvars = NULL
   returnlst <- list()
   showsteps <- FALSE
+  savemultest <- savedata
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=AOI=
     title.rowvar=title.colvar=title.rowgrp=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
-    JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
+    JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var=
+    SAEarea_estimators=SAEunit_estimators=predselect.areadf=predselect.unitdf <- NULL
+  
+  ## Set estimator list
+  estimatorlst <- c('JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA')
   
   ## Set seed
   set.seed(66)
@@ -239,87 +241,36 @@ modSAarea <- function(SApopdatlst = NULL,
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-  
-  ## Check parameter lists
-  pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
-                savedata_opts=savedata_opts, multest_opts=multest_opts)
-  
-  
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-  
-  ## Set table defaults
-  table_defaults_list <- formals(table_options)[-length(formals(table_options))]
-  
-  for (i in 1:length(table_defaults_list)) {
-    assign(names(table_defaults_list)[[i]], table_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied table values
-  if (length(table_opts) > 0) {
-    for (i in 1:length(table_opts)) {
-      if (names(table_opts)[[i]] %in% names(table_defaults_list)) {
-        assign(names(table_opts)[[i]], table_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(table_opts)[[i]]))
-      }
-    }
-  }
-  
-  ## Set title defaults
-  title_defaults_list <- formals(title_options)[-length(formals(title_options))]
-  
-  for (i in 1:length(title_defaults_list)) {
-    assign(names(title_defaults_list)[[i]], title_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied title values
-  if (length(title_opts) > 0) {
-    for (i in 1:length(title_opts)) {
-      if (names(title_opts)[[i]] %in% names(title_defaults_list)) {
-        assign(names(title_opts)[[i]], title_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(title_opts)[[i]]))
-      }
-    }
-  }
-  
-  ## Set multest defaults
-  multest_defaults_list <- formals(multest_options)[-length(formals(multest_options))]
-  
-  for (i in 1:length(multest_defaults_list)) {
-    assign(names(multest_defaults_list)[[i]], multest_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied multest values
-  if (length(multest_opts) > 0) {
-    for (i in 1:length(multest_opts)) {
-      if (names(multest_opts)[[i]] %in% names(multest_defaults_list)) {
-        assign(names(multest_opts)[[i]], multest_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(multest_opts)[[i]]))
-      }
-    }
-  }
 
+  ## Check parameter lists
+  pcheck.params(input.params = input.params,
+                title_opts = title_opts, 
+                table_opts = table_opts, 
+                savedata_opts = savedata_opts,
+                multest_opts = multest_opts)
+  
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         title_opts = title_opts,
+                         table_opts = table_opts,
+                         savedata_opts = savedata_opts,
+                         multest_opts = multest_opts)) 
+  title_opts <- optslst$title_opts  
+  table_opts <- optslst$table_opts  
+  multest_opts <- optslst$multest_opts  
+  savedata_opts <- optslst$savedata_opts  
+  
+  for (i in 1:length(title_opts)) {
+    assign(names(title_opts)[[i]], title_opts[[i]])
+  }
+  for (i in 1:length(table_opts)) {
+    assign(names(table_opts)[[i]], table_opts[[i]])
+  }
+  for (i in 1:length(multest_opts)) {
+    assign(names(multest_opts)[[i]], multest_opts[[i]])
+  }
+  
+  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -341,7 +292,7 @@ modSAarea <- function(SApopdatlst = NULL,
   }
   
   ## Check na.fill 
-  na.filllst <- c("NONE", "DIR", "JoSAE", "sae", "hbsae")
+  na.filllst <- c("NONE", "DIR", estimatorlst)
   na.filllst <- na.filllst[na.filllst != SApackage]
   na.fill <- pcheck.varchar(var2check=na.fill, varnm="na.fill", gui=gui, 
                               checklst=na.filllst, caption="na.fill", 
@@ -380,7 +331,6 @@ modSAarea <- function(SApopdatlst = NULL,
     returnSApopdat <- FALSE
   }
 
-    
   ##########################################################################
   ## Check output parameters 
   ##########################################################################
@@ -389,16 +339,10 @@ modSAarea <- function(SApopdatlst = NULL,
 	                  allin1 = allin1, 
                     estround = estround, pseround = pseround, 
 			              divideby = divideby, 
-			              addtitle = addtitle,
 			              returntitle = returntitle, 
 			              rawdata = rawdata, rawonly = rawonly, 
 			              savedata = savedata, 
-	                  outfolder = outfolder,
-			              overwrite_dsn = overwrite_dsn, 
-	                  overwrite_layer = overwrite_layer, 
-			              outfn.pre = outfn.pre, outfn.date = outfn.date, 
-			              append_layer = append_layer, 
-			              raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+	                  savedata_opts = savedata_opts, 
 			              gui = gui)
   allin1 <- outparams$allin1
   estround <- outparams$estround
@@ -411,6 +355,8 @@ modSAarea <- function(SApopdatlst = NULL,
   savedata <- outparams$savedata
   outfolder <- outparams$outfolder
   overwrite_layer <- outparams$overwrite_layer
+  outfn.pre <- outparams$outfn.pre
+  outfn.date <- outparams$outfn.date
   append_layer <- outparams$append_layer
   layer.pre <- outparams$layer.pre
   raw_fmt <- outparams$raw_fmt
@@ -424,17 +370,40 @@ modSAarea <- function(SApopdatlst = NULL,
                             varnm = "multest", title = "Multiple estimates?", 
                             first = "YES", gui = gui, stopifnull= TRUE)
   if (multest) {
+
+    ## Define objects
+    for (i in 1:length(multest_opts)) {
+      assign(names(multest_opts)[[i]], multest_opts[[i]])
+    }
+    multest_outfolder <- pcheck.outfolder(multest_outfolder)
+    
     estimatorlst <- c('JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA')
     estimatorSElst <- c('JU.GREG.se','JU.EBLUP.se','JFH.se','hbsaeU.se','hbsaeA.se')
-    multest_fmt <- pcheck.varchar(var2check = estimatorlst, 
-                                  varnm = "multest_estimators", checklst = estimatorlst, 
+    multest_estimators <- pcheck.varchar(var2check = estimatorlst, 
+                                  varnm = "multest_estimators", checklst = c("all", estimatorlst), 
                                   gui = gui, caption = "Output multest format?", multiple = TRUE) 
-    multest_fmt <- sort(c(multest_fmt, estimatorSElst[which(estimatorlst %in% multest_fmt)]))
-  }
+    multest_estimators <- sort(c(multest_estimators, estimatorSElst[which(estimatorlst %in% multest_estimators)]))
+  } 
+
+  ## Check na.fill
+  if (!is.null(na.fill) && na.fill != "NONE") {
+    if (!na.fill %in% c("DIR", estimatorlst)) {
+      stop("na.fill must be in following list: ", toString(c("DIR", estimatorlst)))
+    }
+    if (!multest) {
+      multest <- TRUE
+      multest_estimators <- na.fill
+    } else {
+      if (!"all" %in% multest_estimators && !na.fill %in% multest_estimators) {
+        multest_estimators <- c(multest_estimators, na.fill)
+      } 
+    }
+  }  
+  
   
   ## Check output for multest 
   ########################################################
-  if (savedata || savemultest) {
+  if (savedata) {
     fmtlst <- c("sqlite", "sqlite3", "db", "db3", "gpkg", "csv", "gdb")
     
     if (multest) {
@@ -468,7 +437,7 @@ modSAarea <- function(SApopdatlst = NULL,
     stepfolder <- NULL
   }
   
-  
+
   #####################################################################################
   ## GENERATE ESTIMATES
   #####################################################################################
@@ -535,7 +504,7 @@ modSAarea <- function(SApopdatlst = NULL,
       break
     }
     message("generating estimates for... ", SApopdatnm)
-
+    
     SAdomsdf <- SApopdat$SAdomsdf
     pltidsadj <- SApopdat$pltidsadj
     pltcondx <- SApopdat$pltcondx
@@ -575,7 +544,7 @@ modSAarea <- function(SApopdatlst = NULL,
     ## check smallbnd.dom
     ########################################################
     smallbnd.dom <- "DOMAIN"
-
+    
     ## check SAdomsdf
     ########################################################
     SAdomsdf <- pcheck.table(SAdomsdf, tabnm="SAdomsdf", caption="SAdoms?")
@@ -587,7 +556,7 @@ modSAarea <- function(SApopdatlst = NULL,
         SAdomsdfbind <- rbind(SAdomsdfbind, SAdomsdf)
       }
     } 
- 
+    
     ## Check prednames
     if (is.null(prednames)) {
       prednames <- SApopdat$prednames
@@ -603,7 +572,7 @@ modSAarea <- function(SApopdatlst = NULL,
         }
       }
     }
-    
+
     if (popdatindb) {
       if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
         if (!is.null(pop_dsn)) {
@@ -620,7 +589,7 @@ modSAarea <- function(SApopdatlst = NULL,
     } else {
       pltcondxWITHqry=pltcondxadjWITHqry <- NULL
     }
-
+    
     ########################################
     ## Check area units
     ########################################
@@ -649,21 +618,15 @@ modSAarea <- function(SApopdatlst = NULL,
                     pltcondx = pltcondx,
                     totals = totals,
                     pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
-                    sumunits = sumunits, 
                     landarea = landarea,
                     ACI = ACI, 
                     pcfilter = pcfilter,
                     allin1 = allin1, divideby = divideby,
                     estround = estround, pseround = pseround,
-                    addtitle = addtitle, returntitle = returntitle, 
+                    returntitle = returntitle, 
                     rawonly = rawonly, 
                     savedata = savedata, 
-                    outfolder = outfolder, 
-                    overwrite_dsn = overwrite_dsn, 
-                    overwrite_layer = overwrite_layer, 
-                    outfn.pre = outfn.pre, outfn.date = outfn.date, 
-                    append_layer = append_layer, 
-                    raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+                    savedata_opts = savedata_opts, 
                     gui = gui)
     if (is.null(estdat)) return(NULL)
     esttype <- estdat$esttype
@@ -679,6 +642,8 @@ modSAarea <- function(SApopdatlst = NULL,
     savedata <- estdat$savedata
     outfolder <- estdat$outfolder
     overwrite_layer <- estdat$overwrite_layer
+    outfn.pre <- estdat$outfn.pre
+    outfn.date <- estdat$outfn.date
     append_layer = estdat$append_layer
     rawfolder <- estdat$rawfolder
     raw_fmt <- estdat$raw_fmt
@@ -773,7 +738,7 @@ modSAarea <- function(SApopdatlst = NULL,
     colvar <- conddat$colvar
     grpvar <- conddat$grpvar
     
-    
+
     #####################################################################################
     ## GENERATE ESTIMATES
     #####################################################################################
@@ -786,7 +751,6 @@ modSAarea <- function(SApopdatlst = NULL,
                      dunitlut = dunitlut,
                      dunitvar = dunitvar,
                      uniqueid = pltassgnid,
-                     pltassgnid = pltassgnid,
                      prednames = prednames,
                      rowvar = rowvar,
                      SApopdatnm = SApopdatnm,

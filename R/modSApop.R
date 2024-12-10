@@ -313,12 +313,15 @@ modSApop <- function(popType = "VOL",
 
   ## Check output
   ########################################################
-  if (savedata) {
-    if (out_fmt == "sqlite" && is.null(out_dsn)) {
-      out_dsn <- "GBpopdat.db"
+  if (savedata || saveobj) {
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    
+    if (savedata) {
+      if (out_fmt == "sqlite" && is.null(out_dsn)) {
+        out_dsn <- "SApopdat.db"
+      }
+      outlst$add_layer <- TRUE
     }
-    outlst <- FIESTAutils::pcheck.output(savedata_opts)
-    outlst$add_layer <- TRUE
   }
   
   if (saveobj) {

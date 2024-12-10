@@ -62,6 +62,7 @@ getGBestimates <- function(esttype,
               by = c(strunitvars, uniqueid, "TOTAL"), .SDcols=estvard.name]
       domdattot <- merge(domdattot, domdatdtot, by=c(strunitvars, uniqueid, "TOTAL"))
     }
+
     unit_totest <- 
       GBest.pbar(sumyn = estvarn.name, 
                  sumyd = estvard.name,

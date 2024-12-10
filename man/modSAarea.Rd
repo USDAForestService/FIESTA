@@ -21,12 +21,11 @@ modSAarea(
   multest = TRUE,
   addSAdomsdf = TRUE,
   SAdomvars = NULL,
-  savemultest = FALSE,
   returntitle = FALSE,
   table_opts = NULL,
   title_opts = NULL,
-  savedata_opts = NULL,
-  multest_opts = NULL,
+  savedata_opts = savedata_options(),
+  multest_opts = multest_options(),
   save4testing = FALSE,
   ...
 )
@@ -64,8 +63,8 @@ mase:ElasticNet.}
 
 \item{na.fill}{String. An estimate to fill in for NA values (i.e., when 
 model is unstable or no predictors are selected). Choose from the following 
-list that does not include SApackage used ('NONE', 'DIR', 'JoSAE', 'sae', 
-'hbsae'). DIR is suggested value for no NA values.}
+list that does not include SApackage used ('NONE', 'DIR', 'JU.GREG', 
+'JU.EBLUP','JFH','hbsaeU','hbsaeA'). DIR is suggested value to fill NA values.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
@@ -80,9 +79,6 @@ for output.}
 
 \item{SAdomvars}{String vector. List of attributes from SAdoms to include in
 multest output.}
-
-\item{savemultest}{Logical. If TRUE, save table with area- and unit-level
-estimates.}
 
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}

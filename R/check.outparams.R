@@ -1,8 +1,10 @@
-check.outparams <- function(esttype, totals=TRUE, sumunits=FALSE, allin1=FALSE,
-	estround=6, pseround=3, divideby=NULL, addtitle=TRUE, returntitle=TRUE,
-	rawdata=FALSE, rawonly=FALSE, savedata=FALSE, outfolder=NULL,
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, outfn.pre=NULL, outfn.date=TRUE,
-	append_layer=FALSE, raw_fmt="csv", raw_dsn=NULL, gui=FALSE){
+check.outparams <- function(esttype, totals = TRUE, 
+                            sumunits = FALSE, allin1 = FALSE,
+	                          estround = 6, pseround = 3, divideby = NULL, 
+                            returntitle = TRUE,
+	                          rawdata = FALSE, rawonly = FALSE, 
+	                          savedata = FALSE, savedata_opts = savedata_options(), 
+	                          gui = FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks output parameters
@@ -46,10 +48,6 @@ check.outparams <- function(esttype, totals=TRUE, sumunits=FALSE, allin1=FALSE,
   savedata <- pcheck.logical(savedata, varnm="savedata",
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
 
-  ### Check addtitle
-  addtitle <- pcheck.logical(addtitle, varnm="addtitle",
-		title="Add title to output?", first="YES", gui=gui, stopifnull=TRUE)
-
   ### Check returntitle
   returntitle <- pcheck.logical(returntitle, varnm="returntitle",
 		title="Save output titles?", first="YES", gui=gui, stopifnull=TRUE)
@@ -67,11 +65,16 @@ check.outparams <- function(esttype, totals=TRUE, sumunits=FALSE, allin1=FALSE,
   ## Check output info
   ########################################################
   if (savedata) {
+    ## Define objects
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+    
     if (!rawonly) {
       outlst <- pcheck.output(out_fmt="csv", outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date,
-		overwrite_layer=overwrite_layer, append_layer=append_layer, gui=gui)
-      outfolder <- outlst$outfolder
+		         outfn.pre=outfn.pre, outfn.date=outfn.date,
+		         overwrite_layer=overwrite_layer, append_layer=append_layer, gui=gui)
+             outfolder <- outlst$outfolder
       overwrite_layer <- outlst$overwrite_layer
       outfn.pre <- outfn.pre
     }
@@ -84,9 +87,9 @@ check.outparams <- function(esttype, totals=TRUE, sumunits=FALSE, allin1=FALSE,
           raw_dsn <- "rawdata"
         }
         outlst <- pcheck.output(out_dsn=raw_dsn, out_fmt=raw_fmt,
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date,
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-		append_layer=append_layer, gui=gui)
+		           outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date,
+		           overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+		           append_layer=append_layer, gui=gui)
         rawfolder <- outlst$outfolder
         raw_fmt <- outlst$out_fmt
         raw_dsn <- outlst$out_dsn
@@ -113,14 +116,23 @@ check.outparams <- function(esttype, totals=TRUE, sumunits=FALSE, allin1=FALSE,
       warning("check pseround... very high number, setting to ", pseround)
     }
   }
-
+  
   ## Set up list of variables to return
   ######################################################################################
-  returnlst <- list(sumunits=sumunits, allin1=allin1, estround=estround, pseround=pseround,
- 	divideby=divideby, addtitle=addtitle, returntitle=returntitle, estround=estround,
- 	pseround=pseround, rawdata=rawdata, rawonly=rawonly, savedata=savedata,
-	outfolder=outfolder, overwrite_layer=overwrite_layer, append_layer=append_layer,
-	rawfolder=rawfolder, raw_fmt=raw_fmt, raw_dsn=raw_dsn)
+  returnlst <- list(sumunits=sumunits, allin1=allin1, 
+                    estround=estround, pseround=pseround, divideby=divideby, 
+                    returntitle=returntitle, 
+                    rawdata=rawdata, rawonly=rawonly, savedata=savedata)
+  if (savedata) {
+     returnlst <- append(returnlst, 
+        list(outfolder=outfolder, 
+             overwrite_layer=overwrite_layer, 
+             append_layer=append_layer, 
+             addtitle = addtitle,
+	           outfn.pre=outfn.pre, outfn.date=outfn.date, 
+	           rawfolder=rawfolder, 
+	           raw_fmt=raw_fmt, raw_dsn=raw_dsn))
+  }
 
   if (esttype %in% c("AREA", "TREE")) {
     returnlst$totals <- totals

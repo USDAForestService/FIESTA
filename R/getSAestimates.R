@@ -3,7 +3,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
                            pltassgnx,
                            dunitlut,
                            dunitvar,
-                           uniqueid, pltassgnid,
+                           uniqueid,
                            prednames,
                            rowvar,
                            SApopdatnm,
@@ -44,6 +44,13 @@ getSAestimates <- function(esttype, i, largebnd.unique,
     message("using the following predictors... ", toString(prednames))
   }
   
+  ## Check column names
+  prednames <- names(data.frame(matrix(NA,1,length(prednames), 
+                                       dimnames=list(rownames=NULL, colnames=prednames))))
+  pltassgnx <- data.table(pltassgnx, check.names = TRUE)
+  dunitlut <- data.table(dunitlut, check.names = TRUE)
+  
+  
   if (!is.null(largebnd.unique)) {
     if (!largebnd.unique %in% names(pltassgnx)) {
       stop("largebnd.unique is not in pltassgn")
@@ -63,42 +70,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   if (!"TOTAL" %in% names(domdat)) {
     domdat$TOTAL <- 1
   }
-  
-  
-  # if (!is.null(largebnd.unique)) {
-  #   if (largebnd.unique %in% names(domdat) && largebnd.unique %in% names(pltassgnx)) {
-  #     domdat <- merge(pltassgnx, domdat, 
-  #                     by.x = c(largebnd.unique, pltassgnid, "DOMAIN"), 
-  #                     by.y = c(largebnd.unique, uniqueid, "DOMAIN"), , all.x=TRUE)
-  #   } else if (largebnd.unique %in% names(pltassgnx)) {
-  #     domdat <- merge(pltassgnx, domdat, 
-  #                     by.x = c(pltassgnid, "DOMAIN"), 
-  #                     by.y = c(uniqueid, "DOMAIN"), all.x=TRUE)
-  #   } else if (!is.null(SAdomsdf)) {
-  #     domdat <- merge(domdat, 
-  #                     unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
-  #                     by=smallbnd.dom)
-  #   } else {
-  #     domdat$LARGEBND <- 1
-  #     largebnd.unique <- "LARGEBND"
-  #   }
-  # 
-  # } else {
-  #   # domdat <- merge(pltassgnx, domdat, 
-  #   #                 by.x=c(pltassgnid, "DOMAIN"), 
-  #   #                 by.y=c(uniqueid, "DOMAIN"), all.x=TRUE)
-  #   domdat <- merge(pltassgnx, domdat, 
-  #                   by.x=c(pltassgnid), 
-  #                   by.y=c(uniqueid), all.x=TRUE)
-  #   
-  #   domdat$LARGEBND <- 1
-  #   largebnd.unique <- "LARGEBND"
-  # }
-  
-  #if (pltassgnid != uniqueid) {
-  #  setnames(domdat, pltassgnid, uniqueid)
-  #}
-  
+ 
   if (SApackage == "spAbundance") {
     bayes <- TRUE
   } else {
@@ -125,11 +97,11 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   largebnd.vals <- sort(unique(domdattot[[largebnd.unique]]))
   largebnd.vals <- largebnd.vals[table(domdattot[[largebnd.unique]]) > 30]
   
-# dat = domdattot
-# cuniqueid = uniqueid 
-# dunitvar = "DOMAIN" 
-# domain = "TOTAL"
-# largebnd.val = largebnd.vals[1]
+#dat = domdattot
+#cuniqueid = uniqueid 
+#dunitvar = "DOMAIN" 
+#domain = "TOTAL"
+#largebnd.val = largebnd.vals[1]
 #   
   dunit_totestlst <- 
     tryCatch(
@@ -152,8 +124,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
         return(NULL)
       }
     )
-  
-  
+
   if (is.null(dunit_totestlst)) {
     return(NULL)
   }
@@ -194,7 +165,8 @@ getSAestimates <- function(esttype, i, largebnd.unique,
     
   }
   
-  
+print("TSET2")
+print(dunit_est)
   if (multest || SAmethod == "unit") {
     predselectlst.unit[[SApopdatnm]] <- predselect.unit
   }

@@ -366,67 +366,27 @@ modGBratio <- function(GBpopdat,
   }
   
   ## Check parameter lists
-  pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
-                savedata_opts=savedata_opts)
+  pcheck.params(input.params = input.params,
+                title_opts = title_opts, 
+                table_opts = table_opts, 
+                savedata_opts = savedata_opts)
   
-
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+    title_opts = title_opts,
+    table_opts = table_opts,
+    savedata_opts = savedata_opts)) 
+  title_opts <- optslst$title_opts  
+  table_opts <- optslst$table_opts  
+  savedata_opts <- optslst$savedata_opts  
   
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  for (i in 1:length(title_opts)) {
+    assign(names(title_opts)[[i]], title_opts[[i]])
+  }
+  for (i in 1:length(table_opts)) {
+    assign(names(table_opts)[[i]], table_opts[[i]])
   }
   
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-  
-  ## Set table defaults
-  table_defaults_list <- formals(table_options)[-length(formals(table_options))]
-  
-  for (i in 1:length(table_defaults_list)) {
-    assign(names(table_defaults_list)[[i]], table_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied table values
-  if (length(table_opts) > 0) {
-    for (i in 1:length(table_opts)) {
-      if (names(table_opts)[[i]] %in% names(table_defaults_list)) {
-        assign(names(table_opts)[[i]], table_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(table_opts)[[i]]))
-      }
-    }
-  }
-  
-  ## Set title defaults
-  title_defaults_list <- formals(title_options)[-length(formals(title_options))]
-  
-  for (i in 1:length(title_defaults_list)) {
-    assign(names(title_defaults_list)[[i]], title_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied title values
-  if (length(title_opts) > 0) {
-    for (i in 1:length(title_opts)) {
-      if (names(title_opts)[[i]] %in% names(title_defaults_list)) {
-        assign(names(title_opts)[[i]], title_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(title_opts)[[i]]))
-      }
-    }
-  }
-
 
   ##################################################################
   ## CHECK PARAMETER INPUTS
@@ -529,15 +489,10 @@ modGBratio <- function(GBpopdat,
                   pcfilter = pcfilter,
                   allin1 = allin1, divideby = divideby,
                   estround = estround, pseround = pseround,
-                  addtitle = addtitle, returntitle = returntitle, 
+                  returntitle = returntitle, 
                   rawonly = rawonly, 
                   savedata = savedata, 
-                  outfolder = outfolder, 
-                  overwrite_dsn = overwrite_dsn, 
-                  overwrite_layer = overwrite_layer, 
-                  outfn.pre = outfn.pre, outfn.date = outfn.date, 
-                  append_layer = append_layer, 
-                  raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+                  savedata_opts = savedata_opts, 
                   gui = gui)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
@@ -554,6 +509,8 @@ modGBratio <- function(GBpopdat,
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
   overwrite_layer <- estdat$overwrite_layer
+  outfn.pre <- estdat$outfn.pre
+  outfn.date <- estdat$outfn.date
   append_layer = estdat$append_layer
   rawfolder <- estdat$rawfolder
   raw_fmt <- estdat$raw_fmt

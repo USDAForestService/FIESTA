@@ -332,19 +332,22 @@ modMApop <- function(popType="VOL",
   
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", 
-                             title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+        title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
   ## Check saveobj 
   saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
-                            title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+        title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
   
   ## Check output
   ########################################################
-  if (savedata) {
-    if (out_fmt == "sqlite" && is.null(out_dsn)) {
-      out_dsn <- "GBpopdat.db"
+  if (savedata || saveobj) {
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    
+    if (savedata) {
+      if (out_fmt == "sqlite" && is.null(out_dsn)) {
+        out_dsn <- "MApopdat.db"
+      }
+      outlst$add_layer <- TRUE
     }
-    outlst <- FIESTAutils::pcheck.output(savedata_opts)
-    outlst$add_layer <- TRUE
   }
   
   if (saveobj) {

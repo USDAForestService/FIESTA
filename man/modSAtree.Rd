@@ -24,7 +24,6 @@ modSAtree(
   savedata = FALSE,
   savesteps = FALSE,
   multest = TRUE,
-  savemultest = FALSE,
   returntitle = FALSE,
   table_opts = NULL,
   title_opts = NULL,
@@ -84,8 +83,8 @@ mase:ElasticNet.}
 
 \item{na.fill}{String. An estimate to fill in for NA values (i.e., when 
 model is unstable or no predictors are selected). Choose from the following 
-list that does not include SApackage used ('NONE', 'DIR', 'JoSAE', 'sae', 
-'hbsae'). DIR is suggested value for no NA values.}
+list that does not include SApackage used ('NONE', 'DIR', 'JU.GREG', 
+'JU.EBLUP','JFH','hbsaeU','hbsaeA'). DIR is suggested value to fill NA values.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
@@ -94,9 +93,6 @@ labels whether selected or not for both area- and unit-level models.}
 
 \item{multest}{Logical. If TRUE, returns a data frame of SA estimates using
 both unit-level and area-level estimates.}
-
-\item{savemultest}{Logical. If TRUE, save table with area- and unit-level
-estimates.}
 
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}

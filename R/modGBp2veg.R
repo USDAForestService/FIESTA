@@ -443,15 +443,10 @@ modGBp2veg <- function(GBpopdat = NULL,
                   pcfilter = pcfilter,
                   allin1 = allin1, divideby = divideby,
                   estround = estround, pseround = pseround,
-                  addtitle = addtitle, returntitle = returntitle, 
+                  returntitle = returntitle, 
                   rawonly = rawonly, 
                   savedata = savedata, 
-                  outfolder = outfolder, 
-                  overwrite_dsn = overwrite_dsn, 
-                  overwrite_layer = overwrite_layer, 
-                  outfn.pre = outfn.pre, outfn.date = outfn.date, 
-                  append_layer = append_layer, 
-                  raw_fmt = raw_fmt, raw_dsn = raw_dsn, 
+                  savedata_opts = savedata_opts, 
                   gui = gui)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype

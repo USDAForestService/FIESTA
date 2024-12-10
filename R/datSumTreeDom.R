@@ -375,10 +375,7 @@ datSumTreeDom <- function(tree = NULL,
   
   ## Check output parameters
   if (savedata) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-                            add_layer=add_layer, append_layer=append_layer, out_conn=dbconn, 
+    outlst <- pcheck.output(savedata_opts = savedata_opts, 
                             dbconnopen=TRUE, gui=gui)
     outfolder <- outlst$outfolder
     out_dsn <- outlst$out_dsn
@@ -390,7 +387,7 @@ datSumTreeDom <- function(tree = NULL,
     if (is.null(out_layer)) {
       out_layer <- "tdomsum"
     }
-    out_conn = outlst$out_conn
+    outconn = outlst$out_conn
   }
 
 
@@ -876,7 +873,7 @@ datSumTreeDom <- function(tree = NULL,
                                 append_layer=append_layer, 
                                 add_layer=TRUE))
     } else {
-      datExportData(sumtreef, dbconn = out_conn, dbconnopen = TRUE,
+      datExportData(sumtreef, dbconn = outconn, dbconnopen = TRUE,
           savedata_opts=list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
@@ -901,7 +898,7 @@ datSumTreeDom <- function(tree = NULL,
                                 append_layer=append_layer, 
                                 add_layer=TRUE))
       } else {
-        datExportData(sumtreef.prop, dbconn = out_conn, dbconnopen = TRUE,
+        datExportData(sumtreef.prop, dbconn = outconn, dbconnopen = TRUE,
             savedata_opts=list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
@@ -926,7 +923,7 @@ datSumTreeDom <- function(tree = NULL,
                                 append_layer=append_layer, 
                                 add_layer=TRUE))
       } else {
-        datExportData(sumtreef.pres, dbconn = out_conn, dbconnopen = TRUE,
+        datExportData(sumtreef.pres, dbconn = outconn, dbconnopen = TRUE,
             savedata_opts=list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
@@ -951,7 +948,7 @@ datSumTreeDom <- function(tree = NULL,
                                 append_layer=append_layer, 
                                 add_layer=TRUE))
       } else {
-        datExportData(sumtreef.cov, dbconn = out_conn, dbconnopen = TRUE,
+        datExportData(sumtreef.cov, dbconn = outconn, dbconnopen = TRUE,
             savedata_opts=list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
@@ -965,7 +962,7 @@ datSumTreeDom <- function(tree = NULL,
     }
     
     
-    datExportData(tdomvarlut, dbconn = out_conn, dbconnopen = TRUE,
+    datExportData(tdomvarlut, dbconn = outconn, dbconnopen = TRUE,
         savedata_opts=list(outfolder=outfolder, 
                             out_fmt=out_fmt, 
                             out_dsn=out_dsn, 

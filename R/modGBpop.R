@@ -358,7 +358,6 @@ modGBpop <- function(popType = "VOL",
     assign(names(savedata_opts)[[i]], savedata_opts[[i]])
   }
   
-  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -376,12 +375,15 @@ modGBpop <- function(popType = "VOL",
   
   ## Check output
   ########################################################
-  if (savedata) {
-    if (out_fmt == "sqlite" && is.null(out_dsn)) {
-      out_dsn <- "GBpopdat.db"
+  if (savedata || saveobj) {
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    
+    if (savedata) {
+      if (out_fmt == "sqlite" && is.null(out_dsn)) {
+        out_dsn <- "GBpopdat.db"
+      }
+       outlst$add_layer <- TRUE
     }
-    outlst <- FIESTAutils::pcheck.output(savedata_opts)
-    outlst$add_layer <- TRUE
   }
   
   if (saveobj) {

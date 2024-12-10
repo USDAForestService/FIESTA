@@ -135,8 +135,8 @@ DBgetCSV <- function(DBtable,
       tab <- fread(filenm, integer64="character")
       if (nrow(tab) == 0) {
         message(DBtable, " has 0 rows")
-		return(NULL)
-	  }
+		    return(NULL)
+	    }
       tab <- changeclass(tab)
 
       unlink(temp)
@@ -153,13 +153,22 @@ DBgetCSV <- function(DBtable,
     csvtable <- gettab(DBtable=DBtable)
   } else {
     csvtable <- tryCatch(
-      do.call(rbind, lapply(stabbrs, gettab, DBtable)),
-		    error=function(e) {
- 		    message(e, "\n")
-		    return(NULL)
+      rbindlist(lapply(stabbrs, gettab, DBtable), fill=TRUE),
+      error=function(e) {
+        message(e, "\n")
+        return(NULL)
       }
     )
   }
+      
+#    csvtable <- tryCatch(
+#      do.call(rbind, lapply(stabbrs, gettab, DBtable)),
+#		    error=function(e) {
+# 		    message(e, "\n")
+#		    return(NULL)
+#      }
+#    )
+#  }
   if (is.null(csvtable)) {
     return(NULL)
   }

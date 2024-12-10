@@ -10,13 +10,11 @@ check.estdata <-
            T1filter = NULL, T2filter = NULL,
 	         allin1 = FALSE, divideby = NULL, 
            estround = 6, pseround = 3, 
-	         addtitle = TRUE, returntitle = TRUE, 
+	         returntitle = TRUE, 
            rawonly = FALSE, 
-	         savedata = FALSE, outfolder = NULL, 
-           overwrite_dsn = FALSE, overwrite_layer = TRUE,
-           outfn.pre = NULL, outfn.date = TRUE, 
-           append_layer = FALSE, 
-           raw_fmt = "csv", raw_dsn = NULL, gui = FALSE){
+	         savedata = FALSE, 
+           savedata_opts, 
+           gui = FALSE){
 
   #############################################################################
   ## DESCRIPTION: Checks data inputs
@@ -241,7 +239,7 @@ check.estdata <-
 
   ## Add ACI.filter to where.qry
   ###################################################################################
-  if (!ACI && landarea != "FOREST") {
+  if (esttype %in% c("TREE", "RATIO") && !ACI && landarea != "FOREST") {
     ACI.filter <- "pc.COND_STATUS_CD = 1"
     if (!is.null(where.qry)) {
       where.qry <- paste0(where.qry,
@@ -282,33 +280,28 @@ check.estdata <-
   savedata <- pcheck.logical(savedata, varnm="savedata",
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
 
-
-  ## Check addtitle
-  addtitle <- pcheck.logical(addtitle, varnm="addtitle",
-		title="Add title to output?", first="YES", gui=gui, stopifnull=TRUE)
-
-  ## Check raw_fmt
-  if (rawdata) {
-    raw_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp')
-    raw_fmt <- pcheck.varchar(raw_fmt, varnm="raw_fmt", checklst=raw_fmtlst,
-		             caption="Out raw format", gui=gui)
+  ## Define objects
+  for (i in 1:length(savedata_opts)) {
+    assign(names(savedata_opts)[[i]], savedata_opts[[i]])
   }
-
+  
   ## Check output info
   ########################################################
   if (savedata) {
+
     if (!rawonly) {
-      outlst <- pcheck.output(out_fmt = "csv", 
-                    outfolder = outfolder,
-		                outfn.pre = outfn.pre, 
-		                outfn.date = outfn.date,
-		                overwrite_layer = overwrite_layer, 
-		                append_layer = append_layer, gui=gui)
+      outlst <- pcheck.output(savedata_opts = savedata_opts,
+                              gui=gui)
       outfolder <- outlst$outfolder
       overwrite_layer <- outlst$overwrite_layer
       outfn.pre <- outfn.pre
     }
     if (rawdata) {
+      ## Check raw_fmt
+      raw_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp')
+      raw_fmt <- pcheck.varchar(raw_fmt, varnm="raw_fmt", checklst=raw_fmtlst,
+                                  caption="Out raw format", gui=gui)
+
       if (!is.null(raw_fmt) && raw_fmt == "csv") {
         rawfolder <- paste(outfolder, "rawdata", sep="/")
         if (!file.exists(rawfolder)) dir.create(rawfolder)
@@ -316,13 +309,8 @@ check.estdata <-
         if (is.null(raw_dsn)) {
           raw_dsn <- "rawdata"
         }
-        outlst <- pcheck.output(out_dsn = raw_dsn, out_fmt = raw_fmt,
-		                  outfolder = outfolder, 
-		                  outfn.pre = outfn.pre, 
-		                  outfn.date = outfn.date,
-		                  overwrite_dsn = overwrite_dsn, 
-		                  overwrite_layer = overwrite_layer,
-		                  append_layer = append_layer, gui=gui)
+        outlst <- pcheck.output(savedata_opts = savedata_opts, 
+                                gui=gui)
         rawfolder <- outlst$outfolder
         raw_fmt <- outlst$out_fmt
         raw_dsn <- outlst$out_dsn
@@ -330,6 +318,7 @@ check.estdata <-
       }
     }
   }
+  
   ## Check rounding variables
   if (is.null(estround)) {
     estround <- ifelse(allin1, 0, 6)
@@ -366,6 +355,8 @@ check.estdata <-
                     savedata = savedata,
                     outfolder = outfolder, 
                     overwrite_layer = overwrite_layer, 
+                    outfn.pre = outfn.pre,
+                    outfn.date = outfn.date,
                     append_layer = append_layer,
                     rawfolder = rawfolder, 
                     raw_fmt = raw_fmt, 
