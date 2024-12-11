@@ -350,7 +350,6 @@ check.popdataPLT <-
       }
     }
     
-    
     ##################################################################################
     ## 6. Check estimation unit(s) and auxiliary information in pltassgn.
     ##################################################################################
@@ -545,7 +544,7 @@ check.popdataPLT <-
     pwhereqry <- popFilterqry$pwhereqry
     pltselectqry <- popFilterqry$pltselectqry
     pltassgnvars <- popFilterqry$pltassgnvars
-    pfromqry <- popFilterqry$pfromqry
+    #pfromqry <- popFilterqry$pfromqry
     pltafromqry <- popFilterqry$pltafromqry
     states <- popFilterqry$states
     invyrs <- popFilterqry$invyrs
@@ -1181,7 +1180,7 @@ check.popdataPLT <-
     #############################################################################
     returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid,
                       pltidsWITHqry=pltidsWITHqry, pwhereqry=pwhereqry, pltassgn.=pltassgn.,
-                      pltselectqry=pltselectqry, pfromqry=pfromqry, 
+                      pltselectqry=pltselectqry, pltafromqry=pltafromqry, 
                       pltx=pltx, plotlst=plotlst, pltidsid = pltidsid,
                       projidvars=projidvars, pltidvars=as.vector(pltidvars),
                       pdoms2keep=pdoms2keep,

@@ -568,9 +568,6 @@ modMApop <- function(popType="VOL",
   pltaindb <- pltcheck$pltaindb
   datindb <- pltcheck$datindb
   POP_PLOT_STRATUM_ASSGN <- pltcheck$POP_PLOT_STRATUM_ASSGN
-  pltselectqry <- pltcheck$pltselectqry
-  pltfromqry <- pltcheck$pltfromqry
-  pwhereqry <- pltcheck$pwhereqry
   getdataWITHqry <- pltcheck$getdataWITHqry
   getdataCNs <- pltcheck$getdataCNs
   plotunitcnt <- pltcheck$plotunitcnt

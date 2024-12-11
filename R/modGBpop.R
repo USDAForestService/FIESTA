@@ -657,7 +657,7 @@ modGBpop <- function(popType = "VOL",
   datindb <- pltcheck$datindb
   POP_PLOT_STRATUM_ASSGN <- pltcheck$POP_PLOT_STRATUM_ASSGN
   pltselectqry <- pltcheck$pltselectqry
-  pltfromqry <- pltcheck$pltfromqry
+  pltafromqry <- pltcheck$pltafromqry
   pwhereqry <- pltcheck$pwhereqry
   plotunitcnt <- pltcheck$plotunitcnt
   getdataWITHqry <- pltcheck$getdataWITHqry
@@ -707,15 +707,16 @@ modGBpop <- function(popType = "VOL",
   
   stratcombinelut <- auxdat$stratcombinelut
   if (!is.null(stratcombinelut)) {
-    classcols <- c(unitvar2, unitvar, strvar)
     if (!is.null(auxdat$unitltmin)) {
-      fromcols <- c(unitvar2, unitvar, strvar)
-      tocols <- c(auxdat$unitvar, auxdat$strvar)
+      classcols <- c(auxdat$unitvar, auxdat$strvar)
     } else {
-      fromcols <- strvar
-      tocols <- auxdat$strvar
+      classcols <- auxdat$strvar
     }
     
+    ## Get from columns and to columns
+    fromcols <- c(unitvar2, unitvar, strvar)
+    tocols <- c(auxdat$unitvar, auxdat$strvar)
+
     ## Get select join for new strata variables
     combineqry <- 
       getcombineqry(lut = stratcombinelut,
@@ -723,12 +724,15 @@ modGBpop <- function(popType = "VOL",
                     fromcols = fromcols,
                     tocols = tocols,
                     tab. = pltassgn.)
-    
     pltidsqry <- paste0(
       pltselectqry, ", ",
       combineqry,
-      pltfromqry,
+      pltafromqry,
       pwhereqry)
+    
+    pltidsWITHqry <- paste0("WITH",
+      "\npltids AS",
+      "\n(", pltidsqry, ")")
     
   }  
   unitvar <- auxdat$unitvar
@@ -765,7 +769,6 @@ modGBpop <- function(popType = "VOL",
                        POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
                        adj = adj, ACI = ACI, 
                        plotlst = plotlst,  
-                       #pltfromqry = pltfromqry, 
                        condid = condid, 
                        areawt = areawt, areawt2 = areawt2,
                        unitvars = unitvars,
@@ -822,7 +825,6 @@ modGBpop <- function(popType = "VOL",
                         adj = adj, ACI = ACI, 
                         plotlst = plotlst, 
                         pwhereqry = pwhereqry, 
-                        pltfromqry = pltfromqry,
                         condid = condid, 
                         areawt = areawt, areawt2 = areawt2,
                         unitvars = unitvars,
@@ -877,7 +879,6 @@ modGBpop <- function(popType = "VOL",
                          adj = adj, ACI = ACI, 
                          plotlst = plotlst, 
                          pwhereqry = pwhereqry, 
-                         pltfromqry = pltfromqry,
                          condid = condid, 
                          areawt = areawt, areawt2 = areawt2,
                          unitvars = unitvars,

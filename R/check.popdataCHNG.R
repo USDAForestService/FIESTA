@@ -11,7 +11,7 @@ check.popdataCHNG <-
            pltassgnx, pltx, 
            POP_PLOT_STRATUM_ASSGN, 
            adj, ACI, plotlst, 
-           pltfromqry, pwhereqry = NULL, 
+           pwhereqry = NULL, 
            condid = "CONDID", 
            areawt = "SUBPTYP_PROP_CHNG", areawt2 = NULL,
            MICRO_BREAKPOINT_DIA = 5, 
