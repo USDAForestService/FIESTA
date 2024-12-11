@@ -745,7 +745,7 @@ modGBpop <- function(popType = "VOL",
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
   
-
+  
   ###################################################################################
   ## Check Population Data
   ###################################################################################

@@ -265,13 +265,15 @@ modSAtree <- function(SApopdatlst = NULL,
   pcheck.params(input.params = input.params,
                 title_opts = title_opts, 
                 table_opts = table_opts, 
-                savedata_opts = savedata_opts)
+                savedata_opts = savedata_opts,
+                multest_opts = multest_opts)
   
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-    title_opts = title_opts,
-    table_opts = table_opts,
-    savedata_opts = savedata_opts)) 
+                         title_opts = title_opts,
+                         table_opts = table_opts,
+                         savedata_opts = savedata_opts,
+                         multest_opts = multest_opts)) 
   title_opts <- optslst$title_opts  
   table_opts <- optslst$table_opts  
   multest_opts <- optslst$multest_opts  

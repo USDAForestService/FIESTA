@@ -2757,6 +2757,7 @@ DBgetPlots <- function (states = NULL,
         }
         if (is.null(treex) || nrow(treex) == 0) {
           message("TREE query is invalid")
+          message(tree.qry)
         } else {
           
 		      if (!"tree" %in% names(dbqueries[[state]])) {

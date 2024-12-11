@@ -65,6 +65,11 @@ check.popdataVOL <-
     pltcondindb <- datindb
     addfortypgrp <- TRUE
     
+    ## Get variables from outlst
+    for (i in 1:length(outlst)) {
+      assign(names(outlst)[[i]], outlst[[i]])
+    }
+    
     
     ##############################################################################
     ## Define variables necessary for estimation
