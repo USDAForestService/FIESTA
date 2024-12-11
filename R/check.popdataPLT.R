@@ -209,11 +209,13 @@ check.popdataPLT <-
         pjoinidchk <- unlist(sapply(pjoinid, findnm, pltflds, returnNULL=TRUE))
         if (is.null(pjoinidchk)) {
           stop("invalid pjoinid... must be in plot table")
+        } else {
+          pjoinid <- pjoinidchk
         }
       } else {
         pjoinid <- puniqueid
       }
-      if (length(pjoinidchk) != length(pltassgnid)) {
+      if (length(pjoinid) != length(pltassgnid)) {
         pltassgnchk <- unlist(sapply(pjoinidchk, findnm, pltassgnflds, returnNULL=TRUE))
         if (is.null(pltassgnchk)) {
           message("pjoinid must be same number of variables as pltassgnid")
