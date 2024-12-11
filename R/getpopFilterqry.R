@@ -280,14 +280,16 @@ getpopFilterqry <- function(popType,
       if (!is.null(evalchk)) {
         measCur <- evalchk$measCur
         measEndyr <- evalchk$measEndyr
-        invyrs <- evalchk$invyrs
         measyears <- evalchk$measyrs
         invyrlst <- evalchk$invyrlst
         measyrlst <- evalchk$measyrlst
+        if (!is.null(evalchk$invyrs)) {
+          invyrs <- evalchk$invyrs
+        }
       }
     }
   }
-  
+ 
   ###################################################################################
   ## 5. Build pwhereqry
   ###################################################################################
@@ -491,7 +493,6 @@ getpopFilterqry <- function(popType,
   ## 5.7. Check invyrs and add to where query. 
   ############################################################################
   if (!is.null(popFilter$invyrs)) {
-    
     #print(invyrs)
     if (chkvalues) {
       invyrlst.qry <- paste0("SELECT DISTINCT invyr", 
@@ -581,7 +582,7 @@ getpopFilterqry <- function(popType,
     #      pltidsqry <- paste0(pltidsqry, pwhereqry)
     #    }
   }   
-  
+
   ## 5.9 Check INTENSITY and add to where query.
   ########################################################################
   if (!is.null(popFilter$intensity)) { 	

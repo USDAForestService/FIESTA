@@ -857,12 +857,17 @@ DBgetEvalid <- function(states = NULL,
         } else {
           #return(list(states=states, rslst=rslst, evalidlist=NULL, 
           #		invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
-          
           returnlst <- list(states=states, rslst=rslst, 
                             evalidlist = NULL, 
                             invtype = invtype, 
                             invyrtab = invyrtab, 
                             evalType = evalTypelist)
+          
+          if (!is.null(invyrs)) {
+            returnlst$invyrs <- invyrs
+          } else {
+            returnlst$invyrs <- sort(unique(invyrtab$INVYR))
+          }
           
           ## Return population information
           if (!is.null(surveynm)) {
@@ -1207,7 +1212,7 @@ DBgetEvalid <- function(states = NULL,
       }
     }  ## END evalresp
   }  ## returnevalid
-  
+
   returnlst <- list(states=states, rslst=rslst, 
                     evalidlist=evalidlist, 
                     invtype=invtype, invyrtab=invyrtab, 
