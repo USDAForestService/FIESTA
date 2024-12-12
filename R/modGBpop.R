@@ -307,7 +307,7 @@ modGBpop <- function(popType = "VOL",
   
   
   ## Set global variables
-  expcondtab=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=sccmx=popevalid <- NULL
+  expcondtab=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=sccmx=popevalid=outlst <- NULL
   condid <- "CONDID"
   pvars2keep=unitlevels <- NULL
   pltidsadjindb=savepltids=dsnreadonly <- FALSE

@@ -38,6 +38,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   response <- estvar.name
   addSAdomsdf <- FALSE
   SAdomsdf <- NULL
+  save4testing <- FALSE
   
   if (i == 1) {
     message("getting estimates for ", response, "...")
@@ -165,8 +166,6 @@ getSAestimates <- function(esttype, i, largebnd.unique,
     
   }
   
-print("TSET2")
-print(dunit_est)
   if (multest || SAmethod == "unit") {
     predselectlst.unit[[SApopdatnm]] <- predselect.unit
   }
@@ -189,7 +188,11 @@ print(dunit_est)
     dunitlutlst[[SApopdatnm]] <- dunitlut
     
   }
-  
+
+  if (is.null(dunit_est)) {
+    warning("no estimates generated...")
+    return(0)
+  }
   estlst[[SApopdatnm]] <- dunit_est
   
   ## row estimates
@@ -208,11 +211,11 @@ print(dunit_est)
       domdattot$AOI <- 1
     }
     
-# dat = domdattot
-# cuniqueid = uniqueid
-# dunitvar = "DOMAIN"
-# domain = rowvar
-# largebnd.val = largebnd.vals[1]
+#dat = domdattot
+#cuniqueid = uniqueid
+#dunitvar = "DOMAIN"
+#domain = rowvar
+#largebnd.val = largebnd.vals[1]
     
     dunit_rowestlst <-
       tryCatch(
@@ -306,17 +309,22 @@ print(dunit_est)
               domdat = domdat,
               SAobjlst = SAobjlst,
               estlst = estlst,
-              pdomdatlst = pdomdatlst,
-              dunitlutlst = dunitlutlst,
               SAobjlst_row = SAobjlst_row,
               estlst_row = estlst_row,
               predselectlst.unit = predselectlst.unit,
               predselectlst.area = predselectlst.area,
               predselectlst.unit_row = predselectlst.unit_row,
-              predselectlst.area_row = predselectlst.area_row,
-              pdomdatlst_row = pdomdatlst_row,
-              dunitlutlst_row = dunitlutlst_row)
+              predselectlst.area_row = predselectlst.area_row)
   
+  if (save4testing) {
+    out$pdomdatlst <- pdomdatlst
+    out$dunitlutlst <- dunitlutlst
+    if (rowvar != "TOTAL") {
+      out$pdomdatlst_row <- pdomdatlst_row
+      out$dunitlutlst_row <- dunitlutlst_row
+    }
+  }
+
   return(out)
   
 }

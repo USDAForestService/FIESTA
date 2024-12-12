@@ -278,7 +278,7 @@ modMApop <- function(popType="VOL",
   
   ## Set parameters
   adjtree <- FALSE
-  nonsamp.pfilter=nonsamp.cfilter=schema=vcondstrx=vcondsppx <- NULL
+  nonsamp.pfilter=nonsamp.cfilter=schema=vcondstrx=vcondsppx=outlst <- NULL
   returnlst <- list(module = "MA")
   
   ## Set global variables

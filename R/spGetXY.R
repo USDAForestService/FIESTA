@@ -476,6 +476,7 @@ spGetXY <- function(bnd,
     pjoinid <- xydat$pjoinid 
     evalInfo <- xydat$evalInfo
     pop_plot_stratum_assgn <- xydat$pop_plot_stratum_assgn
+    dbconn <- xydat$dbconn
     if (!is.null(evalInfo)) {
       states <- evalInfo$states
 
@@ -622,6 +623,10 @@ spGetXY <- function(bnd,
   returnlst$xyjoinid <- xyjoinid
   returnlst$states <- statenames
   returnlst$countyfips <- countyfips
+  
+  if (!is.null(dbconn)) {
+    returnlst$dbconn <- dbconn
+  }
 
   #if (!is.null(pop_plot_stratum_assgn)) {
   #  returnlst$pop_plot_stratum_assgn <- pop_plot_stratum_assgn

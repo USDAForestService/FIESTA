@@ -394,7 +394,7 @@ check.popdataPLT <-
       selectpvars <- c(selectpvars, paste0(unitvarsa., unitvars))
       pltidvars <- c(pltidvars, unitvars)
     }
-    
+
     ## 6.2. Check strata variable (strvar) in plot/pltassgn.
     #######################################################################
     if (strata) {
@@ -429,15 +429,18 @@ check.popdataPLT <-
           names(auxlut) <- c(unitvar2, unitvar)
         }
       }
-      strvar <- "ONESTRAT"
-      strata <- TRUE
+
+      if (module == "GB") {
+        strvar <- "ONESTRAT"
+        strata <- TRUE
       
-      auxlut$ONESTRAT <- 1
-      auxlut$strwt <- 1
-      pltassgnx$ONESTRAT <- 1
-      pltassgnvars <- c(pltassgnvars, "ONESTRAT")
-      pltassgnflds <- c(pltassgnflds, "ONESTRAT")
-      selectpvars <- c(selectpvars, "ONESTRAT")
+        auxlut$ONESTRAT <- 1
+        auxlut$strwt <- 1
+        pltassgnx$ONESTRAT <- 1
+        pltassgnvars <- c(pltassgnvars, "ONESTRAT")
+        pltassgnflds <- c(pltassgnflds, "ONESTRAT")
+        selectpvars <- c(selectpvars, "ONESTRAT")
+      }
     }
    
     ## 6.3. Check prednames in plot/pltassgn.

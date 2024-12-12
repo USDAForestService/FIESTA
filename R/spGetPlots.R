@@ -596,6 +596,7 @@ spGetPlots <- function(bnd = NULL,
           xyjoinid = xydat1$xyjoinid       
           bndx1 <- xydat1$bndx
           evalInfo1 <- xydat1$evalInfo
+          dbconn <- xydat1$dbconn
           #pop_plot_stratum_assgn1 <- xydat1$pop_plot_stratum_assgn
 
           ## Get plots outside filter
@@ -666,6 +667,7 @@ spGetPlots <- function(bnd = NULL,
           #pjoinid = xydat$pjoinid 
           xyjoinid = xydat$xyjoinid 
           evalInfo <- xydat$evalInfo  
+          dbconn <- xydat$dbconn
           #pop_plot_stratum_assgn <- xydat$pop_plot_stratum_assgn   
         }
 
@@ -934,6 +936,7 @@ spGetPlots <- function(bnd = NULL,
                          stateFilter = stateFilterDB1, 
                          returndata = TRUE,
                          evalInfo = evalInfo1st,
+                         dbconn = dbconn,
                          ...
                          )
       tabs1 <- dat1$tabs
@@ -1031,6 +1034,7 @@ spGetPlots <- function(bnd = NULL,
                          stateFilter = stateFilterDB2, 
                          returndata = TRUE,
                          evalInfo = evalInfo2st,
+                         dbconn = dbconn,
                          ...
                          )
       tabs2 <- dat2$tabs
@@ -1118,6 +1122,7 @@ spGetPlots <- function(bnd = NULL,
         stateFilterDB <- paste(stateFilterDB, "&", stateFilter) 
         rm(stateFilter)
       }
+
       dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 
@@ -1131,6 +1136,7 @@ spGetPlots <- function(bnd = NULL,
                          returndata = TRUE,
                          evalInfo = evalInfost,
                          dbconnopen = TRUE,
+                         dbconn = dbconn,
                          ...
                          )
       tabs <- dat$tabs

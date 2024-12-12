@@ -307,27 +307,11 @@ modSAarea <- function(SApopdatlst = NULL,
   } else {
     if (!is.list(SApopdatlst)) {
       SApopdatlst <- list(SApopdatlst)
-    } else if ("condx" %in% names(SApopdatlst)) {
+    } else if ("pltcondx" %in% names(SApopdatlst)) {
       SApopdatlst <- list(SApopdatlst)
     }  
 
-    if (is.list(SApopdatlst)) {
-      list.items <- c("pltcondx", "cuniqueid", "condid", 
-		                  "dunitarea", "dunitvar", "dunitlut",
-		                  "prednames", "plotsampcnt", "condsampcnt")
-      popchk <- tryCatch(
-        {
-          pcheck.object(SApopdatlst, list.items = list.items)
-        },
-     	 	error = function(cond) {
-     	 	     message(cond)
-			       return(NULL)
-     	 	}
-      )
-      if (!is.null(popchk)) {
-        SApopdatlst <- list(SApopdatlst)
-      }
-    }
+    list.items <- c("pltcondx", "dunitarea", "dunitvar", "dunitlut")
     returnSApopdat <- FALSE
   }
 
@@ -780,6 +764,7 @@ modSAarea <- function(SApopdatlst = NULL,
                      pdomdatlst_row = pdomdatlst_row,
                      dunitlutlst_row = dunitlutlst_row,
                      save4testing = save4testing) 
+    if (is.numeric(SAestimates) && SAestimates == 0) stop()
     largebnd.unique <-  SAestimates$largebnd.unique
     response <- SAestimates$response
     domdat <- SAestimates$domdat
@@ -810,15 +795,19 @@ modSAarea <- function(SApopdatlst = NULL,
                           "JU.Synth", "hbsaeU", "hbsaeU.se")
   SAEarea_estimators <- c("all", "saeA", "JFH", "JFH.se", "JA.Synth", "hbsaeA", "hbsaeA.se")
   
-  if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit") {
+  if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit" &&
+      length(predselectlst.unit) > 0) {
     predselect.unitdf <- data.frame(DOMAIN=names(predselectlst.unit), 
 					                          do.call(rbind, predselectlst.unit))
+
     setnames(predselect.unitdf, "DOMAIN", largebnd.unique)
     predselect.unitdf[is.na(predselect.unitdf)] <- 0
   } 
-  if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area") {
+  if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area"&&
+      length(predselectlst.area) > 0) {
     predselect.areadf <- data.frame(DOMAIN=names(predselectlst.area), 
 					                          do.call(rbind, predselectlst.area))
+
     setnames(predselect.areadf, "DOMAIN", largebnd.unique)
     predselect.areadf[is.na(predselect.areadf)] <- 0
   }
@@ -1214,15 +1203,15 @@ modSAarea <- function(SApopdatlst = NULL,
         multestdf_row <- setDF(multestdf_row)
         colnames(multestdf_row) <- NULL
       }
-      if (is.null(multest_layer)) {
-        if (multest_fmt == "csv") {
-          #multest_layer <- paste0("SAmultest_", SApackage, "_", response, ".csv")
-          #multest_layer_row <- paste0("SAmultest_", response, "_", rowvar, ".csv")
-          multest_layer_row <- paste0(outfn.estpse, "_multest.csv")
-        } else {
-          #multest_layer <- paste0(SApackage, "_", response)
-          multest_layer_row <- paste0(response, "_", rowvar)
-        }
+
+      if (multest_fmt == "csv") {
+        multest_basename <- basename.NoExt(multest_layer)
+        #multest_layer <- paste0("SAmultest_", SApackage, "_", response, ".csv")
+        #multest_layer_row <- paste0("SAmultest_", response, "_", rowvar, ".csv")
+        multest_layer_row <- paste0(multest_basename, "_multest_row.csv")
+      } else {
+        #multest_layer <- paste0(SApackage, "_", response)
+        multest_layer_row <- paste0(response, "_", rowvar)
       }
  
       ## Export multestdf
@@ -1298,10 +1287,10 @@ modSAarea <- function(SApopdatlst = NULL,
     rawdat$estvar <- response
     if (rowcolinfo$rowvar != "TOTAL") {
       rawdat$rowvar <- rowvar
-      if (multest || SAmethod == "unit") {
+      if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit") {
         rawdat$predselect.unit_row <- predselect.unitdf_row
       }
-      if (multest || SAmethod == "area") {
+      if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area") {
         rawdat$predselect.area_row <- predselect.areadf_row
       }
     }

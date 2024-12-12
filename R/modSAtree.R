@@ -327,23 +327,7 @@ modSAtree <- function(SApopdatlst = NULL,
       SApopdatlst <- list(SApopdatlst)
     }  
 
-    if (is.list(SApopdatlst)) {
-      list.items <- c("pltcondx", "treex", "cuniqueid", "condid", 
-		                  "tuniqueid", "dunitarea", "dunitvar", "dunitlut",
-	                  	"prednames", "plotsampcnt", "condsampcnt")
-      popchk <- tryCatch(
-        {
-          pcheck.object(SApopdatlst, list.items=list.items)
-        },
-      	error = function(cond) {
-      	     message(cond)
-			       return(NULL) 
-      	}
-      )
-      if (!is.null(popchk)) {
-        SApopdatlst <- list(SApopdatlst)
-      }
-    }
+    list.items <- c("pltcondx", "dunitarea", "dunitvar", "dunitlut")
     returnSApopdat <- FALSE
   }
 
@@ -875,6 +859,7 @@ modSAtree <- function(SApopdatlst = NULL,
                      pdomdatlst_row = pdomdatlst_row,
                      dunitlutlst_row = dunitlutlst_row,
                      save4testing = save4testing) 
+    if (is.numeric(SAestimates) && SAestimates == 0) stop()
     largebnd.unique <-  SAestimates$largebnd.unique
     response <- SAestimates$response
     domdat <- SAestimates$domdat
@@ -902,20 +887,20 @@ modSAtree <- function(SApopdatlst = NULL,
     estdf$AOI <- 1
   }	
 
-  if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit") {
+  if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit" &&
+      length(predselectlst.unit) > 0) {
 
     predselect.unitdf <- data.frame(DOMAIN=names(predselectlst.unit),
                                     do.call(rbind, predselectlst.unit))
-
     setnames(predselect.unitdf, "DOMAIN", largebnd.unique)
     predselect.unitdf[is.na(predselect.unitdf)] <- 0
 
   }
-  if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area") {
+  if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area" &&
+      length(predselectlst.area) > 0) {
 
     predselect.areadf <- data.frame(DOMAIN=names(predselectlst.area),
                                     do.call(rbind, predselectlst.area))
-
     setnames(predselect.areadf, "DOMAIN", largebnd.unique)
     predselect.areadf[is.na(predselect.areadf)] <- 0
 
@@ -948,7 +933,10 @@ modSAtree <- function(SApopdatlst = NULL,
     
   }
 
-  if (rowvar != "TOTAL") {
+  ################################################################################
+  ## Get estimates by row
+  ################################################################################
+  if (rowcolinfo$rowvar != "TOTAL") {
 
     ## Combine estimates
     estdf_row <- do.call(rbind, estlst_row)
@@ -967,7 +955,6 @@ modSAtree <- function(SApopdatlst = NULL,
       predselect.unitdf_row[is.na(predselect.unitdf_row)] <- 0
       
     }
-    
     if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area") {
       
       predselect.areadf_row <- data.frame(DOMAIN=names(predselectlst.area_row), 
@@ -1086,7 +1073,7 @@ modSAtree <- function(SApopdatlst = NULL,
   }
   
   if (rowvar != "TOTAL") {
-    
+
     ## Set up estimates. If estimate is NULL, use direct estimator
     estdf_row <- setDT(estdf_row)
     estdf_row[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
@@ -1109,7 +1096,14 @@ modSAtree <- function(SApopdatlst = NULL,
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, c(subvars, rowvar), with=FALSE]
     setkeyv(dunit_rowest, "DOMAIN")
-	
+
+    ## Merge dunitarea
+    tabs <- check.matchclass(dunitareabind, dunit_rowest, "DOMAIN")
+    dunitareabind <- tabs$tab1
+    dunit_rowest <- tabs$tab2
+    dunit_rowest <- merge(dunit_rowest, 
+    dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
+
     ###############################################################################
     ## Check add0 and Add area
     ###############################################################################
@@ -1126,7 +1120,7 @@ modSAtree <- function(SApopdatlst = NULL,
       dunit_rowest <- tabs$tab2
       
     }
-    
+
     if (!is.null(dunit_rowest)) {
       
       dunit_rowest[, nhat.var := nhat.se^2]
@@ -1323,14 +1317,14 @@ modSAtree <- function(SApopdatlst = NULL,
         multestdf_row <- setDF(multestdf_row)
         colnames(multestdf_row) <- NULL
       }
-      if (is.null(multest_layer)) {
-        if (multest_fmt == "csv") {
-          #multest_layer <- paste0("SAmultest_", SApackage, "_", response, ".csv")
-          multest_layer_row <- paste0(outfn.estpse, "_multest.csv")
-        } else {
-          #multest_layer <- paste0(SApackage, "_", response)
-          multest_layer_row <- paste0(response, "_", rowvar)
-        }
+      
+      if (multest_fmt == "csv") {
+        multest_basename <- basename.NoExt(multest_layer)
+        #multest_layer <- paste0("SAmultest_", SApackage, "_", response, ".csv")
+        multest_layer_row <- paste0(multest_basename, "_multest_row.csv")
+      } else {
+        #multest_layer <- paste0(SApackage, "_", response)
+        multest_layer_row <- paste0(response, "_", rowvar)
       }
  
       ## Export multestdf
@@ -1411,10 +1405,10 @@ modSAtree <- function(SApopdatlst = NULL,
     if (rowcolinfo$rowvar != "TOTAL") {
       rawdat$rowvar <- rowvar
       rawdat$rowvar <- rowvar
-      if (multest || SAmethod == "unit") {
+      if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit") {
         rawdat$predselect.unit_row <- predselect.unitdf_row
       }
-      if (multest || SAmethod == "area") {
+      if ((multest && any(multest_estimators %in% SAEarea_estimators)) || SAmethod == "area") {
         rawdat$predselect.area_row <- predselect.areadf_row
       }
     }

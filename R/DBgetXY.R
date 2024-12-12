@@ -130,7 +130,7 @@ DBgetXY <- function (states = NULL,
                      POP_PLOT_STRATUM_ASSGN = NULL,
                      SURVEY = NULL,
                      dbconn = NULL,
-                     dbconnopen = FALSE,
+                     dbconnopen = TRUE,
                      evalInfo = NULL
                      ) {
 
@@ -1349,7 +1349,7 @@ DBgetXY <- function (states = NULL,
   if (is.null(xyjoinid)) {
     xyjoinid <- xy.uniqueid
   }
- 
+
   ## GENERATE RETURN LIST
   ###########################################################
   if (returndata) {

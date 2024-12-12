@@ -248,7 +248,7 @@ modSApop <- function(popType = "VOL",
   ## Set parameters
   adjtree <- FALSE
   returnSApopdat <- FALSE
-  nonsamp.pfilter=nonsamp.cfilter=schema=vcondstrx=vcondsppx <- NULL 
+  nonsamp.pfilter=nonsamp.cfilter=schema=vcondstrx=vcondsppx=outlst <- NULL 
   returnlst <- list(module = "SA")
   
   ## Set global variables
@@ -278,6 +278,8 @@ modSApop <- function(popType = "VOL",
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
                          popFilter = popFilter,
+                         popTabs = popTabs,
+                         popTabIDs = popTabIDs,
                          unit_opts = unit_opts, 
                          savedata_opts = savedata_opts,
                          database_opts = database_opts))
@@ -285,6 +287,8 @@ modSApop <- function(popType = "VOL",
   unit_opts <- optslst$unit_opts  
   database_opts <- optslst$database_opts  
   popFilter <- optslst$popFilter
+  popTabs <- optslst$popTabs
+  popTabIDs <- optslst$popTabIDs
   
   for (i in 1:length(unit_opts)) {
     assign(names(unit_opts)[[i]], unit_opts[[i]])
@@ -302,15 +306,17 @@ modSApop <- function(popType = "VOL",
   addxy <- pcheck.logical(addxy, varnm="addxy", 
     title="Add XY?", first="NO", gui=gui, stopifnull=TRUE)
 
-    ## Check savedata 
-  savedata <- pcheck.logical(savedata, varnm="savedata", 
-		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
-
-  ## Check saveobj 
-  saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
-		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+  ## Check savedata 
+  savedata <- FIESTAutils::pcheck.logical(savedata, varnm="savedata", 
+                                          title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+  if (!savedata) {
+    message("savedata=FALSE with savedata parameters... no data are saved")
+  }
   
-
+  ## Check saveobj 
+  saveobj <- FIESTAutils::pcheck.logical(saveobj, varnm="saveobj", 
+                                         title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+  
   ## Check output
   ########################################################
   if (savedata || saveobj) {
@@ -318,7 +324,7 @@ modSApop <- function(popType = "VOL",
     
     if (savedata) {
       if (out_fmt == "sqlite" && is.null(out_dsn)) {
-        out_dsn <- "SApopdat.db"
+        out_dsn <- "GBpopdat.db"
       }
       outlst$add_layer <- TRUE
     }
@@ -326,23 +332,22 @@ modSApop <- function(popType = "VOL",
   
   if (saveobj) {
     outobj_fmtlst <- c('rds', 'rda')
-    outobj_fmt <- pcheck.varchar(var2check=outobj_fmt, varnm="outobj_fmt", gui=gui,
-		                             checklst=outobj_fmtlst, caption="outobj_fmt", 
-		                             multiple=FALSE, stopifnull=TRUE)
-
+    outobj_fmt <- FIESTAutils::pcheck.varchar(var2check = outobj_fmt, varnm="outobj_fmt", 
+                                              gui=gui, checklst = outobj_fmtlst, caption="outobj_fmt", 
+                                              multiple = FALSE, stopifnull = TRUE)
     if (is.null(objnm)) {
-      objnm <- "SApopdat"
+      objnm <- "GBpopdat"
     }
     #if (append_layer) overwrite_layer <- FALSE
     if (append_layer) message("currently cannot append to object lists")
-    objfn <- getoutfn(outfn=objnm,
-                      ext=outobj_fmt,
-                      outfolder=outfolder, 
-                      overwrite=overwrite_layer,
-                      outfn.pre=outfn.pre,
-                      outfn.date=outfn.date)
+    objfn <- getoutfn(outfn = objnm, 
+                      ext = outobj_fmt, 
+                      outfolder = outlst$outfolder, 
+                      overwrite = outlst$overwrite_layer, 
+                      outfn.pre = outlst$outfn.pre, 
+                      outfn.date = outlst$outfn.date)
   }
-
+  
 
   ## Check popType
   ########################################################

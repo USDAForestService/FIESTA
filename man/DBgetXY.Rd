@@ -30,7 +30,7 @@ DBgetXY(
   POP_PLOT_STRATUM_ASSGN = NULL,
   SURVEY = NULL,
   dbconn = NULL,
-  dbconnopen = FALSE,
+  dbconnopen = TRUE,
   evalInfo = NULL
 )
 }

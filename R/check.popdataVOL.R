@@ -66,10 +66,9 @@ check.popdataVOL <-
     addfortypgrp <- TRUE
     
     ## Get variables from outlst
-    for (i in 1:length(outlst)) {
-      assign(names(outlst)[[i]], outlst[[i]])
+    if (savedata) {
+      append_layer <- outlst$append_layer
     }
-    
     
     ##############################################################################
     ## Define variables necessary for estimation
