@@ -193,7 +193,7 @@ SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
 # Fit an area level Fay-Herriot EBLUP with `sae`, while using Elastic Net
 # variable selection
 modSAarea(SApopdatlst = SApopdat,
-          SApackage = "sae",
+          SApackage = "JoSAE",
           SAmethod = "area",
           modelselect = TRUE) 
 }
