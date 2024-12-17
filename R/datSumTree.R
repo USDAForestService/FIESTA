@@ -153,7 +153,7 @@ datSumTree <- function(tree = NULL,
   
   ## Set global variables  
   pltx=treex=seedx=cond.nonsamp.filter=meta=tvars2convert=ssumvarlst=
-    cntvar=fname=tderivevars=pltidsnm=domainlst=classifyvars=propvars <- NULL
+    cntvar=fname=tderivevars=pltidsnm=domainlst=classifyvars=propvars=tpcwhereqry <- NULL
 
   #ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry=pcfromqry=pcselectvars=tpavarnm=pcdomainlst <- NULL
@@ -1119,7 +1119,6 @@ datSumTree <- function(tree = NULL,
     }
 
     ## If ACI, include COND_STATUS_CD = 1 to exclude trees measured on ACI plots
-    tpcwhereqry <- NULL
     if (!ACI) {
       if (is.null(condflds)) {
         message("must include cond to exclude ACI plots... assuming data has no ACI plots")
