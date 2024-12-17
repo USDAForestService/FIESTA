@@ -161,81 +161,47 @@ DBgetXY <- function (states = NULL,
   } 
  
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts,
-				xy_opts=xy_opts)
+  pcheck.params(input.params, 
+                savedata_opts = savedata_opts, 
+                eval_opts = eval_opts,
+				        xy_opts = xy_opts)
 
+  
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts,
+                         eval_opts = eval_opts, 
+                         xy_opts = xy_opts))
+  savedata_opts <- optslst$savedata_opts  
+  eval_opts <- optslst$eval_opts
+  xy_opts <- optslst$xy_opts  
 
-  ## Set eval_options defaults
-  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))] 
-  for (i in 1:length(eval_defaults_list)) {
-    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
-  } 
- 
-  ## Set user-supplied eval_opts values
-  if (length(eval_opts) > 0) {
-    for (i in 1:length(eval_opts)) {
-      if (names(eval_opts)[[i]] %in% names(eval_defaults_list)) {
-        assign(names(eval_opts)[[i]], eval_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
-      }
-    }
-  } else {
-    message("no evaluation timeframe specified...")
-    message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
-    stop()
+  for (i in 1:length(eval_opts)) {
+    assign(names(eval_opts)[[i]], eval_opts[[i]])
   }
-
-  ## Set xy_options defaults
-  xy_defaults_list <- formals(xy_options)[-length(formals(xy_options))]
-  for (i in 1:length(xy_defaults_list)) {
-    assign(names(xy_defaults_list)[[i]], xy_defaults_list[[i]])
+  for (i in 1:length(xy_opts)) {
+    assign(names(xy_opts)[[i]], xy_opts[[i]])
   }
-  ## Set user-supplied xy_opts values
-  if (length(xy_opts) > 0) {
-    for (i in 1:length(xy_opts)) {
-      if (names(xy_opts)[[i]] %in% names(xy_defaults_list)) {
-        assign(names(xy_opts)[[i]], xy_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(xy_opts)[[i]]))
-      }
-    }
-  } 
-
-  ## Set dbTables defaults
+  for (i in 1:length(savedata_opts)) {
+    assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+  }
+  
+  ## Set user-supplied dbTabs options
   dbTables_defaults_list <- formals(dbTables)[-length(formals(dbTables))]
-  for (i in 1:length(dbTables_defaults_list)) {
-    assign(names(dbTables_defaults_list)[[i]], dbTables_defaults_list[[i]])
-  }
-  ## Set user-supplied dbTables values
+  dbTabs2 <- dbTables_defaults_list
   if (length(dbTabs) > 0) {
     for (i in 1:length(dbTabs)) {
       if (names(dbTabs)[[i]] %in% names(dbTables_defaults_list)) {
-        assign(names(dbTabs)[[i]], dbTabs[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(dbTabs)[[i]]))
+        if (!is.null(dbTabs[[i]])) {
+          dbTabs2[[names(dbTabs)[[i]]]] <- dbTabs[[i]]
+        }
       }
     }
   }
-
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  } 
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
+  for (i in 1:length(dbTabs2)) {
+    assign(names(dbTabs2)[[i]], dbTabs2[[i]])
   }
+  
 
   ########################################################################
   ### GET PARAMETER INPUTS 

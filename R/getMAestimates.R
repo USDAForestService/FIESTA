@@ -161,7 +161,6 @@ getMAestimates <- function(esttype,
     } else {
       unit_totest <- getpse(unit_totest, esttype=esttype)
     }      
-    
   }
   
   if (rowvar != "TOTAL") {

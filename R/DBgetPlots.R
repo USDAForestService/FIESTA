@@ -612,27 +612,38 @@ DBgetPlots <- function (states = NULL,
   savedata_opts <- optslst$savedata_opts  
   eval_opts <- optslst$eval_opts
   xy_opts <- optslst$xy_opts  
-  
+
   for (i in 1:length(eval_opts)) {
     assign(names(eval_opts)[[i]], eval_opts[[i]])
   }
   for (i in 1:length(xy_opts)) {
     assign(names(xy_opts)[[i]], xy_opts[[i]])
   }
-
+  
+  ## dbTables
+  ###################################################################
+  ## Set user-supplied dbTabs options
+  dbTables_defaults_list <- formals(dbTables)[-length(formals(dbTables))]
+  dbTabs2 <- dbTables_defaults_list
+  if (length(dbTabs) > 0) {
+    for (i in 1:length(dbTabs)) {
+      if (names(dbTabs)[[i]] %in% names(dbTables_defaults_list)) {
+        if (!is.null(dbTabs[[i]])) {
+          dbTabs2[[names(dbTabs)[[i]]]] <- dbTabs[[i]]
+        }
+      }
+    }
+  }
+  for (i in 1:length(dbTabs2)) {
+    assign(names(dbTabs2)[[i]], dbTabs2[[i]])
+  }
+  
   ## Check isveg
   if ("isveg" %in% names(args)) {
     message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
     isveg <- args$isveg
   }
-  
-  ## Set dbTables defaults
-  dbTables_defaults_list <- dbTables()
-  for (i in 1:length(dbTables_defaults_list)) {
-    assign(names(dbTables_defaults_list)[[i]], dbTables_defaults_list[[i]])
-  } 
-  
-  
+
   ## Define variables
   actual=getinvyr <- FALSE
   SCHEMA <- ""

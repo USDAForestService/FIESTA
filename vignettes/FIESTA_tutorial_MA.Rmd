@@ -179,6 +179,7 @@ modeldat <- spGetAuxiliary(
   keepNA = FALSE,
   showext = FALSE,
   savedata = FALSE)
+
 ```
 ```{r}
 str(modeldat, max.level = 1)
@@ -198,7 +199,9 @@ str(modeldat, max.level = 1)
 We can create our population data for model-assisted estimation. To do so, we use the `modMApop` function in `FIESTA`. We must assign our population tables with the `popTabs` argument (and unique identifiers for these tables with the `popTabIDs` argument if they are not the default), the plot assignment with the `pltassgn` argument, and in auxiliary dataset we just created with the `auxdat` argument. The `spGetAuxiliary` function has done much of the hard work for us so far, so we can just run a simple call to `modMApop`:
  
 ```{r}
-MApopdat <- modMApop(popTabs = list(tree = WYtree, cond = WYcond),
+MApopdat <- modMApop(popTabs = list(tree = WYtree, 
+                                    cond = WYcond, 
+                                    plt = WYplt),
                      auxdat = modeldat)
 ```
 
@@ -309,9 +312,7 @@ Along with raw data and titles:
 raw3 <- area3$raw      # extract raw data list object from output
 names(raw3)
 head(raw3$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
-raw3$totest            # estimates for population (i.e., WY)
 head(raw3$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-head(raw3$rowest)      # estimates by row for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
@@ -367,13 +368,9 @@ head(area4$est)
 raw4 <- area4$raw      # extract raw data list object from output
 names(raw4)
 head(raw4$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
-head(raw4$totest)      # estimates for population (i.e., WY)
 head(raw4$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-head(raw4$rowest)      # estimates by row for population (i.e., WY)
 head(raw4$unit_colest) # estimates by column, by estimation unit (i.e., ESTN_UNIT)
-head(raw4$colest)      # estimates by column for population (i.e., WY)
 head(raw4$unit_grpest) # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
-head(raw4$grpest)      # estimates by row and column for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
@@ -420,6 +417,7 @@ tree1 <- modMAtree(
 
 names(tree1)
 tree1$raw$unit_totest
+
 ```
 
 </details>
@@ -442,6 +440,7 @@ tree2 <- modMAtree(
     estvar.filter = live_trees,  # est - live trees only
     returntitle = TRUE           # out - return title information
     )
+
 ```
 
 We can again see that the structure of the list is very similar to that in the above example:
@@ -493,9 +492,7 @@ tree3$est
 raw3 <- tree3$raw      # extract raw data list object from output
 names(raw3)
 head(raw3$unit_totest)   # estimates by estimation unit (i.e., ESTN_UNIT)
-head(raw3$totest)        # estimates for population (i.e., WY)
 head(raw3$unit_rowest)   # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-head(raw3$rowest)        # estimates by row for population (i.e., WY)
 
 
 ## Titles (list object) for estimate

@@ -323,7 +323,7 @@ modSAtree <- function(SApopdatlst = NULL,
   } else {
     if (!is.list(SApopdatlst)) {
       SApopdatlst <- list(SApopdatlst)
-    } else if ("condx" %in% names(SApopdatlst)) {
+    } else if ("pltcondx" %in% names(SApopdatlst)) {
       SApopdatlst <- list(SApopdatlst)
     }  
 
@@ -379,7 +379,7 @@ modSAtree <- function(SApopdatlst = NULL,
     multest_outfolder <- pcheck.outfolder(multest_outfolder)
     
     estimatorlst <- c('JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA')
-    estimatorSElst <- c('JU.GREG.se','JU.EBLUP.se','JFH.se','hbsaeU.se','hbsaeA.se')
+    estimatorSElst <- c('JU.GREG.se','JU.EBLUP.se.1','JFH.se','hbsaeU.se','hbsaeA.se')
     multest_estimators <- pcheck.varchar(var2check = estimatorlst, 
                                          varnm = "multest_estimators", checklst = c("all", estimatorlst), 
                                          gui = gui, caption = "Output multest format?", multiple = TRUE) 
@@ -779,7 +779,7 @@ modSAtree <- function(SApopdatlst = NULL,
                    gui = gui)
     if (is.null(treedat)) stop(NULL) 
     tdomdat <- treedat$tdomdat
-    #estvar <- treedat$estvar
+    estvar <- treedat$estvar
     estvar.name <- treedat$estvar.name
     estvar.filter <- treedat$estvar.filter
     tdomvarlst <- treedat$tdomvarlst
@@ -1035,7 +1035,12 @@ modSAtree <- function(SApopdatlst = NULL,
 
   if (na.fill != "NONE") {
     estdf[is.na(estdf$nhat), "estimator"] <- na.fill
-    na.fill.se <- paste0(na.fill, ".se")
+    
+    if (na.fill == "JU.EBLUP") {
+      na.fill.se <- "JU.EBLUP.se.1"
+    } else {
+      na.fill.se <- paste0(na.fill, ".se")
+    }
     estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
       estdf[is.na(estdf$nhat), c(na.fill, na.fill.se), with=FALSE]
   }
@@ -1157,7 +1162,7 @@ modSAtree <- function(SApopdatlst = NULL,
                  title.estvarn = title.estvar,
                  unitvar = "DOMAIN",
                  rowvar = rowvar, colvar = colvar,
-                 estvarn = estvar.name,
+                 estvarn = estvar,
                  estvarn.filter = estvar.filter,
                  addtitle = addtitle,
                  returntitle = returntitle,

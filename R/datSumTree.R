@@ -1113,9 +1113,13 @@ datSumTree <- function(tree = NULL,
           }
         }
       }
+      if (grepl("pc.", pcwhereqry)) {
+        pcwhereqry <- gsub("pc.", "c.", pcwhereqry)
+      }
     }
 
     ## If ACI, include COND_STATUS_CD = 1 to exclude trees measured on ACI plots
+    tpcwhereqry <- NULL
     if (!ACI) {
       if (is.null(condflds)) {
         message("must include cond to exclude ACI plots... assuming data has no ACI plots")
@@ -1131,7 +1135,7 @@ datSumTree <- function(tree = NULL,
             pcwhereqry <- paste0(pcwhereqry, " AND pc.COND_STATUS_CD = 1")
           }
         } else {
-          pcwhereqry <- "\n WHERE pc.COND_STATUS_CD = 1"
+          tpcwhereqry <- "\n WHERE pc.COND_STATUS_CD = 1"
         }
         cvars <- unique(c(cvars, cond_status_cdnm))
       }
@@ -1181,7 +1185,8 @@ datSumTree <- function(tree = NULL,
                               "\n----- pltcondx",
                               "\npltcondx AS",
                               "\n(SELECT ", pltcondfldsqry,
-                              pcfromqry, ")")
+                              pcfromqry, 
+                              pcwhereqry, ")")
       condnm <- "pltcondx"
       
       if (!bysubp) {
@@ -2217,7 +2222,7 @@ datSumTree <- function(tree = NULL,
   ################################################################
   tqry <- paste0(tselectqry,
                  tfromqry,
-                 pcwhereqry,
+                 tpcwhereqry,
                  "\nGROUP BY ", toString(tgrpbyvars))	
   
   ## Build final query to summarize tree data including WITH queries

@@ -113,6 +113,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
             title.unitsn <- ifelse (metric, "metric tons", "tons")
           }			
         }
+
         if (esttype == "RATIO") {
           if (is.null(title.unitsd)) {
 		        unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
@@ -460,7 +461,11 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
     titlelst$title.col <- title.col
   }
   if (!is.null(title.unitsn)) {
-    titlelst$title.unitsn <- title.unitsn
+    if (esttype != "RATIO") {
+      titlelst$title.unit <- title.unitsn
+    } else {
+      titlelst$title.unitsn <- title.unitsn
+    }
   }
   if (!is.null(title.unitsd)) {
     titlelst$title.unitsd <- title.unitsd

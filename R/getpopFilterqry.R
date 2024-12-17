@@ -277,6 +277,7 @@ getpopFilterqry <- function(popType,
         error = function(e) {
           message(e,"\n")
           return(NULL) })
+
       if (!is.null(evalchk)) {
         measCur <- evalchk$measCur
         measEndyr <- evalchk$measEndyr
@@ -289,7 +290,7 @@ getpopFilterqry <- function(popType,
       }
     }
   }
- 
+
   ###################################################################################
   ## 5. Build pwhereqry
   ###################################################################################
@@ -824,7 +825,7 @@ getpopFilterqry <- function(popType,
       pltidsqry <- paste0(pltidsqry, pwhereqry)
     }
   }
- 
+
   ###################################################################################
   ## 8. Create pltidsqry to use as WITH statement for extracting data (if pltassgn in database)
   ## getdataWITHqry - used for extracting data (if pltassgn not in database)

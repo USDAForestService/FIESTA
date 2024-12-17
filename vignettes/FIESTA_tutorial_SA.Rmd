@@ -248,7 +248,6 @@ all_preds <- c("slp", "dem", "asp_cos", "asp_sin", "fornf")
 Next, we fit the unit-level EBLUP with the `JoSAE` R package. 
 
 ```{r}
-
 area1 <- modSAarea(
   SApopdatlst = SApopdat,        # pop - population calculations for WY, post-stratification
   prednames = all_preds,         # est - character vector of predictors to be used in the model
@@ -322,6 +321,7 @@ area3 <- modSAarea(
   SAmethod = "unit",        # est - method of small area estimation. Either "unit" or "area"
   multest = TRUE
   )
+
 ```
 
 We can again check our estimates, small area method, and small area package. 
@@ -347,8 +347,10 @@ area4 <- modSAarea(
   prednames = all_preds,      # est - character vector of predictors to be used in the model
   SApackage = "hbsae",        # est - character string of the R package to do the estimation
   SAmethod = "unit",          # est - method of small area estimation. Either "unit" or "area"
+  na.fill = "DIR",
   prior = function(x) 1       # est - prior on ratio of between and within area variation
   )
+
 ```
 
 Let's check our results compared to Example 3 (same model with half-Cauchy prior)

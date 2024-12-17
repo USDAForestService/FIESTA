@@ -362,7 +362,7 @@ modSAarea <- function(SApopdatlst = NULL,
     multest_outfolder <- pcheck.outfolder(multest_outfolder)
     
     estimatorlst <- c('JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA')
-    estimatorSElst <- c('JU.GREG.se','JU.EBLUP.se','JFH.se','hbsaeU.se','hbsaeA.se')
+    estimatorSElst <- c('JU.GREG.se','JU.EBLUP.se.1','JFH.se','hbsaeU.se','hbsaeA.se')
     multest_estimators <- pcheck.varchar(var2check = estimatorlst, 
                                   varnm = "multest_estimators", checklst = c("all", estimatorlst), 
                                   gui = gui, caption = "Output multest format?", multiple = TRUE) 
@@ -790,7 +790,7 @@ modSAarea <- function(SApopdatlst = NULL,
   if (!"AOI" %in% names(estdf)) {
     estdf$AOI <- 1
   }	
- 
+
   SAEunit_estimators <- c("all", "saeU", "JU.EBLUP", "JU.EBLUP.se.1", "JU.GREG", "JU.GREG.se", 
                           "JU.Synth", "hbsaeU", "hbsaeU.se")
   SAEarea_estimators <- c("all", "saeA", "JFH", "JFH.se", "JA.Synth", "hbsaeA", "hbsaeA.se")
@@ -917,22 +917,30 @@ modSAarea <- function(SApopdatlst = NULL,
   } 
 
   if (multest) {
-    multestdf <- estdf
+    multestdf <- copy(estdf)
     multestdf[is.na(multestdf$AOI), "AOI"] <- 0
     if (rowcolinfo$rowvar != "TOTAL") {
       multestdf_row <- estdf_row
       multestdf_row[is.na(multestdf_row$AOI), "AOI"] <- 0
     }
   }
- 
+
   ## Set up estimates. If estimate is NULL, use direct estimator
   estdf <- setDT(estdf)
   estdf[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
+  estdf[, c("nhat", "nhat.se"), ]
   estdf$estimator <- nhat
 
   if (na.fill != "NONE") {
+    if (any(is.na(estdf$nhat))) {
+      message("filling NA values with estimates generated from: ", na.fill)
+    }
     estdf[is.na(estdf$nhat), "estimator"] <- na.fill
-    na.fill.se <- paste0(na.fill, ".se")
+    if (na.fill == "JU.EBLUP") {
+      na.fill.se <- "JU.EBLUP.se.1"
+    } else {
+      na.fill.se <- paste0(na.fill, ".se")
+    }
     estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
             estdf[is.na(estdf$nhat), c(na.fill, na.fill.se), with=FALSE]
   }

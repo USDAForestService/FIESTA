@@ -584,7 +584,6 @@ modMAtree <- function(MApopdat,
   } else {
     pltidsWITHqry <- NULL
   }
-
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -597,7 +596,7 @@ modMAtree <- function(MApopdat,
                estvarn.filter = estvar.filter, 
                estvarn.derive = estvar.derive,
                esttotn = TRUE, 
-               bydomainlst = domainlst,
+               bydomainlst = c(domainlst, "TOTAL"),
                tdomvar = tdomvar, tdomvar2 = tdomvar2,
                adjtree = adjtree, 
                adjvar = "tadjfac",
@@ -613,6 +612,7 @@ modMAtree <- function(MApopdat,
                gui = gui)
   if (is.null(treedat)) stop(NULL) 
   tdomdat <- treedat$tdomdat
+  estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
@@ -632,7 +632,6 @@ modMAtree <- function(MApopdat,
       grpvar <- c(rowvar, colvar)
     }
   }
-  
 
   #################################################################################
   ### GET TITLES FOR OUTPUT TABLES
@@ -654,7 +653,7 @@ modMAtree <- function(MApopdat,
                  title.estvarn = title.estvar, 
                  unitvar = unitvar,
                  rowvar = rowvar, colvar = colvar, 
-                 estvarn = estvar.name,
+                 estvarn = estvar,
                  estvarn.filter = estvar.filter, 
                  addtitle = addtitle,
                  returntitle = returntitle, 
@@ -679,7 +678,7 @@ modMAtree <- function(MApopdat,
   ## Append name of package and method to outfile name
   outfn.estpse <- paste0(outfn.estpse, "_modMA_mase", "_", MAmethod) 
 
-  
+ 
   #################################################################################
   ## GENERATE ESTIMATES
   #################################################################################

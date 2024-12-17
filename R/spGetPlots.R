@@ -222,8 +222,10 @@ spGetPlots <- function(bnd = NULL,
   }
 
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts,
-			xy_opts=xy_opts)
+  pcheck.params(input.params, 
+                savedata_opts = savedata_opts, 
+                eval_opts = eval_opts,
+			          xy_opts = xy_opts)
 
   if ("stateFilter" %in% names(args)) {
     stop("cannot use stateFilter parameter at this time in spGetPlots")
@@ -235,93 +237,47 @@ spGetPlots <- function(bnd = NULL,
     stop("cannot use evalInfo parameter at this time in spGetPlots")    
   }
 
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts,
+                         eval_opts = eval_opts, 
+                         xy_opts = xy_opts))
+  savedata_opts <- optslst$savedata_opts  
+  eval_opts <- optslst$eval_opts
+  xy_opts <- optslst$xy_opts  
 
-  ## Set dbTables defaults
-  dbTables_defaults_list <- formals(dbTables)[-length(formals(dbTables))] 
-  for (i in 1:length(dbTables_defaults_list)) {
-    assign(names(dbTables_defaults_list)[[i]], dbTables_defaults_list[[i]])
+  for (i in 1:length(eval_opts)) {
+    assign(names(eval_opts)[[i]], eval_opts[[i]])
   }
-  ## Set user-supplied dbTables values
+  for (i in 1:length(xy_opts)) {
+    assign(names(xy_opts)[[i]], xy_opts[[i]])
+  }
+  for (i in 1:length(savedata_opts)) {
+    assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+  }
+  
+  ## Set user-supplied dbTabs options
+  dbTables_defaults_list <- formals(dbTables)[-length(formals(dbTables))]
+  dbTabs2 <- dbTables_defaults_list
   if (length(dbTabs) > 0) {
     for (i in 1:length(dbTabs)) {
       if (names(dbTabs)[[i]] %in% names(dbTables_defaults_list)) {
-        assign(names(dbTabs)[[i]], dbTabs[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(dbTabs)[[i]]))
+        if (!is.null(dbTabs[[i]])) {
+          dbTabs2[[names(dbTabs)[[i]]]] <- dbTabs[[i]]
+        }
       }
     }
   }
-
-  ## Set eval_options defaults
-  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))]
-  for (i in 1:length(eval_defaults_list)) {
-    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
+  for (i in 1:length(dbTabs2)) {
+    assign(names(dbTabs2)[[i]], dbTabs2[[i]])
   }
-  ## Set user-supplied eval_opts values
-  if (length(eval_opts) > 0) {
-    for (i in 1:length(eval_opts)) {
-      if (names(eval_opts)[[i]] %in% names(eval_defaults_list)) {
-        assign(names(eval_opts)[[i]], eval_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
-      }
-    }
-    ## Append eval_options defaults not specified to pass on to DBgetXY()
-    if (any(names(eval_defaults_list) %in% names(eval_opts))) {
-      eval_opts <- append(eval_opts, 
-		eval_defaults_list[!names(eval_defaults_list) %in% names(eval_opts)])
-    }
-  } else {
-    message("no evaluation timeframe specified...")
-    message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
-    stop()
-  }
-
+  
   if ("isveg" %in% names(args)) {
     message("the parameter isveg is deprecated... use eval_options(Type='P2VEG'))\n")
     isveg <- args$isveg
   }
 
-  ## Set xy_options defaults
-  xy_defaults_list <- formals(xy_options)[-length(formals(xy_options))]  
-  for (i in 1:length(xy_defaults_list)) {
-    assign(names(xy_defaults_list)[[i]], xy_defaults_list[[i]])
-  }
-  ## Set user-supplied xy_opts values
-  if (length(xy_opts) > 0) {
-    for (i in 1:length(xy_opts)) {
-      if (names(xy_opts)[[i]] %in% names(xy_defaults_list)) {
-        assign(names(xy_opts)[[i]], xy_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(xy_opts)[[i]]))
-      }
-    }
-    ## Append xy_options defaults not specified to pass on to DBgetXY()
-    if (any(names(xy_defaults_list) %in% names(xy_opts))) {
-      xy_opts <- append(xy_opts, 
-		xy_defaults_list[!names(xy_defaults_list) %in% names(xy_opts)])
-    }
-  } 
-
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))] 
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  } 
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-
+  
   ##################################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################################      
@@ -831,7 +787,7 @@ spGetPlots <- function(bnd = NULL,
   if (savePOP) {
     pop_plot_stratum_assgnx <- {} 
   }
- 
+
   for (i in 1:length(states)) { 
     stcliptabs <- list()
     state <- states[i]
@@ -1122,7 +1078,6 @@ spGetPlots <- function(bnd = NULL,
         stateFilterDB <- paste(stateFilterDB, "&", stateFilter) 
         rm(stateFilter)
       }
-
       dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 

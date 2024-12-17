@@ -86,7 +86,6 @@ check.tree <-
     
     tsumvarn <- tdomdata$tsumvarnm
     tdomvarlstn <- tdomdata$tdomlst
-    estunitsn <- tdomdata$estunits
     tsumuniqueid <- tdomdata$tsumuniqueid
     classifynmlst <- tdomdata$classifynmlst
     tdomvarnm <- tdomdata$tdomvarnm
@@ -142,13 +141,15 @@ check.tree <-
     if (is.null(treedata)) return(NULL)
     tdomdat <- treedata$treedat
     tsumvarn <- treedata$sumvars
-    estunitsn <- treedata$estunits
     treeqryn <- treedata$treeqry
     classifynmlst <- treedata$classifynmlst
     tdomainlst <- treedata$tdomainlst
     pcdomainlst <- treedata$pcdomainlst
   }
 
+  unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
+  estunitsn <- ref_units[ref_units$VARIABLE == estvarn, unitcol]
+  
   #############################################################################
   ### GET ESTIMATION DATA (& TREE DOMAIN DATA) FROM TREE TABLE AND
   ### AGGREGATE TO CONDITION (DENOMINATOR)
@@ -211,10 +212,8 @@ check.tree <-
       }
       tdomdatd <- data.table(tdomdata$tdomdat)
       treeqryd <- tdomdata$treeqry
-      
       tsumvard <- tdomdata$tsumvarnm
       tdomvarlstd <- tdomdata$tdomlst
-      estunitsd <- tdomdata$estunits
 
       if (!pivot) {
         tdomdatd <- tdomdatd[!is.na(tdomdatd[[tdomvar]]),]
@@ -264,7 +263,6 @@ check.tree <-
       }
       tdomdatd <- treedata$treedat
       tsumvard <- treedata$sumvars
-      estunitsd <- treedata$estunits
       treeqryd <- treedata$treeqry
       tsumuniqueid <- treedata$tsumuniqueid
       
@@ -275,6 +273,11 @@ check.tree <-
     
     ## Merge table with denominator to table with numerator
     tdomdat <- merge(tdomdat, tdomdatd, by=tsumuniqueid)
+    
+    
+    unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
+    estunitsd <- ref_units[ref_units$VARIABLE == estvard, unitcol]
+    
 
   } else {
     tdomvard <- NULL

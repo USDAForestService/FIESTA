@@ -755,6 +755,7 @@ DBgetEvalid <- function(states = NULL,
         message(paste0(utils::capture.output(invyrtab), collapse = "\n"))
         
       } else {
+
         ## Create table of all inventory years in database
         invdbtab <- NULL
         if (!is.null(plotnm)) {
@@ -773,6 +774,8 @@ DBgetEvalid <- function(states = NULL,
               invyrtab <- sqldf::sqldf(invyrqry, connection = NULL)
             }
           }
+        } else {
+          message("INVYR not in input data...  no invyrs returned...")
         }
       }
     } else {
@@ -847,7 +850,7 @@ DBgetEvalid <- function(states = NULL,
           evalresp <- TRUE
         }
       }
-      
+     
       if ((is.null(evalCur) || !evalCur) && (is.null(evalAll) || !evalAll)) {
         if (gui) {
           evalresp <- select.list(c("NO", "YES"), title="Use an Evaluation?", 
@@ -855,6 +858,7 @@ DBgetEvalid <- function(states = NULL,
           if (evalresp == "") stop("")
           evalresp <- ifelse(evalresp == "YES", TRUE, FALSE)
         } else {
+
           #return(list(states=states, rslst=rslst, evalidlist=NULL, 
           #		invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
           returnlst <- list(states=states, rslst=rslst, 
