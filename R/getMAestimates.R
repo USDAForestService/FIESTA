@@ -164,7 +164,6 @@ getMAestimates <- function(esttype,
   }
   
   if (rowvar != "TOTAL") {
-    domdatn <- domdatn[!is.na(domdatn[[rowvar]]),] 
     domdattot <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
                          by=c(unitvar, uniqueid, rowvar, prednames), .SDcols=response]
     
@@ -186,7 +185,6 @@ getMAestimates <- function(esttype,
     }
     
     if (colvar != "NONE") {
-      domdatn <- domdatn[!is.na(domdatn[[colvar]]),] 	
       domdattot <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
                             by=c(unitvar, uniqueid, colvar, prednames), .SDcols=response]
       
