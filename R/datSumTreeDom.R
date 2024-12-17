@@ -1046,7 +1046,7 @@ datSumTreeDom <- function(tree = NULL,
 
   tdomdata <- list()
   if (!notdomdat) {
-    if (returnDT) {
+    if (!returnDT) {
       sumtreef <- setDF(sumtreef)
     }
     tdomdata$tdomdat <- sumtreef

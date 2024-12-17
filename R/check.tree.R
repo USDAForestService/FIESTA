@@ -78,7 +78,7 @@ check.tree <-
                     database_opts = database_options(schema = schema))
 
     if (is.null(tdomdata)) return(NULL)
-    tdomdat <- data.table(tdomdata$tdomdat)
+    tdomdat <- tdomdata$tdomdat
     treeqryn <- tdomdata$treeqry
     domainlst <- tdomdata$domainlst
     tdomainlst <- tdomdata$tdomainlst
@@ -90,7 +90,7 @@ check.tree <-
     classifynmlst <- tdomdata$classifynmlst
     tdomvarnm <- tdomdata$tdomvarnm
     tdomvar2nm <- tdomdata$tdomvar2nm
-   
+
     if (pivot) {
       ## Transpose back to rows
 #      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst, tdomvar2),
@@ -273,7 +273,7 @@ check.tree <-
     
     ## Merge table with denominator to table with numerator
     tdomdat <- merge(tdomdat, tdomdatd, by=tsumuniqueid)
-    
+    setkeyv(tdomdat, tsumuniqueid)
     
     unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
     estunitsd <- ref_units[ref_units$VARIABLE == estvard, unitcol]

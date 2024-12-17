@@ -849,6 +849,7 @@ names(treedomCNTs)
 tdomdat.pres <- treedomCNTs$tdomdat.pres
 
 head(tdomdat.pres)
+
 ```
 
 </details>
@@ -876,6 +877,7 @@ tdomdat.pres <- treedomCNTs$tdomdat.pres
 tdomdat.prop <- treedomCNTs$tdomdat.prop
 
 head(tdomdat.pres)
+
 ```
 
 </details>

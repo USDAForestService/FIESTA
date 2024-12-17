@@ -2283,7 +2283,6 @@ datSumTree <- function(tree = NULL,
     sumdat[, (tcols) := round(.SD, tround), .SDcols=tcols]
   }
   
-  
   ## Get metadata
   #############################################################  
   sumdatcols <- names(sumdat)
