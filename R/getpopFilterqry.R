@@ -16,6 +16,7 @@ getpopFilterqry <- function(popType,
                             pltassgnvars,
                             selectpvars = NULL,
                             pltassgnx = NULL,
+                            pltx = NULL,
                             projectid = NULL,
                             adj = "samp",
                             schema = NULL,
@@ -138,13 +139,29 @@ getpopFilterqry <- function(popType,
           stcntywhereqry <- NULL
         }
       } else {
+
         if (pltaindb) {
           getstates.qry <- paste0(
             "\nSELECT DISTINCT ", statenm,
             stfromqry)
           states <- DBI::dbGetQuery(dbconn, getstates.qry)[[1]]
         } else {
-          states <- unique(pltassgnx[[statenm]])
+          if (noplt) {
+            statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
+            statecda. <- pltassgn.
+          } else {
+            statenm <- findnm("STATECD", pltflds, returnNULL=TRUE)
+            if (is.null(statenm)) {
+              statenm <- findnm("STATECD", pltassgnflds, returnNULL=TRUE)
+              statecda. <- ifelse(statenm %in% pltassgnflds, pltassgn., plt.)
+            } else {
+              statecda. <- ifelse(statenm %in% pltflds, plt., pltassgn.)
+            }
+          }
+          states.qry <- paste0(
+            "\nSELECT DISTINCT ", statecda., statenm,
+            pltafromqry)
+          states <- sqldf::sqldf(states.qry)[[1]]
         }
 
         if (noplt) {
@@ -170,7 +187,19 @@ getpopFilterqry <- function(popType,
                 "\nWHERE ", statenm, " = ", stcd)
               cntycds <- DBI::dbGetQuery(dbconn, getcntycds.qry)[[1]]
             } else {
-              cntycds <- unique(pltassgnx[pltassgnx[[statenm]] %in% stcd, countynm, with=FALSE])[[1]]
+              if (!is.null(states) && length(states != 0)) {
+                getcntycds.qry <- paste0(
+                  "\nSELECT DISTINCT ", countycda., countynm,
+                  pltafromqry,
+                  "\nWHERE ", statecda., statenm, " IN(", toString(states), ")")
+                cntycds <- sqldf::sqldf(getcntycds.qry)[[1]]
+                #cntycds <- unique(pltassgnx[pltassgnx[[statenm]] %in% stcd, countynm, with=FALSE])[[1]]
+              } else {
+                getcntycds.qry <- paste0(
+                  "\nSELECT DISTINCT ", countycda., countynm,
+                  pltafromqry)
+                cntycds <- sqldf::sqldf(getcntycds.qry)[[1]]
+              }
             }
             if (length(cntycds) > 0) {
               if (!is.null(stcntywhereqry)) {

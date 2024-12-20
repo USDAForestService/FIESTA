@@ -517,6 +517,7 @@ check.popdataPLT <-
     } else {
       dbTabs <- dbTables(plot_layer = tabs$plt)
     }
+
     popFilterqry <- 
       getpopFilterqry(popType = popType, 
                       popFilter = popFilter, 
@@ -537,6 +538,7 @@ check.popdataPLT <-
                       datindb = datindb,
                       pltaindb = pltaindb,
                       pltassgnx = pltassgnx,
+                      pltx = pltx,
                       chkvalues = FALSE,
                       projectid = projectid) 
     if (is.null(popFilterqry)) {
