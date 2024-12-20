@@ -596,10 +596,13 @@ spGetStrata <- function(xyplt,
     setnames(sppltx, strclvar, strvar2)
     strvar <- strvar2
   } else {
+
     strvar2 <- checknm("STRATUMCD", names(sppltx))
-    setnames(stratalut, strvar, strvar2)
-    setnames(sppltx, strvar, strvar2)
-    strvar <- strvar2
+    if (!is.null(strvar2)) {
+      setnames(stratalut, strvar, strvar2)
+      setnames(sppltx, strvar, strvar2)
+      strvar <- strvar2
+    }
   } 
 
   if (!is.null(vars2keep)) {
