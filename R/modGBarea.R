@@ -506,7 +506,6 @@ modGBarea <- function(GBpopdat,
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
  
-  
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################

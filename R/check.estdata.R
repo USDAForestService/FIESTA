@@ -186,39 +186,51 @@ check.estdata <-
   ## Create landarea.filter
   landarea.filter <- NULL
   landcols <- {}
-  if (landarea != "ALL") {
-    if (landarea == "FOREST") {
-      if ("COND_STATUS_CD" %in% pltcondflds) {
-        landarea.filter <- "pc.COND_STATUS_CD = 1"
-        # if (popType %in% c("CHNG", "GRM")) {
-        #   landarea.filterCHNG <- gsub("pc.", "ppc.", landarea.filter)
-        #   landarea.filter <- paste0(landarea.filter, " AND ", landarea.filterCHNG)
-        # }
-        landcols <- "COND_STATUS_CD"
-      } else {
-	      message("COND_STATUS_CD not in pltcond")
-		    return(NULL)
-	    }
-    } else if (landarea == "TIMBERLAND") {
-      landcols <- c("SITECLCD", "RESERVCD")
-      if (any(!landcols %in% pltcondflds)) {
-        landcols.miss <- landcols[which(!landcols %in% pltcondflds)]
-        stop(paste("missing variables for TIMBERLAND landarea filter:",
-		                paste(landcols.miss, collapse=", ")))
-      }
-      landarea.filter <- "pc.SITECLCD IN(1,2,3,4,5,6) AND pc.RESERVCD = 0"
+  if (landarea == "ALL") {
+    if ("COND_STATUS_CD" %in% pltcondflds) {
+      landarea.filter <- "pc.COND_STATUS_CD <> 5"
       # if (popType %in% c("CHNG", "GRM")) {
       #   landarea.filterCHNG <- gsub("pc.", "ppc.", landarea.filter)
       #   landarea.filter <- paste0(landarea.filter, " AND ", landarea.filterCHNG)
       # }
+      landcols <- "COND_STATUS_CD"
+    } else {
+      message("COND_STATUS_CD not in pltcond")
+      return(NULL)
     }
-    ## Check for missing landcols
-    if (length(landcols) > 0) {
-      landcolsmiss <- landcols[which(!landcols %in% pltcondflds)]
-      if (length(landcolsmiss) > 0) {
-        message("missing variables: ", paste(landcolsmiss, collapse=", "))
-		    return(NULL)
-      }
+    
+  } else if (landarea == "FOREST") {
+    if ("COND_STATUS_CD" %in% pltcondflds) {
+      landarea.filter <- "pc.COND_STATUS_CD = 1"
+      # if (popType %in% c("CHNG", "GRM")) {
+      #   landarea.filterCHNG <- gsub("pc.", "ppc.", landarea.filter)
+      #   landarea.filter <- paste0(landarea.filter, " AND ", landarea.filterCHNG)
+      # }
+      landcols <- "COND_STATUS_CD"
+    } else {
+	    message("COND_STATUS_CD not in pltcond")
+		  return(NULL)
+	  }
+  } else if (landarea == "TIMBERLAND") {
+    landcols <- c("SITECLCD", "RESERVCD")
+    if (any(!landcols %in% pltcondflds)) {
+      landcols.miss <- landcols[which(!landcols %in% pltcondflds)]
+      stop(paste("missing variables for TIMBERLAND landarea filter:",
+		                paste(landcols.miss, collapse=", ")))
+    }
+    landarea.filter <- "pc.SITECLCD IN(1,2,3,4,5,6) AND pc.RESERVCD = 0"
+    # if (popType %in% c("CHNG", "GRM")) {
+    #   landarea.filterCHNG <- gsub("pc.", "ppc.", landarea.filter)
+    #   landarea.filter <- paste0(landarea.filter, " AND ", landarea.filterCHNG)
+    # }
+  }
+    
+  ## Check for missing landcols
+  if (length(landcols) > 0) {
+    landcolsmiss <- landcols[which(!landcols %in% pltcondflds)]
+    if (length(landcolsmiss) > 0) {
+      message("missing variables: ", paste(landcolsmiss, collapse=", "))
+		  return(NULL)
     }
   }
 

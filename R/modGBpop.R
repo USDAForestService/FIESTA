@@ -707,15 +707,15 @@ modGBpop <- function(popType = "VOL",
   
   stratcombinelut <- auxdat$stratcombinelut
   if (!is.null(stratcombinelut)) {
-    if (!is.null(auxdat$unitltmin)) {
-      classcols <- c(auxdat$unitvar, auxdat$strvar)
+    if (!is.null(auxdat$unitltmin) && length(auxdat$unitltmin) != 0) {
+      classcols <- c(auxdat$unitvars, auxdat$strvar)
     } else {
       classcols <- auxdat$strvar
     }
     
     ## Get from columns and to columns
     fromcols <- c(unitvar2, unitvar, strvar)
-    tocols <- c(auxdat$unitvar, auxdat$strvar)
+    tocols <- c(auxdat$unitvars, auxdat$strvar)
 
     ## Get select join for new strata variables
     combineqry <- 

@@ -44,6 +44,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   gui=pivotstrat <- FALSE
   unitvars <- c(unitvar2, unitvar)
   strunitvars <- c(unitvars)
+  stratalevels <- NULL
   
   ## Check auxlut
   #stopifnull <- ifelse((module == "SA" || (module == "MA" && any(MAmethod != "HT"))),
@@ -60,7 +61,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       unitarea <- unitarea[unitarea[[unitvar]] %in% auxlut[[unitvar]], ]
     }
   }
-  
+
   #######################################################################
   ## Check strata
   #######################################################################
@@ -78,9 +79,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     }
     
     ## Make strvar a factor for retaining order for collapsing
-    if (!is.factor(auxlut[[strvar]])) {
-      auxlut[[strvar]] <- factor(auxlut[[strvar]])
-    }
+#    if (!is.factor(auxlut[[strvar]])) {
+#      auxlut[[strvar]] <- factor(auxlut[[strvar]])
+#    }
     
     ## If auxlut is NULL, generate based on unitvars in pltx
     #############################################################
@@ -243,7 +244,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
         auxlut <- na.omit(auxlut, cols=predcon)
     }
   }
-  
+ 
   if (module == "MA") {
     auxnmlst <- names(auxlut)
     ## Check npixelvar from strata table.
@@ -263,6 +264,11 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   if (!is.null(unitlevels) && !is.factor(auxlut[[unitvar]])) {
     auxlut[[unitvar]] <- factor(auxlut[[unitvar]], levels = unitlevels)
     setorderv(auxlut, c(unitvar, unitvar2))
+    
+    if (!is.null(unitarea)) {
+      unitarea[[unitvar]] <- factor(unitarea[[unitvar]], levels = unitlevels)
+      setorderv(unitarea, c(unitvar, unitvar2))
+    }
   }
 
   ##################################################################################
@@ -272,18 +278,18 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     unitvar21 <- paste(unitvar2, unitvar, sep="-")
     auxlut[[unitvar21]] <- paste(auxlut[[unitvar2]], auxlut[[unitvar]], sep="-")
     #auxlut[, c(unitvar, unitvar2) := NULL]
-    
+
     pltx[[unitvar21]] <- paste(pltx[[unitvar2]], pltx[[unitvar]], sep="-")
     if (!is.null(unitarea)) {
       unitarea[[unitvar21]] <- paste(unitarea[[unitvar2]], unitarea[[unitvar]], sep="-")
       unitarea[, c(unitvar, unitvar2) := NULL]
     }
-    
+
     if (!is.null(RHGlut)) {
       RHGlut[[unitvar21]] <- paste(RHGlut[[unitvar2]], RHGlut[[unitvar]], sep="-")
       RHGlut[, c(unitvar, unitvar2) := NULL]
     }
-    
+
     unitvar <- unitvar21
     unitlevels <- unique(auxlut[[unitvar]])
     auxlut[[unitvar]] <- factor(auxlut[[unitvar]], levels = unitlevels)
@@ -294,22 +300,22 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   ##################################################
   p2pointcntnm <- findnm("P2POINTCNT", names(auxlut), returnNULL = TRUE)
   if (!is.null(P2POINTCNT) && !is.null(p2pointcntnm)) {
-    
+
     ## Check if class of unitvar in auxlut matches class of unitvar in P2POINTCNT
     tabs <- check.matchclass(P2POINTCNT, auxlut, strunitvars,
                              tab1txt="P2POINTCNT", tab2txt="auxlut")
     P2POINTCNT <- tabs$tab1
     auxlut <- tabs$tab2
-    
+
     ## Check that the strunitvars in pltx are all in auxlut
     auxlut <- merge(auxlut, P2POINTCNT, by=strunitvars, all.x=TRUE)
     auxlut[is.na(auxlut)] <- 0
     auxlut$NBRPLOTS <- NULL
   }
-  
+
   ## Redefine strunitvars
   strunitvars <- c(unitvar, strvar)
-  
+
   ## Make unitvar a factor for retaining order for collapsing{
   if (!is.factor(auxlut[[unitvar]])) {
     if (is.null(unitlevels)) {
@@ -318,7 +324,17 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     auxlut[[unitvar]] <- factor(auxlut[[unitvar]], levels=unitlevels)
     pltx[[unitvar]] <- factor(pltx[[unitvar]], levels=unitlevels)
   }
-
+  
+  # ## Make strvar a factor for retaining order for collapsing
+  # if (!is.factor(auxlut[[strvar]])) {
+  #   if (is.null(stratalevels)) {
+  #     stratalevels <- sort(unique(auxlut[[strvar]]))
+  #   }
+  #   auxlut[[strvar]] <- factor(auxlut[[strvar]], levels=stratalevels)
+  #   pltx[[strvar]] <- factor(pltx[[strvar]], levels=stratalevels)
+  # }
+  
+  
   ###################################################################################
   ## Check number of plots by unitvar
   ##	 (including partially sampled plots - COND_STATUS_CD=5)
@@ -347,15 +363,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   } else {
     minplotnum.strat <- 0
   }
-  
-  unitlut = copy(auxlut) 
-  #unitvars = unitvar
-  strvars = strvar
-  stopiferror = FALSE
-  showwarnings = TRUE  
- 
+
   pltcnts <- check.pltcnt(pltx = pltx, puniqueid = puniqueid,
-		                      unitlut = auxlut, 
+		                      unitlut = copy(auxlut), 
 		                      unitvars = unitvar, strvars = strvar,
 		                      stopiferror = FALSE, showwarnings = TRUE, 
 		                      minplotnum.unit = minplotnum.unit,
@@ -363,6 +373,15 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   auxlut <- pltcnts$unitlut
   errtab <- pltcnts$errtab
   nostrat <- pltcnts$nostrat
+  
+  ## order by unitvar and strvar
+  if (module == "GB" && !is.null(strvar)) {
+    errtab <- errtab[order(errtab[[unitvar]], errtab[[strvar]]),]
+    auxlut <- auxlut[order(auxlut[[unitvar]], auxlut[[strvar]]),]
+  } else {
+    errtab <- errtab[order(errtab[[unitvar]]),]
+    auxlut <- auxlut[order(auxlut[[unitvar]]),]
+  }
 
   ## If unit.action="remove", remove estimation with less than minplotnum.unit plots
   ## If unit.action="keep", return estimation units with less than minplotnum.unit as NA

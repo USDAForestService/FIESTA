@@ -1121,7 +1121,8 @@ check.popdataP2VEG <-
   ## 7. Build and run queries for other necessary tables (if returndata = TRUE) 
   ##############################################################################  
   if (returndata || savedata) {
-
+    message("returning data needed for estimation...")
+    
     # ## 7.1 Return and/or save plot data (pltx / PLOT)
     # ##################################################################
     # 

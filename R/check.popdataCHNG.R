@@ -795,7 +795,7 @@ check.popdataCHNG <-
     ## 7. Build and run queries for other necessary tables (if returndata = TRUE) 
     ##############################################################################  
     if (returndata || savedata) {
-      message("returndata data needed for estimation...")
+      message("returning data needed for estimation...")
       
       # ## 7.1 Return and/or save plot data (pltx / PLOT)
       # ##################################################################

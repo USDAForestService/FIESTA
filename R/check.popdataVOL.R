@@ -592,6 +592,7 @@ check.popdataVOL <-
     ## 7. Build and run queries for other necessary tables (if returndata/savedata = TRUE) 
     ##############################################################################  
     if ((returndata || savedata) && popType == "VOL") {
+      message("returning data needed for estimation...")
       
       ## 7.1 Return and/or save plot data (pltx / PLOT)
       ##################################################################

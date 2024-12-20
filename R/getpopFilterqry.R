@@ -194,7 +194,7 @@ getpopFilterqry <- function(popType,
   returnPOP <- ifelse(pltaindb, FALSE, TRUE)
   if (!is.null(dbconn) && popFilter$evalCur && 
       !is.null(findnm("DATAMART_MOST_RECENT_INV", dbtables, returnNULL = TRUE))) {
-
+    
     if (!is.numeric(states)) {
       states <- FIESTAutils::pcheck.states(states, statereturn="VALUE")
     }
@@ -207,8 +207,7 @@ getpopFilterqry <- function(popType,
     evalyr <- substr(evalgrps, nchar(evalgrps) - 1, nchar(evalgrps))
     evalend <- ifelse (popType == "CHNG", "03", "01")
     popevalid <- paste0(evalpre, evalyr, evalend)
-    
-    #print(popevalid)
+    iseval <- TRUE
 
     ppsanm <- findnm("POP_PLOT_STRATUM_ASSGN", dbtables, returnNULL = TRUE)
     if (is.null(ppsanm)) {
@@ -219,10 +218,32 @@ getpopFilterqry <- function(popType,
     
     ## Get inventory years from pop_plot_stratum_assgn
     invyrnm <- findnm("INVYR", ppsaflds, returnNULL  = TRUE)
-    if (!is.null(invyrnm)) {
-      invyrs.qry <- paste0("SELECT DISTINCT invyr FROM pop_plot_stratum_assgn 
-                   WHERE evalid IN (", toString(popevalid), ")")
-      invyrs <- sort(DBI::dbGetQuery(dbconn, invyrs.qry)[[1]])
+    statecdnm <- findnm("STATECD", ppsaflds, returnNULL  = TRUE)
+
+    if (!is.null(invyrnm) && !is.null(statecdnm)) {
+      invyrs.qry <- paste0("SELECT DISTINCT ", toString(c(statecdnm, invyrnm)),
+                           "\nFROM pop_plot_stratum_assgn",
+                           "\nWHERE evalid IN (", toString(popevalid), ")")
+      invyrsdf <- DBI::dbGetQuery(dbconn, invyrs.qry)
+      invyrs <- sort(unique(invyrsdf[[invyrnm]]))
+
+      if (length(invyrs) == 0) {
+        message("no data in database for ", toString(states))
+        return(NULL)
+      } else {
+      
+        stcds <- sort(unique(invyrsdf[[statecdnm]]))
+        if (length(stcds) < length(states)) {
+          statemiss <- states[!states %in% stcds]
+
+          message("no data in database for ", toString(pcheck.states(statemiss)))
+          states <- states[!states %in% statemiss]
+          
+          for (st in statemiss) {
+            popevalid <- popevalid[!startsWith(popevalid, as.character(st))]
+          }
+        }
+      }
     }
 
   } else if (datsource == "obj" || 
@@ -356,7 +377,7 @@ getpopFilterqry <- function(popType,
       pwhereqry <- paste0(pwhereqry, 
                           "\n  AND ", ewhereqry)
     }
-    
+
   } else {
     
     ## 5.2. Check states, add to where query
@@ -494,6 +515,7 @@ getpopFilterqry <- function(popType,
   ## 5.7. Check invyrs and add to where query. 
   ############################################################################
   if (!is.null(popFilter$invyrs)) {
+    invyrs <- popFilter$invyrs
     #print(invyrs)
     if (chkvalues) {
       invyrlst.qry <- paste0("SELECT DISTINCT invyr", 

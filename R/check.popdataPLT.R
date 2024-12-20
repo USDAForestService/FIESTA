@@ -792,8 +792,14 @@ check.popdataPLT <-
         unitindb <- TRUE
         unitarea_layer <- chkdbtab(dbtablst, unitarea)
         unitareaflds <- DBI::dbListFields(dbconn, unitarea_layer)
-        unitareaqry <- paste0("SELECT * \nFROM ", unitarea_layer)
-        
+        unitareajoinqry <- getjoinqry("EVALID", alias1="unitarea.", alias2="plta.")
+#        unitareaqry <- paste0("SELECT ", toString(paste0("unitarea.", unitareaflds)),
+#                              pltafromqry,
+#                              "\n JOIN ", unitarea_layer, " unitarea ", unitareajoinqry,
+#                              pwhereqry)
+        unitareaqry <- paste0("SELECT *", 
+                              "\nFROM ", unitarea_layer)
+       
         if (!is.null(popevalid)) {	
           uevalidnm <- findnm("EVALID", unitareaflds, returnNULL = TRUE) 
           
@@ -817,8 +823,10 @@ check.popdataPLT <-
           
           if (!is.null(popevalid) && !is.null(uevalidnm)) {
             unitareaqry <- paste0(unitareaqry, 
-                                  "\nWHERE ", uevalidnm, " IN (", toString(popevalid), ")")
+                                  "\nWHERE ", uevalidnm, " IN (", toString(popevalid), ")",
+                                  "\nORDER BY ", toString(unitvars))
           }
+  
         } else {
           unitareaqry <- NULL
         }
@@ -952,7 +960,8 @@ check.popdataPLT <-
           if (!is.null(popevalid) && !is.null(evalidnm)) {
             auxlutqry <- paste0(
               auxlutqry, 
-              "\nWHERE ", evalidnm, " IN (", toString(popevalid), ")")
+              "\nWHERE ", evalidnm, " IN (", toString(popevalid), ")",
+              "\nORDER BY ", toString(unitvars, strvar))
           }
           auxlutx <- pcheck.table(auxlut, conn = dbconn,
                                   tabnm = auxtabnm, caption = paste(auxtabnm, " table?"),
