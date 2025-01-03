@@ -393,7 +393,9 @@ spGetAuxiliary <- function(xyplt = NULL,
   ## Check continuous rasters
   ###################################################################
   rastlst.contfn <- tryCatch(
-              getrastlst(rastlst.cont, rastfolder, quiet=TRUE, gui=gui),
+              getrastlst(rastlst.cont, rastfolder, 
+                         stopifnull = TRUE, stopifinvalid = TRUE, 
+                         gui=gui),
      	 	            error=function(e) {
 			              message(e, "\n")
 			              return("stop") })

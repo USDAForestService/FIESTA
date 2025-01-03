@@ -408,7 +408,9 @@ spGetStrata <- function(xyplt,
     stratlayerfn <- tryCatch(
             getrastlst(strat_layer, 
                        rastfolder = strat_dsn, 
-                       stopifLonLat = TRUE),
+                       stopifLonLat = TRUE, 
+                       stopifnull = TRUE,
+                       stopifinvalid = TRUE),
                     error=function(e) {
                       message(e, "\n")
                       return("stop") })
@@ -466,7 +468,7 @@ spGetStrata <- function(xyplt,
       ## Note: removing all NA values
       polyvarlst <- unique(c(unitvar2, unitvar, vars2keep))
       polyvarlstchk <- polyvarlst[!polyvarlst %in% names(sppltx)]
-      
+
       if (length(polyvarlstchk) == length(polyvarlst)) { 
         extpoly <- tryCatch(
             spExtractPoly(sppltx, 
@@ -481,7 +483,7 @@ spGetStrata <- function(xyplt,
         sppltx <- extpoly$spxyext
         unitNA <- extpoly$NAlst[[1]]
         outname <- extpoly$outname
-      
+
         ## Check if the name of unitvar and/or unitvar changed (duplicated)
         if (!is.null(unitvar2)) {
           if (outname[1] != unitvar2) {
@@ -559,12 +561,15 @@ spGetStrata <- function(xyplt,
 							               rast.NODATA = rast.NODATA,
 							               ncores = ncores, 
 							               savedata_opts=savedata_opts)
-    sppltx <- extrast$spplt
-    pltdat <- extrast$sppltext
+    #sppltx <- extrast$spplt
+    sppltx <- extrast$sppltext
     rastfnlst <- extrast$rastfnlst
     outname <- extrast$outnames
     NAlst <- extrast$NAlst[[1]]
-
+    
+    if (any(duplicated(sppltx[[uniqueid]]))) {
+      sppltx <- unique(sppltx)
+    }
     if (!is.null(NAlst)) {
       message("NA values shown in red... ")
       plot(sf::st_geometry(sppltx), pch=16, cex=.5)
@@ -596,7 +601,10 @@ spGetStrata <- function(xyplt,
     setnames(sppltx, strclvar, strvar2)
     strvar <- strvar2
   } else {
-
+    strvar <- findnm(strvar, names(sppltx), returnNULL = TRUE)
+    if (is.null(strvar)) {
+      stop("no data returned for: ", stratlayerfn)
+    }
     strvar2 <- checknm("STRATUMCD", names(sppltx))
     if (!is.null(strvar2)) {
       setnames(stratalut, strvar, strvar2)
