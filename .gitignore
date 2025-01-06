@@ -11,3 +11,5 @@ src/*.dll
 .RData
 auxdata_example/.netrc
 auxdata_example/.urs_cookies
+docs
+README.md
