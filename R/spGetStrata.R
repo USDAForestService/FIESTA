@@ -178,10 +178,6 @@ spGetStrata <- function(xyplt,
 
   if (gui) {uniqueid=stratclip=unitarea <- NULL}
 
-  ## Set global variables
-  value=count=strwt=polyv.lut=NAlst <- NULL
-  unittype <- "POLY"
-
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
     Filters=rbind(Filters,shp=c("Shapefiles (*.shp)", "*.shp"))
@@ -189,6 +185,9 @@ spGetStrata <- function(xyplt,
     Filters=rbind(Filters,tif=c("Raster tif files (*.tif)", "*.tif"))
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
 
+  ## Set global variables
+  value=count=strwt=polyv.lut=NAlst <- NULL
+  unittype <- "POLY"
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -360,8 +359,10 @@ spGetStrata <- function(xyplt,
   unitarea=stratalut=PLOT_STATUS_CD <- NULL
 
   ## Check unit_layer
-  unitlayerx <- pcheck.spatial(layer=unit_layer, dsn=unit_dsn, gui=gui, 
-	caption="Estimation unit layer?")
+  unitlayerx <- pcheck.spatial(layer = unit_layer, 
+                               dsn = unit_dsn, gui=gui, 
+                               polyfix = TRUE,
+	                             caption = "Estimation unit layer?")
   nounit <- ifelse (is.null(unitlayerx), TRUE, FALSE)
 
   ## unit.filter
@@ -528,8 +529,15 @@ spGetStrata <- function(xyplt,
       }
 
       ## Get pixel counts by estimation unit
-      stratalut <- setDT(zonalFreq(src=unitlayerprj, attribute=unitvar, 
-			      rasterfile=stratlayerfn, band=1, na.rm=TRUE, ignoreValue=rast.NODATA))
+      stratalut <- tryCatch(
+        zonalFreq(src=unitlayerprj, attribute=unitvar, 
+			      rasterfile=stratlayerfn, band=1, na.rm=TRUE, ignoreValue=rast.NODATA),
+      error=function(e) {
+        message(e, "\n")
+        return(NULL)})
+      if (is.null(stratalut)) {
+        stop("error in zonalFreq...")
+      }
       setnames(stratalut, c("zoneid", "value", "zoneprop"), c(unitvar, strvar, "strwt"))
       strataNA <- stratalut[is.na(get(strvar)), ]
       stratalut <- stratalut[!is.na(get(strvar)), ]
@@ -561,6 +569,7 @@ spGetStrata <- function(xyplt,
 							               rast.NODATA = rast.NODATA,
 							               ncores = ncores, 
 							               savedata_opts=savedata_opts)
+
     #sppltx <- extrast$spplt
     sppltx <- extrast$sppltext
     rastfnlst <- extrast$rastfnlst
