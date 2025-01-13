@@ -529,13 +529,14 @@ spGetStrata <- function(xyplt,
       }
 
       ## Get pixel counts by estimation unit
+      message("getting zonal pixel counts...")
       stratalut <- tryCatch(
         zonalFreq(src=unitlayerprj, attribute=unitvar, 
 			      rasterfile=stratlayerfn, band=1, na.rm=TRUE, ignoreValue=rast.NODATA),
       error=function(e) {
         message(e, "\n")
         return(NULL)})
-      if (is.null(stratalut)) {
+      if (is.null(stratalut) || nrow(stratalut) == 0) {
         stop("error in zonalFreq...")
       }
       setnames(stratalut, c("zoneid", "value", "zoneprop"), c(unitvar, strvar, "strwt"))
@@ -560,6 +561,7 @@ spGetStrata <- function(xyplt,
     }
 
     ## Extract values of raster layer to points
+    message("gettting pixel values...")
     extrast <- spExtractRast(sppltx, 
 	                           rastlst = stratlayerfn,
 							               var.name = strvar, 
@@ -575,7 +577,7 @@ spGetStrata <- function(xyplt,
     rastfnlst <- extrast$rastfnlst
     outname <- extrast$outnames
     NAlst <- extrast$NAlst[[1]]
-    
+   
     if (any(duplicated(sppltx[[uniqueid]]))) {
       sppltx <- unique(sppltx)
     }

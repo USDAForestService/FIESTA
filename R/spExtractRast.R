@@ -461,7 +461,7 @@ spExtractRast <- function(xyplt,
 
     ## Check projection and reproject sppltx if different than rast
     sppltprj <- crsCompare(sppltx, rast.prj, crs.default=rast.crs)$x
-    
+
     ## Subset Spatial data frame to just id, x, y
     sppltxy <- data.frame(sppltprj[[xy.uniqueid]], sf::st_coordinates(sppltprj))
     names(sppltxy)[1] <- xy.uniqueid
@@ -503,7 +503,8 @@ spExtractRast <- function(xyplt,
 			                       statistic = statistic, 
 			                       ncores = ncores),
      	 	error=function(e) {
-			return(NULL) })
+     	 	  message(e, "\n")
+			    return(NULL) })
       if (is.null(dat) || nrow(dat) == 0) {
         message("no data returned for: ", rastfn)
         break
