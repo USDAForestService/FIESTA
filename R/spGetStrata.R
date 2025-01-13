@@ -402,6 +402,7 @@ spGetStrata <- function(xyplt,
     } else {
       strvar <- "value"
     }
+    
     ##################################################################
     ## if strattype == "RASTER"
     ##################################################################
@@ -539,6 +540,7 @@ spGetStrata <- function(xyplt,
       if (is.null(stratalut) || nrow(stratalut) == 0) {
         stop("error in zonalFreq...")
       }
+      stratalut <- setDT(stratalut)
       setnames(stratalut, c("zoneid", "value", "zoneprop"), c(unitvar, strvar, "strwt"))
       strataNA <- stratalut[is.na(get(strvar)), ]
       stratalut <- stratalut[!is.na(get(strvar)), ]
