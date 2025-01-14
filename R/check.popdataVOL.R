@@ -240,7 +240,7 @@ check.popdataVOL <-
         cvars2keep <- cvars2keepchk
       }	  
     }
-    
+   
     ##############################################################################
     ## 3. Build query for adjustment factors and append to pltids
     ##############################################################################
@@ -425,7 +425,6 @@ check.popdataVOL <-
       setkeyv(setDT(pltidsadj), pltidsid)
     }
     dbqueries$pltidsadj <- pltidsadj.qry
-    
 
     ##############################################################################
     ## 4. Build and run queries for PLOT/COND (pltcondx)
@@ -567,7 +566,7 @@ check.popdataVOL <-
                           " ELSE ", adjvars['SUBP'], " END")
       }
     }
-  
+
     ##############################################################################
     ## 6. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
     ##############################################################################  
@@ -586,7 +585,6 @@ check.popdataVOL <-
       returnlst$pltcondx <- "pltcondx"
       returnlst$pltidsadj <- "pltidsadj"
     }
-   
    
     ##############################################################################
     ## 7. Build and run queries for other necessary tables (if returndata/savedata = TRUE) 
@@ -1062,7 +1060,6 @@ check.popdataVOL <-
       estfromqry <- paste0(
         "\n FROM pltcondf cond")
     }
-    
     
     ## 10. Return data objects
     ######################################################################################

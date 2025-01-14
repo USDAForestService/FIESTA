@@ -306,7 +306,7 @@ modMApop <- function(popType="VOL",
   pcheck.params(input.params = input.params,
                 unit_opts = unit_opts, 
                 savedata_opts = savedata_opts, database_opts = database_opts)
-  
+ 
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
                          popFilter = popFilter,
@@ -324,7 +324,7 @@ modMApop <- function(popType="VOL",
   for (i in 1:length(savedata_opts)) {
     assign(names(savedata_opts)[[i]], savedata_opts[[i]])
   }
-  
+ 
   
   ##################################################################
   ## CHECK PARAMETER INPUTS
@@ -341,7 +341,6 @@ modMApop <- function(popType="VOL",
   ########################################################
   if (savedata || saveobj) {
     outlst <- pcheck.output(savedata_opts = savedata_opts)
-    
     if (savedata) {
       if (out_fmt == "sqlite" && is.null(out_dsn)) {
         out_dsn <- "MApopdat.db"
@@ -369,7 +368,7 @@ modMApop <- function(popType="VOL",
                       outfn.date = outfn.date)
   }
   
-  
+ 
   ## Check popType
   ########################################################
   #evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "GRM", "DWM")
@@ -616,7 +615,7 @@ modMApop <- function(popType="VOL",
   unitNA <- auxcheck$unitNA
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
   
-  
+
   if (popType %in% c("ALL", "CURR", "VOL")) {
     
     ###################################################################################
@@ -676,7 +675,6 @@ modMApop <- function(popType="VOL",
     stop("invalid popType")
   }
  
-
   ###################################################################################
   ## Return population data objects
   ###################################################################################
