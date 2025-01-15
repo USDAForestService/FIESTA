@@ -926,10 +926,11 @@ modSAarea <- function(SApopdatlst = NULL,
   }
 
   ## Set up estimates. If estimate is NULL, use direct estimator
-  estdf <- setDT(estdf)
+  estdf <- data.table::setDT(estdf)
   estdf[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
   estdf$estimator <- nhat
-
+  estdf <- data.table::setDF(estdf)
+  
   if (na.fill != "NONE") {
     if (any(is.na(estdf$nhat))) {
       message("filling NA values with estimates generated from: ", na.fill)
@@ -940,7 +941,6 @@ modSAarea <- function(SApopdatlst = NULL,
     } else {
       na.fill.se <- paste0(na.fill, ".se")
     }
-    estdf <- setDF(estdf)
     estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
             estdf[is.na(estdf$nhat), c(na.fill, na.fill.se)]
   }
@@ -978,10 +978,11 @@ modSAarea <- function(SApopdatlst = NULL,
   if (rowcolinfo$rowvar != "TOTAL") {
     
     ## Set up estimates. If estimate is NULL, use direct estimator
-    estdf_row <- setDT(estdf_row)
+    estdf_row <- data.table::setDT(estdf_row)
     estdf_row[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
     estdf_row$estimator <- nhat
-
+    estdf_row <- data.table::setDF(estdf_row)
+    
     if (na.fill != "NONE") {
       if (any(is.na(estdf_row$nhat))) {
         message("filling NA values for row estimates with estimates generated from: ", na.fill)
@@ -992,7 +993,6 @@ modSAarea <- function(SApopdatlst = NULL,
       } else {
         na.fill.se <- paste0(na.fill, ".se")
       }
-      estdf_row <- setDF(estdf_row)
       estdf_row[is.na(estdf_row$nhat), c("nhat", "nhat.se")] <- 
         estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se)]
     }
