@@ -1034,15 +1034,18 @@ modSAtree <- function(SApopdatlst = NULL,
   estdf$estimator <- nhat
 
   if (na.fill != "NONE") {
+    if (any(is.na(estdf$nhat))) {
+      message("filling NA values with estimates generated from: ", na.fill)
+    }
     estdf[is.na(estdf$nhat), "estimator"] <- na.fill
-    
     if (na.fill == "JU.EBLUP") {
       na.fill.se <- "JU.EBLUP.se.1"
     } else {
       na.fill.se <- paste0(na.fill, ".se")
     }
+    estdf <- setDF(estdf)
     estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
-      estdf[is.na(estdf$nhat), c(na.fill, na.fill.se), with=FALSE]
+      estdf[is.na(estdf$nhat), c(na.fill, na.fill.se)]
   }
 
   ## Change values that are less than 0 to 0
@@ -1052,7 +1055,7 @@ modSAtree <- function(SApopdatlst = NULL,
  
   ## Subset multest to estimation output
   subvars <- c("DOMAIN", "nhat", "nhat.se", "NBRPLT.gt0", "estimator")
-  dunit_totest <- setDT(estdf)[AOI == 1, subvars, with = FALSE]
+  dunit_totest <- setDT(estdf[estdf$AOI==1, subvars])
   setkeyv(dunit_totest, "DOMAIN")
 
   ## Merge dunitarea
@@ -1085,12 +1088,18 @@ modSAtree <- function(SApopdatlst = NULL,
     estdf_row$estimator <- nhat
 
     if (na.fill != "NONE") {
-      
+      if (any(is.na(estdf_row$nhat))) {
+        message("filling NA values for row estimates with estimates generated from: ", na.fill)
+      }
       estdf_row[is.na(estdf_row$nhat), "estimator"] <- na.fill
-      na.fill.se <- paste0(na.fill, ".se")
+      if (na.fill == "JU.EBLUP") {
+        na.fill.se <- "JU.EBLUP.se.1"
+      } else {
+        na.fill.se <- paste0(na.fill, ".se")
+      }
+      estdf_row <- setDF(estdf_row)
       estdf_row[is.na(estdf_row$nhat), c("nhat", "nhat.se")] <- 
-        estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se), with = FALSE]
-      
+        estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se)]
     }
 
     ## Change values that are less than 0 to 0
@@ -1099,7 +1108,8 @@ modSAtree <- function(SApopdatlst = NULL,
     } 
     
     ## Subset multest to estimation output
-    dunit_rowest <- setDT(estdf_row)[AOI==1, c(subvars, rowvar), with=FALSE]
+    subvars <- c("DOMAIN", "nhat", "nhat.se", "NBRPLT.gt0", "estimator")
+    dunit_rowest <- setDT(estdf_row[estdf_row$AOI==1, c(subvars, rowvar)])
     setkeyv(dunit_rowest, "DOMAIN")
 
     ## Merge dunitarea

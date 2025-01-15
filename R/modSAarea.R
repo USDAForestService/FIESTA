@@ -785,7 +785,7 @@ modSAarea <- function(SApopdatlst = NULL,
   
   ## Combine estimates
   estdf <- do.call(rbind, estlst)
-  
+
   ## Check for AOI column
   if (!"AOI" %in% names(estdf)) {
     estdf$AOI <- 1
@@ -836,7 +836,7 @@ modSAarea <- function(SApopdatlst = NULL,
     estdf <- estdf[order(-estdf$AOI, estdf[["DOMAIN"]]),]
     
   }
-	
+
   ################################################################################
   ## Get estimates by row
   ################################################################################
@@ -928,7 +928,6 @@ modSAarea <- function(SApopdatlst = NULL,
   ## Set up estimates. If estimate is NULL, use direct estimator
   estdf <- setDT(estdf)
   estdf[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
-  estdf[, c("nhat", "nhat.se"), ]
   estdf$estimator <- nhat
 
   if (na.fill != "NONE") {
@@ -941,20 +940,21 @@ modSAarea <- function(SApopdatlst = NULL,
     } else {
       na.fill.se <- paste0(na.fill, ".se")
     }
+    estdf <- setDF(estdf)
     estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
-            estdf[is.na(estdf$nhat), c(na.fill, na.fill.se), with=FALSE]
+            estdf[is.na(estdf$nhat), c(na.fill, na.fill.se)]
   }
 
   ## Change values that are less than 0 to 0
   if (!lt0 && any(!is.na(estdf$nhat)) && any(na.omit(estdf$nhat) < 0)) {
     estdf[estdf$nhat < 0, "nhat"] <- 0
   } 
- 
+
   ## Subset multest to estimation output
   subvars <- c("DOMAIN", "nhat", "nhat.se", "NBRPLT.gt0", "estimator")
-  dunit_totest <- estdf[AOI==1, subvars, with=FALSE]
+  dunit_totest <- setDT(estdf[estdf$AOI==1, subvars])
   setkeyv(dunit_totest, "DOMAIN")
-
+  
   ## Merge dunitarea
   tabs <- check.matchclass(dunitareabind, dunit_totest, "DOMAIN")
   dunitareabind <- tabs$tab1
@@ -962,11 +962,9 @@ modSAarea <- function(SApopdatlst = NULL,
   dunit_totest <- merge(dunit_totest, 
                         dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE],
                         by="DOMAIN")
-
+  
   if (!is.null(dunit_totest)) {
-    
     dunit_totest[, nhat.var := nhat.se^2]
-
     if (totals) {
       dunit_totest <- getpse(dunit_totest,
                              areavar=areavar,
@@ -985,23 +983,30 @@ modSAarea <- function(SApopdatlst = NULL,
     estdf_row$estimator <- nhat
 
     if (na.fill != "NONE") {
-      
+      if (any(is.na(estdf_row$nhat))) {
+        message("filling NA values for row estimates with estimates generated from: ", na.fill)
+      }
       estdf_row[is.na(estdf_row$nhat), "estimator"] <- na.fill
-      na.fill.se <- paste0(na.fill, ".se")
+      if (na.fill == "JU.EBLUP") {
+        na.fill.se <- "JU.EBLUP.se.1"
+      } else {
+        na.fill.se <- paste0(na.fill, ".se")
+      }
+      estdf_row <- setDF(estdf_row)
       estdf_row[is.na(estdf_row$nhat), c("nhat", "nhat.se")] <- 
-			  estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se), with=FALSE]
-      
+        estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se)]
     }
-
+    
     ## Change values that are less than 0 to 0
     if (!lt0 && any(!is.na(estdf_row$nhat)) && any(na.omit(estdf_row$nhat) < 0)) {
       estdf_row[estdf_row$nhat < 0, "nhat"] <- 0
     } 
- 
+    
     ## Subset multest to estimation output
-    dunit_rowest <- setDT(estdf_row)[AOI==1, c(subvars, rowvar), with=FALSE]
+    subvars <- c("DOMAIN", "nhat", "nhat.se", "NBRPLT.gt0", "estimator")
+    dunit_rowest <- setDT(estdf_row[estdf_row$AOI==1, c(subvars, rowvar)])
     setkeyv(dunit_rowest, "DOMAIN")
-
+    
     ## Merge dunitarea
     tabs <- check.matchclass(dunitareabind, dunit_rowest, "DOMAIN")
     dunitareabind <- tabs$tab1
