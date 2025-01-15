@@ -378,10 +378,10 @@ modGBpop <- function(popType = "VOL",
   if (savedata || saveobj) {
     outlst <- pcheck.output(savedata_opts = savedata_opts)
     if (savedata) {
-      if (out_fmt == "sqlite" && is.null(out_dsn)) {
-        out_dsn <- "GBpopdat.db"
+      if (outlst$out_fmt == "sqlite" && is.null(outlst$out_dsn)) {
+        outlst$out_dsn <- "GBpopdat.db"
       }
-       outlst$add_layer <- TRUE
+      outlst$add_layer <- TRUE
     }
   }
   
