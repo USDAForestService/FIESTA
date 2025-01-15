@@ -1,11 +1,9 @@
-FIESTA_3.6.0
-==============
+# FIESTA 3.6.0
 
 - Added National Volume and Biomass capability
 
 
-FIESTA_3.5.0
-==============
+# FIESTA 3.5.0
 
 - fixed functions for accessing new CSV files on FIA Datamart.
 - grouped parameters in DBgetPlots and spGetPlots for database layer names (dbTables)
@@ -13,11 +11,8 @@ FIESTA_3.5.0
   DBgetPlots, DBgetXY, spGetPlots, spGetXY (xy_opts, dbTabs, eval_opts) 
 
 
+# FIESTA 3.4.1 
 
-
-FIESTA_3.4.1 
-==============
- 
 - added function to change class of columns if integer64 or IDate
     if integer64 and columns in(CN,PLT_CN,PREV_PLT_CN) - change to character
     	else, change to numeric
@@ -34,17 +29,15 @@ FIESTA_3.4.1
 - added SQLite database for Rhode Island to external data, with example in GB vignette
 
 
-FIESTA_3.0.30 (Release date: 2021-09-27)
-==============
-created anGetData(), to deprecate (anSAdata, anGBdata, anMAdata)
+# FIESTA 3.0.30 
 
-removed anSApop_ecomap()
-removed anSApop_RAVG()
-
+- created anGetData(), to deprecate (anSAdata, anGBdata, anMAdata)
+- removed anSApop_ecomap()
+- removed anSApop_RAVG()
 
 
-FIESTA_3.0.29 (Release date: 2021-08-02)
-==============
+# FIESTA 3.0.29 
+
 added new function, spGetXY(), to clip XY coordinates before getting plot data.
 this function returns spatial sf points (if returnxy=TRUE) or a non-spatial data frame 
 	of xy plot identifiers and state information. 
@@ -58,8 +51,8 @@ spGetPlots
 
 
 
-FIESTA_3.0.28 (Release date: 2021-06-25)
-==============
+# FIESTA 3.0.28 
+
 added functionality for P2VEG adjustment factors in modGBpop()
 added new function to calculate P2VEG estimates - modGBp2veg()
 added new parameter in datSumTree() and datSumTreeDom() to give flexibility 
@@ -76,16 +69,16 @@ changed to spGetAuxiliary()
 
 
 
-FIESTA_3.0.27 (Release date: 2021-06-14)
-==============
+# FIESTA 3.0.27 
+
 added anSApop_report() function 
 removed checks for sf and rgdal package in installed.packages
 changed installed.packages(.Library) to installed.packages() to check for suggests packages
 and changed from stop to message when a package does not exist
 
 
-FIESTA_3.0.26 (Release date: 2021-06-11)
-==============
+# FIESTA 3.0.26
+
 changed estimation rawdata output names
 unit.rowest to unit_rowest
 unit.colest to unit_colest
@@ -93,8 +86,8 @@ unit.totest to unit_totest
 unit.grpest to unit_grpest
 
 
-FIESTA_3.0.25 (Release date: 2021-05-26)
-==============
+# FIESTA 3.0.25
+
 DBgetPlots()
 - add functionality to access sqlite database from DataMart.
 
@@ -103,16 +96,16 @@ modGBpop()
 
 
 
-FIESTA_3.0.23 (Release date: 2021-05-20)
-==============
+# FIESTA 3.0.23
+
 Model-assisted
 - added ratio estimators
 - added intensity = modMApop()
 
 
 
-FIESTA_3.0.21 (Release date: 2021-05-06)
-==============
+# FIESTA 3.0.21 
+
 Fixed bug in spGetStrata when using more than one NODATA value.
 
 Added ability to output results in metric units.
@@ -133,8 +126,7 @@ plt.filter to pfilter
 pnt.filter to pntfilter
 
 
-FIESTA_3.0.20 (Release date: 2021-05-05)
-==============
+# FIESTA 3.0.20
 
 Fixes bugs in spGetStrata()
 if you are using a raster and you already have a variable named STRATUMCD in your data table,
@@ -157,8 +149,8 @@ Combined pfilter and cfilter into pcfilter
 
 
 
-FIESTA_3.0.13 (Release date: 2021-02-09)
-==============
+# FIESTA 3.0.13
+
 This release contains updates for core functions and Green Book (GB), Model-Assisted (MA), and Photo-Based (PB) modules. There are also several additional analysis functions for streamlining routines and generating core tables of estimates and core reports.
 
 Next priorities include: (1) updating SA module; (2) adding to core tables and reports; (3) on-the-fly estimation for Growth/Removal/Mortality (GRM), P2 vegetation, and Change; (4) and continued documentation.
@@ -168,8 +160,7 @@ Next priorities include: (1) updating SA module; (2) adding to core tables and r
 
 
 
-FIESTA_3.0.0 (Release date: 2019-04-09)
-==============
+# FIESTA 3.0.0
 
 1. Removed default connection to Oracle database (creating FIESTAO for FIA use only)
 
@@ -200,8 +191,7 @@ DBgetPlots -
 
 
 
-FIESTA_2.4.2 (Release date: 2019-09-09)
-==============
+# FIESTA 2.4.2
 
 1. Changed Oracle database connections and queries from using RODBC package to DBI. 
 	DBI package is more versatile for querying Oracle and spatial databases.
@@ -212,17 +202,13 @@ FIESTA_2.4.2 (Release date: 2019-09-09)
 
 
 
-FIESTA_2.4.1 (Release date: 2019-07-11)
-==============
+# FIESTA 2.4.1 
 
 1. Model-Assisted estimation module is functioning similar to Green-Book Module,
 	with similar format of output.
 
 
-
-
-FIESTA_2.4.0 (Release date: 2019-05-23)
-==============
+# FIESTA 2.4.0 
 
 Changes:
 

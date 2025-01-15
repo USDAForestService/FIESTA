@@ -1,8 +1,10 @@
 ---
-title: "FIESTA - Database Tools"
+title: "Database Tools"
 output: rmarkdown::html_vignette
+description: >
+  Explore the various database utility functions available within FIESTA.
 vignette: >
-  %\VignetteIndexEntry{FIESTA - Database Tools}
+  %\VignetteIndexEntry{Database Tools}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

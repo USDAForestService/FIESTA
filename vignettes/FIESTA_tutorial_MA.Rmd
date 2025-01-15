@@ -1,8 +1,10 @@
 ---
-title: "FIESTA - Model-Assisted Estimators"
+title: "Model-Assisted Estimators"
 output: rmarkdown::html_vignette
+description: >
+  Learn how to calculate population estimates and their sampling errors using model-assisted survey estimators from the `mase` R package (McConville, et al. 2018).
 vignette: >
-  %\VignetteIndexEntry{FIESTA - Model-Assisted Estimators}
+  %\VignetteIndexEntry{Model-Assisted Estimators}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

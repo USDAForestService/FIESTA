@@ -1,8 +1,10 @@
 ---
-title: "FIESTA - Photo-Based Module"
+title: "Photo-Based Estimators"
 output: rmarkdown::html_vignette
+description: >
+  Learn how to calculate population estimates and their sampling errors using photo-based estimators from Patterson (2012)
 vignette: >
-  %\VignetteIndexEntry{FIESTA - Photo-Based Module}
+  %\VignetteIndexEntry{Photo-Based Estimators}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

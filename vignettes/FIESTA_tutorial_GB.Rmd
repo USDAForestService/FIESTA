@@ -1,8 +1,10 @@
 ---
-title: "FIESTA - Green-book Estimators"
+title: "Green-book Estimators"
 output: rmarkdown::html_vignette
+description: >
+  Learn how calculate population estimates and their sampling errors using the sample-based estimators from Bechtold and Patterson's (2005), 'Green-Book'.
 vignette: >
-  %\VignetteIndexEntry{FIESTA - Green-book Estimators}
+  %\VignetteIndexEntry{Green-book Estimators}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

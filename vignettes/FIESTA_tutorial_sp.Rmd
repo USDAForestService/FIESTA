@@ -1,8 +1,10 @@
 ---
-title: "FIESTA - Spatial Tools"
+title: "Spatial Tools"
 output: rmarkdown::html_vignette
+description: >
+  Explore the various spatial utility functions available within FIESTA.
 vignette: >
-  %\VignetteIndexEntry{FIESTA - Spatial Tools}
+  %\VignetteIndexEntry{Spatial Tools}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
