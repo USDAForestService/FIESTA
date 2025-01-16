@@ -98,12 +98,13 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   largebnd.vals <- sort(unique(domdattot[[largebnd.unique]]))
   largebnd.vals <- largebnd.vals[table(domdattot[[largebnd.unique]]) > 30]
   
-#dat = domdattot
-#cuniqueid = uniqueid 
-#dunitvar = "DOMAIN" 
-#domain = "TOTAL"
-#largebnd.val = largebnd.vals[1]
+# dat = domdattot
+# cuniqueid = uniqueid
+# dunitvar = "DOMAIN"
+# domain = "TOTAL"
+# largebnd.val = largebnd.vals[1]
 #   
+
   dunit_totestlst <- 
     tryCatch(
       {
@@ -211,12 +212,6 @@ getSAestimates <- function(esttype, i, largebnd.unique,
       domdattot$AOI <- 1
     }
     
-#dat = domdattot
-#cuniqueid = uniqueid
-#dunitvar = "DOMAIN"
-#domain = rowvar
-#largebnd.val = largebnd.vals[1]
-    
     dunit_rowestlst <-
       tryCatch(
         {
@@ -239,7 +234,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
           return(NULL)
         }
       )
-    
+
     if (length(largebnd.vals) > 1) {
       
       dunit_est_row <- do.call(rbind, do.call(rbind, dunit_rowestlst)[ ,"est.large"])

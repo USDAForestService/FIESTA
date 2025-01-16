@@ -947,7 +947,7 @@ modSAarea <- function(SApopdatlst = NULL,
 
   ## Change values that are less than 0 to 0
   if (!lt0 && any(!is.na(estdf$nhat)) && any(na.omit(estdf$nhat) < 0)) {
-    estdf[estdf$nhat < 0, "nhat"] <- 0
+    estdf[!is.na(estdf$nhat) & estdf$nhat < 0, "nhat"] <- 0
   } 
 
   ## Subset multest to estimation output
@@ -999,7 +999,7 @@ modSAarea <- function(SApopdatlst = NULL,
     
     ## Change values that are less than 0 to 0
     if (!lt0 && any(!is.na(estdf_row$nhat)) && any(na.omit(estdf_row$nhat) < 0)) {
-      estdf_row[estdf_row$nhat < 0, "nhat"] <- 0
+      estdf_row[!is.na(estdf_row$nhat) & estdf_row$nhat < 0, "nhat"] <- 0
     } 
     
     ## Subset multest to estimation output

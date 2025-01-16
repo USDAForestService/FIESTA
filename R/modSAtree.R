@@ -216,7 +216,7 @@ modSAtree <- function(SApopdatlst = NULL,
   esttype <- "TREE"
   popType <- "VOL"
   rawdata <- TRUE 
-  vars2keep <- c("DOMAIN", "AOI")
+  vars2keep <- c("AOI")
   returnSApopdat <- TRUE
   sumunits=FALSE
   SAdomsdf=multestdf_row <- NULL
@@ -378,12 +378,20 @@ modSAtree <- function(SApopdatlst = NULL,
     }
     multest_outfolder <- pcheck.outfolder(multest_outfolder)
     
-    estimatorlst <- c('JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA')
-    estimatorSElst <- c('JU.GREG.se','JU.EBLUP.se.1','JFH.se','hbsaeU.se','hbsaeA.se')
-    multest_estimators <- pcheck.varchar(var2check = estimatorlst, 
+    estimatordf <- data.frame(
+      estimator = c('DIR', 'JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA'),
+      estimatorSE = c('DIR.se', 'JU.GREG.se','JU.EBLUP.se.1','JFH.se','hbsaeU.se','hbsaeA.se'))
+    
+    multest_estimators <- pcheck.varchar(var2check = estimatordf$estimator[-1], 
                                          varnm = "multest_estimators", checklst = c("all", estimatorlst), 
                                          gui = gui, caption = "Output multest format?", multiple = TRUE) 
-    multest_estimators <- sort(c(multest_estimators, estimatorSElst[which(estimatorlst %in% multest_estimators)]))
+    
+    if ("all" %in% multest_estimators) {
+      multest_estimators <- c("DIR", "DIR.se", "JU.Synth", "JA.Synth", as.vector(t(estimatordf)))
+    } else {
+      multestdf <- estimatordf[estimatordf$estimator %in% multest_estimators,]
+      multest_estimators <- as.vector(t(multestdf))
+    }
   } 
   
   ## Check na.fill
@@ -395,8 +403,9 @@ modSAtree <- function(SApopdatlst = NULL,
       multest <- TRUE
       multest_estimators <- na.fill
     } else {
-      if (!"all" %in% multest_estimators && !na.fill %in% multest_estimators) {
-        multest_estimators <- c(multest_estimators, na.fill)
+      if (!na.fill %in% multest_estimators) {
+        na.filldf <- estimatordf[estimatordf$estimator == na.fill, ]
+        multest_estimators <- c(multest_estimators, as.vector(t(na.filldf)))
       } 
     }
   }  
@@ -1050,7 +1059,7 @@ modSAtree <- function(SApopdatlst = NULL,
 
   ## Change values that are less than 0 to 0
   if (!lt0 && any(!is.na(estdf$nhat)) && any(na.omit(estdf$nhat) < 0)) {
-    estdf[estdf$nhat < 0, "nhat"] <- 0
+    estdf[!is.na(estdf$nhat) & estdf$nhat < 0, "nhat"] <- 0
   } 
  
   ## Subset multest to estimation output
@@ -1104,7 +1113,7 @@ modSAtree <- function(SApopdatlst = NULL,
 
     ## Change values that are less than 0 to 0
     if (!lt0 && any(!is.na(estdf_row$nhat)) && any(na.omit(estdf_row$nhat) < 0)) {
-      estdf_row[estdf_row$nhat < 0, "nhat"] <- 0
+      estdf_row[!is.na(estdf_row$nhat) & estdf_row$nhat < 0, "nhat"] <- 0
     } 
     
     ## Subset multest to estimation output
@@ -1137,7 +1146,6 @@ modSAtree <- function(SApopdatlst = NULL,
     }
 
     if (!is.null(dunit_rowest)) {
-      
       dunit_rowest[, nhat.var := nhat.se^2]
 
       if (totals) {
@@ -1202,7 +1210,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
-  message("getting output...")
+  message("\ngetting output...")
   estnm <- "est"
   tabs <- 
     est.outtabs(esttype = esttype, 
