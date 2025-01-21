@@ -44,7 +44,9 @@ knitr::knit_hooks$set(
 FIESTA's DB tools extract data from FIA's online publicly-available, comma-delimited files (\*.csv or \*.zip). FIA's CSV files are available by state from the FIA DataMart at the following link: https://apps.fs.usda.gov/fia/datamart/datamart.html. Because of FIA's confidentiality agreement to protect the privacy of landowners, as well as protecting the scientific integrity of FIA's sample design, the exact coordinates of the sample plot locations are not included in the public data. If the exact coordinates are necessary for your analysis, contact FIA's Spatial Data Services (https://www.fia.fs.fed.us/tools-data/spatial/index.php).
 
 
-### Objective of tutorialThe objective of this tutorial is to demonstrate the use of FIESTA's DB tools for accessing FIA data. These tools extract data from FIA Datamart using FIA's standard evaluations as well as customized evaluations. 
+### Objective of tutorial
+
+The objective of this tutorial is to demonstrate the use of FIESTA's DB tools for accessing FIA data. These tools extract data from FIA Datamart using FIA's standard evaluations as well as customized evaluations. 
 
 An FIA Evaluation is a group of plots within the FIA database that is used for population estimates. An FIA Evaluation represents different inventory spans of data with different stratification and area adjustments for nonreponse. Each Evaluation is determined by the type of estimation (evalType) including: area and tree estimates, growth and mortality estimates, and area change estimates (evalType). These plots are identified by an evalid, which is a unique identifier in the format of a 2-digit State code, a 2-digit year code, and a 2-digit evaluation type code. For example, EVALID '491601' represents the Utah 2016 evaluation for current area estimates. 
 

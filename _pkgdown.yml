@@ -28,6 +28,7 @@ articles:
       - FIESTA_manual_mod_pop
   - title: Tooling Tutorials
     contents:
+      - FIESTA_datSum_examples
       - FIESTA_tutorial_dat
       - FIESTA_tutorial_DB
       - FIESTA_tutorial_sp

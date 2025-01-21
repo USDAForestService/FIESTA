@@ -1,0 +1,170 @@
+---
+title: "Tree Data Summaries"
+output: rmarkdown::html_vignette
+description: >
+  Walk through a series of examples to learn how to use FIESTA utility functions to summarise FIA tree data.
+vignette: >
+  %\VignetteIndexEntry{Tree Data Summaries}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, setup}
+library(FIESTA)
+options(scipen = 6)
+```
+
+### Example 1
+
+Let's first start by using the sample data from FIESTA. Here, in it's most simple form, we get summed live basal area and net cubic-foot volume by plot.
+
+Note: datSum_opts has several parameter options, such as TPA and rounding (See datSum_options() for other parameters). 
+
+What is TPA? 
+TPA is Trees Per Acre (TPA_UNADJ). The TPA_UNADJ variable is an acre-level expansion factor for measured trees. 
+For FIA's annual inventory, fixed plot design: TPA equals the inverse of the plot area (TPA = 1 / (Number of plots * area of plot).
+
+FIA's fixed plot design includes 4 subplots that are 24ft (7.3m) radius (0.04154 acres) and 4 microplots that are 6.8ft (2.1m) radius (0.00333 acres). Trees 5.0in (61cm) and greater are measured on the subplots and trees less than 5.0in are measured on the microplots. TPA for trees measured on the subplots is 6.018 (1 / (4 * 0.04143) and TPA for trees measured on the microplots is 74.965 (1 / 4 * 0.00333)). So, if we set TPA = TRUE, each tree 5.0in and greater represents 6.018 trees and each tree less than 5.0in represents 74.965 trees. 
+
+In FIESTA, TPA is default to TRUE. This means anything in the tsumvarlst (except TPA_UNADJ) is multiplied by TPA_UNADJ. If TPA = FALSE, we simply get a sum of the count of trees measured on the FIA plots. 
+
+```{r, ex1}
+sumdat1 <- datSumTree(tree = WYtree,
+                      tsumvarlst = c("BA", "VOLCFNET"),
+                      tfilter = "STATUSCD == 1")
+
+## Returned list items
+names(sumdat1)
+
+## The first six rows of the summarized data table.
+head(sumdat1$treedat)
+
+## The summarized variable names
+sumdat1$sumvars
+
+## The query used to get data (use message to output in pretty format)
+message(sumdat1$treeqry)
+```
+
+### Example 2
+
+So, let's now get a little more familiar with this function by showing what else it can do.
+
+This time we will do the following things:
+1) Add custom names (`tsumvarnmlst`)
+2) summarize by plot and species (`bydomainlst`)
+3) Add a derived variable (`tderive`)
+4) Exclude woodland species (`woodland`)
+5) Include seedlings (`seedlings`)
+6) include a per acre count (i.e., TPA_UNADJ) 
+
+Note: 
+Derived variables are not multiplied by TPA_UNADJ when the default is set (`datSum_opts(TPA = TRUE)`). Therefore, you must include it in the derived statement if it is desired. Furthermore variables defined in `tderive` should not be included in `tsumvarlst`.
+
+Notice that the definitions for the derived variables are written in SQL syntax. This is required so that the statement can be appropriately plugged into the query that is used to generate collect the data.
+
+```{r, ex2}
+sumdat2 <- 
+  datSumTree(tree = WYtree,
+             seed = WYseed,
+             tsumvarlst = c("BA", "VOLCFNET", "TPA_UNADJ"),
+             tsumvarnmlst = c("BA_LIVE", "VOLNET_LIVE", "COUNT"),
+             bydomainlst = "SPCD",
+             tderive = list(SDI = '(POWER(DIA / 10, 1.605)) * TPA_UNADJ'),
+             woodland = "N",
+             seedlings = "Y",
+             tfilter = "STATUSCD == 1")
+
+## Returned list items
+names(sumdat2)
+
+## The first six rows of the summarized data table.
+head(sumdat2$treedat)
+
+## The summarized variable names
+sumdat2$sumvars
+
+## The query used to get data (use message to output in pretty format)
+message(sumdat2$treeqry)
+```
+
+
+### Example 3:
+
+Now, let's go further and include classified domains to summarize by.
+1) Classify species into 3 classes (C-Conifer;W-Woodland;H-Hardwood)
+2) Specify diameter breaks
+3) Add species look up table and diameter breaks to domclassify, while also adding variables classified to bydomainlst.
+
+```{r, ex3}
+## First, find unique species in WYtree
+spcdlst <- sort(unique(WYtree$SPCD))
+## specify new class values for each unique species in WYtree
+spcdlut <- data.frame(SPCD = spcdlst,
+                      SPCDCL = c("C","W","W","C","C","C","W","C","C","C","C","H","H","W","H","H","H","H","H"))
+
+## Next, find unique diameters in WYtree
+dialst <- sort(unique(WYtree$DIA))
+## specify break values to define new diameter class
+diabrks <- c(0,20,40,80)
+
+sumdat3 <- 
+  datSumTree(tree = WYtree,
+             seed = WYseed,
+             tsumvarlst = c("BA", "VOLCFNET", "TPA_UNADJ"),
+             tsumvarnmlst = c("BA_LIVE", "VOLNET_LIVE", "COUNT"),
+             bydomainlst = c("SPCD", "DIA"),
+             tderive = list(SDI = '(POWER(DIA / 10, 1.605)) * TPA_UNADJ'),
+             domclassify = list(SPCD = spcdlut, DIA = diabrks),
+             woodland = "N",
+             seedlings = "Y",
+             tfilter = "STATUSCD == 1")
+
+## Returned list items
+names(sumdat3)
+
+## The first six rows of the summarized data table.
+head(sumdat3$treedat)
+
+## The summarized variable names
+sumdat3$sumvars
+
+## The query used to get data (use message to output in pretty format)
+message(sumdat3$treeqry)
+```
+
+
+
+### Example 4:
+
+Lastly, let's play around with some additional derived variables:
+
+```{r, ex4}
+
+sumdat4 <- 
+  datSumTree(tree = WYtree,
+             tderive = list(LIVE_BA = "SUM(power(DIA, 2) * 0.005454 * TPA_UNADJ * (CASE WHEN STATUSCD = 1 THEN 1 ELSE 0 END))",
+                            DEAD_BA = "SUM(power(DIA, 2) * 0.005454 * TPA_UNADJ * (CASE WHEN STATUSCD = 2 THEN 1 ELSE 0 END))",
+                            SDI = "SUM((POWER(DIA / 10, 1.605)) * TPA_UNADJ)",
+                            QMD = "sqrt(SUM(power(DIA, 2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ) * 0.005454))",
+                            MEAN_DIA = "AVG(DIA)",
+                            MEDIAN_DIA = "MEDIAN(DIA)",
+                            LIVELESS20 = "SUM(TPA_UNADJ * (CASE WHEN DIA < 10 THEN 1 ELSE 0 END))",
+                            LIVE10to30 = "SUM(TPA_UNADJ * (CASE WHEN DIA > 10 AND DIA <= 30 THEN 1 ELSE 0 END))"))
+                          
+## Returned list items
+names(sumdat4)
+
+## The first six rows of the summarized data table.
+head(sumdat4$treedat)
+
+## The summarized variable names
+sumdat4$sumvars
+
+## The query used to get data (use message to output in pretty format)
+message(sumdat4$treeqry)
+```
+
+
+
+
