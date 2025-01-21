@@ -523,8 +523,8 @@ modGBp2veg <- function(GBpopdat = NULL,
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                 rowgrpord = rowgrpord, title.rowgrp = NULL,
-                 landarea = landarea, states = states, 
+                 rowgrpord = rowgrpord, title.rowgrp = NULL, 
+                 NA.FIAname = NA.FIAname,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
