@@ -226,11 +226,11 @@ spExtractRast <- function(xyplt,
  
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- spMakeSpatialPoints(xyplt=sppltx, 
-                                  xy.uniqueid=xy.uniqueid, 
-                                  xvar=xvar, 
-                                  yvar=yvar,
-                                  xy.crs=xy.crs)
+    sppltx <- spMakeSpatialPoints(xyplt = sppltx, 
+                                  xy.uniqueid = xy.uniqueid, 
+                                  xvar = xvar, 
+                                  yvar = yvar,
+                                  xy.crs = xy.crs)
   } else {
     ## GET uniqueid
     sppltnames <- names(sppltx)
@@ -277,7 +277,8 @@ spExtractRast <- function(xyplt,
  
   ## Verify rasters
   ########################################################
-  rastfnlst <- suppressWarnings(getrastlst(rastlst, rastfolder, gui=gui))
+  rastfnlst <- getrastlst(rastlst, rastfolder, gui=gui, 
+                          stopifnull = TRUE, stopifinvalid = TRUE)
   #if (any(rastfnlst == "")) stop("must write raster to file")
   nrasts <- length(rastfnlst)
 
@@ -460,7 +461,7 @@ spExtractRast <- function(xyplt,
 
     ## Check projection and reproject sppltx if different than rast
     sppltprj <- crsCompare(sppltx, rast.prj, crs.default=rast.crs)$x
-    
+
     ## Subset Spatial data frame to just id, x, y
     sppltxy <- data.frame(sppltprj[[xy.uniqueid]], sf::st_coordinates(sppltprj))
     names(sppltxy)[1] <- xy.uniqueid
@@ -471,7 +472,7 @@ spExtractRast <- function(xyplt,
       bbox1 <- sf::st_bbox(rast.bbox, crs=rast.prj)
       bbox2 <- sf::st_bbox(sppltprj)
       check.extents(bbox1, bbox2, showext=showext, layer1nm=rastnm, 
-		layer2nm="xyplt", stopifnotin=TRUE)
+		          layer2nm="xyplt", stopifnotin=TRUE)
     }
            
     ## Extract values
@@ -492,24 +493,27 @@ spExtractRast <- function(xyplt,
       if (statistic == "value") statistic <- NULL
       rast.NODATA <- inputs.rast[j, rast.NODATA]
 
-      dat <- tryCatch(unique(extractPtsFromRaster(ptdata=sppltxy, 
-			                rasterfile=rastfn, 
-			                band=band, 
-			                var.name=var.name, 
-			                interpolate=interpolate, 
-			                windowsize=windowsize, 
-			                statistic=statistic, 
-			                ncores=ncores)),
+      dat <- tryCatch(
+        extractPtsFromRaster(ptdata = sppltxy, 
+			                       rasterfile = rastfn, 
+			                       band = band, 
+			                       var.name = var.name, 
+			                       interpolate = interpolate, 
+			                       windowsize = windowsize, 
+			                       statistic = statistic, 
+			                       ncores = ncores),
      	 	error=function(e) {
-			return(NULL) })
-      if (is.null(dat)) {
+     	 	  message(e, "\n")
+			    return(NULL) })
+      if (is.null(dat) || nrow(dat) == 0) {
+        message("no data returned for: ", rastfn)
         break
       }
       cname <- names(dat)[2]
       outnames <- c(outnames, cname)
  
       if ("data.table" %in% class(sppltx)) {
-        stop("xyplt cannot be sf data.table")
+        stop("xyplt cannot be an sf data.table")
       }
       if (nrow(dat) == 0) {
         stop("no data in ", cname)

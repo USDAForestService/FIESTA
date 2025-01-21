@@ -393,7 +393,9 @@ spGetAuxiliary <- function(xyplt = NULL,
   ## Check continuous rasters
   ###################################################################
   rastlst.contfn <- tryCatch(
-              getrastlst(rastlst.cont, rastfolder, quiet=TRUE, gui=gui),
+              getrastlst(rastlst.cont, rastfolder, 
+                         stopifnull = TRUE, stopifinvalid = TRUE, 
+                         gui=gui),
      	 	            error=function(e) {
 			              message(e, "\n")
 			              return("stop") })
@@ -559,11 +561,13 @@ spGetAuxiliary <- function(xyplt = NULL,
   ##################################################################
   ## DO WORK
   ##################################################################
- 
+
   #############################################################################
   ## 1) Extract values from unit_layer
   #############################################################################
   unitarea <- NULL
+
+  ## check if variables are in sppltx
   polyvarlst <- unique(c(unitvar2, unitvar, vars2keep))
   polyvarlstchk <- polyvarlst[!polyvarlst %in% names(sppltx)]
 
@@ -574,7 +578,7 @@ spGetAuxiliary <- function(xyplt = NULL,
             spExtractPoly(xyplt = sppltx,
                           polyvlst = unitlayerx, 
                           xy.uniqueid = uniqueid, 
-                          polyvarlst = polyvarlst, 
+                          polyvarlst = polyvarlstchk, 
                           keepNA = keepNA, 
                           exportNA = exportNA),
      	            error=function(e) {
@@ -591,7 +595,7 @@ spGetAuxiliary <- function(xyplt = NULL,
     } else {
       message(unitvar, " already in spplt...")
     }
-  
+
     ## Check if the name of unitvar and/or unitvar changed (duplicated)
     if (!is.null(unitvar2)) {
       if (outname[1] != unitvar2) {
@@ -639,14 +643,13 @@ spGetAuxiliary <- function(xyplt = NULL,
   #############################################################################
   ## 2) Set up outputs - unitzonal, prednames, inputdf, zonalnames
   #############################################################################
-  unitzonal <- data.table(unique(sf::st_drop_geometry(unitlayerx[, unitvar,
- 		                             drop=FALSE])))
+  unitzonal <- data.table(unique(sf::st_drop_geometry(unitlayerx[, c(unitvar, vars2keep),
+                                                                 drop=FALSE])))
   setkeyv(unitzonal, unitvar)
   prednames <- {}
   inputdf <- {}
   zonalnames <- {}
 
-  
   if (extract && addN) {
     ## Get plot counts by domain unit
     ##########################################################################
@@ -654,13 +657,14 @@ spGetAuxiliary <- function(xyplt = NULL,
     if (!"AOI" %in% names(pltcnt)) {
       pltcnt$AOI <- 1
     }
-    pltcnt <- pltcnt[AOI == 1, .N, by=unitvar]
+    pltcntN <- pltcnt[AOI == 1, .N, by=unitvar]
+
     message("checking number of plots in domain...")
-    message(paste0(utils::capture.output(pltcnt), collapse = "\n"))
-    setkeyv(pltcnt, unitvar)
+    message(paste0(utils::capture.output(pltcntN), collapse = "\n"))
+    setkeyv(pltcntN, unitvar)
 
     ## Append plot counts to unitzonal
-    unitzonal <- merge(unitzonal, pltcnt, by=unitvar, all.x=TRUE)
+    unitzonal <- merge(unitzonal, pltcntN, by=unitvar, all.x=TRUE)
     #unitzonal <- unitzonal[pltcnt]
     unitzonal <- DT_NAto0(unitzonal, c("N", vars2keep))
   }

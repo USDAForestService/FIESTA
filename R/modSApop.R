@@ -321,10 +321,9 @@ modSApop <- function(popType = "VOL",
   ########################################################
   if (savedata || saveobj) {
     outlst <- pcheck.output(savedata_opts = savedata_opts)
-    
     if (savedata) {
-      if (out_fmt == "sqlite" && is.null(out_dsn)) {
-        out_dsn <- "GBpopdat.db"
+      if (outlst$out_fmt == "sqlite" && is.null(outlst$out_dsn)) {
+        outlst$out_dsn <- "SApopdat.db"
       }
       outlst$add_layer <- TRUE
     }
@@ -590,7 +589,6 @@ modSApop <- function(popType = "VOL",
   #   }
   # }
   
-  
   ###################################################################################
   ## Check auxiliary data
   ###################################################################################
@@ -622,7 +620,7 @@ modSApop <- function(popType = "VOL",
   unitNA <- auxcheck$unitNA
   unitwarnlut <- auxcheck$stratwarnlut
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
-  
+    
   # subset pvars2keep 
   if (!"AOI" %in% names(dunitlut)) {
     dunitlut$AOI <- 1
