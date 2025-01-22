@@ -1,8 +1,10 @@
 ---
-title: "`FIESTA` Manual - Population Data"
+title: "Population Functions"
 output: rmarkdown::html_vignette
+description: >
+  A description of all the inputs and outputs associated with FIESTA estimation functions
 vignette: >
-  %\VignetteIndexEntry{`FIESTA` Manual - Population Data}
+  %\VignetteIndexEntry{Population Functions}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

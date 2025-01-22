@@ -1,8 +1,10 @@
 ---
-title: "FIESTA - Data Tools"
+title: "Data Tools"
 output: rmarkdown::html_vignette
+description: >
+  Explore the various data utility functions available within FIESTA.
 vignette: >
-  %\VignetteIndexEntry{FIESTA - Data Tools}
+  %\VignetteIndexEntry{Data Tools}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
