@@ -134,7 +134,7 @@ check.cond <- function(areawt,
   }
   setkeyv(setDT(cdomdat), c(cuniqueid, condid))
   
-  
+
   return(list(cdomdat = cdomdat, 
               cdomdatqry = cdomdatqry,
               estnm = estnm,

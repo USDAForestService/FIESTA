@@ -23,7 +23,8 @@ getGBestimates <- function(esttype,
                            row.add0 = FALSE, 
                            col.add0 = FALSE,
                            row.orderby = NULL, 
-                           col.orderby = NULL) {
+                           col.orderby = NULL,
+                           NA.name = "Other") {
 
 
   ## Set global variables
@@ -48,7 +49,7 @@ getGBestimates <- function(esttype,
     }
     domdatd <- pltassgnx[domdatd]
   }
-
+  
   ## Get total estimate and merge area	
   if (addtotal) {
     ## Sum numerator to plot, domain (TOTAL) level
@@ -95,9 +96,15 @@ getGBestimates <- function(esttype,
   ## Get row estimate
   if (is.null(rowvar)) rowvar <- "TOTAL"
   if (rowvar != "TOTAL") {
-    
+
+    ## Check uniquerow - add NA factor value
+    uniquerow <- check.unique(x = domdatn, 
+                              uniquex = uniquerow,
+                              xvar = rowvar, 
+                              NA.name = NA.name)
+
     ## Sum numerator to plot, rowvar level
-    domdatn <- domdatn[!is.na(domdatn[[rowvar]]),] 
+    #domdatn <- domdatn[!is.na(domdatn[[rowvar]]),] 
     domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
               by = c(strunitvars, uniqueid, rowvar), .SDcols=estvarn.name]
@@ -135,13 +142,19 @@ getGBestimates <- function(esttype,
                  strvar = strvar, 
                  domain = rowvar)
   }
-
+  
   ## Get column (and cell) estimate  
   if (is.null(colvar)) colvar <- "NONE"
   if ( colvar != "NONE") {
 
+    ## Check uniquecol - add NA factor value
+    uniquecol <- check.unique(x = domdatn, 
+                              uniquex = uniquecol,
+                              xvar = colvar, 
+                              NA.name = NA.name)
+    
     ## Sum numerator to plot, colvar level
-    domdatn <- domdatn[!is.na(domdatn[[colvar]]),] 
+    #domdatn <- domdatn[!is.na(domdatn[[colvar]]),] 
     domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
               by = c(strunitvars, uniqueid, colvar), .SDcols=estvarn.name]
@@ -181,8 +194,8 @@ getGBestimates <- function(esttype,
                  domain = colvar)
 
    ## Sum numerator to plot, grpvar level
-   domdatn <- domdatn[!is.na(domdatn[[rowvar]]) & domdatn[[rowvar]] != "NA",] 
-   domdatn <- domdatn[!is.na(domdatn[[colvar]]) & domdatn[[colvar]] != "NA",] 
+   #domdatn <- domdatn[!is.na(domdatn[[rowvar]]) & domdatn[[rowvar]] != "NA",] 
+   #domdatn <- domdatn[!is.na(domdatn[[colvar]]) & domdatn[[colvar]] != "NA",] 
    domdattot <- 
       domdatn[, lapply(.SD, sum, na.rm=TRUE), 
                  by = c(strunitvars, uniqueid, grpvar), .SDcols=estvarn.name]
@@ -234,7 +247,7 @@ getGBestimates <- function(esttype,
     tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
-    
+
     if (!is.null(row.orderby) && row.orderby != "NONE") {
       setorderv(unit_rowest, c(row.orderby))
     }
@@ -302,7 +315,6 @@ getGBestimates <- function(esttype,
     #  unit_grpest <- unit_rowest[unit_grpest$nhat > 0,]
     #}
     
-  
     if (!is.null(row.orderby) && row.orderby != "NONE") {
       if (!is.null(col.orderby) && col.orderby != "NONE") {
         setorderv(unit_grpest, c(row.orderby, col.orderby))

@@ -227,7 +227,7 @@ check.condCHNG <- function(areawt, areawt2,
     return(NULL)
   }
   setkeyv(setDT(cdomdat), c(cuniqueid, condid)) 
-
+  
   
   return(list(cdomdat = cdomdat, 
               cdomdatqry = cdomdat.qry,

@@ -476,8 +476,7 @@ modGBarea <- function(GBpopdat,
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                 rowgrpord = rowgrpord, title.rowgrp = NULL,
-                 landarea = landarea, states = states, 
+                 rowgrpord = rowgrpord, title.rowgrp = NULL, 
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -596,7 +595,8 @@ modGBarea <- function(GBpopdat,
                    row.orderby = row.orderby,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
-                   col.add0 = col.add0)
+                   col.add0 = col.add0,
+                   NA.name = NA.name)
  
   if (is.null(estdat)) stop()
   unit_totest <- estdat$unit_totest
@@ -606,7 +606,7 @@ modGBarea <- function(GBpopdat,
   rowunit <- estdat$rowunit
   totunit <- estdat$totunit
   unitvar <- estdat$unitvar
-  
+
 
   ###################################################################################
   ## GENERATE OUTPUT TABLES

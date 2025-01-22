@@ -657,8 +657,7 @@ modSAarea <- function(SApopdatlst = NULL,
                    title.rowvar = title.rowvar, title.colvar = title.colvar, 
                    rowlut = rowlut, collut = collut, 
                    rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                   rowgrpord = rowgrpord, title.rowgrp = NULL,
-                   landarea = landarea, states = states, 
+                   rowgrpord = rowgrpord, title.rowgrp = NULL, 
                    gui = gui)
     uniquerow <- rowcolinfo$uniquerow
     uniquecol <- rowcolinfo$uniquecol
@@ -763,6 +762,7 @@ modSAarea <- function(SApopdatlst = NULL,
                      predselectlst.area_row = predselectlst.area_row,
                      pdomdatlst_row = pdomdatlst_row,
                      dunitlutlst_row = dunitlutlst_row,
+                     NA.name = NA.name,
                      save4testing = save4testing) 
     if (is.numeric(SAestimates) && SAestimates == 0) stop()
     largebnd.unique <-  SAestimates$largebnd.unique
