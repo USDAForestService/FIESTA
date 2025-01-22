@@ -491,7 +491,6 @@ modMAarea <- function(MApopdat,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
-                 landarea = landarea, states = states, 
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -610,7 +609,8 @@ modMAarea <- function(MApopdat,
                    row.orderby = row.orderby,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
-                   col.add0 = col.add0)
+                   col.add0 = col.add0,
+                   NA.name = NA.name)
   
   if (is.null(estdat)) stop()
   unit_totest <- estdat$unit_totest

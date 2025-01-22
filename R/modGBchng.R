@@ -582,6 +582,8 @@ modGBchng <- function(GBpopdat,
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
+  source("C:\\_tsf\\_GitHub\\FIESTAutils\\R\\checks.R")
+  source("C:\\_tsf\\_GitHub\\FIESTA\\R\\getGBestimates.R")
   estdat <- 
     getGBestimates(esttype = esttype,
                    domdatn = cdomdat,
@@ -603,7 +605,8 @@ modGBchng <- function(GBpopdat,
                    row.orderby = row.orderby,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
-                   col.add0 = col.add0)
+                   col.add0 = col.add0,
+                   NA.name = "Other")
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest
   unit_colest <- estdat$unit_colest
@@ -618,7 +621,7 @@ modGBchng <- function(GBpopdat,
   ###################################################################################
   message("getting output...")
   estnm <- "est" 
-  
+ 
   tabs <- 
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 

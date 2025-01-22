@@ -330,7 +330,7 @@ modGBpop <- function(popType = "VOL",
                 unit_opts = unit_opts, 
                 savedata_opts = savedata_opts, 
                 database_opts = database_opts)
- 
+
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
                          popFilter = popFilter,
@@ -377,12 +377,11 @@ modGBpop <- function(popType = "VOL",
   ########################################################
   if (savedata || saveobj) {
     outlst <- pcheck.output(savedata_opts = savedata_opts)
-    
     if (savedata) {
-      if (out_fmt == "sqlite" && is.null(out_dsn)) {
-        out_dsn <- "GBpopdat.db"
+      if (outlst$out_fmt == "sqlite" && is.null(outlst$out_dsn)) {
+        outlst$out_dsn <- "GBpopdat.db"
       }
-       outlst$add_layer <- TRUE
+      outlst$add_layer <- TRUE
     }
   }
   
@@ -428,7 +427,7 @@ modGBpop <- function(popType = "VOL",
   if (popType %in% c("GROW", "MORT", "REMV")) {
     popType <- "GRM"
   }
-  
+ 
   ###################################################################################
   ## Load data
   ###################################################################################
@@ -745,7 +744,7 @@ modGBpop <- function(popType = "VOL",
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
   
-  
+
   ###################################################################################
   ## Check Population Data
   ###################################################################################

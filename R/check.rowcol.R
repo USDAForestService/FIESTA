@@ -20,9 +20,8 @@ check.rowcol <-
  	         rowlut = NULL, collut = NULL, 
            rowgrp = FALSE, rowgrpnm = NULL, 
            rowgrpord = NULL, title.rowgrp = NULL, 
-           landarea = NULL, states = NULL, 
-           cvars2keep = NULL, 
-           whereqry = NULL,
+           cvars2keep = NULL, whereqry = NULL,
+           factor.addNA = TRUE,
            gui = FALSE){
 
   ####################################################################################
@@ -53,7 +52,6 @@ check.rowcol <-
   ## Set global variables
   SITECLCD=GSSTKCD=domainlst=tdomvar=tdomvar2=grpvar=rowvarnm=colvarnm <- NULL
   tuniquex=suniquex=coluniquex <- NULL
-  #keepNA <- ifelse(landarea == "ALL", TRUE, FALSE)
   keepNA=isdbc=isdbt=colgrp <- FALSE
 
   ## define function to make factors
@@ -609,9 +607,10 @@ check.rowcol <-
             }
           }
         }
+
         if (any(is.na(uniquex)) && !keepNA) {
-          uniquex <- uniquex[!is.na(uniquex)]		
-		    }
+          uniquex <- uniquex[!is.na(uniquex)]
+        }
         rowuniquex <- uniquex
 
         ## Check seedling table
@@ -837,7 +836,17 @@ check.rowcol <-
               }
             }
           }
-	      }
+	        # if (!is.null(NA.FIAname)) {
+	        #   if (any(is.na(rowlut[[rowvar]]))) {
+	        #     if (is.character(rowlut[[rowvarnm]]) && 
+	        #         (is.na(rowlut[is.na(rowlut[[rowvar]])][[rowvarnm]]) || rowlut[is.na(rowlut[[rowvar]])][[rowvarnm]] == "NA")) {
+	        #       rowlut[is.na(rowlut[[rowvar]])][[rowvarnm]] <- NA.FIAname
+	        #     }
+	        #   } else {
+	        #     rowlut <- rbind(rowlut, list(NA, NA.FIAname))
+	        #   }
+	        # }
+	      }  ## end if (row.FIAname & !is.null(rowlut))
       }  ## end !is.null(row.orderby) && row.orderby != "NONE"
     }  ## end domlut is null
   } ## end rowvar != "NONE"      
@@ -1539,6 +1548,9 @@ check.rowcol <-
       }
     }
     uniquerow[[rowvarnew]] <- factor(uniquerow[[rowvarnew]], levels=rowuniquex)
+    if (factor.addNA && any(!is.na(uniquerow[[rowvarnew]]))) {
+      uniquerow[[rowvarnew]] <- addNA(uniquerow[[rowvarnew]])
+    }
     setkeyv(uniquerow, rowvarnew)
     
   } else if (rowvar %in% pltcondflds && is.data.frame(pltcondx)) {
@@ -1673,10 +1685,6 @@ check.rowcol <-
     }
   }
 
-  #if (!is.null(landarea) && landarea %in% c("FOREST", "TIMBERLAND")) {
-  #  uniquerow2 <- uniquerow[!uniquerow[[rowvar]] %in% c(0, "Nonforest"),]
-  #}
-
   ## uniquecol
   #########################################################
   if (!is.null(collut)) {
@@ -1710,6 +1718,9 @@ check.rowcol <-
       }
     }
     uniquecol[[colvarnew]] <- factor(uniquecol[[colvarnew]], levels=coluniquex)
+    if (factor.addNA && any(!is.na(uniquecol[[colvarnew]]))) {
+      uniquecol[[colvarnew]] <- addNA(uniquecol[[colvarnew]])
+    }
     setkeyv(uniquecol, colvarnew)
     
   } else if (colvar %in% pltcondflds && is.data.frame(pltcondx)) {
@@ -1842,12 +1853,6 @@ check.rowcol <-
     }
   }
 
-  #if (!is.null(landarea) && landarea %in% c("FOREST", "TIMBERLAND")) {
-  #  if (any(uniquecol[[colvar]] %in% c(0, "Nonforest"))) {
-  #    message("0 values are assumed to represent nonforest land and are removed from analysis")
-  #    uniquecol <- uniquecol[!uniquecol[[colvar]] %in% c(0, "Nonforest"),]
-  #  }
-  #}
 
   ## Create factors for ordering tables
   ##############################################################################
@@ -1862,6 +1867,7 @@ check.rowcol <-
     ## Create factors for ordering
 	  uniquerow <- uniquerow[, lapply(.SD, makefactor)]
 	  setkeyv(uniquerow, rowvarnew)
+	  setorderv(uniquerow, rowvarnew, na.last=TRUE)
   }
 
   if (!is.null(uniquecol)) {
@@ -1875,6 +1881,7 @@ check.rowcol <-
     ## Create factors for ordering
 	  uniquecol <- uniquecol[, lapply(.SD, makefactor)]
 	  setkeyv(uniquecol, colvarnew)
+	  setorderv(uniquecol, colvarnew, na.last=TRUE)
   }
 
   ## Define pltcondvars

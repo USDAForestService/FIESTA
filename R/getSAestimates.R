@@ -32,6 +32,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
                            predselectlst.area_row,
                            pdomdatlst_row,
                            dunitlutlst_row,
+                           NA.name = "Other",
                            save4testing) {
   
   dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
@@ -98,12 +99,13 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   largebnd.vals <- sort(unique(domdattot[[largebnd.unique]]))
   largebnd.vals <- largebnd.vals[table(domdattot[[largebnd.unique]]) > 30]
   
-#dat = domdattot
-#cuniqueid = uniqueid 
-#dunitvar = "DOMAIN" 
-#domain = "TOTAL"
-#largebnd.val = largebnd.vals[1]
+# dat = domdattot
+# cuniqueid = uniqueid
+# dunitvar = "DOMAIN"
+# domain = "TOTAL"
+# largebnd.val = largebnd.vals[1]
 #   
+
   dunit_totestlst <- 
     tryCatch(
       {
@@ -198,6 +200,12 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   ## row estimates
   if (rowvar != "TOTAL") {
     
+    ## Check uniquerow - add NA factor value
+    uniquerow <- check.unique(x = domdat, 
+                              uniquex = uniquerow,
+                              xvar = rowvar, 
+                              NA.name = NA.name)
+    
     domdat <- domdat[!is.na(domdat[[rowvar]]),] 
     domdattot <- setDT(domdat)[ ,lapply(.SD, sum, na.rm=TRUE), 
                                 by=c(largebnd.unique, dunitvar, uniqueid, rowvar, prednames)
@@ -210,12 +218,6 @@ getSAestimates <- function(esttype, i, largebnd.unique,
     if (!"AOI" %in% names(domdattot)) {
       domdattot$AOI <- 1
     }
-    
-#dat = domdattot
-#cuniqueid = uniqueid
-#dunitvar = "DOMAIN"
-#domain = rowvar
-#largebnd.val = largebnd.vals[1]
     
     dunit_rowestlst <-
       tryCatch(
@@ -239,7 +241,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
           return(NULL)
         }
       )
-    
+
     if (length(largebnd.vals) > 1) {
       
       dunit_est_row <- do.call(rbind, do.call(rbind, dunit_rowestlst)[ ,"est.large"])
