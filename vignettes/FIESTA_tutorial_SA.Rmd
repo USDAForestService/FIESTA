@@ -1,8 +1,10 @@
 ---
-title: "FIESTA - Small Area Estimators"
+title: "Small Area Estimators"
 output: rmarkdown::html_vignette
+description: >
+  Learn how to calculate population estimates and variance estimates using a suite of small area estimators from packages like `JoSAE` (Breidenbach 2015), `sae` (Molina and Marhuenda 2015), and `hbsae` (Boonstra 2012).
 vignette: >
-  %\VignetteIndexEntry{FIESTA - Small Area Estimators}
+  %\VignetteIndexEntry{Small Area Estimators}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -34,9 +36,6 @@ knitr::knit_hooks$set(
 )
 ```
 
-```{r, echo=-1}
-data.table::setDTthreads(2)
-```
 
 ## Small Area (SA) module overview
 
@@ -91,7 +90,7 @@ First, you'll need to load the `FIESTA` library:
 library(FIESTA)
 ```
 
-Next, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For our purposes in this vignette, we have saved our outfolder file path as the `outfolder` object in a temporary directory. We also set a few default options preferred for this vignette.
+Next, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For this vignette, we have set our outfolder file path as a temporary directory. 
 
 ```{r}
 outfolder <- tempdir()
@@ -106,7 +105,6 @@ outfolder <- tempdir()
 Now that we've loaded `FIESTA` and setup our outfolder, we can retrieve the data needed to run the examples. First, we point to some external data and predictor layers stored in `FIESTA` and derive new predictor layers using the `terra` package. 
 
 ```{r}
-
 # File names for external spatial data
 WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
 WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
@@ -117,7 +115,9 @@ demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIEST
 
 # Derive new predictor layers from dem
 library(terra)
+
 dem <- rast(demfn)
+
 slpfn <- paste0(outfolder, "/WYbh_slp.img")
 slp <- terra::terrain(dem,
                       v = "slope",
@@ -125,6 +125,7 @@ slp <- terra::terrain(dem,
                       filename = slpfn, 
                       overwrite = TRUE, 
                       NAflag = -99999.0)
+
 aspfn <- paste0(outfolder, "/WYbh_asp.img")
 asp <- terra::terrain(dem,
                       v = "aspect",
@@ -134,39 +135,42 @@ asp <- terra::terrain(dem,
                       NAflag = -99999.0)
 ```
 
-Next, we set up our small area domains with `FIESTA::spGetSAdoms`. For more information on how to use this function, please see the `sp` vignette included with `FIESTA` (link). 
+Next, we define the small area boundary layer and the name of the attribute in the layer that delineates the domains.
 
 ```{r}
 smallbnd <- WYbhdistfn
 smallbnd.domain <- "DISTRICTNA"
 ```
 
-Next, we can get our FIA plot data and set up our auxiliary data. We can get our FIA plot data with the `spGetPlots` function from `FIESTA`, which accesses data through [FIA's DataMart](https://apps.fs.usda.gov/fia/datamart/datamart.html). Here, data are downloaded for all states intersecting boundary, then subset to boundary. 
+Next, we can get our FIA plot data and set up our auxiliary data. We can get our FIA plot data with the `spGetPlots` function from `FIESTA`. In this case we already have all of the necessary tables loaded as objects into R so we just need to supply them to the function in an appropriate manner. Note that `spGetPlots` is also capable of accessing data through [FIA's DataMart](https://apps.fs.usda.gov/fia/datamart/datamart.html). In that case, the data is first downloaded for all U.S. states intersecting the boundary, and then later on it is further subset to plots that fall within the boundary of interest. For more examples and documentation see `help(spGetPlots)` or the `sp` vignette.
+
+For this example we define a custom evaluation (`eval = 'custom'`) which consists of plots from inventory years 2011-2013.
 
 ```{r}
 SApltdat <- spGetPlots(bnd = WYbhdistfn,
                        xy_datsource = "obj",
                        xy = WYplt,
-                       xy_opts = list(xy.uniqueid = "CN", xvar = "LON_PUBLIC", 
-                                    yvar = "LAT_PUBLIC", xy.crs = 4269),
+                       xy_opts = xy_options(xy.uniqueid = "CN",
+                                            xvar = "LON_PUBLIC", 
+                                            yvar = "LAT_PUBLIC",
+                                            xy.crs = 4269),
                        datsource = "obj",
-                       istree = TRUE,
-                       isseed = TRUE,
-                       dbTabs = list(plot_layer = WYplt, cond_layer = WYcond,
-                                   tree_layer = WYtree, seed_layer = WYseed),
+                       dbTabs = dbTables(plot_layer = WYplt,
+                                         cond_layer = WYcond,
+                                         tree_layer = WYtree, 
+                                         seed_layer = WYseed),
                        eval = "custom",
-                       eval_opts = list(invyrs = 2011:2013),
+                       eval_opts = eval_options(invyrs = 2011:2013),
                        showsteps = TRUE,
                        returnxy = TRUE,
                        savedata_opts = savedata_options(outfolder = outfolder))
-
 ```
 
 ```{r}
 str(SApltdat, max.level = 1)
 ```
 
-Finally, we must generate the dataset with predictors for small area estimation. We can do this with the `spGetAuxiliary` function from `FIESTA`. Again, see the `sp` vignette for further information on this function. 
+Finally, we must have plot level auxiliary data for for small area estimation. We can do this with the `spGetAuxiliary` function from `FIESTA`. Again, see the `sp` vignette for further information on this function. 
 
 ```{r, results='hide'}
 rastlst.cont <- c(demfn, slpfn, aspfn)
@@ -177,25 +181,21 @@ rastlst.cat.name <- "fornf"
 unit_layer <- WYbhdistfn
 unitvar <- "DISTRICTNA"
 
-auxdat <- spGetAuxiliary(
-  xyplt = SApltdat$spxy,
-  uniqueid = "PLT_CN",
-  unit_layer = unit_layer,
-  unitvar = "DISTRICTNA",
-  rastlst.cont = rastlst.cont,
-  rastlst.cont.name = rastlst.cont.name,
-  rastlst.cont.stat = "mean",
-  rastlst.cont.NODATA = 0,
-  rastlst.cat = rastlst.cat,
-  rastlst.cat.name = rastlst.cat.name,
-  asptransform = TRUE,
-  rast.asp = aspfn,
-  keepNA = FALSE,
-  showext = FALSE,
-  savedata = FALSE
-)
-names(auxdat)
-
+auxdat <- spGetAuxiliary(xyplt = SApltdat$spxy,
+                         uniqueid = "PLT_CN",
+                         unit_layer = unit_layer,
+                         unitvar = "DISTRICTNA",
+                         rastlst.cont = rastlst.cont,
+                         rastlst.cont.name = rastlst.cont.name,
+                         rastlst.cont.stat = "mean",
+                         rastlst.cont.NODATA = 0,
+                         rastlst.cat = rastlst.cat,
+                         rastlst.cat.name = rastlst.cat.name,
+                         asptransform = TRUE,
+                         rast.asp = aspfn,
+                         keepNA = FALSE,
+                         showext = FALSE,
+                         savedata = FALSE)
 ```
 
 ```{r}
@@ -213,7 +213,7 @@ str(auxdat, max.level = 1)
 <details>
   <summary>View Example</summary>
 
-We can create our population data for model-assisted estimation. To do so, we use the `modSApop` function in `FIESTA`. We must assign our plot data with the `pltdat` argument, the auxiliary dataset with the `auxdat` argument, and set information for our small areas with the `smallbnd` and `smallbnd.domain` arguments. The `spGetPlots` and `spGetAuxiliary` functions have done much of the hard work for us so far, so we can just run a simple call to `modSApop`:
+We can create our population data for small area estimation. To do so, we use the `modSApop` function in `FIESTA`. We must assign our plot data with the `pltdat` argument, the auxiliary dataset with the `auxdat` argument, and set information for our small areas with the `smallbnd` and `smallbnd.domain` arguments. The `spGetPlots` and `spGetAuxiliary` functions have done much of the hard work for us so far, so we can just run a simple call to `modSApop`:
 
 ```{r}
 SApopdat <- modSApop(pltdat = SApltdat, 
@@ -245,27 +245,23 @@ First, we can set up our predictors as a vector:
 all_preds <- c("slp", "dem", "asp_cos", "asp_sin", "fornf")
 ```
 
-Next, we fit the unit-level EBLUP with the `JoSAE` R package. 
+Next, we fit the unit-level EBLUP using all of the predictors with the `JoSAE` R package. 
 
 ```{r}
-area1 <- modSAarea(
-  SApopdatlst = SApopdat,        # pop - population calculations for WY, post-stratification
-  prednames = all_preds,         # est - character vector of predictors to be used in the model
-  SApackage = "JoSAE",           # est - character string of the R package to do the estimation
-  SAmethod = "unit"              # est - method of small area estimation. Either "unit" or "area"
-  )
-
+area1 <- modSAarea(SApopdatlst = SApopdat,        # pop - population calculations for WY, post-stratification
+                   prednames = all_preds,         # est - character vector of predictors to be used in the model
+                   SApackage = "JoSAE",           # est - character string of the R package to do the estimation
+                   SAmethod = "unit",             # est - method of small area estimation. Either "unit" or "area"
+                   multest = FALSE)               # est - whether to also run all other available small area estimators
 ```
 
-The `modSAarea` function outputs a list, and we can see our estimates and estimation method.
+The `modSAarea` function outputs both the estimates:
 
 ```{r}
-str(area1, max.level = 1)
 area1$est
-area1$raw$SAmethod
 ```
 
-We can also look further into the `raw` list below:
+and a series of intermediate "raw" tables and items. These are usually a collection of items that were used to produce the cleaned up table of estimates (i.e `area1$est`).
 
 ```{r}
 str(area1$raw, max.level = 1)
@@ -278,16 +274,14 @@ str(area1$raw, max.level = 1)
 <details>
   <summary>View Example</summary>
 
-In this example, we fit an area level EBLUP with `JoSAE`, while only using slp as a predictor. We use only one predictor in the area level model because at the area level, we only have three rows in our dataset. Since we also have a random effect term, the model we fit can have a maximum of one predictor without being exactly singular.  
+In this example, we fit an area-level EBLUP with `JoSAE`, while only using slp as a predictor. We use only one predictor in the area level model because at the area level, we only have three rows in our dataset. Since we also have a random effect term, the model we fit can have a maximum of one predictor without being exactly singular. We also set `multest = TRUE` which will cause the function to produce estimates using all of the available small area estimators and output these in a separate table.
 
 ```{r}
-area2 <- modSAarea(
-  SApopdatlst = SApopdat,   # pop - population calculations for WY, post-stratification
-  prednames = "slp",        # est - character vector of predictors to be used in the model
-  SApackage = "JoSAE",      # est - character string of the R package to do the estimation
-  SAmethod = "area",        # est - method of small area estimation. Either "unit" or "area"
-  multest = TRUE
-  )
+area2 <- modSAarea(SApopdatlst = SApopdat,   # pop - population calculations for WY, post-stratification
+                   prednames = "dem",        # est - character vector of predictors to be used in the model
+                   SApackage = "JoSAE",      # est - character string of the R package to do the estimation
+                   SAmethod = "area",        # est - method of small area estimation. Either "unit" or "area"
+                   multest = TRUE)           # est - whether to also run all other available small area estimators
 ```
 
 We again can see our estimates. Notably, we have slightly larger percent sampling errors to the unit-level model fit in Example 2. This is likely due to only being able to incorporate one predictor's worth of information to the model. 

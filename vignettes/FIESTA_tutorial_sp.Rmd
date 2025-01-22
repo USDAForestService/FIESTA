@@ -1,8 +1,10 @@
 ---
-title: "FIESTA - Spatial Tools"
+title: "Spatial Tools"
 output: rmarkdown::html_vignette
+description: >
+  Explore the various spatial utility functions available within FIESTA.
 vignette: >
-  %\VignetteIndexEntry{FIESTA - Spatial Tools}
+  %\VignetteIndexEntry{Spatial Tools}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -35,9 +37,6 @@ knitr::knit_hooks$set(
 )
 ```
 
-```{r, echo=-1}
-data.table::setDTthreads(2)
-```
 
 ## `FIESTA` Overview
 The R package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. `FIESTA` contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
@@ -131,25 +130,27 @@ Next, you'll have to load some external data from the `FIESTA` package and set u
 WYbhfn <- system.file("extdata",
                       "sp_data/WYbighorn_adminbnd.shp",
                       package = "FIESTA")
+
 WYbhdistfn <- system.file("extdata",
                           "sp_data/WYbighorn_districtbnd.shp",
                           package = "FIESTA")
+
 WYbhdist.att <- "DISTRICTNA"
 
 fornffn <- system.file("extdata",
                        "sp_data/WYbighorn_forest_nonforest_250m.tif",
                        package = "FIESTA")
+
 demfn <- system.file("extdata",
                      "sp_data/WYbighorn_dem_250m.img",
                      package = "FIESTA")
 
-
 # County-level boundaries for USA and subset for Wyoming
 WYco <- stunitco[stunitco$STATENM == "Wyoming",]
-
 ```
 
-Finally, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For this vignette, we have saved our outfolder file path as the `outfolder` object.
+Finally, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For this vignette, we have set our outfolder file path as a temporary directory. .
+
 ```{r, include = F}
 outfolder <- tempdir()
 ```
@@ -166,11 +167,11 @@ The `spImportSpatial` function imports a spatial layer (e.g., ESRI Shapefile) to
   <summary>View Example</summary>
 
 ```{r}
-## Import external data shapefiles
+# Import external data shapefiles
 WYbh <- spImportSpatial(WYbhfn)
 WYbhdist <- spImportSpatial(WYbhdistfn)
 
-## Display boundary
+# Display boundary
 plot(sf::st_geometry(WYbhdist), border="blue")
 plot(sf::st_geometry(WYbh), add=TRUE)
 
@@ -186,13 +187,11 @@ The `spExportSpatial` function exports an `sf` object.
   <summary>View Example</summary>
   
 ```{r}
-## Export Spatial Polygons layer to a shapefile
-spExportSpatial(WYbh, 
-                savedata_opts = list(out_dsn = "WYbh.shp", 
-                                     outfolder = outfolder, 
-                                     overwrite_dsn = TRUE)
-                )
-
+# Export Spatial Polygons layer to a shapefile
+spExportSpatial(sfobj = WYbh, 
+                savedata_opts = savedata_options(out_dsn = "WYbh.shp", 
+                                                 outfolder = outfolder, 
+                                                 overwrite_dsn = TRUE))
 ```
 
 </details>
@@ -211,20 +210,14 @@ WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
                                xy.uniqueid = "CN", 
                                xvar = "LON_PUBLIC", 
                                yvar = "LAT_PUBLIC", 
-                               xy.crs = 4269
-                               )
+                               xy.crs = 4269)
 
 ```        
 
-To view our output we can run the following code.
+We can look at the results to verify that WYspplt is now an `sf` points object with the desired projection:
         
 ```{r}        
-## Display output
-plot(sf::st_geometry(WYbhdist))
-plot(sf::st_geometry(WYspplt), add=TRUE)
-
-## NOTE: To display multiple layers, all layers must be in the same coordinate system.
-lapply(list(WYbh, WYbhdist, WYspplt), sf::st_crs)
+WYspplt[ ,c("CN", "geometry")]
 ```
 
 And finally we export the spatial points to an outfolder. 
@@ -236,32 +229,28 @@ WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
                                yvar = "LAT_PUBLIC",
                                xy.crs = 4269,
                                exportsp = TRUE,
-                               savedata_opts = list(
-                                    out_dsn = "spplt",
-                                    out_fmt = "shp",
-                                    outfolder = outfolder,
-                                    out_layer = "WYplots",
-                                    overwrite_layer = TRUE)
-                               )
-
+                               savedata_opts = savedata_options(out_dsn = "spplt",
+                                                                out_fmt = "shp",
+                                                                outfolder = outfolder,
+                                                                out_layer = "WYplots",
+                                                                overwrite_layer = TRUE))
 ```
 
 </details>
 
 ### <a name="spReprojectVector"/>`spReprojectVector()`
 
-The `spReprojectVector` function reprojects a spatial vector layer. Note: The layer must have a defined coordinate reference system (test using `sf::st_crs`). 
+The `spReprojectVector` function re-projects a spatial vector layer. Note: The layer must have a defined coordinate reference system. 
 
 <details>
   <summary>View Example</summary>
   
 ```{r}
-sf::st_crs(WYspplt)
 prj <- "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 WYspplt.utm12 <- spReprojectVector(layer = WYspplt, 
                                    crs.new = prj)
         
-## Check results
+# Check results
 sf::st_crs(WYspplt.utm12)
 ```
 
@@ -275,27 +264,25 @@ The `spClipPoint` function subsets `SpatialPoints` or point file with a Spatial 
   <summary>View Example</summary>
 
 ```{r}
-## Get points within Bighorn National Forest boundary (project on the fly)
+# Get points within Bighorn National Forest boundary (project on the fly)
 
 WYbhptslst <- spClipPoint(xyplt = WYplt, 
                           uniqueid = "CN", 
                           clippolyv = WYbh, 
-                          spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                                  yvar = "LAT_PUBLIC",
-                                                  xy.crs = 4269)
-                          )
+                          spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
+                                                    yvar = "LAT_PUBLIC",
+                                                    xy.crs = 4269))
 
 WYbhptslst <- spClipPoint(xyplt = WYplt, 
                           uniqueid = "CN", 
                           clippolyv = WYbh, 
                           savedata = TRUE, 
                           exportsp = TRUE, 
-                          spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                                  yvar = "LAT_PUBLIC",
-                                                  xy.crs = 4269), 
-                          savedata_opts = list(outfolder=outfolder, 
-                                               out_layer = "WYbh")
-                          )
+                          spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
+                                                    yvar = "LAT_PUBLIC",
+                                                    xy.crs = 4269), 
+                          savedata_opts = list(outfolder = outfolder, 
+                                               out_layer = "WYbh"))
 
 names(WYbhptslst)
 WYbhspplt <- WYbhptslst$clip_xyplt
@@ -306,7 +293,6 @@ WYbhprj <- WYbhptslst$clip_polyv
 Next we check and display the output:
 
 ```{r}
-WYbhspplt
 plot(sf::st_geometry(WYbhprj), border="red", lwd=2)
 plot(sf::st_geometry(WYbhspplt), add=TRUE)
 ```
@@ -321,12 +307,13 @@ WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
                                xvar = "LON_PUBLIC", 
                                yvar = "LAT_PUBLIC", 
                                xy.crs = 4269)
+
 WYbhptslst <- spClipPoint(xyplt = WYspplt, 
                           uniqueid = "CN",
                           clippolyv = WYbh)
 ```
 
-We can also subset other tales with clipped points. 
+We can also subset other tables with clipped points. 
 
 ```{r}
 WYbhptslst <- spClipPoint(xyplt = WYspplt, 
@@ -343,11 +330,9 @@ Next, we can export clipped points.
 ```{r} 
 ## Export clipped points
 spExportSpatial(WYbhspplt, 
-                savedata_opts = list(out_layer = "WYbhpts", 
-                                     outfolder = outfolder, 
-                                     overwrite_layer = TRUE)
-                )
-
+                savedata_opts = savedata_options(out_layer = "WYbhpts", 
+                                                 outfolder = outfolder, 
+                                                 overwrite_layer = TRUE))
 ```
 
 Finally, we can get points within Bighorn National Forest boundary (project on the fly) and save to an outfolder. 
@@ -358,16 +343,14 @@ WYbhptslst <- spClipPoint(xyplt = WYplt,
                           clippolyv = WYbh, 
                           othertabnms = c("WYcond", "WYtree"), 
                           exportsp = TRUE, 
-                          spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                        yvar = "LAT_PUBLIC", 
-                                        xy.crs = 4269), 
-                          savedata_opts = list(
-                                        outfolder = outfolder, 
-                                        overwrite_layer = TRUE,
-                                        outfn.pre = "clip")
-                          )
-names(WYbhptslst)
+                          spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
+                                                    yvar = "LAT_PUBLIC", 
+                                                    xy.crs = 4269), 
+                          savedata_opts = list(outfolder = outfolder, 
+                                               overwrite_layer = TRUE,
+                                               outfn.pre = "clip"))
 
+names(WYbhptslst)
 ```
 
 </details>
@@ -378,18 +361,16 @@ The `spClipPoly` function clips (intersects) a polygon vector layer with another
 <details>
   <summary>View Example</summary>
   
-We first subsect the WYco `SpatialPolygons` layer with `WYbighorn`. Note: you must download USAco from the `geodata` package and subset to Wyoming. See the "Set Up" section above.
+We first subset the WYco `SpatialPolygons` layer with `WYbighorn`. Note: you must download USAco from the `geodata` package and subset to Wyoming. See the "Set Up" section above.
   
 ```{r}
 WYbhco <- spClipPoly(polyv = WYco,
-                             clippolyv = WYbh)
-
+                     clippolyv = WYbh)
 ```
 
 We can now check and display `WYbighorn_co` with labels.
 
 ```{r}
-head(WYbhco)
 plot(sf::st_geometry(WYbhco['COUNTYCD']), col = sf::sf.colors(nrow(WYbhco)))
 coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(WYbhco)))
 text(coords[,"X"], coords[,"Y"], WYbhco[["COUNTYCD"]])
@@ -408,7 +389,6 @@ The `spClipRast` function subsets a raster to a polygon extent or boundary.
 First, we subset the strata layer with the Medicine Wheel district boundary
 
 ```{r}
-WYbhdist
 WYbhMW <- WYbhdist[WYbhdist$DISTRICTNA == "Medicine Wheel Ranger District",]
 
 plot(sf::st_geometry(WYbhdist))
@@ -418,19 +398,19 @@ plot(sf::st_geometry(WYbhMW), border="red", add=TRUE)
 Next, we can clip the raster. Note: If the projection of `polyv` is not the same as `rast`, `polyv` will by reprojected to the same projection as `rast` before clipping (See note in the help file for more details).
 
 ```{r}
-WYbhMW.fornf <- spClipRast(fornffn, 
+WYbhMW.fornf <- spClipRast(rast = fornffn, 
                            clippolyv = WYbhMW, 
                            outfolder = outfolder)
 ```
 
 Finally, we display the results:
+
 ```{r}
 WYbhMWprj <- FIESTAutils::crsCompare(WYbhMW, 
                         FIESTAutils::rasterInfo(WYbhMW.fornf)$crs)$x
+
 terra::plot(terra::rast(WYbhMW.fornf))
-plot(sf::st_geometry(WYbhMWprj), 
-     border = "red", 
-     add = TRUE)
+plot(sf::st_geometry(WYbhMWprj), border = "red", add = TRUE)
 ```
 
 </details>
@@ -448,14 +428,11 @@ First, we extract polygon attributes from `WYbighorn` to `WYpts`, keeping `NULL`
 extpolylst <- spExtractPoly(WYspplt, 
                             xy.uniqueid = "CN", 
                             polyvlst = WYbhdist)
-WYspplt_bh <- extpolylst$spxyext
 
-dim(WYspplt)
-dim(WYspplt_bh)
+WYspplt_bh <- extpolylst$spxyext
 
 head(WYspplt_bh)
 plot(WYspplt_bh["DISTRICTNA"], pch = 8)
-
 ```
 
 Next we can extract a subset of polygon attributes from `WYbighorn` to `WYpts`, not keeping `NULL` values.
@@ -466,10 +443,8 @@ extpolylst <- spExtractPoly(WYspplt,
                             polyvlst = WYbh, 
                             polyvarlst = c("FORESTNUMB", "FORESTNAME"), 
                             keepNA = FALSE)
-WYspplt_bh2 <- extpolylst$spxyext
 
-dim(WYspplt)
-dim(WYspplt_bh2)
+WYspplt_bh2 <- extpolylst$spxyext
 
 head(WYspplt_bh2)
 ```
@@ -478,7 +453,7 @@ head(WYspplt_bh2)
 
 ### <a name="spExtractRast"/>`spExtractRast()`
 
-The `spExtractRast` function subsets a `SpatialPolygons` layer with another `SpatialPolygons` layer.
+The `spExtractRast` function extracts values from one or more raster layers and appends to a SpatialPoints layer or data frame.
 
 <details>
   <summary>View Example</summary>
@@ -490,12 +465,15 @@ extrastlst <- spExtractRast(WYspplt,
                             rastlst = c(fornffn, demfn), 
                             xy.uniqueid = "CN", 
                             keepNA = FALSE)
+
 WYspplt_dem <- extrastlst$sppltext
 
-dim(WYspplt)
-dim(WYspplt_dem)
+```
 
-head(WYspplt_dem)
+We can verify that the values from the raster layers were indeed added to our SpatialPoints layer.
+
+``` {r}
+head(WYspplt_dem[ , c("WYbighorn_forest_nonforest_250m", "WYbighorn_dem_250m")])
 ```
 
 
@@ -529,6 +507,7 @@ Next, we derive new layers from `dem`.
 
 ```{r}
 library(terra)
+
 dem <- rast(demfn)
 slpfn <- paste0(outfolder, "/WYbh_slp.img")
 slp <- terra::terrain(dem,
@@ -537,6 +516,7 @@ slp <- terra::terrain(dem,
                       filename = slpfn, 
                       overwrite = TRUE,
                       NAflag = -99999.0)
+
 aspfn <- paste0(outfolder, "/WYbh_asp.img")
 asp <- terra::terrain(dem,
                       v = "aspect",
@@ -546,7 +526,7 @@ asp <- terra::terrain(dem,
                       NAflag = -99999.0)
 ```
 
-Finally, we extract estimation unit and zonal raster statistics (i.e., mean).
+Finally, we call `spGetAuxiliary` with out points object, boundary layer, and raster files.
 
 ```{r}
 rastlst.cont <- c(demfn, slp, asp)
@@ -568,28 +548,37 @@ modeldat <- spGetAuxiliary(xyplt = WYspplt,
                            keepNA = FALSE, 
                            showext = FALSE, 
                            savedata = FALSE)
-names(modeldat)
-
-pltassgn <- modeldat$pltassgn
-unitzonal <- modeldat$unitzonal
-unitvar <- modeldat$dunitvar
-inputdf <- modeldat$inputdf
-unitarea <- modeldat$unitarea
-areavar <- modeldat$areavar
-inputdf <- modeldat$inputdf
-prednames <- modeldat$prednames
-zonalnames <- modeldat$zonalnames
-
-unitvar
-areavar
-unitzonal
-unitarea
-head(pltassgn)
-
-prednames
-zonalnames
 ```
 
+We start by getting a sense for all that `spGetAuxiliary` outputs by looking at the names of the `modeldat` object:
+
+``` {r}
+names(modeldat)
+```
+
+The `pltassgn` object returned by this function contains all of the necessary plot identifiers as well as the extracted values from each of the auxiliary rasters.
+
+``` {r}
+head(modeldat$pltassgn)
+```
+
+`unitzonal` contains zonal statistics for each domain in the input layer. In this case we are treating the entire layer as a single domain so we just get one row of output.
+
+```{r}
+head(modeldat$unitzonal)
+```
+
+`unitarea` contains area values by domain in the input layer.
+
+```{r}
+head(modeldat$unitarea)
+```
+
+Finally, we can look at the resulting predictor names (prednames). 
+
+``` {r}
+prednames <- modeldat$prednames
+```
 
 </details>
 
@@ -614,15 +603,14 @@ pltids <- WYbhxy$pltids
 head(pltids)
 
 spxy <- WYbhxy$spxy
-plot(sf::st_geometry(spxy))
-
+plot(sf::st_geometry(WYbhprj))
+plot(sf::st_geometry(spxy), add=TRUE)
 ```
 
 
 Or, returning only nonspatial plot identifiers (pltids).
 
 ```{r}
-
 WYbhxyids <- spGetXY(bnd = WYbhfn,
                      xy_datsource = "datamart",
                      eval = "FIA",
@@ -632,8 +620,6 @@ names(WYbhxyids)
 
 pltids <- WYbhxyids$pltids
 head(pltids)
-
-
 ```
 
 
@@ -646,7 +632,7 @@ The `spGetPlots` function extracts plot data within a given boundary.
 <details>
   <summary>View Example</summary>
   
-We can extract public coordinates within WY Bighorn NF boundary.
+We can extract plots using the public coordinates within WY Bighorn NF boundary. In this example we utilize the FIA datamart to pull all of the necessary tables in and draw plots from the most recent FIA evaluation.
 
 ```{r}
 WYbhdat <- spGetPlots(bnd = WYbhfn, 
@@ -669,6 +655,7 @@ The `spGetEstUnit` function extracts estimation unit values to plots and calcula
   <summary>View Example</summary>
   
 First, we create a `SpatialPoints` object from `WYplt`
+
 ```{r}
 WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
                                xy.uniqueid = "CN", 
@@ -678,53 +665,23 @@ WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
 xyplt <- WYspplt
 ```
 
-#### By Bighorn National Forest
 
-We now get estimation unit acres for Bighorn National Forest.
-
-```{r}
-unitdat.bh <- spGetEstUnit(xyplt = WYplt, 
-                           uniqueid = "CN", 
-                           unit_layer = WYbhfn, 
-                           spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                                   yvar = "LAT_PUBLIC", 
-                                                   xy.crs = 4269)
-                           )
-
-names(unitdat.bh)
-unitarea.bh <- unitdat.bh$unitarea
-unitvar.bh <- unitdat.bh$unitvar
-areavar.bh <- unitdat.bh$areavar
-
-unitarea.bh
-unitvar.bh
-areavar.bh
-
-```
 
 #### By Bighorn National Forest District
 
-We now get estimation unit acres and strata information for Bighorn National Forest.
+We now get acres and strata information for Bighorn National Forest using the districts as our estimation units.
 
 ```{r}
 unitdat.bhdist <- spGetEstUnit(xyplt = WYplt, 
                                uniqueid = "CN", 
                                unit_layer = WYbhdistfn, 
                                unitvar = "DISTRICTNA", 
-                               spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                                       yvar = "LAT_PUBLIC", 
-                                                       xy.crs = 4269)
-                               )
+                               spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
+                                                         yvar = "LAT_PUBLIC", 
+                                                         xy.crs = 4269))
 
-names(unitdat.bhdist)
-unitarea.bhdist <- unitdat.bhdist$unitarea
-unitvar.bhdist <- unitdat.bhdist$unitvar
-areavar.bhdist <- unitdat.bhdist$areavar
-
-unitarea.bhdist
-unitvar.bhdist
-areavar.bhdist
-
+head(unitdat.bhdist$unitarea)
+head(unitdat.bhdist$pltassgn[ ,c("CN", "DISTRICTNA")])
 ```
 
 </details>
@@ -774,7 +731,7 @@ First, we import spatial data with `spImportSpatial`, and then extract polygon a
 ```{r}
 WYbh <- spImportSpatial(WYbhfn)
 
-polyUnion <- spUnionPoly(polyv1 = USAco[USAco$NAME_1 == "Wyoming",], 
+polyUnion <- spUnionPoly(polyv1 = stunitco[stunitco$STATENM == "Wyoming", ], 
                          polyv2 = WYbh, 
                          areacalc = TRUE)
 
@@ -803,12 +760,7 @@ zonallst <- spZonalRast(polyv = WYbhdist,
 names(zonallst) 
 
 zonalext <- zonallst$zonalext
-outname <- zonallst$outname
-rasterfile <- zonallst$rasterfile
-
 head(zonalext)
-outname
-rasterfile
 ```
 
 </details>

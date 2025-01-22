@@ -1,16 +1,18 @@
 
 <!-- badges: start -->
+
 [![R-CMD-check](https://github.com/USDAForestService/FIESTA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/USDAForestService/FIESTA/actions/workflows/R-CMD-check.yaml)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/FIESTA)](https://CRAN.R-project.org/package=FIESTA)
-[![CRAN checks](https://badges.cranchecks.info/worst/FIESTA.svg)](https://cran.r-project.org/web/checks/check_results_FIESTA.html)
-[![r-universe status](https://usdaforestservice.r-universe.dev/badges/FIESTA)](https://usdaforestservice.r-universe.dev/FIESTA)
+[![CRAN
+checks](https://badges.cranchecks.info/worst/FIESTA.svg)](https://cran.r-project.org/web/checks/check_results_FIESTA.html)
+[![r-universe
+status](https://usdaforestservice.r-universe.dev/badges/FIESTA)](https://usdaforestservice.r-universe.dev/FIESTA)
 <!-- badges: end -->
 
-<b>Authors:</b> Frescino, Tracey S.; Moisen, Gretchen G.; Patterson,
-Paul L.; Toney, Chris; White, Grayson W.
+<!-- [![GitHub Super-Linter](https://github.com/USDAForestService/FIESTA/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter) -->
 
-# 🎉 FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
+# FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
 
 ## Overview
 
@@ -43,29 +45,29 @@ other functions for a specific purpose.
 
 ##### Core Functions
 
--   Database tools (`DB*`) - functions for querying and extracting data
-    from FIA’s national database.
--   Data tools (`dat*`) - functions for summarizing and exploring FIA
-    data.
--   Spatial tools (`sp*`) - functions for manipulating and summarizing
-    spatial data.
+- Database tools (`DB*`) - functions for querying and extracting data
+  from FIA’s national database.
+- Data tools (`dat*`) - functions for summarizing and exploring FIA
+  data.
+- Spatial tools (`sp*`) - functions for manipulating and summarizing
+  spatial data.
 
 ##### Estimation Modules (mod)
 
--   Green-Book (`modGB*`) - functions for FIA’s standard Green-Book
-    estimators.
--   Photo-Based (`modPB*`) - functions for supplementary photo-based
-    estimators.
--   Small Area (`modSA*`) - functions for integration with available
-    small area estimators (SAE).
--   Model-Assisted (`modMA*`) - functions for integration with available
-    Model-Assisted estimators.
+- Green-Book (`modGB*`) - functions for FIA’s standard Green-Book
+  estimators.
+- Photo-Based (`modPB*`) - functions for supplementary photo-based
+  estimators.
+- Small Area (`modSA*`) - functions for integration with available small
+  area estimators (SAE).
+- Model-Assisted (`modMA*`) - functions for integration with available
+  Model-Assisted estimators.
 
 ##### Analysis Functions
 
--   Analysis functions (`an*`) - wrapper functions for steam-lining
-    estimation processes. These functions reside in the `FIESTAnalysis`
-    package.
+- Analysis functions (`an*`) - wrapper functions for steam-lining
+  estimation processes. These functions reside in the `FIESTAnalysis`
+  package.
 
 ## Installation
 
@@ -194,33 +196,45 @@ GBpopdat <- modGBpop(popTabs = list(cond = FIESTA::WYcond,
                      strata_opts = strata_options(getwt = TRUE))
 
 summary(GBpopdat)
-#>             Length Class      Mode     
-#> popType      1     -none-     character
-#> condx       12     data.table list     
-#> pltcondx    43     data.table list     
-#> cuniqueid    1     -none-     character
-#> condid       1     -none-     character
-#> ACI.filter   1     -none-     character
-#> unitarea     2     data.table list     
-#> areavar      1     -none-     character
-#> areaunits    1     -none-     character
-#> unitvar      1     -none-     character
-#> unitvars     1     -none-     character
-#> strata       1     -none-     logical  
-#> stratalut   18     data.table list     
-#> strvar       1     -none-     character
-#> strwtvar     1     -none-     character
-#> expcondtab  12     data.table list     
-#> plotsampcnt  3     data.frame list     
-#> condsampcnt  3     data.frame list     
-#> states       1     -none-     character
-#> invyrs       1     -none-     list     
-#> estvar.area  1     -none-     character
-#> adj          1     -none-     character
-#> areawt       1     -none-     character
-#> treex       21     data.table list     
-#> tuniqueid    1     -none-     character
-#> adjtree      1     -none-     logical
+#>               Length Class      Mode     
+#> module         1     -none-     character
+#> popType        1     -none-     character
+#> pltidsadj      5     data.table list     
+#> pltcondx      29     data.table list     
+#> pltcondflds   28     -none-     character
+#> pjoinid        1     -none-     character
+#> cuniqueid      1     -none-     character
+#> condid         1     -none-     character
+#> ACI            1     -none-     logical  
+#> areawt         1     -none-     character
+#> areawt2        0     -none-     NULL     
+#> adjcase        1     -none-     character
+#> dbqueries      4     -none-     list     
+#> dbqueriesWITH  4     -none-     list     
+#> pltassgnx      4     data.table list     
+#> pltassgnid     1     -none-     character
+#> unitarea       2     data.table list     
+#> areavar        1     -none-     character
+#> areaunits      1     -none-     character
+#> unitvar        1     -none-     character
+#> unitvars       1     -none-     character
+#> unitltmin      1     -none-     numeric  
+#> strata         1     -none-     logical  
+#> stratalut      6     data.table list     
+#> strvar         1     -none-     character
+#> strwtvar       1     -none-     character
+#> plotsampcnt    0     data.frame list     
+#> condsampcnt    3     data.frame list     
+#> states         1     -none-     character
+#> invyrs         0     -none-     NULL     
+#> adj            1     -none-     character
+#> P2POINTCNT     3     data.frame list     
+#> plotunitcnt    2     data.frame list     
+#> treex         19     data.table list     
+#> tuniqueid      1     -none-     character
+#> adjfactors     7     data.table list     
+#> adjvarlst      4     -none-     character
+#> popdatindb     1     -none-     logical
 ```
 
 Note that the `GBpopdat` list generated by `modGBpop` contains many
@@ -249,12 +263,13 @@ state code, and inventory year:
 str(GBest, max.level = 2)
 #> List of 4
 #>  $ est    :'data.frame': 23 obs. of  3 variables:
-#>   ..$ ESTN_UNIT             : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...
-#>   ..$ Estimate              : num [1:23] 35117889 24184274 8223787 73174024 16031144 ...
-#>   ..$ Percent Sampling Error: num [1:23] 11.71 26.91 32.24 8.56 31.4 ...
-#>  $ raw    :List of 11
-#>   ..$ unit_totest  :'data.frame':    23 obs. of  17 variables:
-#>   ..$ domdat       :'data.frame':    590 obs. of  14 variables:
+#>   ..$ ESTN_UNIT             : chr [1:23] "1" "11" "13" "15" ...
+#>   ..$ Estimate              : num [1:23] 34637492 34861880 70412559 308998 4687031 ...
+#>   ..$ Percent Sampling Error: num [1:23] 11.7 14.4 11.6 84.6 67.7 ...
+#>  $ raw    :List of 12
+#>   ..$ unit_totest  :'data.frame':    23 obs. of  18 variables:
+#>   ..$ domdat       :'data.frame':    590 obs. of  4 variables:
+#>   ..$ domdatqry    : chr "WITH\npltids AS\n(SELECT DISTINCT PLT_CN\n FROM condx), \n----- pltcondx\npltcondx AS\n(SELECT c.PLT_CN, c.COND"| __truncated__
 #>   ..$ estvar       : chr "BA"
 #>   ..$ estvar.filter: chr "STATUSCD == 1"
 #>   ..$ module       : chr "GB"
@@ -265,7 +280,7 @@ str(GBest, max.level = 2)
 #>   ..$ areaunits    : chr "acres"
 #>   ..$ estunits     : chr "square feet"
 #>  $ statecd: int 56
-#>  $ invyr  : int [1:3] 2011 2012 2013
+#>  $ states : chr "Wyoming"
 ```
 
 ### Example 2: Model-assisted estimation
@@ -303,16 +318,15 @@ and we can see the output of `modMAtree()`:
 ``` r
 str(MAest, max.level = 2)
 #> List of 4
-#>  $ est    :Classes 'data.table' and 'data.frame':    23 obs. of  3 variables:
-#>   ..$ ESTN_UNIT             : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...
-#>   ..$ Estimate              : num [1:23] 34769303 28493559 8260491 69278394 23200460 ...
-#>   ..$ Percent Sampling Error: num [1:23] 8.7 19.8 25.69 9.23 20.17 ...
-#>   ..- attr(*, ".internal.selfref")=<externalptr> 
-#>   ..- attr(*, "sorted")= chr "ESTN_UNIT"
+#>  $ est    :'data.frame': 23 obs. of  3 variables:
+#>   ..$ ESTN_UNIT             : chr [1:23] "1" "11" "13" "15" ...
+#>   ..$ Estimate              : num [1:23] 75809929 117896280 312165085 -14313592 42191880 ...
+#>   ..$ Percent Sampling Error: num [1:23] 17 12.3 11 0 43.6 ...
 #>  $ raw    :List of 13
 #>   ..$ unit_totest  :'data.frame':    23 obs. of  18 variables:
-#>   ..$ domdat       :'data.frame':    3210 obs. of  14 variables:
-#>   ..$ plotweights  :List of 1
+#>   ..$ domdat       :'data.frame':    590 obs. of  5 variables:
+#>   ..$ plotweights  :Classes 'data.table' and 'data.frame':   556 obs. of  5 variables:
+#>   .. ..- attr(*, ".internal.selfref")=<externalptr> 
 #>   ..$ estvar       : chr "BA"
 #>   ..$ estvar.filter: chr "STATUSCD == 1"
 #>   ..$ module       : chr "MA"
@@ -322,7 +336,7 @@ str(MAest, max.level = 2)
 #>   ..$ rowvar       : chr "TOTAL"
 #>   ..$ colvar       : chr "NONE"
 #>   ..$ areaunits    : chr "acres"
-#>   ..$ estunits     : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...
+#>   ..$ estunits     : chr "square feet"
 #>  $ statecd: int 56
-#>  $ invyr  : int [1:3] 2011 2012 2013
+#>  $ states : chr "Wyoming"
 ```
