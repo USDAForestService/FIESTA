@@ -1,0 +1,143 @@
+url: https://usdaforestservice.github.io/FIESTA/
+template:
+  bootstrap: 5
+  light-switch: true
+  bslib:
+    primary: "#0054AD"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+    danger: "#A6081A"
+    
+home:
+  title: Forest Inventory Estimation and Analysis
+  sidebar:
+    structure: [dev, links, community, authors, license, citation]
+
+articles:
+
+  - title: Estimation Tutorials
+    navbar: ~
+    contents:
+      - FIESTA_tutorial_GB
+      - FIESTA_tutorial_MA
+      - FIESTA_tutorial_SA
+      - FIESTA_tutorial_PB
+  - title: Input & Output Descriptions
+    contents:
+      - FIESTA_manual_mod_est
+      - FIESTA_manual_mod_pop
+  - title: Tooling Tutorials
+    contents:
+      - FIESTA_datSum_examples
+      - FIESTA_tutorial_dat
+      - FIESTA_tutorial_DB
+      - FIESTA_tutorial_sp
+    
+reference:
+  - title: Package Overview
+  - contents:
+    - FIESTA-package
+  - title: Estimation Modules
+  - subtitle: Population
+  - contents:
+    - modGBpop
+    - modMApop
+    - modSApop
+    - modPBpop
+  - subtitle: Estimation
+  - contents:
+    - modGBtree
+    - modGBarea
+    - modGBchng
+    - modGBratio
+    - modGBp2veg
+    - modMAtree
+    - modMAarea
+    - modSAtree
+    - modSAarea
+    - modPB
+  - title: Core Functions
+  - subtitle: Database Tools
+  - contents:
+    - DBgetCSV
+    - DBgetEvalid
+    - DBgetPlots
+    - DBgetSQLite
+    - DBgetStrata
+    - DBgetXY
+    - DBqryCSV
+    - dbTables
+  - subtitle: Data Tools
+  - contents:
+    - datBarplot
+    - datBarStacked
+    - datFilter
+    - datFreq
+    - datLineplot
+    - datLUTclass
+    - datLUTnm
+    - datPivot
+    - datPlotcnt
+    - datSumCond
+    - datSumTree
+    - datSumTreeDom
+    - datLUTspp
+    - datPBplotchg
+    - datPBpnt2pct
+  - subtitle: Spatial Tools
+  - contents:
+    - spAlignRast
+    - spClassifyRast
+    - spClipPoint
+    - spClipPoly
+    - spClipRast
+    - spExportSpatial
+    - spExtractPoly
+    - spExtractRast
+    - spGetAuxiliary
+    - spGetEstUnit
+    - spGetPlots
+    - spGetSAdoms
+    - spGetStates
+    - spGetStrata
+    - spGetXY
+    - spImportSpatial
+    - spMakeSpatialPoints
+    - spPoly2Rast
+    - spReprojectRaster
+    - spReprojectVector
+    - spUnionPoly
+    - spZonalRast
+  - title: Reference Tables
+  - contents:
+    - GDT_NAMES
+    - kindcd3old
+    - ref_codes 
+    - ref_diacl2in 
+    - ref_domain
+    - ref_estvar 
+    - ref_units
+    - ref_statecd
+    - stunitco
+    - ref_plt 
+    - ref_cond
+    - ref_tree
+    - ref_shp
+    - ref_species 
+    - ref_conversion
+    - ref_popType 
+    - ref_titles 
+  - title: Example Data
+  - contents:
+    - WYtree
+    - WYplt
+    - WYcond
+    - WYseed
+    - WYpltassgn
+    - WYsubplot
+    - WYsubp_cond
+    - WYunitarea
+    - WYunitzonal
+    - WYstratalut
+    - WYp2veg_subp_structure
+    - WYp2veg_subplot_spp
