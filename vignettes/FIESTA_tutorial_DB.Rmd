@@ -182,17 +182,18 @@ WYeval$invtype
 
 </details>
 
-#### Example 2: Get most current evaluations for New York and Texas for VOL and GRM evalTypes
+#### Example 2: Get most current evaluations for New York for VOL and GRM evalTypes
 <details>
   <summary>View Example</summary>
   
 ```{r}
-NYTXeval <- DBgetEvalid(states = c("New York", "Texas"), 
-                        evalType = c("VOL", "GRM"))
+NYeval <- DBgetEvalid(states = c("New York"), 
+                      evalType = c("VOL", "GRM"),
+                      evalCur = TRUE)
 
-names(NYTXeval)
-NYTXeval$evalidlist
-NYTXeval$evalTypelist
+names(NYeval)
+NYeval$evalidlist
+NYeval$evalTypelist
 ```
 
 </details>
@@ -449,15 +450,14 @@ table(ppsa6$EVALID)
 </details>
 
 
-#### Example 7: Get data for multiple states by Endyr
+#### Example 7: Get data by Endyr
 <details>
   <summary>View Example</summary>
 
 ```{r}
-dat7 <- DBgetPlots(states = c("Connecticut", "South Carolina"), 
+dat7 <- DBgetPlots(states = c("Connecticut"), 
                    eval = "FIA",
-                   eval_opts = eval_options(Cur = TRUE, 
-                                            evalType = "ALL",
+                   eval_opts = eval_options(evalType = "ALL",
                                             Endyr = 2017))
 
 names(dat7)
@@ -493,7 +493,7 @@ table(plt8$INVYR)
 
 </details>
 
-#### Example 9: Get data for Periodic inventory
+#### Example 9: Get data for periodic inventory
 <details>
   <summary>View Example</summary>
 
@@ -523,37 +523,23 @@ table(plt9$STATECD, plt9$INVYR)
 The objective of this section is to understand the differences when using INTENSITY=1.
 
 ```{r}
-## With intensified plots
+## With only P2 plots (intensity1 = TRUE)
 dat10 <- DBgetPlots(states = "Vermont", 
                     eval = "FIA",
                     eval_opts = list(Cur = TRUE, 
                                      Type = "ALL"),
+                    intensity1 = TRUE,
                     issp = TRUE)
 
 tabs10 <- dat10$tabs
-plt10 <- tabs10$plot
-spxy10 <- dat10$xyCur_PUBLIC
-
-## With only P2 plots (intensity1 = TRUE)
-dat10b <- DBgetPlots(states = "Vermont", 
-                     eval = "FIA",
-                     eval_opts = list(Cur = TRUE, 
-                                     Type = "ALL"),
-                     intensity1 = TRUE,
-                     issp = TRUE)
-
-tabs10b <- dat10b$tabs
-plt10b <- tabs10b$plt
+plt10 <- tabs10$plt
 
 table(plt10$INVYR)
-table(plt10b$INVYR)
-spxy10b <- dat10b$xyCur_PUBLIC
+spxy10 <- dat10$xyCur_PUBLIC
 
 
 # Display spatial output of public coordinates
 plot(sf::st_geometry(spxy10), pch = 16, cex = .5)
-plot(sf::st_geometry(spxy10b), pch = 16, cex = .5, add = TRUE, col = "grey")
-
 ```
 
 
