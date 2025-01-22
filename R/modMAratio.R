@@ -219,7 +219,6 @@
 #' Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 #' 0.1.4 https://cran.r-project.org/package=mase
 #' @keywords data
-#' @export modMAratio          
 modMAratio <- function(MApopdat, 
                        ratiotype = "PERACRE",
                        woodland = "Y",

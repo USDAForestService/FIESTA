@@ -4,37 +4,13 @@
 \name{FIESTA-package}
 \alias{FIESTA-package}
 \alias{FIESTA}
-\title{EcoMap SpatialPolygonsDataFrame}
+\title{FIESTA - Forest Inventory Estimation for Analysis}
 \description{
-Contains regional geographic delineations for analysis of ecological
-relationships across ecological units. ECOMAP is the term used for a USDA
-Forest Service initiative to map ecological units and encourage their use in
-ecosystem-based approaches to forest land conservation and management. It is
-coordinated at the national and regional levels by USDA Forest Service staff
-and implemented in cooperation with State forestry agencies and others.
-ECOMAP mapping criteria are outlined in the National Hierarchical Framework
-of Ecological Units (https://www.ncrs.fs.fed.us/gla/reports/hierarch-
-y.htm). The framework systematically divides the country into progressively
-smaller areas of land and water that have similar physical and biological
-characteristics and ecological processes.
-}
-\details{
-The EcoMap Provinces feature class contains ecological province polygons
-attributed with names and descriptions. The EcomapSections 2007 data set
-describes the ecological sections within the conterminous United States. The
-EcomapSubections 2007 data set describes the ecological subsections within
-the conterminous United States.
-
-Converted to simple feature\cr Transformed CRS from longlat(EPSG:4269) to
-Albers (EPSG:5070)\cr Saved to R object, with compression='xz'
-
-
-FIESTA - Forest Inventory Estimation for Analysis
-
 FIESTA is a research estimation tool for analysts that work with sample-based 
 inventory data from the U.S. Department of Agriculture, Forest Service, 
-Forest Inventory and Analysis (FIA) Program. 
-
+Forest Inventory and Analysis (FIA) Program.
+}
+\details{
 FIESTA can generate FIA's traditional state-wide estimates while also accommodate: 
 unique population boundaries, different evaluation time periods, customized 
 stratification schemes, non-standard variance equations, integration of 
