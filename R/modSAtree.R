@@ -711,7 +711,6 @@ modSAtree <- function(SApopdatlst = NULL,
                    rowlut = rowlut, collut = collut, 
                    rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                    rowgrpord = rowgrpord, title.rowgrp = NULL, 
-                   NA.FIAname = NA.FIAname,
                    gui = gui)
     uniquerow <- rowcolinfo$uniquerow
     uniquecol <- rowcolinfo$uniquecol
@@ -867,6 +866,7 @@ modSAtree <- function(SApopdatlst = NULL,
                      predselectlst.area_row = predselectlst.area_row,
                      pdomdatlst_row = pdomdatlst_row,
                      dunitlutlst_row = dunitlutlst_row,
+                     NA.name = NA.name,
                      save4testing = save4testing) 
     if (is.numeric(SAestimates) && SAestimates == 0) stop()
     largebnd.unique <-  SAestimates$largebnd.unique

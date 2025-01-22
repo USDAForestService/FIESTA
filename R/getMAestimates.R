@@ -24,7 +24,8 @@ getMAestimates <- function(esttype,
                            row.add0 = FALSE, 
                            col.add0 = FALSE,
                            row.orderby = NULL, 
-                           col.orderby = NULL) {
+                           col.orderby = NULL,
+                           NA.name = "Other") {
   
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
 #  addtotal <- ifelse(rowvar %in% c("PREV_TOTAL", "TOTAL") || 
@@ -164,6 +165,13 @@ getMAestimates <- function(esttype,
   }
   
   if (rowvar != "TOTAL") {
+    
+    ## Check uniquerow - add NA factor value
+    uniquerow <- check.unique(x = domdatn, 
+                              uniquex = uniquerow,
+                              xvar = rowvar, 
+                              NA.name = NA.name)
+    
     domdattot <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
                          by=c(unitvar, uniqueid, rowvar, prednames), .SDcols=response]
     
@@ -185,6 +193,13 @@ getMAestimates <- function(esttype,
     }
     
     if (colvar != "NONE") {
+      
+      ## Check uniquercol- add NA factor value
+      uniquecol <- check.unique(x = domdatn, 
+                                uniquex = uniquecol,
+                                xvar = colvar, 
+                                NA.name = NA.name)
+      
       domdattot <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
                             by=c(unitvar, uniqueid, colvar, prednames), .SDcols=response]
       

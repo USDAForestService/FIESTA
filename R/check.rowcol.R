@@ -21,7 +21,7 @@ check.rowcol <-
            rowgrp = FALSE, rowgrpnm = NULL, 
            rowgrpord = NULL, title.rowgrp = NULL, 
            cvars2keep = NULL, whereqry = NULL,
-           factor.addNA = TRUE, NA.FIAname = "Other",
+           factor.addNA = TRUE,
            gui = FALSE){
 
   ####################################################################################
@@ -607,9 +607,10 @@ check.rowcol <-
             }
           }
         }
+
         if (any(is.na(uniquex)) && !keepNA) {
-          uniquex <- uniquex[!is.na(uniquex)]		
-		    }
+          uniquex <- uniquex[!is.na(uniquex)]
+        }
         rowuniquex <- uniquex
 
         ## Check seedling table
@@ -835,16 +836,16 @@ check.rowcol <-
               }
             }
           }
-	        if (!is.null(NA.FIAname)) {
-	          if (any(is.na(rowlut[[rowvar]]))) {
-	            if (is.character(rowlut[[rowvarnm]]) && 
-	                (is.na(rowlut[is.na(rowlut[[rowvar]])][[rowvarnm]]) || rowlut[is.na(rowlut[[rowvar]])][[rowvarnm]] == "NA")) {
-	              rowlut[is.na(rowlut[[rowvar]])][[rowvarnm]] <- NA.FIAname
-	            }
-	          } else {
-	            rowlut <- rbind(rowlut, list(NA, NA.FIAname))
-	          }
-	        }
+	        # if (!is.null(NA.FIAname)) {
+	        #   if (any(is.na(rowlut[[rowvar]]))) {
+	        #     if (is.character(rowlut[[rowvarnm]]) && 
+	        #         (is.na(rowlut[is.na(rowlut[[rowvar]])][[rowvarnm]]) || rowlut[is.na(rowlut[[rowvar]])][[rowvarnm]] == "NA")) {
+	        #       rowlut[is.na(rowlut[[rowvar]])][[rowvarnm]] <- NA.FIAname
+	        #     }
+	        #   } else {
+	        #     rowlut <- rbind(rowlut, list(NA, NA.FIAname))
+	        #   }
+	        # }
 	      }  ## end if (row.FIAname & !is.null(rowlut))
       }  ## end !is.null(row.orderby) && row.orderby != "NONE"
     }  ## end domlut is null

@@ -537,7 +537,6 @@ modMAtree <- function(MApopdat,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL, 
-                 NA.FIAname = NA.FIAname,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -705,7 +704,8 @@ modMAtree <- function(MApopdat,
                    row.orderby = row.orderby,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
-                   col.add0 = col.add0)
+                   col.add0 = col.add0,
+                   NA.name = NA.name)
   
   if (is.null(estdat)) stop()
   unit_totest <- estdat$unit_totest

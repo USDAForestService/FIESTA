@@ -575,13 +575,9 @@ tree4$est
 raw4 <- tree4$raw      # extract raw data list object from output
 names(raw4)
 head(raw4$unit_totest)   # estimates by estimation unit (i.e., ESTN_UNIT)
-head(raw4$totest)        # estimates for population (i.e., WY)
 head(raw4$unit_rowest)   # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-head(raw4$rowest)        # estimates by row for population (i.e., WY)
 head(raw4$unit_colest)   # estimates by column, by estimation unit (i.e., ESTN_UNIT)
-head(raw4$colest)        # estimates by column for population (i.e., WY)
 head(raw4$unit_grpest)   # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
-head(raw4$grpest)        # estimates by row and column for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
