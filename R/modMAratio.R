@@ -218,7 +218,7 @@
 #' @references Kelly McConville, Becky Tang, George Zhu, Shirley Cheung, and
 #' Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 #' 0.1.4 https://cran.r-project.org/package=mase
-#' @keywords data
+#' @keywords internal
 modMAratio <- function(MApopdat, 
                        ratiotype = "PERACRE",
                        woodland = "Y",

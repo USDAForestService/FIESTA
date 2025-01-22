@@ -284,4 +284,4 @@ Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 \author{
 Josh Yamamoto
 }
-\keyword{data}
+\keyword{internal}
