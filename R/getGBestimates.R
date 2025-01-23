@@ -24,7 +24,8 @@ getGBestimates <- function(esttype,
                            col.add0 = FALSE,
                            row.orderby = NULL, 
                            col.orderby = NULL,
-                           NA.name = "Other") {
+                           row.NAname = "Other",
+                           col.NAname = "Other") {
 
 
   ## Set global variables
@@ -97,11 +98,11 @@ getGBestimates <- function(esttype,
   if (is.null(rowvar)) rowvar <- "TOTAL"
   if (rowvar != "TOTAL") {
 
-    ## Check uniquerow - add NA factor value
+    ## Check uniquerow with domain-level data - add NA factor values if necessary
     uniquerow <- check.unique(x = domdatn, 
                               uniquex = uniquerow,
                               xvar = rowvar, 
-                              NA.name = NA.name)
+                              NAname = row.NAname)
 
     ## Sum numerator to plot, rowvar level
     #domdatn <- domdatn[!is.na(domdatn[[rowvar]]),] 
@@ -147,11 +148,11 @@ getGBestimates <- function(esttype,
   if (is.null(colvar)) colvar <- "NONE"
   if ( colvar != "NONE") {
 
-    ## Check uniquecol - add NA factor value
+    ## Check uniquecol with domain-level data - add NA factor values if necessary
     uniquecol <- check.unique(x = domdatn, 
                               uniquex = uniquecol,
                               xvar = colvar, 
-                              NA.name = NA.name)
+                              NAname = col.NAname)
     
     ## Sum numerator to plot, colvar level
     #domdatn <- domdatn[!is.na(domdatn[[colvar]]),] 

@@ -32,7 +32,8 @@ getSAestimates <- function(esttype, i, largebnd.unique,
                            predselectlst.area_row,
                            pdomdatlst_row,
                            dunitlutlst_row,
-                           NA.name = "Other",
+                           row.NAname,
+                           col.NAname,
                            save4testing) {
   
   dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
@@ -204,7 +205,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
     uniquerow <- check.unique(x = domdat, 
                               uniquex = uniquerow,
                               xvar = rowvar, 
-                              NA.name = NA.name)
+                              NAname = row.NAname)
     
     domdat <- domdat[!is.na(domdat[[rowvar]]),] 
     domdattot <- setDT(domdat)[ ,lapply(.SD, sum, na.rm=TRUE), 

@@ -789,7 +789,8 @@ modGBratio <- function(GBpopdat,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
                    col.add0 = col.add0,
-                   NA.name = NA.name)
+                   row.NAname = row.NAname,
+                   col.NAname = col.NAname)
   if (is.null(estdat)) stop()
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest

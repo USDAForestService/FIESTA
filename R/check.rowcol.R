@@ -52,7 +52,8 @@ check.rowcol <-
   ## Set global variables
   SITECLCD=GSSTKCD=domainlst=tdomvar=tdomvar2=grpvar=rowvarnm=colvarnm <- NULL
   tuniquex=suniquex=coluniquex <- NULL
-  keepNA=isdbc=isdbt=colgrp <- FALSE
+  isdbc=isdbt=colgrp <- FALSE
+  keepNA <- TRUE
 
   ## define function to make factors
   makefactor <- function(x) {
@@ -289,6 +290,26 @@ check.rowcol <-
         }
       }
     } else {  ## domlut is null
+      
+      if (popType == "CHNG" && (is.null(colvar) || colvar == "NONE")) {
+        colvar <- rowvar
+        col.orderby <- row.orderby
+        title.colvar <- title.rowvar
+        col.FIAname <- row.FIAname
+        col.add0 = row.add0
+        collut <- rowlut
+        col.classify <- row.classify
+        
+        ## Rename rowvar variables with prefix 'PREV_'
+        rowvar <- paste0("PREV_", rowvar)
+        if (!is.null(row.orderby)) {
+          row.orderby <- paste0("PREV_", row.orderby)
+        }
+        if (!is.null(title.rowvar)) {
+          title.rowvar <- paste0("Previous ", title.rowvar)
+        }
+        rowvarnm=rowvarnew <- rowvar
+      }
 
       ## Build fromqry for rowvar 
       ###############################################
@@ -541,30 +562,33 @@ check.rowcol <-
                                        fill = NULL)
             
           } else if (is.data.frame(row.classify)) {
-            if (ncol(row.classify) != 2) {
-              message("invalid row.classify... must be a vector of class breaks or a data.frame with 2 columns")
+
+            if (ncol(row.classify) < 2) {
+              message("invalid row.classify... must be a data.frame with TO and FROM columns")
               stop()
             }
-            rowclassnm <- names(row.classify)[!names(row.classify) %in% rowvar]
-            if (length(rowclassnm) != 1) {
+            rowclassnm <- checknm(paste0(rowvar, "CL"), pltcondflds)
+            names(row.classify) <- toupper(names(row.classify))
+            if (!all(c("TO", "FROM") %in% names(row.classify))) {
               message("invalid classes for ", rowvar, 
-                      "... the data.frame must include name of variable to classify: ", rowvar)
+                      "... the data.frame must include columns: FROM and TO")
               stop()
             }
-            fromval <- row.classify[[rowvar]]
-            toval <- row.classify[[rowclassnm]]
+            fromval <- row.classify$FROM
+            toval <- row.classify$TO
             
             ## Check values of fromval
-            if (any(!fromval %in% uniquex)) {
-              missvals <- fromval[which(!fromval %in% uniquex)]
+            if (!any(!is.na(uniquex) %in% fromval)) {
+              missvals <- uniquex[which(!uniquex %in% fromval)]
               message("missing values in row.classify: ", toString(missvals))
             }
-            rowclassqry <- classqry(rowvar, fromval, toval, 
+            rowclassqry <- classqry(classcol = rowvar, 
+                                    fromval, toval, 
                                     classnm = rowclassnm, 
                                     class. = class.,
                                     fill = NULL)
           } else {
-            message("invalid row.classify... must be a vector of class breaks or a data.frame with 2 columns")
+            message("invalid row.classify... must be a vector of class breaks or a data.frame with TO and FROM columns")
             stop()
           }
           
@@ -675,6 +699,7 @@ check.rowcol <-
           }
           rowuniquex <- sort(unique(c(uniquex, suniquex)))
         }
+        
 	      if (row.FIAname || !is.null(rowlut)) {
         
           if (!is.null(rowlut) && ncol(rowlut) > 1 && all(names(rowlut) %in% rowflds)) {
@@ -794,8 +819,12 @@ check.rowcol <-
                 }  ## end estseed %in% c("add", "only")
               }
             } else { ## rowvar in pltcondflds
+              
+              ## check for prefix (PREV_) xvar
+              xvar <- ifelse(popType %in% c("CHNG"), sub("PREV_", "", rowvar), rowvar)
+
               rowLUT <- datLUTnm(x = rowflds, 
-                                 xvar = rowvar, 
+                                 xvar = xvar, 
                                  uniquex = uniquex,
                                  LUT = rowlut, 
                                  FIAname = row.FIAname,
@@ -803,6 +832,12 @@ check.rowcol <-
                                  add0 = row.add0)
               rowlut <- setDT(rowLUT$LUT)
               rowLUTnm <- rowLUT$xLUTnm
+              
+              ## append prefix
+              if (popType %in% c("CHNG")) {
+                names(rowlut) <- paste0("PREV_", names(rowlut))
+                rowLUTnm <- paste0("PREV_", rowLUTnm)
+              }
             }
             
             if (rowgrp) {
@@ -1177,30 +1212,31 @@ check.rowcol <-
                                        fill = NULL)
             
           } else if (is.data.frame(col.classify)) {
-            if (ncol(col.classify) != 2) {
-              message("invalid col.classify... must be a vector of class breaks or a data.frame with 2 columns")
+            if (ncol(col.classify) < 2) {
+              message("invalid col.classify... must be a data.frame with TO and FROM columns")
               stop()
             }
-            colclassnm <- names(col.classify)[!names(col.classify) %in% colvar]
-            if (length(colclassnm) != 1) {
+            colclassnm <- checknm(paste0(colvar, "CL"), pltcondflds)
+            names(col.classify) <- toupper(names(col.classify))
+            if (!all(c("TO", "FROM") %in% names(col.classify))) {
               message("invalid classes for ", colvar, 
-                      "... the data.frame must include name of variable to classify: ", colvar)
+                      "... the data.frame must include columns: FROM and TO")
               stop()
             }
-            fromval <- col.classify[[colvar]]
-            toval <- row.classify[[colclassnm]]
+            fromval <- col.classify$FROM
+            toval <- col.classify$TO
             
             ## Check values of fromval
-            if (any(!fromval %in% uniquex)) {
-              missvals <- fromval[which(!fromval %in% uniquex)]
-              message("missing values in col.classify: ", toString(missvals))
+            if (!any(!is.na(uniquex) %in% fromval)) {
+              missvals <- uniquex[which(!uniquex %in% fromval)]
+              message("missing values in row.classify: ", toString(missvals))
             }
             colclassqry <- classqry(colvar, fromval, toval, 
                                     classnm = colclassnm, 
                                     class. = class.,
                                     fill = NULL)
           } else {
-            message("invalid col.classify... must be a vector of class breaks or a data.frame with 2 columns")
+            message("invalid col.classify... must be a vector of class breaks or a data.frame with TO and FROM columns")
             stop()
           }
           
@@ -1374,7 +1410,7 @@ check.rowcol <-
                                         uniquex = coluniquex)
                   } else {
                     colLUT <- datLUTnm(x = x, 
-                                       xvar = colvar, 
+                                       xvar = sub("PREV_", "", colvar), 
                                        LUT = collut, 
                                        FIAname = col.FIAname,
                                        group = colLUTgrp, 
@@ -1428,6 +1464,7 @@ check.rowcol <-
                 }  ## end estseed %in% c("add", "only")
               }
             } else { ## colvar in pltcondflds
+              
               colLUT <- datLUTnm(x = colflds, 
                                  xvar = colvar, 
                                  uniquex = uniquex,

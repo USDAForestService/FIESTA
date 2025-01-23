@@ -273,7 +273,7 @@ modGBchng <- function(GBpopdat,
   parameters <- FALSE
   returnlst <- list()
   rawdata <- TRUE
-
+  
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder <- NULL
   #estvar <- "CONDPROP_ADJ"
@@ -285,12 +285,12 @@ modGBchng <- function(GBpopdat,
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(modGBchng)),
-		names(formals(modGBpop))) 
+                 names(formals(modGBpop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-
+  
   ## Check parameter lists
   pcheck.params(input.params = input.params,
                 title_opts = title_opts, 
@@ -317,8 +317,8 @@ modGBchng <- function(GBpopdat,
   ## CHECK PARAMETER INPUTS
   ##################################################################
   list.items <- c("pltcondx", "cuniqueid", "condid", 
-             "unitarea", "unitvar", "stratalut", "strvar",
-             "plotsampcnt", "condsampcnt")
+                  "unitarea", "unitvar", "stratalut", "strvar",
+                  "plotsampcnt", "condsampcnt")
   GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   if (is.null(GBpopdat)) return(NULL)
   pltidsadj <- GBpopdat$pltidsadj
@@ -378,26 +378,26 @@ modGBchng <- function(GBpopdat,
     pltcondxWITHqry <- NULL
   }
   
-
+  
   ## Check chngtype
   ########################################################
   chngtypelst <- c('total', 'annual')
   chngtype <- pcheck.varchar(var2check=chngtype, varnm="chngtype", gui=gui,
-		checklst=chngtypelst, caption="chngtype", multiple=FALSE, stopifnull=TRUE)
-
+                             checklst=chngtypelst, caption="chngtype", multiple=FALSE, stopifnull=TRUE)
+  
   ########################################
   ## Check area units
   ########################################
   unitchk <- pcheck.areaunits(unitarea=unitarea, areavar=areavar, 
-			areaunits=areaunits, metric=metric)
+                              areaunits=areaunits, metric=metric)
   unitarea <- unitchk$unitarea
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
-
+  
   if (is.null(key(unitarea))) {
-     setkeyv(unitarea, unitvar)
+    setkeyv(unitarea, unitvar)
   }
-
+  
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -447,7 +447,7 @@ modGBchng <- function(GBpopdat,
   landarea.filter <- estdat$landarea.filter
   pltcondflds <- estdat$pltcondflds
   
-
+  
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -534,16 +534,8 @@ modGBchng <- function(GBpopdat,
   estnm <- conddat$estnm
   rowvar <- conddat$rowvar
   colvar <- conddat$colvar
-  rowvarnm <- conddat$rowvarnm
-  row.orderby <- conddat$row.orderby
-  uniquerow <- conddat$uniquerow
-  title.rowvar <- conddat$title.rowvar
-  colvarnm <- conddat$colvarnm
-  col.orderby <- conddat$col.orderby
-  uniquecol <- conddat$uniquecol
-  title.colvar <- conddat$title.colvar
   grpvar <- conddat$grpvar
-
+  
 
   ###################################################################################
   ### Get titles for output tables
@@ -582,8 +574,6 @@ modGBchng <- function(GBpopdat,
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
-  source("C:\\_tsf\\_GitHub\\FIESTAutils\\R\\checks.R")
-  source("C:\\_tsf\\_GitHub\\FIESTA\\R\\getGBestimates.R")
   estdat <- 
     getGBestimates(esttype = esttype,
                    domdatn = cdomdat,
@@ -606,7 +596,8 @@ modGBchng <- function(GBpopdat,
                    col.orderby = col.orderby,
                    row.add0 = row.add0,
                    col.add0 = col.add0,
-                   NA.name = "Other")
+                   row.NAname = "Other",
+                   col.NAname = "Other")
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest
   unit_colest <- estdat$unit_colest
