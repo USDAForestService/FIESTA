@@ -1,0 +1,18 @@
+pandoc: 3.1.11
+pkgdown: 2.1.1
+pkgdown_sha: ~
+articles:
+  FIESTA_datSum_examples: FIESTA_datSum_examples.html
+  FIESTA_manual_mod_est: FIESTA_manual_mod_est.html
+  FIESTA_manual_mod_pop: FIESTA_manual_mod_pop.html
+  FIESTA_tutorial_dat: FIESTA_tutorial_dat.html
+  FIESTA_tutorial_DB: FIESTA_tutorial_DB.html
+  FIESTA_tutorial_GB: FIESTA_tutorial_GB.html
+  FIESTA_tutorial_MA: FIESTA_tutorial_MA.html
+  FIESTA_tutorial_PB: FIESTA_tutorial_PB.html
+  FIESTA_tutorial_SA: FIESTA_tutorial_SA.html
+  FIESTA_tutorial_sp: FIESTA_tutorial_sp.html
+last_built: 2025-01-22T23:59Z
+urls:
+  reference: https://usdaforestservice.github.io/FIESTA/reference
+  article: https://usdaforestservice.github.io/FIESTA/articles
