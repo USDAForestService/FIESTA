@@ -1,3 +1,29 @@
+# FIESTA 3.7.0
+
+- Overhaul of data summaries to SQL queries to improve efficiency with database inputs.
+- Cleaned up code easier reading.
+- Created new options in table_options parameter to classify row and/or column variables 
+  for estimation (row.classify/col.classify).
+- Added database_opts to mod_pop functions to access databases, such as postgreSQL.
+- Added dbconn to most functions to allow input of an open database connection.
+- Added returndata parameter in mod_pop functions with default as TRUE. If returndata = FALSE,
+  and the input data is a database, only queries are returned and passed to estimation functions. 
+  The objective is to minimize storing large objects in R memory.
+- Fixed process for combining strata and estimation units (See help).
+
+- Created several new parameters in datSum functions (See help for more details):
+    datSum_opts - to group parameters with options that are not commonly used.
+    woodland - to filter for woodland trees.
+    bydomainlst - to sum tree data by domain variables (e.g., SPCD).
+    domclassify - to classify domain variables.
+    tderive - to derive new variables fro data tables.
+    pltidsWITHqry - to filter queries using a WITH query.
+    database_opts - to access databases such as postgreSQL.
+
+- Updated vignettes.
+
+
+
 # FIESTA 3.6.0
 
 - Added National Volume and Biomass capability

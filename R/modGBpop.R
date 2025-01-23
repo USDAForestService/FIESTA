@@ -362,6 +362,10 @@ modGBpop <- function(popType = "VOL",
   ## CHECK PARAMETER INPUTS
   ##################################################################
   
+  ## Check returndata 
+  returndata <- FIESTAutils::pcheck.logical(returndata, varnm="returndata", 
+                  title="Return data as objectsd?", first="YES", gui=gui, stopifnull=TRUE)
+  
   ## Check savedata 
   savedata <- FIESTAutils::pcheck.logical(savedata, varnm="savedata", 
                   title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
@@ -606,7 +610,6 @@ modGBpop <- function(popType = "VOL",
   pltcheck <- 
     check.popdataPLT(dsn = dsn, dbconn = dbconn, schema = schema,
                      datsource = datsource, 
-                     returndata = returndata,
                      tabs = popTabs, tabIDs = popTabIDs, 
                      pltassgn = pltassgn, 
                      pltassgnid = pltassgnid, pjoinid = pjoinid, 
@@ -661,8 +664,7 @@ modGBpop <- function(popType = "VOL",
   plotunitcnt <- pltcheck$plotunitcnt
   getdataWITHqry <- pltcheck$getdataWITHqry
   getdataCNs <- pltcheck$getdataCNs
-  returndata <- pltcheck$returndata
-  
+
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }

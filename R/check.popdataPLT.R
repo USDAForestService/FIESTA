@@ -1,7 +1,7 @@
 check.popdataPLT <- 
   function(dsn, 
            datsource, schema = NULL, 
-           tabs, tabIDs, returndata,
+           tabs, tabIDs, 
            pltassgn, pltassgnid, pjoinid, 
            module, popType, popevalid, adj, 
            popFilter, nonsamp.pfilter = NULL, 
@@ -1206,7 +1206,6 @@ check.popdataPLT <-
                       nonsamp.pfilter=nonsamp.pfilter, POP_PLOT_STRATUM_ASSGN=POP_PLOT_STRATUM_ASSGN,
                       states=states, invyrs=invyrs, pltaindb=pltaindb, datindb=datindb, 
                       getdataWITHqry = getdataWITHqry, getdataCNs = getdataCNs, 
-                      returndata = returndata,
                       dbconn=dbconn, SCHEMA.=SCHEMA.)
     
     if (module == "GB") {

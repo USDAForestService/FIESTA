@@ -302,7 +302,11 @@ modSApop <- function(popType = "VOL",
   ## CHECK PARAMETER INPUTS
   ##################################################################
   
-  ## Check addxy 
+  ## Check returndata 
+  returndata <- FIESTAutils::pcheck.logical(returndata, varnm="returndata", 
+        title="Return data as objectsd?", first="YES", gui=gui, stopifnull=TRUE)
+
+    ## Check addxy 
   addxy <- pcheck.logical(addxy, varnm="addxy", 
     title="Add XY?", first="NO", gui=gui, stopifnull=TRUE)
 
@@ -516,7 +520,6 @@ modSApop <- function(popType = "VOL",
   pltcheck <- 
     check.popdataPLT(dsn = dsn, dbconn = dbconn, schema = schema,
                      datsource = datsource, 
-                     returndata = returndata,
                      tabs = popTabs, tabIDs = popTabIDs, 
                      pltassgn = pltassgn,
                      pltassgnid = pltassgnid, pjoinid = pjoinid, 
@@ -568,7 +571,6 @@ modSApop <- function(popType = "VOL",
   auxlut <- dunitzonal
   getdataWITHqry <- pltcheck$getdataWITHqry
   getdataCNs <- pltcheck$getdataCNs
-  returndata <- pltcheck$returndata
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
