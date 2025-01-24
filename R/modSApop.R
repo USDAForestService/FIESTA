@@ -538,7 +538,6 @@ modSApop <- function(popType = "VOL",
                      dsnreadonly = dsnreadonly)
   if (is.null(pltcheck)) return(0)
   pltassgnx <- pltcheck$pltassgnx
-  pltx <- pltcheck$pltx
   pltassgnid <- pltcheck$pltassgnid
   pltassgn. <- pltcheck$pltassgn.
   plotlst <- pltcheck$plotlst
@@ -645,7 +644,7 @@ modSApop <- function(popType = "VOL",
     ###################################################################################
     areawt <- "CONDPROP_UNADJ"
     popcheck <- 
-      check.popdataVOL(tabs=popTabs, tabIDs=popTabIDs,
+      check.popdataVOL(tabs = popTabs, tabIDs = popTabIDs,
                        popType = popType,
                        datindb = datindb, pltaindb = pltaindb,
                        pltidsWITHqry = pltidsWITHqry, 
@@ -883,20 +882,22 @@ modSApop <- function(popType = "VOL",
   ###################################################################################
   returnlst$popType <- popType
   
-  returnlst <- append(returnlst, list(pltidsadj = pltidsadj, pltcondx=pltcondx, 
-                                      pltcondflds = pltcondflds, pjoinid = pjoinid,
-                                      cuniqueid = cuniqueid, pltassgnid = pltassgnid,
-                                      condid = condid, ACI = ACI,
-                                      areawt = areawt, areawt2 = areawt2, adjcase = adjcase,
-                                      dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH,
-                                      pltassgnx = pltassgnx, dunitlut = data.table(dunitlut),
-                                      dunitarea = dunitarea, npixels = npixels,
-                                      npixelvar = npixelvar, estvar.area = estvar.area,
-                                      areavar = areavar, areaunits = areaunits, 
-                                      dunitvar = dunitvar, dunitvars = dunitvars,
-                                      plotsampcnt = plotsampcnt, condsampcnt = condsampcnt,
-                                      states = states, invyrs = invyrs, adj = adj,
-                                      P2POINTCNT = P2POINTCNT, plotunitcnt = plotunitcnt))
+  returnlst <- append(returnlst, list(
+    pltidsadj = pltidsadj, pltcondx=pltcondx, 
+    pltcondflds = pltcondflds, 
+    pjoinid = pjoinid,
+    cuniqueid = cuniqueid, pltassgnid = pltassgnid,
+    condid = condid, ACI = ACI,
+    areawt = areawt, areawt2 = areawt2, adjcase = adjcase,
+    dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH,
+    pltassgnx = pltassgnx, dunitlut = data.table(dunitlut),
+    dunitarea = dunitarea, npixels = npixels,
+    npixelvar = npixelvar, estvar.area = estvar.area,
+    areavar = areavar, areaunits = areaunits, 
+    dunitvar = dunitvar, dunitvars = dunitvars,
+    plotsampcnt = plotsampcnt, condsampcnt = condsampcnt,
+    states = states, invyrs = invyrs, adj = adj,
+    P2POINTCNT = P2POINTCNT, plotunitcnt = plotunitcnt))
 
   if (popType == "VOL") {
     if (!is.null(treex)) {

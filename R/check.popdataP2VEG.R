@@ -8,7 +8,7 @@ check.popdataP2VEG <-
            pltidsadjindb = FALSE, 
            defaultVars = TRUE,
            pltassgnid, 
-           pltassgnx, pltx, 
+           pltassgnx, 
            POP_PLOT_STRATUM_ASSGN, 
            adj, ACI, plotlst, 
            pwhereqry = NULL, 

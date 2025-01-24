@@ -679,8 +679,9 @@ modGBpop <- function(popType = "VOL",
   ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
-  auxdat <- 
-    check.auxiliary(pltx = pltassgnx, 
+  auxcheck <- 
+    check.auxiliary(module = "GB",
+                    pltx = pltassgnx, 
                     puniqueid = pltassgnid,
                     unitvar = unitvar, 
                     unitvar2 = unitvar2,
@@ -701,22 +702,22 @@ modGBpop <- function(popType = "VOL",
                     P2POINTCNT = P2POINTCNT,
                     auxtext = "stratalut",
                     AOI = popFilter$AOIonly)
-  if (is.null(auxdat)) return(0)
-  pltassgnx <- setDT(auxdat$pltx)
-  unitarea <- auxdat$unitarea
-  stratalut <- auxdat$auxlut
+  if (is.null(auxcheck)) return(0)
+  pltassgnx <- setDT(auxcheck$pltx)
+  unitarea <- auxcheck$unitarea
+  stratalut <- auxcheck$auxlut
   
-  stratcombinelut <- auxdat$stratcombinelut
+  stratcombinelut <- auxcheck$stratcombinelut
   if (!is.null(stratcombinelut)) {
-    if (!is.null(auxdat$unitltmin) && length(auxdat$unitltmin) != 0) {
-      classcols <- c(auxdat$unitvars, auxdat$strvar)
+    if (!is.null(auxcheck$unitltmin) && length(auxcheck$unitltmin) != 0) {
+      classcols <- c(auxcheck$unitvars, auxcheck$strvar)
     } else {
-      classcols <- auxdat$strvar
+      classcols <- auxcheck$strvar
     }
     
     ## Get from columns and to columns
     fromcols <- c(unitvar2, unitvar, strvar)
-    tocols <- c(auxdat$unitvars, auxdat$strvar)
+    tocols <- c(auxcheck$unitvars, auxcheck$strvar)
 
     ## Get select join for new strata variables
     combineqry <- 
@@ -736,12 +737,12 @@ modGBpop <- function(popType = "VOL",
       "\n(", pltidsqry, ")")
     
   }  
-  unitvar <- auxdat$unitvar
-  unitvars <- auxdat$unitvars
-  strvar <- auxdat$strvar
-  strwtvar <- auxdat$strwtvar
-  stratcombinelut <- auxdat$stratcombinelut
-  unitltmin <- auxdat$unitltmin
+  unitvar <- auxcheck$unitvar
+  unitvars <- auxcheck$unitvars
+  strvar <- auxcheck$strvar
+  strwtvar <- auxcheck$strwtvar
+  stratcombinelut <- auxcheck$stratcombinelut
+  unitltmin <- auxcheck$unitltmin
   
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)

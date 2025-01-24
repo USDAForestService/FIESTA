@@ -8,7 +8,7 @@ check.popdataVOL <-
            pltidsadjindb = FALSE, 
            defaultVars = TRUE,
            pltassgnid, 
-           pltx, pltassgnx,
+           pltassgnx,
            POP_PLOT_STRATUM_ASSGN,
            adj, ACI, plotlst, 
            condid = "CONDID", 

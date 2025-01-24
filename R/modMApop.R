@@ -545,7 +545,6 @@ modMApop <- function(popType="VOL",
                      dsnreadonly = dsnreadonly)
   if (is.null(pltcheck)) return(0)
   pltassgnx <- pltcheck$pltassgnx
-  pltx <- pltcheck$pltx
   pltassgnid <- pltcheck$pltassgnid
   pltassgn. <- pltcheck$pltassgn.
   plotlst <- pltcheck$plotlst
@@ -625,7 +624,7 @@ modMApop <- function(popType="VOL",
     ###################################################################################
     areawt <- "CONDPROP_UNADJ"
     popcheck <- 
-      check.popdataVOL(tabs=popTabs, tabIDs=popTabIDs,
+      check.popdataVOL(tabs = popTabs, tabIDs = popTabIDs,
                        popType = popType,
                        datindb = datindb, pltaindb = pltaindb,
                        pltidsWITHqry = pltidsWITHqry, 
