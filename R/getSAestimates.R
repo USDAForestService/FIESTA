@@ -23,6 +23,8 @@ getSAestimates <- function(esttype, i, largebnd.unique,
                            estlst,
                            pdomdatlst,
                            dunitlutlst,
+                           uniquerow,
+                           uniquecol,
                            SAdomvars,
                            SAobjlst_row,
                            estlst_row,
@@ -197,7 +199,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
     return(0)
   }
   estlst[[SApopdatnm]] <- dunit_est
-  
+
   ## row estimates
   if (rowvar != "TOTAL") {
     
