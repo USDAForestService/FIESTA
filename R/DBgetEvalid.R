@@ -285,7 +285,6 @@ DBgetEvalid <- function(states = NULL,
   rslst[rslst %in% c("NERS", "NCRS")] <- "NRS"
   rslst <- unique(rslst)
 
-
   ######################################################################################
   ## Get database tables - SURVEY, POP_EVAL, POP_EVAL_GRP, POP_EVAL_TYP
   ######################################################################################
@@ -336,7 +335,7 @@ DBgetEvalid <- function(states = NULL,
       ppsaindb <- TRUE
       ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
     }
-    
+
   } else if (datsource == "datamart") {
     if (!is.null(survey_layer) && is.data.frame(survey_layer)) {
       SURVEY <- survey_layer
@@ -442,23 +441,54 @@ DBgetEvalid <- function(states = NULL,
       "\nFROM ", SCHEMA., surveynm, " ", surveynm,
       surveywhere.qry)
     if (indb) {
-      SURVEY <- setDT(DBI::dbGetQuery(dbconn, survey.qry)) 
+      SURVEY <- tryCatch(
+        DBI::dbGetQuery(dbconn, survey.qry),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
     } else {
-      SURVEY <- setDT(sqldf::sqldf(survey.qry, connection = NULL)) 
+      SURVEY <- tryCatch(
+        sqldf::sqldf(survey.qry, connection = NULL),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
     }
+    if (is.null(SURVEY)) {
+      message("invalid query...")
+      message(survey.qry)
+      stop()
+    } else {
+      SURVEY <- data.table::setDT(SURVEY)
+    }
+    
     #if (nrow(SURVEY) == 0) return(NULL)
   }
   
   if (!is.null(popevaltypnm) && !is.null(popevalgrpnm)) {
-    pop_eval_typ_qry <- paste0(
+    pop_eval_typ.qry <- paste0(
       "SELECT ptyp.* ",
       "\nFROM ", SCHEMA., "POP_EVAL_TYP ptyp ",
       "\nJOIN ", SCHEMA., "POP_EVAL_GRP pgrp ON(pgrp.CN = ptyp.EVAL_GRP_CN) ",
       "\nWHERE pgrp.statecd IN (", toString(stcdlst), ")")
     if (indb) {
-      POP_EVAL_TYP <- setDT(DBI::dbGetQuery(dbconn, pop_eval_typ_qry)) 
+      POP_EVAL_TYP <- tryCatch(
+        DBI::dbGetQuery(dbconn, pop_eval_typ.qry),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
     } else {
-      POP_EVAL_TYP <- setDT(sqldf::sqldf(pop_eval_typ_qry, connection = NULL)) 
+      POP_EVAL_TYP <- tryCatch(
+        sqldf::sqldf(pop_eval_typ.qry, connection = NULL),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
+    }
+    if (is.null(POP_EVAL_TYP)) {
+      message("invalid query...")
+      message(pop_eval_typ.qry)
+      stop()
+    } else {
+      POP_EVAL_TYP <- data.table::setDT(POP_EVAL_TYP)
     }
   }
   if (!is.null(popevalnm)) {
@@ -466,33 +496,63 @@ DBgetEvalid <- function(states = NULL,
       ## Define query POP_EVAL, POP_EVAL_TYP table
       popevalvars <- c("CN", "EVAL_GRP_CN", "RSCD", "EVALID", 
                        "EVAL_DESCR", "STATECD", "START_INVYR", "END_INVYR", "LOCATION_NM")
-      pop_eval_qry <- paste0(
+      pop_eval.qry <- paste0(
         "SELECT ", toString(paste0("pev.", popevalvars)), ", pet.eval_typ",
         "\nFROM ", SCHEMA., popevaltypnm, " pet ",
         "\nJOIN ", SCHEMA., popevalnm, " pev ON (pev.cn = pet.eval_cn) ",
         "\nWHERE pev.STATECD ", paste0("IN(", toString(stcdlst), ")"))
       
     } else {
-      pop_eval_qry <- paste0(
+      pop_eval.qry <- paste0(
         "SELECT * ",
         "\nFROM ", SCHEMA., popevalnm,
         "\nWHERE statecd IN(", toString(stcdlst), ")")
     }
     if (indb) {
-      POP_EVAL <- setDT(DBI::dbGetQuery(dbconn, pop_eval_qry)) 
+      POP_EVAL <- tryCatch(
+        DBI::dbGetQuery(dbconn, pop_eval.qry),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
     } else {
-      POP_EVAL <- setDT(sqldf::sqldf(pop_eval_qry, connection = NULL)) 
+      POP_EVAL <- tryCatch(
+        sqldf::sqldf(pop_eval.qry, connection = NULL),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
+    }
+    if (is.null(POP_EVAL)) {
+      message("invalid query...")
+      message(pop_eval.qry)
+      stop()
+    } else {
+      POP_EVAL <- data.table::setDT(POP_EVAL)
     }
   }
   if (!is.null(popevalgrpnm)) {
-    pop_eval_grp_qry <- paste0(
+    pop_eval_grp.qry <- paste0(
       "SELECT * ",
       "\nFROM ", SCHEMA., popevalgrpnm, 
       "\nWHERE statecd IN(", toString(stcdlst), ")")
     if (indb) {
-      POP_EVAL_GRP <- setDT(DBI::dbGetQuery(dbconn, pop_eval_grp_qry)) 
+      POP_EVAL_GRP <- tryCatch(
+        DBI::dbGetQuery(dbconn, pop_eval_grp.qry),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
     } else {
-      POP_EVAL_GRP <- setDT(sqldf::sqldf(pop_eval_grp_qry, connection = NULL)) 
+      POP_EVAL_GRP <- tryCatch(
+        sqldf::sqldf(pop_eval_grp.qry, connection = NULL),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
+    }
+    if (is.null(POP_EVAL_GRP)) {
+      message("invalid query...")
+      message(pop_eval_grp.qry)
+      stop()
+    } else {
+      POP_EVAL_GRP <- data.table::setDT(POP_EVAL_GRP)
     }
     
     ## Add a parsed EVAL_GRP endyr to POP_EVAL_GRP
@@ -542,7 +602,7 @@ DBgetEvalid <- function(states = NULL,
   ## Create state filter
   stfilter <- getfilter("STATECD", stcdlst, syntax='sql')
   
-
+  
   ######################################################################################
   ## Generate invyrtab
   ######################################################################################
@@ -923,7 +983,7 @@ DBgetEvalid <- function(states = NULL,
         }
       } 
     }
-    
+
     ## Get last year of evaluation period and the evaluation type
     if (evalresp) {
       ## Get the evalidation type
@@ -934,7 +994,7 @@ DBgetEvalid <- function(states = NULL,
       if (is.null(evalType)) {
         evalType <- "VOL"
       }
-      
+
       if (indb && nopoptables) {
         #ppsanm <- chkdbtab(dbtablst, ppsa_layer)
         #if (is.null(ppsanm)) {
@@ -958,19 +1018,22 @@ DBgetEvalid <- function(states = NULL,
           eval.qry <- paste0(
             "SELECT DISTINCT evalid FROM ", ppsanm) 
         }
-        
         ## Get table of EVALID found in database
         #        eval.qry <- paste("select distinct STATECD, EVALID 
         #			             from", ppsanm,  
         #			             "where", stfilter, "order by STATECD, EVALID")
         evaldt <- tryCatch( 
-          setDT(DBI::dbGetQuery(dbconn, eval.qry)),
+          DBI::dbGetQuery(dbconn, eval.qry),
           error=function(e) 
             return(NULL))
-        if (is.null(evaldt)) {
-          return(NULL)
-        }
 
+        if (is.null(evaldt)) {
+          message("invalid query...")
+          message(eval.qry)
+          stop()
+        } else {
+          evaldt <- data.table::setDT(evaldt)
+        }
         names(evaldt) <- toupper(names(evaldt))
         if (!"STATECD" %in% names(evaldt)) {
           evaldt[, STATECD := substr(EVALID, nchar(EVALID) - 5, nchar(EVALID)-4)]
