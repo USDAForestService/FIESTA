@@ -1013,7 +1013,8 @@ DBgetEvalid <- function(states = NULL,
           eval.qry <- paste(
             "SELECT DISTINCT statecd, evalid",
             "\nFROM ", ppsanm, 
-            "\nWHERE statecd IN(", toString(stcdlst), ")")
+            "\nWHERE statecd IN(", toString(stcdlst), ")",
+            "\nORDER BY statecd, evalid")
         } else {
           eval.qry <- paste0(
             "SELECT DISTINCT evalid FROM ", ppsanm) 
