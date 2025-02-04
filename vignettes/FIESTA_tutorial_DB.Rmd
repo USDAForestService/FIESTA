@@ -12,7 +12,7 @@ vignette: >
 
 ```{r setup, include = F}
 library(knitr)
-knitr::opts_chunk$set(message = F, warning = F)
+knitr::opts_chunk$set(message = F, warning = F, eval = F)
 ```
 
 ```{r, include=FALSE}
@@ -38,10 +38,13 @@ knitr::knit_hooks$set(
 )
 ```
 
+```{r, echo=-1}
+data.table::setDTthreads(2)
+```
 
 
 ### Overview of FIESTA Database (DB) tools
-FIESTA's DB tools extract data from FIA's online publicly-available, comma-delimited files (\*.csv or \*.zip). FIA's CSV files are available by state from the FIA DataMart at the following link: https://apps.fs.usda.gov/fia/datamart/datamart.html. Because of FIA's confidentiality agreement to protect the privacy of landowners, as well as protecting the scientific integrity of FIA's sample design, the exact coordinates of the sample plot locations are not included in the public data. If the exact coordinates are necessary for your analysis, contact FIA's Spatial Data Services (https://www.fia.fs.fed.us/tools-data/spatial/index.php).
+FIESTA's DB tools extract data from FIA's online publicly-available, comma-delimited files (\*.csv or \*.zip). FIA's CSV files are available by state from the FIA DataMart at the following link: https://apps.fs.usda.gov/fia/datamart/datamart.html. Because of FIA's confidentiality agreement to protect the privacy of landowners, as well as protecting the scientific integrity of FIA's sample design, the exact coordinates of the sample plot locations are not included in the public data. If the exact coordinates are necessary for your analysis, contact FIA's Spatial Data Services (https://research.fs.usda.gov/programs/fia/sds).
 
 
 ### Objective of tutorial

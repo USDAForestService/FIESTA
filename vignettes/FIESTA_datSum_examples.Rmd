@@ -14,6 +14,10 @@ library(FIESTA)
 options(scipen = 6)
 ```
 
+```{r, echo=-1}
+data.table::setDTthreads(2)
+```
+
 ### Example 1
 
 Let's first start by using the sample data from FIESTA. Here, in it's most simple form, we get summed live basal area and net cubic-foot volume by plot.
