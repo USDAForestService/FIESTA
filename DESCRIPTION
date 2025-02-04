@@ -51,7 +51,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Remotes:
-    USDAForestService/FIESTAutis
+    USDAForestService/FIESTAutils
 VignetteBuilder: knitr
 License: GPL-3
 Copyright: See file COPYRIGHTS for details. 
