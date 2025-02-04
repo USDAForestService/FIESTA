@@ -916,10 +916,11 @@ DBgetPlots <- function (states = NULL,
       return(NULL)
     }
   }
-
+  
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   evalidlist <- evalInfo$evalidlist
+  evalEndyrlist <- evalInfo$evalEndyrlist
   evalTypelist <- evalInfo$evalTypelist
   invtype <- evalInfo$invtype
   invyrtab <- evalInfo$invyrtab
@@ -932,7 +933,7 @@ DBgetPlots <- function (states = NULL,
   SURVEY <- evalInfo$SURVEY
   POP_PLOT_STRATUM_ASSGNe <- evalInfo$POP_PLOT_STRATUM_ASSGN
   PLOTe <- evalInfo$PLOT
-  
+
   if (savePOP) {
     if (!is.null(POP_PLOT_STRATUM_ASSGNe) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
       ppsaflds <- names(POP_PLOT_STRATUM_ASSGNe)
@@ -4641,6 +4642,7 @@ DBgetPlots <- function (states = NULL,
  
     if (length(evalidlist) > 0) {
       returnlst$evalid <- evalInfo$evalidlist
+      returnlst$evalEndyr <- evalInfo$evalEndyrlist
     }
     returnlst$pltcnt <- pltcnt
     returnlst$invyrs <- invyrs
