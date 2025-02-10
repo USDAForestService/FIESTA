@@ -1,5 +1,5 @@
-FIESTA.Rproj
-.Rproj.user
+*.Rproj
+.Rproj.user/
 .Rproj.user/shared/notebooks/paths
 .DS_Store
 .Rhistory
