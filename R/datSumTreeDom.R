@@ -108,6 +108,7 @@
 #' QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454))'))
 #' @param pltidsWITHqry SQL query. A query identifying plots to sum (e.g., 
 #' 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')
+#' @param pltidsid Sting. Name of unique identifier in pltidsWITHqry.
 #' @param pcwhereqry String. Plot/Condition filter if plot and/or cond table is 
 #' included.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
