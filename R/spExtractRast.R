@@ -421,6 +421,11 @@ spExtractRast <- function(xyplt,
         } else {
           stop("number of statistics does not match number of windowsize greater than 1")
         }
+      } else {
+        if (length(windowsize[windowsize > 1]) != length(windowstat)) {
+          stop("number of windowstats matches number of layers, but not number of windowsizes > 1")
+        }
+        statistic[windowsize > 1] <- windowstat
       }
     }
   }
