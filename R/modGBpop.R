@@ -302,7 +302,7 @@ modGBpop <- function(popType = "VOL",
   }
   
   ## Set parameters
-  nonsamp.pfilter=nonsamp.cfilter=schema=projectid <- NULL
+  nonsamp.pfilter=nonsamp.cfilter=schema=projectid=popconn <- NULL
   returnlst <- list(module = "GB")
   
   
@@ -330,16 +330,16 @@ modGBpop <- function(popType = "VOL",
                 unit_opts = unit_opts, 
                 savedata_opts = savedata_opts, 
                 database_opts = database_opts)
-
+  
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-                         popFilter = popFilter,
-                         popTabs = popTabs,
-                         popTabIDs = popTabIDs,
-                         unit_opts = unit_opts, 
-                         strata_opts = strata_opts,
-                         savedata_opts = savedata_opts,
-                         database_opts = database_opts))
+    popFilter = popFilter,
+    popTabs = popTabs,
+    popTabIDs = popTabIDs,
+    unit_opts = unit_opts, 
+    strata_opts = strata_opts,
+    savedata_opts = savedata_opts,
+    database_opts = database_opts))
   savedata_opts <- optslst$savedata_opts  
   unit_opts <- optslst$unit_opts  
   strata_opts <- optslst$strata_opts  
@@ -364,18 +364,18 @@ modGBpop <- function(popType = "VOL",
   
   ## Check returndata 
   returndata <- FIESTAutils::pcheck.logical(returndata, varnm="returndata", 
-                  title="Return data as objectsd?", first="YES", gui=gui, stopifnull=TRUE)
+                                            title="Return data as objectsd?", first="YES", gui=gui, stopifnull=TRUE)
   
   ## Check savedata 
   savedata <- FIESTAutils::pcheck.logical(savedata, varnm="savedata", 
-                  title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+                                          title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
   if (!savedata) {
     message("savedata=FALSE with savedata parameters... no data are saved")
   }
   
   ## Check saveobj 
   saveobj <- FIESTAutils::pcheck.logical(saveobj, varnm="saveobj", 
-                title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+                                         title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
   
   ## Check output
   ########################################################
@@ -392,8 +392,8 @@ modGBpop <- function(popType = "VOL",
   if (saveobj) {
     outobj_fmtlst <- c('rds', 'rda')
     outobj_fmt <- FIESTAutils::pcheck.varchar(var2check = outobj_fmt, varnm="outobj_fmt", 
-                      gui=gui, checklst = outobj_fmtlst, caption="outobj_fmt", 
-                      multiple = FALSE, stopifnull = TRUE)
+                                              gui=gui, checklst = outobj_fmtlst, caption="outobj_fmt", 
+                                              multiple = FALSE, stopifnull = TRUE)
     if (is.null(objnm)) {
       objnm <- "GBpopdat"
     }
@@ -415,7 +415,7 @@ modGBpop <- function(popType = "VOL",
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", 
                   "CHNG", "GRM", "GROW", "MORT", "REMV")
   popType <- FIESTAutils::pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
-                checklst=evalTyplst, caption="popType", multiple=FALSE, stopifinvalid=FALSE)
+                                         checklst=evalTyplst, caption="popType", multiple=FALSE, stopifinvalid=FALSE)
   if (is.null(popType)) {
     message("popType is invalid... must be from following list:\n", toString(evalTyplst))
   }
@@ -431,7 +431,7 @@ modGBpop <- function(popType = "VOL",
   if (popType %in% c("GROW", "MORT", "REMV")) {
     popType <- "GRM"
   }
- 
+  
   ###################################################################################
   ## Load data
   ###################################################################################
@@ -600,7 +600,7 @@ modGBpop <- function(popType = "VOL",
       popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]
     }
   }
-
+  
   ###################################################################################
   ## CHECK PLOT PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -664,11 +664,11 @@ modGBpop <- function(popType = "VOL",
   plotunitcnt <- pltcheck$plotunitcnt
   getdataWITHqry <- pltcheck$getdataWITHqry
   getdataCNs <- pltcheck$getdataCNs
-
+  
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
-
+  
   ###################################################################################
   ## Check Auxiliary Data
   ###################################################################################
@@ -718,7 +718,7 @@ modGBpop <- function(popType = "VOL",
     ## Get from columns and to columns
     fromcols <- c(unitvar2, unitvar, strvar)
     tocols <- c(auxcheck$unitvars, auxcheck$strvar)
-
+    
     ## Get select join for new strata variables
     combineqry <- 
       getcombineqry(lut = stratcombinelut,
@@ -733,8 +733,8 @@ modGBpop <- function(popType = "VOL",
       pwhereqry)
     
     pltidsWITHqry <- paste0("WITH",
-      "\npltids AS",
-      "\n(", pltidsqry, ")")
+                            "\npltids AS",
+                            "\n(", pltidsqry, ")")
     
   }  
   unitvar <- auxcheck$unitvar
@@ -747,7 +747,7 @@ modGBpop <- function(popType = "VOL",
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
   
-
+  
   ###################################################################################
   ## Check Population Data
   ###################################################################################
@@ -806,7 +806,7 @@ modGBpop <- function(popType = "VOL",
       }
     }
   }
-
+  
   if (popType %in% c("CHNG", "GRM")) {
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
@@ -907,9 +907,9 @@ modGBpop <- function(popType = "VOL",
     adjcase <- popcheck$adjcase
     varadjP2VEG <- popcheck$varadjP2VEG
 
-    vcondsppx <- popcheck$vcondsppx
-    vcondstrx <- popcheck$vcondstrx
-    
+    p2veg_subp_structure <- popcheck$p2veg_subp_structure
+    p2veg_subplot_spp <- popcheck$p2veg_subplot_spp
+
         
     if (returndata) {
       #pltx <- popcheck$pltx
@@ -1094,10 +1094,10 @@ modGBpop <- function(popType = "VOL",
     returnlst$vcondstrx <- vcondstrx
     returnlst$varadjP2VEG <- varadjP2VEG
     
-    subplotx <- popcheck$subplotx
-    subp_condx <- popcheck$subp_condx
-    p2veg_subp_structure <- popcheck$p2veg_subp_structure
-    p2veg_subplot_spp <- popcheck$p2veg_subplot_spp
+    returnlst$subplotx <- popcheck$subplotx
+    returnlst$subp_condx <- popcheck$subp_condx
+    returnlst$p2veg_subp_structure <- popcheck$p2veg_subp_structure
+    returnlst$p2veg_subplot_spp <- popcheck$p2veg_subplot_spp
     
   }
   if (popType %in% c("CHNG")) {
@@ -1118,12 +1118,10 @@ modGBpop <- function(popType = "VOL",
   
   ## Save data frames
   ##################################################################
-  if (returndata) {
-    returnlst$popdatindb <- FALSE
-  } else {
-    returnlst$popdatindb <- TRUE
-    
+  returnlst$popdatindb <- ifelse(returndata, FALSE, TRUE)
+  if (!returndata) {
     if (savedata) {
+      
       if (outlst$out_fmt == "sqlite") {
         returnlst$pop_fmt <- "sqlite"
         returnlst$pop_dsn <- file.path(outlst$outfolder, outlst$out_dsn)

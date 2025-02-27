@@ -39,6 +39,7 @@ datSumTreeDom(
   domclassify = NULL,
   tderive = NULL,
   pltidsWITHqry = NULL,
+  pltidsid = NULL,
   pcwhereqry = NULL,
   savedata = FALSE,
   tabIDs = tableIDs(),

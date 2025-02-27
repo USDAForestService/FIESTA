@@ -412,6 +412,7 @@ modGBtree <- function(GBpopdat,
   adjcase <- GBpopdat$adjcase
   pltidsid <- GBpopdat$pjoinid
   pltassgnid <- GBpopdat$pltassgnid
+  pltcondflds <- GBpopdat$pltcondflds
   
   #adjfactors <- GBpopdat$adjfactors
   #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
@@ -458,6 +459,7 @@ modGBtree <- function(GBpopdat,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondx = pltcondx,
+                  pltcondflds = pltcondflds,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
@@ -494,8 +496,7 @@ modGBtree <- function(GBpopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
-  pltcondflds <- estdat$pltcondflds
-  
+
   
   ###################################################################################
   ## Check parameter inputs and tree filters

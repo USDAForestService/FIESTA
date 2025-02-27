@@ -21,7 +21,7 @@ check.rowcol <-
            rowgrp = FALSE, rowgrpnm = NULL, 
            rowgrpord = NULL, title.rowgrp = NULL, 
            cvars2keep = NULL, whereqry = NULL,
-           factor.addNA = TRUE,
+           factor.addNA = FALSE,
            gui = FALSE){
 
   ####################################################################################
@@ -65,9 +65,9 @@ check.rowcol <-
   }
   
   ref_growth_habit <- 
-  data.frame(GROWTH_HABIT_CD = c("SD", "ST", "GR", "FB", "SH", "TT", "LT", "TR", "NT"),
+  data.frame(GROWTH_HABIT_CD = c("SD", "ST", "GR", "FB", "SH", "TT", "LT", "TR", "NT", "DS"),
              GROWTH_HABIT_NM = c("Seedlings/Saplings", "Seedlings", "Graminoids", 
-			             "Forbs", "Shrubs", "Trees", "Large trees", "Trees", "Non-tally"))
+			             "Forbs", "Shrubs", "Trees", "Large trees", "Trees", "Non-tally", "Dead pinyon"))
   
   
   ## Check popconn
@@ -299,7 +299,7 @@ check.rowcol <-
         col.add0 = row.add0
         collut <- rowlut
         col.classify <- row.classify
-        
+
         ## Rename rowvar variables with prefix 'PREV_'
         rowvar <- paste0("PREV_", rowvar)
         if (!is.null(row.orderby)) {
@@ -330,7 +330,7 @@ check.rowcol <-
         ## build row fromqry
         rowfromqry <- paste0(
           "\nFROM ", rowtabnm, " pc")
-        
+
       } else {
         if (estseed == "only" && rowvar %in% seedflds) {
           bytdom <- TRUE
@@ -382,7 +382,13 @@ check.rowcol <-
           }
         }
       }  
-
+      
+      ## define where statement (if row.add0, get all values in population)
+      whereqry.row <- whereqry
+      if (!row.add0 && !is.null(whereqry)) {
+        whereqry.row <- NULL
+      }
+      
 	    ## Check row.orderby
       ###############################################
       if (!is.null(row.orderby) && row.orderby != "NONE") {
@@ -403,7 +409,7 @@ check.rowcol <-
           uniquerow.qry <- 
 		          paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
 		                 rowfromqry,
-					           whereqry,
+					           whereqry.row,
 					           "\nORDER BY ", toString(c(row.orderby, rowvar)))
           if (!is.null(withqry)) {
             uniquerow.qry <- paste0(withqry,
@@ -452,7 +458,7 @@ check.rowcol <-
             uniquerow.qry <- 
               paste0("SELECT DISTINCT ", toString(c(row.orderby, rowvar)), 
                      seedfromqry,
-                     whereqry,
+                     whereqry.row,
                      "\nORDER BY ", toString(c(row.orderby, rowvar)))
             if (!is.null(withqry)) {
               uniquerow.qry <- paste0(withqry,
@@ -503,7 +509,7 @@ check.rowcol <-
         uniquex.qry <- 
 		      paste0("SELECT DISTINCT ", rowvar, 
 		               rowfromqry,
-			             whereqry,
+			             whereqry.row,
 				           "\nORDER BY ", rowvar)
 
 		    #message("getting unique values for ", rowvar, ":\n", cuniquex.qry, "\n")
@@ -598,7 +604,7 @@ check.rowcol <-
             paste0("SELECT DISTINCT \n", 
                    rowclassqry,
                    rowfromqry,
-                   whereqry,
+                   whereqry.row,
                    "\nORDER BY ", rowclassnm)
           
           
@@ -822,6 +828,7 @@ check.rowcol <-
               
               ## check for prefix (PREV_) xvar
               xvar <- ifelse(popType %in% c("CHNG"), sub("PREV_", "", rowvar), rowvar)
+              #xvar <- rowvar
 
               rowLUT <- datLUTnm(x = rowflds, 
                                  xvar = xvar, 
@@ -886,7 +893,7 @@ check.rowcol <-
     }  ## end domlut is null
   } ## end rowvar != "NONE"      
 
- 
+
   ##############################################################
   ## COLUMN VARIABLE
   ##############################################################
@@ -1035,6 +1042,12 @@ check.rowcol <-
           }
         }
       }  
+ 
+      ## define where statement (if row.add0, get all values in population)
+      whereqry.col <- whereqry
+      if (!col.add0 && !is.null(whereqry)) {
+        whereqry.col <- NULL
+      }
       
       ## Check col.orderby
       if (!is.null(col.orderby) && col.orderby != "NONE") {
@@ -1055,7 +1068,7 @@ check.rowcol <-
           uniquecol.qry <- 
             paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
                    colfromqry,
-                   whereqry,
+                   whereqry.col,
                    "\nORDER BY ", toString(c(col.orderby, colvar)))
           colvartmp <- col.orderby
           col.orderby <- colvar
@@ -1102,7 +1115,7 @@ check.rowcol <-
             uniquecol.qry <- 
               paste0("SELECT DISTINCT ", toString(c(col.orderby, colvar)), 
                      seedfromqry,
-                     whereqry,
+                     whereqry.col,
                      "\nORDER BY ", toString(c(col.orderby, colvar)))
             if (!is.null(withqry)) {
               uniquecol.qry <- paste0(withqry,
@@ -1154,7 +1167,7 @@ check.rowcol <-
         uniquex.qry <- 
           paste0("SELECT DISTINCT ", colvar, 
                  colfromqry,
-                 whereqry,
+                 whereqry.col,
                  "\nORDER BY ", colvar)
 
         #message("getting unique values for ", colvar, ":\n", cuniquex.qry, "\n")
@@ -1246,7 +1259,7 @@ check.rowcol <-
             paste0("SELECT DISTINCT \n", 
                    colclassqry,
                    colfromqry,
-                   whereqry,
+                   whereqry.col,
                    "\nORDER BY ", colclassnm)
           
           ## get unique values for classified colvar

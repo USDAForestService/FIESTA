@@ -524,6 +524,7 @@ modSAarea <- function(SApopdatlst = NULL,
     pltassgnid <- SApopdat$pltassgnid
     SAdoms <- SApopdat$SAdoms
     largebnd.unique <- SApopdat$largebnd.unique
+    pltcondflds <- SApopdat$pltcondflds
     
     ## check smallbnd.dom
     ########################################################
@@ -600,6 +601,7 @@ modSAarea <- function(SApopdatlst = NULL,
                     popdatindb = popdatindb, 
                     popconn = popconn, pop_schema = pop_schema,
                     pltcondx = pltcondx,
+                    pltcondflds = pltcondflds,
                     totals = totals,
                     pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                     landarea = landarea,
@@ -634,7 +636,6 @@ modSAarea <- function(SApopdatlst = NULL,
     raw_dsn <- estdat$raw_dsn
     pcwhereqry <- estdat$where.qry
     SCHEMA. <- estdat$SCHEMA.
-    pltcondflds <- estdat$pltcondflds
     
     
     ###################################################################################

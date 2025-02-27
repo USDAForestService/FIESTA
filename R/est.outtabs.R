@@ -214,28 +214,29 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         char.width <- max(char.width,
 		       max(nchar(na.omit(round(colest[[psenm]], pseround)))))
       }
-	  }	
-    if (!is.null(unit_grpest)) {
-      grpest <- 
-        groupUnits(tabest = unit_grpest, domain = rowvar, 
+	  	
+      if (!is.null(unit_grpest)) {
+        grpest <- 
+          groupUnits(tabest = unit_grpest, domain = rowvar, 
                    estncol = estnm, estncol.var = estnm.var, 
                    domvar2 = colvar, esttype = esttype,
 			             rowgrpnm = rowgrpnm, 
 			             unitvar = unitvar, 
 			             phototype = phototype, photoratio = photoratio,
 			             keepvars = c(keepvars.row, keepvars.col))
-      if (esttype != "RATIO" && !is.null(dividebynum)) {
-        grpest[[estnmd]] <- grpest[[estnm2]] / dividebynum
-        grpest[[senmd]] <- grpest[[senm2]] / dividebynum
-        unit_grpest[[estnmd]] <- unit_grpest[[estnm2]] / dividebynum
-        unit_grpest[[senmd]] <- unit_grpest[[senm2]] / dividebynum
-      } else {
-        grpest[[estnmd]] <- grpest[[estnm2]]
-      }
-      grpest[[psenm]] <- grpest[[psenm]]
-      if (allin1) {
-        char.width <- max(char.width,
-		       max(nchar(na.omit(round(grpest[[psenm]], pseround)))))
+        if (esttype != "RATIO" && !is.null(dividebynum)) {
+          grpest[[estnmd]] <- grpest[[estnm2]] / dividebynum
+           grpest[[senmd]] <- grpest[[senm2]] / dividebynum
+          unit_grpest[[estnmd]] <- unit_grpest[[estnm2]] / dividebynum
+          unit_grpest[[senmd]] <- unit_grpest[[senm2]] / dividebynum
+        } else {
+          grpest[[estnmd]] <- grpest[[estnm2]]
+        }
+        grpest[[psenm]] <- grpest[[psenm]]
+        if (allin1) {
+          char.width <- max(char.width,
+		         max(nchar(na.omit(round(grpest[[psenm]], pseround)))))
+        }
       }
     }
   }

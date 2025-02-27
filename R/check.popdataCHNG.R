@@ -654,9 +654,10 @@ check.popdataCHNG <-
     } else {
       pvars <- "*"
     }
-    pselectqry <- toString(paste0(plota., pvars[pvars != "PREV_PLT_CN"]))
+    pvars <- pvars[pvars != "PREV_PLT_CN"]
+    pselectqry <- toString(paste0(plota., pvars))
     pplotselectqry <- toString(paste0(pplota.,  pvars, " AS PREV_", pvars))
-    
+
     if (defaultVars) {
       condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
     } else {
@@ -665,7 +666,7 @@ check.popdataCHNG <-
     cvars <- unique(c(condvars, cvars2keep))
     cselectqry <- toString(paste0(conda., cvars))
     pcondselectqry <- toString(paste0("pcond.", cvars, " AS PREV_", cvars))
-    pltcondflds <- unique(c(cvars, pvars))
+    pltcondflds <- unique(c(cvars, paste0("PREV_", cvars), pvars), paste0("PREV_", pvars))
     
     ## Add FORTYPGRP to SELECT query
     addfortypgrp <- FALSE

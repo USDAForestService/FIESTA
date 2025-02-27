@@ -394,6 +394,7 @@ modMAtree <- function(MApopdat,
   adjcase <- MApopdat$adjcase
   pltidsid <- MApopdat$pjoinid
   pltassgnid <- MApopdat$pltassgnid
+  pltcondflds <- MApopdat$pltcondflds
   
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
@@ -453,6 +454,7 @@ modMAtree <- function(MApopdat,
                   popdatindb = popdatindb,
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondx = pltcondx,
+                  pltcondflds = pltcondflds,
                   totals = totals,
                   pop_fmt=pop_fmt, pop_dsn=pop_dsn,
                   landarea = landarea,
@@ -487,8 +489,7 @@ modMAtree <- function(MApopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
-  pltcondflds <- estdat$pltcondflds
-  
+
   
   ###################################################################################
   ## Check parameter inputs and tree filters

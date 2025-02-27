@@ -50,12 +50,12 @@ Plot-level table to join the aggregated tree data to, if bycond=FALSE. This
 table is optional.}
 
 \item{subp_cond}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
-Subplot condition-level table to use to sum condition proportions, 
+Subplot condition-level table to use to sum condition proportions,
 if bysubp=TRUE.}
 
 \item{subplot}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
-Subplot-level table to used to calculate adjustment factors, to remove 
-nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional. If 
+Subplot-level table to used to calculate adjustment factors, to remove
+nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional. If
 included the aggregated tree data are joined to subplot before returning.}
 
 \item{datsource}{String. Source of data ('obj', 'csv', 'sqlite', 'gdb').}
@@ -67,13 +67,13 @@ included the aggregated tree data are joined to subplot before returning.}
 
 \item{bycond}{Logical. If TRUE, the data are aggregated to the condition
 level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
-level (by: puniqueid). If bysubp = TRUE and bycond = TRUE, data are 
+level (by: puniqueid). If bysubp = TRUE and bycond = TRUE, data are
 aggregated by subplotid, subpid, condid.}
 
 \item{bysubp}{Logical. If TRUE, data are aggregated to the subplot level.}
 
-\item{bydomainlst}{String (vector). Categorical domain variables for 
-summing tree data by (e.g., SPCD). Variables must be in tree table or 
+\item{bydomainlst}{String (vector). Categorical domain variables for
+summing tree data by (e.g., SPCD). Variables must be in tree table or
 plt/cond table if tables are provided.}
 
 \item{tsumvarlst}{String (vector). Tree-level variable(s) to aggregate
@@ -90,8 +90,8 @@ seedlings to summary ('TPA_UNADJ' %in% tsumvarlst). If seedlings = 'N',
 do not add seedlings. If seedlings = 'only', only include seedlings.}
 
 \item{woodland}{String. ('Y', 'N', 'only') If woodland = 'Y', include
-woodland tree species where measured. If woodland = 'N', only include 
-timber species. See FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', 
+woodland tree species where measured. If woodland = 'N', only include
+timber species. See FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only',
 only include woodland species. If NULL, use whatever is in table.}
 
 \item{tfilter}{String. Filter to subset the tree data before aggregating
@@ -102,18 +102,18 @@ prompted.  Use tfilter="NONE" if no filters.}
 (e.g., DIA = c(10,20,30)).}
 
 \item{tderive}{List. List of derivative from tree table to add to output data
-(e.g., list(MEAN_DIA = 'AVG(DIA)', SDI = 'POWER(DIA / 10, 1.605)', 
+(e.g., list(MEAN_DIA = 'AVG(DIA)', SDI = 'POWER(DIA / 10, 1.605)',
 QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454))'))}
 
-\item{getadjplot}{Logical. If TRUE, and adj='plot', adjfactors are 
+\item{getadjplot}{Logical. If TRUE, and adj='plot', adjfactors are
 calculated for nonsampled conditions at plot-level.}
 
-\item{pltidsWITHqry}{SQL query. A query identifying plots to sum (e.g., 
+\item{pltidsWITHqry}{SQL query. A query identifying plots to sum (e.g.,
 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')}
 
 \item{pltidsid}{Sting. Name of unique identifier in pltidsWITHqry.}
 
-\item{pcwhereqry}{String. Plot/Condition filter if plot and/or cond table is 
+\item{pcwhereqry}{String. Plot/Condition filter if plot and/or cond table is
 included.}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
@@ -122,10 +122,10 @@ included.}
 See help(tableIDs) for a list of options.}
 
 \item{datSum_opts}{List. Options for summarizing tree data, such as TPA,
-rounding, and adjusting TPA. See help(datSum_options()) for a list of 
+rounding, and adjusting TPA. See help(datSum_options()) for a list of
 options.}
 
-\item{database_opts}{List. Options for database, such as schema and 
+\item{database_opts}{List. Options for database, such as schema and
 password. See help(database_options()) for a list of options.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list}
@@ -158,8 +158,8 @@ tsumvars = MORTCFGS, MORTBFSL, MORTCFAL, FMORTCFGS, FMORTBFSL, or FMORTCFAL,
 you must have TPAMORT_UNADJ \cr For tsumvars = REMVCFGS, REMVBFSL, REMVCFAL,
 FREMVCFGS, FREMVBFSL, or FREMVCFAL, you must have TPAREMV_UNADJ \cr
 
-If you want to adjust plot-level or subplot-level information by condition 
-proportions (adjplot), you need to include CONDID & CONDPROP_UNADJ in cond 
+If you want to adjust plot-level or subplot-level information by condition
+proportions (adjplot), you need to include CONDID & CONDPROP_UNADJ in cond
 or tree table and COND_STATUS_CD. \cr
 }
 \note{

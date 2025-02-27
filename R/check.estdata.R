@@ -3,6 +3,7 @@ check.estdata <-
            popType, 
            popdatindb, popconn = NULL, pop_schema = pop_schema,
            pltcondx, totals,
+           pltcondflds,
            pop_fmt = NULL, pop_dsn = NULL, 
            sumunits = FALSE, 
            landarea = NULL, landarea_both = TRUE, 
@@ -92,13 +93,13 @@ check.estdata <-
     }
   }
   
-  ## Get table fields
-  ###########################################################################
-  if (popdatindb && is.character(pltcondx)) {
-    pltcondflds <- DBI::dbListFields(popconn, pltcondx)
-  } else {
-    pltcondflds <- names(pltcondx)
-  }
+  # ## Get table fields
+  # ###########################################################################
+  #if (popdatindb && is.character(pltcondx)) {
+  #   pltcondflds <- DBI::dbListFields(popconn, pltcondx)
+  #} else {
+  #  pltcondflds <- names(pltcondx)
+  #}
 
   ## Build where statement with plot/condition filters
   ###########################################################################

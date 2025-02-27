@@ -554,7 +554,8 @@ modSAtree <- function(SApopdatlst = NULL,
     pltassgnid <- SApopdat$pltassgnid
     SAdoms <- SApopdat$SAdoms
     largebnd.unique <- SApopdat$largebnd.unique
-
+    pltcondflds <- SApopdat$pltcondflds
+    
     ## check smallbnd.dom
     ########################################################
     smallbnd.dom <- "DOMAIN"
@@ -629,6 +630,7 @@ modSAtree <- function(SApopdatlst = NULL,
                     popdatindb = popdatindb,
                     popconn = popconn, pop_schema = pop_schema,
                     pltcondx = pltcondx,
+                    pltcondflds = pltcondflds,
                     totals = totals,
                     pop_fmt=pop_fmt, pop_dsn=pop_dsn,
                     landarea = landarea,
