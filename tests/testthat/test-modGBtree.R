@@ -55,12 +55,11 @@ test_that("modGBtree Testing", {
                                     "Sugarberry / hackberry / elm / green ash",
                                     "Aspen",
                                     "Nonstocked",
-                                    "Other",
                                     "Total"))
 
   expect_equal(list(modGBtree_TPA_est$`Forest type`), modGBtree_TPA_est_names) ##ensuring tree names are consistant across output
-  expect_equal(dim(modGBtree_TPA_est) , c(20, 3)) ##ensuring dimension of modGB_TPA is correct
-  expect_equal(dim(modGBtree_VOL_est) , c(20, 3)) ##ensuring dimension of modGB VOL is correct
+  expect_equal(dim(modGBtree_TPA_est) , c(19, 3)) ##ensuring dimension of modGB_TPA is correct
+  expect_equal(dim(modGBtree_VOL_est) , c(19, 3)) ##ensuring dimension of modGB VOL is correct
   expect_snapshot(modGBtree_TPA_est) ##Outputting snapshot
   expect_snapshot(modGBtree_VOL_est) ##Outputting snapshot
 
