@@ -22,8 +22,7 @@
       16 Sugarberry / hackberry / elm / green ash    420.6                      0
       17                                    Aspen    681.5                  22.93
       18                               Nonstocked     64.2                   39.8
-      19                                    Other       --                     --
-      20                                    Total   1292.7                   4.46
+      19                                    Total   1292.7                   4.46
 
 ---
 
@@ -49,6 +48,5 @@
       16 Sugarberry / hackberry / elm / green ash     96.3                      0
       17                                    Aspen    415.1                  11.08
       18                               Nonstocked     17.5                  29.96
-      19                                    Other       --                     --
-      20                                    Total    413.1                   4.55
+      19                                    Total    413.1                   4.55
 

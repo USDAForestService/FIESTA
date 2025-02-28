@@ -22,6 +22,5 @@
       16 Sugarberry / hackberry / elm / green ash    10593.4                    100
       17                                    Aspen     617017                  17.39
       18                               Nonstocked   827200.1                  14.62
-      19                                    Other         --                     --
-      20                                    Total 10455771.5                   2.37
+      19                                    Total 10455771.5                   2.37
 

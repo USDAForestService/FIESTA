@@ -22,8 +22,7 @@
       16 Sugarberry / hackberry / elm / green ash    1020021.8                    100
       17                                    Aspen  256138904.4                  20.59
       18                               Nonstocked   14487669.1                  33.12
-      19                                    Other           --                     --
-      20                                    Total 4319194632.3                   4.83
+      19                                    Total 4319194632.3                   4.83
 
 ---
 
@@ -49,8 +48,7 @@
       16 Sugarberry / hackberry / elm / green ash     4455857.7
       17                                    Aspen   420518373.4
       18                               Nonstocked    53104873.9
-      19                                    Other            --
-      20                                    Total 13516579068.4
+      19                                    Total 13516579068.4
          Percent Sampling Error
       1                   42.43
       2                   86.68
@@ -70,6 +68,5 @@
       16                    100
       17                  27.81
       18                  42.69
-      19                     --
-      20                    4.7
+      19                    4.7
 
