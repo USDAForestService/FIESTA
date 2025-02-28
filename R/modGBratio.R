@@ -547,8 +547,6 @@ modGBratio <- function(GBpopdat,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  withqry <- pltcondxWITHqry
-  #withqry <- dbqueriesWITH$pltidsWITH
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
@@ -556,7 +554,7 @@ modGBratio <- function(GBpopdat,
                  popconn = popconn, SCHEMA. = SCHEMA.,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
-                 withqry = withqry,
+                 withqry = pltcondxWITHqry,
                  estseed = estseed,
                  treex = treex, treeflds = treeflds,
                  seedx = seedx, seedflds = seedflds,
@@ -570,6 +568,7 @@ modGBratio <- function(GBpopdat,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL, 
+                 whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol

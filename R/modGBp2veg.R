@@ -262,73 +262,34 @@ modGBp2veg <- function(GBpopdat = NULL,
   
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(modGBp2veg)),
-                 names(formals(modGBpop))) 
+#  formallst <- c(names(formals(modGBp2veg)),
+#                 names(formals(modGBpop))) 
+  formallst <- names(formals(modGBp2veg)) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
   
   ## Check parameter lists
-  pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
-                savedata_opts=savedata_opts)
+  pcheck.params(input.params = input.params,
+                title_opts = title_opts, 
+                table_opts = table_opts, 
+                savedata_opts = savedata_opts)
   
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+    title_opts = title_opts,
+    table_opts = table_opts,
+    savedata_opts = savedata_opts)) 
+  title_opts <- optslst$title_opts  
+  table_opts <- optslst$table_opts  
+  savedata_opts <- optslst$savedata_opts  
   
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
-  
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  for (i in 1:length(title_opts)) {
+    assign(names(title_opts)[[i]], title_opts[[i]])
   }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-  
-  ## Set table defaults
-  table_defaults_list <- formals(FIESTA::table_options)[-length(formals(FIESTA::table_options))]
-  
-  for (i in 1:length(table_defaults_list)) {
-    assign(names(table_defaults_list)[[i]], table_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied table values
-  if (length(table_opts) > 0) {
-    for (i in 1:length(table_opts)) {
-      if (names(table_opts)[[i]] %in% names(table_defaults_list)) {
-        assign(names(table_opts)[[i]], table_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(table_opts)[[i]]))
-      }
-    }
-  }
-
-  ## Set title defaults
-  title_defaults_list <- formals(FIESTA::title_options)[-length(formals(FIESTA::title_options))]
-  
-  for (i in 1:length(title_defaults_list)) {
-    assign(names(title_defaults_list)[[i]], title_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied title values
-  if (length(title_opts) > 0) {
-    for (i in 1:length(title_opts)) {
-      if (names(title_opts)[[i]] %in% names(title_defaults_list)) {
-        assign(names(title_opts)[[i]], title_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(title_opts)[[i]]))
-      }
-    }
+  for (i in 1:length(table_opts)) {
+    assign(names(table_opts)[[i]], table_opts[[i]])
   }
   
   
@@ -375,6 +336,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   adjcase <- GBpopdat$adjcase
   pltidsid <- GBpopdat$pjoinid
   pltassgnid <- GBpopdat$pltassgnid
+  pltcondflds <- GBpopdat$pltcondflds
   
   vcondsppx <- GBpopdat$vcondsppx
   vcondstrx <- GBpopdat$vcondstrx
@@ -382,11 +344,6 @@ modGBp2veg <- function(GBpopdat = NULL,
   vuniqueid <- "PLT_CN"
   estvar.name <- GBpopdat$estvar.area
   estvar <- "COVER_PCT_SUM"
-
-  
-  #adjfactors <- GBpopdat$adjfactors
-  #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="10")
-  #popVOL_compare
   
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
@@ -398,12 +355,10 @@ modGBp2veg <- function(GBpopdat = NULL,
         stop("invalid database connection")
       }
     }
-    #pltcondx <- dbqueries$pltcondx
     pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
     pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
   } else {
-    pltcondxWITHqry <- NULL
-    pltcondxadjWITHqry <- NULL
+    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
   }
   
 
@@ -435,6 +390,7 @@ modGBp2veg <- function(GBpopdat = NULL,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondx = pltcondx,
+                  pltcondflds = pltcondflds,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
@@ -463,25 +419,27 @@ modGBp2veg <- function(GBpopdat = NULL,
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
   overwrite_layer <- estdat$overwrite_layer
+  outfn.pre <- estdat$outfn.pre
+  outfn.date <- estdat$outfn.date
   append_layer = estdat$append_layer
   rawfolder <- estdat$rawfolder
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
-  pltcondflds <- estdat$pltcondflds
-  
+
   
   ###################################################################################
   ## Check parameter inputs and P2VEG filters
   ###################################################################################
   estdatP2VEG <- 
     check.estdataP2VEG(esttype = esttype,
-                     popdatindb = popdatindb,
-                     popconn = popconn,
-                     vcondsppx = vcondsppx, vcondstrx = vcondstrx,
-                     vuniqueid = vuniqueid,
-                     gui = gui)
+                       popdatindb = popdatindb,
+                       popconn = popconn,
+                       vcondsppx = vcondsppx, vcondstrx = vcondstrx,
+                       vuniqueid = vuniqueid,
+                       vfilter = vfilter,
+                       gui = gui)
   vcondstrx <- estdatP2VEG$vcondstrx
   vcondstrflds <- estdatP2VEG$vcondstrflds
   vcondsppflds <- estdatP2VEG$vcondsppflds
@@ -524,6 +482,7 @@ modGBp2veg <- function(GBpopdat = NULL,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL, 
+                 whereqry = pcwhereqry,
                  gui = gui)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -549,17 +508,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
   
-  ## if classified columns, create domclassify list for summarizing tree data
-  if (any(!is.null(classifyrow), !is.null(classifycol))) {
-    domclassify <- list()
-    if (!is.null(classifyrow)) {
-      domclassify[[rowvar]] <- classifyrow$row.classify
-    }
-    if (!is.null(classifycol)) {
-      domclassify[[colvar]] <- classifycol$col.classify
-    }
-  }
-  
+
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
     uniquecol <- data.table(unitarea[[unitvar]])
@@ -571,9 +520,6 @@ modGBp2veg <- function(GBpopdat = NULL,
   #####################################################################################
   ### Get estimation data from vcond table
   #####################################################################################
-  ###############################################################################
-  ### Get estimation data from tree table
-  ###############################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   p2vegdat <- 
     check.tree(treex = vcondx, 
@@ -591,25 +537,42 @@ modGBp2veg <- function(GBpopdat = NULL,
                adjvar = varadjP2VEG,
                metric = metric, 
                woodland = NULL,
+               ACI = ACI,
                domclassify = domclassify,
                dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltcondxadjWITHqry,
                pcwhereqry = pcwhereqry,
                pltidsid = pltidsid,
-               bytdom = bytdom)
+               bytdom = bytdom,
+               gui = gui)
   if (is.null(p2vegdat)) return(NULL) 
   vdomdat <- p2vegdat$tdomdat
   p2vegqry <- p2vegdat$treeqry
   classifynmlst <- p2vegdat$classifynmlst
   pcdomainlst <- p2vegdat$pcdomainlst
-
+  tdomvarlstn <- p2vegdat$tdomvarlstn
+  
+  ## change variable in query from tree variables to veg variables for display
+  p2vegqry2 <- gsub("tdat", "vdat", p2vegqry)
+  p2vegqry2 <- gsub("get tree data", "get p2veg data", p2vegqry2)
+  p2vegqry2 <- gsub("treex t", "p2vegx v", p2vegqry2)
+  p2vegqry2 <- gsub(" 'TREE' src,", "", p2vegqry2)
+  p2vegqry2 <- gsub(" t.", " v.", p2vegqry2)
+  p2vegqry2 <- gsub("\\(t.", "\\(v.", p2vegqry2)
+  message(p2vegqry2)  
+  
   if (esttype == "RATIO") {
     estvarn.name <- p2vegdat$estvarn.name
-    estvard.name <- areawt
     estvarn.filter <- p2vegdat$estvarn.filter
-    tdomvarlstn <- p2vegdat$tdomvarlstn
+    estvard.name <- areawt
+    estvard.filter <- p2vegdat$estvard.filter
+    tdomvarlstd <- p2vegdat$tdomvarlstd
     estunitsn <- "percent"
     estunitsd <- areaunits
+  } else {
+    estvarn.name <- p2vegdat$estvar.name
+    estvarn.filter <- p2vegdat$estvar.filter
+    estunitsn <- p2vegdat$estunits
   }
   
   
@@ -671,7 +634,6 @@ modGBp2veg <- function(GBpopdat = NULL,
   title.ref <- alltitlelst$title.ref
   outfn.estpse <- alltitlelst$outfn.estpse
   outfn.param <- alltitlelst$outfn.param
-  
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
@@ -720,7 +682,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   ## GENERATE OUTPUT TABLES
   ###################################################################################
   message("getting output...")
-  estnm <- "estn" 
+  estnm <- ifelse(esttype == "RATIO", "estn", "est")
   tabs <- 
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 
@@ -788,6 +750,7 @@ modGBp2veg <- function(GBpopdat = NULL,
     
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(vdomdat) 
+    rawdat$domdatqry <- p2vegqry2
     rawdat$estvarn <- estvarn.name
     rawdat$estvarn.filter <- estvarn.filter
     if (esttype == "RATIO") {

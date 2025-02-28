@@ -385,7 +385,7 @@ check.rowcol <-
       
       ## define where statement (if row.add0, get all values in population)
       whereqry.row <- whereqry
-      if (!row.add0 && !is.null(whereqry)) {
+      if (row.add0 && !is.null(whereqry)) {
         whereqry.row <- NULL
       }
       
@@ -1045,7 +1045,7 @@ check.rowcol <-
  
       ## define where statement (if row.add0, get all values in population)
       whereqry.col <- whereqry
-      if (!col.add0 && !is.null(whereqry)) {
+      if (col.add0 && !is.null(whereqry)) {
         whereqry.col <- NULL
       }
       
