@@ -447,6 +447,7 @@ modGBchng <- function(GBpopdat,
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   landarea.filter <- estdat$landarea.filter
+  pltcondflds <- estdat$pltcondflds
 
   
   ###################################################################################

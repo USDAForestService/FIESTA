@@ -427,7 +427,8 @@ modGBp2veg <- function(GBpopdat = NULL,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
-
+  pltcondflds <- estdat$pltcondflds
+  
   
   ###################################################################################
   ## Check parameter inputs and P2VEG filters

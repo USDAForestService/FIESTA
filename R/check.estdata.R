@@ -93,13 +93,11 @@ check.estdata <-
     }
   }
   
-  # ## Get table fields
+  # ## Get table fields - this will get any new fields added to pltcondx
   # ###########################################################################
-  #if (popdatindb && is.character(pltcondx)) {
-  #   pltcondflds <- DBI::dbListFields(popconn, pltcondx)
-  #} else {
-  #  pltcondflds <- names(pltcondx)
-  #}
+  if (!popdatindb) {
+    pltcondflds <- names(pltcondx)
+  }
 
   ## Build where statement with plot/condition filters
   ###########################################################################

@@ -469,7 +469,8 @@ modMAarea <- function(MApopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
-
+  pltcondflds <- estdat$pltcondflds
+  
   
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf

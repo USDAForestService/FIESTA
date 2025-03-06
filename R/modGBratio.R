@@ -519,7 +519,8 @@ modGBratio <- function(GBpopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
-
+  pltcondflds <- estdat$pltcondflds
+  
   
   ###################################################################################
   ## Check parameter inputs and tree filters
@@ -872,7 +873,10 @@ modGBratio <- function(GBpopdat,
 	  }
 
     rawdat <- tabs$rawdat
-    rawdat$domdat <- setDF(tdomdat) 
+    rawdat$domdatn <- setDF(tdomdat) 
+    rawdat$domdatd <- setDF(cdomdat) 
+    rawdat$domdatnqry <- treeqry
+    rawdat$domdatdqry <- cdomdatqry
     rawdat$estvarn <- estvarn.name
     rawdat$estvarn.filter <- estvarn.filter
     if (ratiotype == "PERACRE") {

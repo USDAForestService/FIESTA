@@ -489,7 +489,8 @@ modMAtree <- function(MApopdat,
   raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
-
+  pltcondflds <- estdat$pltcondflds
+  
   
   ###################################################################################
   ## Check parameter inputs and tree filters
