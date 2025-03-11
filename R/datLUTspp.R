@@ -57,22 +57,23 @@ datLUTspp <- function(x = NULL,
                       spcdname = "COMMON",
                       add0 = FALSE, 
                       stopifmiss = FALSE, 
-                      xtxt = NULL,dsn = NULL,
+                      xtxt = NULL,
+                      dsn = NULL,
                       dbconn = NULL,
                       dbconnopen = FALSE,
                       dbwrite = FALSE,
                       dbreturn = TRUE, 
                       overwrite = TRUE,
                       savedata = FALSE, 
-                      savedata_opts = NULL, 
-                      gui = FALSE){
+                      savedata_opts = NULL){
   #################################################################################
   ## DESCRIPTION: Merge variable(s) from a reference table stored within FIESTA  
   ##      (ref_codes) or a comma-delimited file (*.csv).
   #################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  gui <- FALSE
 
   if (gui) x=group=sciname <- NULL 
 
@@ -383,25 +384,6 @@ datLUTspp <- function(x = NULL,
   ###############################################################
   LUTx <- unique(ref_spp[, lutvars]) 
 
-  for (newvar in LUTnewvar) {
-    if (any(duplicated(LUTx[[newvar]]))) {
-      dups <- unique(LUTx[[newvar]][duplicated(LUTx[[newvar]])])
-      message("duplicated values exist in species ref:\n", toString(dups))
-
-      for (dup in dups) {
-        duprows <- which(LUTx[[newvar]] == dup)
-        nbrdups <- length(duprows)
-        for (i in 2:nbrdups) {
-          row <- duprows[i]
-          newnm <- paste0(dup, "_", i - 1)
-          LUTx[duprows[i], ][[newvar]] <- paste0(dup, "_", i - 1)
-          if (is.factor(LUTx[[newvar]])) {
-            levels(LUTx[[newvar]]) <- c(levels(LUTx[[newvar]]), newnm)
-          }
-		    }
-      }
-    }
-  }
 
   ## Merge ref_spp to datx
   ###############################################################
@@ -435,6 +417,9 @@ datLUTspp <- function(x = NULL,
     #all.x <- ifelse(add0, TRUE, FALSE)
     xLUT <- merge(datx, LUTx, by.x=xvar, by.y=LUTvar, all.x=TRUE)
  
+    ## subset LUTx to include only values from LUTx
+    LUTx <- LUTx[LUTx[[LUTvar]] %in% xLUT[[xvar]],]
+    
     ## Get all values of LUTx newvars
     LUTnewvar.vals <- unique(unlist(lapply(LUTx[,LUTnewvar, with=FALSE], as.character)))
 
@@ -457,6 +442,28 @@ datLUTspp <- function(x = NULL,
       DT_NAto0(xLUT, LUTnewvar, changeto=NAclass)
     }
   }
+  
+  ## check for duplicated values
+  for (newvar in LUTnewvar) {
+    if (any(duplicated(LUTx[[newvar]]))) {
+      dups <- unique(LUTx[[newvar]][duplicated(LUTx[[newvar]])])
+      message("duplicated values exist in species ref:\n", toString(dups))
+      
+      for (dup in dups) {
+        duprows <- which(LUTx[[newvar]] == dup)
+        nbrdups <- length(duprows)
+        for (i in 2:nbrdups) {
+          row <- duprows[i]
+          newnm <- paste0(dup, "_", i - 1)
+          LUTx[duprows[i], ][[newvar]] <- paste0(dup, "_", i - 1)
+          if (is.factor(LUTx[[newvar]])) {
+            levels(LUTx[[newvar]]) <- c(levels(LUTx[[newvar]]), newnm)
+          }
+        }
+      }
+    }
+  }
+  
 
   ## Add records if no other values exist in xLUT
   if (!all(uniquex %in% LUTx[[xvar]])) {

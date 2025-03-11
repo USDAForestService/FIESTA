@@ -21,8 +21,7 @@ datLUTspp(
   dbreturn = TRUE,
   overwrite = TRUE,
   savedata = FALSE,
-  savedata_opts = NULL,
-  gui = FALSE
+  savedata_opts = NULL
 )
 }
 \arguments{
