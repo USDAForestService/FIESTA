@@ -69,8 +69,6 @@ in x, overwrites class name.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'datlut'.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 \item{xLUT}{ The input data table with look-up table variable(s). }

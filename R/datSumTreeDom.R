@@ -425,12 +425,21 @@ datSumTreeDom <- function(tree = NULL,
   tsumvarnm <- sumdat$sumvars
   tsumuniqueid <- sumdat$tsumuniqueid
   treeqry <- sumdat$treeqry
-  domainlst <- sumdat$domainlst     ## new pc and tree variables if classified
   tdomainlst <- sumdat$tdomainlst   ## original tree variables
   pcdomainlst <- sumdat$pcdomainlst ## original pc variables
   classifynmlst <- sumdat$classifynmlst
   tround <- sumdat$tround
+  domainlst <- c(pcdomainlst, tdomainlst)
 
+  ## get sum by fields in data table
+  keepall <- datSum_opts$keepall
+  if (keepall) {
+    dat <- tdomtree[, names(tdomtree)[!names(tdomtree) %in% tsumvarnm], with=FALSE]
+    if (length(domainlst) > 0) {
+      tdomtree <- tdomtree[tdomtree[, rowSums(!is.na(.SD)) > 0, .SDcols = domainlst],]
+    }
+  }
+  
   if (length(tsumvarnm) > 1) {
     tsumnm=tsumvarnm <- tsumvarnm[length(tsumvarnm)]
   } else {
@@ -768,100 +777,51 @@ datSumTreeDom <- function(tree = NULL,
                outfolder = outfolder, 
                ylabel = tsumvarnm) 
   }
+  
+  ## Merge if keepall
+  if (keepall) {
+    ## Check if class of cuniqueid matches class of cuniqueid
+    tabs <- check.matchclass(dat, tdoms, key(dat), key(tdoms))
+    dat <- tabs$tab1
+    tdoms <- tabs$tab2
 
-  ## Merge to cond or plot
-  ###################################
-#   if (bycond && !nocond) {
-# 
-#     ## Check for duplicate names
-#     matchnames <- sapply(tdomscolstot, checknm, condnames) 
-#     setnames(tdoms, tdomscolstot, matchnames)
-# 
-#     ## Check if class of cuniqueid matches class of cuniqueid
-#     tabs <- check.matchclass(condx, tdoms, c(cuniqueid, condid))
-#     condx <- tabs$tab1
-#     tdoms <- tabs$tab2
-#     
-#     ## Merge summed data to cond table
-#     sumtreef <- merge(condx, tdoms, all.x=TRUE, by=c(cuniqueid, condid))
-#     if (NAto0) {
-#       for (col in tdomscolstot) set(sumtreef, which(is.na(sumtreef[[col]])), col, 0)
-#       #sumtreef[is.na(sumtreef)] <- 0
-#     }
-# 
-#     ## Merge proportion table to cond table
-#     if (proportion) {
-#       sumtreef.prop <- merge(condx, tdoms.prop, all.x=TRUE)
-#       if (NAto0) {
-#         for (col in tdomscolstot) set(sumtreef.prop, which(is.na(sumtreef.prop[[col]])), col, 0)
-#       }
-#     }
-#     ## Merge presence table to cond table
-#     if (presence) {
-#       sumtreef.pres <- merge(condx, tdoms.pres, all.x=TRUE)
-#       if (NAto0) {
-#         for (col in tdomscolstot) set(sumtreef.pres, which(is.na(sumtreef.pres[[col]])), col, 0)
-#       }
-#     }
-#     ## Create a table of cover (absolute) based on proportion table and live canopy cover for cond
-#     if (cover) {
-#       sumtreef.cov <- copy(sumtreef.prop)
-#       if (NAto0) {
-#         for (col in tdomscolstot) {set(sumtreef.cov, i=NULL, j=col, 
-# 				value=round(sumtreef.cov[[col]] * sumtreef.cov[[covervar]])) }
-#       }
-#     }
-# 
-#   } else if (!noplt) {  ## Plot-level
-# 
-#     ## Check for duplicate names
-#     matchnames <- sapply(tdomscolstot, checknm, names(pltx)) 
-#     setnames(tdoms, tdomscolstot, matchnames)
-# 
-#     ## Check if class of cuniqueid matches class of cuniqueid
-#     tabs <- check.matchclass(pltx, tdoms, puniqueid, cuniqueid)
-#     pltx <- tabs$tab1
-#     tdoms <- tabs$tab2
-# 
-#     ## Merge summed data to plt table
-#     setkeyv(tdoms, tuniqueid)
-#     sumtreef <- merge(pltx, tdoms, by.x=puniqueid, by.y=tuniqueid, all.x=TRUE)
-#     if (NAto0) {
-#       for (col in tdomscolstot) set(sumtreef, which(is.na(sumtreef[[col]])), col, 0)
-#     }
-#  
-#     ## Merge proportion table to plt table
-#     if (proportion) {
-#       setkeyv(tdoms.prop, tuniqueid)
-#       sumtreef.prop <- merge(pltx, tdoms.prop, by.x=puniqueid, by.y=tuniqueid, all.x=TRUE)
-#       if (NAto0) {
-#         for (col in tdomscolstot) set(sumtreef.prop, which(is.na(sumtreef.prop[[col]])), col, 0)
-#       }
-#     }
-# 
-#     ## Merge presence table to plt table
-#     if (presence) {
-#       setkeyv(tdoms.pres, tuniqueid)
-#       sumtreef.pres <- merge(pltx, tdoms.pres, by.x=puniqueid, by.y=tuniqueid, all.x=TRUE)
-#       if (NAto0) {
-#         for (col in tdomscolstot) set(sumtreef.pres, which(is.na(sumtreef.pres[[col]])), col, 0)
-#       }
-#     }
-# 
-#     ## Create a table of cover (absolute) based on proportion table and live canopy cover for plot
-#     if (cover) {
-#       sumtreef.cov <- copy(sumtreef.prop)
-#       if (NAto0) {
-#         for (col in tdomscolstot) {set(sumtreef.cov, i=NULL, j=col, 
-# 				value=sumtreef.cov[[col]] * sumtreef.cov[[covervar]]) }
-#       }
-#     }
-#   } else {
-    sumtreef <- tdoms
+    tdoms <- tdoms[dat]
+    if (NAto0) {
+      tdoms <- DT_NAto0(tdoms, cols=tdomscols)
+    }
+    setcolorder(tdoms, c(names(tdoms)[!names(tdoms) %in% tdomscols], tdomscols))
+    
+    if (presence) {
+      ## Check if class of cuniqueid matches class of cuniqueid
+      tabs <- check.matchclass(dat, tdoms.pres, key(dat), key(tdoms.pres))
+      dat <- tabs$tab1
+      tdoms.pres <- tabs$tab2
+      
+      tdoms.pres <- tdoms.pres[dat]
+      if (NAto0) {
+        tdoms.pres <- DT_NAto0(tdoms.pres, cols=tdomscols)
+      }
+      setcolorder(tdoms.pres, c(names(tdoms.pres)[!names(tdoms.pres) %in% tdomscols], tdomscols))
+    }
+    
+    if (proportion) {
+      ## Check if class of cuniqueid matches class of cuniqueid
+      tabs <- check.matchclass(dat, tdoms.prop, key(dat), key(tdoms.prop))
+      dat <- tabs$tab1
+      tdoms.prop <- tabs$tab2
+      
+      tdoms.prop <- tdoms.prop[dat]
+      if (NAto0) {
+        tdoms.prop <- DT_NAto0(tdoms.prop, cols=tdomscols)
+      }
+      setcolorder(tdoms.prop, c(names(tdoms.prop)[!names(tdoms.prop) %in% tdomscols], tdomscols))
+    }
+  }
 
-    if (proportion) sumtreef.prop <- tdoms.prop 
-    if (presence) sumtreef.pres <- tdoms.pres
-#  }
+  sumtreef <- tdoms
+  if (proportion) sumtreef.prop <- tdoms.prop 
+  if (presence) sumtreef.pres <- tdoms.pres
+
 
   if (savedata) {
     if (pltsp) {
@@ -977,74 +937,6 @@ datSumTreeDom <- function(tree = NULL,
                             add_layer=TRUE))   
     
   
-#     if (parameters) {
-#       ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
-#       ###########################################################
-#       outfn.param <- paste(out_layer, "parameters", sep="_")
-#       outparamfnbase <- paste(outfn.param, format(Sys.time(), "%Y%m%d"), sep="_")
-#       outparamfn <- fileexistsnm(outfolder, outparamfnbase, "txt")
-#   
-#       tdomvarlstout <- addcommas(sapply(tdomvarlst, function(x) paste0("'", x, "'") ))
-#       tdomvarlst2out <- addcommas(sapply(tdomvar2lst, function(x) paste0("'", x, "'") ))
-#       strunitvars <- addcommas(sapply(strunitvars, function(x) paste0("'", x, "'") ))
-# 
-#       outfile <- file(paste0(outfolder, "/", outparamfn, ".txt"), "w")
-#       cat(  "tree = ", as.character(bquote(tree)), "\n",
-#       	"seed = ", as.character(bquote(seed)), "\n",
-#       	"cond = ", as.character(bquote(cond)), "\n",
-#       	"plt = ", as.character(bquote(plt)), "\n",
-#       	"plt_dsn = \"", plt_dsn, "\"", "\n",
-#       	"tuniqueid = \"", tuniqueid, "\"", "\n",
-#       	"cuniqueid = \"", cuniqueid, "\"", "\n",
-#       	"puniqueid = \"", puniqueid, "\"", "\n",
-#       	"bycond = ", bycond, "\n",
-#       	"condid = \"", condid, "\"", "\n",
-#       	"bysubp = ", bysubp, "\n",
-#       	"subpid = \"", subpid, "\"", "\n",
-#       	"tsumvar = \"", tsumvar, "\"", "\n",
-#       	"TPA = ", TPA, "\n",
-#       	"tfun = ", noquote(tfunstr), "\n",
-#       	"ACI = ", ACI, "\n",
-#       	"tfilter = \"", tfilter, "\"", "\n",
-#       	"lbs2tons = ", lbs2tons, "\n",
-#       	"tdomvar = \"", tdomvar, "\"", "\n",
-#       	"tdomvarlst = c(", tdomvarlstout, ")", "\n", 
-#       	"tdomvar2 = \"", tdomvar2, "\"", "\n",
-#       	"tdomvar2lst = c(", tdomvarlst2out, ")", "\n", 
-#       	"tdomprefix = \"", tdomprefix, "\"", "\n",
-#       	"tdombarplot = ", tdombarplot, "\n",
-#       	"tdomtot = ", tdomtot, "\n",
-#       	"tdomtotnm = \"", tdomtotnm, "\"", "\n",
-#       	"FIAname = ", FIAname, "\n",
-#       	"addseed = ", addseed, "\n",
-#       	"presence = ", presence, "\n",
-#       	"proportion = ", proportion, "\n",
-#       	"cover = ", cover, "\n",
-#       	"getadjplot = ", getadjplot, "\n",
-#       	"adjtree = ", adjtree, "\n",
-#       	"NAto0 = ", NAto0, "\n",
-#       	"adjTPA = ", adjTPA, "\n",
-#       	"savedata = ", savedata, "\n",
-#       	"outfolder = \"", outfolder, "\"", "\n",
-#       	"out_layer = ", out_layer, "\n",
-#       	"outfn.date = ", outfn.date, "\n",
-#       	"overwrite_dsn = ", overwrite_dsn, "\n",
-#       	"tround = \"", tround, "\"", "\n", "\n",
-#     	file = outfile, sep="")
-# 
-#     	cat(  "tdomdat <- datSumTreeDom(tree=tree, seed=seed, cond=cond, plt=plt, 
-# 		plt_dsn=plt_dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid,
-#  		bycond=bycond, condid=condid, bysubp=bysubp, subpid=subpid, tsumvar=tsumvar,
-# 		TPA=TPA, tfun=tfun, ACI=ACI, tfilter=tfilter, lbs2tons=lbs2tons, tdomvar=tdomvar,
-#  		tdomvarlst=tdomvarlst, tdomvar2=tdomvar2, tdomvar2lst=tdomvar2lst, 
-# 		tdomprefix=tdomprefix, tdombarplot=tdombarplot, tdomtot=tdomtot, 
-# 		tdomtotnm=tdomtotnm, FIAname=FIAname, addseed=addseed, presence=presence,
-#  		proportion=proportion, cover=cover, getadjplot=getadjplot, adjtree=adjtree,
-# 		NAto0=NAto0, adjTPA=adjTPA, savedata=savedata, outfolder=outfolder, 
-# 		out_layer=out_layer, outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, tround=tround)",
-#     	file = outfile, sep="")
-#     	close(outfile)
-#     }
   }
 
   tdomdata <- list()
@@ -1064,19 +956,21 @@ datSumTreeDom <- function(tree = NULL,
     tdomdata$tdomvar2nm <- tdomvar2nm
   }
   if (proportion) {
-    if (returnDT) {
-      sumtreef.prop <- setDF(sumtreef.prop)
+    if (!returnDT) {
+      if (!returnDT) {
+        sumtreef.prop <- setDF(sumtreef.prop)
+      }
+      tdomdata$tdomdat.prop <- sumtreef.prop
     }
-    tdomdata$tdomdat.prop <- sumtreef.prop
   }
   if (presence) {
-    if (returnDT) {
+    if (!returnDT) {
       sumtreef.pres <- setDF(sumtreef.pres)
     }
     tdomdata$tdomdat.pres <- setDF(sumtreef.pres)
   }
   if (cover) {
-    if (returnDT) {
+    if (!returnDT) {
       sumtreef.cov <- setDF(sumtreef.cov)
     }
     tdomdata$tdomdat.cov <- setDF(sumtreef.cov)

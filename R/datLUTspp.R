@@ -31,7 +31,6 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'datlut'. 
-#' @param gui Logical. If gui, user is prompted for parameters.
 #'
 #' @return \item{xLUT}{ The input data table with look-up table variable(s). }
 #' \item{xLUTnm}{ Name of the new variable(s). } \item{LUT}{ Look up table with
