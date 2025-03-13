@@ -2883,12 +2883,13 @@ DBgetPlots <- function (states = NULL,
             message("saving tree table...")
             index.unique.treex <- NULL
             if (!append_layer) {
-              index.unique.treex <- list(c("PLT_CN", "CONDID", "SUBP", "TREE"), "TREE_CN",
-				                              "PREV_TREE_CN")
+              index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
+              index.treex <- "PREV_TRE_CN"
             }
             outlst$out_layer <- "tree"
             datExportData(treex, 
                           index.unique = index.unique.treex,
+                          index = index.treex,
                           savedata_opts = outlst) 
             #rm(treex)
             #gc()
@@ -4513,6 +4514,7 @@ DBgetPlots <- function (states = NULL,
         #rm(condx)
         # gc()
       }  
+
       if (savedata && savePOP && !is.null(ppsax)) {
         message("saving pop_plot_stratum_assgn table...")
 
@@ -4521,6 +4523,13 @@ DBgetPlots <- function (states = NULL,
           index.unique.ppsax <- "PLT_CN"
           if (all(c("STATECD","UNITCD","COUNTYCD","PLOT") %in% names(ppsax))) {
             index.ppsax <- c("STATECD","UNITCD", "COUNTYCD","PLOT")
+          }
+          if (all(c("EVALID", "ESTN_UNIT", "STRATUMCD") %in% names(ppsax))) {
+            if (!is.null(index.ppsax)) {
+              index.ppsax <- list(index.ppsax, c("EVALID", "ESTN_UNIT", "STRATUMCD"))
+            } else {
+              index.ppsax <- c("EVALID", "ESTN_UNIT", "STRATUMCD")
+            }
           }
         }
         outlst$out_layer <- "pop_plot_stratum_assgn"
@@ -4575,7 +4584,7 @@ DBgetPlots <- function (states = NULL,
                   index.unique = list("SPCD", "SPECIES_SYMBOL"),
                   savedata_opts = outlst) 
   }
- 
+
   if (savedata && saveSURVEY) {
     message("saving survey table...")
 
@@ -4584,7 +4593,7 @@ DBgetPlots <- function (states = NULL,
                   index.unique = "CN",
                   savedata_opts = outlst) 
   }
- 
+
   ## Write out plot/condition counts to comma-delimited file.
   if (savedata && !is.null(pltcnt)) {
     message("saving pltcnt table...")
