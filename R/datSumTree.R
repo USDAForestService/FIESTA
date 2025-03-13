@@ -2161,10 +2161,10 @@ datSumTree <- function(tree = NULL,
       tjoinid <- getjoinqry(c(tuniqueid, condid), uniqueid, "tdat.", subpa.)
 
       ## use LEFT JOIN for tdat to get all records, no data filled with 0
-      tfromqry <- paste0(tfromqry,
-                         "\nJOIN tdat ", tjoinid)
 #      tfromqry <- paste0(tfromqry,
-#                         "\nLEFT JOIN tdat ", tjoinid)
+#                         "\nJOIN tdat ", tjoinid)
+      tfromqry <- paste0(tfromqry,
+                         "\nLEFT JOIN tdat ", tjoinid)
     }
   } else if (!is.null(condnm)) {
     conda. <- "pc."
@@ -2172,30 +2172,30 @@ datSumTree <- function(tree = NULL,
     tjoinid <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "tdat.", conda.)
     
     ## use LEFT JOIN for tdat to get all records, no data filled with 0
-    tfromqry <- paste0(tfromqry,
-                       "\nJOIN tdat ", tjoinid)
 #    tfromqry <- paste0(tfromqry,
-#                       "\nLEFT JOIN tdat ", tjoinid)
+#                       "\nJOIN tdat ", tjoinid)
+    tfromqry <- paste0(tfromqry,
+                       "\nLEFT JOIN tdat ", tjoinid)
 
   } else if (!is.null(pltidsnm)) {
     tfromqry <- paste0("\nFROM ", pltidsnm, " pltids")
     tjoinid <- getjoinqry(tuniqueid, pltidsid, "tdat.", pltidsa.)
     
     ## use LEFT JOIN for tdat to get all records, no data filled with 0
-    tfromqry <- paste0(tfromqry,
-                         "\nJOIN tdat ", tjoinid)
 #    tfromqry <- paste0(tfromqry,
-#                           "\nLEFT JOIN tdat ", tjoinid)
+#                         "\nJOIN tdat ", tjoinid)
+    tfromqry <- paste0(tfromqry,
+                           "\nLEFT JOIN tdat ", tjoinid)
     
   } else if (!is.null(plotnm)) {
     tfromqry <- paste0("\nFROM ", plotnm)
     tjoinid <- getjoinqry(tuniqueid, pltidsid, "tdat.", pltidsa.)
 
     ## use LEFT JOIN for tdat to get all records, no data filled with 0
-    tfromqry <- paste0(tfromqry,
-                         "\nJOIN tdat ", tjoinid)
 #    tfromqry <- paste0(tfromqry,
-#                         "\nLEFT JOIN tdat ", tjoinid)
+#                         "\nJOIN tdat ", tjoinid)
+    tfromqry <- paste0(tfromqry,
+                         "\nLEFT JOIN tdat ", tjoinid)
     
   } else {
     tfromqry <- paste0("\nFROM ", twithalias)
@@ -2205,8 +2205,8 @@ datSumTree <- function(tree = NULL,
   ####################################################################
 
   #define grpby variables
-  #tgrpbyvars <- paste0(grpby., uniqueid)
-  tgrpbyvars <- paste0("tdat.", tsumuniqueid)
+  tgrpbyvars <- paste0(grpby., uniqueid)
+  #tgrpbyvars <- paste0("tdat.", tsumuniqueid)
 
   ## add grpby variable to select qry query
   tselectqry <- paste0("\nSELECT ", toString(tgrpbyvars))
