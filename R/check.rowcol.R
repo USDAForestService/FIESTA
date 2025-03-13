@@ -260,7 +260,7 @@ check.rowcol <-
                    cuniqueid = cuniqueid, cvars2keep = cvars2keep,
                    treex = treex, treeflds = treeflds, seedx = seedx,
                    seedflds = seedflds, estseed = estseed, 
-                   tuniqueid = tuniqueid, whereqry = whereqry, 
+                   tuniqueid = tuniqueid, whereqry = whereqry, withqry = withqry,
                    popdatindb = popdatindb, 
                    popconn = popconn, SCHEMA. = SCHEMA.,
                    domlut = domlut, domvarlst = domvarlst, gui = gui)
