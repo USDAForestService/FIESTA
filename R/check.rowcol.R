@@ -21,8 +21,7 @@ check.rowcol <-
            rowgrp = FALSE, rowgrpnm = NULL, 
            rowgrpord = NULL, title.rowgrp = NULL, 
            cvars2keep = NULL, whereqry = NULL,
-           factor.addNA = FALSE,
-           gui = FALSE){
+           factor.addNA = FALSE, spcdname = "COMMON_SCIENTIFIC"){
 
   ####################################################################################
   ## CHECKS ROW AND COLUMN INFO
@@ -51,7 +50,7 @@ check.rowcol <-
 
   ## Set global variables
   domainlst=tdomvar=tdomvar2=grpvar=rowvarnm=colvarnm <- NULL
-
+  gui <- FALSE
 
   ## Check for condid
   if (!is.null(condid) && !condid %in% c(treeflds, pltcondflds)) condid <- NULL
@@ -179,6 +178,19 @@ check.rowcol <-
   ## ROW VARIABLE
   ##############################################################
   if (rowvar != "NONE") { 
+    
+    ## if popType == "CHNG" and no colvar is defined...
+    ## assume rowvar is previous rowvar and colvar is current rowvar 
+    if (popType == "CHNG" && (is.null(colvar) || colvar == "NONE")) {
+      colvar <- rowvar
+      col.orderby <- row.orderby
+      title.colvar <- title.rowvar
+      col.FIAname <- row.FIAname
+      col.add0 = row.add0
+      collut <- rowlut
+      col.classify <- row.classify
+    }
+    
 
     rowvardat <- 
       check.tabvar(popType = popType, tabvartype = "row", 
@@ -193,7 +205,7 @@ check.rowcol <-
                    seedflds = seedflds, estseed = estseed, 
                    tuniqueid = tuniqueid, whereqry = whereqry, withqry = withqry,
                    popdatindb = popdatindb, popconn = popconn, SCHEMA. = SCHEMA.,
-                   domlut = domlut, domvarlst = domvarlst, gui = gui)
+                   domlut = domlut, domvarlst = domvarlst, spcdname = spcdname)
                               
     uniquerow <- rowvardat$uniquetabvar
     rowvar <- rowvardat$tabvar
@@ -225,31 +237,7 @@ check.rowcol <-
 		warn=paste(colvar, "not found"))
   if (is.null(colvar)) colvar <- "NONE"
   
-  
   if (colvar != "NONE") {
-  
-    ## if popType == "CHNG" and no colvar is defined...
-    ## assume rowvar is previous rowvar and colvar is current rowvar 
-    if (popType == "CHNG" && (is.null(colvar) || colvar == "NONE")) {
-      colvar <- rowvar
-      col.orderby <- row.orderby
-      title.colvar <- title.rowvar
-      col.FIAname <- row.FIAname
-      col.add0 = row.add0
-      collut <- rowlut
-      col.classify <- row.classify
-    
-      ## Rename rowvar variables with prefix 'PREV_'
-      rowvar <- paste0("PREV_", rowvar)
-      if (!is.null(row.orderby)) {
-        row.orderby <- paste0("PREV_", row.orderby)
-      }
-      if (!is.null(title.rowvar)) {
-        title.rowvar <- paste0("Previous ", title.rowvar)
-      }
-      rowvarnm=rowvarnew <- rowvar
-    }
-  
     colvardat <- 
       check.tabvar(popType = popType, tabvartype = "col", 
                    tabvar = colvar, tab.orderby = col.orderby, 
@@ -263,7 +251,7 @@ check.rowcol <-
                    tuniqueid = tuniqueid, whereqry = whereqry, withqry = withqry,
                    popdatindb = popdatindb, 
                    popconn = popconn, SCHEMA. = SCHEMA.,
-                   domlut = domlut, domvarlst = domvarlst, gui = gui)
+                   domlut = domlut, domvarlst = domvarlst)
   
     uniquecol <- colvardat$uniquetabvar
     colvar <- colvardat$tabvar
@@ -277,6 +265,20 @@ check.rowcol <-
     colclassqry <- colvardat$tabclassqry
     bytdom <- colvardat$bytdom
     bypcdom <- colvardat$bypcdom
+  }
+  
+  ## Rename rowvar variables with prefix 'PREV_'
+  if (popType %in% c("CHNG", "GRM")) {
+
+    names(uniquerow) <- paste0("PREV_", names(uniquerow))
+    rowvar <- paste0("PREV_", rowvar)
+    rowvarnm <- paste0("PREV_", rowvarnm)
+    if (!is.null(row.orderby)) {
+      row.orderby <- paste0("PREV_", row.orderby)
+    }
+    if (!is.null(title.rowvar)) {
+      title.rowvar <- paste0("Previous ", title.rowvar)
+    }
   }
 
 

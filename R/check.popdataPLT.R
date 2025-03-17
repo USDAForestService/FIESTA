@@ -83,8 +83,12 @@ check.popdataPLT <-
     ###################################################################################
     ## 2. Define a set of plot-level domain variables used for estimation. 
     ###################################################################################
-    pltdoms <- c("INVYR", "MEASYEAR", "RDDISTCD", "WATERCD", "ELEV", 
-               "ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "DESIGNCD", "EMAP_HEX")
+    pltdoms <- c("INVYR", "MEASYEAR", "MEASMON", "RDDISTCD", "WATERCD", 
+                 "ELEV", "ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "DESIGNCD", 
+                 "P2PANEL", "SUBPANEL", 
+                 "HUC", "EMAP_HEX", "ALP_ADFORCD", "FVS_VARIANT", "FVS_LOC_CD", 
+                 "FVS_REGION", "FVS_FOREST", "FVS_DISTRICT", "ROADLESSCD", 
+                 "NBRCND", "NBRCNDFOR", "CCLIVEPLT")
     
     ##############################################################################
     ## 3. Check database connection (dbconn) or dsn and define SCHEMA.
