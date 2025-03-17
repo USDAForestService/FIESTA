@@ -13,17 +13,19 @@
        6: BA_LIVE746     1241.96       63
        7: BA_LIVE019     7418.88      217
        8: BA_LIVE093     6306.60      185
-       9: BA_LIVE065     2209.71       20
-      10: BA_LIVE745      226.37        3
-      11: BA_LIVE823      180.43       12
-      12: BA_LIVE375        0.59        1
-      13: BA_LIVE101     1616.61       90
-      14: BA_LIVE096       73.35        3
-      15: BA_LIVE749      166.86        4
-      16: BA_LIVE475        8.48        2
-      17: BA_LIVE313       27.62        2
-      18: BA_LIVE544       30.92        2
-      19: BA_LIVE106        4.57        1
+       9: BA_LIVE NA        0.00       42
+      10: BA_LIVE065     2209.71       20
+      11: BA_LIVE745      226.37        3
+      12: BA_LIVE823      180.43       12
+      13: BA_LIVE375        0.59        1
+      14: BA_LIVE101     1616.61       90
+      15: BA_LIVE096       73.35        3
+      16: BA_LIVE749      166.86        4
+      17: BA_LIVE475        8.48        2
+      18: BA_LIVE313       27.62        2
+      19: BA_LIVE544       30.92        2
+      20: BA_LIVE106        4.57        1
+              SPCDNM BA_TPA_live NBRPLOTS
 
 ---
 
@@ -40,15 +42,17 @@
        6: VOLCFNET_LIVE746          15245.03       63
        7: VOLCFNET_LIVE019         121517.15      217
        8: VOLCFNET_LIVE093         140401.87      185
-       9: VOLCFNET_LIVE065              0.00       20
-      10: VOLCFNET_LIVE745           5159.30        3
-      11: VOLCFNET_LIVE823           1416.15       12
-      12: VOLCFNET_LIVE375              0.00        1
-      13: VOLCFNET_LIVE101          19228.57       90
-      14: VOLCFNET_LIVE096           2012.45        3
-      15: VOLCFNET_LIVE749           2717.93        4
-      16: VOLCFNET_LIVE475              0.00        2
-      17: VOLCFNET_LIVE313            213.42        2
-      18: VOLCFNET_LIVE544            372.56        2
-      19: VOLCFNET_LIVE106              0.00        1
+       9: VOLCFNET_LIVE NA              0.00       42
+      10: VOLCFNET_LIVE065              0.00       20
+      11: VOLCFNET_LIVE745           5159.30        3
+      12: VOLCFNET_LIVE823           1416.15       12
+      13: VOLCFNET_LIVE375              0.00        1
+      14: VOLCFNET_LIVE101          19228.57       90
+      15: VOLCFNET_LIVE096           2012.45        3
+      16: VOLCFNET_LIVE749           2717.93        4
+      17: VOLCFNET_LIVE475              0.00        2
+      18: VOLCFNET_LIVE313            213.42        2
+      19: VOLCFNET_LIVE544            372.56        2
+      20: VOLCFNET_LIVE106              0.00        1
+                    SPCDNM VOLCFNET_TPA_live NBRPLOTS
 

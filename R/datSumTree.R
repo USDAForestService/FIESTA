@@ -2205,8 +2205,8 @@ datSumTree <- function(tree = NULL,
   ####################################################################
 
   #define grpby variables
-  #tgrpbyvars <- paste0(grpby., uniqueid)
-  tgrpbyvars <- paste0("tdat.", tsumuniqueid)
+  tgrpbyvars <- paste0(grpby., uniqueid)
+  #tgrpbyvars <- paste0("tdat.", tsumuniqueid)
 
   ## add grpby variable to select qry query
   tselectqry <- paste0("\nSELECT ", toString(tgrpbyvars))
@@ -2367,7 +2367,7 @@ datSumTree <- function(tree = NULL,
   #   stop()
   # }
   # setkeyv(setDT(sumdat), uniqueidchk)
-  setkeyv(setDT(sumdat), tsumuniqueid)
+  setkeyv(setDT(sumdat), uniqueid)
 
   ## Round digits
   if (!is.null(tround)) {
@@ -2473,7 +2473,7 @@ datSumTree <- function(tree = NULL,
   }
   sumtreelst <- list(treedat = sumdat,
                      sumvars = tsumvardf$NAME,
-                     tsumuniqueid = tsumuniqueid,
+                     tsumuniqueid = uniqueid,
                      treeqry = tree.qry)
   #sumtreelst$estunits <- estunits
   if (!is.null(tfilter)) {

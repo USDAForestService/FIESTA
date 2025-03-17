@@ -159,19 +159,10 @@
 #' datSumTreeDom(tree = FIESTA::WYtree,
 #'               plt = FIESTA::WYplt, 
 #'               bycond = FALSE, 
-#'               tsumvar = "PLT_CN", 
+#'               tsumvar = "TPA_UNADJ", 
 #'               tdomtot = TRUE, 
 #'               tdomprefix = "CNT", 
 #'               tfilter = "STATUSCD==1",
-#'               datSum_opts = list(tround = 0))
-#'               
-#' # Sum of Number of Live Trees by Species, Including Seedlings
-#' datSumTreeDom(tree = WYtree,
-#'               seed = WYseed, 
-#'               bycond = FALSE, 
-#'               tsumvar = "PLT_CN", 
-#'               tdomtot = TRUE, 
-#'               tdomprefix = "CNT", 
 #'               datSum_opts = list(tround = 0))
 #' }
 #' @export datSumTreeDom

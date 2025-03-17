@@ -5,7 +5,7 @@
 \alias{ref_codes}
 \title{Reference tables - Code definitions.}
 \format{
-An object of class \code{data.frame} with 739 rows and 7 columns.
+An object of class \code{data.frame} with 745 rows and 7 columns.
 }
 \source{
 FIA look-up tables.

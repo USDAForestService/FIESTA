@@ -12,4 +12,4 @@ utils::globalVariables(names(formals(dbTables)[1:(length(formals(dbTables))-1)])
 utils::globalVariables(names(formals(xy_options)[1:(length(formals(xy_options))-1)]))
 utils::globalVariables(names(formals(eval_options)[1:(length(formals(eval_options))-1)]))
 utils::globalVariables(c("count", "vcondsppid", "vcondstrid",
-                         "zone_ds", ".cl_ds"))
+                         "zone_ds", ".cl_ds", "keepall"))
