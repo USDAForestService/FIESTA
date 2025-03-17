@@ -712,18 +712,35 @@ DBgetPlots <- function (states = NULL,
 
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
   ###########################################################
-  getType <- ifelse (is.null(evalid), TRUE, FALSE)
-  Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", "CHNG", 
-	             "GROW", "MORT", "REMV", "GRM")
-  if (gui) {
-    Type <- select.list(Typelst, title="eval type", 
-		preselect="VOL", multiple=TRUE)
-    if (length(Type)==0) Type <- "VOL"
-  } 
-  Typemiss <- Type[!Type %in% Typelst]
-  if (length(Typemiss) > 0) {
-    stop("Type must be in following list: \n", toString(Typelst))
+  #Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", "CHNG", 
+  #             "GROW", "MORT", "REMV", "GRM")
+  #endTypelst <- c("00", "01", "01", "10", "07", "09", "06", "03", "04", "05", "03")
+  #endTypelst <- c("00", "01", "01", "10", "07", "09", "03", "03", "03", "03", "03")
+  
+  if (!is.null(evalid)) {
+    endType <- sort(unique(sapply(evalid, function(x) substr(x, nchar(x)-1, nchar(x)))))
+    Type <- ifelse(endType == "00", "ALL", 
+                   ifelse(endType == "01", "VOL", 
+                          ifelse(endType == "10", "P2VEG",
+                                 ifelse(endType == "07", "DWM",
+                                        ifelse(endType == "09", "INV",
+                                               ifelse(endType %in% c("04","05"), "GRM",
+                                              "CHNG"))))))
+
+  } else {
+    Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", "CHNG", 
+                 "GROW", "MORT", "REMV", "GRM")
+    if (gui) {
+      Type <- select.list(Typelst, title="eval type", 
+		  preselect="VOL", multiple=TRUE)
+      if (length(Type)==0) Type <- "VOL"
+    } 
+    Typemiss <- Type[!Type %in% Typelst]
+    if (length(Typemiss) > 0) {
+      stop("Type must be in following list: \n", toString(Typelst))
+    }
   }
+  
   if (any(Type == "VOL") && !istree) {
     message("eval Type includes 'VOL', but istree = FALSE... no trees included")
   }
@@ -732,6 +749,7 @@ DBgetPlots <- function (states = NULL,
   if (any(Type == "CHNG")) ischng <- TRUE # SUBP_COND_CHNG_MTR
   if (any(Type == "DWM")) isdwm <- TRUE  # COND_DWM_CALC
   if (any(Type %in% c("GROW", "MORT", "REMV", "GRM"))) ischng=isgrm <- TRUE
+  
   
   if (isveg && invtype == "PERIODIC") {
     message("understory vegetation data only available for annual data\n")

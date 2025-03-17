@@ -14,7 +14,7 @@
 #' ref_codes, SPGRPCD Variable.
 #' @param states String. Name of state(s) the x table is from.
 #' @param spcdname String. Name for species output type ('COMMON', 'SCIENTIFIC', 
-#' 'SYMBOL', 'COMMON_SCIENTIFIC').
+#' 'SYMBOL', 'COMMON_SCIENTIFIC', 'NONE').
 #' @param add0 Logical. IF TRUE, keep all codes in look up table. If FALSE,
 #' only include codes that are in x.
 #' @param stopifmiss Logical. IF TRUE, stops function if missing codes in LUTx.
@@ -381,7 +381,8 @@ datLUTspp <- function(x = NULL,
 
   ## Subset ref_spp table
   ###############################################################
-  LUTx <- unique(ref_spp[, lutvars]) 
+  ref_spp <- data.table::setDT(ref_spp)
+  LUTx <- unique(ref_spp[order(ref_spp[[xvar]]), lutvars, with=FALSE]) 
 
 
   ## Merge ref_spp to datx

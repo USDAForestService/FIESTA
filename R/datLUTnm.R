@@ -39,7 +39,6 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'datlut'. 
-#' @param gui Logical. If gui, user is prompted for parameters.
 #'
 #' @return \item{xLUT}{ The input data table with look-up table variable(s). }
 #' \item{xLUTnm}{ Name of the new variable(s). } \item{LUT}{ Look up table with
@@ -94,15 +93,15 @@ datLUTnm <- function(xvar,
                      dbreturn = TRUE, 
                      overwrite = TRUE,
                      savedata = FALSE, 
-                     savedata_opts = NULL, 
-                     gui = FALSE){
+                     savedata_opts = NULL){
   #################################################################################
   ## DESCRIPTION: Merge variable(s) from a reference table stored within FIESTA  
   ##      (ref_codes) or a comma-delimited file (*.csv).
   #################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  gui <- FALSE
 
   if (gui) x=xvar=FIAname=LUT=LUTvar=LUTnewvar=datnmlst <- NULL 
 
@@ -438,7 +437,7 @@ datLUTnm <- function(xvar,
 
   } else if (FIAname) {
     xvar.ref <- getRefobject(toupper(xvar))
-	
+
     ## Check if DSTRBCD
     #################################################
     LUTvar <- ifelse (FIAname && length(grep("DSTRBCD", xvar)) == 1, "DSTRBCD", xvar)
@@ -457,7 +456,7 @@ datLUTnm <- function(xvar,
     if (group) grpvars <- c("GROUPCD", "GROUPNM") 
     ref <- setDT(FIESTAutils::ref_codes[FIESTAutils::ref_codes[["VARIABLE"]] == xvar.ref,
  		                  c(lutvars, grpvars)])
-    
+
     ## Check LUTx - xvar in LUTx
     #################################################
     if (!is.null(LUTx)) {
