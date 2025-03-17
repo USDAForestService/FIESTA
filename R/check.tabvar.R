@@ -4,11 +4,11 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
                          pltcondflds, pltcondx, cuniqueid, condid = "CONDID",
                          treex, treeflds, seedx, seedflds, estseed,
                          tuniqueid, whereqry, withqry, cvars2keep,
-                         popdatindb, popconn, SCHEMA.,
+                         popdatindb, popconn, SCHEMA., 
                          tabgrp = FALSE, tabgrpnm = NULL, 
                          tabgrpord = NULL, title.tabgrp = NULL,
                          domlut = NULL, domvarlst = NULL, 
-                         factor.addNA = FALSE, gui=FALSE) {
+                         factor.addNA = FALSE, spcdname = "COMMON_SCIENTIFIC") {
   
   ## set global variables
   tabuniquex=uniquetabvar=SITECLCD=GSSTKCD=tuniquex=suniquex=coluniquex=
@@ -17,6 +17,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
   keepNA <- TRUE
   isdbc=isdbt=bytdom=bypcdom <- FALSE
   seedclnm <- "<1"
+  gui <- FALSE
   
   
   ## define function to make factors
@@ -579,7 +580,8 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
                 tabLUT <- datLUTspp(x = x, 
                                     add0 = tab.add0, 
                                     xtxt = "tree", 
-                                    uniquex = uniquex)
+                                    uniquex = uniquex,
+                                    spcdname = spcdname)
               } else {
                 tabLUT <- datLUTnm(x = x, 
                                    xvar = tabvar, 
@@ -595,6 +597,8 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
               }
               tablut <- setDT(tabLUT$LUT)
               tabLUTnm <- tabLUT$xLUTnm
+              tabvarnm <- tabLUTnm
+              
             } ## end estseed != only
             
             if (estseed %in% c("add", "only") && !is.null(seedx)) {
@@ -622,6 +626,8 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
                 tabluts <- setDT(tabLUT$LUT)
                 tabluts <- tabluts[!tabluts[[tabvar]] %in% tablut[[tabvar]],]
                 tabLUTnm <- tabLUT$xLUTnm
+                tabvarnm <- tabLUTnm
+                
                 if (nrow(tabluts) > 0) {
                   tablut <- rbind(tablut, tabluts)
                 }
@@ -650,42 +656,44 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
                              add0 = tab.add0)
           tablut <- setDT(tabLUT$LUT)
           tabLUTnm <- tabLUT$xLUTnm
-            
-          ## append prefix
-          if (popType %in% c("CHNG")) {
-            names(tablut) <- paste0("PREV_", names(tablut))
-            tabLUTnm <- paste0("PREV_", tabLUTnm)
-          }
-
-          if (tabgrp) {
-            tabgrpord <- tabLUT$grpcode
-            tabgrpnm <- tabLUT$grpname
-            if (all(sapply(tablut[[tabgrpnm]], function(x) x == "")) || 								
-                all(is.na(tablut[[tabgrpnm]]))) {
-              stop("no groups for ", tabvar)
-            }
-            title.tabgrp <- ifelse (tabgrpord %in% ref_titles[["DOMVARNM"]], 
-                                    ref_titles[ref_titles[["DOMVARNM"]] == tabgrpord, "DOMTITLE"], tabgrpnm)
-          }
+        } 
+        
           
-          if (is.null(tab.orderby) || tab.orderby == "NONE") {
-            if (!is.null(tabLUTnm)) {
-              tab.orderby <- tabvar
-              tabvarnm <- tabLUTnm
-            }
-            if (!is.null(tab.orderby) && tab.orderby == tabvar) {
-              tab.name <- names(tablut)[names(tablut) != tabvar]
-              if (length(tab.name) > 1) {
-                message("invalid tablut... only 2 columns allowed")
-                return(NULL)
-              }
-              tabvarnm <- tab.name
-            }
-          } else {
-            if (!tab.orderby %in% names(tablut)) {
-              message("tab.orderby not in tablut")
+        # ## append prefix
+        # if (popType %in% c("CHNG")) {
+        #   names(tablut) <- paste0("PREV_", names(tablut))
+        #   tabLUTnm <- paste0("PREV_", tabLUTnm)
+        #   tabvarnew=tabvar <- paste0("PREV_", tabvar)
+        # }
+
+        if (tabgrp) {
+          tabgrpord <- tabLUT$grpcode
+          tabgrpnm <- tabLUT$grpname
+          if (all(sapply(tablut[[tabgrpnm]], function(x) x == "")) || 								
+              all(is.na(tablut[[tabgrpnm]]))) {
+              stop("no groups for ", tabvar)
+          }
+          title.tabgrp <- ifelse (tabgrpord %in% ref_titles[["DOMVARNM"]], 
+                                    ref_titles[ref_titles[["DOMVARNM"]] == tabgrpord, "DOMTITLE"], tabgrpnm)
+        }
+          
+        if (is.null(tab.orderby) || tab.orderby == "NONE") {
+          if (!is.null(tabLUTnm)) {
+            tab.orderby <- tabvar
+            tabvarnm <- tabLUTnm
+          }
+          if (!is.null(tab.orderby) && tab.orderby == tabvar) {
+            tab.name <- names(tablut)[names(tablut) != tabvar]
+            if (length(tab.name) > 1) {
+              message("invalid tablut... only 2 columns allowed")
               return(NULL)
             }
+            tabvarnm <- tab.name
+          }
+        } else {
+          if (!tab.orderby %in% names(tablut)) {
+            message("tab.orderby not in tablut")
+            return(NULL)
           }
         }
       }  ## end if (tab.FIAname & !is.null(tablut))
