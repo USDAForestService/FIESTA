@@ -2205,8 +2205,8 @@ datSumTree <- function(tree = NULL,
   ####################################################################
 
   #define grpby variables
-  tgrpbyvars <- paste0(grpby., uniqueid)
-  #tgrpbyvars <- paste0("tdat.", tsumuniqueid)
+  #tgrpbyvars <- paste0(grpby., uniqueid)
+  tgrpbyvars <- paste0("tdat.", tsumuniqueid)
 
   ## add grpby variable to select qry query
   tselectqry <- paste0("\nSELECT ", toString(tgrpbyvars))
