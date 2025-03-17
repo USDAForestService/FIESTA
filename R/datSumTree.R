@@ -165,7 +165,7 @@ datSumTree <- function(tree = NULL,
   SCHEMA. <- ""
   checkNA = FALSE
   returnDT = TRUE
-  seedonly=addseed <- FALSE
+  seedonly=addseed=keepall <- FALSE
 
   ## Query alias.
   talias. <- "t."
@@ -686,10 +686,14 @@ datSumTree <- function(tree = NULL,
       if (!is.null(BAchk) && is.null(findnm("BA", tsumvarchklst, returnNULL = TRUE))) {
         BAderivechk <- findnm("BA", names(tderive), returnNULL = TRUE)
         if (is.null(BAderivechk)) {
+          baderive <- "power(dia, 2) * 0.005454"
+          if (TPA) baderive <- paste0(baderive, " * tpa_unadj")
+          if (adjtree) baderive <- paste0(baderive, " * tadjfac")
+
           if (!is.null(tderive)) {
-            tderive[["BA"]] <- "SUM(power(dia, 2) * 0.005454 * tpa_unadj)"
+            tderive[["BA"]] <- paste0("SUM(", baderive, ")")
           } else {
-            tderive <- list(BA = "SUM(power(dia, 2) * 0.005454 * tpa_unadj)")
+            tderive <- list(BA = paste0("SUM(", baderive, ")"))
           }
           tsumvarlst <- tsumvarlst[tsumvarlst != BAderivechk]
           if (length(tsumvarlst) == 0) tsumvarlst <- NULL
@@ -977,9 +981,19 @@ datSumTree <- function(tree = NULL,
     
     ## Check plt table
     if (!is.null(plt) && is.data.frame(plt)) {
+      
       pltx <- pcheck.table(plt, gui=gui, tabnm="plot", caption="Plot table?")
       if (!is.null(pltx)) {
-        pltx <- setDT(int64tochar(pltx))
+        if ("sf" %in% class(pltx)) {
+          pltsp <- TRUE
+          sppltx <- pltx
+          pltx <- sf::st_drop_geometry(pltx)
+          if ("geometry" %in% names(pltx)){
+            pltx$geometry <- NULL
+          }
+        }
+        
+        pltx <- setDF(int64tochar(pltx))
         pltflds <- names(pltx)
         plotnm <- "pltx"
       }
@@ -1023,11 +1037,11 @@ datSumTree <- function(tree = NULL,
             })
     } 
     
-    ## set key 
-    if (!is.null(pltx) && is.data.frame(pltx)) {
-      pltx <- setDT(pltx)
-      setkeyv(pltx, puniqueid)
-    }
+    # ## set key 
+    # if (!is.null(pltx) && is.data.frame(pltx)) {
+    #   pltx <- setDT(pltx)
+    #   setkeyv(pltx, puniqueid)
+    # }
     
     ## build pltidsWITHqry
     if (is.null(pltidsWITHqry)) {
@@ -2359,7 +2373,6 @@ datSumTree <- function(tree = NULL,
     stop()
   }
 
-
   # uniqueidchk <- unlist(sapply(uniqueid, findnm, names(sumdat), returnNULL = TRUE))
   # if (length(uniqueidchk) < length(uniqueid)) {
   #   message("uniqueid (", toString(uniqueid), ") is not in resulting table: ",
@@ -2374,17 +2387,28 @@ datSumTree <- function(tree = NULL,
     tcols <- tsumvardf$NAME
     sumdat[, (tcols) := round(.SD, tround), .SDcols=tcols]
   }
-  
 
   ## Join tables
   #############################################################
   if (keepall) {
     if (!bycond && !is.null(pltx)) {
-      sumdat <- sumdat[pltx]
-      #sumdat <- merge(pltx, sumdat, all.x=TRUE)
-      if (NAto0) {
-        sumdat <- DT_NAto0(sumdat, cols=tcols)
+      if (pltsp) {
+        sumdat <- merge(sppltx, sumdat, by.x=puniqueid, by.y=uniqueid)
+        tsumuniqueid <- puniqueid
+        returnDT <- FALSE
+
+      } else {
+        ## set key
+        pltx <- setDT(pltx)
+        setkeyv(pltx, puniqueid)
+        
+        sumdat <- sumdat[pltx]
+        #sumdat <- merge(pltx, sumdat, all.x=TRUE)
       }
+      
+      #if (NAto0) {
+      #  sumdat <- DT_NAto0(sumdat, cols=tcols)
+      #}
     }
     if (bycond && !is.null(condx)) {
       sumdat <- sumdat[condx]
@@ -2394,7 +2418,6 @@ datSumTree <- function(tree = NULL,
     }
     setcolorder(sumdat, c(names(sumdat)[!names(sumdat) %in% tcols], tcols))
   }
-
 
   ## Get metadata
   #############################################################
@@ -2468,13 +2491,23 @@ datSumTree <- function(tree = NULL,
     }
   }
 
-  if (!returnDT) {
-    sumdat <- setDF(sumdat)
+  if (returnDT) {
+    if ("sf" %in% class(sumdat)) {
+      sumdat <- setDT(sf::st_drop_geometry(sumdat))
+    } else {
+      sumdat <- setDT(sumdat)
+    }
   }
   sumtreelst <- list(treedat = sumdat,
                      sumvars = tsumvardf$NAME,
+<<<<<<< Updated upstream
                      tsumuniqueid = uniqueid,
                      treeqry = tree.qry)
+=======
+                     tsumuniqueid = tsumuniqueid,
+                     treeqry = tree.qry,
+                     pltsp = pltsp)
+>>>>>>> Stashed changes
   #sumtreelst$estunits <- estunits
   if (!is.null(tfilter)) {
     sumtreelst$tfilter <- tfilter
