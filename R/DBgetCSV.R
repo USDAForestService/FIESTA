@@ -118,6 +118,9 @@ DBgetCSV <- function(DBtable,
       }
       
       temp <- tempfile()
+      utils::download.file(fn, temp, mode="wb", quiet=TRUE)
+      
+      temp <- tempfile()
       tempdir <- tempdir()
       tab <- tryCatch(
 			  utils::download.file(fn, temp, mode="wb", quiet=FALSE),
