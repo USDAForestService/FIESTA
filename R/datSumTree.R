@@ -155,7 +155,7 @@ datSumTree <- function(tree = NULL,
   ## Set global variables
   pltx=treex=seedx=cond.nonsamp.filter=meta=tvars2convert=ssumvarlst=
     cntvar=fname=tderivevars=pltidsnm=domainlst=classifyvars=propvars=tpcwhereqry=
-    condx=pltx <- NULL
+    condx=pltx=sppltx <- NULL
   
   #ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry=pcfromqry=pcselectvars=tpavarnm=pcdomainlst <- NULL
@@ -2393,9 +2393,12 @@ datSumTree <- function(tree = NULL,
   if (keepall) {
     if (!bycond && !is.null(pltx)) {
       if (pltsp) {
-        sumdat <- merge(sppltx, sumdat, by.x=puniqueid, by.y=uniqueid)
+        sumdat <- merge(sppltx, sumdat, by.x=puniqueid, by.y=uniqueid, all.x=TRUE)
         tsumuniqueid <- puniqueid
         returnDT <- FALSE
+        if (NAto0) {
+          for (col in tcols) sumdat[is.na(sumdat[[col]]), col] <- 0
+        }
 
       } else {
         ## set key
@@ -2500,7 +2503,7 @@ datSumTree <- function(tree = NULL,
   }
   sumtreelst <- list(treedat = sumdat,
                      sumvars = tsumvardf$NAME,
-                     tsumuniqueid = uniqueid,
+                     tsumuniqueid = tsumuniqueid,
                      treeqry = tree.qry,
                      pltsp = pltsp)
   #sumtreelst$estunits <- estunits

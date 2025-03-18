@@ -159,10 +159,19 @@
 #' datSumTreeDom(tree = FIESTA::WYtree,
 #'               plt = FIESTA::WYplt, 
 #'               bycond = FALSE, 
-#'               tsumvar = "TPA_UNADJ", 
+#'               tsumvar = "PLT_CN", 
 #'               tdomtot = TRUE, 
 #'               tdomprefix = "CNT", 
 #'               tfilter = "STATUSCD==1",
+#'               datSum_opts = list(tround = 0))
+#'               
+#' # Sum of Number of Live Trees by Species, Including Seedlings
+#' datSumTreeDom(tree = WYtree,
+#'               seed = WYseed, 
+#'               bycond = FALSE, 
+#'               tsumvar = "PLT_CN", 
+#'               tdomtot = TRUE, 
+#'               tdomprefix = "CNT", 
 #'               datSum_opts = list(tround = 0))
 #' }
 #' @export datSumTreeDom
@@ -421,6 +430,12 @@ datSumTreeDom <- function(tree = NULL,
   classifynmlst <- sumdat$classifynmlst
   tround <- sumdat$tround
   domainlst <- c(pcdomainlst, tdomainlst)
+  pltsp <- sumdat$pltsp
+
+  if (pltsp) {
+    sppltx <- tdomtree[, names(tdomtree)[!names(tdomtree) %in% tsumvarnm]]
+    tdomtree <- setDT(sf::st_drop_geometry(tdomtree))
+  }
 
   ## get sum by fields in data table
   keepall <- datSum_opts$keepall
@@ -430,7 +445,7 @@ datSumTreeDom <- function(tree = NULL,
       tdomtree <- tdomtree[tdomtree[, rowSums(!is.na(.SD)) > 0, .SDcols = domainlst],]
     }
   }
-  
+
   if (length(tsumvarnm) > 1) {
     tsumnm=tsumvarnm <- tsumvarnm[length(tsumvarnm)]
   } else {
@@ -768,51 +783,78 @@ datSumTreeDom <- function(tree = NULL,
                outfolder = outfolder, 
                ylabel = tsumvarnm) 
   }
-  
+
   ## Merge if keepall
   if (keepall) {
-    ## Check if class of cuniqueid matches class of cuniqueid
-    tabs <- check.matchclass(dat, tdoms, key(dat), key(tdoms))
-    dat <- tabs$tab1
-    tdoms <- tabs$tab2
 
-    tdoms <- tdoms[dat]
-    if (NAto0) {
-      tdoms <- DT_NAto0(tdoms, cols=tdomscols)
-    }
-    setcolorder(tdoms, c(names(tdoms)[!names(tdoms) %in% tdomscols], tdomscols))
-    
-    if (presence) {
-      ## Check if class of cuniqueid matches class of cuniqueid
-      tabs <- check.matchclass(dat, tdoms.pres, key(dat), key(tdoms.pres))
-      dat <- tabs$tab1
-      tdoms.pres <- tabs$tab2
-      
-      tdoms.pres <- tdoms.pres[dat]
+    NAcols <- c(tdomscols, tdomtotnm)
+    if (pltsp) {
+      tdoms <- merge(sppltx, tdoms, by=tsumuniqueid, all.x=TRUE)
       if (NAto0) {
-        tdoms.pres <- DT_NAto0(tdoms.pres, cols=tdomscols)
+        for (col in NAcols) tdoms[is.na(tdoms[[col]]), col] <- 0
       }
-      setcolorder(tdoms.pres, c(names(tdoms.pres)[!names(tdoms.pres) %in% tdomscols], tdomscols))
+    } else {
+      ## Check if class of cuniqueid matches class of cuniqueid
+      tabs <- check.matchclass(dat, tdoms, tsumuniqueid, key(tdoms))
+      dat <- tabs$tab1
+      tdoms <- tabs$tab2
+
+      tdoms <- tdoms[dat]
+      if (NAto0) {
+        tdoms <- DT_NAto0(tdoms, cols=NAcols)
+      }
+      setcolorder(tdoms, c(names(tdoms)[!names(tdoms) %in% NAcols], NAcols))
+    }
+   
+    if (presence) {
+      
+      if (pltsp) {
+        tdoms.pres <- merge(sppltx, tdoms.pres, by=tsumuniqueid, all.x=TRUE)
+        if (NAto0) {
+          for (col in NAcols) tdoms.pres[is.na(tdoms.pres[[col]]), col] <- 0
+        }
+      } else {
+        
+        ## Check if class of cuniqueid matches class of cuniqueid
+        tabs <- check.matchclass(dat, tdoms.pres, tsumuniqueid, key(tdoms.pres))
+        dat <- tabs$tab1
+        tdoms.pres <- tabs$tab2
+      
+        tdoms.pres <- tdoms.pres[dat]
+        if (NAto0) {
+          tdoms.pres <- DT_NAto0(tdoms.pres, cols=NAcols)
+        }
+        setcolorder(tdoms.pres, c(names(tdoms.pres)[!names(tdoms.pres) %in% NAcols], NAcols))
+      }
     }
     
     if (proportion) {
-      ## Check if class of cuniqueid matches class of cuniqueid
-      tabs <- check.matchclass(dat, tdoms.prop, key(dat), key(tdoms.prop))
-      dat <- tabs$tab1
-      tdoms.prop <- tabs$tab2
+      if (pltsp) {
+        tdoms.prop <- merge(sppltx, tdoms.prop, by=tsumuniqueid, all.x=TRUE)
+        if (NAto0){
+          for (col in NAcols) tdoms.prop[is.na(tdoms.prop[[col]]), col] <- 0
+        }
+        
+      } else {
+        
+        ## Check if class of cuniqueid matches class of cuniqueid
+        tabs <- check.matchclass(dat, tdoms.prop, tsumuniqueid, key(tdoms.prop))
+        dat <- tabs$tab1
+        tdoms.prop <- tabs$tab2
       
-      tdoms.prop <- tdoms.prop[dat]
-      if (NAto0) {
-        tdoms.prop <- DT_NAto0(tdoms.prop, cols=tdomscols)
+        tdoms.prop <- tdoms.prop[dat]
+        if (NAto0) {
+          tdoms.prop <- DT_NAto0(tdoms.prop, cols=NAcols)
+        }
+        setcolorder(tdoms.prop, c(names(tdoms.prop)[!names(tdoms.prop) %in% NAcols], NAcols))
       }
-      setcolorder(tdoms.prop, c(names(tdoms.prop)[!names(tdoms.prop) %in% tdomscols], tdomscols))
     }
   }
 
   sumtreef <- tdoms
   if (proportion) sumtreef.prop <- tdoms.prop 
   if (presence) sumtreef.pres <- tdoms.pres
-
+  
 
   if (savedata) {
     if (pltsp) {
