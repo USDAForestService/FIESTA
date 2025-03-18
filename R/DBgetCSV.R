@@ -122,8 +122,7 @@ DBgetCSV <- function(DBtable,
       tab <- tryCatch(
 			  utils::download.file(fn, temp, mode="wb", quiet=FALSE),
 			  error=function(e) {
-			    warning(e)
-  			  return(NULL)
+			    stop(e)
         }
       )
       if (is.null(tab)) {
