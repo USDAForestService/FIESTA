@@ -2503,7 +2503,7 @@ datSumTree <- function(tree = NULL,
   }
   sumtreelst <- list(treedat = sumdat,
                      sumvars = tsumvardf$NAME,
-                     tsumuniqueid = tsumuniqueid,
+                     tsumuniqueid = uniqueid,
                      treeqry = tree.qry,
                      pltsp = pltsp)
   #sumtreelst$estunits <- estunits
