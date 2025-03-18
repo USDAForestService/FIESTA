@@ -2500,14 +2500,9 @@ datSumTree <- function(tree = NULL,
   }
   sumtreelst <- list(treedat = sumdat,
                      sumvars = tsumvardf$NAME,
-<<<<<<< Updated upstream
                      tsumuniqueid = uniqueid,
-                     treeqry = tree.qry)
-=======
-                     tsumuniqueid = tsumuniqueid,
                      treeqry = tree.qry,
                      pltsp = pltsp)
->>>>>>> Stashed changes
   #sumtreelst$estunits <- estunits
   if (!is.null(tfilter)) {
     sumtreelst$tfilter <- tfilter

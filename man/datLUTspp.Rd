@@ -41,7 +41,7 @@ ref_codes, SPGRPCD Variable.}
 \item{states}{String. Name of state(s) the x table is from.}
 
 \item{spcdname}{String. Name for species output type ('COMMON', 'SCIENTIFIC', 
-'SYMBOL', 'COMMON_SCIENTIFIC').}
+'SYMBOL', 'COMMON_SCIENTIFIC', 'NONE').}
 
 \item{add0}{Logical. IF TRUE, keep all codes in look up table. If FALSE,
 only include codes that are in x.}

@@ -546,7 +546,7 @@ modGBtree <- function(GBpopdat,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
-                 whereqry = pcwhereqry, spcdname = spcdname)
+                 whereqry = pcwhereqry)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
