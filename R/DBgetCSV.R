@@ -116,19 +116,18 @@ DBgetCSV <- function(DBtable,
         fn <- paste0(downloadfn, stabbr, "_", toupper(DBtable), ".zip")
         message(paste("downloading and extracting", DBtable, "for", stabbr, "..."))
       }
-
+      
       temp <- tempfile()
       tempdir <- tempdir()
       tab <- tryCatch(
-			  utils::download.file(fn, temp, mode="wb", quiet=TRUE),
+			  utils::download.file(fn, temp, mode="wb", quiet=FALSE),
 			  error=function(e) {
-			    warning(basename(fn), " does not exist")
-  			    return(NULL)
+			    warning(e)
+  			  return(NULL)
         }
       )
       if (is.null(tab)) {
-        message(DBtable, " is not available")
-        return(NULL)
+        stop(DBtable, " is not available")
       }
 
       filenm <- utils::unzip(temp, exdir=tempdir)
