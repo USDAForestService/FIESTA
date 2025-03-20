@@ -2,9 +2,8 @@
 .github$
 .git$
 ^Meta$
-
 ^inst\extdata
-
+^vignettes/articles$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^_pkgdown\.yml$

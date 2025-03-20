@@ -288,24 +288,6 @@ head(GBpopdat$treex)
 head(GBpopdat$seedx)
 ```
 
-One may also want to compare `FIESTA` output with FIADB pop_stratum table for WY in the 2013 evaluation to check for consistency. The can be done as follows: 
-
-```{r, results = TRUE, messages = FALSE}
-qry <- "SELECT ESTN_UNIT, STRATUMCD, P1POINTCNT, P2POINTCNT,
-               ADJ_FACTOR_MACR, ADJ_FACTOR_SUBP, ADJ_FACTOR_MICR
-        FROM POP_STRATUM
-        WHERE EVALID = 561301
-        ORDER BY ESTN_UNIT, STRATUMCD"
-
-pop_stratum <- DBqryCSV(qry, 
-                        states="Wyoming",
-                        sqltables="POP_STRATUM")
-
-
-head(pop_stratum)
-
-head(GBpopdat$stratalut)
-```
 
 </details>
 
