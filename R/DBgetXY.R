@@ -245,7 +245,13 @@ DBgetXY <- function (states = NULL,
                                    varnm = "xy_datsource", gui=gui, 
                                    checklst = xy_datsourcelst, 
                                    caption="XY data source?")
-
+    if (is.null(xy_datsource)) {
+      if (!is.null(xy_dsn) && !is.null(datsource)) {
+        xy_datsource <- datsource
+      } else {
+        stop("xy_datsource is invalid")
+      }
+    }
     if (xy_datsource == "sqlite" && !is.null(xy_dsn)) {
       xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE)
       xytablst <- DBI::dbListTables(xyconn)
@@ -253,10 +259,7 @@ DBgetXY <- function (states = NULL,
         stop("no data in ", xy_datsource)
       }
     }
-    if (is.null(xy_datsource) && !is.null(datsource)) {
-      xy_datsource <- datsource
-    }
-    
+
     ## Check xy database
     ####################################################################
     if (all(list(class(xy), class(plot_layer)) == "character") && 
@@ -517,7 +520,8 @@ DBgetXY <- function (states = NULL,
   }    
 
   if (!is.null(measyrs) || measCur) {
-    XYvarlst <- unique(c(XYvarlst, "MEASYEAR", "PLOT_STATUS_CD", "INVYR")) 
+    #XYvarlst <- unique(c(XYvarlst, "MEASYEAR", "PLOT_STATUS_CD", "INVYR")) 
+    XYvarlst <- unique(c(XYvarlst, "INVYR")) 
   }
   if (!is.null(invyrs)) {
     XYvarlst <- unique(c(XYvarlst, "INVYR")) 
@@ -886,7 +890,16 @@ DBgetXY <- function (states = NULL,
       if (!is.null(pmisschk)) {
         xymiss <- pmisschk
         if (length(xymiss) > 0) {
-          stop("missing essential variables: ", toString(xymiss))
+          pltindx <- sapply(c("STATECD", "UNITCD", "COUNTYCD", "PLOT"), findnm, names(XYdf), returnNULL = TRUE)
+          if (!is.null(pltindx) && !any(duplicated(XYdf[, pltindx, with=FALSE])) && measCur) {
+            measCur <- FALSE
+            allyrs <- TRUE
+            plotnm=pvars <- NULL
+            pjoinid <- xy.uniqueid
+          } else {
+            #stop("missing essential variables: ", toString(xymiss))
+            stop("missing essential variables: ", toString(xymiss))
+          }
         } else {
           warning("missing plot variables: ", toString(pmiss))
         }
@@ -924,7 +937,7 @@ DBgetXY <- function (states = NULL,
         }
       }
 	  }
-	
+
     ## Define xyfromqry
 	  xyfromqry <- paste0("\nFROM ", SCHEMA., xynm, " xy")
 	  xyfromqry <- paste0(xyfromqry, "\nINNER JOIN ", plotnm, " p ON(xy.", xyjoinid, " = p.", pjoinid, ")")
@@ -965,9 +978,13 @@ DBgetXY <- function (states = NULL,
 	    xyfromqry2 <- paste0(xyfromqry2, " and ", valias., varCur, " = maxyear.maxyr)")
       #xyfromqry <- paste0(xyfromqry, xyfromqry2)	  
 	  } 
-	  xyqry <- paste0("SELECT ", toString(c(paste0("xy.", xyvars), paste0("p.", pvars))), 
+	  if (is.null(pvars)) {
+	    xyqry <- paste0("SELECT ", toString(c(paste0("xy.", xyvars))), 
+	                    xyfromqry)
+	  } else {
+	    xyqry <- paste0("SELECT ", toString(c(paste0("xy.", xyvars), paste0("p.", pvars))), 
              xyfromqry)	
-
+	  }
     ## Inventory year table query
     yrvar <- ifelse(!is.null(invyrs), "INVYR", "MEASYEAR")
 	  yrvarnmA=stcdnmA <- NULL
