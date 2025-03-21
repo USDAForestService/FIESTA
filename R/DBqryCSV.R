@@ -62,7 +62,11 @@ DBqryCSV <- function(sql, states=NULL, sqltables=NULL) {
 
   ## Get tables
   for (tab in sqltables) {
-    assign(tab, FIESTA::DBgetCSV(DBtable=tab, states=states))
+    tb <- DBgetCSV(DBtable = tab, states = states)
+    if (!is.null(tb)) {
+      assign(tab, tb)
+    }
+
   }
 
   ## Query dataset

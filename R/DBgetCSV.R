@@ -77,74 +77,56 @@ DBgetCSV <- function(DBtable,
   ## Check states and get in proper format (abbr)
   stabbrs <- pcheck.states(states, "ABBR")
 
-  ## Check ZIP
-  ZIP <- pcheck.logical(ZIP, varnm="ZIP", title="Zip files?",
-    first="YES")
 
   ###################################################################
   ## Define gettab function
   ###################################################################
-  if (!ZIP) {
-    gettab <- function(stabbr=NULL, DBtable) {
-      if (is.null(stabbr)) {
-        fn <- paste0(downloadfn, toupper(DBtable), ".csv")
-        message(paste("downloading", DBtable, "..."))
-      } else {
-        fn <- paste0(downloadfn, stabbr, "_", toupper(DBtable), ".csv")
-        message(paste("downloading", DBtable, "for", stabbr, "..."))
-      }
-      tab <- tryCatch(
-			  fread(fn, integer64="character"),
-		  	  error=function(e) {
-				  warning(basename(fn), " does not exist")
-  			  return(NULL)
-             }
-      )
-      if (nrow(tab) == 0) {
-        stop("invalid table in datamart")
-      }
-      tab <- changeclass(tab)
-      return(tab)
+    
+  gettab <- function(stabbr = NULL, DBtable) {
+    
+    if (is.null(stabbr)) {
+      fn <- paste0(downloadfn, toupper(DBtable), ".zip")
+      message(paste("downloading and extracting", DBtable, "..."))
+    } else {
+      fn <- paste0(downloadfn, stabbr, "_", toupper(DBtable), ".zip")
+      message(paste("downloading and extracting", DBtable, "for", stabbr, "..."))
     }
 
-  } else {
-    gettab <- function(stabbr=NULL, DBtable) {
-      if (is.null(stabbr)) {
-        fn <- paste0(downloadfn, toupper(DBtable), ".zip")
-        message(paste("downloading and extracting", DBtable, "..."))
-      } else {
-        fn <- paste0(downloadfn, stabbr, "_", toupper(DBtable), ".zip")
-        message(paste("downloading and extracting", DBtable, "for", stabbr, "..."))
+    temp <- tempfile()
+    tempdir <- tempdir()
+    
+    tab <- tryCatch(
+      {
+        utils::download.file(fn, temp, mode = "wb", quiet = TRUE)
+      },
+		  error = function(e) {
+		    message(e)
+		    NULL
       }
-
-      temp <- tempfile()
-      tempdir <- tempdir()
-      tab <- tryCatch(
-			  utils::download.file(fn, temp, mode="wb", quiet=TRUE),
-			  error=function(e) {
-			    warning(basename(fn), " does not exist")
-  			    return(NULL)
-        }
-      )
-      if (is.null(tab)) {
-        message(DBtable, " is not available")
-        return(NULL)
-      }
-
-      filenm <- utils::unzip(temp, exdir=tempdir)
-      tab <- fread(filenm, integer64="character")
-      if (nrow(tab) == 0) {
-        message(DBtable, " has 0 rows")
-		    return(NULL)
-	    }
-      tab <- changeclass(tab)
-
-      unlink(temp)
-      unlink(tempdir)
-      file.remove(filenm)
-      return(tab)
+    )
+    
+    # if download.file fails it either throws an error or invisibly returns a non-zero integer value
+    if (is.null(tab) || tab != 0) {
+      stop("Download of ", DBtable, " was unsuccessful")
     }
+
+    filenm <- utils::unzip(temp, exdir = tempdir)
+    tab_out <- fread(filenm, integer64 = "character")
+    
+    if (nrow(tab_out) == 0) {
+      stop("Attempted download of ", DBtable, " returned zero rows.")
+    }
+    
+    tab_out <- changeclass(tab_out)
+
+    unlink(temp)
+    unlink(tempdir)
+    file.remove(filenm)
+    
+    return(tab_out)
+    
   }
+  
 
   ###################################################################
   ## Get tables
@@ -155,22 +137,14 @@ DBgetCSV <- function(DBtable,
     csvtable <- tryCatch(
       rbindlist(lapply(stabbrs, gettab, DBtable), fill=TRUE),
       error=function(e) {
-        message(e, "\n")
-        return(NULL)
+        stop(e, "\n")
       }
     )
   }
       
-#    csvtable <- tryCatch(
-#      do.call(rbind, lapply(stabbrs, gettab, DBtable)),
-#		    error=function(e) {
-# 		    message(e, "\n")
-#		    return(NULL)
-#      }
-#    )
-#  }
+
   if (is.null(csvtable)) {
-    return(NULL)
+    stop("Unable to download table(s).")
   }
   names(csvtable) <- toupper(names(csvtable))
 
