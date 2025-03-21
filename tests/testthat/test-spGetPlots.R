@@ -2,7 +2,7 @@
 
 test_that("multiplication works", {
 
-  skip()
+  skip_on_cran()
 
   # Set Up Data
   WYbhfn <- system.file("extdata",

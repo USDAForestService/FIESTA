@@ -1,6 +1,6 @@
 test_that("Get XY creates consistent result", {
   
-  skip()
+  skip_on_cran()
 
   # Set up Data
   WYbhfn <- system.file("extdata",
