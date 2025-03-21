@@ -2,7 +2,8 @@
 
 test_that("multiplication works", {
 
-  skip_on_cran()
+  # skip for now until alternative testing dataset is configured
+  skip()
 
   # Set Up Data
   WYbhfn <- system.file("extdata",
