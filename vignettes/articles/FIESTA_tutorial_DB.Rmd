@@ -1,5 +1,7 @@
 ---
 title: "Database Tools"
+description: >
+   Explore the various database utility functions available within FIESTA.
 ---
 
 
@@ -35,13 +37,13 @@ FUNCTION  | DESCRIPTION
 
 First, you'll need to load the `FIESTA` library:
 
-```{r, warning = F, message = F}
+```
 library(FIESTA)
 ```
 
 Next, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For this vignette, we have saved our outfolder file path as the `outfolder` object in a temporary directory. We also set a few default options preferred for this vignette.
 
-```{r}
+```
 outfolder <- tempdir()
 ```
 
@@ -198,7 +200,7 @@ head(nplots3)
 #> 6      19  2003      114
 ```
 
-###`DBgetEvalid()`
+### `DBgetEvalid()`
 
 The `DBgetEvalid` function gets information for FIA Evaluations. 
 
