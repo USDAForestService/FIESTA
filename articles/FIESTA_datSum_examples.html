@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FIESTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.6.4.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.7.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,7 +76,7 @@
       <h1>Tree Data Summaries</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/USDAForestService/FIESTA/blob/master/vignettes/FIESTA_datSum_examples.Rmd" class="external-link"><code>vignettes/FIESTA_datSum_examples.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/USDAForestService/FIESTA/blob/master/vignettes/articles/FIESTA_datSum_examples.Rmd" class="external-link"><code>vignettes/articles/FIESTA_datSum_examples.Rmd</code></a></small>
       <div class="d-none name"><code>FIESTA_datSum_examples.Rmd</code></div>
     </div>
 
@@ -117,8 +117,8 @@ plots.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Returned list items</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sumdat1</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "tfilter"     </span></span>
-<span><span class="co">## [6] "tround"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "pltsp"       </span></span>
+<span><span class="co">## [6] "tfilter"      "tround"</span></span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## The first six rows of the summarized data table.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sumdat1</span><span class="op">$</span><span class="va">treedat</span><span class="op">)</span></span></code></pre></div>
@@ -182,8 +182,8 @@ plugged into the query that is used to generate collect the data.</p>
 <span></span>
 <span><span class="co">## Returned list items</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sumdat2</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "tfilter"     </span></span>
-<span><span class="co">## [6] "tdomainlst"   "pcdomainlst"  "tround"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "pltsp"       </span></span>
+<span><span class="co">## [6] "tfilter"      "tdomainlst"   "pcdomainlst"  "tround"</span></span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## The first six rows of the summarized data table.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sumdat2</span><span class="op">$</span><span class="va">treedat</span><span class="op">)</span></span></code></pre></div>
@@ -267,9 +267,9 @@ bydomainlst.</p>
 <span></span>
 <span><span class="co">## Returned list items</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sumdat3</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "treedat"       "sumvars"       "tsumuniqueid"  "treeqry"      </span></span>
-<span><span class="co">## [5] "tfilter"       "tdomainlst"    "pcdomainlst"   "classifynmlst"</span></span>
-<span><span class="co">## [9] "tround"</span></span></code></pre>
+<pre><code><span><span class="co">##  [1] "treedat"       "sumvars"       "tsumuniqueid"  "treeqry"      </span></span>
+<span><span class="co">##  [5] "pltsp"         "tfilter"       "tdomainlst"    "pcdomainlst"  </span></span>
+<span><span class="co">##  [9] "classifynmlst" "tround"</span></span></code></pre>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## The first six rows of the summarized data table.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sumdat3</span><span class="op">$</span><span class="va">treedat</span><span class="op">)</span></span></code></pre></div>
@@ -329,13 +329,13 @@ bydomainlst.</p>
 <span><span class="co">##    WHEN tdat.SPCD = 745 THEN 'H'</span></span>
 <span><span class="co">##    WHEN tdat.SPCD = 746 THEN 'H'</span></span>
 <span><span class="co">##    WHEN tdat.SPCD = 749 THEN 'H'</span></span>
-<span><span class="co">##    WHEN tdat.SPCD = 823 THEN 'H' END) AS SPCDCL,</span></span>
+<span><span class="co">##    WHEN tdat.SPCD = 823 THEN 'H' END) AS 'SPCDCL',</span></span>
 <span><span class="co">##   (CASE </span></span>
 <span><span class="co">##    WHEN tdat.DIA IS NULL THEN '&lt;1'</span></span>
 <span><span class="co">##    WHEN tdat.DIA &gt;= 0 AND tdat.DIA &lt; 20 THEN '0-20'</span></span>
 <span><span class="co">##    WHEN tdat.DIA &gt;= 20 AND tdat.DIA &lt; 40 THEN '20-40'</span></span>
 <span><span class="co">##    WHEN tdat.DIA &gt;= 40 AND tdat.DIA &lt; 80 THEN '40-80'</span></span>
-<span><span class="co">##    WHEN tdat.DIA &gt;= 80 THEN '80+' END) AS DIACL,   </span></span>
+<span><span class="co">##    WHEN tdat.DIA &gt;= 80 THEN '80+' END) AS 'DIACL',   </span></span>
 <span><span class="co">##   COALESCE(SUM(CASE WHEN src = 'TREE' THEN TPA_UNADJ ELSE 0 END),0) AS COUNT_TREE,  </span></span>
 <span><span class="co">##   COALESCE(SUM(CASE WHEN src = 'TREE' THEN BA * TPA_UNADJ ELSE 0 END),0) AS BA_LIVE,  </span></span>
 <span><span class="co">##   COALESCE(SUM(CASE WHEN src = 'TREE' THEN VOLCFNET * TPA_UNADJ ELSE 0 END),0) AS VOLNET_LIVE,  </span></span>
@@ -363,7 +363,8 @@ bydomainlst.</p>
 <span>                          </span>
 <span><span class="co">## Returned list items</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sumdat4</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "tround"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "pltsp"       </span></span>
+<span><span class="co">## [6] "tround"</span></span></code></pre>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## The first six rows of the summarized data table.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sumdat4</span><span class="op">$</span><span class="va">treedat</span><span class="op">)</span></span></code></pre></div>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FIESTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.6.4.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.7.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,8 +71,7 @@
 <span>  dbreturn <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  gui <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  savedata_opts <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -107,7 +106,7 @@ ref_codes, SPGRPCD Variable.</p></dd>
 
 <dt id="arg-spcdname">spcdname<a class="anchor" aria-label="anchor" href="#arg-spcdname"></a></dt>
 <dd><p>String. Name for species output type ('COMMON', 'SCIENTIFIC',
-'SYMBOL', 'COMMON_SCIENTIFIC').</p></dd>
+'SYMBOL', 'COMMON_SCIENTIFIC', 'NONE').</p></dd>
 
 
 <dt id="arg-add-">add0<a class="anchor" aria-label="anchor" href="#arg-add-"></a></dt>
@@ -158,10 +157,6 @@ in x, overwrites class name.</p></dd>
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'datlut'.</p></dd>
 
-
-<dt id="arg-gui">gui<a class="anchor" aria-label="anchor" href="#arg-gui"></a></dt>
-<dd><p>Logical. If gui, user is prompted for parameters.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -193,8 +188,6 @@ sort(unique(ref_codes$VARIABLE))</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">WYtreelut</span> <span class="op">&lt;-</span> <span class="fu">datLUTspp</span><span class="op">(</span><span class="va">WYtree</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> duplicated values exist in species ref:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Norfolk Island pine, mati, ukall ra ngebard, devils-pepper, black wattle, sandalwood, raintree, hoawa, alaa, mamalava, lathberry, Chinese banyan, aoa, peacocksplume, tilol, mangrove, olive, fanuamamala, bastard oak, Saitamu, laulilii, Japanese cedar, saltcedar, tropical almond, esemiich, chesemiich, yellowwood, coconut palm, nightblooming cactus, toyon, hau kuahiwi, common teatree, turpentine tree, asi vai, asi, popona, poumuli, senna, Oriental mangrove, mesecheues, goldenrain tree, masame, vitiensis, bullwood, bauhinia, ahakea, samoensis, dermarm, papaya, scorpionbush, biut, mango, pumpwood, pochote, Elaeocarpus, taputoi, loquat, tiger's claw, Dubautia, date palm, bayrumtree, gasu, ongor, ongor, ertochet, olioli, kattar, cyrtandra, cocobolo, kesiamel, omechidel, ochod, ailanthus, luluhut, melaleuca, cinnamon, Monoa melicope</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">WYtreelut</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "xLUT"    "xLUTnm"  "LUT"     "ref_spp"</span>
 <span class="r-in"><span><span class="va">WYtree2</span> <span class="op">&lt;-</span> <span class="va">WYtreelut</span><span class="op">$</span><span class="va">xLUT</span></span></span>

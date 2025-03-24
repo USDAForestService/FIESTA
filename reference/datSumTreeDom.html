@@ -13,7 +13,7 @@ data, and cover data."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">FIESTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.6.4.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.7.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -97,6 +97,7 @@ data, and cover data.</p>
 <span>  domclassify <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tderive <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pltidsWITHqry <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pltidsid <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pcwhereqry <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  savedata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  tabIDs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/FIESTAutils/man/tableIDs.html" class="external-link">tableIDs</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -287,6 +288,10 @@ QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454)
 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')</p></dd>
 
 
+<dt id="arg-pltidsid">pltidsid<a class="anchor" aria-label="anchor" href="#arg-pltidsid"></a></dt>
+<dd><p>Sting. Name of unique identifier in pltidsWITHqry.</p></dd>
+
+
 <dt id="arg-pcwhereqry">pcwhereqry<a class="anchor" aria-label="anchor" href="#arg-pcwhereqry"></a></dt>
 <dd><p>String. Plot/Condition filter if plot and/or cond table is
 included.</p></dd>
@@ -401,14 +406,14 @@ used for mapping tree domain distributions.</p>
 <span class="r-in"><span><span class="fu">datSumTreeDom</span><span class="op">(</span>tree <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYtree.html">WYtree</a></span>,</span></span>
 <span class="r-in"><span>              plt <span class="op">=</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="va"><a href="WYplt.html">WYplt</a></span>, </span></span>
 <span class="r-in"><span>              bycond <span class="op">=</span> <span class="cn">FALSE</span>, </span></span>
-<span class="r-in"><span>              tsumvar <span class="op">=</span> <span class="st">"PLT_CN"</span>, </span></span>
+<span class="r-in"><span>              tsumvar <span class="op">=</span> <span class="st">"TPA_UNADJ"</span>, </span></span>
 <span class="r-in"><span>              tdomtot <span class="op">=</span> <span class="cn">TRUE</span>, </span></span>
 <span class="r-in"><span>              tdomprefix <span class="op">=</span> <span class="st">"CNT"</span>, </span></span>
 <span class="r-in"><span>              tfilter <span class="op">=</span> <span class="st">"STATUSCD==1"</span>,</span></span>
 <span class="r-in"><span>              datSum_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tround <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $tdomdat</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Key: &lt;PLT_CN&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               PLT_CN CNT NA CNT019 CNT065 CNT066 CNT093 CNT096 CNT101 CNT106</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Key: &lt;CN&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   CN CNT NA CNT019 CNT065 CNT066 CNT093 CNT096 CNT101 CNT106</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;char&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    1: 40404728010690      0      0      0      0      0      0      0      0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    2: 40404729010690      0      0      0     12      0      0      0      0</span>
@@ -449,7 +454,7 @@ used for mapping tree domain distributions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3047:      0      0    300</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $tsumuniqueid</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "PLT_CN"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "CN"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $tsumvarnm</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "COUNT_TPA"</span>
@@ -490,105 +495,8 @@ used for mapping tree domain distributions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $tdomtotnm</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "CNTTOT"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tdomainlst</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $domainlst</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "SPCD"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pcdomainlst</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $treeqry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "WITH\npltids AS\n(SELECT CN AS PLT_CN\n FROM pltx), \n----- get tree data\ntdat AS\n(SELECT 'TREE' src, t.PLT_CN, t.CONDID, t.SUBP, t.TREE, t.SPCD, t.TPA_UNADJ\n FROM treex t\n JOIN pltids ON (t.PLT_CN = pltids.PLT_CN)\n WHERE STATUSCD=1)\n-------------------------------------------\nSELECT pltids.PLT_CN, SPCD,   \n  COALESCE(SUM(TPA_UNADJ),0) AS COUNT_TPA\nFROM pltids pltids\nLEFT JOIN tdat ON (tdat.PLT_CN = pltids.PLT_CN)\nGROUP BY pltids.PLT_CN, SPCD"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span>              </span></span>
-<span class="r-in"><span><span class="co"># Sum of Number of Live Trees by Species, Including Seedlings</span></span></span>
-<span class="r-in"><span><span class="fu">datSumTreeDom</span><span class="op">(</span>tree <span class="op">=</span> <span class="va">WYtree</span>,</span></span>
-<span class="r-in"><span>              seed <span class="op">=</span> <span class="va">WYseed</span>, </span></span>
-<span class="r-in"><span>              bycond <span class="op">=</span> <span class="cn">FALSE</span>, </span></span>
-<span class="r-in"><span>              tsumvar <span class="op">=</span> <span class="st">"PLT_CN"</span>, </span></span>
-<span class="r-in"><span>              tdomtot <span class="op">=</span> <span class="cn">TRUE</span>, </span></span>
-<span class="r-in"><span>              tdomprefix <span class="op">=</span> <span class="st">"CNT"</span>, </span></span>
-<span class="r-in"><span>              datSum_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tround <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tdomdat</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Key: &lt;PLT_CN&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              PLT_CN CNT019 CNT065 CNT066 CNT093 CNT096 CNT101 CNT106 CNT108</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1: 40404729010690      0      0     12      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2: 40404730010690      0      0      0      0      0      0      0      6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3: 40404737010690      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   4: 40404738010690      6      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5: 40404742010690      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ---                                                                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 569: 40407821010690      0      0      6      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 570: 40407831010690      0      0    309      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 571: 40407845010690      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 572: 40407861010690      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 573: 46792188020004      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      CNT113 CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1:     30      0      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2:     48    141    138      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3:     12      0      0      0      0      0      0      0     12      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   4:     72      6      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5:      0     42      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ---                                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 569:      0      6      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 570:      0     84      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 571:      0      6      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 572:      0    501      0      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 573:     42      0    391      0      0      0      0      0      0      0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      CNT823 CNTTOT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;  &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1:      0     42</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2:      0    333</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3:      0     24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   4:      0     84</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5:      0     42</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ---              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 569:      0     12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 570:      0    393</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 571:      0      6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 572:      0    501</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 573:      0    433</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tsumuniqueid</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "PLT_CN"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tsumvarnm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "COUNT_TPA"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tdomvarnm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "SPCDNM"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tdomvarlut</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     SPCDNM COUNT_TPA NBRPLOTS</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt;     &lt;num&gt;    &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1: CNT066      5562       75</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2: CNT113      6270      102</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3: CNT108     81140      262</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4: CNT122     13670       98</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5: CNT202     11871      107</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6: CNT746     13608       72</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7: CNT019     60632      243</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8: CNT093     26341      209</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9: CNT065      2493       21</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10: CNT745       102        4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11: CNT823      1237       12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12: CNT375        81        2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13: CNT101     15291      106</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14: CNT096       348        3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15: CNT749       231        5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16: CNT475        36        3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17: CNT313        60        2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18: CNT544        66        2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19: CNT106         6        1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tdomlst</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "CNT019" "CNT065" "CNT066" "CNT093" "CNT096" "CNT101" "CNT106" "CNT108"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "CNT113" "CNT122" "CNT202" "CNT313" "CNT375" "CNT475" "CNT544" "CNT745"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17] "CNT746" "CNT749" "CNT823"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tdomtotnm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "CNTTOT"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $tdomainlst</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "SPCD"</span>
@@ -597,7 +505,7 @@ used for mapping tree domain distributions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $treeqry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "WITH tdat AS\n(SELECT 'TREE' src, t.PLT_CN, t.CONDID, t.SUBP, t.TREE, t.SPCD, t.TPA_UNADJ\n FROM treex t)\n-------------------------------------------\nSELECT tdat.PLT_CN, SPCD,   \n  COALESCE(SUM(TPA_UNADJ),0) AS COUNT_TPA\nFROM tdat\nGROUP BY tdat.PLT_CN, SPCD"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "WITH\npltids AS\n(SELECT CN\n FROM pltx), \n----- get tree data\ntdat AS\n(SELECT 'TREE' src, t.PLT_CN, t.CONDID, t.SUBP, t.TREE, t.SPCD, t.TPA_UNADJ\n FROM treex t\n JOIN pltids ON (t.PLT_CN = pltids.CN)\n WHERE STATUSCD=1)\n-------------------------------------------\nSELECT pltids.CN, SPCD,   \n  COALESCE(SUM(TPA_UNADJ),0) AS COUNT_TPA\nFROM pltids pltids\nLEFT JOIN tdat ON (tdat.PLT_CN = pltids.CN)\nGROUP BY pltids.CN, SPCD"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>

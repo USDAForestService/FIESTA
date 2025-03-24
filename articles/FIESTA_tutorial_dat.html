@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FIESTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.6.4.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.7.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,7 +76,7 @@
       <h1>Data Tools</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/USDAForestService/FIESTA/blob/master/vignettes/FIESTA_tutorial_dat.Rmd" class="external-link"><code>vignettes/FIESTA_tutorial_dat.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/USDAForestService/FIESTA/blob/master/vignettes/articles/FIESTA_tutorial_dat.Rmd" class="external-link"><code>vignettes/articles/FIESTA_tutorial_dat.Rmd</code></a></small>
       <div class="d-none name"><code>FIESTA_tutorial_dat.Rmd</code></div>
     </div>
 
@@ -937,25 +937,25 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##  [1] "ADFORCD"                 "AGENTCD"                </span></span>
-<span><span class="co">##  [3] "ALSTKCD"                 "COND_NONSAMPLE_REASN_CD"</span></span>
-<span><span class="co">##  [5] "COND_STATUS_CD"          "DSTRBCD"                </span></span>
-<span><span class="co">##  [7] "DSTRBGRP"                "FLDSZCD"                </span></span>
-<span><span class="co">##  [9] "FORINDCD"                "FORTYPCD"               </span></span>
-<span><span class="co">## [11] "FORTYPGRPCD"             "GSSTKCD"                </span></span>
-<span><span class="co">## [13] "KINDCD"                  "LAND_COVER_CLASS_CD"    </span></span>
-<span><span class="co">## [15] "LANDCLCD"                "LANDSTATUSCD"           </span></span>
-<span><span class="co">## [17] "LANDUSECD"               "MAJOR_SPGRPCD"          </span></span>
-<span><span class="co">## [19] "MIST_CL_CD"              "NF_COND_STATUS_CD"      </span></span>
-<span><span class="co">## [21] "NF_PLOT_STATUS_CD"       "OWNCD"                  </span></span>
-<span><span class="co">## [23] "OWNGRPCD"                "PHYSCLCD"               </span></span>
-<span><span class="co">## [25] "PLOT_STATUS_CD"          "PRESNFCD"               </span></span>
-<span><span class="co">## [27] "RDDISTCD"                "RESERVCD"               </span></span>
-<span><span class="co">## [29] "SITECLCD"                "SPGRPCD"                </span></span>
-<span><span class="co">## [31] "STATIONCD"               "STATUSCD"               </span></span>
-<span><span class="co">## [33] "STDORGCD"                "STDSZCD"                </span></span>
-<span><span class="co">## [35] "SURVEY"                  "TIMBERCD"               </span></span>
-<span><span class="co">## [37] "TIMBERCD.PROD"           "TREECLCD"               </span></span>
-<span><span class="co">## [39] "TRTCD"</span></span></code></pre>
+<span><span class="co">##  [3] "ALSTKCD"                 "CCLCD"                  </span></span>
+<span><span class="co">##  [5] "COND_NONSAMPLE_REASN_CD" "COND_STATUS_CD"         </span></span>
+<span><span class="co">##  [7] "DSTRBCD"                 "DSTRBGRP"               </span></span>
+<span><span class="co">##  [9] "FLDSZCD"                 "FORINDCD"               </span></span>
+<span><span class="co">## [11] "FORTYPCD"                "FORTYPGRPCD"            </span></span>
+<span><span class="co">## [13] "GSSTKCD"                 "KINDCD"                 </span></span>
+<span><span class="co">## [15] "LAND_COVER_CLASS_CD"     "LANDCLCD"               </span></span>
+<span><span class="co">## [17] "LANDSTATUSCD"            "LANDUSECD"              </span></span>
+<span><span class="co">## [19] "MAJOR_SPGRPCD"           "MIST_CL_CD"             </span></span>
+<span><span class="co">## [21] "NF_COND_STATUS_CD"       "NF_PLOT_STATUS_CD"      </span></span>
+<span><span class="co">## [23] "OWNCD"                   "OWNGRPCD"               </span></span>
+<span><span class="co">## [25] "PHYSCLCD"                "PLOT_STATUS_CD"         </span></span>
+<span><span class="co">## [27] "PRESNFCD"                "RDDISTCD"               </span></span>
+<span><span class="co">## [29] "RESERVCD"                "SITECLCD"               </span></span>
+<span><span class="co">## [31] "SPGRPCD"                 "STATIONCD"              </span></span>
+<span><span class="co">## [33] "STATUSCD"                "STDORGCD"               </span></span>
+<span><span class="co">## [35] "STDSZCD"                 "SURVEY"                 </span></span>
+<span><span class="co">## [37] "TIMBERCD"                "TIMBERCD.PROD"          </span></span>
+<span><span class="co">## [39] "TREECLCD"                "TRTCD"</span></span></code></pre>
 </details><p>Next, we set the code descriptions for FIA disturbance variable.</p>
 <div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ref_dstrbcd</span> <span class="op">&lt;-</span> <span class="fu">FIESTAutils</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/FIESTAutils/man/ref_codes.html" class="external-link">ref_codes</a></span><span class="op">[</span><span class="fu">FIESTAutils</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/FIESTAutils/man/ref_codes.html" class="external-link">ref_codes</a></span><span class="op">$</span><span class="va">VARIABLE</span> <span class="op">==</span> <span class="st">"DSTRBCD"</span>,<span class="op">]</span></span>
@@ -963,19 +963,19 @@ output
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##     VARIABLE VALUE                          MEANING COLORHEX GROUPCD</span></span>
-<span><span class="co">## 223  DSTRBCD     0           No visible disturbance       NA       0</span></span>
-<span><span class="co">## 224  DSTRBCD    10                           Insect       NA      10</span></span>
-<span><span class="co">## 225  DSTRBCD    11  Insect to understory vegetation       NA      10</span></span>
-<span><span class="co">## 226  DSTRBCD    12                  Insect to trees       NA      10</span></span>
-<span><span class="co">## 227  DSTRBCD    20                          Disease       NA      20</span></span>
-<span><span class="co">## 228  DSTRBCD    21 Disease to understory vegetation       NA      20</span></span>
+<span><span class="co">## 228  DSTRBCD     0           No visible disturbance       NA       0</span></span>
+<span><span class="co">## 229  DSTRBCD    10                           Insect       NA      10</span></span>
+<span><span class="co">## 230  DSTRBCD    11  Insect to understory vegetation       NA      10</span></span>
+<span><span class="co">## 231  DSTRBCD    12                  Insect to trees       NA      10</span></span>
+<span><span class="co">## 232  DSTRBCD    20                          Disease       NA      20</span></span>
+<span><span class="co">## 233  DSTRBCD    21 Disease to understory vegetation       NA      20</span></span>
 <span><span class="co">##                    GROUPNM GROUPHEX</span></span>
-<span><span class="co">## 223 No visible disturbance         </span></span>
-<span><span class="co">## 224                 Insect         </span></span>
-<span><span class="co">## 225                 Insect         </span></span>
-<span><span class="co">## 226                 Insect         </span></span>
-<span><span class="co">## 227                Disease         </span></span>
-<span><span class="co">## 228                Disease</span></span></code></pre>
+<span><span class="co">## 228 No visible disturbance         </span></span>
+<span><span class="co">## 229                 Insect         </span></span>
+<span><span class="co">## 230                 Insect         </span></span>
+<span><span class="co">## 231                 Insect         </span></span>
+<span><span class="co">## 232                Disease         </span></span>
+<span><span class="co">## 233                Disease</span></span></code></pre>
 </details><p>Next, we can append forest type names using the reference table
 above.</p>
 <div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
@@ -1396,15 +1396,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat1</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "tfilter"     </span></span>
-<span><span class="co">## [6] "tround"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "pltsp"       </span></span>
+<span><span class="co">## [6] "tfilter"      "tround"       "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum1</span> <span class="op">&lt;-</span> <span class="va">treesumdat1</span><span class="op">$</span><span class="va">treedat</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum1</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## Key: &lt;PLT_CN&gt;</span></span>
-<span><span class="co">##            PLT_CN BA_live VOLCFNET_live</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN BA_live VOLCFNET_live</span></span>
 <span><span class="co">##            &lt;char&gt;   &lt;num&gt;         &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690    0.00          0.00</span></span>
 <span><span class="co">## 2: 40404729010690    2.37          6.95</span></span>
@@ -1438,15 +1438,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat2</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "tfilter"     </span></span>
-<span><span class="co">## [6] "tround"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "pltsp"       </span></span>
+<span><span class="co">## [6] "tfilter"      "tround"       "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum2</span> <span class="op">&lt;-</span> <span class="va">treesumdat2</span><span class="op">$</span><span class="va">treedat</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum2</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## Key: &lt;PLT_CN&gt;</span></span>
-<span><span class="co">##            PLT_CN BA_TPA_live VOLCFNET_TPA_live</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN BA_TPA_live VOLCFNET_TPA_live</span></span>
 <span><span class="co">##            &lt;char&gt;       &lt;num&gt;             &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690        0.00              0.00</span></span>
 <span><span class="co">## 2: 40404729010690       14.27             41.80</span></span>
@@ -1507,14 +1507,18 @@ output
 <code class="sourceCode R"><span><span class="va">treesum1</span><span class="op">[</span><span class="va">treesum1</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="fl">40404758010690</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## Key: &lt;PLT_CN&gt;</span></span>
-<span><span class="co">## Empty data.table (0 rows and 3 cols): PLT_CN,BA_live,VOLCFNET_live</span></span></code></pre>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN BA_live VOLCFNET_live</span></span>
+<span><span class="co">##            &lt;char&gt;   &lt;num&gt;         &lt;num&gt;</span></span>
+<span><span class="co">## 1: 40404758010690    4.26         42.72</span></span></code></pre>
 </details><div class="sourceCode" id="cb118"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum2</span><span class="op">[</span><span class="va">treesum2</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="fl">40404758010690</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## Key: &lt;PLT_CN&gt;</span></span>
-<span><span class="co">## Empty data.table (0 rows and 3 cols): PLT_CN,BA_TPA_live,VOLCFNET_TPA_live</span></span></code></pre>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN BA_TPA_live VOLCFNET_TPA_live</span></span>
+<span><span class="co">##            &lt;char&gt;       &lt;num&gt;             &lt;num&gt;</span></span>
+<span><span class="co">## 1: 40404758010690       25.65             257.1</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level3">
@@ -1535,15 +1539,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat3</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "tfilter"     </span></span>
-<span><span class="co">## [6] "tround"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "pltsp"       </span></span>
+<span><span class="co">## [6] "tfilter"      "tround"       "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum3</span> <span class="op">&lt;-</span> <span class="va">treesumdat3</span><span class="op">$</span><span class="va">treedat</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum3</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## Key: &lt;PLT_CN&gt;</span></span>
-<span><span class="co">##            PLT_CN MEAN_DIA MEAN_HT</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN MEAN_DIA MEAN_HT</span></span>
 <span><span class="co">##            &lt;char&gt;    &lt;num&gt;   &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690       NA      NA</span></span>
 <span><span class="co">## 2: 40404729010690     9.06   20.00</span></span>
@@ -1594,10 +1598,8 @@ output
 <code class="sourceCode R"><span><span class="va">treesum3</span><span class="op">[</span><span class="va">treesum3</span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op">==</span> <span class="fl">40404758010690</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## Key: &lt;PLT_CN&gt;</span></span>
-<span><span class="co">##            PLT_CN MEAN_DIA MEAN_HT</span></span>
-<span><span class="co">##            &lt;char&gt;    &lt;num&gt;   &lt;num&gt;</span></span>
-<span><span class="co">## 1: 40404758010690     8.89   24.44</span></span></code></pre>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">## Empty data.table (0 rows and 3 cols): CN,MEAN_DIA,MEAN_HT</span></span></code></pre>
 </details></details><div class="section level4">
 <h4 id="example-4a-number-of-live-trees-by-plot-tpatrue">Example 4a: Number of Live Trees by Plot
 (<code>TPA=TRUE</code>)<a class="anchor" aria-label="anchor" href="#example-4a-number-of-live-trees-by-plot-tpatrue"></a>
@@ -1617,15 +1619,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat4a</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "tfilter"     </span></span>
-<span><span class="co">## [6] "tround"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "pltsp"       </span></span>
+<span><span class="co">## [6] "tfilter"      "tround"       "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb134"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum4a</span> <span class="op">&lt;-</span> <span class="va">treesumdat4a</span><span class="op">$</span><span class="va">treedat</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum4a</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## Key: &lt;PLT_CN&gt;</span></span>
-<span><span class="co">##            PLT_CN COUNT_TPA</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN COUNT_TPA</span></span>
 <span><span class="co">##            &lt;char&gt;     &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690      0.00</span></span>
 <span><span class="co">## 2: 40404729010690     30.09</span></span>
@@ -1658,8 +1660,8 @@ variables</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat4b</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "tfilter"     </span></span>
-<span><span class="co">## [6] "tround"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "pltsp"       </span></span>
+<span><span class="co">## [6] "tfilter"      "tround"</span></span></code></pre>
 </details><div class="sourceCode" id="cb138"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum4b</span> <span class="op">&lt;-</span> <span class="va">treesumdat4b</span><span class="op">$</span><span class="va">treedat</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum4b</span><span class="op">)</span></span></code></pre></div>
@@ -1750,15 +1752,15 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat5a</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "tfilter"     </span></span>
-<span><span class="co">## [6] "tround"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "pltsp"       </span></span>
+<span><span class="co">## [6] "tfilter"      "tround"       "meta"</span></span></code></pre>
 </details><div class="sourceCode" id="cb148"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum5a</span> <span class="op">&lt;-</span> <span class="va">treesumdat5a</span><span class="op">$</span><span class="va">treedat</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum5a</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## Key: &lt;PLT_CN&gt;</span></span>
-<span><span class="co">##            PLT_CN COUNT_TREE_TPA COUNT_SEED_TPA COUNT_TPA</span></span>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN COUNT_TREE_TPA COUNT_SEED_TPA COUNT_TPA</span></span>
 <span><span class="co">##            &lt;char&gt;          &lt;num&gt;          &lt;num&gt;     &lt;num&gt;</span></span>
 <span><span class="co">## 1: 40404728010690           0.00           0.00      0.00</span></span>
 <span><span class="co">## 2: 40404729010690          30.09          74.97    105.06</span></span>
@@ -1770,8 +1772,10 @@ output
 <code class="sourceCode R"><span><span class="va">treesum5a</span><span class="op">[</span><span class="va">treesum5a</span><span class="op">$</span><span class="va">CN</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## Key: &lt;PLT_CN&gt;</span></span>
-<span><span class="co">## Empty data.table (0 rows and 4 cols): PLT_CN,COUNT_TREE_TPA,COUNT_SEED_TPA,COUNT_TPA</span></span></code></pre>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN COUNT_TREE_TPA COUNT_SEED_TPA COUNT_TPA</span></span>
+<span><span class="co">##            &lt;char&gt;          &lt;num&gt;          &lt;num&gt;     &lt;num&gt;</span></span>
+<span><span class="co">## 1: 40407815010690          48.14          224.9    273.04</span></span></code></pre>
 </details><div class="sourceCode" id="cb152"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">WYseed</span><span class="op">[</span><span class="va">WYseed</span><span class="op">$</span><span class="va">PLT_CN</span> <span class="op">==</span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
@@ -1805,8 +1809,8 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treesumdat5b</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "tfilter"     </span></span>
-<span><span class="co">## [6] "tround"</span></span></code></pre>
+</summary><pre><code><span><span class="co">## [1] "treedat"      "sumvars"      "tsumuniqueid" "treeqry"      "pltsp"       </span></span>
+<span><span class="co">## [6] "tfilter"      "tround"</span></span></code></pre>
 </details><div class="sourceCode" id="cb156"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum5b</span> <span class="op">&lt;-</span> <span class="va">treesumdat5b</span><span class="op">$</span><span class="va">treedat</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treesum5b</span><span class="op">)</span></span></code></pre></div>
@@ -1825,8 +1829,10 @@ output
 <code class="sourceCode R"><span><span class="va">treesum5a</span><span class="op">[</span><span class="va">treesum5a</span><span class="op">$</span><span class="va">CN</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## Key: &lt;PLT_CN&gt;</span></span>
-<span><span class="co">## Empty data.table (0 rows and 4 cols): PLT_CN,COUNT_TREE_TPA,COUNT_SEED_TPA,COUNT_TPA</span></span></code></pre>
+</summary><pre><code><span><span class="co">## Key: &lt;CN&gt;</span></span>
+<span><span class="co">##                CN COUNT_TREE_TPA COUNT_SEED_TPA COUNT_TPA</span></span>
+<span><span class="co">##            &lt;char&gt;          &lt;num&gt;          &lt;num&gt;     &lt;num&gt;</span></span>
+<span><span class="co">## 1: 40407815010690          48.14          224.9    273.04</span></span></code></pre>
 </details><div class="sourceCode" id="cb160"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">treesum5b</span><span class="op">[</span><span class="va">treesum5b</span><span class="op">$</span><span class="va">CN</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
@@ -1894,7 +1900,8 @@ View Example
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomvarlut"  </span></span>
-<span><span class="co">##  [6] "tdomlst"      "tdomtotnm"    "tdomainlst"   "pcdomainlst"  "treeqry"</span></span></code></pre>
+<span><span class="co">##  [6] "tdomlst"      "tdomtotnm"    "domainlst"    "tdomainlst"   "pcdomainlst" </span></span>
+<span><span class="co">## [11] "treeqry"</span></span></code></pre>
 </details><div class="sourceCode" id="cb166"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat</span> <span class="op">&lt;-</span> <span class="va">treedomBA</span><span class="op">$</span><span class="va">tdomdat</span></span>
 <span><span class="va">tdomvarlut</span> <span class="op">&lt;-</span> <span class="va">treedomBA</span><span class="op">$</span><span class="va">tdomvarlut</span></span>
@@ -2011,7 +2018,8 @@ View Example
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomvarlut"  </span></span>
-<span><span class="co">##  [6] "tdomlst"      "tdomtotnm"    "tdomainlst"   "pcdomainlst"  "treeqry"</span></span></code></pre>
+<span><span class="co">##  [6] "tdomlst"      "tdomtotnm"    "domainlst"    "tdomainlst"   "pcdomainlst" </span></span>
+<span><span class="co">## [11] "treeqry"</span></span></code></pre>
 </details><div class="sourceCode" id="cb180"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.tree</span> <span class="op">&lt;-</span> <span class="va">treedomCNT</span><span class="op">$</span><span class="va">tdomdat</span></span>
 <span><span class="va">tdomvarlut</span> <span class="op">&lt;-</span> <span class="va">treedomCNT</span><span class="op">$</span><span class="va">tdomvarlut</span></span>
@@ -2069,7 +2077,8 @@ View Example
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomvarlut"  </span></span>
-<span><span class="co">##  [6] "tdomlst"      "tdomtotnm"    "tdomainlst"   "pcdomainlst"  "treeqry"</span></span></code></pre>
+<span><span class="co">##  [6] "tdomlst"      "tdomtotnm"    "domainlst"    "tdomainlst"   "pcdomainlst" </span></span>
+<span><span class="co">## [11] "treeqry"</span></span></code></pre>
 </details><div class="sourceCode" id="cb184"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.seed</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat</span></span>
 <span><span class="va">tdomvarlut</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomvarlut</span></span>
@@ -2122,7 +2131,8 @@ View Example
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomvarlut"  </span></span>
-<span><span class="co">##  [6] "tdomlst"      "tdomtotnm"    "tdomainlst"   "pcdomainlst"  "treeqry"</span></span></code></pre>
+<span><span class="co">##  [6] "tdomlst"      "tdomtotnm"    "domainlst"    "tdomainlst"   "pcdomainlst" </span></span>
+<span><span class="co">## [11] "treeqry"</span></span></code></pre>
 </details><div class="sourceCode" id="cb188"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.treeseed</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat</span></span>
 <span><span class="va">tdomvarlut</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomvarlut</span></span>
@@ -2205,8 +2215,8 @@ View Example
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomdat.pres"</span></span>
-<span><span class="co">##  [6] "tdomvarlut"   "tdomlst"      "tdomtotnm"    "tdomainlst"   "pcdomainlst" </span></span>
-<span><span class="co">## [11] "treeqry"</span></span></code></pre>
+<span><span class="co">##  [6] "tdomvarlut"   "tdomlst"      "tdomtotnm"    "domainlst"    "tdomainlst"  </span></span>
+<span><span class="co">## [11] "pcdomainlst"  "treeqry"</span></span></code></pre>
 </details><div class="sourceCode" id="cb198"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.pres</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat.pres</span></span>
 <span></span>
@@ -2252,8 +2262,8 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treedomCNTs</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomdat.prop"</span></span>
-<span><span class="co">##  [6] "tdomvarlut"   "tdomlst"      "tdomtotnm"    "tdomainlst"   "pcdomainlst" </span></span>
+</summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomvarlut"  </span></span>
+<span><span class="co">##  [6] "tdomlst"      "tdomtotnm"    "domainlst"    "tdomainlst"   "pcdomainlst" </span></span>
 <span><span class="co">## [11] "treeqry"</span></span></code></pre>
 </details><div class="sourceCode" id="cb202"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.pres</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat.pres</span></span>
@@ -2298,8 +2308,8 @@ plot
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treedomCNTs</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomdat.prop"</span></span>
-<span><span class="co">##  [6] "tdomdat.pres" "tdomvarlut"   "tdomlst"      "tdomtotnm"    "tdomainlst"  </span></span>
+</summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomdat.pres"</span></span>
+<span><span class="co">##  [6] "tdomvarlut"   "tdomlst"      "tdomtotnm"    "domainlst"    "tdomainlst"  </span></span>
 <span><span class="co">## [11] "pcdomainlst"  "treeqry"</span></span></code></pre>
 </details><div class="sourceCode" id="cb207"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.pres</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat.pres</span></span>
@@ -2335,10 +2345,7 @@ output
 <code class="sourceCode R"><span><span class="va">tdomdat.prop</span><span class="op">[</span><span class="va">tdomdat.prop</span><span class="op">$</span><span class="va">CN</span> <span class="op">==</span> <span class="va">cn</span>,<span class="op">]</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##  [1] PLT_CN CNT019 CNT065 CNT066 CNT093 CNT096 CNT101 CNT106 CNT108 CNT113</span></span>
-<span><span class="co">## [11] CNT122 CNT202 CNT313 CNT375 CNT475 CNT544 CNT745 CNT746 CNT749 CNT823</span></span>
-<span><span class="co">## [21] CNTTOT</span></span>
-<span><span class="co">## &lt;0 rows&gt; (or 0-length row.names)</span></span></code></pre>
+</summary><pre><code><span><span class="co">## NULL</span></span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -2374,8 +2381,8 @@ plot
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treedomCNTs</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomdat.prop"</span></span>
-<span><span class="co">##  [6] "tdomdat.pres" "tdomvarlut"   "tdomlst"      "tdomtotnm"    "tdomainlst"  </span></span>
+</summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomdat.pres"</span></span>
+<span><span class="co">##  [6] "tdomvarlut"   "tdomlst"      "tdomtotnm"    "domainlst"    "tdomainlst"  </span></span>
 <span><span class="co">## [11] "pcdomainlst"  "treeqry"</span></span></code></pre>
 </details><div class="sourceCode" id="cb220"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.pres</span> <span class="op">&lt;-</span> <span class="va">treedomCNTs</span><span class="op">$</span><span class="va">tdomdat.pres</span></span>
@@ -2422,8 +2429,8 @@ View Example
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">treedomBA</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">## [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomvarlut"  </span></span>
-<span><span class="co">## [6] "tdomlst"      "tdomainlst"   "pcdomainlst"  "treeqry"</span></span></code></pre>
+</summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomvarlut"  </span></span>
+<span><span class="co">##  [6] "tdomlst"      "domainlst"    "tdomainlst"   "pcdomainlst"  "treeqry"</span></span></code></pre>
 </details><div class="sourceCode" id="cb224"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ba.limber</span> <span class="op">&lt;-</span> <span class="va">treedomBA</span><span class="op">$</span><span class="va">tdomdat</span></span>
 <span></span>
@@ -2487,7 +2494,7 @@ plot
 <details><summary>
 output
 </summary><pre><code><span><span class="co">##  [1] "tdomdat"      "tsumuniqueid" "tsumvarnm"    "tdomvarnm"    "tdomvar2nm"  </span></span>
-<span><span class="co">##  [6] "tdomdat.prop" "tdomdat.pres" "tdomvarlut"   "tdomlst"      "tdomtotnm"   </span></span>
+<span><span class="co">##  [6] "tdomdat.pres" "tdomvarlut"   "tdomlst"      "tdomtotnm"    "domainlst"   </span></span>
 <span><span class="co">## [11] "tdomainlst"   "pcdomainlst"  "treeqry"</span></span></code></pre>
 </details><div class="sourceCode" id="cb229"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdomdat.pres</span> <span class="op">&lt;-</span> <span class="va">treedomDIACNTs</span><span class="op">$</span><span class="va">tdomdat.pres</span></span>

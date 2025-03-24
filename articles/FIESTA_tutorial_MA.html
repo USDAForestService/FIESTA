@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FIESTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.6.4.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.7.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -373,10 +373,10 @@ output
 <span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
 <span><span class="co">##   ..- attr(*, "sorted")= Named chr "CN"</span></span>
 <span><span class="co">##   .. ..- attr(*, "names")= chr "CN"</span></span>
-<span><span class="co">##  $ pltcondx     :Classes 'data.table' and 'data.frame':  67 obs. of  37 variables:</span></span>
+<span><span class="co">##  $ pltcondx     :Classes 'data.table' and 'data.frame':  67 obs. of  40 variables:</span></span>
 <span><span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span></span>
 <span><span class="co">##   ..- attr(*, "sorted")= chr [1:2] "PLT_CN" "CONDID"</span></span>
-<span><span class="co">##  $ pltcondflds  : chr [1:36] "PLT_CN" "CONDID" "COND_NONSAMPLE_REASN_CD" "CONDPROP_UNADJ" ...</span></span>
+<span><span class="co">##  $ pltcondflds  : chr [1:39] "PLT_CN" "CONDID" "COND_NONSAMPLE_REASN_CD" "CONDPROP_UNADJ" ...</span></span>
 <span><span class="co">##  $ pjoinid      : Named chr "CN"</span></span>
 <span><span class="co">##   ..- attr(*, "names")= chr "CN"</span></span>
 <span><span class="co">##  $ cuniqueid    : chr "PLT_CN"</span></span>
@@ -572,7 +572,7 @@ includes titlelst, a list of associated titles.</p>
 <details><summary>
 output
 </summary><pre><code><span><span class="co">## List of 6</span></span>
-<span><span class="co">##  $ est     :'data.frame':    9 obs. of  3 variables:</span></span>
+<span><span class="co">##  $ est     :'data.frame':    8 obs. of  3 variables:</span></span>
 <span><span class="co">##  $ titlelst:List of 10</span></span>
 <span><span class="co">##  $ raw     :List of 11</span></span>
 <span><span class="co">##  $ statecd : int 56</span></span>
@@ -591,8 +591,7 @@ output
 <span><span class="co">## 5         281 618425.6                  13.59</span></span>
 <span><span class="co">## 6         901  38648.7                  75.39</span></span>
 <span><span class="co">## 7         999    36765                  64.92</span></span>
-<span><span class="co">## 8        &lt;NA&gt;       --                     --</span></span>
-<span><span class="co">## 9       Total  1036942                   3.76</span></span></code></pre>
+<span><span class="co">## 8       Total  1036942                   3.76</span></span></code></pre>
 </details><p>Along with raw data and titles:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">raw3</span> <span class="op">&lt;-</span> <span class="va">area3</span><span class="op">$</span><span class="va">raw</span>      <span class="co"># extract raw data list object from output</span></span>
@@ -1058,8 +1057,7 @@ output
 <span><span class="co">## 5         281 1182924852.4                  18.33</span></span>
 <span><span class="co">## 6         901           --                     --</span></span>
 <span><span class="co">## 7         999           --                     --</span></span>
-<span><span class="co">## 8        &lt;NA&gt;           --                     --</span></span>
-<span><span class="co">## 9       Total   1931700102                   11.2</span></span></code></pre>
+<span><span class="co">## 8       Total   1931700102                   11.2</span></span></code></pre>
 </details><p>We can also create a simple barplot from the output:</p>
 <div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/datBarplot.html">datBarplot</a></span><span class="op">(</span><span class="va">raw3</span><span class="op">$</span><span class="va">unit_rowest</span>, </span>
@@ -1067,7 +1065,7 @@ output
 <span>           yvar <span class="op">=</span> <span class="st">"est"</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_MA_files/figure-html/unnamed-chunk-30-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_MA_files/figure-html/unnamed-chunk-31-1.png" width="700"></p>
 </details><p>And a fancier barplot:</p>
 <div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/datBarplot.html">datBarplot</a></span><span class="op">(</span><span class="va">raw3</span><span class="op">$</span><span class="va">unit_rowest</span>, </span>
@@ -1080,7 +1078,7 @@ plot
 <span>           divideby <span class="op">=</span> <span class="st">"million"</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
 plot
-</summary><p><img src="FIESTA_tutorial_MA_files/figure-html/unnamed-chunk-31-1.png" width="700"></p>
+</summary><p><img src="FIESTA_tutorial_MA_files/figure-html/unnamed-chunk-32-1.png" width="700"></p>
 </details></details>
 </div>
 <div class="section level4">
@@ -1370,16 +1368,14 @@ output
 <span><span class="va">tree5</span><span class="op">$</span><span class="va">est</span></span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span><span class="co">##                  Species     Estimate Percent Sampling Error</span></span>
-<span><span class="co">## 1          subalpine fir  790299214.1                  14.69</span></span>
-<span><span class="co">## 2 Rocky Mountain juniper           --                     --</span></span>
-<span><span class="co">## 3       Engelmann spruce  259528743.9                  20.03</span></span>
-<span><span class="co">## 4         lodgepole pine  311324152.7                  18.87</span></span>
-<span><span class="co">## 5            limber pine   41737320.1                 127.12</span></span>
-<span><span class="co">## 6            Douglas-fir   57576633.6                 102.22</span></span>
-<span><span class="co">## 7          quaking aspen   91703320.1                 107.42</span></span>
-<span><span class="co">## 8                  Other           --                     --</span></span>
-<span><span class="co">## 9                  Total 1552169384.5                  12.85</span></span></code></pre>
+</summary><pre><code><span><span class="co">##                                Species     Estimate Percent Sampling Error</span></span>
+<span><span class="co">## 1     subalpine fir (Abies lasiocarpa)  790299214.1                  14.69</span></span>
+<span><span class="co">## 2 Engelmann spruce (Picea engelmannii)  259528743.9                  20.03</span></span>
+<span><span class="co">## 3      lodgepole pine (Pinus contorta)  311324152.7                  18.87</span></span>
+<span><span class="co">## 4         limber pine (Pinus flexilis)   41737320.1                 127.12</span></span>
+<span><span class="co">## 5  Douglas-fir (Pseudotsuga menziesii)   57576633.6                 102.22</span></span>
+<span><span class="co">## 6  quaking aspen (Populus tremuloides)   91703320.1                 107.42</span></span>
+<span><span class="co">## 7                                Total 1552169384.5                  12.85</span></span></code></pre>
 </details></details>
 </div>
 </div>
