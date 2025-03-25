@@ -921,7 +921,8 @@ DBgetEvalid <- function(states = NULL,
 
           #return(list(states=states, rslst=rslst, evalidlist=NULL, 
           #		invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
-          returnlst <- list(states=states, rslst=rslst, 
+          returnlst <- list(states=states, stcdlst=stcdlst, 
+                            rslst=rslst, 
                             evalidlist = NULL, 
                             invtype = invtype, 
                             invyrtab = invyrtab, 

@@ -845,6 +845,7 @@ DBgetPlots <- function (states = NULL,
   ## Get states, Evalid and/or invyrs info
   ##########################################################
   returnPOP <- ifelse (datsource == "datamart", TRUE, FALSE)
+
   if (!is.null(evalInfo)) {
     list.items <- c("states", "invtype")
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
@@ -934,9 +935,10 @@ DBgetPlots <- function (states = NULL,
       return(NULL)
     }
   }
-  
+
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
+  stcdlst <- evalInfo$stcdlst
   evalidlist <- evalInfo$evalidlist
   evalEndyrlist <- evalInfo$evalEndyrlist
   evalTypelist <- evalInfo$evalTypelist
@@ -964,13 +966,15 @@ DBgetPlots <- function (states = NULL,
 #      }
     }
   }
+
   if (!is.null(PLOTe) && is.data.frame(PLOTe)) {
     pltflds <- names(PLOTe)
     statenm <- findnm("STATECD", pltflds)
     if (is.null(statenm)) {
       PLOTe <- NULL
     } else {
-      if (length(unique(PLOTe[[statenm]])) != length(states)) {
+      #if (length(unique(PLOTe[[statenm]])) != length(states)) {
+      if (!all(stcdlst %in% unique(PLOTe[[statenm]]))) {
         message("invalid PLOT from DBgetEvalid")
         PLOTe <- NULL
       }
