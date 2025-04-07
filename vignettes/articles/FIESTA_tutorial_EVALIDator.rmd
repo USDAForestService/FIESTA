@@ -4,11 +4,6 @@ description: >
    Generate estimates from FIESTA using population data from FIADB and compare with estimates from the EVALIDator API.
 ---
 
-```{r setup, include = F}
-library(knitr)
-knitr::opts_chunk$set(message = F, warning = F, collapse = T, comment = "#>")
-```
-
 The FIESTA R package is an estimation engine that generates estimates using FIA data for custom situations (Frescino et al. 2023). The package provides functions for using FIA's standard estimation techniques and also includes different modules for using alternative estimation strategies for unique situations (Frescino et al. 2022). The package facilitates compilation of FIA and geospatial auxiliary information needed for estimation and provides consistent output for reporting.
 
 To use the FIESTA R package, you need to be familiar with the R statistical software and also have a firm knowledge of the FIA database. Please consult the FIA database description user guide (Version 9.0.1) for variable descriptions (Burrill et al. 2021).
@@ -18,13 +13,13 @@ The following examples demonstrate how we can use FIA's standard estimators thro
 
 Install necessary packages and set options.
 
-```{r install}
+```
 # devtools::install_github("USDAForestService/FIESTAnalysis")
 library(FIESTAnalysis)
 ```
 
 
-```{r setup, include = FALSE}
+```
 options(scipen = 6)
 library(FIESTA)
 outfolder <- tempdir()
