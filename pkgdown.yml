@@ -3,6 +3,7 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   articles/FIESTA_datSum_examples: FIESTA_datSum_examples.html
+  articles/FIESTA_FIAplots_species_distribution: FIESTA_FIAplots_species_distribution.html
   articles/FIESTA_manual_mod_est: FIESTA_manual_mod_est.html
   articles/FIESTA_manual_mod_pop: FIESTA_manual_mod_pop.html
   articles/FIESTA_tutorial_dat: FIESTA_tutorial_dat.html
@@ -13,7 +14,7 @@ articles:
   FIESTA_tutorial_PB: FIESTA_tutorial_PB.html
   FIESTA_tutorial_SA: FIESTA_tutorial_SA.html
   articles/FIESTA_tutorial_sp: FIESTA_tutorial_sp.html
-last_built: 2025-04-07T18:08Z
+last_built: 2025-04-08T16:36Z
 urls:
   reference: https://usdaforestservice.github.io/FIESTA/reference
   article: https://usdaforestservice.github.io/FIESTA/articles
