@@ -33,6 +33,7 @@ articles:
       - articles/FIESTA_tutorial_DB
       - articles/FIESTA_tutorial_sp
       - articles/FIESTA_tutorial_EVALIDator
+      - articles/FIESTA_FIAplots_species_distribution
     
 reference:
   - title: Package Overview

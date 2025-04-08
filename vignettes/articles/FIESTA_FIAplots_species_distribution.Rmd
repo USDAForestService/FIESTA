@@ -1,0 +1,80 @@
+---
+title: FIA plots - species distribution map
+description: >
+  Generate plot-level data summaries of species precence and display with a map
+---
+
+The FIESTA R package is an estimation engine that generates estimates using FIA data for custom situations (Frescino et al. 2023). The package provides functions for using FIA's standard estimation techniques and also includes different modules for using alternative estimation strategies for unique situations (Frescino et al. 2022). The package facilitates compilation of FIA and geospatial auxiliary information needed for estimation and provides consistent output for reporting.
+
+To use the FIESTA R package, you need to be familiar with the R statistical software and also have a firm knowledge of the FIA database. Please consult the FIA database description user guide (Version 9.0.1) for variable descriptions (Burrill et al. 2021).
+
+The following examples demonstrate how we use FIESTA for compiling plot-level summaries.
+
+## Setup
+
+First install the necessary packages and define outfolders.
+
+``` {r}
+options(scipen = 6)
+library(FIESTA)
+```
+
+Next we can specify a few parameters:
+
+```{r}
+spcd <- c(101, 113)
+tfilter <- FIESTAutils::getfilter("SPCD", spcd)
+```
+
+We can look at the resulting filter and use the internal `ref_species` table to decide on a name for the column in the output data frame.
+
+```{r}
+tfilter
+```
+
+```{r}
+ref <- ref_species[ref_species$SPCD %in% spcd, ]
+ref
+spcd_name <- "whitebark_limber"
+```
+
+Finally we create a spatial points data frame using the internal Wyoming plot data
+
+```{r}
+WYpltsp <- spMakeSpatialPoints(xyplt = WYplt,
+                               xy.uniqueid = "CN",
+                               xvar = "LON_PUBLIC",
+                               yvar = "LAT_PUBLIC")
+```
+
+
+
+## Summarize Plots
+
+Finally we can put all of the pieces together to get plot level species presence/absence:
+
+```{r message = FALSE, warning = FALSE}
+pltdomdat <- datSumTreeDom(plt = WYpltsp,
+                           tree = WYtree,
+                           seed = WYseed,
+                           bycond = FALSE,
+                           tsumvar = "TPA_UNADJ",
+                           tfilter = tfilter,
+                           tdomtot = TRUE,
+                           tdomtotnm = spcd_name,
+                           seedlings = "Y",
+                           presence = TRUE,
+                           FIAname = TRUE,
+                           datSum_opts = list(keepall = TRUE))
+
+tdomdat.pres <- pltdomdat$tdomdat.pres
+head(tdomdat.pres)
+```
+
+And we can plot the results to get a picture of the whitebark_limber presence/absence distribution.
+
+```{r}
+cols <- c("0" = "lightgrey", "1" = "#009E73")
+point_cols <- cols[as.character(tdomdat.pres$whitebark_limber)]
+plot(tdomdat.pres[ ,"whitebark_limber"], col = point_cols, pch = 16)
+```
