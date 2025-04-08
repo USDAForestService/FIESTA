@@ -74,7 +74,12 @@ head(tdomdat.pres)
 And we can plot the results to get a picture of the whitebark_limber presence/absence distribution.
 
 ```{r}
-cols <- c("0" = "lightgrey", "1" = "#009E73")
+cols <- c("0" = "darkgrey", "1" = "#009E73")
 point_cols <- cols[as.character(tdomdat.pres$whitebark_limber)]
-plot(tdomdat.pres[ ,"whitebark_limber"], col = point_cols, pch = 16)
+
+f <- system.file("extdata/sp_data/wy_bnd.gpkg", package = "FIESTA")
+WYbnd <- sf::st_read(f, quiet = TRUE)
+
+plot(sf::st_geometry(WYbnd), main = "Whitebark and limber pine in Wyoming")
+plot(tdomdat.pres[ ,"whitebark_limber"], col = point_cols, pch = 16, add = TRUE)
 ```
