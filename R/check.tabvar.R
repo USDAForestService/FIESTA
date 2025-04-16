@@ -4,6 +4,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
                          pltcondflds, pltcondx, cuniqueid, condid = "CONDID",
                          treex, treeflds, seedx, seedflds, estseed,
                          tuniqueid, whereqry, withqry, cvars2keep,
+                         tfilter = NULL,
                          popdatindb, popconn, SCHEMA., 
                          tabgrp = FALSE, tabgrpnm = NULL, 
                          tabgrpord = NULL, title.tabgrp = NULL,
@@ -152,7 +153,12 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
         } else {
           tabnm <- seedx
         }
+        ## Check tfilter
+        if (!is.null(tfilter)) {
+          tfilter <- check.logic(seedflds, statement = tfilter, stopifinvalid = FALSE)
+        }
       } else if (tabvar %in% treeflds) {
+
         bytdom <- TRUE
         tabisdb <- isdbt
         tabflds <- treeflds
@@ -161,15 +167,23 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
         } else {
           tabnm <- treex
         }
+        ## Check tfilter
+        if (!is.null(tfilter)) {
+          tfilter <- check.logic(treeflds, statement = tfilter, stopifinvalid = FALSE)
+        }
         if (estseed == "add") {
           if (!tabisdb) {
             seedtabnm <- "seedx"
           } else {
             seedtabnm <- seedx
           }
+          ## Check tfilter
+          if (!is.null(tfilter)) {
+            tfilter <- check.logic(seedflds, statement = tfilter, stopifinvalid = FALSE)
+          }
         }
       }
-      
+    
       ## build tab fromqry
       tabfromqry <- paste0(
         "\nFROM ", SCHEMA., tabnm, " t")
@@ -198,6 +212,15 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
     whereqry.tab <- whereqry
     if (tab.add0 && !is.null(whereqry)) {
       whereqry.tab <- NULL
+    } 
+    if (bytdom && !is.null(tfilter)) {
+      tfilter <- RtoSQL(tfilter)
+      if (!is.null(whereqry.tab)) {
+        whereqry.tab <- paste0(whereqry.tab, 
+                              "\n   AND ", tfilter)
+      } else {
+        whereqry.tab <- paste0("\nWHERE ", tfilter)
+      }
     }
     
     ## Check tab.orderby
@@ -322,7 +345,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
                tabfromqry,
                whereqry.tab,
                "\nORDER BY ", tabvar)
-      
+
       #message("getting unique values for ", tabvar, ":\n", cuniquex.qry, "\n")
       if (tabisdb) {
         if (!is.null(withqry)) {
@@ -875,7 +898,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
       uniquetabvar <- uniquetabvar[!uniquetabvar[[tab.orderby]] %in% vals2chg, ] 
     }
   }
-  
+
   
   ## Create factors for ordering tables
   ##############################################################################

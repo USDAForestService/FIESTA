@@ -29,31 +29,31 @@ check.popdataVOL <-
     
     ##############################################################################
     ## DESCRIPTION: Checks data inputs for AREA/VOL estimation
-    ## Define variables necessary for estimation:
+    ## 1. Define variables necessary for estimation:
     ## - cvars2keep = 'PROP_BASIS'
-    ## Check if data are in a database (datindb) and if dbconn is valid.
-    ## 1.	Get table names used in estimation from tabs.
+    ## 2. Check if data are in a database (datindb) and if dbconn is valid.
+    ## 3. Get table names used in estimation from tabs.
     ## - PLOT; COND; 
     ## - TREE (if popType = 'VOL'); SEEDLING (if popType = 'VOL')
-    ## 2.	Check for necessary variables in tables.
+    ## 4. Check for necessary variables in tables.
     ##    cond - (cuniqueid, condid, cvars2keep)
-    ## 3. Build query for adjustment factors and append to pltids
-    ## 4. Build and run queries for PLOT/COND (pltcondx)
-    ## 5. Build CASE statement for adding adjustment factors to SELECT
-    ## 6. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
+    ## 5. Build query for adjustment factors
+    ## 6. Build queries for PLOT/COND (pltcondx)
+    ## 7. Build CASE statement for adding adjustment factors to SELECT
+    ## 8. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
     ## 
-    ## 7. Build and run queries for other necessary tables (if returndata/savedata = TRUE)
-    ## 7.1 Return and/or save plot data (pltx / PLOT)
-    ## 7.2 Return and/or save cond data (condx / COND)
-    ## 7.3. Return and/or save tree data (treex / TREE)
-    ## 7.4. Return and/or save seedling data (seedx / SEEDLING)
+    ## 9. Build and run queries for other necessary tables (if returndata/savedata = TRUE)
+    ## 9.1 Return and/or save plot data (pltx / PLOT)
+    ## 9.2 Return and/or save cond data (condx / COND)
+    ## 9.3. Return and/or save tree data (treex / TREE)
+    ## 9.4. Return and/or save seedling data (seedx / SEEDLING)
     ## 
-    ## 8. Check COND_STATUS_CD and generate table with number of conditions
-    ## 8.1. Sampled conditions
-    ## 8.2. Sampled nonforest conditions
+    ## 10. Check COND_STATUS_CD and generate table with number of conditions
+    ## 10.1. Sampled conditions
+    ## 10.2. Sampled nonforest conditions
     ## 
-    ## 9. Build FROM statement for estimation queries
-    ## 10. Return data objects
+    ## 11. Build FROM statement for estimation queries
+    ## 12. Return data objects
     ###################################################################################
     
     ## Set global variables
@@ -64,6 +64,7 @@ check.popdataVOL <-
     diavar <- "DIA"
     pltcondindb <- datindb
     addfortypgrp <- TRUE
+    returnadj <- TRUE
     
     ## Get variables from outlst
     if (savedata) {
@@ -71,13 +72,13 @@ check.popdataVOL <-
     }
     
     ##############################################################################
-    ## Define variables necessary for estimation
+    ## 1. Define variables necessary for estimation
     ##############################################################################
     cvars2keep <- unique(c(cvars2keep, "PROP_BASIS"))
     
     
     ##############################################################################
-    ## Check if data are in a database (datindb) and if dbconn is valid
+    ## 2. Check if data are in a database (datindb) and if dbconn is valid
     ##############################################################################
     if (datindb) {
       if (is.null(dbconn) || !DBI::dbIsValid(dbconn)) {
@@ -89,7 +90,7 @@ check.popdataVOL <-
     }
     
     ##############################################################################
-    ## 1. Get tables used in estimation from tabs
+    ## 3. Get tables used in estimation from tabs
     ##############################################################################
     
     ## plot table
@@ -119,8 +120,10 @@ check.popdataVOL <-
       stop("must include cond for estimation")
     }
 
-    ## If pltassgn is not in database but all other tables are in database, 
-    ## we need to load tables to memory and subset for population queries.
+    
+    ## Note: If pltassgn is not in database but all other tables are in database,
+    ## we need to import the cond table to memory and subset for calculating 
+    ## adjustment factors.
     if (datindb && !pltaindb) {
       
       ## Build cond FROM query
@@ -211,7 +214,7 @@ check.popdataVOL <-
     }
    
     ##############################################################################
-    ## 2. Check for necessary variables in tables
+    ## 4. Check for necessary variables in tables
     ##############################################################################
     condxnm <- ifelse (!is.null(condx), "condx", condnm) 
     
@@ -242,10 +245,11 @@ check.popdataVOL <-
     }
    
     ##############################################################################
-    ## 3. Build query for adjustment factors and append to pltids
+    ## 5. Build query for adjustment factors
     ##############################################################################
     
-    ## Check proportion variables, including area weight 
+    ## 5.1. Check proportion variables, including area weight 
+    ###################################################################
     cpropvars <- check.PROPvars(condflds,
                                 propvars = unlist(cpropvars))
     areawt <- findnm(areawt, cpropvars, returnNULL = TRUE)
@@ -264,19 +268,21 @@ check.popdataVOL <-
     }
     
     
+    ## 5.2. Build query for adjustment factors (ADJqry) based on popType  
+    ###################################################################
+
+    ## Build FROM statement
+    adjjoinqry <- getjoinqry(cuniqueid, pltidsid, "c.", pltidsa.)
+    adjfromqry <- paste0("\n FROM pltids",
+                         "\n JOIN ", condnm, " c ", adjjoinqry)
+    
     ## Build ADJqry WHERE statement (i.e., excluding nonresponse)
     adjwhereqry <- NULL
     if (adj != "none") {
       adjwhereqry <- getADJwherePLOT(condflds, conda.="c.")
     }
-    
-    
-    ## Build FROM query
-    adjjoinqry <- getjoinqry(cuniqueid, pltidsid, "c.", pltidsa.)
-    adjfromqry <- paste0("\n FROM pltids",
-                         "\n JOIN ", condnm, " c ", adjjoinqry)
-    
-    ## Get getADJqry function 
+
+    ## Build final query using getADJqry()
     ADJqry <- 
       getADJqry(popType = popType,
                 adj = adj,
@@ -299,58 +305,52 @@ check.popdataVOL <-
     #message(adjfactors.qry)
     
     
-    ## Run query to calculate adjustment factors
-    if (pltaindb) {
-      adjfactors <- tryCatch(
-        DBI::dbGetQuery(dbconn, adjfactors.qry),
-        error=function(e) {
-          message(e,"\n")
-          return(NULL)})
-    } else {
-      adjfactors <- tryCatch(
-        sqldf::sqldf(adjfactors.qry, connection = NULL),
-        error = function(e) {
-          message(e,"\n")
-          return(NULL) })
-    }
-    
-    if (is.null(adjfactors) || nrow(adjfactors) == 0) {
-      message("invalid adjustment query...")
-      message(adjfactors.qry)
-      return(NULL)
-    }
-    if (adj == "samp") {
-      setkeyv(setDT(adjfactors), strunitvars)
-    } else {
-      setkeyv(setDT(adjfactors), pltidsid)
+    ## 5.3. If returnadj = TRUE, return adjustment factors  
+    ###################################################################
+    if (adj != "samp") returnadj <- FALSE
+    if (returnadj) {
+      ## Run query to calculate adjustment factors
+      if (pltaindb) {
+        adjfactors <- tryCatch(
+          DBI::dbGetQuery(dbconn, adjfactors.qry),
+          error=function(e) {
+            message(e,"\n")
+            return(NULL)})
+      } else {
+        adjfactors <- tryCatch(
+          sqldf::sqldf(adjfactors.qry, connection = NULL),
+          error = function(e) {
+            message(e,"\n")
+            return(NULL) })
+      }
+      
+      if (is.null(adjfactors) || nrow(adjfactors) == 0) {
+        message("invalid adjustment query...")
+        message(adjfactors.qry)
+        return(NULL)
+      }
+      if (adj == "samp") {
+        setkeyv(setDT(adjfactors), strunitvars)
+      } else {
+        setkeyv(setDT(adjfactors), pltidsid)
+      }
     }
     dbqueries$adjfactors <- adjfactors.qry
     
-    ## Check adjustment factors
-    #source("C:/_tsf/_GitHub/FIESTAnalysis/R/IEVALIDator_compare.R") 
-    #evalid <- 81901
-    #FIADBpop <- getFIADBpop(evalid = evalid, dbconn = FIAconn)$pop_stratum
-    #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
-    #adjfactors <- replacepopfun(adjfactors, FIADBpop)
-    #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
     
+    ## 5.4 Build query for plot-level adjustment factors
+    ###################################################################
     adja. <- "adj."
     adjvars <- sapply(propvars, function(x) {
       ifelse(grepl("PROP_UNADJ", x), paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)), 
              ifelse (grepl("prop_unadj", x), paste0("ADJ_FACTOR_", toupper(sub("prop_unadj", "", x))), 
                      paste0(x, "_ADJ"))) })
-
-    ## Build and run final query to append adjustment factors to pltids, including ADJ query
+    selectvars <- toString(c(paste0(pltidsa., pltidsid), paste0(adja., adjvars)))
+    
+    ## if adj='samp', append query for plot-level adjustment factors 
     if (adj == "samp") {
-      adja. <- "adj."
-      adjvars <- sapply(propvars, function(x) {
-        ifelse(grepl("PROP_UNADJ", x), paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)), 
-               ifelse (grepl("prop_unadj", x), paste0("ADJ_FACTOR_", toupper(sub("prop_unadj", "", x))), 
-                       paste0(x, "_ADJ"))) })
-      #selectvars <- toString(c(paste0(pltidsa., pltidvars), paste0(adja., adjvars)))
-      selectvars <- toString(c(paste0(pltidsa., pltidsid), paste0(adja., adjvars)))
-      
-      ## Build WITH query for adjustment factors, including pltids WITH query
+
+      ## First, build WITH query for adjustment factors
       adjfactorsWITHqry <- paste0(
         pltidsWITHqry, ",",
         "\n----- calculate strata-level adjustment factors",
@@ -358,13 +358,11 @@ check.popdataVOL <-
         "\n(", ADJqry, ")")
       #message(adjfactorsWITHqry)
       
- 
-      ## Build pltidsadjFROM.qry
+      ## Next, build pltidsadjFROM.qry
       adjjoinqry <- getjoinqry(strunitvars, strunitvars, adja., pltidsa.)
       pltidsadjFROM.qry <- paste0(
         "\nFROM pltids",
         "\nJOIN adjfactors adj ", adjjoinqry)
-      
       
       ## Build pltidsadj.qry
       pltidsadj.qry <- paste0(
@@ -374,8 +372,7 @@ check.popdataVOL <-
                pltidsadjFROM.qry))
       ## message(pltidsadj.qry)
       
-      
-      ## Build WITH query to identify pltids, including adjustment factors
+      ## Build WITH query for plot-level adjustment factors
       pltidsadjWITHqry <- paste0(
         adjfactorsWITHqry, ",",
         "\n----- get plot-level adjustment factors",
@@ -390,7 +387,7 @@ check.popdataVOL <-
         pltidsWITHqry,
         "\n", ADJqry)
       
-      ## Build WITH query to identify pltids, including adjustment factors
+      ## Build WITH query for plot-level adjustment factors
       pltidsadjWITHqry <- paste0(
         pltidsWITHqry, ",",
         "\n----- calculate plot-level adjustment factors",
@@ -401,7 +398,8 @@ check.popdataVOL <-
     dbqueriesWITH$pltidsadjWITH <- pltidsadjWITHqry   
     
 
-    ## Run query to identify plotids, including adjustment factors
+    ## 5.6. Run query to identify plotids, including adjustment factors
+    ###################################################################
     if (returndata || savedata) {
       if (pltaindb) {
         pltidsadj <- tryCatch(
@@ -426,16 +424,16 @@ check.popdataVOL <-
     }
     dbqueries$pltidsadj <- pltidsadj.qry
 
-    ##############################################################################
-    ## 4. Build and run queries for PLOT/COND (pltcondx)
-    ##############################################################################
-    pltidsa. <- "pltids."
-    conda. <- "c."
     
-    if (!is.null(plotnm)) {
-      ## Build FROM query for pltcondx query
-      plota. <- "p."
+    ##############################################################################
+    ## 6. Build queries for PLOT/COND (pltcondx)
+    ##############################################################################
 
+    ## 6.1. Build FROM and SELECT statements
+    ###############################################################
+    if (!is.null(plotnm)) {
+      
+      ## Build FROM query for pltcondx query
       pjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
       cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., plota.)
       pcfromqry <- paste0(
@@ -460,7 +458,6 @@ check.popdataVOL <-
         "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry)
     }  
     
-    
     if (defaultVars) {
       condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
     } else {
@@ -470,7 +467,9 @@ check.popdataVOL <-
     cselectqry <- toString(paste0(conda., condvars))
     pltcondflds <- unique(c(condvars, pvars))
 
-    ## Add FORTYPGRP to SELECT query
+    
+    ## 6.2. Add FORTYPGRP to SELECT query
+    ###############################################################
     if (addfortypgrp) {
       ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
       ftypqry <- classqry(classcol = "c.FORTYPCD",
@@ -481,6 +480,9 @@ check.popdataVOL <-
                          "\n ", ftypqry)
       pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
     }
+    
+    ## 6.3. Build query for pltcondx
+    ###############################################################
     if (is.null(pvars)) {
       ## Build query for pltcondx
       pltcondx.qry <- paste0("SELECT ", cselectqry, ", 1 AS TOTAL",
@@ -494,6 +496,9 @@ check.popdataVOL <-
     dbqueries$pltcondx <- pltcondx.qry
 
 
+    ## 6.4. Build WITH queries for pltcondx
+    ###############################################################
+    
     ## Build WITH query for pltcondx, including pltids WITH query
     pltcondxWITHqry <- paste0(pltidsWITHqry, ", ",
                                "\n----- pltcondx",
@@ -509,7 +514,7 @@ check.popdataVOL <-
     dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
     
 
-    ## If returndata or savedata, run query for pltcondx
+    ## 6.5. If returndata or savedata, run query for pltcondx
     ##################################################################
     if (returndata || savedata) {
       pltcondindb <- FALSE
@@ -548,7 +553,7 @@ check.popdataVOL <-
       }
     }
    
-    ## 5. Build CASE statement for adding adjustment factors to SELECT
+    ## 7. Build CASE statement for adding adjustment factors to SELECT
     ##################################################################
     if (adj %in% c("samp", "plot")) {
       propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
@@ -568,31 +573,35 @@ check.popdataVOL <-
     }
 
     ##############################################################################
-    ## 6. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
+    ## 8. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
     ##############################################################################  
-    returnlst <- list(pltcondflds = pltcondflds,
-                      cuniqueid = cuniqueid, 
-                      condid = condid, 
-                      adjfactors = adjfactors,
-                      adjcase = adjcase,
-                      adjvarlst = adjvars,
-                      pjoinid = pltidsid)
+    returnlst <- list(pltcondflds = pltcondflds, ## vector of field names in pltcondx
+                      cuniqueid = cuniqueid,     ## unique identifier of plots in pltcondx
+                      condid = condid,           ## unique identifier of conditions
+                      areawt = areawt,           ## variable names used to calcuate area
+                      adjcase = adjcase,         ## CASE statement for summarizing area weights in estimates
+                      adjvarlst = adjvars,       ## named vector of adjustment factor variable names
+                      pjoinid = pltidsid)        ## joinid for joining pltids WITH query to other tables
     
     if (returndata || savedata) {
-      returnlst$pltcondx <- pltcondx
-      returnlst$pltidsadj <- pltidsadj
+      returnlst$pltcondx <- pltcondx    ## data frame of plot/condition variables
+      returnlst$pltidsadj <- pltidsadj  ## data frame of plot-level adjustment factors
     } else {
       returnlst$pltcondx <- "pltcondx"
       returnlst$pltidsadj <- "pltidsadj"
     }
+    if (returnadj) {
+      returnlst$adjfactors <- adjfactors   ## data frame with adjustment factors
+    }
    
+    
     ##############################################################################
-    ## 7. Build and run queries for other necessary tables (if returndata/savedata = TRUE) 
+    ## 9. Build and run queries for other necessary tables (if returndata/savedata = TRUE) 
     ##############################################################################  
     if ((returndata || savedata) && popType == "VOL") {
       message("returning data needed for estimation...")
       
-      ## 7.1 Return and/or save plot data (pltx / PLOT)
+      ## 9.1 Return and/or save plot data (pltx / PLOT)
       ##################################################################
       
       # if (is.null(pltx) && !is.null(plotnm)) {
@@ -653,7 +662,7 @@ check.popdataVOL <-
       # }
       # 
       # 
-      # ## 7.2 Return and/or save cond data (condx / COND)
+      # ## 9.2 Return and/or save cond data (condx / COND)
       # ##################################################################
       # 
       # if (is.null(condx)) {
@@ -722,7 +731,7 @@ check.popdataVOL <-
       # rm(condx)  
       # 
 
-      ## 7.3. Return and/or save tree data (treex / TREE)
+      ## 9.3. Return and/or save tree data (treex / TREE)
       ##################################################################
       if (!is.null(treenm)) {
         treea. <- "t."
@@ -812,7 +821,7 @@ check.popdataVOL <-
         #rm(treex)
       } 
       
-      ## 7.4. Return and/or save seedling data (seedx / SEEDLING)
+      ## 9.4. Return and/or save seedling data (seedx / SEEDLING)
       ##################################################################
       if (!is.null(seednm)) {
         seeda. <- "s."
@@ -898,14 +907,14 @@ check.popdataVOL <-
     
     
     ##############################################################################
-    ## 8. Check COND_STATUS_CD and generate table with number of conditions
+    ## 10. Check COND_STATUS_CD and generate table with number of conditions
     ##############################################################################
     
     ## condfromqry
     condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
     condfromqry <- paste0("\nJOIN ", SCHEMA., condnm, " c ", condjoinqry)
     
-    ## 8.1. Sampled conditions
+    ## 10.1. Sampled conditions
     ##########################################################################
     condsampcnt <- NULL
     cstatuschk <- findnm("COND_STATUS_CD", pltcondflds, returnNULL=TRUE)
@@ -964,7 +973,7 @@ check.popdataVOL <-
       }
     } 
     
-    ## 8.2. Sampled nonforest conditions
+    ## 10.2. Sampled nonforest conditions
     ##########################################################################
     
     ## If ACI, check NF_PLOT_STATUS_CD and generate table with number of plots
@@ -1050,7 +1059,7 @@ check.popdataVOL <-
       returnlst$condsampcnt <- as.data.frame(condsampcnt)
     }
     
-    ## 9. Build FROM statement for estimation queries
+    ## 11. Build FROM statement for estimation queries
     ######################################################################################
     if (datindb) {
       estfromqry <- paste0(
@@ -1061,7 +1070,7 @@ check.popdataVOL <-
         "\n FROM pltcondf cond")
     }
     
-    ## 10. Return data objects
+    ## 12. Return data objects
     ######################################################################################
     if (!returndata) {
       

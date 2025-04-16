@@ -5,9 +5,6 @@ getGBestimates <- function(esttype,
                            uniqueid,
                            estvarn.name, 
                            estvard.name = NULL,
-                           rowvar, 
-                           colvar, 
-                           grpvar,
                            pltassgnx,
                            pltassgnid,
                            unitarea, 
@@ -18,8 +15,11 @@ getGBestimates <- function(esttype,
                            strwtvar,
                            totals, 
                            sumunits, 
-                           uniquerow, 
-                           uniquecol,
+                           rowvar = NULL, 
+                           colvar = NULL, 
+                           grpvar = NULL,
+                           uniquerow = NULL, 
+                           uniquecol = NULL,
                            row.add0 = FALSE, 
                            col.add0 = FALSE,
                            row.orderby = NULL, 
@@ -31,8 +31,10 @@ getGBestimates <- function(esttype,
   ## Set global variables
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=
     strwt=n.total=n.strata=ONEUNIT <- NULL
-  addtotal <- ifelse(rowvar %in% c("PREV_TOTAL", "TOTAL") || 
-                       length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
+  addtotal <- TRUE
+  if (!is.null(rowvar)) {
+    if (length(unique(domdatn[[rowvar]])) == 1) addtotal <- FALSE
+  }
   strunitvars <- c(unitvar, strvar)
   
   message("getting estimates using GB...")
@@ -62,7 +64,8 @@ getGBestimates <- function(esttype,
       domdatdtot <- 
         domdatd[, lapply(.SD, sum, na.rm=TRUE), 
               by = c(strunitvars, uniqueid, "TOTAL"), .SDcols=estvard.name]
-      domdattot <- merge(domdattot, domdatdtot, by=c(strunitvars, uniqueid, "TOTAL"))
+      #domdattot <- merge(domdattot, domdatdtot, by=c(strunitvars, uniqueid, "TOTAL"))
+      domdattot <- merge(domdattot, domdatdtot, by=c(strunitvars, uniqueid, "TOTAL"), all.y=TRUE)
     }
 
     unit_totest <- 
@@ -95,7 +98,7 @@ getGBestimates <- function(esttype,
   }
 
   ## Get row estimate
-  if (is.null(rowvar)) rowvar <- "TOTAL"
+  if (is.null(rowvar) || rowvar == "NONE") rowvar <- "TOTAL"
   if (rowvar != "TOTAL") {
 
     ## Check uniquerow with domain-level data - add NA factor values if necessary
@@ -121,14 +124,18 @@ getGBestimates <- function(esttype,
         domdattot <- tabchk$tab1
         domdatdtot <- tabchk$tab2
         
+#        domdattot <- merge(domdattot, domdatdtot, 
+#                            by = c(strunitvars, uniqueid, rowvar))
         domdattot <- merge(domdattot, domdatdtot, 
-                            by = c(strunitvars, uniqueid, rowvar))
+                           by = c(strunitvars, uniqueid, rowvar), all.y=TRUE)
       } else {
         domdatdtot <- 
           domdatd[, lapply(.SD, sum, na.rm=TRUE),
                   by = c(strunitvars, uniqueid), .SDcols = estvard.name]
+#        domdattot <- merge(domdattot, domdatdtot, 
+#                            by = c(strunitvars, uniqueid))
         domdattot <- merge(domdattot, domdatdtot, 
-                            by = c(strunitvars, uniqueid))
+                           by = c(strunitvars, uniqueid), all.y=TRUE)
       }
     }  
     unit_rowest <- 
@@ -172,14 +179,18 @@ getGBestimates <- function(esttype,
         domdattot <- tabchk$tab1
         domdatdtot <- tabchk$tab2
 
+#        domdattot <- merge(domdattot, domdatdtot, 
+#                           by = c(strunitvars, uniqueid, colvar))
         domdattot <- merge(domdattot, domdatdtot, 
-                           by = c(strunitvars, uniqueid, colvar))
+                           by = c(strunitvars, uniqueid, colvar), all.y=TRUE)
       } else {
         domdatdtot <- 
           domdatd[, lapply(.SD, sum, na.rm=TRUE),
                   by = c(strunitvars, uniqueid), .SDcols = estvard.name]
+#        domdattot <- merge(domdattot, domdatdtot, 
+#                           by = c(strunitvars, uniqueid))
         domdattot <- merge(domdattot, domdatdtot, 
-                           by = c(strunitvars, uniqueid))
+                           by = c(strunitvars, uniqueid), all.y=TRUE)
       }
     }  
     unit_colest <- 
@@ -211,14 +222,18 @@ getGBestimates <- function(esttype,
        domdatdtot <- 
          domdatd[, lapply(.SD, sum, na.rm=TRUE), 
                  by = c(strunitvars, uniqueid, grpvar), .SDcols = estvard.name]
+#       domdattot <- merge(domdattot, domdatdtot, 
+#                          by = c(strunitvars, uniqueid, grpvar))
        domdattot <- merge(domdattot, domdatdtot, 
-                          by = c(strunitvars, uniqueid, grpvar))
+                          by = c(strunitvars, uniqueid, grpvar), all.y=TRUE)
      } else {
        domdatdtot <- 
          domdatd[, lapply(.SD, sum, na.rm=TRUE),
                  by = c(strunitvars, uniqueid), .SDcols = estvard.name]
+#       domdattot <- merge(domdattot, domdatdtot, 
+#                          by = c(strunitvars, uniqueid))
        domdattot <- merge(domdattot, domdatdtot, 
-                          by = c(strunitvars, uniqueid))
+                          by = c(strunitvars, uniqueid), all.y=TRUE)
      }
    }  
    unit_grpest <- 

@@ -46,11 +46,15 @@ sumpropP2VEGqry <- function(fromqry = NULL,
     }
 
     ## Get sampled P2 Vegetation data
+#     whereqry <- paste0(whereqry,
+# 	         "\n   AND p.P2VEG_SAMPLING_STATUS_CD < 3",
+# 			     "\n   AND ((p.SAMP_METHOD_CD = 1 AND subp.P2VEG_SUBP_STATUS_CD = 1)",
+#            "\n           OR p.SAMP_METHOD_CD = 2)")
+    
     whereqry <- paste0(whereqry,
-	         "\n   AND p.P2VEG_SAMPLING_STATUS_CD < 3",
-			     "\n   AND ((p.SAMP_METHOD_CD = 1 AND subp.P2VEG_SUBP_STATUS_CD = 1)",
-           "\n           OR p.SAMP_METHOD_CD = 2)")
-
+                       "\n   AND ((p.SAMP_METHOD_CD = 1 AND subp.P2VEG_SUBP_STATUS_CD = 1)",
+                       "\n           OR p.SAMP_METHOD_CD = 2)")
+    
   }
   
   ## Sum condition proportions by subplot
@@ -70,6 +74,7 @@ sumpropP2VEGqry <- function(fromqry = NULL,
   ## Sum condition proportions by subplot
   ############################################################
   selectqry <- paste0("SELECT ", selectgrpvars, ", ",
+    "\n    SUM(CASE WHEN subp.P2VEG_SUBP_STATUS_CD = 1 THEN 1 ELSE 0 END) AS NSUBP,",
     "\n    SUM(COALESCE(subpc.SUBPCOND_PROP, 0)) / 4 AS SUBPPROP_UNADJ,",
     "\n    SUM(COALESCE(subpc.MICRCOND_PROP, 0)) / 4 AS MICRPROP_UNADJ,",
     "\n    SUM(COALESCE(subpc.MACRCOND_PROP, 0)) / 4 AS MACRPROP_UNADJ,",

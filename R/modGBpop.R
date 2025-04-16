@@ -510,15 +510,6 @@ modGBpop <- function(popType = "VOL",
         unitvar2 <- stratdat$unitvar2
       } 
       
-      #      if (strata) {
-      #        if (is.null(strwtvar)) {
-      #          stop("missing strwtvar")
-      #        }
-      #        if (strwtvar != "strwt") {
-      #          names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
-      #          strwtvar <- "strwt"
-      #        }
-      #      }
     } else if (!is.null(auxdat)) {
       list.items <- c("pltassgn", "unitzonal", "unitvar", "predfac", 
                       "pltassgnid", "unitarea", "areavar")
@@ -542,17 +533,6 @@ modGBpop <- function(popType = "VOL",
         } 
         pivot <- TRUE
       }
-      #    } else {
-      #      strwtvar <- "strwt" 
-      #      if (!is.null(stratalut)) {
-      #        byunitvars <- c(unitvar, unitvar2)
-      #        if ("AOI" %in% names(unitzonal)) {
-      #          byunitvars <- c(byunitvars, "AOI")
-      #        }
-      #        stratalut <- strat.pivot(unitzonal, unitvars=byunitvars, 
-      #                                 strvar, strwtvar=strwtvar)
-      #        pivot <- FALSE
-      #      }
     }
   } 
   
@@ -603,10 +583,15 @@ modGBpop <- function(popType = "VOL",
   
   ###################################################################################
   ## CHECK PLOT PARAMETERS AND DATA
-  ## Generate table of sampled/nonsampled plots and conditions
-  ## Remove nonsampled plots (if nonsamp.pfilter != "NONE")
-  ## Applies plot filters
+  ## This function is used to perform several data checks on the input data and to 
+  ## define the set of plots and auxiliary data within the given population that is 
+  ## used for estimation. The function also generates tables of sampled/nonsampled 
+  ## plots and conditions, removes nonsampled plots, and applies population level 
+  ## filters. The input data consists of plot-level and auxiliary information 
+  ## including: plot data from the FIA database; plot assignments from auxiliary 
+  ## data using external spatial data extractions or from the FIA database; unique plot identifiers; plot-level filters; variable names, and summarized auxiliary information. The plot filters included filters that subset the population of plots within the area of interest (e.g., INVYR = 2014:2016, evalid = 82101).
   ###################################################################################
+  popdatindb <- ifelse(returndata, FALSE, TRUE)
   pltcheck <- 
     check.popdataPLT(dsn = dsn, dbconn = dbconn, schema = schema,
                      datsource = datsource, 
@@ -749,7 +734,14 @@ modGBpop <- function(popType = "VOL",
   
   
   ###################################################################################
-  ## Check Population Data
+  ## Check Population Data for given popType.
+  ## The objectives of these functions are to: 
+  ## 1.	Check variables that are necessary for estimation.
+  ## 2.	Return plot/condition level data as an R object (pltcondx).
+  ## 3.	Return plot-level adjustment factors (pltidsadj).
+  ## 4.	Check other data needed for estimation and return data frames, if returndata = TRUE.
+  ## 5.	Return adjustment factor query to use in WITH statement.
+  ## 6.	Return all data queries (dbqueries).
   ###################################################################################
   if (popType %in% c("ALL", "CURR", "VOL")) {
     ###################################################################################
@@ -826,7 +818,6 @@ modGBpop <- function(popType = "VOL",
                         POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
                         adj = adj, ACI = ACI, 
                         plotlst = plotlst, 
-                        pwhereqry = pwhereqry, 
                         condid = condid, 
                         areawt = areawt, areawt2 = areawt2,
                         unitvars = unitvars,
@@ -880,7 +871,6 @@ modGBpop <- function(popType = "VOL",
                          POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN,
                          adj = adj, ACI = ACI, 
                          plotlst = plotlst, 
-                         pwhereqry = pwhereqry, 
                          condid = condid, 
                          areawt = areawt, areawt2 = areawt2,
                          unitvars = unitvars,
@@ -903,27 +893,34 @@ modGBpop <- function(popType = "VOL",
     condsampcnt <- popcheck$condsampcnt
     dbqueries <- popcheck$dbqueries
     dbqueriesWITH <- popcheck$dbqueriesWITH
-    ACI.filter <- popcheck$ACI.filter
     adjcase <- popcheck$adjcase
     varadjP2VEG <- popcheck$varadjP2VEG
+    #popdatindb <- popcheck$popdatindb
 
-    p2veg_subp_structure <- popcheck$p2veg_subp_structure
-    p2veg_subplot_spp <- popcheck$p2veg_subplot_spp
+    #p2veg_subp_structure <- popcheck$p2veg_subp_structure
+    #p2veg_subplot_spp <- popcheck$p2veg_subplot_spp
 
-        
-    if (returndata) {
+    #if (returndata) {
       #pltx <- popcheck$pltx
       #condx <- popcheck$condx
-      subplotx <- popcheck$subplotx
-      subp_condx <- popcheck$subp_condx
-      p2veg_subp_structure <- popcheck$p2veg_subp_structure
-      p2veg_subplot_spp <- popcheck$p2veg_subplot_spp
+      #subplotx <- popcheck$subplotx
+      #subp_condx <- popcheck$subp_condx
+      #p2veg_subp_structure <- popcheck$vcondstrx
+      #p2veg_subplot_spp <- popcheck$vcondsppx
       
-      vcondsppx <- popcheck$vcondsppx
-      vcondstrx <- popcheck$vcondstrx
-    }
+    # vcondstrx <- popcheck$vcondstrx
+    # vcondstrflds <- popcheck$vcondstrflds
+    # vcondsppx <- popcheck$vcondsppx
+    # vcondsppflds <- popcheck$vcondsppflds
+    # vcondareax <- popcheck$vcondareax 
+    # 
+    p2veg_subp_structurex <- popcheck$p2veg_subp_structurex
+    p2veg_subp_structureflds <- popcheck$p2veg_subp_structureflds
+    p2veg_subplot_sppx <- popcheck$p2veg_subplot_sppx
+    p2veg_subplot_sppflds <- popcheck$p2veg_subplot_sppflds
+    areawt <- popcheck$areawt
+    #}
   }
-  
 
   ###################################################################################
   ## Add new variables to pltcondx for estimation
@@ -1050,6 +1047,7 @@ modGBpop <- function(popType = "VOL",
     returnlst$bndx <- bndx
   }
   returnlst <- append(returnlst, list(
+    popdatindb = popdatindb,
     pltidsadj = pltidsadj,
     pltcondx = pltcondx, 
     pltcondflds = pltcondflds, pjoinid = pjoinid,
@@ -1090,14 +1088,22 @@ modGBpop <- function(popType = "VOL",
     returnlst$evalid <- popevalid
   }
   if (popType == "P2VEG") {
-    returnlst$vcondsppx <- vcondsppx
+    returnlst$vcondareax <- vcondareax
     returnlst$vcondstrx <- vcondstrx
+    returnlst$vcondstrflds <- vcondstrflds
+    returnlst$vcondsppx <- vcondsppx
+    returnlst$vcondsppflds <- vcondsppflds
     returnlst$varadjP2VEG <- varadjP2VEG
     
-    returnlst$subplotx <- popcheck$subplotx
-    returnlst$subp_condx <- popcheck$subp_condx
-    returnlst$p2veg_subp_structure <- popcheck$p2veg_subp_structure
-    returnlst$p2veg_subplot_spp <- popcheck$p2veg_subplot_spp
+    returnlst$p2veg_subp_structurex <- p2veg_subp_structurex
+    returnlst$p2veg_subp_structureflds <- p2veg_subp_structureflds
+    returnlst$p2veg_subplot_sppx <- p2veg_subplot_sppx
+    returnlst$p2veg_subplot_sppflds <- p2veg_subplot_sppflds
+    
+    #returnlst$subplotx <- popcheck$subplotx
+    #returnlst$subp_condx <- popcheck$subp_condx
+    #returnlst$p2veg_subp_structurex <- p2veg_subp_structure
+    #returnlst$p2veg_subplot_sppx <- p2veg_subplot_spp
     
   }
   if (popType %in% c("CHNG")) {
@@ -1118,8 +1124,9 @@ modGBpop <- function(popType = "VOL",
   
   ## Save data frames
   ##################################################################
-  returnlst$popdatindb <- ifelse(returndata, FALSE, TRUE)
-  if (!returndata) {
+  if (returndata) {
+    returnlst$popconn <- NULL
+  } else {
     if (savedata) {
       
       if (outlst$out_fmt == "sqlite") {
@@ -1154,6 +1161,14 @@ modGBpop <- function(popType = "VOL",
       #                 savedata_opts = outlst)
       # }
       
+      if (!is.null(pltcondx)) {
+        message("saving pltcondx...")
+        outlst$out_layer <- "pltcondx"
+        datExportData(pltcondx, 
+                      savedata_opts = outlst)
+        rm(pltcondx)
+        # gc()
+      }
       
       if (!is.null(vcondsppx)) {
         message("saving vcondsppx...")
@@ -1171,14 +1186,23 @@ modGBpop <- function(popType = "VOL",
         rm(vcondstrx)
         # gc()
       }
+      if (!is.null(vcondareax)) {
+        message("saving vcondareax...")
+        outlst$out_layer <- "vcondareax"
+        datExportData(vcondareax, 
+                      savedata_opts = outlst)
+        rm(vcondareax)
+        # gc()
+      }
       
-    } else if (datindb) {
-      
-      returnlst$pop_fmt <- datsource
-      returnlst$pop_dsn <- dsn
-      returnlst$pop_schema <- schema
-      returnlst$popconn <- dbconn
     }
+    # } else if (datindb) {
+    #   
+    #   returnlst$pop_fmt <- datsource
+    #   returnlst$pop_dsn <- dsn
+    #   returnlst$pop_schema <- schema
+    #   returnlst$popconn <- dbconn
+    # }
   }
   
   

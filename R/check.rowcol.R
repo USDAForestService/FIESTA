@@ -20,7 +20,8 @@ check.rowcol <-
  	         rowlut = NULL, collut = NULL, 
            rowgrp = FALSE, rowgrpnm = NULL, 
            rowgrpord = NULL, title.rowgrp = NULL, 
-           cvars2keep = NULL, whereqry = NULL,
+           cvars2keep = NULL, whereqry = NULL, 
+           tfilter = NULL,
            factor.addNA = FALSE, spcdname = "COMMON_SCIENTIFIC"){
 
   ####################################################################################
@@ -50,6 +51,7 @@ check.rowcol <-
 
   ## Set global variables
   domainlst=tdomvar=tdomvar2=grpvar=rowvarnm=colvarnm <- NULL
+  rowbytdom = colbytdom = rowbypcdom = colbypcdom <- FALSE
   gui <- FALSE
 
   ## Check for condid
@@ -204,6 +206,7 @@ check.rowcol <-
                    treex = treex, treeflds = treeflds, seedx = seedx,
                    seedflds = seedflds, estseed = estseed, 
                    tuniqueid = tuniqueid, whereqry = whereqry, withqry = withqry,
+                   tfilter = tfilter,
                    popdatindb = popdatindb, popconn = popconn, SCHEMA. = SCHEMA.,
                    domlut = domlut, domvarlst = domvarlst, spcdname = spcdname)
                               
@@ -217,8 +220,8 @@ check.rowcol <-
     cvars2keep <- rowvardat$cvars2keep
     rowclassnm <- rowvardat$tabclassnm
     rowclassqry <- rowvardat$tabclassqry
-    bytdom <- rowvardat$bytdom
-    bypcdom <- rowvardat$bypcdom
+    rowbytdom <- rowvardat$bytdom
+    rowbypcdom <- rowvardat$bypcdom
   }
   
   
@@ -249,6 +252,7 @@ check.rowcol <-
                    treex = treex, treeflds = treeflds, seedx = seedx,
                    seedflds = seedflds, estseed = estseed, 
                    tuniqueid = tuniqueid, whereqry = whereqry, withqry = withqry,
+                   tfilter = tfilter,
                    popdatindb = popdatindb, 
                    popconn = popconn, SCHEMA. = SCHEMA.,
                    domlut = domlut, domvarlst = domvarlst)
@@ -263,8 +267,8 @@ check.rowcol <-
     cvars2keep <- colvardat$cvars2keep
     colclassnm <- colvardat$tabclassnm
     colclassqry <- colvardat$tabclassqry
-    bytdom <- colvardat$bytdom
-    bypcdom <- colvardat$bypcdom
+    colbytdom <- colvardat$bytdom
+    colbypcdom <- colvardat$bypcdom
   }
   
   ## Rename rowvar variables with prefix 'PREV_'
@@ -319,7 +323,10 @@ check.rowcol <-
   ## Define pltcondvars
   pltcondvars = unique(c(cuniqueid, condid, cvars2keep, domainlst))
   
-
+  ## Define bytdom and bypcdom
+  bytdom <- ifelse (any(c(rowbytdom, colbytdom)), TRUE, FALSE)
+  bypcdom <- ifelse (any(c(rowbypcdom, colbypcdom)), TRUE, FALSE)
+  
   returnlst <- list(pltcondvars = pltcondvars, 
                     bytdom = bytdom, bypcdom = bypcdom, 
                     domainlst = domainlst, 

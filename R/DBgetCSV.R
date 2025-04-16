@@ -101,7 +101,7 @@ DBgetCSV <- function(DBtable,
       },
 		  error = function(e) {
 		    message(e)
-		    NULL
+		    return(NULL)
       }
     )
     

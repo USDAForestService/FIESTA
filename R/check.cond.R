@@ -1,11 +1,11 @@
 check.cond <- function(areawt, 
                        areawt2 = NULL, 
                        adj, 
-                       adjcase, 
+                       adjcase = NULL, 
                        cuniqueid = "PLT_CN", 
                        condid = "CONDID", 
-                       rowvar, 
-                       colvar, 
+                       rowvar = NULL, 
+                       colvar = NULL, 
                        pcdomainlst = NULL,
                        popdatindb = TRUE,
                        popconn = NULL,
@@ -28,7 +28,7 @@ check.cond <- function(areawt,
   if (!is.null(areawt2)) {
     estvarqry <- areawt * areawt2
   }
-  if (adj %in% c("samp", "plot")) {
+  if (adj %in% c("samp", "plot") && !is.null(adjcase)) {
     estvarqry <- paste0(estvarqry, " * ", adjcase)
   }
   estvarqry <- paste0("SUM(COALESCE(", estvarqry, ", 0)) AS ", estnm)
@@ -79,7 +79,7 @@ check.cond <- function(areawt,
   }
 
   ## Append classified variables to query
-  if (rowvar != "TOTAL") {
+  if (!is.null(rowvar) && rowvar != "TOTAL") {
     totalnm <- findnm("TOTAL", pcdomainlst, returnNULL = TRUE)
     if (!is.null(totalnm)) {
       cselectqry <- paste0(cselectqry, ", pc.", totalnm)

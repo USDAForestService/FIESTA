@@ -1427,7 +1427,7 @@ DBgetPlots <- function (states = NULL,
         ## POP_PLOT_STRATUM_ASSGN table (ZIP FILE) - 
         if (is.null(ppsanm)) {
           POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbr, 
-		                                         returnDT=TRUE, stopifnull=FALSE) 
+		                                         returnDT=TRUE, stopifnull=TRUE) 
         }
 		    if (!is.null(POP_PLOT_STRATUM_ASSGN)) { 
           ppsanm <- "POP_PLOT_STRATUM_ASSGN"

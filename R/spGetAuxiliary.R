@@ -217,7 +217,7 @@ spGetAuxiliary <- function(xyplt = NULL,
   gui <- FALSE
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
   if (gui) {uniqueid=savedata <- NULL}
 
 
@@ -394,7 +394,7 @@ spGetAuxiliary <- function(xyplt = NULL,
   ###################################################################
   rastlst.contfn <- tryCatch(
               getrastlst(rastlst.cont, rastfolder, 
-                         stopifnull = TRUE, stopifinvalid = TRUE, 
+                         stopifnull = TRUE, stopifinvalid = TRUE,
                          gui=gui),
      	 	            error=function(e) {
 			              message(e, "\n")

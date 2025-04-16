@@ -7,7 +7,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 	title.estpse=NULL, title.est=NULL, title.pse=NULL, outfn.estpse=NULL,
 	outfolder=NULL, outfn.date=TRUE, overwrite=FALSE, estnm, psenm="pse",
 	estround=0, pseround=2, estnull="--", psenull="--", divideby=NULL,
-	coltitlerow=TRUE, rowtotal=TRUE, rawdata=FALSE, CI=TRUE, rawdat=NULL,
+	coltitlerow=TRUE, rowtotal=TRUE, rawdata=TRUE, CI=TRUE, rawdat=NULL,
 	char.width=NULL, rawonly=FALSE, raw.keep0=FALSE){
 
   ## Set global variables
@@ -141,7 +141,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
                         max(nchar(na.omit(round(unit_grpest[[psenm]], pseround)))))
     }
   }
-  
+ 
   if (sumunits) {
     ## Group estimates
     #if (!is.null(uniquerow))

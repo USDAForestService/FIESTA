@@ -223,24 +223,19 @@ datSumTreeDom <- function(tree = NULL,
   gui <- FALSE
 
   ## Set global variables  
-  COND_STATUS_CD=COUNT=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=
-	seedx=tunits=TREECOUNT_CALC=cond.nonsamp.filter=ref_spcd=tdomvar2nm=concatvar <- NULL
-  checkNApvars <- NULL
-  checkNAcvars <- NULL
-  checkNAtvars <- NULL
+  tunits=ref_spcd=tdomvar2nm=concatvar <- NULL
   seedclnm <- "<1"
   parameters <- FALSE
   ref_units <- FIESTAutils::ref_units
   ref_estvar <- FIESTAutils::ref_estvar
-  twhereqry=swhereqry=tfromqry=sfromqry <- NULL
   cover <- FALSE
   pltsp = FALSE
   checkNA = FALSE
   returnDT = TRUE
   
-  ## If gui.. set variables to NULL
-  if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
-	tdombarplot=FIAname=addseed=proportion=presence=tdomtot=adjtree=tmp <- NULL
+#   ## If gui.. set variables to NULL
+#   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
+# 	tdombarplot=FIAname=addseed=proportion=presence=tdomtot=adjtree=tmp <- NULL
 
 
   ##################################################################
@@ -382,7 +377,6 @@ datSumTreeDom <- function(tree = NULL,
     }
     outconn = outlst$out_conn
   }
-
 
   ##############################################################################
   ############################################################################## 
