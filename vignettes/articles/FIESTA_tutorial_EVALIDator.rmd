@@ -1,0 +1,979 @@
+---
+title: FIESTA - EVALIDator API - compare
+description: >
+   Generate estimates from FIESTA using population data from FIADB and compare with estimates from the EVALIDator API.
+---
+
+The FIESTA R package is an estimation engine that generates estimates using FIA data for custom situations (Frescino et al. 2023). The package provides functions for using FIA's standard estimation techniques and also includes different modules for using alternative estimation strategies for unique situations (Frescino et al. 2022). The package facilitates compilation of FIA and geospatial auxiliary information needed for estimation and provides consistent output for reporting.
+
+To use the FIESTA R package, you need to be familiar with the R statistical software and also have a firm knowledge of the FIA database. Please consult the FIA database description user guide (Version 9.0.1) for variable descriptions (Burrill et al. 2021).
+
+The following examples demonstrate how we can use FIA's standard estimators through FIESTA to generate estimates that match EVALIDator (https://apps.fs.usda.gov/fiadb-api/evalidator). The example uses population data that were previously generated and stored in FIADB. Plot coordinates are not needed for this exercise. 
+
+
+Install necessary packages and set options.
+
+```
+# devtools::install_github("USDAForestService/FIESTAnalysis")
+library(FIESTAnalysis)
+```
+
+
+```
+options(scipen = 6)
+library(FIESTA)
+outfolder <- tempdir()
+
+```
+
+## Get Area of Interest
+
+```
+state <- "Colorado"
+evalyr <- 21
+evalendTypeVOL <- "01"
+evalendTypeCHNG <- "03"
+
+stabbr <- ref_statecd[ref_statecd$MEANING == state, "ABBR"]
+stcd <- ref_statecd[ref_statecd$MEANING == state, "VALUE"]
+#evalid <- paste0(formatC(stcd, width =2, flag="0"), evalyr, evalType)
+evalidVOL <- paste0(stcd, evalyr, evalendTypeVOL)
+evalidCHNG <- paste0(stcd, evalyr, evalendTypeCHNG)
+
+## Create folder for population of interest inside outfolder 
+popfolder <- file.path(outfolder, state)
+
+dir.create(popfolder)
+```
+
+```
+## Set name of output SQLite database and data object
+out_dsn <- paste0("pltdat_", paste0(stabbr, collapse=""), "_20", evalyr, ".db")
+out_obj <- paste0("pltdat_", paste0(stabbr, collapse=""), "_20", evalyr, ".rds")
+
+## Get data from FIA datamart for public only plots, All VOL Evaluations
+pltdat <- 
+  DBgetPlots(
+     datsource = "datamart",    ## Access datamart
+     states = state,           ## States of interest
+     eval = "FIA",                     ## Get an FIA Evaluation
+     eval_opts = list(evalid=c(evalidVOL, evalidCHNG)),  ## Get all annual Evaluations for VOL
+     isseed = TRUE,             ## Include seedling data
+     addplotgeom = TRUE,        ## Add plot data from PLOTGEOM table (for ALP_ADFORCD)
+     issp = TRUE,               ## Make XY coordinates spatial
+     ischng = TRUE,
+     returndata = TRUE,         ## Return data as R list object
+     savePOP = TRUE,            ## Return POP tables (POP_PLOT_STRATUM_ASSGN, POP_STRATUM, POP_ESTN_UNIT)
+     savedata = TRUE,           ## Save data to an folder
+     savedata_opts = list(outfolder = popfolder,   ## Save data to a SQLite database
+                          out_dsn = out_dsn,
+                          out_fmt = "sqlite"))
+#> downloading and extracting SURVEY for CO ...
+#> downloading and extracting POP_EVAL for CO ...
+#> downloading and extracting POP_EVAL_GRP for CO ...
+#> downloading and extracting POP_EVAL_TYP for CO ...
+#> downloading and extracting PLOT for CO ...
+#> downloading and extracting POP_PLOT_STRATUM_ASSGN for CO ...
+#> issp=TRUE, but getxy = FALSE...  changing getxy = TRUE
+#> creating new SQLite database...
+#> ================================================================================
+#> 
+#> getting data for Colorado...
+#> downloading and extracting PLOT for CO ...
+#> downloading and extracting PLOTGEOM for CO ...
+#> downloading and extracting COND for CO ...
+#> downloading and extracting POP_PLOT_STRATUM_ASSGN for CO ...
+#> downloading and extracting POP_STRATUM for CO ...
+#> downloading and extracting POP_ESTN_UNIT for CO ...
+#> 8 - ppsa.EVALID IN(82101, 82103)
+#> WITH 
+#> p AS
+#>  (SELECT distinct p.*
+#> FROM POP_PLOT_STRATUM_ASSGN ppsa 
+#> JOIN XYdf p ON (ppsa.PLT_CN = p.CN) 
+#>   WHERE EVALID in(82101, 82103))
+#> SELECT xy.CN, xy.LON, xy.LAT, xy.STATECD, xy.UNITCD, xy.COUNTYCD, xy.PLOT, xy.INVYR, xy.PLOT_STATUS_CD, xy.INTENSITY
+#> FROM XYdf xy
+#> INNER JOIN p ON (xy.CN = p.CN)
+
+## Check datAZNM and pull out XY data
+names(pltdat)
+#>  [1] "states"                 "tabs"                   "tabIDs"                
+#>  [4] "dbqueries"              "puniqueid"              "xy_PUBLIC"             
+#>  [7] "pop_plot_stratum_assgn" "pop_stratum"            "pop_estn_unit"         
+#> [10] "evalid"                 "evalEndyr"              "pltcnt"                
+#> [13] "invyrs"                 "evalInfo"               "ref_species"           
+#> [16] "args"
+names(pltdat$pop_plot_stratum_assgn)
+#>  [1] "CN"            "STRATUM_CN"    "PLT_CN"        "STATECD"      
+#>  [5] "INVYR"         "UNITCD"        "COUNTYCD"      "PLOT"         
+#>  [9] "RSCD"          "EVALID"        "ESTN_UNIT"     "STRATUMCD"    
+#> [13] "CREATED_DATE"  "MODIFIED_DATE"
+table(pltdat$pop_plot_stratum_assgn$EVALID)
+#> 
+#> 82101 82103 
+#> 10814 10588
+
+## Get public XY coordinates
+xydat <- pltdat$xy_PUBLIC
+dim(xydat)
+#> [1] 10814    13
+names(xydat)
+#>  [1] "PLT_CN"         "STATECD"        "UNITCD"         "COUNTYCD"      
+#>  [5] "PLOT"           "INVYR"          "PLOT_STATUS_CD" "INTENSITY"     
+#>  [9] "PLOT_ID"        "COUNTYFIPS"     "LON_PUBLIC"     "LAT_PUBLIC"    
+#> [13] "geometry"
+table(xydat$STATECD)
+#> 
+#>     8 
+#> 10814
+
+
+## Extract the EVALIDATOR_POP_ESTIMATE table from datamart
+fn <- "https://apps.fs.usda.gov/fia/datamart/CSV/EVALIDATOR_POP_ESTIMATE.csv"
+EVALIDATOR_POP_ESTIMATE <- data.table::fread(fn, integer64 = "character")
+```
+
+
+ We can check out the database we created to make sure it has all of the necessary tables and is properly indexed.
+
+```
+## Define database
+dbfn <- file.path(popfolder, out_dsn)
+
+## Open connection of database
+dbconn <- DBI::dbConnect(RSQLite::SQLite(), dbfn)
+
+## List tables in database
+tablst <- DBI::dbListTables(dbconn)
+tablst
+#>  [1] "cond"                   "condu"                  "plot"                  
+#>  [4] "plotu"                  "pltcnt"                 "pop_estn_unit"         
+#>  [7] "pop_plot_stratum_assgn" "pop_stratum"            "ref_species"           
+#> [10] "seedling"               "subp_cond_chng_mtrx"    "tree"                  
+#> [13] "xy_PUBLIC"
+
+## List fields in table
+ppsa_flds <- DBI::dbListFields(dbconn, "pop_plot_stratum_assgn")
+ppsa_flds
+#>  [1] "CN"            "STRATUM_CN"    "PLT_CN"        "STATECD"      
+#>  [5] "INVYR"         "UNITCD"        "COUNTYCD"      "PLOT"         
+#>  [9] "RSCD"          "EVALID"        "ESTN_UNIT"     "STRATUMCD"    
+#> [13] "CREATED_DATE"  "MODIFIED_DATE"
+
+## check indices
+FIESTAutils::checkidx(dbconn)
+#>                                                       name
+#> 1                                     xy_PUBLIC_plt_cn_idx
+#> 2         xy_PUBLIC_statecd_unitcd_countycd_plot_invyr_idx
+#> 3                                             plotu_cn_idx
+#> 4                                 plotu_cn_prev_plt_cn_idx
+#> 5                   plotu_statecd_unitcd_countycd_plot_idx
+#> 6                                  condu_plt_cn_condid_idx
+#> 7                           subp_cond_chng_mtrx_plt_cn_idx
+#> 8                      subp_cond_chng_mtrx_prev_plt_cn_idx
+#> 9                         tree_plt_cn_condid_subp_tree_idx
+#> 10                                    tree_prev_tre_cn_idx
+#> 11                                             plot_cn_idx
+#> 12             plot_statecd_unitcd_countycd_plot_invyr_idx
+#> 13                                  cond_plt_cn_condid_idx
+#> 14 pop_plot_stratum_assgn_statecd_unitcd_countycd_plot_idx
+#> 15   pop_plot_stratum_assgn_evalid_estn_unit_stratumcd_idx
+#> 16         pop_stratum_rscd_evalid_estn_unit_stratumcd_idx
+#> 17                 pop_estn_unit_rscd_evalid_estn_unit_idx
+#> 18                                    ref_species_spcd_idx
+#> 19                          ref_species_species_symbol_idx
+#>                  tbl_name
+#> 1               xy_PUBLIC
+#> 2               xy_PUBLIC
+#> 3                   plotu
+#> 4                   plotu
+#> 5                   plotu
+#> 6                   condu
+#> 7     subp_cond_chng_mtrx
+#> 8     subp_cond_chng_mtrx
+#> 9                    tree
+#> 10                   tree
+#> 11                   plot
+#> 12                   plot
+#> 13                   cond
+#> 14 pop_plot_stratum_assgn
+#> 15 pop_plot_stratum_assgn
+#> 16            pop_stratum
+#> 17          pop_estn_unit
+#> 18            ref_species
+#> 19            ref_species
+#>                                                                                                                             sql
+#> 1                                                                 CREATE UNIQUE INDEX xy_PUBLIC_plt_cn_idx ON xy_PUBLIC(PLT_CN)
+#> 2         CREATE UNIQUE INDEX xy_PUBLIC_statecd_unitcd_countycd_plot_invyr_idx ON xy_PUBLIC(STATECD,UNITCD,COUNTYCD,PLOT,INVYR)
+#> 3                                                                                 CREATE UNIQUE INDEX plotu_cn_idx ON plotu(CN)
+#> 4                                                         CREATE UNIQUE INDEX plotu_cn_prev_plt_cn_idx ON plotu(CN,PREV_PLT_CN)
+#> 5                                    CREATE INDEX plotu_statecd_unitcd_countycd_plot_idx ON plotu(STATECD,UNITCD,COUNTYCD,PLOT)
+#> 6                                                           CREATE UNIQUE INDEX condu_plt_cn_condid_idx ON condu(PLT_CN,CONDID)
+#> 7                                                    CREATE INDEX subp_cond_chng_mtrx_plt_cn_idx ON subp_cond_chng_mtrx(PLT_CN)
+#> 8                                          CREATE INDEX subp_cond_chng_mtrx_prev_plt_cn_idx ON subp_cond_chng_mtrx(PREV_PLT_CN)
+#> 9                                         CREATE UNIQUE INDEX tree_plt_cn_condid_subp_tree_idx ON tree(PLT_CN,CONDID,SUBP,TREE)
+#> 10                                                                       CREATE INDEX tree_prev_tre_cn_idx ON tree(PREV_TRE_CN)
+#> 11                                                                                  CREATE UNIQUE INDEX plot_cn_idx ON plot(CN)
+#> 12                  CREATE UNIQUE INDEX plot_statecd_unitcd_countycd_plot_invyr_idx ON plot(STATECD,UNITCD,COUNTYCD,PLOT,INVYR)
+#> 13                                                            CREATE UNIQUE INDEX cond_plt_cn_condid_idx ON cond(PLT_CN,CONDID)
+#> 14 CREATE INDEX pop_plot_stratum_assgn_statecd_unitcd_countycd_plot_idx ON pop_plot_stratum_assgn(STATECD,UNITCD,COUNTYCD,PLOT)
+#> 15     CREATE INDEX pop_plot_stratum_assgn_evalid_estn_unit_stratumcd_idx ON pop_plot_stratum_assgn(EVALID,ESTN_UNIT,STRATUMCD)
+#> 16          CREATE UNIQUE INDEX pop_stratum_rscd_evalid_estn_unit_stratumcd_idx ON pop_stratum(RSCD,EVALID,ESTN_UNIT,STRATUMCD)
+#> 17                          CREATE UNIQUE INDEX pop_estn_unit_rscd_evalid_estn_unit_idx ON pop_estn_unit(RSCD,EVALID,ESTN_UNIT)
+#> 18                                                                CREATE UNIQUE INDEX ref_species_spcd_idx ON ref_species(SPCD)
+#> 19                                            CREATE UNIQUE INDEX ref_species_species_symbol_idx ON ref_species(SPECIES_SYMBOL)
+FIESTAutils::checkidx(dbconn, "pop_plot_stratum_assgn")
+#> checking indices in database...
+#>                 tbl_name
+#> 1 pop_plot_stratum_assgn
+#> 2 pop_plot_stratum_assgn
+#>                                                                                                                            sql
+#> 1 CREATE INDEX pop_plot_stratum_assgn_statecd_unitcd_countycd_plot_idx ON pop_plot_stratum_assgn(STATECD,UNITCD,COUNTYCD,PLOT)
+#> 2     CREATE INDEX pop_plot_stratum_assgn_evalid_estn_unit_stratumcd_idx ON pop_plot_stratum_assgn(EVALID,ESTN_UNIT,STRATUMCD)
+#>                           cols
+#> 1 STATECD,UNITCD,COUNTYCD,PLOT
+#> 2   EVALID,ESTN_UNIT,STRATUMCD
+
+
+## get saved population tables from database
+pop_stratum <- DBI::dbReadTable(dbconn, "pop_stratum")
+pop_estn_unit <- DBI::dbReadTable(dbconn, "pop_estn_unit")
+pop_plot_stratum_assgn <- DBI::dbReadTable(dbconn, "pop_plot_stratum_assgn")
+
+sort(unique(pop_stratum$EVALID))
+#> [1] 82101 82103
+sort(unique(pop_estn_unit$EVALID))
+#> [1] 82101 82103
+sort(uniqu(pop_plot_stratum_assgn$EVALID))
+#> [1] 82101 82103
+```
+
+Next, we use `modGBpop` to create population data for the estimates. We can explore the data objects that are returned as well as the queries that are built.
+
+```
+popdatVOL <- modGBpop(popType = "VOL",
+                      dbconn = dbconn,
+                      popFilter = list(evalid = evalidVOL),
+                      pltassgn = "pop_plot_stratum_assgn",
+                      unitarea = "pop_estn_unit",
+                      unitvar = "ESTN_UNIT",
+                      unit_opts = list(unitvar2 = "STATECD", minplotnum.unit = 2),
+                      areavar = "AREA_USED",
+                      stratalut = "pop_stratum",
+                      strata = TRUE,
+                      strvar = "STRATUMCD",
+                      strata_opts = list(getwt=TRUE),
+                      returndata = TRUE)
+#> savedata=FALSE with savedata parameters... no data are saved
+#> SURVEY table does not exist in database... assuming annual inventory plots
+#> removing nonsampled forest plots...
+#> returning data needed for estimation...
+#> there are 149 nonsampled conditions
+names(popdatVOL)
+#>  [1] "module"        "popType"       "pltidsadj"     "pltcondx"     
+#>  [5] "pltcondflds"   "pjoinid"       "cuniqueid"     "condid"       
+#>  [9] "ACI"           "areawt"        "areawt2"       "adjcase"      
+#> [13] "dbqueries"     "dbqueriesWITH" "pltassgnx"     "pltassgnid"   
+#> [17] "unitarea"      "areavar"       "areaunits"     "unitvar"      
+#> [21] "unitvars"      "unitltmin"     "strata"        "stratalut"    
+#> [25] "strvar"        "strwtvar"      "plotsampcnt"   "condsampcnt"  
+#> [29] "states"        "invyrs"        "adj"           "P2POINTCNT"   
+#> [33] "plotunitcnt"   "treex"         "tuniqueid"     "seedx"        
+#> [37] "evalid"        "adjfactors"    "adjvarlst"     "popdatindb"
+
+## extract queries from population data
+dbqueries <- popdatVOL$dbqueries
+dbqueriesWITH <- popdatVOL$dbqueriesWITH
+
+names(dbqueries)
+#> [1] "adjfactors" "pltidsadj"  "pltcondx"   "TREE"       "SEEDLING"
+names(dbqueriesWITH)
+#> [1] "pltidsWITH"      "pltidsadjWITH"   "pltcondxWITH"    "pltcondxadjWITH"
+
+## look at query for adjustment factors
+message(dbqueries$adjfactors)
+#> WITH
+#> pltids AS
+#> (SELECT 'VOL' AS POP_TYP, p.CN, plta.STATECD, plta.ESTN_UNIT, plta.STRATUMCD
+#> FROM plot p 
+#>  JOIN pop_plot_stratum_assgn plta ON (plta.PLT_CN = p.CN)
+#>  WHERE plta.EVALID IN (82101))
+#> -------------------------------------------
+#> SELECT pltids.POP_TYP, pltids.STATECD, pltids.ESTN_UNIT, pltids.STRATUMCD,
+#>    COALESCE(COUNT(DISTINCT pltids.CN) / NULLIF(SUM(CONDPROP_UNADJ),0), 0) AS ADJ_FACTOR_COND,
+#>    COALESCE(COUNT(DISTINCT pltids.CN) / NULLIF(SUM(SUBPPROP_UNADJ),0), 0) AS ADJ_FACTOR_SUBP,
+#>    COALESCE(COUNT(DISTINCT pltids.CN) / NULLIF(SUM(MACRPROP_UNADJ),0), 0) AS ADJ_FACTOR_MACR,
+#>    COALESCE(COUNT(DISTINCT pltids.CN) / NULLIF(SUM(MICRPROP_UNADJ),0), 0) AS ADJ_FACTOR_MICR
+#>  FROM pltids
+#>  JOIN cond c ON (c.PLT_CN = pltids.CN)
+#>  WHERE c.COND_STATUS_CD <> 5
+#>  GROUP BY pltids.POP_TYP, pltids.STATECD, pltids.ESTN_UNIT, pltids.STRATUMCD
+
+## look at WITH query for getting plots, adjustment factors, and plot/cond data for population
+message(dbqueriesWITH$pltcondxadjWITH)
+#> WITH
+#> pltids AS
+#> (SELECT 'VOL' AS POP_TYP, p.CN, plta.STATECD, plta.ESTN_UNIT, plta.STRATUMCD
+#> FROM plot p 
+#>  JOIN pop_plot_stratum_assgn plta ON (plta.PLT_CN = p.CN)
+#>  WHERE plta.EVALID IN (82101)),
+#> ----- calculate strata-level adjustment factors
+#> adjfactors AS
+#> (SELECT pltids.POP_TYP, pltids.STATECD, pltids.ESTN_UNIT, pltids.STRATUMCD,
+#>    COALESCE(COUNT(DISTINCT pltids.CN) / NULLIF(SUM(CONDPROP_UNADJ),0), 0) AS ADJ_FACTOR_COND,
+#>    COALESCE(COUNT(DISTINCT pltids.CN) / NULLIF(SUM(SUBPPROP_UNADJ),0), 0) AS ADJ_FACTOR_SUBP,
+#>    COALESCE(COUNT(DISTINCT pltids.CN) / NULLIF(SUM(MACRPROP_UNADJ),0), 0) AS ADJ_FACTOR_MACR,
+#>    COALESCE(COUNT(DISTINCT pltids.CN) / NULLIF(SUM(MICRPROP_UNADJ),0), 0) AS ADJ_FACTOR_MICR
+#>  FROM pltids
+#>  JOIN cond c ON (c.PLT_CN = pltids.CN)
+#>  WHERE c.COND_STATUS_CD <> 5
+#>  GROUP BY pltids.POP_TYP, pltids.STATECD, pltids.ESTN_UNIT, pltids.STRATUMCD),
+#> ----- get plot-level adjustment factors
+#> pltidsadj AS 
+#> (SELECT pltids.CN, adj.ADJ_FACTOR_COND, adj.ADJ_FACTOR_SUBP, adj.ADJ_FACTOR_MACR, adj.ADJ_FACTOR_MICR
+#> FROM pltids
+#> JOIN adjfactors adj ON (adj.STATECD = pltids.STATECD AND adj.ESTN_UNIT = pltids.ESTN_UNIT AND adj.STRATUMCD = pltids.STRATUMCD)), 
+#> ----- pltcondx
+#> pltcondx AS
+#> (SELECT c.PLT_CN, c.CONDID, c.COND_STATUS_CD, c.COND_NONSAMPLE_REASN_CD, c.RESERVCD, c.OWNCD, c.OWNGRPCD, c.ADFORCD, c.FORTYPCD, c.FLDTYPCD, c.MAPDEN, c.STDAGE, c.STDSZCD, c.FLDSZCD, c.SITECLCD, c.SICOND, c.SIBASE, c.SISP, c.STDORGCD, c.STDORGSP, c.PROP_BASIS, c.CONDPROP_UNADJ, c.MICRPROP_UNADJ, c.SUBPPROP_UNADJ, c.MACRPROP_UNADJ, c.SLOPE, c.ASPECT, c.PHYSCLCD, c.GSSTKCD, c.ALSTKCD, c.DSTRBCD1, c.DSTRBYR1, c.DSTRBCD2, c.DSTRBYR2, c.DSTRBCD3, c.DSTRBYR3, c.TRTCD1, c.TRTYR1, c.TRTCD2, c.TRTYR2, c.TRTCD3, c.TRTYR3, c.PRESNFCD, c.BALIVE, c.FLDAGE, c.FORTYPCDCALC, c.HABTYPCD1, c.HABTYPCD2, c.LIVE_CANOPY_CVR_PCT, c.LIVE_MISSING_CANOPY_CVR_PCT, c.CANOPY_CVR_SAMPLE_METHOD_CD, c.CARBON_DOWN_DEAD, c.CARBON_LITTER, c.CARBON_SOIL_ORG, c.CARBON_UNDERSTORY_AG, c.CARBON_UNDERSTORY_BG, c.NF_COND_STATUS_CD, c.NF_COND_NONSAMPLE_REASN_CD, c.LAND_COVER_CLASS_CD, 
+#>    (CASE
+#>    WHEN c.FORTYPCD = 100 THEN '100'
+#>    ...
+#>    WHEN c.FORTYPCD = 999 THEN '999' END) AS 'FORTYPGRPCD', 
+#> p.STATECD, p.UNITCD, p.COUNTYCD, p.PLOT, p.PLOT_STATUS_CD, p.PLOT_NONSAMPLE_REASN_CD, p.INTENSITY, p.SUBCYCLE, p.MACRO_BREAKPOINT_DIA, p.INVYR, p.MEASYEAR, p.MEASMON, p.RDDISTCD, p.WATERCD, p.ELEV_PUBLIC, p.ECOSUBCD, p.CONGCD, p.DESIGNCD, p.P2PANEL, p.SUBPANEL, p.HUC, p.EMAP_HEX, p.ALP_ADFORCD, p.FVS_VARIANT, p.FVS_LOC_CD, p.FVS_REGION, p.FVS_FOREST, p.FVS_DISTRICT, p.ROADLESSCD, p.NBRCND, p.NBRCNDFOR, p.CCLIVEPLT, 1 AS TOTAL
+#>  FROM pltids
+#>  JOIN plot p ON (p.CN = pltids.CN)
+#>  JOIN cond c ON (c.PLT_CN = p.CN))
+
+
+## look at plot/cond data for generating estimates (pltcondx)
+
+pltcondx <- popdatVOL$pltcondx
+head(pltcondx)
+#> Key: <PLT_CN, CONDID>
+#>             PLT_CN CONDID COND_STATUS_CD COND_NONSAMPLE_REASN_CD RESERVCD OWNCD
+#>             <char>  <int>          <int>                   <int>    <int> <int>
+#> 1: 188756625020004      1              1                      NA        0    11
+#> 2: 188756626020004      1              2                      NA        0    24
+#> 3: 188756627020004      1              2                      NA        0    46
+#> 4: 188756628020004      1              1                      NA        1    11
+#> 5: 188756629020004      1              2                      NA        0    46
+#> 6: 188756630020004      1              2                      NA        0    46
+#>    OWNGRPCD ADFORCD FORTYPCD FLDTYPCD MAPDEN STDAGE STDSZCD FLDSZCD SITECLCD
+#>       <int>   <int>    <int>    <int>  <int>  <int>   <int>   <int>    <int>
+#> 1:       10     212      201      201      1    195       1       3        6
+#> 2:       20      NA       NA       NA     NA     NA      NA      NA       NA
+#> 3:       40      NA       NA       NA     NA     NA      NA      NA       NA
+#> 4:       10     212      265      265      1    104       1       3        5
+#> 5:       40      NA       NA       NA     NA     NA      NA      NA       NA
+#> 6:       40      NA       NA       NA     NA     NA      NA      NA       NA
+#>    SICOND SIBASE  SISP STDORGCD STDORGSP PROP_BASIS CONDPROP_UNADJ
+#>     <int>  <int> <int>    <int>    <num>     <char>          <num>
+#> 1:     29     50   202        0       NA       SUBP              1
+#> 2:     NA     NA    NA       NA       NA       SUBP              1
+#> 3:     NA     NA    NA       NA       NA       SUBP              1
+#> 4:     41     50    93        0       NA       SUBP              1
+#> 5:     NA     NA    NA       NA       NA       SUBP              1
+#> 6:     NA     NA    NA       NA       NA       SUBP              1
+#>    MICRPROP_UNADJ SUBPPROP_UNADJ MACRPROP_UNADJ SLOPE ASPECT PHYSCLCD GSSTKCD
+#>             <num>          <num>          <num> <int>  <int>    <int>   <int>
+#> 1:              1              1             NA    62     83       22       4
+#> 2:              1              1             NA    NA     NA       NA      NA
+#> 3:              1              1             NA    NA     NA       NA      NA
+#> 4:              1              1             NA    45    109       22       2
+#> 5:              1              1             NA    NA     NA       NA      NA
+#> 6:              1              1             NA    NA     NA       NA      NA
+#>    ALSTKCD DSTRBCD1 DSTRBYR1 DSTRBCD2 DSTRBYR2 DSTRBCD3 DSTRBYR3 TRTCD1 TRTYR1
+#>      <int>    <int>    <int>    <int>    <int>    <int>    <int>  <int>  <int>
+#> 1:       4        0       NA        0       NA        0       NA      0     NA
+#> 2:      NA       NA       NA       NA       NA       NA       NA     NA     NA
+#> 3:      NA       NA       NA       NA       NA       NA       NA     NA     NA
+#> 4:       2        0       NA        0       NA        0       NA      0     NA
+#> 5:      NA       NA       NA       NA       NA       NA       NA     NA     NA
+#> 6:      NA       NA       NA       NA       NA       NA       NA     NA     NA
+#>    TRTCD2 TRTYR2 TRTCD3 TRTYR3 PRESNFCD   BALIVE FLDAGE FORTYPCDCALC HABTYPCD1
+#>     <int>  <int>  <int>  <int>    <int>    <num>  <int>        <int>     <int>
+#> 1:      0     NA      0     NA       NA  62.9944    999          201      1209
+#> 2:     NA     NA     NA     NA       20       NA     NA           NA        NA
+#> 3:     NA     NA     NA     NA       10       NA     NA           NA        NA
+#> 4:      0     NA      0     NA       NA 176.2260    999          265       407
+#> 5:     NA     NA     NA     NA       31       NA     NA           NA        NA
+#> 6:     NA     NA     NA     NA       11       NA     NA           NA        NA
+#>    HABTYPCD2 LIVE_CANOPY_CVR_PCT LIVE_MISSING_CANOPY_CVR_PCT
+#>        <int>               <int>                       <int>
+#> 1:      1209                  25                          26
+#> 2:        NA                   0                           0
+#> 3:        NA                   0                           0
+#> 4:       407                  67                          68
+#> 5:        NA                   2                           2
+#> 6:        NA                   0                           0
+#>    CANOPY_CVR_SAMPLE_METHOD_CD CARBON_DOWN_DEAD CARBON_LITTER CARBON_SOIL_ORG
+#>                          <int>            <num>         <num>           <num>
+#> 1:                           1         2.460093      5.755115        43.31157
+#> 2:                          11               NA            NA              NA
+#> 3:                          11               NA            NA              NA
+#> 4:                           1         5.589381     10.025406        69.26936
+#> 5:                          11               NA            NA              NA
+#> 6:                          11               NA            NA              NA
+#>    CARBON_UNDERSTORY_AG CARBON_UNDERSTORY_BG NF_COND_STATUS_CD
+#>                   <num>                <num>             <int>
+#> 1:             0.355146             0.039461                NA
+#> 2:                   NA                   NA                NA
+#> 3:                   NA                   NA                NA
+#> 4:             0.393330             0.043703                NA
+#> 5:                   NA                   NA                NA
+#> 6:                   NA                   NA                NA
+#>    NF_COND_NONSAMPLE_REASN_CD LAND_COVER_CLASS_CD FORTYPGRPCD STATECD UNITCD
+#>                         <int>               <int>      <char>   <int>  <int>
+#> 1:                         NA                  NA         200       8      1
+#> 2:                         NA                  NA        <NA>       8      1
+#> 3:                         NA                  NA        <NA>       8      2
+#> 4:                         NA                  NA         260       8      2
+#> 5:                         NA                  NA        <NA>       8      5
+#> 6:                         NA                  NA        <NA>       8      5
+#>    COUNTYCD  PLOT PLOT_STATUS_CD PLOT_NONSAMPLE_REASN_CD INTENSITY SUBCYCLE
+#>       <int> <int>          <int>                   <int>     <int>    <int>
+#> 1:       41 89494              1                      NA         1        3
+#> 2:       41 84260              2                      NA         1        3
+#> 3:      101 83332              2                      NA         1        3
+#> 4:       71 81232              1                      NA         1        3
+#> 5:        5 80210              2                      NA         1        3
+#> 6:       99 89606              2                      NA         1        3
+#>    MACRO_BREAKPOINT_DIA INVYR MEASYEAR MEASMON RDDISTCD WATERCD ELEV_PUBLIC
+#>                   <int> <int>    <int>   <int>    <int>   <int>       <int>
+#> 1:                   NA  2014     2014       9        6       0        8970
+#> 2:                   NA  2014     2014       9       NA      NA        6020
+#> 3:                   NA  2014     2014       9       NA      NA        5200
+#> 4:                   NA  2014     2014       7        7       0       11620
+#> 5:                   NA  2014     2014       9       NA      NA        5250
+#> 6:                   NA  2014     2014       9       NA      NA        3860
+#>    ECOSUBCD CONGCD DESIGNCD P2PANEL SUBPANEL      HUC EMAP_HEX ALP_ADFORCD
+#>      <char>  <num>    <int>   <int>    <int>    <num>    <num>       <num>
+#> 1:   M331In    805        1       1        2 11020003    18328         212
+#> 2:    331Ii    805        1       1        2 11020003    18159          NA
+#> 3:    331If    803        1       1        2 11020002    18161          NA
+#> 4:   M331Fa    803        1       1        2 11020007    18165         212
+#> 5:    331Hc    806        1       1        2 10190002    18325          NA
+#> 6:    331Ia    804        1       1        2 11020009    16591          NA
+#>    FVS_VARIANT FVS_LOC_CD FVS_REGION FVS_FOREST FVS_DISTRICT ROADLESSCD NBRCND
+#>         <char>      <int>      <int>      <int>        <int>     <char>  <int>
+#> 1:          CR        208          2          8           NA                 1
+#> 2:          CR        207          2          7           NA                 1
+#> 3:          CR        207          2          7           NA                 1
+#> 4:          CR        212          2         12           NA         1B      1
+#> 5:          CR        207          2          7           NA                 1
+#> 6:          CR        207          2          7           NA                 1
+#>    NBRCNDFOR CCLIVEPLT TOTAL LANDSTATUSCD                   LANDSTATUSNM
+#>        <num>     <num> <int>        <num>                         <char>
+#> 1:         1        25     1            1                     Timberland
+#> 2:         0         0     1           NA                           <NA>
+#> 3:         0         0     1           NA                           <NA>
+#> 4:         1        67     1            3 Reserved productive forestland
+#> 5:         0         2     1           NA                           <NA>
+#> 6:         0         0     1           NA                           <NA>
+#>    DSTRBGRP
+#>      <char>
+#> 1:        0
+#> 2:     <NA>
+#> 3:     <NA>
+#> 4:        0
+#> 5:     <NA>
+#> 6:     <NA>
+dim(pltcondx)
+#> [1] 12083    96
+table(pltcondx$STATECD)
+#> 
+#>     8 
+#> 12083
+  
+  ## List variable names in tree table (treex)
+names(popdatVOL$treex)
+#>  [1] "CN"                  "PLT_CN"              "PREV_TRE_CN"        
+#>  [4] "SUBP"                "TREE"                "CONDID"             
+#>  [7] "STATUSCD"            "SPCD"                "SPGRPCD"            
+#> [10] "DIA"                 "HT"                  "ACTUALHT"           
+#> [13] "HTCD"                "TREECLCD"            "CR"                 
+#> [16] "CCLCD"               "AGENTCD"             "CULL"               
+#> [19] "DECAYCD"             "STOCKING"            "WDLDSTEM"           
+#> [22] "MORTYR"              "UNCRCD"              "BHAGE"              
+#> [25] "TOTAGE"              "MORTCD"              "MIST_CL_CD"         
+#> [28] "STANDING_DEAD_CD"    "PREV_STATUS_CD"      "PREV_WDLDSTEM"      
+#> [31] "RECONCILECD"         "PREVDIA"             "VOLCFGRS"           
+#> [34] "VOLCFGRS_BARK"       "VOLCFGRS_STUMP"      "VOLCFGRS_STUMP_BARK"
+#> [37] "VOLCFGRS_TOP"        "VOLCFGRS_TOP_BARK"   "VOLCFNET"           
+#> [40] "VOLCFNET_BARK"       "VOLCFSND"            "VOLCFSND_BARK"      
+#> [43] "VOLCFSND_STUMP"      "VOLCFSND_STUMP_BARK" "VOLCFSND_TOP"       
+#> [46] "VOLCFSND_TOP_BARK"   "VOLCSGRS"            "VOLCSGRS_BARK"      
+#> [49] "VOLCSNET"            "VOLCSNET_BARK"       "VOLCSSND"           
+#> [52] "VOLCSSND_BARK"       "VOLTSGRS"            "VOLTSGRS_BARK"      
+#> [55] "VOLTSSND"            "VOLTSSND_BARK"       "VOLBFGRS"           
+#> [58] "VOLBFNET"            "VOLBSGRS"            "VOLBSNET"           
+#> [61] "TPA_UNADJ"           "DRYBIO_AG"           "DRYBIO_BG"          
+#> [64] "DRYBIO_BOLE"         "DRYBIO_BOLE_BARK"    "DRYBIO_BRANCH"      
+#> [67] "DRYBIO_FOLIAGE"      "DRYBIO_SAWLOG"       "DRYBIO_SAWLOG_BARK" 
+#> [70] "DRYBIO_STEM"         "DRYBIO_STEM_BARK"    "DRYBIO_STUMP"       
+#> [73] "DRYBIO_STUMP_BARK"   "CARBON_BG"           "CARBON_AG"          
+#> [76] "tadjfac"
+
+
+## extract adjustment factors from population data to compare to EVALIDator
+adjfactors <- popdatVOL$adjfactors
+head(adjfactors)
+#> Key: <STATECD, ESTN_UNIT, STRATUMCD>
+#>    POP_TYP STATECD ESTN_UNIT STRATUMCD ADJ_FACTOR_COND ADJ_FACTOR_SUBP
+#>     <char>   <int>     <int>     <int>           <num>           <num>
+#> 1:     VOL       8         1        56        1.000000        1.000000
+#> 2:     VOL       8         3        46        1.000000        1.000000
+#> 3:     VOL       8         3       135        1.000000        1.000000
+#> 4:     VOL       8         5      7777        1.000000        1.000000
+#> 5:     VOL       8         7         1        1.000000        1.000000
+#> 6:     VOL       8         7         2        1.043478        1.043478
+#>    ADJ_FACTOR_MACR ADJ_FACTOR_MICR
+#>              <int>           <num>
+#> 1:               0        1.000000
+#> 2:               0        1.000000
+#> 3:               0        1.000000
+#> 4:               0        1.000000
+#> 5:               0        1.000000
+#> 6:               0        1.043478
+
+```
+
+Next, we can check to see whether the adjustment factors from the FIESTA population data match the adjustment factor from FIADB. The function `checkpop` returns the rows where the adjustment factors differ, meaning we should expect to see zero rows returned here.
+
+```
+## Get POP_STRATUM with adjustment factors for evalid
+FIADBpop <- getFIADBpop(evalid = evalidVOL, 
+                        dbconn = dbconn)$pop_stratum
+#> querying pop tables from database...
+
+## Compare adjustment factors from FIESTA to adjustment factors from FIADB
+pop_compare <- checkpop(FIADBpop, 
+                        FIESTApop = popdatVOL$adjfactors, 
+                        evalendType = evalendTypeVOL, 
+                        rnd = 6)
+pop_compare
+#> Key: <estn_unit, stratumcd>
+#> Empty data.table (0 rows and 14 cols): estn_unit,stratumcd,statecd,expns_fiadb,p2pointcnt_fiadb,adj_factor_subp_fiadb...
+
+```
+
+## Area estimates
+
+We now move on to actually generating estimates with FIESTA and with the EVALIDator API to see if we can produce the same results. To begin we'll work through a handful of estimates for area. For each example we list the EVALIDator estimate attribute number (parameter `snum` in the API) as well as it's description.
+
+### Example 1 
+
+0002 Area of forest land, in acres by forest type and stand-size class.
+
+We start by producing estimates in FIESTA:
+
+```
+## Set parameters
+landarea = "FOREST"
+rowvar = "FORTYPCD"
+colvar = "STDSZCD"
+
+## Get estimates using GB module
+areaest1 <- 
+  modGBarea(GBpopdat = popdatVOL, 
+            landarea = landarea,
+            rowvar = rowvar,
+            colvar = colvar,
+            table_opts = list(row.FIAname = TRUE,
+                              col.FIAname = TRUE)
+            )
+#> getting estimates using GB...
+#> getting output...
+names(areaest1)
+#> [1] "est"     "pse"     "raw"     "statecd" "states"  "invyr"
+
+## Look at estimates (est) and percent standard errors (pse) and compare with EVALIDator
+areaest1$est  
+#>                                 Forest type Large diameter Medium diameter
+#> 1                    Rocky Mountain juniper       519737.8         24081.9
+#> 2                          Juniper woodland      1089171.5         20386.3
+#> 3                 Pinyon / juniper woodland      4149531.4        400413.6
+#> 4                               Douglas-fir      1258582.7          211782
+#> 5                            Ponderosa pine      1301600.3         65335.5
+#> 6                                 White fir       211180.1         16615.9
+#> 7                          Engelmann spruce      1274963.8          237463
+#> 8          Engelmann spruce / subalpine fir      1311577.1        413122.5
+#> 9                             Subalpine fir       264371.3        136425.9
+#> 10                              Blue spruce         131814         40001.4
+#> 11                           Lodgepole pine       444725.9        681818.6
+#> 12                  Southwestern white pine         4192.2              --
+#> 13          Foxtail pine / bristlecone pine          86534         16844.2
+#> 14                              Limber pine       132659.7          7717.9
+#> 15                               Cottonwood        98931.2            1758
+#> 16 Sugarberry / hackberry / elm / green ash         3160.6          2452.9
+#> 17                      Cottonwood / willow         9017.8              --
+#> 18                                    Aspen         889276       1608515.6
+#> 19                          Other hardwoods             --              --
+#> 20                   Deciduous oak woodland        63909.1        307973.8
+#> 21    Cercocarpus (mountain brush) woodland        27395.2          1647.3
+#> 22                   Other exotic hardwoods             --          8174.6
+#> 23                               Nonstocked             --              --
+#> 24                                    Total     13272331.7         4202531
+#>    Small diameter Nonstocked      Total
+#> 1         14612.4         --   558432.1
+#> 2         25123.4         --  1134681.2
+#> 3        167053.5         --  4716998.6
+#> 4         40663.2         --  1511027.9
+#> 5         63990.2         --  1430925.9
+#> 6          1966.2         --   229762.2
+#> 7        318812.8         --  1831239.6
+#> 8          216918         --  1941617.5
+#> 9        138848.7         --   539645.9
+#> 10           6032         --   177847.4
+#> 11       268957.1         --  1395501.7
+#> 12             --         --     4192.2
+#> 13        11488.5         --   114866.7
+#> 14           6833         --   147210.6
+#> 15         5633.8         --     106323
+#> 16             --         --     5613.6
+#> 17             --         --     9017.8
+#> 18       972001.7         --  3469793.2
+#> 19         6967.2         --     6967.2
+#> 20        2153953         --  2525835.9
+#> 21             --         --    29042.5
+#> 22         4414.2         --    12588.8
+#> 23             --   813300.1   813300.1
+#> 24      4424268.8   813300.1 22712431.6
+```
+
+Next we can use the function getAPIest to get EVALIDator estimates for the same population:
+
+``` 
+## Get estimate from EVALIDator API
+APIest <- getAPIest(evalid = evalidVOL,
+                    landarea = landarea,
+                    rowvar = rowvar,
+                    colvar = colvar,
+                    EVALIDATOR_POP_ESTIMATE = EVALIDATOR_POP_ESTIMATE)
+#> EVALIDATOR_POP_ESTIMATE missing key variables: attribute_nbr, attribute_descr, estn_type
+#> attribute number 2: 
+#> Area of forest land, in acres
+#>     by Forest type and Stand-size class
+APIest$eval_rowest
+#>    ESTIMATE                                                 GRP2 PLOT_COUNT
+#> 1  558432.1                         `0182 Rocky Mountain juniper        101
+#> 2   1134681                               `0184 Juniper woodland        210
+#> 3   4716999                    `0185 Pinyon \\/ juniper woodland        809
+#> 4   1511028                                    `0201 Douglas-fir        290
+#> 5   1430926                                 `0221 Ponderosa pine        275
+#> 6  229762.2                                      `0261 White fir         43
+#> 7   1831240                               `0265 Engelmann spruce        342
+#> 8   1941618             `0266 Engelmann spruce \\/ subalpine fir        359
+#> 9  539645.9                                  `0268 Subalpine fir        107
+#> 10 177847.4                                    `0269 Blue spruce         37
+#> 11  1395502                                 `0281 Lodgepole pine        249
+#> 12 4192.193                        `0362 Southwestern white pine          1
+#> 13 114866.7              `0365 Foxtail pine \\/ bristlecone pine         27
+#> 14 147210.6                                    `0366 Limber pine         28
+#> 15   106323                                     `0703 Cottonwood         23
+#> 16 5613.572 `0706 Sugarberry \\/ hackberry \\/ elm \\/ green ash          2
+#> 17 9017.829                          `0709 Cottonwood \\/ willow          1
+#> 18  3469793                                          `0901 Aspen        659
+#> 19 6967.227                                `0962 Other hardwoods          2
+#> 20  2525836                         `0971 Deciduous oak woodland        442
+#> 21 29042.49          `0974 Cercocarpus (mountain brush) woodland          5
+#> 22  12588.8                         `0995 Other exotic hardwoods          2
+#> 23 813300.1                                     `0999 Nonstocked        194
+#>          SE SE_PERCENT    VARIANCE
+#> 1  56087.68   10.04378  3145827784
+#> 2  75291.91   6.635513  5668872255
+#> 3  132279.4   2.804312 17497831620
+#> 4  87116.91   5.765407  7589356136
+#> 5  83466.72   5.833056  6966693171
+#> 6  36805.56   16.01898  1354649368
+#> 7  95706.71   5.226335  9159774025
+#> 8   97246.4   5.008525  9456862363
+#> 9  53315.89   9.879792  2842584346
+#> 10 31122.34   17.49946   968599915
+#> 11 80719.38   5.784255  6515617999
+#> 12 4567.055   108.9419    20857992
+#> 13 24680.73   21.48641   609138391
+#> 14 29298.74    19.9026   858416308
+#> 15 24212.21   22.77232   586231017
+#> 16 3861.984   68.79727    14914924
+#> 17 7716.041   85.56429    59537294
+#> 18   125530   3.617794 15757775065
+#> 19 6043.163     86.737    36519820
+#> 20 108437.6   4.293138 11758716160
+#> 21 13116.99   45.16483   172055448
+#> 22 8650.144     68.713    74824990
+#> 23 63511.96   7.809167  4033769361
+```
+
+Finally we can use the function compareAPI to check whether all of the estimates match up.
+
+``` 
+## Compare estimates - Row
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = areaest1,
+           compareType = "ROW")
+#> 
+#> All estimates match
+#> NULL
+
+## Compare estimates - Column
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = areaest1,
+           compareType = "COL")
+#> 
+#> All estimates match
+#> NULL
+
+## Compare estimates - Group
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = areaest1,
+           compareType = "GRP")
+#> 
+#> All estimates match
+#> NULL
+```
+
+
+### Example 2 
+
+0079 Area of sampled land and water, in acres, by distance to road and owner class.
+
+``` 
+## Set parameters
+landarea = "ALL"
+rowvar = "RDDISTCD"
+colvar = "OWNCD"
+
+## Get estimates using GB module
+areaest2 <- 
+  modGBarea(GBpopdat = popdatVOL, 
+            landarea = landarea,
+            rowvar = rowvar,
+            colvar = colvar,
+            table_opts = list(row.FIAname = TRUE,
+                              col.FIAname = TRUE)
+            )
+
+## Get estimate from EVALIDator API
+APIest <- getAPIest(evalid = evalidVOL,
+                    landarea = landarea,
+                    rowvar = rowvar,
+                    colvar = colvar,
+                    EVALIDATOR_POP_ESTIMATE = EVALIDATOR_POP_ESTIMATE)
+```
+
+Once again we can see that all of the estimates match up:
+
+``` 
+## Compare estimates - Row
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = areaest2,
+           compareType = "ROW")
+#> 
+#> All estimates match
+#> NULL
+
+## Compare estimates - Column
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = areaest2,
+           compareType = "COL")
+#> 
+#> All estimates match
+#> NULL
+
+## Compare estimates - Group
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = areaest2,
+           compareType = "GRP")
+#> 
+#> All estimates match
+#> NULL
+```
+
+## Tree estimates
+
+### Example 1 
+
+0004 Number of live trees (at least 1 inch d.b.h./d.r.c.), in trees, on forest land by forest type and #stand-size class.
+
+``` 
+landarea = "FOREST"
+estvar = "TPA_UNADJ"
+estvar.filter = "STATUSCD == 1"
+rowvar = "FORTYPCD"
+colvar = "STDSZCD"
+
+## Get estimates using GB module
+treeest1 <- 
+  modGBtree(GBpopdat = popdatVOL, 
+            landarea = landarea,
+            rowvar = rowvar,
+            colvar = colvar,
+            estvar = estvar,
+            estvar.filter = estvar.filter,
+            table_opts = list(row.FIAname = TRUE,
+                              col.FIAname = TRUE)
+            )
+
+## Get estimate from EVALIDator API
+APIest <- getAPIest(evalid = evalidVOL,
+                    landarea = landarea,
+                    estvar = estvar,
+                    estvar.filter = estvar.filter,
+                    rowvar = rowvar,
+                    colvar = colvar,
+                    EVALIDATOR_POP_ESTIMATE = EVALIDATOR_POP_ESTIMATE)
+
+
+## Compare estimates - Row
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = treeest1,
+           compareType = "ROW")
+#> 
+#> All estimates match
+#> NULL
+
+## Compare estimates - Column
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = treeest1,
+           compareType = "COL")
+#> 
+#> All estimates match
+#> NULL
+
+## Compare estimates - Group
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = treeest1,
+           compareType = "GRP")
+#> 
+#> All estimates match
+#> NULL
+```
+
+### Example 2 
+
+574201 - Net sawlog wood volume of sawtimber trees, in board feet (Scribner rule), on timberland by forest #type and administrative forest.
+
+``` 
+## Set parameters
+landarea = "TIMBERLAND"
+estvar = "VOLBSNET"
+estvar.filter = "STATUSCD == 1"
+rowvar = "FORTYPCD"
+colvar = "ADFORCD"
+
+## Get estimates using GB module
+treeest2 <- 
+  modGBtree(GBpopdat = popdatVOL, 
+            landarea = landarea,
+            rowvar = rowvar,
+            colvar = colvar,
+            estvar = estvar,
+            estvar.filter = estvar.filter,
+            table_opts = list(row.FIAname = TRUE,
+                              col.FIAname = TRUE)
+            )
+
+## Get estimate from EVALIDator API
+APIest <- getAPIest(evalid = evalidVOL,
+                    landarea = landarea,
+                    estvar = estvar,
+                    estvar.filter = estvar.filter,
+                    rowvar = rowvar,
+                    colvar = colvar,
+                    EVALIDATOR_POP_ESTIMATE = EVALIDATOR_POP_ESTIMATE)
+
+
+## Compare estimates - Row
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = treeest2,
+           compareType = "ROW")
+#> 
+#> All estimates match
+#> NULL
+
+## Compare estimates - Column
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = treeest2,
+           compareType = "COL")
+#> 
+#> All estimates match
+#> NULL
+
+## Compare estimates - Group
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = treeest2,
+           compareType = "GRP")
+#> 
+#> All estimates match
+#> NULL
+```
+
+## Tree Ratio Estimates 
+
+### Example 1 
+
+0010 Aboveground biomass of live trees (at least 1 inch d.b.h./d.r.c.), in dry short tons, on forest land by species group and tree class.
+
+``` 
+## Set parameters
+landarea = "FOREST"
+estvar = "DRYBIO_AG"
+estvar.filter = "STATUSCD == 1"
+rowvar = "FORTYPCD"
+colvar = "STDSZCD"
+strFilter = NULL
+
+## Get estimates using GB module
+ratest1 <- 
+  modGBratio(GBpopdat = popdatVOL, 
+             landarea = landarea,
+             rowvar = rowvar,
+             colvar = colvar,
+             estvarn = estvar,
+             estvarn.filter = paste0(estvar.filter),
+             table_opts = list(row.FIAname = TRUE,
+                              col.FIAname = TRUE)
+             )
+
+## Get estimate from EVALIDator API
+APIest <- getAPIest(evalid = evalidVOL,
+                    landarea = landarea,
+                    estvar = estvar,
+                    estvar.filter = estvar.filter,
+                    rowvar = rowvar,
+                    colvar = colvar,
+                    ratio = TRUE,
+                    strFilter = strFilter,
+                    EVALIDATOR_POP_ESTIMATE = EVALIDATOR_POP_ESTIMATE)
+
+## Compare estimates - Row
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = ratest1,
+           compareType = "ROW")
+#> number of rows are not equal
+#> 
+#> All estimates match
+#> NULL
+
+## Compare estimates - Column
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = ratest1,
+           compareType = "COL")
+#> 
+#> All estimates match
+#> NULL
+
+## Compare estimates - Group
+compareAPI(EVALIDatorlst = APIest,
+           FIESTAlst = ratest1,
+           compareType = "GRP")
+#> 
+#> All estimates match
+#> NULL
+```
+
+
+
