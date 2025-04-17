@@ -54,7 +54,7 @@ See help(popTables) for a list of options.}
 that the user has requested. See help(popTableIDs) for a list of
 options.}
 
-\item{popFilter}{List of population filters. See help(popFilters) for a 
+\item{popFilter}{List of population filters. See help(popFilters) for a
 list of options.}
 
 \item{pltassgn}{DF/DT, comma-separated values (CSV) file(*.csv), or layer in
@@ -147,28 +147,28 @@ A list with population data for Small-Area estimates.
 
 \item{SAdomsdf}{ Data frame. Attribute table from SAdoms spatial layer.
 Includes DOMAIN and AOI attributes. DOMAIN represents modeling domains.  AOI
-identifies the small area of interest. } 
-\item{pltidsadj}{ Data frame. Condition-level data with condition proportions, 
-domain and predictor assignments, and adjusted condition proportions, 
-if adjplot = TRUE. } 
+identifies the small area of interest. }
+\item{pltidsadj}{ Data frame. Condition-level data with condition proportions,
+domain and predictor assignments, and adjusted condition proportions,
+if adjplot = TRUE. }
 \item{pltcondx}{ Data frame. Plot/Condition data used for estimation. }
 \item{cuniqueid}{ String. Unique identifier of plot in condx and pltcondx. }
-\item{condid}{ String. Unique identifier of condition in condx and pltcondx. } 
+\item{condid}{ String. Unique identifier of condition in condx and pltcondx. }
 \item{treex}{ Data frame. If esttype='TREE', tree-level data, including
-adjustment factors, if adjplot = TRUE. } 
-\item{tuniqueid}{ String. If esttype='TREE', unique identifier of plot in 
-treex. } 
-\item{ACI.filter}{ String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1" . } 
-\item{dunitarea}{ Data frame. Area by model domain unit. } 
-\item{areavar}{ String. Name of area variable in dunitarea. } 
-\item{dunitvar}{ String. Name of variable defining model domain units in 
-dunitarea. } 
-\item{dunitlut}{ Data frame. Table of model domain units with zonal statistics 
-of predictor values, number of plots by domain unit. } 
-\item{prednames}{ String vector. Name of variables in dunitlut and condx 
-defining potential predictors for small area estimation. } 
-\item{plotsampcnt}{ Data frame. Number of plots by PLOT_STATUS_CD. } 
-\item{condsampcnt}{ Data frame. Number of conditions by COND_STATUS_CD. } 
+adjustment factors, if adjplot = TRUE. }
+\item{tuniqueid}{ String. If esttype='TREE', unique identifier of plot in
+treex. }
+\item{ACI.filter}{ String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1" . }
+\item{dunitarea}{ Data frame. Area by model domain unit. }
+\item{areavar}{ String. Name of area variable in dunitarea. }
+\item{dunitvar}{ String. Name of variable defining model domain units in
+dunitarea. }
+\item{dunitlut}{ Data frame. Table of model domain units with zonal statistics
+of predictor values, number of plots by domain unit. }
+\item{prednames}{ String vector. Name of variables in dunitlut and condx
+defining potential predictors for small area estimation. }
+\item{plotsampcnt}{ Data frame. Number of plots by PLOT_STATUS_CD. }
+\item{condsampcnt}{ Data frame. Number of conditions by COND_STATUS_CD. }
 \item{states}{ String. State names in dataset. }
 \item{invyrs}{ String. Range of inventory years in dataset. }
 \item{adjtree}{ Logical. If TRUE, treex includes adjustment factors. }
@@ -180,39 +180,39 @@ Compile population data for input to the modSA* modules.
 If variables are NULL, then it will prompt user to input variables.
 
 Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
-\bold{Variable} \tab \bold{Description}\cr 
-\tab tree \tab tuniqueid \tab Unique identifier for each plot, to link to 
-pltassgn (e.g. PLT_CN).\cr 
+\bold{Variable} \tab \bold{Description}\cr
+\tab tree \tab tuniqueid \tab Unique identifier for each plot, to link to
+pltassgn (e.g. PLT_CN).\cr
 \tab \tab CONDID \tab Unique identifier of each condition on plot, to link to
-cond.  Set CONDID=1, if only 1 condition per plot.\cr 
-\tab \tab TPA_UNADJ \tab Number of trees per acre each sample tree 
-represents (e.g. DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot; 
-74.965282 for trees on microplot).\cr 
-\tab cond \tab cuniqueid \tab Unique identifier for each plot, to link to 
-pltassgn (e.g. PLT_CN).\cr 
-\tab \tab CONDID \tab Unique identifier of each condition on plot. Set 
-CONDID=1, if only 1 condition per plot.\cr 
+cond.  Set CONDID=1, if only 1 condition per plot.\cr
+\tab \tab TPA_UNADJ \tab Number of trees per acre each sample tree
+represents (e.g. DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot;
+74.965282 for trees on microplot).\cr
+\tab cond \tab cuniqueid \tab Unique identifier for each plot, to link to
+pltassgn (e.g. PLT_CN).\cr
+\tab \tab CONDID \tab Unique identifier of each condition on plot. Set
+CONDID=1, if only 1 condition per plot.\cr
 \tab \tab CONDPROP_UNADJ \tab Unadjusted proportion of condition on
-each plot.  Set CONDPROP_UNADJ=1, if only 1 condition per plot.\cr 
+each plot.  Set CONDPROP_UNADJ=1, if only 1 condition per plot.\cr
 \tab \tab COND_STATUS_CD \tab Status of each forested condition on plot (i.e.
-accessible forest, nonforest, water, etc.)\cr 
-\tab \tab NF_COND_STATUS_CD \tab If ACI=TRUE. Status of each nonforest 
-condition on plot (i.e. accessible nonforest, nonsampled nonforest)\cr 
-\tab \tab SITECLCD \tab If landarea=TIMBERLAND. Measure of site productivity.\cr 
-\tab \tab RESERVCD \tab If landarea=TIMBERLAND. Reserved status.\cr 
-\tab \tab SUBPROP_UNADJ \tab Unadjusted proportion of subplot conditions 
-on each plot. Set SUBPROP_UNADJ=1, if only 1 condition per subplot.\cr 
-\tab \tab MICRPROP_UNADJ \tab If microplot trfee attributes. Unadjusted 
-proportion of microplot conditions on each plot. Set MICRPROP_UNADJ=1, 
-if only 1 condition per microplot.\cr 
-\tab \tab MACRPROP_UNADJ \tab If macroplot tree attributes. Unadjusted 
-proportion of macroplot conditions on each plot. Set MACRPROP_UNADJ=1, 
-if only 1 condition per macroplot.\cr 
-\tab pltassgn \tab puniqueid \tab Unique identifier for each plot, to 
-link to cond (e.g. CN).\cr 
-\tab \tab STATECD \tab Identifies state each plot is located in.\cr 
-\tab \tab INVYR \tab Identifies inventory year of each plot.\cr 
-\tab \tab PLOT_STATUS_CD \tab Status of each plot (i.e. sampled, nonsampled).  
+accessible forest, nonforest, water, etc.)\cr
+\tab \tab NF_COND_STATUS_CD \tab If ACI=TRUE. Status of each nonforest
+condition on plot (i.e. accessible nonforest, nonsampled nonforest)\cr
+\tab \tab SITECLCD \tab If landarea=TIMBERLAND. Measure of site productivity.\cr
+\tab \tab RESERVCD \tab If landarea=TIMBERLAND. Reserved status.\cr
+\tab \tab SUBPROP_UNADJ \tab Unadjusted proportion of subplot conditions
+on each plot. Set SUBPROP_UNADJ=1, if only 1 condition per subplot.\cr
+\tab \tab MICRPROP_UNADJ \tab If microplot trfee attributes. Unadjusted
+proportion of microplot conditions on each plot. Set MICRPROP_UNADJ=1,
+if only 1 condition per microplot.\cr
+\tab \tab MACRPROP_UNADJ \tab If macroplot tree attributes. Unadjusted
+proportion of macroplot conditions on each plot. Set MACRPROP_UNADJ=1,
+if only 1 condition per macroplot.\cr
+\tab pltassgn \tab puniqueid \tab Unique identifier for each plot, to
+link to cond (e.g. CN).\cr
+\tab \tab STATECD \tab Identifies state each plot is located in.\cr
+\tab \tab INVYR \tab Identifies inventory year of each plot.\cr
+\tab \tab PLOT_STATUS_CD \tab Status of each plot (i.e. sampled, nonsampled).
 If not included, all plots are assumed as sampled.\cr }
 
 For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
@@ -226,15 +226,15 @@ It is calculated by dividing 1 / summed condition proportions by plot. An
 adjustment factor is determined for each tree based on the size of the plot
 it was measured on. This is identified using TPA_UNADJ as follows:
 
-\tabular{llr}{ \tab \bold{PLOT SIZE} \tab \bold{TPA_UNADJ} \cr 
-\tab SUBPLOT \tab 6.018046 \cr 
-\tab MICROPLOT \tab 74.965282 \cr 
+\tabular{llr}{ \tab \bold{PLOT SIZE} \tab \bold{TPA_UNADJ} \cr
+\tab SUBPLOT \tab 6.018046 \cr
+\tab MICROPLOT \tab 74.965282 \cr
 \tab MACROPLOT \tab 0.999188 \cr }
 
 If ACI=FALSE, only nonsampled forest conditions are accounted for in the
-adjustment factor. \cr 
-If ACI=TRUE, the nonsampled nonforest conditions are removed as well and 
-accounted for in adjustment factor.  This is if you are interested in 
+adjustment factor. \cr
+If ACI=TRUE, the nonsampled nonforest conditions are removed as well and
+accounted for in adjustment factor.  This is if you are interested in
 estimates for all lands or nonforest lands in the All-Condition-Inventory.
 }
 \examples{
@@ -243,7 +243,7 @@ estimates for all lands or nonforest lands in the All-Condition-Inventory.
 # can be generated for populations of interest by the user with functions in
 # `FIESTA` such as `spGetPlots()`, `spGetAuxiliary()`, etc. For more
 # information, see `FIESTA`'s extensive vignettes.
- 
+
 # Population data for counties in Wyoming
 modSApop(popTabs = list(tree = FIESTA::WYtree,
                         cond = FIESTA::WYcond),
@@ -254,7 +254,7 @@ modSApop(popTabs = list(tree = FIESTA::WYtree,
          dunitzonal = FIESTA::WYunitzonal,
          prednames = c("dem", "tcc", "tpi", "tnt"),
          predfac = "tnt")
-         
+
 # Adding seedling data as well
 modSApop(popTabs = list(tree = FIESTA::WYtree,
                         cond = FIESTA::WYcond,
