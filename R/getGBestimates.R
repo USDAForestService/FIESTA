@@ -32,7 +32,8 @@ getGBestimates <- function(esttype,
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=
     strwt=n.total=n.strata=ONEUNIT <- NULL
   addtotal <- TRUE
-  if (!is.null(rowvar)) {
+
+  if (!is.null(rowvar) && rowvar != "TOTAL") {
     if (length(unique(domdatn[[rowvar]])) == 1) addtotal <- FALSE
   }
   strunitvars <- c(unitvar, strvar)
@@ -52,7 +53,7 @@ getGBestimates <- function(esttype,
     }
     domdatd <- pltassgnx[domdatd]
   }
-  
+
   ## Get total estimate and merge area	
   if (addtotal) {
     ## Sum numerator to plot, domain (TOTAL) level
