@@ -199,6 +199,7 @@ spGetPlots <- function(bnd = NULL,
   cuniqueid=tuniqueid=duniqueid <- "PLT_CN"
   stbnd.att <- "COUNTYFIPS"
   returnlst <- list()
+  evalidlst <- {}
   #clipdat <- list()
 
   gui <- FALSE
@@ -902,6 +903,9 @@ spGetPlots <- function(bnd = NULL,
       evalid1 <- dat1$evalid
       puniqueid <- dat1$puniqueid
       dbqueries <- dat1$dbqueries
+      
+      evalidlst <- unique(c(evalidlst, evalid1))
+      
 
       ## Check pjoinid
       ##############################################
@@ -998,6 +1002,9 @@ spGetPlots <- function(bnd = NULL,
       evalid2 <- dat2$evalid
       PLOT2 <- tabs2$plt
 	    PLOT2u <- tabs2$pltu
+	    
+	    evalidlst <- unique(c(evalidlst, evalid2))
+	    
 
       if (nrow(PLOT2) > length(unique(PLOT2[[puniqueid]]))) {
         if ("INVYR" %in% names(PLOT2)) {
@@ -1102,6 +1109,9 @@ spGetPlots <- function(bnd = NULL,
 	    PLOTu <- tabs$pltu
       puniqueid <- dat$puniqueid
       dbqueries <- dat$dbqueries
+      
+      evalidlst <- unique(c(evalidlst, evalid))
+      
 
       if (is.null(PLOT)) {
         message("no data for ", stcd)
@@ -1351,7 +1361,7 @@ spGetPlots <- function(bnd = NULL,
     #  returnlst$pop_plot_stratum_assgn <- get(ppsanm)
     #}
     if (iseval) {
-      returnlst$evalid <- evalid
+      returnlst$evalid <- unlist(evalidlst)
     }
     
     if (returndata) {

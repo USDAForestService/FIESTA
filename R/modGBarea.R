@@ -646,7 +646,7 @@ modGBarea <- function(GBpopdat,
 	              returntitle = returntitle, 
 			          estnull = estnull, psenull = psenull, 
 			          raw.keep0 = raw.keep0) 
-
+  
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 

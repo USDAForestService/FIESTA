@@ -554,6 +554,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   vdomdat <- treedat$tdomdat  
   p2vegqry <- treedat$treeqryn
   estvarn.name <- treedat$estvar.name
+  pcdomainlst <- treedat$pcdomainlst
   
   #message(p2vegqry)
   

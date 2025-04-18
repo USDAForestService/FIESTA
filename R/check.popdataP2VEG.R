@@ -2,7 +2,7 @@ check.popdataP2VEG <-
   function(tabs, tabIDs, popType, 
            datindb, pltaindb, 
            pltidsWITHqry,
-           pltidsid, pltidvars, 
+           pltidsid, pltidvars, projidvars = NULL,
            plotnm,
            pdoms2keep = NULL, 
            pltidsadjindb = FALSE, 
@@ -54,6 +54,7 @@ check.popdataP2VEG <-
   diavar <- "DIA"
   subpid <- "SUBP"
   pltcondindb <- datindb
+  addfortypgrp <- TRUE
   returnadj <- TRUE
   #if (!returndata && !savedata) returndata <- TRUE
   
@@ -521,10 +522,10 @@ check.popdataP2VEG <-
     #message(adjfactorsP2VEGWITHqry)
     
     ## Next, build pltidsadjFROM.qry
-    adjjoinqry <- getjoinqry(strunitvars, strunitvars, "adja.", pltidsa.)
+    adjjoinqry <- getjoinqry(strunitvars, strunitvars, adja., pltidsa.)
     pltidsadjFROM.qry <- paste0(
       "\nFROM pltids",
-      "\nJOIN adjfactors adjP2VEG ", adjjoinqry)
+      "\nJOIN adjfactors adj ", adjjoinqry)
     
     ## Build pltidsadj.qry
     pltidsadj.qry <- paste0(
@@ -763,7 +764,7 @@ check.popdataP2VEG <-
     returnlst$pltidsadj <- "pltidsadj"
   }
   if (returnadj) {
-    returnlst$adjfactors <- adjfactorsP2VEG   ## data frame with adjustment factors
+    returnlst$adjfactors <- adjfactors   ## data frame with adjustment factors
   }
   
 

@@ -1088,11 +1088,11 @@ modGBpop <- function(popType = "VOL",
     returnlst$evalid <- popevalid
   }
   if (popType == "P2VEG") {
-    returnlst$vcondareax <- vcondareax
-    returnlst$vcondstrx <- vcondstrx
-    returnlst$vcondstrflds <- vcondstrflds
-    returnlst$vcondsppx <- vcondsppx
-    returnlst$vcondsppflds <- vcondsppflds
+    # returnlst$vcondareax <- vcondareax
+    # returnlst$vcondstrx <- vcondstrx
+    # returnlst$vcondstrflds <- vcondstrflds
+    # returnlst$vcondsppx <- vcondsppx
+    # returnlst$vcondsppflds <- vcondsppflds
     returnlst$varadjP2VEG <- varadjP2VEG
     
     returnlst$p2veg_subp_structurex <- p2veg_subp_structurex
