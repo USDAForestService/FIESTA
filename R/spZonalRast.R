@@ -155,10 +155,10 @@ spZonalRast <- function(polyv,
   
   ## Validate polygon
   if (validate) {
-    spobj <- sf::st_make_valid(spobj, 
-                               geos_method = 'valid_structure', 
-                               geos_keep_collapsed = FALSE)
-    spobj <- sf::st_cast(spobj)
+    spobj <- polyfix.sf(spobj)
+    # spobj <- sf::st_make_valid(spobj, 
+    #                            geos_method = 'valid_structure', 
+    #                            geos_keep_collapsed = FALSE)
   }
  
   ## Check polyv.att 

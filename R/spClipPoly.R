@@ -99,7 +99,7 @@ spClipPoly <- function(polyv,
   #####################################################################################
  
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  gui = FALSE
 
   ## If gui.. set variables to NULL
   if(gui){polyv=clippolyv=exportsp=areacalc <- NULL}
@@ -138,36 +138,17 @@ spClipPoly <- function(polyv,
     }
   }
   
-  
+
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################  
 
-  ## Get poly and clippoly layers
-  polyvx <- pcheck.spatial(layer = polyv, dsn = polyv_dsn, gui=gui, 
-	                caption = "Poly to clip?")
-  if (validate) {
-    polyvx <- sf::st_make_valid(polyvx, 
-                                geos_method = 'valid_structure', 
-                                geos_keep_collapsed = FALSE)
-  }
-  clippolyvx <- pcheck.spatial(layer = clippolyv, dsn = clippolyv_dsn, 
-	                 gui=gui, caption="Clipping poly?")
- 
-  ## clippolyv.filter
-  clippolyvx <- datFilter(clippolyvx, xfilter = clippolyv.filter)$xf
-
-  ## Check buffdist
-  if (!is.null(buffdist)) {
-    if (!is.numeric(buffdist)) stop("invalid buffdist... must be numeric")
-  }
-  
   ## Check validate
   validate <- pcheck.logical(validate, "Validate polys?", "NO")
   
   ## Check areacalc
   areacalc <- pcheck.logical(areacalc, "Calculate area?", "YES")
-
+  
   ## Check exportsp 
   exportsp <- pcheck.logical(exportsp, varnm="exportsp", title="Export spatial layer?", 
                              first="NO", gui=gui)
@@ -183,11 +164,42 @@ spClipPoly <- function(polyv,
     }
     outlst$out_layer <- out_layer
   }
-
+  
+  
   ##################################################################
   ## DO WORK
   ##################################################################
 
+  ## Get poly and clippoly layers
+  polyvx <- pcheck.spatial(layer = polyv, dsn = polyv_dsn, gui=gui, 
+                           caption = "Poly to clip?")
+  if (validate) {
+    polyvx <- polyfix.sf(polyvx)
+    # polyvx <- sf::st_make_valid(polyvx, 
+    #                             geos_method = 'valid_structure', 
+    #                             geos_keep_collapsed = FALSE)
+    # polyvx <- sf::st_cast(polyvx)
+  }
+  clippolyvx <- pcheck.spatial(layer = clippolyv, dsn = clippolyv_dsn, 
+                               gui=gui, caption="Clipping poly?")
+  
+  
+  if (validate) {
+    clippolyvx <- polyfix.sf(clippolyvx)
+    # clippolyvx <- sf::st_make_valid(clippolyvx, 
+    #                                 geos_method = 'valid_structure', 
+    #                                 geos_keep_collapsed = FALSE)
+    # clippolyvx <- sf::st_cast(clippolyvx)
+  }
+  
+  ## clippolyv.filter
+  clippolyvx <- datFilter(clippolyvx, xfilter = clippolyv.filter)$xf
+  
+  ## Check buffdist
+  if (!is.null(buffdist)) {
+    if (!is.numeric(buffdist)) stop("invalid buffdist... must be numeric")
+  }
+  
   ## Check projections of polygons 
   prjdat <- crsCompare(clippolyvx, polyvx, nolonglat=nolonglat)
   clippolyvx <- prjdat$x
@@ -197,22 +209,20 @@ spClipPoly <- function(polyv,
     ## This will buffer the polygon 1 pixel to include all pixels inside boundary
     clippolyvx <- sf::st_buffer(clippolyvx, dist=buffdist)
   }
-
-  if (validate) {
-    clippolyvx <- sf::st_make_valid(clippolyvx, 
-                                    geos_method = 'valid_structure', 
-                                    geos_keep_collapsed = FALSE)
-    clippolyvx <- sf::st_cast(clippolyvx)
-  }
   
   ## Check extents
   bbox1 <- sf::st_bbox(clippolyvx)
   bbox2 <- sf::st_bbox(polyvx)
-  check.extents(bbox1, bbox2, showext, layer1nm="polyv", layer2nm="clippoly",
-			stopifnotin=TRUE)
+  suppressWarnings(
+  check.extents(bbox1, bbox2, showext, 
+                layer1nm = "polyv", layer2nm = "clippoly",
+			          stopifnotin = TRUE))
 
   ## Clip poly
   ipoly <- sf::st_intersection(polyvx, sf::st_union(clippolyvx))
+  if (nrow(ipoly) == 0) {
+    stop("no intersecting polygons... try validate = TRUE")
+  }
   ipoly <- sf::st_cast(sf::st_make_valid(ipoly))
   
 

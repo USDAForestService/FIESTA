@@ -82,6 +82,8 @@
 #' if TRUE, exports XY data as spatial data.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
+#' @param dbconn Open database connection.
+#' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
 #'
 #' @return \item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }
 #' \item{pltids}{ data frame. A table of pltids that are within bnd. }
@@ -152,7 +154,9 @@ spGetXY <- function(bnd,
                     returnxy = TRUE, 
                     savedata = FALSE, 
                     exportsp = FALSE, 
-                    savedata_opts = NULL){
+                    savedata_opts = NULL,
+					          dbconn = NULL,
+					          dbconnopen = FALSE){
   ##############################################################################
   ## DESCRIPTION
   ## Get FIA plots within the boundary population (area of interest)
@@ -262,27 +266,21 @@ spGetXY <- function(bnd,
 	  }
   }
 
-  ## Check Endyr.filter
+  ## check Endyr.filter
   #############################################################################
   Endyr.filter <- check.logic(bnd, Endyr.filter, stopifnull=FALSE)
 
-  ## Check intensity1
-  #############################################################################
+  ## check intensity1
   intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
                               title="Intensity 1?", first="NO", gui=gui) 
-
-  ## Check showsteps
-  #############################################################################
+  ## check showsteps
   showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
                              title="Show steps?", first="NO", gui=gui) 
-  
-  ## Check returnxy
-  #############################################################################
+  ## check returnxy
   returnxy <- pcheck.logical(returnxy, varnm="returnxy", 
                              title="Return XY?", first="NO", gui=gui) 
 
-  ## Check savedata
-  #############################################################################
+  ## check savedata
   savedata <- pcheck.logical(savedata, varnm="savedata", 
                              title="Save data?", first="NO", gui=gui) 
   if (savedata && returnxy) {
@@ -386,6 +384,7 @@ spGetXY <- function(bnd,
                      eval_opts = eval_opts,
                      datsource = datsource,
                      data_dsn = data_dsn,
+                     dbconn = dbconn,
                      dbTabs = dbTabs,
                      pjoinid = pjoinid,
                      invtype = invtype,
@@ -549,10 +548,16 @@ spGetXY <- function(bnd,
   returnlst$states <- statenames
   returnlst$countyfips <- countyfips
   
+  
+  ## Disconnect database
   if (!is.null(dbconn)) {
-    returnlst$dbconn <- dbconn
+    if (!dbconnopen && DBI::dbIsValid(dbconn)) {
+      DBI::dbDisconnect(dbconn)
+    } else {
+      returnlst$dbconn <- dbconn
+    }
   }
-
+  
   #if (!is.null(pop_plot_stratum_assgn)) {
   #  returnlst$pop_plot_stratum_assgn <- pop_plot_stratum_assgn
   #}

@@ -110,10 +110,11 @@ spPoly2Rast <- function(polyv,
   
   ## Check validate
   if (validate) {
-    polyvx <- sf::st_make_valid(polyvx, 
-                                geos_method = 'valid_structure', 
-                                geos_keep_collapsed = FALSE)
-    polyvx <- sf::st_cast(polyvx)
+    polyv1x <- polyfix.sf(polyv1x)
+    # polyvx <- sf::st_make_valid(polyvx, 
+    #                             geos_method = 'valid_structure', 
+    #                             geos_keep_collapsed = FALSE)
+    # polyvx <- sf::st_cast(polyvx)
   }
 
   ## Check polyv.att

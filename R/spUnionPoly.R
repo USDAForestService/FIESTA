@@ -152,15 +152,16 @@ spUnionPoly <- function(polyv1,
   
   ## Validate polygon
   if (validate) {
-    polyv1x <- sf::st_make_valid(polyv1x, 
-                                 geos_method = 'valid_structure', 
-                                 geos_keep_collapsed = FALSE)
-    polyv1x <- sf::st_cast(polyv1x)
-    
-    polyv2x <- sf::st_make_valid(polyv2x, 
-                                 geos_method = 'valid_structure', 
-                                 geos_keep_collapsed = FALSE)
-    polyv2x <- sf::st_cast(polyv2x)
+    polyv1x <- polyfix.sf(polyv1x)
+    # polyv1x <- sf::st_make_valid(polyv1x, 
+    #                              geos_method = 'valid_structure', 
+    #                              geos_keep_collapsed = FALSE)
+    #polyv1x <- sf::st_cast(polyv1x)
+    polyv2x <- polyfix.sf(polyv2x)
+    # polyv2x <- sf::st_make_valid(polyv2x, 
+    #                              geos_method = 'valid_structure', 
+    #                              geos_keep_collapsed = FALSE)
+    #polyv2x <- sf::st_cast(polyv2x)
   }
   
 
@@ -203,7 +204,6 @@ spUnionPoly <- function(polyv1,
   #st_agr(polyv1x) <- "constant"
   #st_agr(polyv2x) <- "constant"
 
-
   ## Check extents
 #  msg <- check.extents(polyv1x, polyv2prj, showext, layer1nm="polyv1x", 
 #		layer2nm="polyv2x")
@@ -211,10 +211,9 @@ spUnionPoly <- function(polyv1,
 
   ## 
   ## Union polygons
-  upoly <- layerUnion(polyv1x, polyv2x)
+  upoly <- suppressWarnings(layerUnion(polyv1x, polyv2x))
   if (showext) plot(sf::st_geometry(upoly, add=TRUE))
 
-   
   ## Calculate area
   if (areacalc) {
     upoly <- areacalc.poly(upoly, areavar=areavar)
