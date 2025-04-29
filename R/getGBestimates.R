@@ -2,9 +2,14 @@ getGBestimates <- function(esttype,
                            ratiotype = "PERACRE",
                            domdatn, 
                            domdatd = NULL, 
-                           uniqueid,
+                           uniqueid, 
+                           condid = "CONDID",
                            estvarn.name, 
                            estvard.name = NULL,
+                           tdomvar = NULL,
+                           tdomvar2 = NULL,
+                           tdomvarlstn = NULL,
+                           tdomvarlstd = NULL,
                            pltassgnx,
                            pltassgnid,
                            unitarea, 
@@ -30,49 +35,63 @@ getGBestimates <- function(esttype,
 
   ## Set global variables
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=
-    strwt=n.total=n.strata=ONEUNIT <- NULL
-  addtotal <- TRUE
-
-  if (!is.null(rowvar) && rowvar != "TOTAL") {
-    if (length(unique(domdatn[[rowvar]])) == 1) addtotal <- FALSE
-  }
+    strwt=n.total=n.strata=ONEUNIT=domvard=variable <- NULL
   strunitvars <- c(unitvar, strvar)
   
-  message("getting estimates using GB...")
+  message("generating post-stratified estimates using FIESTA...")
+  
+  ## Get estimates for total
+  if (is.null(rowvar)) rowvar <- "TOTAL"
+  addtotal <- ifelse(rowvar %in% c("PREV_TOTAL", "TOTAL") ||
+                       length(unique(domdatn[[rowvar]])) > 1, TRUE, FALSE)
   
   ## Append TOTAL to domdatn
   if (addtotal && !"TOTAL" %in% names(domdatn)) {
     domdatn$TOTAL <- 1
   }
   
-  ## Join domdat to pltassgnx using data.table key
+  ## Join domdat to pltassgnx using data.table key and all.y=TRUE
   domdatn <- pltassgnx[domdatn]
   if (esttype == "RATIO") {
+    ## Append TOTAL to domdatn
     if (addtotal && !"TOTAL" %in% names(domdatd)) {
       domdatd$TOTAL <- 1
     }
     domdatd <- pltassgnx[domdatd]
+    
+    ## Check to make sure class of join variables match
+    chk <- FIESTAutils::check.matchclass(domdatd, domdatn, c(uniqueid, condid))
+    domdatd <- chk$tab1
+    domdatn <- chk$tab2
   }
-
-  ## Get total estimate and merge area	
+  
+  ## Get total estimate 	
+  #############################################################################
   if (addtotal) {
-    ## Sum numerator to plot, domain (TOTAL) level
-    domdattot <- 
-      domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-              by = c(strunitvars, uniqueid, "TOTAL"), .SDcols=estvarn.name]
-    if (esttype == "RATIO") {
-      ## Sum denominator to plot, domain (TOTAL) level 
-      domdatdtot <- 
-        domdatd[, lapply(.SD, sum, na.rm=TRUE), 
-              by = c(strunitvars, uniqueid, "TOTAL"), .SDcols=estvard.name]
-      #domdattot <- merge(domdattot, domdatdtot, by=c(strunitvars, uniqueid, "TOTAL"))
-      domdattot <- merge(domdattot, domdatdtot, by=c(strunitvars, uniqueid, "TOTAL"), all.y=TRUE)
-    }
 
+    ## sum condition/domain-level data to plot/domain-level
+    domdatplt <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
+                          by=c(strunitvars, uniqueid, "TOTAL"), .SDcols=estvarn.name]
+
+    if (esttype == "RATIO") {  
+#      if (!is.null(tdomvar)) {
+        ## denominator: sum condition/domain-level data to plot/domain-level
+        domdatdplt <- domdatd[, lapply(.SD, sum, na.rm=TRUE), 
+                              by=c(strunitvars, uniqueid, "TOTAL"), .SDcols=estvard.name]   
+        ## merge denominator and numerator data keeping all denominator data (all.x=TRUE) 
+        domdatplt <- merge(domdatdplt, domdatplt, by=c(strunitvars, uniqueid, "TOTAL"), all.x = TRUE)
+#      } else {
+#        ## numerator/denominator: sum condition/domain-level data to plot/domain-level
+#        domdatplt <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
+#                              by=c(strunitvars, uniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
+#      }
+    }
+    
+    ## generate estimates by estimation unit
     unit_totest <- 
       GBest.pbar(sumyn = estvarn.name, 
                  sumyd = estvard.name,
-                 ysum = domdattot,
+                 ysum = copy(domdatplt),
                  esttype = esttype, 
                  ratiotype = ratiotype,
                  uniqueid = uniqueid, 
@@ -86,6 +105,7 @@ getGBestimates <- function(esttype,
     setkeyv(unit_totest, unitvar)     
     unit_totest <- unit_totest[unitarea, nomatch=0]
 
+    ## calculate percent standard errors (pse) by estimation unit
     if (totals) {
       unit_totest <- 
         getpse(unit_totest, 
@@ -97,8 +117,61 @@ getGBestimates <- function(esttype,
                esttype = esttype)
     }
   }
+   
+  ## Sum data to condition/domain-level	
+  #############################################################################
+  domvars <- c(rowvar, colvar)
+  domvars <- domvars[domvars != "NONE"]
+  byvars <- c(strunitvars, uniqueid, condid)
+  byvarsplt <- c(strunitvars, uniqueid)
+  
+  if (esttype == "RATIO") {
+    domvard <- domvars[domvars %in% names(domdatd)]
 
+    ## denominator: sum estimation variable to condition/domain-level
+    byvarsd <- c(byvars, domvard)
+    domdatdcond <- domdatd[, lapply(.SD, sum, na.rm=TRUE), by = byvarsd, .SDcols = estvard.name]
+    
+    
+    ## numerator: sum estimation variable to condition/domain-level
+    if (!is.null(tdomvar)) {
+      
+      ## merge denominator and numerator data keeping all rows in denominator (all.x=TRUE) 
+      domdattmp <- merge(domdatdcond, domdatn, by = byvars, all.x = TRUE)
+      ## change any NA values to 0 values
+      domdattmp <- DT_NAto0(domdattmp, c(tdomvarlstn, estvarn.name, "TOTAL"))
+      
+      ## numerator: transpose columns to rows for estimation
+      domdatncondt <- data.table(transpose2row(domdattmp, uniqueid = byvarsd,
+                                               tvars = tdomvarlstn))
+      setnames(domdatncondt, "value", estvarn.name)
+      
+      if (!is.null(tdomvar2)) {
+        domdatncondt[, (grpvar) := tstrsplit(variable, "#")][, variable := NULL]
+      } else {
+        setnames(domdatncondt, "variable", tdomvar)
+      }
+      
+      ## numerator: total sums
+      domdatcond <- domdattmp[, c(byvars, estvard.name, estvarn.name), with = FALSE]
+      
+    } else {
+      ## merge denominator and numerator data keeping rows in denominator (all.x=TRUE) 
+      domdatcond <- merge(domdatdcond, domdatn, by = byvars, all.x = TRUE)
+    }
+    
+  } else {
+    
+    domvarn <- domvars[domvars %in% names(domdatn)]
+    byvarsn <- c(byvars, domvarn)
+    
+    domdatcond <- domdatn[, lapply(.SD, sum, na.rm=TRUE),
+                          by = byvarsn, .SDcols = estvarn.name]
+  }
+
+  
   ## Get row estimate
+  #############################################################################
   if (is.null(rowvar) || rowvar == "NONE") rowvar <- "TOTAL"
   if (rowvar != "TOTAL") {
 
@@ -107,42 +180,39 @@ getGBestimates <- function(esttype,
                               uniquex = uniquerow,
                               xvar = rowvar, 
                               NAname = row.NAname)
-
-    ## Sum numerator to plot, rowvar level
-    #domdatn <- domdatn[!is.na(domdatn[[rowvar]]),] 
-    domdattot <- 
-      domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-              by = c(strunitvars, uniqueid, rowvar), .SDcols=estvarn.name]
+    
+    
+    ## sum estimation variable to plot/domain-level by rowvar
+    ###########################################################################
     if (esttype == "RATIO") {
-      ## Sum denominator to plot, domain (TOTAL) level 
-      if (rowvar %in% names(domdatd)) {
-        domdatdtot <- 
-          domdatd[, lapply(.SD, sum, na.rm=TRUE), 
-                  by = c(strunitvars, uniqueid, rowvar), .SDcols = estvard.name]
-       
-        ## Check class of ddomdattot and domdatdtot and merge tables
-        tabchk <- check.matchclass(domdattot, domdatdtot, c(strunitvars, uniqueid, rowvar))
-        domdattot <- tabchk$tab1
-        domdatdtot <- tabchk$tab2
-        
-#        domdattot <- merge(domdattot, domdatdtot, 
-#                            by = c(strunitvars, uniqueid, rowvar))
-        domdattot <- merge(domdattot, domdatdtot, 
-                           by = c(strunitvars, uniqueid, rowvar), all.y=TRUE)
+      
+      ## denominator: sum estimates by rowvar if in denominator
+      domdatdplt <- domdatdcond[, lapply(.SD, sum, na.rm=TRUE), 
+                                by = c(byvarsplt, domvard), .SDcols = estvard.name]
+      
+      if (!is.null(tdomvar) && (!is.null(tdomvar2) || tdomvar == rowvar)) {
+        ## numerator: sum estimates by rowvar
+        domdatnplt <- domdatncondt[, lapply(.SD, sum, na.rm=TRUE),                                    
+                                   by = c(byvarsplt, rowvar), .SDcols = estvarn.name]
       } else {
-        domdatdtot <- 
-          domdatd[, lapply(.SD, sum, na.rm=TRUE),
-                  by = c(strunitvars, uniqueid), .SDcols = estvard.name]
-#        domdattot <- merge(domdattot, domdatdtot, 
-#                            by = c(strunitvars, uniqueid))
-        domdattot <- merge(domdattot, domdatdtot, 
-                           by = c(strunitvars, uniqueid), all.y=TRUE)
+        domdatnplt <- domdatcond[, lapply(.SD, sum, na.rm=TRUE), 
+                                  by = byvarsplt, .SDcols = estvarn.name]
       }
-    }  
+      ## merge denominator and numerator
+      domdatrow <- merge(domdatdplt, domdatnplt, by = byvarsplt)
+      
+    } else {
+      
+      domvarsrow <- domvars[domvars %in% rowvar]
+      domdatrow <- domdatcond[, lapply(.SD, sum, na.rm=TRUE), 
+                              by = c(byvarsplt, domvarsrow), .SDcols = estvarn.name]
+    }
+    
+    ## generate estimates by estimation unit and rowvar
     unit_rowest <- 
       GBest.pbar(sumyn = estvarn.name, 
                  sumyd = estvard.name,
-                 ysum = domdattot,
+                 ysum = copy(domdatrow),
                  esttype = esttype, 
                  ratiotype = ratiotype,
                  uniqueid = uniqueid, 
@@ -151,8 +221,10 @@ getGBestimates <- function(esttype,
                  strvar = strvar, 
                  domain = rowvar)
   }
-  
+
+
   ## Get column (and cell) estimate  
+  #############################################################################
   if (is.null(colvar)) colvar <- "NONE"
   if ( colvar != "NONE") {
 
@@ -161,43 +233,37 @@ getGBestimates <- function(esttype,
                               uniquex = uniquecol,
                               xvar = colvar, 
                               NAname = col.NAname)
-    
-    ## Sum numerator to plot, colvar level
-    #domdatn <- domdatn[!is.na(domdatn[[colvar]]),] 
-    domdattot <- 
-      domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-              by = c(strunitvars, uniqueid, colvar), .SDcols=estvarn.name]
 
+
+    ## sum estimation variable to plot/domain-level by rowvar
+    ###########################################################################
     if (esttype == "RATIO") {
-      ## Sum denominator to plot, domain (TOTAL) level 
-      if (colvar %in% names(domdatd)) {
-        domdatdtot <- 
-          domdatd[, lapply(.SD, sum, na.rm=TRUE), 
-                  by = c(strunitvars, uniqueid, colvar), .SDcols = estvard.name]
-        
-        ## Check class of ddomdattot and domdatdtot and merge tables
-        tabchk <- check.matchclass(domdattot, domdatdtot, c(strunitvars, uniqueid, colvar))
-        domdattot <- tabchk$tab1
-        domdatdtot <- tabchk$tab2
-
-#        domdattot <- merge(domdattot, domdatdtot, 
-#                           by = c(strunitvars, uniqueid, colvar))
-        domdattot <- merge(domdattot, domdatdtot, 
-                           by = c(strunitvars, uniqueid, colvar), all.y=TRUE)
+      ## denominator: sum estimates by colvar if in denominator
+      domvardcol <- domvard[domvard == colvar]
+      domdatdplt <- domdatdcond[, lapply(.SD, sum, na.rm=TRUE), 
+                                by = c(byvarsplt, domvardcol), .SDcols = estvard.name]
+      
+      if (!is.null(tdomvar) && (!is.null(tdomvar2) || tdomvar == colvar)) {
+        ## numerator: sum estimates by rowvar
+        domdatnplt <- domdatncondt[, lapply(.SD, sum, na.rm=TRUE),                                    
+                                   by = c(byvarsplt, colvar), .SDcols = estvarn.name]
       } else {
-        domdatdtot <- 
-          domdatd[, lapply(.SD, sum, na.rm=TRUE),
-                  by = c(strunitvars, uniqueid), .SDcols = estvard.name]
-#        domdattot <- merge(domdattot, domdatdtot, 
-#                           by = c(strunitvars, uniqueid))
-        domdattot <- merge(domdattot, domdatdtot, 
-                           by = c(strunitvars, uniqueid), all.y=TRUE)
+        domdatnplt <- domdatcond[, lapply(.SD, sum, na.rm=TRUE), 
+                                 by = byvarsplt, .SDcols = estvarn.name]
       }
-    }  
+      ## merge denominator and numerator
+      domdatcol <- merge(domdatdplt, domdatnplt, by = byvarsplt)
+      
+    } else {
+      domdatcol <- domdatcond[, lapply(.SD, sum, na.rm=TRUE), 
+                              by = c(byvarsplt, colvar), .SDcols = estvarn.name]
+    }
+   
+    ## generate estimates by estimation unit and colvar
     unit_colest <- 
       GBest.pbar(sumyn = estvarn.name, 
                  sumyd = estvard.name,
-                 ysum = domdattot,
+                 ysum = copy(domdatcol),
                  esttype = esttype, 
                  ratiotype = ratiotype,
                  uniqueid = uniqueid, 
@@ -205,42 +271,53 @@ getGBestimates <- function(esttype,
                  unitvar = unitvar, 
                  strvar = strvar, 
                  domain = colvar)
+    
 
-   ## Sum numerator to plot, grpvar level
-   #domdatn <- domdatn[!is.na(domdatn[[rowvar]]) & domdatn[[rowvar]] != "NA",] 
-   #domdatn <- domdatn[!is.na(domdatn[[colvar]]) & domdatn[[colvar]] != "NA",] 
-   domdattot <- 
-      domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-                 by = c(strunitvars, uniqueid, grpvar), .SDcols=estvarn.name]
-  
-   if (esttype == "RATIO") {
+    ## Get estimates for cell values (grpvar)
+    #############################################################################
 
-     if (all(grpvar %in% names(domdatd))) {
-       ## Sum denominator to plot, grpvar level 
-       domdatd <- domdatd[!is.na(domdatd[[rowvar]]) & domdatd[[rowvar]] != "NA",] 
-       domdatd <- domdatd[!is.na(domdatd[[colvar]]) & domdatd[[colvar]] != "NA",] 
-       
-       domdatdtot <- 
-         domdatd[, lapply(.SD, sum, na.rm=TRUE), 
-                 by = c(strunitvars, uniqueid, grpvar), .SDcols = estvard.name]
-#       domdattot <- merge(domdattot, domdatdtot, 
-#                          by = c(strunitvars, uniqueid, grpvar))
-       domdattot <- merge(domdattot, domdatdtot, 
-                          by = c(strunitvars, uniqueid, grpvar), all.y=TRUE)
-     } else {
-       domdatdtot <- 
-         domdatd[, lapply(.SD, sum, na.rm=TRUE),
-                 by = c(strunitvars, uniqueid), .SDcols = estvard.name]
-#       domdattot <- merge(domdattot, domdatdtot, 
-#                          by = c(strunitvars, uniqueid))
-       domdattot <- merge(domdattot, domdatdtot, 
-                          by = c(strunitvars, uniqueid), all.y=TRUE)
-     }
-   }  
-   unit_grpest <- 
+    ## sum estimation variable to plot/domain-level by grpvar
+    ###########################################################################
+    if (esttype == "RATIO") {
+      ## denominator: sum estimates by grpvar if in denominator
+      domvardgrp <- domvard[domvard %in% grpvar]
+      domdatdplt <- domdatdcond[, lapply(.SD, sum, na.rm=TRUE), 
+                                by = c(byvarsplt, domvardgrp), .SDcols = estvard.name]
+      
+      if (!is.null(tdomvar)) {
+        if (!is.null(tdomvar2)) {
+          ## numerator: sum estimates by rowvar and colvar
+          domdatnplt <- domdatncondt[, lapply(.SD, sum, na.rm=TRUE),
+                                   by = c(byvarsplt, grpvar), .SDcols = estvarn.name]
+          
+          ## merge denominator and numerator
+          domdatgrp <- merge(domdatdplt, domdatnplt, by = byvarsplt)
+          
+        } else {
+          ## numerator: sum estimates by rowvar
+          domdatnplt <- domdatncondt[, lapply(.SD, sum, na.rm=TRUE),
+                                 by = c(byvarsplt, grpvar), .SDcols = estvarn.name]
+          
+          ## merge denominator and numerator
+          domdatgrp <- merge(domdatdplt, domdatnplt, by = c(byvarsplt, domvard))
+        }
+      } else {
+        ## numerator: sum estimates by rowvar
+        domdatnplt <- domdatcond[, lapply(.SD, sum, na.rm=TRUE), 
+                                   by = c(byvarsplt, rowvar, colvar), .SDcols = estvarn.name]
+
+        ## merge denominator and numerator
+        domdatgrp <- merge(domdatdplt, domdatnplt, by = c(rowvar, colvar, byvarsplt))
+      }  
+    } else {
+      domdatgrp <- domdatcond[, lapply(.SD, sum, na.rm=TRUE), 
+                              by = c(byvarsplt, grpvar), .SDcols = estvarn.name]
+    }
+
+    unit_grpest <- 
       GBest.pbar(sumyn = estvarn.name, 
                  sumyd = estvard.name,
-                 ysum = domdattot,
+                 ysum = copy(domdatgrp),
                  esttype = esttype,
                  ratiotype = ratiotype,
                  uniqueid = uniqueid, 
@@ -249,7 +326,7 @@ getGBestimates <- function(esttype,
                  strvar = strvar, 
                  domain = grpvar)
   }
-
+print("TEST4")
   ###################################################################################
   ## Check add0 and Add area
   ###################################################################################
