@@ -40,9 +40,9 @@ check.cond <- function(areawt,
   #cdomdatvars <- paste0("pc.", byvars)
   
   ## Check pcdomainlst
-  if (is.null(pcdomainlst)) {
-    pcdomainlst <- c(rowvar, colvar)
-  }
+  #if (is.null(pcdomainlst)) {
+  #  pcdomainlst <- c(rowvar, colvar)
+  #}
   
   ## Append classified variables to query
   if (!is.null(rowvar) && rowvar %in% pcdomainlst) {

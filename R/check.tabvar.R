@@ -185,14 +185,16 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
       }
     
       ## build tab fromqry
-      tabfromqry <- paste0(
-        "\nFROM ", SCHEMA., tabnm, " t")
-      
       if (!is.null(pltcondx)) {
+        tabfromqry <- paste0(
+          "\nFROM ", pltcondxnm, " pc")
         tabtjoinqry <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "t.", "pc.")
         tabfromqry <- paste0(
           tabfromqry,
-          "\nJOIN ", pltcondxnm, " pc ", tabtjoinqry)
+          "\nLEFT JOIN ", SCHEMA., tabnm, " t ", tabtjoinqry)
+      } else {
+        tabfromqry <- paste0(
+          "\nFROM ", SCHEMA., tabnm, " t")
       }
       
       if (estseed == "add") {
@@ -374,7 +376,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
           stop()
         }
       }
-      
+
       ## Build query for getting unique tabvarclass values within population
       if (!is.null(tab.classify)) {
         class. <- ifelse (tabvar %in% pltcondflds, "pc.", "t.")

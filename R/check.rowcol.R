@@ -50,7 +50,7 @@ check.rowcol <-
   ####################################################################################
 
   ## Set global variables
-  domainlst=tdomvar=tdomvar2=grpvar=rowvarnm=colvarnm <- NULL
+  domainlst=pcdomainlst=tdomvar=tdomvar2=grpvar=rowvarnm=colvarnm <- NULL
   rowbytdom = colbytdom = rowbypcdom = colbypcdom <- FALSE
   gui <- FALSE
 
@@ -222,6 +222,10 @@ check.rowcol <-
     rowclassqry <- rowvardat$tabclassqry
     rowbytdom <- rowvardat$bytdom
     rowbypcdom <- rowvardat$bypcdom
+    
+    if (rowbypcdom) {
+      pcdomainlst <- c(pcdomainlst, rowvar)
+    }
   }
   
   
@@ -269,6 +273,10 @@ check.rowcol <-
     colclassqry <- colvardat$tabclassqry
     colbytdom <- colvardat$bytdom
     colbypcdom <- colvardat$bypcdom
+    
+    if (colbypcdom) {
+      pcdomainlst <- c(pcdomainlst, colvar)
+    }
   }
   
   ## Rename rowvar variables with prefix 'PREV_'
@@ -329,7 +337,7 @@ check.rowcol <-
   
   returnlst <- list(pltcondvars = pltcondvars, 
                     bytdom = bytdom, bypcdom = bypcdom, 
-                    domainlst = domainlst, 
+                    domainlst = domainlst, pcdomainlst = pcdomainlst,
                     uniquerow = uniquerow, uniquecol = uniquecol, 
                     rowvar = rowvar, rowvarnm = rowvarnm, 
                     colvar = colvar, colvarnm = colvarnm,

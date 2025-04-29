@@ -696,7 +696,7 @@ modGBtree <- function(GBpopdat,
   estdat <- 
     getGBestimates(esttype = esttype,
                    domdatn = tdomdat,
-                   uniqueid = pltassgnid,
+                   uniqueid = pltassgnid, condid = condid,
                    estvarn.name = estvar.name,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,

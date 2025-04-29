@@ -579,7 +579,7 @@ modGBarea <- function(GBpopdat,
   estdat <- 
     getGBestimates(esttype = esttype,
                    domdatn = cdomdat,
-                   uniqueid = pltassgnid,
+                   uniqueid = pltassgnid, condid = condid,
                    estvarn.name = estnm,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,

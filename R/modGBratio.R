@@ -573,6 +573,7 @@ modGBratio <- function(GBpopdat,
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
+  pcdomainlst <- rowcolinfo$pcdomainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
   rowvarnm <- rowcolinfo$rowvarnm
@@ -640,7 +641,7 @@ modGBratio <- function(GBpopdat,
                estvard.derive = estvard.derive,
                esttotn = TRUE, esttotd = TRUE,
                tdomvar = tdomvar, tdomvar2 = tdomvar2,
-               bydomainlst = domainlst,
+               bydomainlst = c(tdomvar, tdomvar2),
                adjtree = adjtree, 
                adjvar = "tadjfac",
                metric = metric, 
@@ -651,8 +652,7 @@ modGBratio <- function(GBpopdat,
                pltidsWITHqry = pltidsWITHqry,
                pcwhereqry = pcwhereqry,
                pltidsid = pltidsid,
-               bytdom = bytdom,
-               gui = gui)
+               bytdom = bytdom)
   if (is.null(treedat)) return(NULL) 
   tdomdat <- treedat$tdomdat
   estvarn <- treedat$estvarn
@@ -660,18 +660,15 @@ modGBratio <- function(GBpopdat,
   estvarn.filter <- treedat$estvarn.filter
   tdomvarlstn <- treedat$tdomvarlstn
   estunitsn <- treedat$estunitsn
-  estunitsd <- treedat$estunitsd
   treeqry <- treedat$treeqry
   classifynmlst <- treedat$classifynmlst
-  pcdomainlst <- treedat$pcdomainlst
-  
+
   if (ratiotype == "PERTREE") {
     estvard <- treedat$estvard
     estvard.name <- treedat$estvard.name
     tdomvarlstd <- treedat$tdomvarlstd
   } else {
     estvard <- treedat$estvard
-    estvard.name <- treedat$estvard.name
     tdomvarlstd <- NULL
     estunitsd <- areaunits
   } 
@@ -689,10 +686,12 @@ modGBratio <- function(GBpopdat,
     }
   }
 
+  
+  ###################################################################################
+  ### Get condition-level domain data
+  ###################################################################################
+  cdomdat=estvard.name <- NULL
   if (ratiotype == "PERACRE") {
-    ###################################################################################
-    ### Get condition-level domain data
-    ###################################################################################
     conddat <- 
       check.cond(areawt = areawt,
                  areawt2 = areawt2,
@@ -762,6 +761,7 @@ modGBratio <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
+  
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
@@ -769,9 +769,12 @@ modGBratio <- function(GBpopdat,
     getGBestimates(esttype = esttype,
                    domdatn = tdomdat,
                    domdatd = cdomdat,
-                   uniqueid = pltassgnid,
+                   uniqueid = pltassgnid, condid = condid,
                    estvarn.name = estvarn.name,
                    estvard.name = estvard.name,
+                   tdomvar = tdomvar, tdomvar2 = tdomvar2,
+                   tdomvarlstn = tdomvarlstn,
+                   tdomvarlstd = tdomvarlstd,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
@@ -836,11 +839,11 @@ modGBratio <- function(GBpopdat,
   
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
-  
+
+
   if (!row.add0 && any(est2return$Total == "--")) {
     est2return <- est2return[est2return$Total != "--",]
   }
-  
   
   if (!is.null(est2return)) {
     if (!row.add0 && any(est2return$Total == "--")) {

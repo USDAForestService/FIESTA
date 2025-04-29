@@ -622,9 +622,11 @@ datSumTreeDom <- function(tree = NULL,
   ## GET NAME FOR SUMMED TREE VARIABLE FOR FILTERED TREE DOMAINS 
   if (tdomtot && is.null(tdomtotnm) && pivot) {
     if (is.null(tdomprefix)) {
-      tdomtotnm <- paste0(tsumvarnm, "TOT")
+      #tdomtotnm <- paste0(tsumvarnm, "_TOT")
+      tdomtotnm <- tsumvarnm
     } else {
-      tdomtotnm <- paste0(tdomprefix, "TOT")
+      #tdomtotnm <- paste0(tdomprefix, "_", tsumvarnm, "_TOT")
+      tdomtotnm <- paste0(tdomprefix, "_", tsumvarnm)
     }
   }
 
@@ -840,7 +842,6 @@ datSumTreeDom <- function(tree = NULL,
   if (proportion) sumtreef.prop <- tdoms.prop 
   if (presence) sumtreef.pres <- tdoms.pres
   
-
   if (savedata) {
     if (pltsp) {
       spExportSpatial(sumtreef, 

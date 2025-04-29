@@ -24,8 +24,8 @@ check.tree <-
   ###################################################################################
 
   ## Set global variables
-  tdomvarlstn=estunitsd=variable=tsumvard <- NULL  
-
+  tdomvarlstn=tdomtotnm=estunitsd=variable=tsumvard=tdomvarlstd=tdomtotdnm <- NULL  
+  
   if (estseed == "only") {
     seedlings <- "only"
   } else if (estseed == "add") {
@@ -47,6 +47,7 @@ check.tree <-
 
   if (bytdom) {
     pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
+
     tdomdata <- 
       datSumTreeDom(tree = treex, 
                     seed = seedx, 
@@ -91,25 +92,12 @@ check.tree <-
     classifynmlst <- tdomdata$classifynmlst
     tdomvarnm <- tdomdata$tdomvarnm
     tdomvar2nm <- tdomdata$tdomvar2nm
+    tdomtotnm <- tdomdata$tdomtotnm
 
-    if (pivot) {
-      ## Transpose back to rows
-#      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst, tdomvar2),
-#                             tvars = tdomvarlstn, na.rm = FALSE)
-      tdomdat <- transpose2row(tdomdat, uniqueid = c(tsumuniqueid, pcdomainlst),
-                               tvars = tdomvarlstn, na.rm = FALSE)
-      if (!is.null(tdomvar2)) {
-        if ("variable" %in% names(tdomdat)) {
-          tdomdat <- data.table(tdomdat, tdomdat[, tstrsplit(variable, "#", fixed=TRUE)])
-        } else {
-          tdomdat <- data.table(tdomdat, tdomdat[, tstrsplit(get(tdomvar2), "#", fixed=TRUE)])
-        }
-        setnames(tdomdat, c("V1", "V2", "value"), c(tdomvarnm, tdomvar2nm, tsumvarn))
-        tdomdat$variable <- NULL
-      } else {
-        setnames(tdomdat, c("variable", "value"), c(tdomvarnm, tsumvarn))
-      }
-    }
+    # if (!pivot) {
+    #   tdomdat <- tdomdat[!is.na(tdomdat[[tdomvar]]),]
+    # }
+
   } else {  
 
     ## Get summed tree data
@@ -216,10 +204,11 @@ check.tree <-
       treeqryd <- tdomdata$treeqry
       tsumvard <- tdomdata$tsumvarnm
       tdomvarlstd <- tdomdata$tdomlst
+      tdomtotdnm <- tdomdata$tdomtotnm
 
-      if (!pivot) {
-        tdomdatd <- tdomdatd[!is.na(tdomdatd[[tdomvar]]),]
-      }
+      # if (!pivot) {
+      #   tdomdatd <- tdomdatd[!is.na(tdomdatd[[tdomvar]]),]
+      # }
       tdombadlst <- tdomvarlstn[which(!tdomvarlstn %in% tdomvarlstd)]
       if (length(tdombadlst) > 0) {
         warning("there are more tree domains in the numerator than in the denominator")
@@ -279,15 +268,12 @@ check.tree <-
     
     unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
     estunitsd <- ref_units[ref_units$VARIABLE == estvard, unitcol]
-    
-
-  } else {
-    tdomvard <- NULL
-    tdomvarlstd <- NULL
   }
 
+  
   if (esttype == "RATIO") {
     
+    tdomvard <- tdomvar
     if (seedlings == "Y" && length(tsumvard) > 1) {
       tsumvard <- tsumvard[length(tsumvard)]
     }
@@ -296,10 +282,12 @@ check.tree <-
                     estvarn.name = tsumvarn,
 		                estvarn.filter = estvarn.filter, 
 		                tdomvarlstn = tdomvarlstn, 
+		                tdomtotnm = tdomtotnm,
 		                estvard = estvard,
  		                estvard.name = tdomvard, 
 		                estvard.filter = estvard.filter, 
 		                tdomvarlstd = tdomvarlstd,
+		                tdomtotdnm = tdomtotdnm,
 		                estunitsn = estunitsn, 
 		                estunitsd = estunitsd,
 		                tdomainlst = tdomainlst,
