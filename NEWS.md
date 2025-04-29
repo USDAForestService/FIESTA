@@ -1,3 +1,11 @@
+# FIESTA 3.7.2
+
+- Fixed estimate in denominator for esttype = 'RATIO' when the rowvar or colvar is from 
+  the tree table (e.g. SPCD).
+- Added modGBp2veg to generate estimates for FIA understory vegetation.
+
+
+
 # FIESTA 3.7.0
 
 - Overhaul of data summaries to SQL queries to improve efficiency with database inputs.
