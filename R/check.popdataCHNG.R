@@ -744,7 +744,7 @@ check.popdataCHNG <-
       returnlst$pltidsadj <- "pltidsadj"
     }
     if (returnadj) {
-      returnlst$adjfactors <- adjfactorsP2VEG   ## data frame with adjustment factors
+      returnlst$adjfactors <- adjfactors   ## data frame with adjustment factors
     }
     
 
