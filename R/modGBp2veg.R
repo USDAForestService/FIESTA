@@ -210,6 +210,7 @@
 #' NC: U.S. Department of Agriculture, Forest Service, Southern Research
 #' Station, p.53-77.
 #' @keywords data
+#' @export modGBp2veg
 modGBp2veg <- function(GBpopdat = NULL, 
                        p2vegtype = "str", 
                        peracre = FALSE,
@@ -253,7 +254,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   returnlst <- list()
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder=domclassify=nhat=nhat.var <- NULL
+  ONEUNIT=n.total=n.strata=TOTAL=rawfolder=domclassify=estvard.name <- NULL
 
   
   ##################################################################
@@ -339,12 +340,12 @@ modGBp2veg <- function(GBpopdat = NULL,
   pltcondflds <- GBpopdat$pltcondflds
   popdatindb <- GBpopdat$popdatindb
   
-  vcondareax <- GBpopdat$vcondareax
-  vcondstrx <- GBpopdat$vcondstrx
-  vcondstrflds <- GBpopdat$vcondstrflds
-  vcondsppx <- GBpopdat$vcondsppx
-  vcondsppflds <- GBpopdat$vcondsppflds
-  varadjP2VEG <- GBpopdat$varadjP2VEG
+  # vcondareax <- GBpopdat$vcondareax
+  # vcondstrx <- GBpopdat$vcondstrx
+  # vcondstrflds <- GBpopdat$vcondstrflds
+  # vcondsppx <- GBpopdat$vcondsppx
+  # vcondsppflds <- GBpopdat$vcondsppflds
+  # varadjP2VEG <- GBpopdat$varadjP2VEG
   
   p2veg_subp_structurex <- GBpopdat$p2veg_subp_structurex
   p2veg_subp_structureflds <- GBpopdat$p2veg_subp_structureflds
@@ -514,8 +515,8 @@ modGBp2veg <- function(GBpopdat = NULL,
   grpvar <- rowcolinfo$grpvar
   bytdom <- rowcolinfo$bytdom
   bypcdom <- rowcolinfo$bypcdom
-  tdomvar <- rowcolinfo$tdomvar
-  tdomvar2 <- rowcolinfo$tdomvar2
+  vdomvar <- rowcolinfo$tdomvar
+  vdomvar2 <- rowcolinfo$tdomvar2
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
@@ -533,31 +534,41 @@ modGBp2veg <- function(GBpopdat = NULL,
   ### Get estimation data from vcond table
   #####################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  treedat <- 
+  p2vegdat <- 
     check.tree(treex = vsubpx, 
                bycond = TRUE, 
                condx = pltcondx, 
+               esttype = esttype,
                estvarn.derive = list(COVER_PCT_SUM = "COALESCE(SUM(COVER_PCT * 1.0) / 4 / 100, 0)"), 
                estvarn.filter = vfilter, 
-               bydomainlst = domainlst,
-               tdomvar = tdomvar, tdomvar2 = tdomvar2,
+               tdomvar = vdomvar, tdomvar2 = vdomvar2,
+               bydomainlst = c(vdomvar, vdomvar2),
                estvarn.TPA = FALSE,
                adjtree = TRUE, 
                adjvar = "vadjfac",
                ACI = ACI,
                domclassify = domclassify,
-               dbconn = popconn, #schema = pop_schema,
+               dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltcondxadjWITHqry,
                pcwhereqry = pcwhereqry,
                pltidsid = pltidsid,
                bytdom = bytdom)
-  vdomdat <- treedat$tdomdat  
-  p2vegqry <- treedat$treeqryn
-  estvarn.name <- treedat$estvar.name
-  pcdomainlst <- treedat$pcdomainlst
+  vdomdat <- p2vegdat$tdomdat  
+  estvarn <- p2vegdat$estvarn
+  estvarn.name <- p2vegdat$estvar.name
+  estvarn.filter <- p2vegdat$estvarn.filter
+  vdomvarlstn <- p2vegdat$tdomvarlstn
+  estunitsn <- "percent"
+  p2vegqry <- p2vegdat$treeqryn
+  classifynmlst <- p2vegdat$classifynmlst
   
-  #message(p2vegqry)
-  
+  if (esttype == "RATIO") {
+    estvarn.name <- p2vegdat$estvarn.name
+    estvard <- p2vegdat$estvard
+    vdomvarlstd <- NULL
+    estunitsd <- areaunits
+  } 
+
   # p2vegdat <- 
   #   datSumCoverDom(tree = vsubpx, 
   #              bycond = TRUE, 
@@ -582,6 +593,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   # pcdomainlst <- p2vegdat$pcdomainlst
   # tdomvarlstn <- p2vegdat$tdomvarlstn
   
+  
   ## change variable in query from tree variables to veg variables for display
   p2vegqry2 <- gsub("tdat", "vdat", p2vegqry)
   p2vegqry2 <- gsub("get tree data", "get p2veg data", p2vegqry2)
@@ -591,25 +603,11 @@ modGBp2veg <- function(GBpopdat = NULL,
   p2vegqry2 <- gsub("\\(t.", "\\(v.", p2vegqry2)
   #message(p2vegqry2)  
   
-  # if (esttype == "RATIO") {
-  #   estvarn.name <- p2vegdat$estvarn.name
-  #   estvarn.filter <- p2vegdat$estvarn.filter
-  #   estvard.name <- areawt
-  #   estvard.filter <- p2vegdat$estvard.filter
-  #   tdomvarlstd <- p2vegdat$tdomvarlstd
-  #   estunitsn <- "percent"
-  #   estunitsd <- areaunits
-  # } else {
-  #   estvarn.name <- p2vegdat$estvar.name
-  #   estvarn.filter <- p2vegdat$estvar.filter
-  #   estunitsn <- p2vegdat$estunits
-  # }
-  
   
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################
-  cdomdat=estvard.name <- NULL
+  cdomdat <- NULL
   if (peracre) {
     conddat <- 
       check.cond(areawt = areawt,
@@ -668,94 +666,23 @@ modGBp2veg <- function(GBpopdat = NULL,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
   
-  
-################
-source("C:/_tsf/_GitHub/FIESTA/R/getGBestimates.R")
-    estdatRat <- 
-    getGBestimates(esttype = "RATIO",
+
+  ###################################################################################
+  ## GENERATE ESTIMATES
+  ###################################################################################
+  estdat <- 
+    getGBestimates(esttype = esttype,
                    domdatn = vdomdat,
                    domdatd = cdomdat,
                    uniqueid = pltassgnid,
                    estvarn.name = estvarn.name,
                    estvard.name = estvard.name,
                    rowvar = rowvar, colvar = colvar, 
+                   tdomvar = vdomvar, tdomvar2 = vdomvar2,
+                   tdomvarlstn = vdomvarlstn,
+                   tdomvarlstd = vdomvarlstd,
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
-                   unitarea = unitarea,
-                   unitvar = unitvar,
-                   areavar = areavar,
-                   stratalut = stratalut,
-                   strvar = strvar,
-                   strwtvar = strwtvar,
-                   totals = totals,
-                   sumunits = sumunits,
-                   uniquerow = uniquerow,
-                   uniquecol = uniquecol,
-                   row.orderby = row.orderby,
-                   col.orderby = col.orderby,
-                   row.add0 = row.add0,
-                   col.add0 = col.add0,
-                   row.NAname = row.NAname,
-                   col.NAname = col.NAname)
-  if (is.null(estdat)) stop()
-  unit_totest <- estdatRat$unit_totest
-  unit_rowest <- estdatRat$unit_rowest
-  unit_colest <- estdatRat$unit_colest
-  unit_grpest <- estdatRat$unit_grpest
-  
-
-estround = 5  
-  message("getting output...")
-  estnm <- "estn" 
-  tabsRat <- 
-    est.outtabs(esttype = "RATIO", 
-                sumunits = sumunits, areavar = areavar, 
-                unitvar = unitvar, unitvars = unitvars, 
-                unit_totest = unit_totest, 
-                unit_rowest = unit_rowest, unit_colest = unit_colest, 
-                unit_grpest = unit_grpest,
-                rowvar = rowvarnm, colvar = colvarnm, 
-                uniquerow = uniquerow, uniquecol = uniquecol,
-                rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                rowunit = rowunit, totunit = totunit, 
-                allin1 = allin1, 
-                savedata = savedata, addtitle = addtitle, 
-                title.ref = title.ref, 
-                title.rowvar = title.rowvar, title.colvar = title.colvar, 
-                title.rowgrp = title.rowgrp,
-                title.unitvar = title.unitvar, title.estpse = title.estpse, 
-                title.est = title.est, title.pse = title.pse, 
-                rawdata = rawdata, rawonly = rawonly, 
-                outfn.estpse = outfn.estpse, 
-                outfolder = outfolder, outfn.date = outfn.date, 
-                overwrite = overwrite_layer, estnm = estnm, 
-                estround = estround, pseround = pseround, 
-                divideby = divideby, 
-                returntitle = returntitle, 
-                estnull = estnull, psenull = psenull, 
-                raw.keep0 = raw.keep0) 
-  
-  est2returnRat <- tabsRat$tabest
-  pse2returnRat <- tabsRat$tabpse
-  
-  tabsRat$rawdat$totest
-  tabsRat$rawdat$grpest
-  
-  
-#######################
-
-  ############################################################################
-  ## GENERATE ESTIMATES
-  ############################################################################
-  estdat <- 
-    getGBestimates(esttype = "TREE",
-                   domdatn = vdomdat,
-                   uniqueid = pltassgnid,
-                   estvarn.name = estvarn.name,
-                   rowvar = rowvar, colvar = colvar, 
-                   grpvar = grpvar,
-                   pltassgnx = pltassgnx,
-                   pltassgnid = pltassgnid,
                    unitarea = unitarea,
                    unitvar = unitvar,
                    areavar = areavar,
@@ -779,16 +706,16 @@ estround = 5
   unit_grpest <- estdat$unit_grpest
   rowunit <- estdat$rowunit
   totunit <- estdat$totunit
-  unitvar <- estdat$unitvar
+  #unitvar <- estdat$unitvar
   
   
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
   message("getting output...")
-  #estnm <- ifelse(esttype == "RATIO", "estn", "est")
+  estnm <- ifelse(esttype == "RATIO", "estn", "est")
   tabs <- 
-    est.outtabs(esttype = "TREE", 
+    est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 
                 unitvar = unitvar, unitvars = unitvars, 
                 unit_totest = unit_totest, 
@@ -808,65 +735,16 @@ estround = 5
                 rawdata = rawdata, rawonly = rawonly, 
                 outfn.estpse = outfn.estpse, 
                 outfolder = outfolder, outfn.date = outfn.date, 
-                overwrite = overwrite_layer, estnm = "est", 
+                overwrite = overwrite_layer, estnm = estnm, 
                 estround = estround, pseround = pseround, 
                 divideby = divideby, 
                 returntitle = returntitle, 
                 estnull = "--", psenull = "--", 
                 raw.keep0 = raw.keep0) 
   
-  if (peracre) {
-    
-    #22,694,850
-    ## Get total area with P2VEG coverage (P2VEG_SUBP_STATUS_CD = 1)
-    estdatArea <- 
-      getGBestimates(esttype = "AREA",
-                     domdatn = cdomdat,
-                     uniqueid = pltassgnid,
-                     estvarn.name = "ESTIMATED_VALUE",
-                     pltassgnx = pltassgnx,
-                     pltassgnid = pltassgnid,
-                     unitarea = unitarea,
-                     unitvar = unitvar,
-                     areavar = areavar,
-                     stratalut = stratalut,
-                     strvar = strvar,
-                     strwtvar = strwtvar,
-                     totals = totals,
-                     sumunits = sumunits,
-                     row.NAname = row.NAname,
-                     col.NAname = col.NAname)
-    if (is.null(estdatArea)) stop()
-    tabsArea <- 
-      est.outtabs(esttype = "AREA", 
-                  sumunits = sumunits, areavar = areavar, 
-                  unitvar = unitvar, unitvars = unitvars, 
-                  unit_totest = estdatArea$unit_totest, estnm = 'est',
-                  rowvar = "TOTAL", rawdata = TRUE) 
-    est2returnArea <- tabsArea$tabest
-    tabsArea$rawdat$totest
-    est2returnArea
-    
-    if (sumunits) {
-      totest <- tabsArea$rawdat$totest
-      rowest <- tabsArea$rawdat$rowest
-      colest <- tabsArea$rawdat$colest
-      grpest <- tabsArea$rawdat$grpest
-    } else {
-      unit_totest <- tabsArea$rawdat$unit_totest
-      unit_rowest <- tabsArea$rawdat$unit_rowest
-      unit_colest <- tabsArea$rawdat$unit_colest
-      unit_grpest <- tabsArea$rawdat$unit_grpest
-    }
-  } else {
-    
-    est2return <- tabs$tabest
-    pse2return <- tabs$tabpse
-  }
- 
-  tabsArea$rawdat$totest
-  
-  
+  est2return <- tabs$tabest
+  pse2return <- tabs$tabpse
+
   
   if (!row.add0 && any(est2return$Total == "--")) {
     est2return <- est2return[est2return$Total != "--",]
