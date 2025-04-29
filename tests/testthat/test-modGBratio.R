@@ -1,6 +1,6 @@
 
 test_that("modGBratio Testing", {
-  
+
   skip_on_cran()
 
   # Running GBpop
@@ -15,15 +15,15 @@ test_that("modGBratio Testing", {
                     strata_opts = strata_options(getwt = TRUE))
 
   # Running GBratio - VOL
-  modGBratio_VOL <- modGBratio(GBpop, 
+  modGBratio_VOL <- modGBratio(GBpop,
                       landarea = "FOREST",
                       estvarn = "VOLCFNET",
                       estvarn.filter = "STATUSCD == 1",
                       rowvar = "FORTYPCD",
                       table_opts = list(row.FIAname = TRUE))
 
-  # Running GBratio - TPA  
-  modGBratio_TPA <- modGBratio(GBpop, 
+  # Running GBratio - TPA
+  modGBratio_TPA <- modGBratio(GBpop,
                       landarea = "FOREST",
                       estvarn = "TPA_UNADJ",
                       estvarn.filter = "STATUSCD == 1",
@@ -34,7 +34,7 @@ test_that("modGBratio Testing", {
 
   modGBratio_VOL_est <- modGBratio_VOL$est
   modGBratio_TPA_est <- modGBratio_TPA$est
-  
+
   modGBratio_est_names <- list(c("Rocky Mountain juniper",
                                  "Juniper woodland",
                                  "Pinyon / juniper woodland",
@@ -52,12 +52,11 @@ test_that("modGBratio Testing", {
                                  "Cottonwood",
                                  "Sugarberry / hackberry / elm / green ash",
                                  "Aspen",
-                                 "Nonstocked",
-                                 "Total"))
+                                 "Nonstocked"))
 
   expect_equal(list(modGBratio_VOL_est$`Forest type`), modGBratio_est_names) ##Ensuring names are consistant
-  expect_equal(dim(modGBratio_VOL$est), c(19,3)) ##Ensuring consistant dimensionality among outputs
-  expect_equal(dim(modGBratio_TPA$est), c(19,3))
+  expect_equal(dim(modGBratio_VOL$est), c(18,3)) ##Ensuring consistant dimensionality among outputs
+  expect_equal(dim(modGBratio_TPA$est), c(18,3))
   expect_snapshot(modGBratio_VOL_est) ##Outputting snapshot for each output
   expect_snapshot(modGBratio_TPA_est)
 
