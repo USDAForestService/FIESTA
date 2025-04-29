@@ -21,7 +21,7 @@ DBgetPlots(
   greenwt = FALSE,
   addplotgeom = FALSE,
   othertables = NULL,
-  getxy = FALSE,
+  getxy = TRUE,
   xy_datsource = NULL,
   xy_dsn = NULL,
   xy = "PLOT",

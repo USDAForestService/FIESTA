@@ -7,7 +7,7 @@
 DBgetXY(
   states = NULL,
   RS = NULL,
-  xy_datsource = NULL,
+  xy_datsource = "datamart",
   xy_dsn = NULL,
   xy = "PLOT",
   xy_opts = xy_options(),

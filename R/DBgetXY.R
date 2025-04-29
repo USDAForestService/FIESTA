@@ -107,7 +107,7 @@
 #' @export DBgetXY
 DBgetXY <- function (states = NULL, 
                      RS = NULL, 
-                     xy_datsource = NULL, 
+                     xy_datsource = "datamart", 
                      xy_dsn = NULL, 
                      xy = "PLOT", 
                      xy_opts = xy_options(),
@@ -240,6 +240,7 @@ DBgetXY <- function (states = NULL,
     xy_datsource=datsource <- "sqlite"
     xytablst <- DBI::dbListTables(xyconn)
   } else {
+
     xy_datsourcelst <- c("datamart", "sqlite", "csv", "obj")
     xy_datsource <- pcheck.varchar(var2check = xy_datsource, 
                                    varnm = "xy_datsource", gui=gui, 

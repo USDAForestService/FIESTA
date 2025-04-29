@@ -29,7 +29,9 @@ spGetXY(
   returnxy = TRUE,
   savedata = FALSE,
   exportsp = FALSE,
-  savedata_opts = NULL
+  savedata_opts = NULL,
+  dbconn = NULL,
+  dbconnopen = FALSE
 )
 }
 \arguments{
@@ -113,6 +115,10 @@ if TRUE, exports XY data as spatial data.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
+
+\item{dbconn}{Open database connection.}
+
+\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 }
 \value{
 \item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }

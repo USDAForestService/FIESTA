@@ -474,7 +474,7 @@ DBgetPlots <- function (states = NULL,
                         greenwt = FALSE,
                         addplotgeom = FALSE, 
                         othertables = NULL, 
-                        getxy = FALSE,
+                        getxy = TRUE,
                         xy_datsource = NULL, 
                         xy_dsn = NULL, 
                         xy = "PLOT",
@@ -1106,8 +1106,7 @@ DBgetPlots <- function (states = NULL,
   issp <- pcheck.logical(issp, varnm="issp", 
                title="SpatialPoints of plot vars?", first="NO", gui=gui)
   if (issp && !getxy) {
-    message("issp=TRUE, but getxy = FALSE...  changing getxy = TRUE")
-    getxy <- TRUE
+    message("issp=TRUE, but getxy = FALSE... no xy extracted")
   }
 
   if (getxy) {
@@ -1135,22 +1134,18 @@ DBgetPlots <- function (states = NULL,
   ### Saving data
   ########################################################################
 
-  ## Check lowernames
+  ## check lowernames
   lowernames <- pcheck.logical(lowernames, varnm="lowernames", 
                                title="Lowercase names?", first="NO", gui=gui)
-
-    ## Check returndata
+  ## check returndata
   returndata <- pcheck.logical(returndata, varnm="returndata", 
 		    title="Return data?", first="YES", gui=gui)
-  
-  ## Check savedata
+  ## check savedata
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		              title="Save data to outfolder?", first="YES", gui=gui)
-
-  ## Check exportsp
+  ## check exportsp
   exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
                   title="Export spatial", first="YES", gui=gui)
-  
   if (!returndata && !savedata) {
     message("both returndata and savedata are FALSE... how would you like output")
     return(NULL)
@@ -1181,7 +1176,7 @@ DBgetPlots <- function (states = NULL,
                             createSQLite = TRUE)
     outfolder <- outlst$outfolder
     #out_dsn <- outlst$out_dsn
-    #out_fmt <- outlst$out_fmt
+    out_fmt <- outlst$out_fmt
     outlst$add_layer <- TRUE
     append_layer <- savedata_opts$append_layer
     overwrite_layer <- savedata_opts$overwrite_layer
@@ -4682,11 +4677,16 @@ DBgetPlots <- function (states = NULL,
       returnlst$evalInfo <- evalInfo
     }
   }
+  
   ## Disconnect database
-  if (!is.null(dbconn) && !dbconnopen && DBI::dbIsValid(dbconn)) {
-    DBI::dbDisconnect(dbconn)
+  if (!is.null(dbconn)) {
+    if (!dbconnopen && DBI::dbIsValid(dbconn)) {
+      DBI::dbDisconnect(dbconn)
+    } else {
+      returnlst$dbconn <- dbconn
+    }
   }
-
+  
   if (returndata && !is.null(evalidlist)) {
     #evaliddf <- data.frame(do.call(rbind, evalidlist))
     #stcds <- pcheck.states(row.names(evaliddf), "VALUE")

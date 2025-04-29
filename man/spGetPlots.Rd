@@ -33,8 +33,9 @@ spGetPlots(
   savebnd = FALSE,
   exportsp = FALSE,
   savedata_opts = NULL,
+  dbconn = NULL,
+  dbconnopen = FALSE,
   spXYdat = NULL,
-  gui = FALSE,
   ...
 )
 }
@@ -125,9 +126,11 @@ spatial data. If FALSE, saves xy data as table.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
-\item{spXYdat}{R list object. Output from spGetXY().}
+\item{dbconn}{Open database connection.}
 
-\item{gui}{Logical. If TRUE, uses gui interface.}
+\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
+
+\item{spXYdat}{R list object. Output from spGetXY().}
 
 \item{...}{parameters passed to DBgetPlots().}
 }
