@@ -589,7 +589,10 @@ modGBpop <- function(popType = "VOL",
   ## plots and conditions, removes nonsampled plots, and applies population level 
   ## filters. The input data consists of plot-level and auxiliary information 
   ## including: plot data from the FIA database; plot assignments from auxiliary 
-  ## data using external spatial data extractions or from the FIA database; unique plot identifiers; plot-level filters; variable names, and summarized auxiliary information. The plot filters included filters that subset the population of plots within the area of interest (e.g., INVYR = 2014:2016, evalid = 82101).
+  ## data using external spatial data extractions or from the FIA database; unique plot 
+  ## identifiers; plot-level filters; variable names, and summarized auxiliary information. 
+  ## The plot filters included filters that subset the population of plots within the area 
+  ## of interest (e.g., INVYR = 2014:2016, evalid = 82101).
   ###################################################################################
   popdatindb <- ifelse(returndata, FALSE, TRUE)
   pltcheck <- 

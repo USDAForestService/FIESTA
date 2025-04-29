@@ -3,6 +3,7 @@ getMAestimates <- function(esttype,
                            domdatn, 
                            domdatd = NULL, 
                            uniqueid,
+                           condid = "CONDID",
                            estvarn.name, 
                            estvard.name = NULL,
                            rowvar, 
@@ -67,14 +68,17 @@ getMAestimates <- function(esttype,
       domdatd$TOTAL <- 1
     }
     domdatd <- pltassgnx[domdatd]
+    
+    ## Check to make sure class of join variables match
+    chk <- FIESTAutils::check.matchclass(domdatd, domdatn, c(uniqueid, condid))
+    domdatd <- chk$tab1
+    domdatn <- chk$tab2
   }
   
   ## Get unique estimation unit values
   estunits <- sort(unique(domdatn[[unitvar]]))
   
   predselect.overall <- NULL
-  
-  
   if (masemethod == "greg" && modelselect == T) {
     
     # want to do variable selection on plot level data...

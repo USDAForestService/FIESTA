@@ -276,10 +276,25 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   ##################################################################################
   if (length(unitvars) > 1) {
     unitvar21 <- paste(unitvar2, unitvar, sep="-")
+    
+    if (!is.numeric(unitvar)) {
+      unitvar.nchar <- max(nchar(as.character(auxlut[[unitvar]])))
+      unitvar.nchar <- formatC(unitvar.nchar, width=2, flag="0")
+      sprintfd <- paste0("%", unitvar.nchar, "d")
+    
     auxlut[[unitvar21]] <- paste(auxlut[[unitvar2]], auxlut[[unitvar]], sep="-")
-    #auxlut[, c(unitvar, unitvar2) := NULL]
+##      auxlut[[unitvar21]] <- paste(auxlut[[unitvar2]],
+##                                   sprintf(sprintfd, auxlut[[unitvar]]), sep="-")
 
+    #auxlut[, c(unitvar, unitvar2) := NULL]
     pltx[[unitvar21]] <- paste(pltx[[unitvar2]], pltx[[unitvar]], sep="-")
+##      pltx[[unitvar21]] <- paste(pltx[[unitvar2]],
+##                                 sprintf(sprintfd, auxlut[[unitvar]]), sep="-")
+    } else {
+      auxlut[[unitvar21]] <- paste(auxlut[[unitvar2]], auxlut[[unitvar]], sep="-")
+      pltx[[unitvar21]] <- paste(pltx[[unitvar2]], pltx[[unitvar]], sep="-")
+    }
+  
     if (!is.null(unitarea)) {
       unitarea[[unitvar21]] <- paste(unitarea[[unitvar2]], unitarea[[unitvar]], sep="-")
       unitarea[, c(unitvar, unitvar2) := NULL]

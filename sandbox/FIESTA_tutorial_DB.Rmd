@@ -234,7 +234,6 @@ The `DBgetXY` function queries XY data from FIA' online publicly-available DataM
 #### <a name="DBgetXY"/>DBgetXY()
 
 ```{r}
-
 xydat1 <- DBgetXY(states = "Wyoming", 
                   eval = "FIA",
                   eval_opts = eval_options(Cur = TRUE)
@@ -316,7 +315,6 @@ The `DBgetPlots` function extracts data from FIA's online DataMart or SQLite dat
 
 #### <a name="DBgetPlots"/>DBgetPlots()
 ```{r}
-
 dat1 <- DBgetPlots(states = "Rhode Island", 
                   eval = "FIA", 
                   eval_opts = eval_options(Cur = TRUE, 
@@ -325,7 +323,7 @@ dat1 <- DBgetPlots(states = "Rhode Island",
                   )
 names(dat1)
 plt1 <- dat1$tabs$plot
-spxy1 <- dat1$xy_PUBLIC
+spxy1 <- dat1$xyCur_PUBLIC
 table(plt1$INVYR)
 
 # Display spatial output
@@ -342,7 +340,7 @@ dat1b <- DBgetPlots(states = "Rhode Island",
                    allFilter = "FORTYPCD == 505")
 
 names(dat1b)
-spxy1b <- dat1b$xy_PUBLIC
+spxy1b <- dat1b$xyCur_PUBLIC
 dim(spxy1b)
 
 # Display spatial output
@@ -364,10 +362,10 @@ dat2 <- DBgetPlots(states = "Delaware",
                    eval_opts = eval_options(Cur = TRUE, 
                                             Type = "ALL"),
                    issubp = TRUE,
-                   plotgeom = TRUE)
+                   addplotgeom = TRUE)
 names(dat2)
 tabs2 <- dat2$tabs
-plt2 <- tabs2$plot
+plt2 <- tabs2$plt
 
 ## subplot and subp_cond tables are added to tabs list
 names(tabs2)
@@ -391,8 +389,7 @@ dat3 <- DBgetPlots(states = "Delaware",
                    eval = "FIA",
                    eval_opts = eval_options(Cur = TRUE, 
                                             Type = "ALL"),
-                   savePOP = TRUE,
-                   othertables = c("POP_STRATUM", "POP_ESTN_UNIT"))
+                   savePOP = TRUE)
 
 ## savePOP = TRUE, saves the POP_PLOT_STRATUM_ASSGN table used to select plots 
 names(dat3)
