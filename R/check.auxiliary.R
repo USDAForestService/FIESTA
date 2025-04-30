@@ -78,6 +78,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       auxlut <- auxlut[-nrow(auxlut)]
     }
     
+    ## Check for NA values in strvar, remove if there are any
+    auxlut <- auxlut[!is.na(auxlut[[strvar]]),]
+    
     ## Make strvar a factor for retaining order for collapsing
 #    if (!is.factor(auxlut[[strvar]])) {
 #      auxlut[[strvar]] <- factor(auxlut[[strvar]])
@@ -450,15 +453,15 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     }
 
     unitcombine <- ifelse(unit.action == 'combine', TRUE, FALSE)
-    collapse <- strat.collapse(stratacnt=auxlut, 
-                               pltstratx=pltx, 
-                               minplotnum.unit=minplotnum.unit, 
-                               minplotnum.strat=minplotnum.strat, 
-                               unitarea=unitarea, areavar=areavar, 
-                               unitvar=unitvar, strvar=strvar, 
-                               stratcombine=stratcombine, 
-                               unitcombine=unitcombine, 
-                               vars2combine=vars2combine)						 
+    collapse <- strat.collapse(stratacnt = auxlut, 
+                               pltstratx = pltx, 
+                               minplotnum.unit = minplotnum.unit, 
+                               minplotnum.strat = minplotnum.strat, 
+                               unitarea = unitarea, areavar = areavar, 
+                               unitvar = unitvar, strvar = strvar, 
+                               stratcombine = stratcombine, 
+                               unitcombine = unitcombine, 
+                               vars2combine = vars2combine)						 
     if ((stratcombine || unitcombine) && !is.null(collapse$unitstrgrplut)) {
 	    message("check strata groups in returned object, stratcombinelut\n")
       unitstrgrplut <- collapse$unitstrgrplut

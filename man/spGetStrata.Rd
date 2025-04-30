@@ -89,7 +89,9 @@ notes). This values will be converted to NA and removed from output.  if
 keepNA=TRUE, NA values will not be in included in stratalut but will remain
 in pltassgn table.}
 
-\item{keepNA}{Logical. If TRUE, returns data frame of NA values.}
+\item{keepNA}{Logical. If TRUE, returns a separate data frame of NA values
+(NAlst) from strat_layer. Note: NA values in unit_layer are removed before
+extracting from strat_layer and not returned.}
 
 \item{ncores}{Integer. Number of cores to use for extracting values.}
 

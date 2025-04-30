@@ -51,7 +51,9 @@
 #' notes). This values will be converted to NA and removed from output.  if
 #' keepNA=TRUE, NA values will not be in included in stratalut but will remain
 #' in pltassgn table.
-#' @param keepNA Logical. If TRUE, returns data frame of NA values.
+#' @param keepNA Logical. If TRUE, returns a separate data frame of NA values
+#' (NAlst) from strat_layer. Note: NA values in unit_layer are removed before
+#' extracting from strat_layer and not returned.
 #' @param ncores Integer. Number of cores to use for extracting values.
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
 #' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
@@ -683,6 +685,11 @@ spGetStrata <- function(xyplt,
     stratalut <- stratalut[P1POINTCNTFOR]
   }
   
+  
+  ## Check for NA values in stratalut, remove if there are any
+  if (any(is.na(stratalut$STRATUMCD))) {
+    stratalut <- stratalut[!is.na(stratalut$STRATUMCD),]
+  }
   
   if (savedata) {
     
