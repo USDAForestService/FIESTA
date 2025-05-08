@@ -15,6 +15,7 @@ spAlignRast(
   tile_blocksize = 256,
   makestack = FALSE,
   outrastnmlst = NULL,
+  stacknm = "stack",
   outfolder = NULL,
   overwrite = TRUE
 )

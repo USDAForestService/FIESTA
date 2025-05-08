@@ -255,6 +255,7 @@ spClipRast <- function(rast,
       }
     }
   }  
+  #message(co)
   
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
@@ -264,7 +265,7 @@ spClipRast <- function(rast,
                                title="Add date to outfiles?", first="YES", gui=gui)  
   outfolder <- pcheck.outfolder(outfolder, gui)
   
-  
+  ## Note: if overwrite = FALSE and the file exists, the filename will change to filename_1
   outfilenm <- getoutfn(outfn=outfn, outfolder=outfolder, outfn.pre=outfn.pre, 
                         outfn.date=outfn.date, overwrite=overwrite, ext=fmt.ext)
   
@@ -283,10 +284,11 @@ spClipRast <- function(rast,
   
   ## Validate polygon
   if (validate) {
-    clippolyvx <- sf::st_make_valid(clippolyvx, 
-                                    geos_method = 'valid_structure', 
-                                    geos_keep_collapsed = FALSE)
-    clippolyvx <- sf::st_cast(clippolyvx)
+    clippolyvx <- polyfix.sf(clippolyvx)
+    # clippolyvx <- sf::st_make_valid(clippolyvx, 
+    #                                 geos_method = 'valid_structure', 
+    #                                 geos_keep_collapsed = FALSE)
+    # clippolyvx <- sf::st_cast(clippolyvx)
   }
   
   ## Check extents
@@ -295,11 +297,10 @@ spClipRast <- function(rast,
   bbox2 <- sf::st_bbox(rast.bbox, crs=rast.prj)
   check.extents(bbox1, bbox2, showext, layer1nm="clippolyv", layer2nm="rast",
                 stopifnotin=TRUE)
-  
-  
+
   ## Clip raster
   clipRaster(src = clippolyvx, 
-             srcfile = normalizePath(rastfn), 
+             srcfile = rastfn, 
 			       src_band = bands, 
 			       dstfile = outfilenm, 
              fmt = fmt, 

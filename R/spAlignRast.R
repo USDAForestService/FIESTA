@@ -34,6 +34,7 @@ spAlignRast <- function(ref_rastfn,
                         tile_blocksize = 256,
                         makestack = FALSE,
                         outrastnmlst = NULL, 
+                        stacknm = "stack",
                         outfolder = NULL,
                         overwrite = TRUE) {
   ############################################################################
@@ -44,8 +45,9 @@ spAlignRast <- function(ref_rastfn,
   ############################################################################
   out_fmt <- "GTiff"
   gui <- FALSE
+  validate <- TRUE
   
-  
+
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -80,7 +82,7 @@ spAlignRast <- function(ref_rastfn,
       resample_methodlst <- rep(resample_methodlst, nrasts)
     }
   }
-  
+
   ## define output raster name
   if (is.null(outrastnmlst)) {
     rastnmlst <- sapply(rastlst, basename.NoExt)
@@ -101,7 +103,7 @@ spAlignRast <- function(ref_rastfn,
                          title="Clip output", first="NO", gui=gui)  
 
   ## Check makestack
-  makestack <- pcheck.logical(clip, varnm="makestack", 
+  makestack <- pcheck.logical(makestack, varnm="makestack", 
                          title="Make raster stack", first="YES", gui=gui)  
   
   
@@ -111,9 +113,11 @@ spAlignRast <- function(ref_rastfn,
   } else {
     if (!dir.exists(outfolder)) {
       stop("invalid outfolder...")
+    } else {
+      outfolder <- normalizePath(outfolder, winslash = "/")
     }
   }
-  
+
   ## check out_fmt
   out_fmtlst <- c("vrt",  "GTiff")
   if (!out_fmt %in% out_fmtlst) {
@@ -126,20 +130,27 @@ spAlignRast <- function(ref_rastfn,
   ref_crs <- ref_info$crs               ## Coordinate Reference System
   ref_cellsize <- ref_info$cellsize     ## Cell size
   ref_bbox <- rasterInfo(ref_rastfn)$bbox ## Raster extent (xmin, ymin, xmax, ymax)
-
+  #nbands <- rasterInfo$nbands
+  
   
   if (clip) {
     ## Check bnd
     bndx <- pcheck.spatial(layer = bnd, dsn = bnd_dsn, 
                            gui = gui, caption = "Poly to clip?")
     
+    ## Validate polygon
+    if (validate) {
+      bndx <- polyfix.sf(bndx)
+    }
+    
     ## Check projection of bndx... make sure it matches ref rastfn
     bndx <- crsCompare(bndx, ref_crs)$x
   }
   
-  
-  outrastlst <- {}
+
   ## Loop through rasters
+  ##################################################################################
+  outrastlst <- {}
   for (i in 1:length(rastlst)) {
     rastfn <- rastlst[i]
     outrastnm <- outrastnmlst[i]
@@ -192,7 +203,7 @@ spAlignRast <- function(ref_rastfn,
     #################################################################
     if (clip) {
       ## get extent of bnd and add to argument list
-      bndext <- sf::st_bbox(sf::st_buffer(bnd, 100))
+      bndext <- sf::st_bbox(sf::st_buffer(bndx, 100))
       #bndext <- sf::st_bbox(bndx)
       rast_extent <- c("-te", as.character(bndext))
       args <- rast_extent
@@ -287,53 +298,89 @@ spAlignRast <- function(ref_rastfn,
     cl_arg_vrt <- c(sub("\n", "", args_vrt), "-overwrite")
 
 
-    message("processing ", basename(rastfn), "...")
+    message("\nprocessing ", basename(rastfn), "...")
     message("warp arguments:\n", toString(args))
   
     
     ## If clip = TRUE, save to a temporary file first
     if (clip) {
-      ## define temporary outrastnm
-      outvrtfn <- file.path(outfolder, "temp.vrt")
+      #message("\nclipping ", basename(rastfn), "...")
       
+      ## define temporary outrastnm
+      #outvrtfn <- file.path(outfolder, "temp.vrt")
+      outvrtfn <- tempfile(fileext = ".vrt")
+
       ## Use warp to resample to same pixel size and extent
       gdalraster::warp(rastfn, dst_filename = outvrtfn, t_srs = t_srs, cl_arg = cl_arg_vrt)
 
+
+      ## Opens a dataset to name the band
       ds <- new(gdalraster::GDALRaster, outvrtfn, read_only = FALSE)
       ds$setDescription(band = 1, desc = outrastnm)
+      ds$close()     ## we need to keep the dataset open for virtual raster ?????
       #ds$getDescription(band = 1)
       
+      # ## Clip raster to boundary of AOI
+      # chk <- tryCatch(
+      #   clipRaster(src = bndx, 
+      #              srcfile = outvrtfn, 
+      #              src_band = NULL, 
+      #              dstfile = normalizePath(outrastfn), 
+      #              maskByPolygons = TRUE, 
+      #              options = 'COMPRESS = LZW')
+
+      chk <- tryCatch(
+        spClipRast(rast = outvrtfn,
+                   clippolyv = bndx,
+                   clippolyv_dsn = bnd_dsn,
+                   compress = TRUE,
+                   compressType = "LZW",
+                   outfn = outrastfn,
+                   outfolder = outfolder, 
+                   overwrite = overwrite,
+                   showext = TRUE),
+        error=function(e) {
+          message(e,"\n")
+          return(NULL)})
+      if (is.null(chk)) {
+        message("clip failed...")
+        stop()
+      }
       
-      ## Clip raster to boundary of AOI
-      spClipRast(rast = outvrtfn,
-                 clippolyv = bndx,
-                 clippolyv_dsn = bnd_dsn,
-                 compress = TRUE,
-                 compressType = "LZW",
-                 outfn = outrastfn,
-                 overwrite = overwrite,
-                 showext = TRUE)
-      
+      #ds$close()
       file.remove(outvrtfn)
     } else {
     
       ## Use warp to resample to same pixel size and extent
       gdalraster::warp(rastfn, dst_filename = outrastfn, t_srs = t_srs, cl_arg = cl_arg)
     }
-    
-    ds <- new(gdalraster::GDALRaster, stacktiffn, read_only = FALSE)
+
+    ds <- new(gdalraster::GDALRaster, outrastfn, read_only = FALSE)
     ds$getDescription(band = 1)
+    ds$close()
     
     outrastlst <- c(outrastlst, outrastfn)
   }
+
   
   ## Stack rasters to a Virtual Raster 
   if (makestack) {
+    if (is.null(stacknm)) {
+      stacknm <- "stack.tif"
+    } else {
+      if (is.na(getext(stacknm))) {
+        stacknm <- paste0(stacknm, ".tif")
+      }
+    }
+    
+    ## check data types
+    #print(sapply(outrastlst, function(x) rasterInfo(x)$datatype))
+    
     stackvrtfn <- file.path(outfolder, "stack.vrt")
     gdalraster::buildVRT(stackvrtfn, outrastlst, cl_arg = "-separate")
 
     ## Create a geoTiff from a virtual raster
-    stacktiffn <- file.path(outfolder, "stack.tif")
+    stacktiffn <- file.path(outfolder, stacknm)
     gdalraster::translate(stackvrtfn, stacktiffn)
     #rasterInfo(stacktiffn)
     
