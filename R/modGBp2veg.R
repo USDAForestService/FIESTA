@@ -561,6 +561,8 @@ modGBp2veg <- function(GBpopdat = NULL,
   estunitsn <- "percent"
   p2vegqry <- p2vegdat$treeqryn
   classifynmlst <- p2vegdat$classifynmlst
+  pcdomainlst <- p2vegdat$pcdomainlst
+  vdomainlst <- p2vegdat$tdomainlst
   
   if (esttype == "RATIO") {
     estvarn.name <- p2vegdat$estvarn.name
@@ -714,6 +716,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   ###################################################################################
   message("getting output...")
   estnm <- ifelse(esttype == "RATIO", "estn", "est")
+  percent <- ifelse(esttype == "RATIO", TRUE, FALSE)
   tabs <- 
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 
@@ -740,7 +743,8 @@ modGBp2veg <- function(GBpopdat = NULL,
                 divideby = divideby, 
                 returntitle = returntitle, 
                 estnull = "--", psenull = "--", 
-                raw.keep0 = raw.keep0) 
+                raw.keep0 = raw.keep0,
+                percent = percent) 
   
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse

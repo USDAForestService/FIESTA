@@ -8,7 +8,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 	outfolder=NULL, outfn.date=TRUE, overwrite=FALSE, estnm, psenm="pse",
 	estround=0, pseround=2, estnull="--", psenull="--", divideby=NULL,
 	coltitlerow=TRUE, rowtotal=TRUE, rawdata=TRUE, CI=TRUE, rawdat=NULL,
-	char.width=NULL, rawonly=FALSE, raw.keep0=FALSE){
+	char.width=NULL, rawonly=FALSE, raw.keep0=FALSE, percent=FALSE){
 
   ## Set global variables
   estn=pse=keepvars=TOTAL=totest=rowest=colest=grpest <- NULL
@@ -52,8 +52,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     estnmd <- estnm
     senmd <- senm
   }
-  estnmd <- ifelse(esttype == "RATIO", "rhat", estnmd)
-  senmd <- ifelse(esttype == "RATIO", "rhat.se", senmd)
+  if (esttype == "RATIO") {
+    estnmd <- ifelse(percent, "rhat_pct", "rhat")
+    senmd <- ifelse(percent, "rhat_pct.se", "rhat.se")
+  }
   
   rnames <- rowvar
   title.rnames <- title.rowvar
@@ -72,7 +74,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   ## sumunits = FALSE
   if (!is.null(unit_totest)) {
     if (esttype == "RATIO") {
-      unit_totest <- suppressWarnings(getrhat(unit_totest))
+      unit_totest <- suppressWarnings(getrhat(unit_totest, percent = percent))
     } else {
       if (!is.null(dividebynum)) {
         unit_totest[[estnmd]] <- unit_totest[[estnm2]] / dividebynum
@@ -87,10 +89,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       if (!is.null(char.width) && char.width == -Inf) char.width <- 0
     }
   }
-  
+
   if (!is.null(unit_rowest)) {
     if (esttype == "RATIO") {
-      unit_rowest <- suppressWarnings(getrhat(unit_rowest))
+      unit_rowest <- suppressWarnings(getrhat(unit_rowest, percent = percent))
     } else {
       if (!is.null(dividebynum)) {
         unit_rowest[[estnmd]] <- unit_rowest[[estnm2]] / dividebynum
@@ -108,7 +110,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   
   if (!is.null(unit_colest)) {
     if (esttype == "RATIO") {
-      unit_colest <- suppressWarnings(getrhat(unit_colest))
+      unit_colest <- suppressWarnings(getrhat(unit_colest, percent = percent))
     } else {
       if (!is.null(dividebynum)) {
         unit_colest[[estnmd]] <- unit_colest[[estnm2]] / dividebynum
@@ -126,7 +128,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   
   if (!is.null(unit_grpest)) {
     if (esttype == "RATIO") {
-      unit_grpest <- suppressWarnings(getrhat(unit_grpest))
+      unit_grpest <- suppressWarnings(getrhat(unit_grpest, percent = percent))
     } else {
       if (!is.null(dividebynum)) {
         unit_grpest[[estnmd]] <- unit_grpest[[estnm2]] / dividebynum
@@ -158,7 +160,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		               domain = "TOTAL", esttype = esttype, 
 		               rowgrpnm = rowgrpnm, 
 		               unitvar = unitvar, areavar = areavar,
-		               phototype = phototype, photoratio = photoratio)
+		               phototype = phototype, photoratio = photoratio,
+		               percent = percent)
       if (esttype != "RATIO" && !is.null(dividebynum)) {
         totest[[estnmd]] <- totest[[estnm2]] / dividebynum
         totest[[senmd]] <- totest[[senm2]] / dividebynum
@@ -178,6 +181,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
                    esttype = esttype, rowgrpnm = rowgrpnm,
 			             unitvar = unitvar,  
 			             phototype = phototype, photoratio = photoratio, 
+			             percent = percent,
 			             keepvars = keepvars.row)
       if (esttype != "RATIO" && !is.null(dividebynum)) {
         rowest[[estnmd]] <- rowest[[estnm2]] / dividebynum
@@ -200,6 +204,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
                    esttype = esttype, 
                    unitvar = unitvar,  
                    phototype = phototype, photoratio = photoratio,
+                   percent = percent,
 			             keepvars = keepvars.col)
       if (esttype != "RATIO" && !is.null(dividebynum)) {
         colest[[estnmd]] <- colest[[estnm2]] / dividebynum
@@ -223,6 +228,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 			             rowgrpnm = rowgrpnm, 
 			             unitvar = unitvar, 
 			             phototype = phototype, photoratio = photoratio,
+			             percent = percent,
 			             keepvars = c(keepvars.row, keepvars.col))
         if (esttype != "RATIO" && !is.null(dividebynum)) {
           grpest[[estnmd]] <- grpest[[estnm2]] / dividebynum
