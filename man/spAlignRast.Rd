@@ -26,8 +26,8 @@ spAlignRast(
 \item{rastlst}{String. Full path names of one or more rasters to align.}
 
 \item{resample_methodlst}{String. Resample method ('mode', 'near',
-'bilinear', 'cubic', 'cubicspline', 'max', 'min', 'med', 'average'). 
-Suggested values: if raster type is categorical; 'mode' or 'near'. 
+'bilinear', 'cubic', 'cubicspline', 'max', 'min', 'med', 'average').
+Suggested values: if raster type is categorical; 'mode' or 'near'.
 if raster type is continuous; 'bilinear', 'cubic'.}
 
 \item{clip}{Logical. If TRUE, subset raster to a boundary.}
@@ -43,6 +43,8 @@ if raster type is continuous; 'bilinear', 'cubic'.}
 \item{makestack}{Logical. If TRUE, makes a raster stack with format 'GTIFF'.}
 
 \item{outrastnmlst}{String. Base name of output raster (e.g., 'elev').}
+
+\item{stacknm}{String. Stack Name}
 
 \item{outfolder}{String. Name of folder for writing output raster. If NULL,
 outfolder = getwd().}
