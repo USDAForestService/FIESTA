@@ -1,8 +1,6 @@
 ## PBgetest			Calculate estimation variables.
 ## getpltdom.prop	Calculate proportion of points by domain
 ## getgainloss		Calculate gain/loss based on all rowvar/colvar values
-## transpose2row		Transpose data.table columns to rows
-## transpose2col		Transpose data.table rows to columns
 ## bp_wrap.it
 ## bp_width.jpg
 
@@ -233,45 +231,6 @@ getgainloss <- function(val, pltdom.prop, plotid, rowvar, colvar, strlut,
   return(returnlst)
 }
 
-transpose2row <- function(x, uniqueid, tvars=NULL, na.rm=TRUE, tnewname=NULL,
-	tvalue=NULL, returnfactor=FALSE) {
-  ## DESCRIPTION: transpose data.table variables from columns to row
-  ## ARGUMENTS:
-  ## x 		DT. Data.table to transpose
-  ## uniqueid	String vector. Name(s) of unique identifer for table
-  ## tvars		String vector. Names of data.table columns to transpose
-  ## na.rm		Logical. If TRUE, removes NA values after transpose
-
-  xt <- melt(x, id.vars=uniqueid, measure.vars=tvars, na.rm=na.rm)
-  if (is.data.table(xt)) setkeyv(xt, uniqueid)
-
-  if (!is.null(tnewname))
-    setnames(xt, "variable", tnewname)
-  if (!is.null(tvalue))
-    setnames(xt, "value", tvalue)
-
-  if (!returnfactor) {
-    xt[["variable"]] <- as.character(xt[["variable"]])
-  }
-
-  return(xt)
-}
-
-transpose2col <- function(x, uniqueid, tvar, value.var, fill=0, fun.aggregate=sum) {
-  ## DESCRIPTION: transpose data.table variables from columns to row
-  ## ARGUMENTS:
-  ## x 		DT. Data.table to transpose
-  ## uniqueid	String vector. Name(s) of unique identifer for table
-  ## tvar		String vector. Names of data.table columns to transpose
-  ## na.rm		Logical. If TRUE, removes NA values after transpose
-
-  dcast.formula <- sprintf("%s ~ %s", uniqueid, tvar)
-  xt <- dcast(x, formula=dcast.formula, value.var=value.var, fill=fill,
-		fun.aggregate=fun.aggregate)
-  if (is.data.table(xt)) setkeyv(xt, uniqueid)
-
-  return(xt)
-}
 
 bp_wrap.it <- function(x, len){
   ## DESCRIPTION: wraps text of y label on barplot
