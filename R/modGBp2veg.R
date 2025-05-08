@@ -717,6 +717,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   message("getting output...")
   estnm <- ifelse(esttype == "RATIO", "estn", "est")
   percent <- ifelse(esttype == "RATIO", TRUE, FALSE)
+
   tabs <- 
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 

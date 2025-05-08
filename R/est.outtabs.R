@@ -35,7 +35,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   ## Define est.var name
   estnm.var <- paste0(estnm, ".var")
   senm <- paste0(estnm, ".se")
-  estnm2 <- ifelse(esttype == "RATIO", "rhat", estnm)
+  #estnm2 <- ifelse(esttype == "RATIO", "rhat", estnm)
+  if (esttype == "RATIO") {
+    estnm2 <- ifelse(percent, "rhat_pct", "rhat")
+  }
   senm2 <- paste0(estnm2, ".se")
   
   
@@ -183,6 +186,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 			             phototype = phototype, photoratio = photoratio, 
 			             percent = percent,
 			             keepvars = keepvars.row)
+
       if (esttype != "RATIO" && !is.null(dividebynum)) {
         rowest[[estnmd]] <- rowest[[estnm2]] / dividebynum
         rowest[[senmd]] <- rowest[[senm2]] / dividebynum
