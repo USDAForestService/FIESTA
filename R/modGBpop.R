@@ -738,7 +738,7 @@ modGBpop <- function(popType = "VOL",
   
   ###################################################################################
   ## Check Population Data for given popType.
-  ## The objectives of these functions are to: 
+  ## The objectives of these functions are to: 7
   ## 1.	Check variables that are necessary for estimation.
   ## 2.	Return plot/condition level data as an R object (pltcondx).
   ## 3.	Return plot-level adjustment factors (pltidsadj).
