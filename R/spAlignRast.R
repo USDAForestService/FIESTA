@@ -92,8 +92,14 @@ spAlignRast <- function(ref_rastfn,
     } else {
       outrastnmlst <- paste0(rastnmlst, "_align")
     }
-  } else if (length(outrastnmlst) != nrasts) {
-    message("invalid outrastnmlst... must be a vector of length ", nrasts)
+  } else {
+    if (length(outrastnmlst) != nrasts) {
+      message("invalid outrastnmlst... must be a vector of length ", nrasts)
+      stop()
+    } else if (any(outrastnmlst %in% rastnmlst)) {
+      message("invalid outrastnmlst... names must be different than input raster names")
+      stop()
+    }
   }
 
   ## Check tiled
