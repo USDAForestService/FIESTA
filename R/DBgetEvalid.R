@@ -237,12 +237,13 @@ DBgetEvalid <- function(states = NULL,
   ######################################################
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
   if (!is.null(evalid)) {
-    evalid <- unique(unlist(evalid)) 
+    evalid <- as.numeric(unique(unlist(evalid))) 
     if (any(nchar(evalid) > 6)) {
       stop("invalid evalid")
     }
     stcdlst <- unique(substr(evalid, 1, nchar(evalid)-4))
     states <- pcheck.states(stcdlst, "MEANING")
+
   } else if (!is.null(invyrtab)) {
     if (!all(class(invyrtab) %in% c("data.frame", "data.table"))) {
       stop("invyrtab must be a data frame or data table") 
