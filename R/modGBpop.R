@@ -1124,12 +1124,13 @@ modGBpop <- function(popType = "VOL",
     returnlst$adjvarlst <- adjvarlst
   }
   
-  
+
   ## Save data frames
   ##################################################################
   if (returndata) {
     returnlst$popconn <- NULL
   } else {
+    returnlst$popconn <- dbconn
     if (savedata) {
       
       if (outlst$out_fmt == "sqlite") {

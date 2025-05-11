@@ -32,6 +32,14 @@ getGBestimates <- function(esttype,
                            row.NAname = "Other",
                            col.NAname = "Other") {
 
+  ## DESCRIPTION:
+  ## Generates estimates using Green-Book estimators by estimation unit for
+  ## total, row totals, column totals, and groups (cells)
+  ## 1. merges domain-level data with pltassgn
+  ## 2. aggregates data from plot/cond level to plot/domain level
+  ## 3. generates estimates by estimation unit
+  ## 4. merges row/column names to estimates
+  ## 5. returns estimates by estimation unit
 
   ## Set global variables
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=
@@ -220,6 +228,9 @@ getGBestimates <- function(esttype,
       domvarsrow <- domvars[domvars %in% rowvar]
       domdatrow <- domdatcond[, lapply(.SD, sum, na.rm=TRUE),
                               by = c(byvarsplt, domvarsrow), .SDcols = estvarn.name]
+      if (length(domvarsrow) > 0) {
+        domdatrow <- domdatrow[!is.na(domdatrow[[domvarsrow]]),]
+      }
     }
 
     ## generate estimates by estimation unit and rowvar
@@ -279,6 +290,10 @@ getGBestimates <- function(esttype,
       domvarscol <- domvars[domvars %in% colvar]
       domdatcol <- domdatcond[, lapply(.SD, sum, na.rm=TRUE),
                               by = c(byvarsplt, domvarscol), .SDcols = estvarn.name]
+      
+      if (length(domvarscol) > 0) {
+        domdatcol <- domdatcol[!is.na(domdatcol[[domvarscol]]),]
+      }
     }
 
     ## generate estimates by estimation unit and colvar

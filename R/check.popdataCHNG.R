@@ -406,10 +406,10 @@ check.popdataCHNG <-
       ## Change filters
       CHNGwhereqry <- getADJwhereCHNG(condflds, sccmflds, adjwhereqry=adjwhereqry)
     }  
-    
+
     ## Next, build query for summarizing subplot sampled proportions
     sumpropqry <- sumpropCHNGqry(fromqry = sccmfromqry, 
-                                 whereqry = adjwhereqry,
+                                 whereqry = CHNGwhereqry,
                                  ACI = ACI,
                                  selectvars = NULL,
                                  SCHEMA. = SCHEMA.)
@@ -432,7 +432,7 @@ check.popdataCHNG <-
                 pltidsa. = pltidsa.,
                 pltidsid = pltidsid,
                 propqry = NULL)
-    #message(ADJqry)
+    #message(ADJqry))
     
     ## Build final query for adjustment factors, including pltids WITH query
     adjfactors.qry <- paste0(

@@ -17,6 +17,16 @@ check.condCHNG <- function(areawt, areawt2,
                            pcwhereqry = NULL,
                            classifyrow = NULL,
                            classifycol = NULL) {
+  
+  ## DESCRIPTION:
+  ## Gets condition / domain-level (i.e., row/column) aggregated data used for estimation
+  ## 1. define select query for total/annual change estimates
+  ## 2. define where statement for change estimates
+  ## 3. build select query for user-defined domain variables 
+  ## 4. build from query for domain-level data
+  
+  
+  
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################
