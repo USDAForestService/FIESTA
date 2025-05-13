@@ -735,6 +735,9 @@ modGBpop <- function(popType = "VOL",
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
   
+  ## calculate strata-level expansion factors
+  stratalut[unitarea, EXPNS := get(areavar) / n.strata * get(strwtvar)]  
+  
   
   ###################################################################################
   ## Check Population Data for given popType.
