@@ -52,11 +52,12 @@ test_that("modGBratio Testing", {
                                  "Cottonwood",
                                  "Sugarberry / hackberry / elm / green ash",
                                  "Aspen",
-                                 "Nonstocked"))
+                                 "Nonstocked",
+                                 "Total"))
 
   expect_equal(list(modGBratio_VOL_est$`Forest type`), modGBratio_est_names) ##Ensuring names are consistant
-  expect_equal(dim(modGBratio_VOL$est), c(18,3)) ##Ensuring consistant dimensionality among outputs
-  expect_equal(dim(modGBratio_TPA$est), c(18,3))
+  expect_equal(dim(modGBratio_VOL$est), c(19,3)) ##Ensuring consistant dimensionality among outputs
+  expect_equal(dim(modGBratio_TPA$est), c(19,3))
   expect_snapshot(modGBratio_VOL_est) ##Outputting snapshot for each output
   expect_snapshot(modGBratio_TPA_est)
 
