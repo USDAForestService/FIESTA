@@ -65,6 +65,7 @@ spAlignRast <- function(ref_rastfn,
   ## Verify rasters
   ########################################################
   rastlst <- suppressWarnings(getrastlst(rastlst, gui=gui))
+  rastnmlst <- sapply(rastlst, basename.NoExt)
   #if (any(rastlst == "")) stop("must write raster to file")
   nrasts <- length(rastlst)
   out_fmt <- "GTiff"
@@ -86,7 +87,6 @@ spAlignRast <- function(ref_rastfn,
 
   ## define output raster name
   if (is.null(outrastnmlst)) {
-    rastnmlst <- sapply(rastlst, basename.NoExt)
     if (clip) {
       outrastnmlst <- paste0(rastnmlst, "_clip")
     } else {
