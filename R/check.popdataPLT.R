@@ -10,6 +10,7 @@ check.popdataPLT <-
            strata = FALSE, stratalut = NULL, auxlut = NULL, 
            strvar = NULL, stratcombine = TRUE, pivot = FALSE, 
            strwtvar = "strwt", 
+           expnwt = FALSE,
            prednames = NULL, predfac = NULL, 
            pvars2keep = NULL, pdoms2keep = NULL, 
            unitlevels = NULL, defaultVars = FALSE, 
@@ -45,13 +46,15 @@ check.popdataPLT <-
     ## - Check for NA values in pltvars2keep variables
     ## - If unitvar = NULL, add unitvar=ONEUNIT
     ## Subset variables for pltx and pltassgnx
+    ## expnwt - if TRUE, extracts plot-level extractions from pop_stratum and 
+    ##           pop_plot_stratum_assgn tables in database.
     ###################################################################################
     
     ## Set global variables
     ###############################################################################
     plotsampcnt=nonresplut=pfromqry=pltassgnqry=unitareaqry=auxlutqry=MATCH=
       pwhereqry=pltx=pltassgnx=popwhereqry=pstratvars=getdataWITHqry=getdataCNs=
-      P2POINTCNT=POP_PLOT_STRATUM_ASSGN=PLOT=pstatuscdnm <- NULL
+      P2POINTCNT=POP_PLOT_STRATUM_ASSGN=PLOT=pstatuscdnm=expnwts <- NULL
     
     datindb=pltaindb=unitindb=stratindb=subcycle99=gui=nullcheck=nonresp <- FALSE
     unitvars <- unique(c(unitvar2, unitvar))
@@ -1161,7 +1164,29 @@ check.popdataPLT <-
     
     
     ###############################################################################
-    ## 15. Query pltassgnx using popfilters and import pltassgnx
+    ## 17. Get plot-level expansion factors from database
+    ###############################################################################
+    if (expnwt) {
+      ppsanm <- findnm("pop_plot_stratum_assgn", dbtablst, returnNULL = TRUE)
+      pop_stratumnm <- findnm("pop_stratum", dbtablst, returnNULL = TRUE)
+      
+      if (!is.null(ppsanm) && !is.null(pop_stratumnm)) {
+        expnwtqry <- paste0(
+          " SELECT plta.plt_cn, plta.statecd, plta.unitcd, plta.countycd, plta.plot, expns",
+          "\n FROM ", ppsanm, " plta",
+          "\n JOIN ", pop_stratumnm, " pop ON(pop.CN = plta.STRATUM_CN)",
+          pwhereqry)
+        
+        if (pltaindb) {      
+          expnwts <- DBI::dbGetQuery(dbconn, expnwtqry)
+        } else {
+          expnwts <- sqldf::sqldf(expnwtqry, connection = NULL)
+        }
+      }
+    }
+    
+    ###############################################################################
+    ## 18. Query pltassgnx using popfilters and import pltassgnx
     ###############################################################################
     ppsaselectvars <- {}
     pltassgnvars <- pltassgnvars[pltassgnvars %in% pltassgnflds]
@@ -1216,7 +1241,7 @@ check.popdataPLT <-
     
     
     #############################################################################
-    ## 18. Build WITH query defining pltids in population
+    ## 19. Build WITH query defining pltids in population
     #############################################################################
     pltidsWITHqry <- paste0(
       "WITH",
@@ -1226,7 +1251,7 @@ check.popdataPLT <-
     
 
     #############################################################################
-    ## 19. Return data
+    ## 20. Return data
     #############################################################################
     returnlst <- list(
       pltassgnx = pltassgnx,  ## includes unique plot identifier and auxiliary plot assignments
@@ -1287,6 +1312,10 @@ check.popdataPLT <-
     }
     if (ACI) {
       returnlst$nfplotsampcnt <- nfplotsampcnt  ## data.frame with number of plots by NF_PLOT_STATUS_CD 
+    }
+    
+    if (!is.null(expnwts)) {
+      returnlst$expnwts <- expnwts
     }
     
     return(returnlst)
