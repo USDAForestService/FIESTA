@@ -302,7 +302,7 @@ modGBpop <- function(popType = "VOL",
   }
   
   ## Set parameters
-  nonsamp.pfilter=nonsamp.cfilter=schema=projectid=popconn <- NULL
+  nonsamp.pfilter=nonsamp.cfilter=schema=projectid=popconn=EXPNS=n.strata <- NULL
   returnlst <- list(module = "GB")
   
   
