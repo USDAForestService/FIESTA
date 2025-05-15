@@ -674,14 +674,16 @@ datSumTree <- function(tree = NULL,
       tsumuniqueid <- c(tsumuniqueid, condid)
     }
   }
-  
+
   ###############################################################################
   ### 6. Check tsumvarlst
   ###############################################################################
   if (!seedonly) {
-    tsumvarchklst <- pcheck.varchar(var2check = tsumvarlst, varnm = "tsumvarlst",
-                                    checklst = treeflds, caption = "Aggregate variable(s)",
-                                    multiple = TRUE, stopifnull = FALSE, stopifinvalid = FALSE)
+    tsumvarchklst <- unlist(sapply(tsumvarlst, findnm, treeflds, returnNULL = TRUE))
+    # tsumvarchklst <- pcheck.varchar(var2check = tsumvarlst, varnm = "tsumvarlst",
+    #                                 checklst = treeflds, caption = "Aggregate variable(s)",
+    #                                 multiple = TRUE, stopifnull = FALSE, stopifinvalid = FALSE)
+
     if (is.null(tsumvarchklst) || length(tsumvarchklst) < length(tsumvarlst)) {
       BAchk <- findnm("BA", tsumvarlst, returnNULL = TRUE)
       if (!is.null(BAchk) && is.null(findnm("BA", tsumvarchklst, returnNULL = TRUE))) {
@@ -696,7 +698,7 @@ datSumTree <- function(tree = NULL,
           } else {
             tderive <- list(BA = paste0("SUM(", baderive, ")"))
           }
-          tsumvarlst <- tsumvarlst[tsumvarlst != BAderivechk]
+          tsumvarlst <- tsumvarlst[tsumvarlst != BAchk]
           if (length(tsumvarlst) == 0) tsumvarlst <- NULL
         }
       }
@@ -711,7 +713,7 @@ datSumTree <- function(tree = NULL,
       tsumvarlst[tsumvarlst == tuniqueid] <- "TPA_UNADJ"
     }
   }
-  
+
   ## Check seed table
   ## Note: to get counts measured, use TPA_UNADJ and TPA = FALSE
   if (addseed) {
