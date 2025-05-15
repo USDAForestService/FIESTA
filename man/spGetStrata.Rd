@@ -22,6 +22,7 @@ spGetStrata(
   areaunits = "acres",
   rast.NODATA = NULL,
   keepNA = FALSE,
+  keepNApixels = FALSE,
   ncores = 1,
   showext = FALSE,
   returnxy = FALSE,
@@ -89,9 +90,13 @@ notes). This values will be converted to NA and removed from output.  if
 keepNA=TRUE, NA values will not be in included in stratalut but will remain
 in pltassgn table.}
 
-\item{keepNA}{Logical. If TRUE, returns a separate data frame of NA values
-(NAlst) from strat_layer. Note: NA values in unit_layer are removed before
-extracting from strat_layer and not returned.}
+\item{keepNA}{Logical. If TRUE, NA values in plot extractions are kept in 
+the returned data. A data frame of NA values is also returned (NAlst).  
+Note: NA values in unit_layer are removed before extracting from strat_layer 
+and not returned.}
+
+\item{keepNApixels}{Logical. If TRUE, NA values in strat_layer are kept in 
+pixel counts in stratalut.}
 
 \item{ncores}{Integer. Number of cores to use for extracting values.}
 

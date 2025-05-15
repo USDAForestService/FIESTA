@@ -51,9 +51,12 @@
 #' notes). This values will be converted to NA and removed from output.  if
 #' keepNA=TRUE, NA values will not be in included in stratalut but will remain
 #' in pltassgn table.
-#' @param keepNA Logical. If TRUE, returns a separate data frame of NA values
-#' (NAlst) from strat_layer. Note: NA values in unit_layer are removed before
-#' extracting from strat_layer and not returned.
+#' @param keepNA Logical. If TRUE, NA values in plot extractions are kept in 
+#' the returned data. A data frame of NA values is also returned (NAlst).  
+#' Note: NA values in unit_layer are removed before extracting from strat_layer 
+#' and not returned.
+#' @param keepNApixels Logical. If TRUE, NA values in strat_layer are kept in 
+#' pixel counts in stratalut.
 #' @param ncores Integer. Number of cores to use for extracting values.
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
 #' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
@@ -164,6 +167,7 @@ spGetStrata <- function(xyplt,
                         areaunits = "acres", 
                         rast.NODATA = NULL, 
                         keepNA = FALSE, 
+                        keepNApixels = FALSE,
                         ncores = 1,
                         showext = FALSE, 
                         returnxy = FALSE, 
@@ -521,7 +525,7 @@ spGetStrata <- function(xyplt,
           unitvarclass <- "numeric"
           digits <- max(nchar(unitlayerprj[[unitvar]]))
           unitlayerprj$UNITVAR <- paste0(unitlayerprj[[unitvar2]], "#", 
-              formatC(unitlayerprj[[unitvar]], width=digits, digits=digits, flag=0))
+              formatC(unitlayerprj[[unitvar]], width = digits, digits = digits, flag = 0))
         } else {
           unitlayerprj$UNITVAR <- paste0(unitlayerprj[[unitvar2]], "#", unitlayerprj[[unitvar]])
         }
@@ -534,8 +538,12 @@ spGetStrata <- function(xyplt,
       ## Get pixel counts by estimation unit
       message("getting zonal pixel counts...")
       stratalut <- tryCatch(
-        zonalFreq(src=unitlayerprj, attribute=unitvar, 
-			      rasterfile=stratlayerfn, band=1, na.rm=TRUE, ignoreValue=rast.NODATA),
+        zonalFreq(src = unitlayerprj, 
+                  attribute = unitvar, 
+			            rasterfile = stratlayerfn, 
+			            band = 1, 
+			            na.rm = !keepNApixels, 
+			            ignoreValue = rast.NODATA),
       error=function(e) {
         message(e, "\n")
         return(NULL)})
@@ -545,7 +553,9 @@ spGetStrata <- function(xyplt,
       stratalut <- setDT(stratalut)
       setnames(stratalut, c("zoneid", "value", "zoneprop"), c(unitvar, strvar, "strwt"))
       strataNA <- stratalut[is.na(get(strvar)), ]
-      stratalut <- stratalut[!is.na(get(strvar)), ]
+      if (!keepNA) {
+        stratalut <- stratalut[!is.na(get(strvar)), ]
+      }
       class(stratalut[[unitvar]]) <- class(unitlayerx[[unitvar]])        
 
       ## Get unitarea 
