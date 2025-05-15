@@ -60,6 +60,7 @@ getGBestimates <- function(esttype,
 
   ## Join domdat to pltassgnx using data.table key and all.y=TRUE
   domdatn <- pltassgnx[domdatn]
+  
   if (esttype == "RATIO") {
     ## Append TOTAL to domdatn
     if (addtotal && !"TOTAL" %in% names(domdatd)) {
@@ -82,17 +83,11 @@ getGBestimates <- function(esttype,
                           by=c(strunitvars, uniqueid, "TOTAL"), .SDcols=estvarn.name]
 
     if (esttype == "RATIO") {
-#      if (!is.null(tdomvar)) {
-        ## denominator: sum condition/domain-level data to plot/domain-level
-        domdatdplt <- domdatd[, lapply(.SD, sum, na.rm=TRUE),
+      ## denominator: sum condition/domain-level data to plot/domain-level
+      domdatdplt <- domdatd[, lapply(.SD, sum, na.rm=TRUE),
                               by=c(strunitvars, uniqueid, "TOTAL"), .SDcols=estvard.name]
-        ## merge denominator and numerator data keeping all denominator data (all.x=TRUE)
-        domdatplt <- merge(domdatdplt, domdatplt, by=c(strunitvars, uniqueid, "TOTAL"), all.x = TRUE)
-#      } else {
-#        ## numerator/denominator: sum condition/domain-level data to plot/domain-level
-#        domdatplt <- domdatn[, lapply(.SD, sum, na.rm=TRUE),
-#                              by=c(strunitvars, uniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
-#      }
+      ## merge denominator and numerator data keeping all denominator data (all.x=TRUE)
+      domdatplt <- merge(domdatdplt, domdatplt, by=c(strunitvars, uniqueid, "TOTAL"), all.x = TRUE)
     }
 
     ## generate estimates by estimation unit
@@ -158,7 +153,7 @@ getGBestimates <- function(esttype,
 
       ## numerator: transpose columns to rows for estimation
       domdatncondt <- data.table(transpose2row(domdattmp, uniqueid = byvarsd,
-                                               tvars = tdomvarlstn))
+                                               tvars = as.character(tdomvarlstn)))
       setnames(domdatncondt, "value", estvarn.name)
 
       if (!is.null(tdomvar2)) {

@@ -374,7 +374,6 @@ spGetXY <- function(bnd,
 #    }
 
   } else {
-
     xydat <- DBgetXY(states = stcds,
                      xy_datsource = xy_datsource,
                      xy_dsn = xy_dsn,
@@ -401,6 +400,7 @@ spGetXY <- function(bnd,
     evalInfo <- xydat$evalInfo
     pop_plot_stratum_assgn <- xydat$pop_plot_stratum_assgn
     dbconn <- xydat$dbconn
+    xyqry <- xydat$xyqry
     if (!is.null(evalInfo)) {
       states <- evalInfo$states
 
@@ -547,6 +547,7 @@ spGetXY <- function(bnd,
   returnlst$xyjoinid <- xyjoinid
   returnlst$states <- statenames
   returnlst$countyfips <- countyfips
+  returnlst$xyqry <- xyqry
   
   
   ## Disconnect database

@@ -606,6 +606,7 @@ spGetPlots <- function(bnd = NULL,
                            returnxy = TRUE,
                            dbconn = dbconn,
                            dbconnopen = TRUE)
+
         if (is.null(spXYdat)) {
           return(NULL)
         }
@@ -619,6 +620,7 @@ spGetPlots <- function(bnd = NULL,
         evalInfo <- spXYdat$evalInfo  
         dbconn <- spXYdat$dbconn
         countyfips <- sort(unique(pltids$COUNTYFIPS))
+        xyqry <- spXYdat$xyqry
 
         if (!is.null(bndvars2keep)) {
           pltids1 <- pltids[pltids$EndyrAOI == 1,]
@@ -1225,6 +1227,7 @@ spGetPlots <- function(bnd = NULL,
     returnlst$xy.uniqueid <- xyjoinid
     returnlst$pjoinid <- pjoinid
     returnlst$states <- states
+    returnlst$xyqry <- xyqry
 
     if ("plt" %in% names(tabs2save) && "INVYR" %in% names(tabs2save$plt)) {
       invyrnm <- findnm("INVYR", names(tabs2save$plt), returnNULL=TRUE)
