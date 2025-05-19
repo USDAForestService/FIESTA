@@ -554,7 +554,8 @@ modGBpop <- function(popType = "VOL",
     list.items <- c(list.items, "tree")
   }
   if (popType == "P2VEG") {
-    list.items <- c(list.items, "vsubpstr", "subplot", "subp_cond")
+    #list.items <- c(list.items, "subplot", "subp_cond")
+    list.items <- c(list.items, "subplot", "subp_cond")
   }
   if (popType == "DWM") {
     list.items <- c(list.items, "cond_dwm_calc")
@@ -656,7 +657,7 @@ modGBpop <- function(popType = "VOL",
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
-  
+
   ###################################################################################
   ## Check Auxiliary Data
   ###################################################################################
@@ -694,7 +695,7 @@ modGBpop <- function(popType = "VOL",
   pltassgnx <- setDT(auxcheck$pltx)
   unitarea <- auxcheck$unitarea
   stratalut <- auxcheck$auxlut
-  
+
   stratcombinelut <- auxcheck$stratcombinelut
   if (!is.null(stratcombinelut)) {
     if (!is.null(auxcheck$unitltmin) && length(auxcheck$unitltmin) != 0) {
@@ -736,6 +737,11 @@ modGBpop <- function(popType = "VOL",
   strunitvars <- c(unitvars, strvar)
   
   ## calculate strata-level expansion factors
+  ## Check if class of unitvar in auxlut matches class of unitvar in pltx
+  tabs <- check.matchclass(stratalut, unitarea, unitvar)
+  stratalut <- tabs$tab1
+  unitarea <- tabs$tab2
+  
   stratalut[unitarea, EXPNS := get(areavar) / n.strata * get(strwtvar)]  
   
   

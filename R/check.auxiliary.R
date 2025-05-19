@@ -129,7 +129,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     if (keepadjvars && nrow(auxlut) == nrow(auxlutadj)) {
       auxlut <- merge(auxlut, auxlutadj, by=strunitvars)
     }  
-    
+   
     ## Check if class of unitvar in auxlut matches class of unitvar in pltx
     tabs <- check.matchclass(pltx, auxlut, c(unitvars, strvars),
                              tab1txt="pltassgn", tab2txt="auxlut")
@@ -139,7 +139,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     ## Check that the strunitvars in pltx are all in auxlut
     pltx <- check.matchval(tab1=pltx, tab2=auxlut, var1=c(unitvars, strvars),
                            tab1txt="plt", tab2txt=auxtext, stopifmiss=FALSE, subsetrows=TRUE)
-    
+
     ## Check that the strunitvars in pltx are all in auxlut
     pltx <- check.matchval(tab1=pltx, tab2=auxlut, var1=c(unitvars, strvars),
                            tab1txt="plt", tab2txt=auxtext, stopifmiss=FALSE)
@@ -247,7 +247,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
         auxlut <- na.omit(auxlut, cols=predcon)
     }
   }
- 
+
   if (module == "MA") {
     auxnmlst <- names(auxlut)
     ## Check npixelvar from strata table.
@@ -461,7 +461,8 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
                                unitvar = unitvar, strvar = strvar, 
                                stratcombine = stratcombine, 
                                unitcombine = unitcombine, 
-                               vars2combine = vars2combine)						 
+                               vars2combine = vars2combine)	
+
     if ((stratcombine || unitcombine) && !is.null(collapse$unitstrgrplut)) {
 	    message("check strata groups in returned object, stratcombinelut\n")
       unitstrgrplut <- collapse$unitstrgrplut
