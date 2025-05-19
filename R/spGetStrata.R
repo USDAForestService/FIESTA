@@ -689,10 +689,14 @@ spGetStrata <- function(xyplt,
   setkeyv(setDT(pltassgn), strunitvars)
   setkeyv(setDT(stratalut), strunitvars)
   P1POINTCNT <- setDT(pltassgn)[, list(P1POINTCNT=.N), by=strunitvars]
-  stratalut <- stratalut[P1POINTCNT]
+  stratalut <- merge(stratalut, P1POINTCNT, all.x=TRUE)
+  stratalut <- DT_NAto0(stratalut, "P1POINTCNT")
+  #stratalut <- stratalut[P1POINTCNT]
   if ("PLOT_STATUS_CD" %in% names(pltassgn)) {
     P1POINTCNTFOR <- pltassgn[PLOT_STATUS_CD == 1, list(P1POINTCNTFOR=.N), by=strunitvars]
-    stratalut <- stratalut[P1POINTCNTFOR]
+    #stratalut <- stratalut[P1POINTCNTFOR]
+    stratalut <- merge(stratalut, P1POINTCNTFOR, all.x=TRUE)
+    stratalut <- DT_NAto0(stratalut, "P1POINTCNTFOR")
   }
   
   
