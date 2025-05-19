@@ -211,7 +211,7 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @export modGBp2veg
-modGBp2veg <- function(GBpopdat = NULL, 
+modGBp2veg <- function(GBpopdat, 
                        p2vegtype = "str", 
                        peracre = FALSE,
                        landarea = "FOREST", 
@@ -339,7 +339,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   pltassgnid <- GBpopdat$pltassgnid
   pltcondflds <- GBpopdat$pltcondflds
   popdatindb <- GBpopdat$popdatindb
-  
+
   # vcondareax <- GBpopdat$vcondareax
   # vcondstrx <- GBpopdat$vcondstrx
   # vcondstrflds <- GBpopdat$vcondstrflds

@@ -810,7 +810,7 @@ modGBpop <- function(popType = "VOL",
       }
     }
   }
-  
+
   if (popType %in% c("CHNG", "GRM")) {
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
@@ -907,6 +907,7 @@ modGBpop <- function(popType = "VOL",
     dbqueriesWITH <- popcheck$dbqueriesWITH
     adjcase <- popcheck$adjcase
     varadjP2VEG <- popcheck$varadjP2VEG
+    pjoinid <- popcheck$pjoinid
     #popdatindb <- popcheck$popdatindb
 
     #p2veg_subp_structure <- popcheck$p2veg_subp_structure
@@ -934,6 +935,7 @@ modGBpop <- function(popType = "VOL",
     #}
   }
 
+  
   ###################################################################################
   ## Add new variables to pltcondx for estimation
   ###################################################################################
@@ -1062,11 +1064,14 @@ modGBpop <- function(popType = "VOL",
     popdatindb = popdatindb,
     pltidsadj = pltidsadj,
     pltcondx = pltcondx, 
-    pltcondflds = pltcondflds, pjoinid = pjoinid,
+    pltcondflds = pltcondflds, 
+    pjoinid = pjoinid,
     cuniqueid = cuniqueid, condid = condid, 
     ACI = ACI,
-    areawt = areawt, areawt2 = areawt2, adjcase = adjcase,
-    dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH,
+    areawt = areawt, areawt2 = areawt2, 
+    adjcase = adjcase,
+    dbqueries = dbqueries, 
+    dbqueriesWITH = dbqueriesWITH,
     pltassgnx = pltassgnx,
     pltassgnid = pltassgnid,
     unitarea = unitarea, 
@@ -1075,7 +1080,8 @@ modGBpop <- function(popType = "VOL",
     unitltmin = unitltmin,
     strata = strata, stratalut = stratalut, 
     strvar = strvar, strwtvar = strwtvar, 
-    plotsampcnt = plotsampcnt, condsampcnt = condsampcnt, 
+    plotsampcnt = plotsampcnt, 
+    condsampcnt = condsampcnt, 
     states = states, invyrs = invyrs, 
     adj = adj, P2POINTCNT = P2POINTCNT,
     plotunitcnt = plotunitcnt))

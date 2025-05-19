@@ -140,7 +140,7 @@ check.popdataP2VEG <-
   vsubpstrnm <- vsubpstrlst$tabnm
   vsubpstrflds <- vsubpstrlst$tabflds
   vsubpstrid <- vsubpstrlst$tabid
-  vsubpstrx <- vsubpstrlst$tabx
+  p2veg_subp_structurex <- vsubpstrlst$tabx
   if (is.null(vsubpstrnm)) {
     stop("must include p2veg_subp_structure for P2VEG estimates")
   } else {
@@ -154,7 +154,7 @@ check.popdataP2VEG <-
   vsubpsppnm <- vsubpspplst$tabnm
   vsubpsppflds <- vsubpspplst$tabflds
   vsubpsppid <- vsubpspplst$tabid
-  vsubpsppx <- vsubpspplst$tabx
+  p2veg_subplot_sppx <- vsubpspplst$tabx
   if (!is.null(vsubpsppnm)) {
     vsubpsppa. <- "vsubpspp."
   }
