@@ -1163,7 +1163,7 @@ DBgetPlots <- function (states = NULL,
   ##  Check whether to return tree data
   ###########################################################
   treeReturn <- TRUE
-  if (istree && (nbrstates > maxstates.tree)) {
+  if (istree && (nbrstates > maxstates.tree) && returndata) {
     warning("tree data object is too big.. writing to folder, no returned object")
     #savedata <- TRUE
     treeReturn <- FALSE

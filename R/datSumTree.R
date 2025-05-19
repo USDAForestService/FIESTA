@@ -239,7 +239,7 @@ datSumTree <- function(tree = NULL,
   savedata <- FIESTAutils::pcheck.logical(savedata, varnm="savedata",
                                           title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
   if (savedata) {
-    outlst <- FIESTAutils::pcheck.output(savedata_opts)
+    outlst <- FIESTAutils::pcheck.output(savedata_opts = savedata_opts)
   }
   
   ###############################################################################
@@ -551,6 +551,7 @@ datSumTree <- function(tree = NULL,
   ## Check for condition table in WITH queries
   condinWITHqry <- FALSE
   if (!is.null(pltidsWITHqry)) {
+    message("checking pltidsWITHqry...")
     
     if (!all(grepl("WITH", pltidsWITHqry))) {
       pltidsWITHqry <- paste0("WITH pltids AS",
@@ -1433,6 +1434,7 @@ datSumTree <- function(tree = NULL,
   if (adjtree) {
 
     if (getadjplot) {
+      message("building query for plot-level adjustments...")
       adjjoinid <- cuniqueid
 
       ## Build WHERE query to filter nonsampled plots
@@ -1848,7 +1850,7 @@ datSumTree <- function(tree = NULL,
     tsumvardf$SELECT <- paste0("COALESCE(SUM(", tsumvardf$NEW, "),0)")
 
   }
-  
+
   ## Add derived variables to tsumvardf
   ###########################################################################
   if (!is.null(tderive)) {
@@ -1903,6 +1905,8 @@ datSumTree <- function(tree = NULL,
   #################################################################################
   ## Build WITH query to get tree data (tdat)
   #################################################################################
+  message("building query for tree data...")
+  
   adjalias. <- "adj."
   twithalias <- "tdat"
 
@@ -2166,6 +2170,7 @@ datSumTree <- function(tree = NULL,
   #################################################################################
   ## Build query for summarizing tree data
   #################################################################################
+  message("building query for summarizing tree data...")
 
   ## Build FROM statement
   ################################################################
@@ -2354,7 +2359,7 @@ datSumTree <- function(tree = NULL,
   #  }
 
   #cat(tree.qry, "\n")
-
+  message("running query...")
   if (datindb) {
     sumdat <- tryCatch(
       {
