@@ -35,7 +35,10 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
     data.frame(GROWTH_HABIT_CD = c("SD", "ST", "GR", "FB", "SH", "TT", "LT", "TR", "NT", "DS"),
                  GROWTH_HABIT_NM = c("Seedlings/Saplings", "Seedlings", "Graminoids", 
                                      "Forbs", "Shrubs", "Trees", "Large trees", "Trees", "Non-tally", "Dead pinyon"))
-    
+  ref_layer <- 
+    data.frame(LAYER = c(1,2,3,4,5),
+               LAYER_NM = c("0-2.0ft", "2.1-6.0ft", "6.1-16.0ft", ">16ft", "Aerial"))
+  
   
   ## Check popconn
   ###############################################
@@ -65,7 +68,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
   if (!is.null(tab.FIAname) && tab.FIAname) {
     ## Get FIA reference table for xvar
     xvar.ref <- getRefobject(toupper(tabvar))
-    if (is.null(xvar.ref) && !toupper(tabvar) %in% c("SPCD", "GROWTH_HABIT_CD")) {
+    if (is.null(xvar.ref) && !toupper(tabvar) %in% c("SPCD", "GROWTH_HABIT_CD", "LAYER")) {
       message(paste("no reference name for", tabvar))
       tab.FIAname <- FALSE
     }
@@ -94,7 +97,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
     }
     tablut <- tablut[!duplicated(tablut)]
   }
-  
+
   ##################################################################################
   ## Check for lookup tables
   ##################################################################################
@@ -254,7 +257,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
         tabvartmp <- tab.orderby
         tab.orderby <- tabvar
         tabvar <- tabvartmp
-        
+
         #message("getting unique values for ", tabvar, ":\n", uniquetabvar.qry, "\n")
         if (popdatindb) {
           uniquetabvar <- tryCatch(
@@ -348,12 +351,14 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
                whereqry.tab,
                "\nORDER BY ", tabvar)
 
+      
       #message("getting unique values for ", tabvar, ":\n", cuniquex.qry, "\n")
       if (tabisdb) {
         if (!is.null(withqry)) {
           uniquex.qry <- paste0(withqry, 
                                 "\n", uniquex.qry)
         }
+
         uniquex <- tryCatch(
           DBI::dbGetQuery(popconn, uniquex.qry)[[1]],
           error=function(e) {
@@ -364,6 +369,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
           message(uniquex.qry)
           stop()
         }
+
       } else {
         uniquex <- tryCatch(
           sqldf::sqldf(uniquex.qry, connection = NULL)[[1]],
@@ -541,7 +547,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
         }
         tabuniquex <- sort(unique(c(uniquex, suniquex)))
       }   ## end check seedling table
-      
+
       ## Check values in tablut
       if (!is.null(tablut)) {
         tablutvals <- tablut[[tabvar]]
@@ -582,16 +588,22 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
             tabLUTgrp <- TRUE
           }
         }
-        
+
         if (tabvar %in% treeflds) {
-          
-          if (tabvar == "GROWTH_HABIT_CD") {
-            tablut <- ref_growth_habit
-            tabLUTnm <- "GROWTH_HABIT_NM"
+          if (tabvar %in% c("GROWTH_HABIT_CD", "LAYER")) {
+            if (tabvar == "GROWTH_HABIT_CD") {
+              tablut <- ref_growth_habit
+              tabLUTnm <- "GROWTH_HABIT_NM"
+            } else {
+              tablut <- ref_layer
+              tabLUTnm <- "LAYER_NM"
+            }
+
             if (is.data.table(treex)) {
-              treex <- merge(treex, ref_growth_habit, by=tabvar, all.x=TRUE)
+              treex <- merge(treex, tablut, by=tabvar, all.x=TRUE)
               tablut <- data.table(tablut[tablut[[tabvar]] %in% treex[[tabvar]], ])
             }
+            tablut <- tablut[tablut[[tabvar]] %in% uniquex,]
             tablut <- tablut[, lapply(.SD, makefactor)]
           } else {
             if (estseed != "only") {
@@ -729,7 +741,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
   ############################################################################
   ## create uniquetabvar add create factors
   ############################################################################
-  
+
   ## uniquetabvar
   #########################################################
   if (!is.null(tablut)) {
@@ -763,6 +775,17 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
         tabuniquex <- tabuniquex[match(ghord, tabuniquex)]
       }
     }
+    if (tabvar == "LAYER") {
+      layercodes <- ref_layer[[tabvar]]
+      layerord <- layercodes[layercodes %in% tabuniquex]
+      if (length(layerord) < length(tabuniquex)) {
+        missgh <- tabuniquex[!tabuniquex %in% layerord]
+        message("growth_habit_cd not in ref: ", toString(missgh)) 
+      } else {		  
+        tabuniquex <- tabuniquex[match(layerord, tabuniquex)]
+      }
+    }
+    
     uniquetabvar[[tabvarnew]] <- factor(uniquetabvar[[tabvarnew]], levels=tabuniquex)
     if (factor.addNA && any(!is.na(uniquetabvar[[tabvarnew]]))) {
       uniquetabvar[[tabvarnew]] <- addNA(uniquetabvar[[tabvarnew]])

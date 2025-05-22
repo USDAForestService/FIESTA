@@ -1468,6 +1468,11 @@ check.popdataP2VEG <-
       p2veg_subp_structurex <- p2veg_subp_structurex[pltidsadj, vadjfac := ADJ_FACTOR_P2VEG_SUBP]
       
 
+      ## Add to returnlst
+      if (returndata) {
+        returnlst$p2veg_subp_structurex <- p2veg_subp_structurex
+        returnlst$vuniqueid <- vsubpstrid
+      }
       if (savedata) {
         message("saving P2VEG_SUBP_STRUCTRUE...")
         outlst$out_layer <- "P2VEG_SUBP_STRUCTRUE"
@@ -1475,14 +1480,6 @@ check.popdataP2VEG <-
         datExportData(p2veg_subp_structurex,
                     savedata_opts = outlst)
       }
-      
-      if (returndata) {
-        returnlst$p2veg_subp_structurex <- p2veg_subp_structurex
-      } else {
-        returnlst$p2veg_subp_structurex <- vsubpstrnm
-      }
-      returnlst$p2veg_subp_structureflds <- vsubpstrflds
-      
 
       # ## 7.2 Save p2veg_subplot_spp (vsubsppx / P2VEG_SUBPLOT_SPP)
       # ##################################################################
@@ -1552,6 +1549,10 @@ check.popdataP2VEG <-
         p2veg_subplot_sppx <- p2veg_subplot_sppx[pltidsadj, vadjfac := ADJ_FACTOR_P2VEG_SUBP]
         
 
+        ## Add to returnlst
+        if (returndata) {
+          returnlst$p2veg_subplot_sppx <- p2veg_subplot_sppx
+        }
         if (savedata) {
           message("saving P2VEG_SUBPLOT_SPP...")
           outlst$out_layer <- "P2VEG_SUBPLOT_SPP"
@@ -1559,14 +1560,6 @@ check.popdataP2VEG <-
           datExportData(p2veg_subplot_sppx,
                         savedata_opts = outlst)
         }
-        
-        if (returndata) {
-          returnlst$p2veg_subplot_sppx <- p2veg_subplot_sppx
-        } else {
-          returnlst$p2veg_subplot_sppx <- vsubpsppnm
-        }
-        returnlst$p2veg_subplot_sppflds <- vsubpsppflds
-        
       }
 
   #     }
@@ -1750,6 +1743,17 @@ check.popdataP2VEG <-
 
   ## 12. Return data objects
   ######################################################################################
+  if (!returndata) {
+    
+    if (!is.null(vsubpstrnm)) {
+      returnlst$p2veg_subp_structurex <- vsubpstrnm
+      returnlst$vuniqueid <- vsubpstrid
+    }
+    if (!is.null(vsubpsppnm)) {
+      returnlst$p2veg_subplot_sppx <- vsubpsppnm
+      #returnlst$vuniqueid <- vsubpsppid
+    }
+  }
   returnlst$dbqueries <- dbqueries
   returnlst$dbqueriesWITH <- dbqueriesWITH
   returnlst$estfromqry <- estfromqry

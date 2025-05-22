@@ -1,8 +1,7 @@
 check.estdataP2VEG <- 
   function(esttype, 
            popdatindb, popconn = NULL, 
-           cuniqueid = "PLT_CN", condid = "CONDID", 
-           vcondsppx = NULL, vcondstrx = NULL, 
+           p2veg_subp_structurex = NULL, p2veg_subplot_sppx = NULL, 
            vuniqueid = "PLT_CN", 
            vfilter = NULL,
            gui = FALSE){
@@ -23,87 +22,61 @@ check.estdataP2VEG <-
   }
 
   
- 	## Check vcondsppx and vcondstrx
+ 	## Check p2veg_subp_structurex
   ###########################################################################
   if (popdatindb) {
-    # vcondstrx
-    if (!is.character(vcondstrx)) {
-      stop("vcondstrx must be name of table in database")
+    
+    if (!is.character(p2veg_subp_structurex)) {
+      stop("p2veg_subp_structurex must be name of table in database")
     }
-    vcondstrnm <- findnm(vcondstrx, tablst, returnNULL = TRUE)
-    if (is.null(vcondstrnm)) {
-      stop("vcondstrx table is not in database")
+    p2veg_subp_structurenm <- findnm(p2veg_subp_structurex, tablst, returnNULL = TRUE)
+    if (is.null(p2veg_subp_structurenm)) {
+      stop("p2veg_subp_structurex table is not in database")
     }
-    vcondstrflds <- DBI::dbListFields(popconn, vcondstrnm)
+    p2veg_subp_structureflds <- DBI::dbListFields(popconn, p2veg_subp_structurenm)
 
-    ## vcondsppx
-    if (!is.character(vcondsppx)) {
-      stop("vcondsppx must be name of table in database")
-    }
-    vcondsppnm <- findnm(vcondsppx, tablst, returnNULL = TRUE)
-    if (is.null(vcondsppnm)) {
-      stop("vcondsppx table is not in database")
-    }
-    vcondsppflds <- DBI::dbListFields(popconn, vcondsppnm)
-    
-    # if (!is.character(p2veg_subp_structure)) {
-    #   stop("p2veg_subp_structure must be name of table in database")
-    # } 
-    # p2veg_subp_structurex <- findnm("p2veg_subp_structure", tablst, returnNULL = TRUE)
-    # if (is.null(p2veg_subp_structurex)) {
-    #   stop("p2veg_subp_structure table is not in database")
-    # }
-    # vp2veg_subp_structureflds <- DBI::dbListFields(popconn, p2veg_subp_structurex)
-    # 
-    # ## p2veg_subplot_sppx
-    # if (!is.character(p2veg_subplot_spp)) {
-    #   stop("p2veg_subplot_spp must be name of table in database")
-    # } 
-    # p2veg_subplot_sppx <- findnm(p2veg_subplot_spp, tablst, returnNULL = TRUE)
-    # if (is.null(p2veg_subplot_sppx)) {
-    #   stop("p2veg_subplot_spp table is not in database")
-    # }
-    # p2veg_subplot_sppflds <- DBI::dbListFields(popconn, p2veg_subplot_sppx)
-    # 
-    # returnlst$p2veg_subp_structurex <- p2veg_subp_structurex
-    # returnlst$vp2veg_subp_structureflds <- vp2veg_subp_structureflds
-    # 
-    # returnlst$p2veg_subplot_sppx <- p2veg_subplot_sppx
-    # returnlst$p2veg_subplot_sppflds <- p2veg_subplot_sppflds
-    
-    
   } else {
-    ## vcondstrx
-    if (!is.data.frame(vcondstrx)) {
-      stop("vcondsppx must be a data.frame object")
+    if (!is.data.frame(p2veg_subp_structurex)) {
+      stop("p2veg_subp_structurex must be a data.frame object")
     }
-    vcondstrx <- pcheck.table(vcondstrx, stopifnull = TRUE, 
-                              stopifinvalid = TRUE)				
-    vcondstrflds <- names(vcondstrx)
-
-    ## vcondsppx
-    if (!is.null(vcondsppx)) {
-      if (!is.data.frame(vcondsppx)) {
-        stop("vcondsppx must be a data.frame object")
-      }
-      vcondsppx <- pcheck.table(vcondsppx, stopifnull = TRUE, 
-                         stopifinvalid = TRUE)				
-      vcondsppflds <- names(vcondsppx)
-      
-    }
-  } 
+    p2veg_subp_structurex <- pcheck.table(p2veg_subp_structurex, stopifnull = TRUE, 
+                                          stopifinvalid = TRUE)				
+    p2veg_subp_structureflds <- names(p2veg_subp_structurex)
+    
+  }  
+  returnlst$p2veg_subp_structurex <- p2veg_subp_structurex
+  returnlst$p2veg_subp_structureflds <- p2veg_subp_structureflds
   
-  
-  returnlst$vcondstrx <- vcondstrx
-  returnlst$vcondstrflds <- vcondstrflds
-  
-  returnlst$vcondsppx <- vcondstrx
-  returnlst$vcondsppflds <- vcondsppflds
-   
   ## check tuniqueid in tree table
   vuniqueid <- pcheck.varchar(var2check=vuniqueid, varnm="vuniqueid", gui=gui,
-	                   checklst=vcondstrflds, caption="vuniqueid")
+                              checklst=p2veg_subp_structureflds, caption="vuniqueid")
   returnlst$vuniqueid <- vuniqueid
+  
+  
+  ## Check p2veg_subplot_sppx
+  ###########################################################################
+  if (!is.null(p2veg_subplot_sppx)) {
+    
+    if (popdatindb) {
+      
+      if (!is.character(p2veg_subplot_sppx)) {
+        stop("p2veg_subplot_sppx must be name of table in database")
+      }
+      p2veg_subplot_sppnm <- findnm(p2veg_subplot_sppx, tablst, returnNULL = TRUE)
+      if (is.null(p2veg_subplot_sppnm)) {
+        stop("p2veg_subplot_sppx table is not in database")
+      }
+      p2veg_subplot_sppflds <- DBI::dbListFields(popconn, p2veg_subplot_sppnm)
+    
+    } else {
+      p2veg_subplot_sppx <- pcheck.table(p2veg_subplot_sppx, stopifnull = TRUE, 
+                                            stopifinvalid = TRUE)				
+      p2veg_subplot_sppflds <- names(p2veg_subplot_sppx)
+    }  
+    
+    returnlst$p2veg_subplot_sppx <- p2veg_subplot_sppx
+    returnlst$p2veg_subplot_sppflds <- p2veg_subplot_sppflds
+  }
 
   return(returnlst)
 }

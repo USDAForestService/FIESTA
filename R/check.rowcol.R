@@ -193,7 +193,6 @@ check.rowcol <-
       col.classify <- row.classify
     }
     
-
     rowvardat <- 
       check.tabvar(popType = popType, tabvartype = "row", 
                    tabvar = rowvar, tab.orderby = row.orderby, 

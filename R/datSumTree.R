@@ -1,13 +1,8 @@
 #' Data - Aggregates numeric tree data to the plot or condition-level.
 #'
 #' Aggregates numeric tree-level data (e.g., VOLCFNET) to plot or condition,
-#' including options for filtering tree data or extrapolating to plot aseedonlycre by
+#' including options for filtering tree data or extrapolating to acre by
 #' multiplying by TPA.
-#'
-#' If variable = NULL, then it will prompt user for input.
-#'
-#' Dependent external functions: datFilter Dependent internal functions:
-#' addcommas, fileexistsnm, getadjfactor
 #'
 #' For adjcond (bycond=FALSE): \cr If you want to summarize trees-per-acre
 #' information aggregated to plot or condition level, you need to include a TPA
@@ -166,6 +161,7 @@ datSumTree <- function(tree = NULL,
   checkNA = FALSE
   returnDT = TRUE
   seedonly=addseed=keepall <- FALSE
+  tpavar <- "TPA_UNADJ"
 
   ## Query alias.
   talias. <- "t."
@@ -811,6 +807,7 @@ datSumTree <- function(tree = NULL,
       }
     }
   }
+  if (length(pcdomainlst) == 0) pcdomainlst <- NULL
   
   ###############################################################################
   ## 11. Get variables to classify from domainlst or domclassify list
@@ -832,7 +829,7 @@ datSumTree <- function(tree = NULL,
     if (!any(grepl("TPA", tderive, ignore.case = TRUE)))
       message("TPA must be included in derivation if want to multiply by...")
   }
-  
+
   if (TPA) {
     if (!seedonly && !is.null(tsumvarlst)) {
       if (any(tsumvarlst %in% mortvars)) {
@@ -1301,7 +1298,7 @@ datSumTree <- function(tree = NULL,
       grpby. <- "pltids."
     }
   }
-  
+
   ## Check lbs2tons
   ##########################################################################
   if (!seedonly) {
@@ -2174,6 +2171,10 @@ datSumTree <- function(tree = NULL,
 
   ## Build FROM statement
   ################################################################
+  
+  ## use LEFT JOIN for tdat to get all records, no data filled with 0
+  tjointype <- ifelse((is.null(pcdomainlst) || length(pcdomainlst) == 0), "JOIN", "LEFT JOIN")
+  
   if (bysubp) {
     subpa. <- "subp."
     tfromqry <- paste0("\nFROM pltidsSUBP subp")
@@ -2187,43 +2188,27 @@ datSumTree <- function(tree = NULL,
       tfromqry <- paste0(tfromqry,
                          "\nJOIN ", SCHEMA., condnm, " pc ", cjoinid)
       tjoinid <- getjoinqry(c(tuniqueid, condid), uniqueid, "tdat.", subpa.)
-
-      ## use LEFT JOIN for tdat to get all records, no data filled with 0
-#      tfromqry <- paste0(tfromqry,
-#                         "\nJOIN tdat ", tjoinid)
       tfromqry <- paste0(tfromqry,
-                         "\nLEFT JOIN tdat ", tjoinid)
+                         "\n", tjointype, " tdat ", tjoinid)
     }
   } else if (!is.null(condnm)) {
     conda. <- "pc."
     tfromqry <- paste0("\nFROM ", condnm, " pc")
     tjoinid <- getjoinqry(c(tuniqueid, condid), c(cuniqueid, condid), "tdat.", conda.)
-    
-    ## use LEFT JOIN for tdat to get all records, no data filled with 0
-#    tfromqry <- paste0(tfromqry,
-#                       "\nJOIN tdat ", tjoinid)
     tfromqry <- paste0(tfromqry,
-                       "\nLEFT JOIN tdat ", tjoinid)
+                       "\n", tjointype, " tdat ", tjoinid)
 
   } else if (!is.null(pltidsnm)) {
     tfromqry <- paste0("\nFROM ", pltidsnm, " pltids")
     tjoinid <- getjoinqry(tuniqueid, pltidsid, "tdat.", pltidsa.)
-    
-    ## use LEFT JOIN for tdat to get all records, no data filled with 0
-#    tfromqry <- paste0(tfromqry,
-#                         "\nJOIN tdat ", tjoinid)
     tfromqry <- paste0(tfromqry,
-                           "\nLEFT JOIN tdat ", tjoinid)
+                           "\n", tjointype, " tdat ", tjoinid)
     
   } else if (!is.null(plotnm)) {
     tfromqry <- paste0("\nFROM ", plotnm)
     tjoinid <- getjoinqry(tuniqueid, pltidsid, "tdat.", pltidsa.)
-
-    ## use LEFT JOIN for tdat to get all records, no data filled with 0
-#    tfromqry <- paste0(tfromqry,
-#                         "\nJOIN tdat ", tjoinid)
     tfromqry <- paste0(tfromqry,
-                         "\nLEFT JOIN tdat ", tjoinid)
+                         "\n", tjointype, " tdat ", tjoinid)
     
   } else {
     tfromqry <- paste0("\nFROM ", twithalias)
@@ -2515,34 +2500,34 @@ datSumTree <- function(tree = NULL,
       sumdat <- setDT(sumdat)
     }
   }
-  sumtreelst <- list(treedat = sumdat,
+  returnlst <- list(treedat = sumdat,
                      sumvars = tsumvardf$NAME,
                      tsumuniqueid = uniqueid,
                      treeqry = tree.qry,
                      pltsp = pltsp)
-  #sumtreelst$estunits <- estunits
+  #returnlst$estunits <- estunits
   if (!is.null(tfilter)) {
-    sumtreelst$tfilter <- tfilter
+    returnlst$tfilter <- tfilter
   }
   #if (!is.null(domainlst)) {
-  #  sumtreelst$domainlst <- domainlst
+  #  returnlst$domainlst <- domainlst
   #}
   if (!is.null(tdomainlst)) {
-    sumtreelst$tdomainlst <- tdomainlst
+    returnlst$tdomainlst <- tdomainlst
   }
   if (!is.null(pcdomainlst)) {
-    sumtreelst$pcdomainlst <- pcdomainlst
+    returnlst$pcdomainlst <- pcdomainlst
   }
   if (!is.null(domclassify)) {
-    sumtreelst$classifynmlst <- classifynmlst
+    returnlst$classifynmlst <- classifynmlst
   }
   if (!is.null(tround)) {
-    sumtreelst$tround <- tround
+    returnlst$tround <- tround
   }
   if (!is.null(meta) && nrow(meta) > 0) {
-    sumtreelst$meta <- meta
+    returnlst$meta <- meta
   }
 
-  return(sumtreelst)
+  return(returnlst)
 
 }

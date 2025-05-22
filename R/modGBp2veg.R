@@ -263,8 +263,6 @@ modGBp2veg <- function(GBpopdat,
   
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-#  formallst <- c(names(formals(modGBp2veg)),
-#                 names(formals(modGBpop))) 
   formallst <- names(formals(modGBp2veg)) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
@@ -307,6 +305,12 @@ modGBp2veg <- function(GBpopdat,
   pltcondx <- GBpopdat$pltcondx
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
+  p2veg_subp_structurex <- GBpopdat$p2veg_subp_structurex
+  p2veg_subplot_sppx <- GBpopdat$p2veg_subplot_sppx
+  if (is.null(p2veg_subp_structurex) && is.null(p2veg_subplot_sppx)) {
+    stop("must include vegetation data for P2VEG estimates")
+  }
+  vuniqueid <- GBpopdat$vuniqueid
   ACI <- GBpopdat$ACI
   pltassgnx <- GBpopdat$pltassgnx
   unitarea <- GBpopdat$unitarea
@@ -338,24 +342,9 @@ modGBp2veg <- function(GBpopdat,
   pltidsid <- GBpopdat$pjoinid
   pltassgnid <- GBpopdat$pltassgnid
   pltcondflds <- GBpopdat$pltcondflds
-  popdatindb <- GBpopdat$popdatindb
-
-  # vcondareax <- GBpopdat$vcondareax
-  # vcondstrx <- GBpopdat$vcondstrx
-  # vcondstrflds <- GBpopdat$vcondstrflds
-  # vcondsppx <- GBpopdat$vcondsppx
-  # vcondsppflds <- GBpopdat$vcondsppflds
-  # varadjP2VEG <- GBpopdat$varadjP2VEG
-  
-  p2veg_subp_structurex <- GBpopdat$p2veg_subp_structurex
-  p2veg_subp_structureflds <- GBpopdat$p2veg_subp_structureflds
-  p2veg_subplot_sppx <- GBpopdat$p2veg_subplot_sppx
-  p2veg_subplot_sppflds <- GBpopdat$p2veg_subplot_sppflds
-  
-  
-  vuniqueid <- "PLT_CN"
   estvar.name <- GBpopdat$estvar.area
   estvar <- "COVER_PCT_SUM"
+  
   
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
@@ -367,33 +356,53 @@ modGBp2veg <- function(GBpopdat,
         stop("invalid database connection")
       }
     }
+    #pltcondx <- dbqueries$pltcondx
     pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
-    vcondstrxWITHqry <- dbqueriesWITH$vcondstrxWITH
-    vcondstrxadjWITHqry <- dbqueriesWITH$vcondstrxadjWITH
-    vcondareaqry <- dbqueries$vcondarea
+    pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
   } else {
-    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
+    pltcondxWITHqry <- NULL
+    pltcondxadjWITHqry <- NULL
   }
-  
-
-  ## Check peracre
-  ########################################################
-  peracre <- pcheck.logical(peracre, varnm="peracre",
-		title="Per-acre estimates?", first="YES", gui=gui, stopifnull=TRUE)
-  
-  ## Define estimation type
-  esttype <- ifelse(peracre, "RATIO", "TREE")
   
   
   ########################################
   ## Check area units
   ########################################
   unitchk <- pcheck.areaunits(unitarea=unitarea, areavar=areavar, 
-			areaunits=areaunits, metric=metric)
+                              areaunits=areaunits, metric=metric)
   unitarea <- unitchk$unitarea
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
+  
+  if (is.null(key(unitarea))) {
+    setkeyv(unitarea, unitvar)
+  }
+  
+  ## Check peracre
+  ########################################################
+  peracre <- pcheck.logical(peracre, varnm="peracre",
+                            title="Per-acre estimates?", first="YES", gui=gui, stopifnull=TRUE)
+  
+  ## Define estimation type
+  esttype <- ifelse(peracre, "RATIO", "TREE")
+  
+  
+  ###################################################################################
+  ## Check parameter inputs and P2VEG filters
+  ###################################################################################
+  estdatP2VEG <- 
+    check.estdataP2VEG(popdatindb = popdatindb,
+                       popconn = popconn,
+                       p2veg_subp_structurex = p2veg_subp_structurex, 
+                       p2veg_subplot_sppx = p2veg_subplot_sppx,
+                       vuniqueid = vuniqueid)
+  p2veg_subp_structurex <- estdatP2VEG$p2veg_subp_structurex
+  p2veg_subp_structureflds <- estdatP2VEG$p2veg_subp_structureflds
+  vuniqueid <- estdatP2VEG$vuniqueid
 
+  p2veg_subplot_sppx <- estdatP2VEG$p2veg_subplot_sppx
+  p2veg_subplot_sppflds <- estdatP2VEG$p2veg_subplot_sppflds
+  
 
   ###################################################################################
   ## Check parameters and apply plot and condition filters
@@ -443,23 +452,6 @@ modGBp2veg <- function(GBpopdat,
   SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
   
-  
-  # ###################################################################################
-  # ## Check parameter inputs and P2VEG filters
-  # ###################################################################################
-  # estdatP2VEG <-
-  #   check.estdataP2VEG(esttype = esttype,
-  #                      popdatindb = popdatindb,
-  #                      popconn = popconn,
-  #                      vcondsppx = vcondsppx, vcondstrx = vcondstrx,
-  #                      vuniqueid = vuniqueid,
-  #                      vfilter = vfilter,
-  #                      gui = gui)
-  # vcondstrx <- estdatP2VEG$vcondstrx
-  # vcondstrflds <- estdatP2VEG$vcondstrflds
-  # vcondsppflds <- estdatP2VEG$vcondsppflds
-  # vuniqueid <- estdatP2VEG$vuniqueid
-
 
   ## Check p2vegtype 
   ########################################################
@@ -473,6 +465,7 @@ modGBp2veg <- function(GBpopdat,
     vsubpx <- p2veg_subplot_sppx
     vsubpflds <- p2veg_subplot_sppflds
   }
+
   
   ###################################################################################
   ### Check row and column data
@@ -487,6 +480,7 @@ modGBp2veg <- function(GBpopdat,
                  withqry = pltcondxWITHqry,
                  treex = vsubpx, treeflds = vsubpflds,
                  cuniqueid = cuniqueid, condid = condid,
+                 tuniqueid = vuniqueid,
                  rowvar = rowvar, colvar = colvar, 
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
                  row.orderby = row.orderby, col.orderby = col.orderby,
@@ -529,73 +523,82 @@ modGBp2veg <- function(GBpopdat,
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
 
-
   #####################################################################################
   ### Get estimation data from vcond table
   #####################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  p2vegdat <- 
-    check.tree(treex = vsubpx, 
-               bycond = TRUE, 
-               condx = pltcondx, 
-               esttype = esttype,
-               estvarn.derive = list(COVER_PCT_SUM = "COALESCE(SUM(COVER_PCT * 1.0) / 4 / 100, 0)"), 
-               estvarn.filter = vfilter, 
-               tdomvar = vdomvar, tdomvar2 = vdomvar2,
-               bydomainlst = c(vdomvar, vdomvar2),
-               estvarn.TPA = FALSE,
-               adjtree = TRUE, 
-               adjvar = "vadjfac",
-               ACI = ACI,
-               domclassify = domclassify,
-               dbconn = popconn, schema = pop_schema,
-               pltidsWITHqry = pltcondxadjWITHqry,
-               pcwhereqry = pcwhereqry,
-               pltidsid = pltidsid,
-               bytdom = bytdom)
-  vdomdat <- p2vegdat$tdomdat  
-  estvarn <- p2vegdat$estvarn
-  estvarn.name <- p2vegdat$estvar.name
-  estvarn.filter <- p2vegdat$estvarn.filter
-  vdomvarlstn <- p2vegdat$tdomvarlstn
-  estunitsn <- "percent"
-  p2vegqry <- p2vegdat$treeqryn
+  pivot <- ifelse(peracre, TRUE, FALSE)
+ 
+  p2vegdat <-
+    datSumCoverDom(tab = vsubpx,
+                   cond = pltcondx,
+                   covtype = "P2VEG",
+                   bycond = TRUE,
+                   tfilter = vfilter,
+                   bydomainlst = domainlst,
+                   tdomvar = vdomvar,
+                   tdomvar2 = vdomvar2,
+                   domclassify = domclassify,
+                   pivot = pivot,
+                   dbconn = popconn,
+                   pltidsWITHqry = pltcondxadjWITHqry,
+                   pcwhereqry = pcwhereqry,
+                   pltidsid = pltidsid,
+                   datSum_opts = datSum_options(adjtree = adjtree,
+                                                adjvar = "vadjfac",
+                                                ACI = ACI),
+                   database_opts = database_options(schema = pop_schema))
+  vdomdat <- p2vegdat$tsumdat
+  estvarn <- p2vegdat$sumvar
+  estvarn.name <- p2vegdat$sumvar
+  estvarn.filter <- p2vegdat$tfilter
+  vdomvarlstn <- p2vegdat$tdomlst
+  estunits <- "percent"
+  p2vegqry <- p2vegdat$treeqry
   classifynmlst <- p2vegdat$classifynmlst
   pcdomainlst <- p2vegdat$pcdomainlst
   vdomainlst <- p2vegdat$tdomainlst
+  vdomtotnm <- p2vegdat$tdomtotnm
   
-  if (esttype == "RATIO") {
-    estvarn.name <- p2vegdat$estvarn.name
-    estvard <- p2vegdat$estvard
-    vdomvarlstd <- NULL
-    estunitsd <- areaunits
-  } 
-
-  # p2vegdat <- 
-  #   datSumCoverDom(tree = vsubpx, 
-  #              bycond = TRUE, 
-  #              cond = pltcondx, 
-  #              covtype = "P2VEG", 
-  #              tfilter = vfilter, 
+  # p2vegdat <-
+  #   check.tree(treex = vsubpx,
+  #              bycond = TRUE,
+  #              condx = pltcondx,
+  #              esttype = esttype,
+  #              estvarn.derive = list(COVER_PCT_SUM = "SUM(COVER_PCT * 1.0) / 4 / 100"),
+  #              estvarn.filter = vfilter,
   #              bydomainlst = domainlst,
-  #              tdomvar = tdomvar, tdomvar2 = tdomvar2,
-  #              datSum_opts = list(adjtree = TRUE, 
-  #                                 adjvar = varadjP2VEG,
-  #                                 ACI = ACI),
+  #              tdomvar = vdomvar, tdomvar2 = vdomvar2,
+  #              estvarn.TPA = FALSE,
+  #              adjtree = TRUE,
+  #              adjvar = "vadjfac",
+  #              ACI = ACI,
+  #              woodland = NULL,
   #              domclassify = domclassify,
-  #              dbconn = popconn, #schema = pop_schema,
+  #              dbconn = popconn, schema = pop_schema,
   #              pltidsWITHqry = pltcondxadjWITHqry,
   #              pcwhereqry = pcwhereqry,
   #              pltidsid = pltidsid,
   #              bytdom = bytdom)
-  # if (is.null(p2vegdat)) return(NULL) 
-  # vdomdat <- p2vegdat$treedat
-  # p2vegqry <- p2vegdat$treeqry
+  # vdomdat <- p2vegdat$tdomdat
+  # estvarn <- p2vegdat$estvarn
+  # vdomvarlstn <- p2vegdat$tdomvarlstn
+  # estunits <- "percent"
+  # p2vegqry <- p2vegdat$treeqryn
   # classifynmlst <- p2vegdat$classifynmlst
   # pcdomainlst <- p2vegdat$pcdomainlst
-  # tdomvarlstn <- p2vegdat$tdomvarlstn
-  
-  
+  # vdomainlst <- p2vegdat$tdomainlst
+  # 
+  # if (esttype == "RATIO") {
+  #   estvarn.name <- p2vegdat$estvarn.name
+  #   estvard <- NULL
+  #   vdomvarlstd <- NULL
+  #   estunitsd <- areaunits
+  # } else {
+  #   estvarn.name <- p2vegdat$estvar.name
+  #   estvarn.filter <- p2vegdat$estvar.filter
+  # }
+
   ## change variable in query from tree variables to veg variables for display
   p2vegqry2 <- gsub("tdat", "vdat", p2vegqry)
   p2vegqry2 <- gsub("get tree data", "get p2veg data", p2vegqry2)
@@ -667,7 +670,6 @@ modGBp2veg <- function(GBpopdat,
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
-  
 
   ###################################################################################
   ## GENERATE ESTIMATES
@@ -682,7 +684,7 @@ modGBp2veg <- function(GBpopdat,
                    rowvar = rowvar, colvar = colvar, 
                    tdomvar = vdomvar, tdomvar2 = vdomvar2,
                    tdomvarlstn = vdomvarlstn,
-                   tdomvarlstd = vdomvarlstd,
+                   tdomvarlstd = NULL,
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
                    unitarea = unitarea,
@@ -834,7 +836,7 @@ modGBp2veg <- function(GBpopdat,
     if (esttype == "RATIO") {
       rawdat$areaunits <- areaunits
     }
-    rawdat$estunitsn <- estunitsn
+    rawdat$estunits <- estunits
     returnlst$raw <- rawdat
   }
   

@@ -6,8 +6,6 @@
 #' multiplying by TPA. Includes options for generating barplots, proportion
 #' data, and cover data.
 #' 
-#' If variable = NULL, then it will prompt user for input.
-#' 
 #' If you want to get trees-per-acre information aggregated to plot or
 #' condition level, you need to include a TPA variable in tree table. \cr For
 #' tsumvars = GROWCFGS, GROWBFSL, GROWCFAL, FGROWCFGS, FGROWBFSL, or FGROWCFAL,
@@ -619,6 +617,7 @@ datSumTreeDom <- function(tree = NULL,
     }
   }
 
+
   ## GET NAME FOR SUMMED TREE VARIABLE FOR FILTERED TREE DOMAINS 
   if (tdomtot && is.null(tdomtotnm) && pivot) {
     if (is.null(tdomprefix)) {
@@ -781,7 +780,7 @@ datSumTreeDom <- function(tree = NULL,
         for (col in NAcols) tdoms[is.na(tdoms[[col]]), col] <- 0
       }
     } else {
-      ## Check if class of cuniqueid matches class of cuniqueid
+      ## Check if class of tsumuniqueid matches class of tsumuniqueid
       tabs <- check.matchclass(dat, tdoms, tsumuniqueid, key(tdoms))
       dat <- tabs$tab1
       tdoms <- tabs$tab2
@@ -958,63 +957,63 @@ datSumTreeDom <- function(tree = NULL,
   
   }
 
-  tdomdata <- list()
+  returnlst <- list()
   if (!notdomdat) {
     if (!returnDT) {
       sumtreef <- setDF(sumtreef)
     }
-    tdomdata$tdomdat <- sumtreef
+    returnlst$tdomdat <- sumtreef
   }
-  tdomdata$tsumuniqueid <- tsumuniqueid
+  returnlst$tsumuniqueid <- tsumuniqueid
   if (length(tunits) > 0) {
-    tdomdata$tunits <- tunits
+    returnlst$tunits <- tunits
   }
-  tdomdata$tsumvarnm <- tsumvarnm
-  tdomdata$tdomvarnm <- tdomvarnm
+  returnlst$tsumvarnm <- tsumvarnm
+  returnlst$tdomvarnm <- tdomvarnm
   if (!is.null(tdomvar2)) {
-    tdomdata$tdomvar2nm <- tdomvar2nm
+    returnlst$tdomvar2nm <- tdomvar2nm
   }
   if (proportion) {
     if (!returnDT) {
       if (!returnDT) {
         sumtreef.prop <- setDF(sumtreef.prop)
       }
-      tdomdata$tdomdat.prop <- sumtreef.prop
+      returnlst$tdomdat.prop <- sumtreef.prop
     }
   }
   if (presence) {
     if (!returnDT) {
       sumtreef.pres <- setDF(sumtreef.pres)
     }
-    tdomdata$tdomdat.pres <- setDF(sumtreef.pres)
+    returnlst$tdomdat.pres <- setDF(sumtreef.pres)
   }
   if (cover) {
     if (!returnDT) {
       sumtreef.cov <- setDF(sumtreef.cov)
     }
-    tdomdata$tdomdat.cov <- setDF(sumtreef.cov)
+    returnlst$tdomdat.cov <- setDF(sumtreef.cov)
   }
-  if (!notdomdat) tdomdata$tdomvarlut <- tdomvarlut
+  if (!notdomdat) returnlst$tdomvarlut <- tdomvarlut
 
-  tdomdata$tdomlst <- tdomscols
+  returnlst$tdomlst <- tdomscols
   if (tdomtot && !is.null(tdomtotnm)) {
-    tdomdata$tdomtotnm <- tdomtotnm
+    returnlst$tdomtotnm <- tdomtotnm
   }
-  tdomdata$domainlst <- domainlst
-  tdomdata$tdomainlst <- tdomainlst
-  tdomdata$pcdomainlst <- pcdomainlst
+  returnlst$domainlst <- domainlst
+  returnlst$tdomainlst <- tdomainlst
+  returnlst$pcdomainlst <- pcdomainlst
 
   if (any(c(tdomvar, tdomvar2) == "SPCD")) {
-    tdomdata$ref_spcd <- ref_spcd
+    returnlst$ref_spcd <- ref_spcd
   }
   if (!is.null(classifynmlst)) {
-    tdomdata$classifynmlst <- classifynmlst
+    returnlst$classifynmlst <- classifynmlst
   }
-  tdomdata$treeqry <- treeqry
+  returnlst$treeqry <- treeqry
   
   if (!is.null(dbconn) && database_opts$dbconnopen) {
     DBI::dbDisconnect(dbconn)
   }
  
-  return(tdomdata)
+  return(returnlst)
 } 

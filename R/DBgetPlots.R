@@ -501,7 +501,7 @@ DBgetPlots <- function (states = NULL,
                         savePOP = FALSE,
                         savedata_opts = NULL,
                         dbconn = NULL,
-                        dbconnopen = FALSE,
+                        dbconnopen = TRUE,
                         evalInfo = NULL,
                         ...
                         ) {
@@ -4312,7 +4312,24 @@ DBgetPlots <- function (states = NULL,
 			              error=function(e) return(NULL))
           }
         }
-
+        if (is.null(otab)) {
+          xqry <- paste0("SELECT *",
+                         "\nFROM ", othertable)
+          
+          if (datsource == "sqlite") {
+            otab <- tryCatch( 
+              DBI::dbGetQuery(dbconn, xqry),
+              error=function(e) return(NULL))
+          } else {
+            otab <- tryCatch( 
+              sqldf::sqldf(xqry, stringsAsFactors=FALSE, connection = NULL), 
+              error=function(e) return(NULL))
+          }
+        }
+        if (is.null(otab)) {
+          message("invalid query for ", othertable)
+        }
+        
         if (isref) {
           othertables2 <- othertables2[othertables2 != othertable]
         }
@@ -4326,8 +4343,8 @@ DBgetPlots <- function (states = NULL,
             }
           }
           if (nrow(otab) == 0) {
-            message("othertable must include PLT_CN")
-            otab <- NULL
+            message(othertable, " does not include PLT_CN... returning entire table")
+            #otab <- NULL
           }
         }
 
@@ -4348,9 +4365,9 @@ DBgetPlots <- function (states = NULL,
           if (returndata) {
 		  	    if (tolower(othertable) %in% names(tabs)) {
               tabs[[tolower(othertable)]] <- 
-						       rbind(tabs[[tolower(othertable)]], get(othertablexnm))
+						       rbind(tabs[[tolower(othertable)]], otab)
 	          } else {
-	            tabs[[tolower(othertable)]] <- get(othertablexnm)
+	            tabs[[tolower(othertable)]] <- otab
 	          }
  	          if (!tolower(othertable) %in% names(tabIDs)) {
               tabIDs[[tolower(othertable)]] <- "PLT_CN"

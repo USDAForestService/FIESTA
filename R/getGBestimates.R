@@ -136,7 +136,6 @@ getGBestimates <- function(esttype,
     byvarsd <- c(byvars, domvard)
     domdatdcond <- domdatd[, lapply(.SD, sum, na.rm=TRUE), by = byvarsd, .SDcols = estvard.name]
 
-
     ## numerator: sum estimation variable to condition/domain-level
     if (!is.null(tdomvar)) {
       
@@ -178,7 +177,6 @@ getGBestimates <- function(esttype,
     domdatcond <- domdatn[, lapply(.SD, sum, na.rm=TRUE),
                           by = byvarsn, .SDcols = estvarn.name]
   }
-
 
   ## Get row estimate
   #############################################################################

@@ -414,10 +414,7 @@ modGBtree <- function(GBpopdat,
   pltassgnid <- GBpopdat$pltassgnid
   pltcondflds <- GBpopdat$pltcondflds
   
-  #adjfactors <- GBpopdat$adjfactors
-  #popVOL_compare <- checkpop(FIADBpop, FIESTApop = adjfactors, evaltype="01")
-  #popVOL_compare
-  
+
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
       if (!is.null(pop_dsn)) {

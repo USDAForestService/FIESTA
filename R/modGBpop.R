@@ -932,6 +932,7 @@ modGBpop <- function(popType = "VOL",
     p2veg_subplot_sppx <- popcheck$p2veg_subplot_sppx
     p2veg_subplot_sppflds <- popcheck$p2veg_subplot_sppflds
     areawt <- popcheck$areawt
+    vuniqueid <- popcheck$vuniqueid
     #}
   }
 
@@ -1117,6 +1118,7 @@ modGBpop <- function(popType = "VOL",
     returnlst$p2veg_subp_structureflds <- p2veg_subp_structureflds
     returnlst$p2veg_subplot_sppx <- p2veg_subplot_sppx
     returnlst$p2veg_subplot_sppflds <- p2veg_subplot_sppflds
+    returnlst$vuniqueid <- vuniqueid
     
     #returnlst$subplotx <- popcheck$subplotx
     #returnlst$subp_condx <- popcheck$subp_condx
