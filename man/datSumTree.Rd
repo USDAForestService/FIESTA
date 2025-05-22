@@ -141,15 +141,10 @@ file of input parameters is saved to outfolder
 }
 \description{
 Aggregates numeric tree-level data (e.g., VOLCFNET) to plot or condition,
-including options for filtering tree data or extrapolating to plot aseedonlycre by
+including options for filtering tree data or extrapolating to acre by
 multiplying by TPA.
 }
 \details{
-If variable = NULL, then it will prompt user for input.
-
-Dependent external functions: datFilter Dependent internal functions:
-addcommas, fileexistsnm, getadjfactor
-
 For adjcond (bycond=FALSE): \cr If you want to summarize trees-per-acre
 information aggregated to plot or condition level, you need to include a TPA
 variable in tree table. \cr For tsumvars = GROWCFGS, GROWBFSL, GROWCFAL,

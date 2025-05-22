@@ -215,8 +215,6 @@ multiplying by TPA. Includes options for generating barplots, proportion
 data, and cover data.
 }
 \details{
-If variable = NULL, then it will prompt user for input.
-
 If you want to get trees-per-acre information aggregated to plot or
 condition level, you need to include a TPA variable in tree table. \cr For
 tsumvars = GROWCFGS, GROWBFSL, GROWCFAL, FGROWCFGS, FGROWBFSL, or FGROWCFAL,

@@ -48,7 +48,7 @@ DBgetPlots(
   savePOP = FALSE,
   savedata_opts = NULL,
   dbconn = NULL,
-  dbconnopen = FALSE,
+  dbconnopen = TRUE,
   evalInfo = NULL,
   ...
 )

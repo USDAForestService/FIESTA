@@ -5,7 +5,7 @@
 \title{Green-Book module - Generate area estimates.}
 \usage{
 modGBp2veg(
-  GBpopdat = NULL,
+  GBpopdat,
   p2vegtype = "str",
   peracre = FALSE,
   landarea = "FOREST",
