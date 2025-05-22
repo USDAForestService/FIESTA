@@ -91,9 +91,10 @@ keepNA=TRUE, NA values will not be in included in stratalut but will remain
 in pltassgn table.}
 
 \item{keepNA}{Logical. If TRUE, NA values in plot extractions are kept in 
-the returned data. A data frame of NA values is also returned (NAlst).  
-Note: NA values in unit_layer are removed before extracting from strat_layer 
-and not returned.}
+the returned data (i.e., pltassgn).If FALSE, NA values are removed from 
+the pltassgn table. A data frame of NA values is returned (NAlst) if TRUE
+or FALSE. Note: NA values in unit_layer are removed before extracting 
+from the strat_layer and not returned.}
 
 \item{keepNApixels}{Logical. If TRUE, NA values in strat_layer are kept in 
 pixel counts in stratalut.}
