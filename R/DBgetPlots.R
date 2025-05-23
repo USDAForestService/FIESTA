@@ -257,6 +257,11 @@
 #' @param greenwt Logical. If TRUE, green weight biomass is calculated.
 #' @param addplotgeom Logical. If TRUE, variables from the PLOTGEOM table are
 #' appended to the plot table.
+#' @param addfvsid Logical. If TRUE, append the stand_id variable from the
+#' FVS_STANDINIT_PLOT table to the plot table and the stand_id variable from the
+#' FVS_STANDINIT_COND table to the cond table.
+#' @param addexpns Logical. If TRUE, the EXPNS variable from the pop_stratum table 
+#' is appended to the plot table.
 #' @param othertables String Vector. Name of other table(s) in FIADB to include
 #' in output. The table must have PLT_CN as unique identifier of a plot.
 #' @param getxy Logical. If TRUE, gets separate XY table.
@@ -474,6 +479,7 @@ DBgetPlots <- function (states = NULL,
                         greenwt = FALSE,
                         addplotgeom = FALSE, 
                         addfvsid = FALSE,
+                        addexpns = FALSE,
                         othertables = NULL, 
                         getxy = TRUE,
                         xy_datsource = NULL, 
@@ -789,7 +795,7 @@ DBgetPlots <- function (states = NULL,
   savePOP <- pcheck.logical(savePOP, varnm="savePOP", 
 		title="Return POP table", first="NO", gui=gui)
 
-  if (savePOP) {
+  if (savePOP || addexpns) {
     savePOPall <- TRUE
   }
   
@@ -1132,6 +1138,18 @@ DBgetPlots <- function (states = NULL,
   ### Saving data
   ########################################################################
 
+  ## check addplotgeom
+  addplotgeom <- pcheck.logical(addplotgeom, varnm="addplotgeom", 
+                               title="Add plotgeom?", first="NO", gui=gui)
+  
+  ## check addfvsid
+  addfvsid <- pcheck.logical(addfvsid, varnm="addfvsid", 
+                               title="Add FVS Id?", first="NO", gui=gui)
+  
+  ## check addexpns
+  addexpns <- pcheck.logical(addexpns, varnm="addexpns", 
+                               title="Add strata expansions?", first="NO", gui=gui)
+
   ## check lowernames
   lowernames <- pcheck.logical(lowernames, varnm="lowernames", 
                                title="Lowercase names?", first="NO", gui=gui)
@@ -1241,7 +1259,7 @@ DBgetPlots <- function (states = NULL,
       } 
     }
   }
-print("TEST")
+
   ## Check data tables
   ##########################################################
   if (datsource == "sqlite" && !is.null(dbconn)) {
@@ -4608,6 +4626,24 @@ print("TEST")
         if (returndata) {
           popstratum <- rbind(popstratum, popstratumx)
           popestnunit <- rbind(popestnunit, popestnunitx)
+        }
+        
+        ## add EXPNS to pltx from pop_stratum table
+        if (addexpns) {
+          expnsqry <- paste0("SELECT pltx.*, EXPNS 
+                          FROM pltx
+                          JOIN ppsax ON (ppsax.PLT_CN = pltx.CN)
+                          JOIN popstratumx ON (popstratumx.CN = ppsax.STRATUM_CN)")
+          pltexpns <- tryCatch(sqldf::sqldf(expnsqry),
+                               error = function(e) {
+                                 message(e,"\n")
+                                 return(NULL) })
+          if (is.null(pltexpns) || nrow(pltexpns) == 0) {
+            message("EXPNS query is invalid")
+            message(expnsqry)
+          } else {
+            pltx <- pltexpns
+          }
         }
       }
     }

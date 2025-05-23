@@ -20,6 +20,8 @@ DBgetPlots(
   isseed = FALSE,
   greenwt = FALSE,
   addplotgeom = FALSE,
+  addfvsid = FALSE,
+  addexpns = FALSE,
   othertables = NULL,
   getxy = TRUE,
   xy_datsource = NULL,
@@ -100,6 +102,13 @@ database (SUBPLOT, SUBP_COND).}
 
 \item{addplotgeom}{Logical. If TRUE, variables from the PLOTGEOM table are
 appended to the plot table.}
+
+\item{addfvsid}{Logical. If TRUE, append the stand_id variable from the
+FVS_STANDINIT_PLOT table to the plot table and the stand_id variable from the
+FVS_STANDINIT_COND table to the cond table.}
+
+\item{addexpns}{Logical. If TRUE, the EXPNS variable from the pop_stratum table 
+is appended to the plot table.}
 
 \item{othertables}{String Vector. Name of other table(s) in FIADB to include
 in output. The table must have PLT_CN as unique identifier of a plot.}

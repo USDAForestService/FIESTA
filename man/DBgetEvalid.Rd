@@ -80,7 +80,7 @@ See help(dbTables) for a list of options.}
 \item{returnPOP}{Logical. If TRUE, returns pop tables (SURVEY, 
 POP_PLOT_STRATUM_ASSGN) as R objects instead of table names, if in db.}
 
-\item{gui}{Logical. If TRUE, gui windows pop up for parameter selection.}
+\item{gui}{Logical. If TRUE, prompts user (deprecated).}
 }
 \value{
 A list of the following objects: \item{states}{ String vector. State

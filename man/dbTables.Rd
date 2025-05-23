@@ -29,6 +29,8 @@ dbTables(
   popstratum_layer = "POP_STRATUM",
   popestnunit_layer = "POP_ESTN_UNIT",
   ppsa_layer = "POP_PLOT_STRATUM_ASSGN",
+  fvsstandplot_layer = "FVS_STANDINIT_PLOT",
+  fvsstandcond_layer = "FVS_STANDINIT_COND",
   refspp_layer = "REF_SPECIES",
   other_layers = NULL,
   ...
@@ -117,12 +119,17 @@ layer in database. Population estimation unit data (POP_ESTN_UNIT).}
 layer in database. Population plot stratum assignment data (
 (POP_PLOT_STRATUM_ASSGN).}
 
+\item{fvsstandplot_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. FVS stand plot data (FVS_STANDINIT_PLOT)}
+
+\item{fvsstandcond_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. FVS stand plot data (FVS_STANDINIT_COND)}
+
 \item{refspp_layer}{R object, comma-delimited file(*.csv), or name of
 layer in database. Reference table for species (REF_SPECIES).}
 
-\item{other_layers}{String. Other layer(s) in database to clip and/or
-extract from database (Note: must include PLT_CN variable as unique
-identifier).}
+\item{other_layers}{R object, comma-delimited file(*.csv), or name of
+layer in database. Other layers to extract from database.}
 
 \item{...}{For extendibility.}
 }

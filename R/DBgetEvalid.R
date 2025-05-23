@@ -65,6 +65,7 @@
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed.
 #' @param returnPOP Logical. If TRUE, returns pop tables (SURVEY, 
 #' POP_PLOT_STRATUM_ASSGN) as R objects instead of table names, if in db.
+#' @param gui Logical. If TRUE, prompts user (deprecated).
 #' @return A list of the following objects: \item{states}{ String vector. State
 #' names. } \item{rslst}{ String vector. FIA research station names included in
 #' output. } \item{evalidlist}{ Named list. evalid by state. } \item{invtype}{
@@ -114,7 +115,8 @@ DBgetEvalid <- function(states = NULL,
                         dbconn = NULL,
                         schema = NULL,
                         dbconnopen = FALSE,
-                        returnPOP = FALSE) {
+                        returnPOP = FALSE,
+                        gui = FALSE) {
   ###############################################################################
   ## DESCRIPTION: Get or check evalid from FIA database.
   ## You must have the following variables in dat: STATECD, INVYR, a uniqueid.
@@ -209,7 +211,7 @@ DBgetEvalid <- function(states = NULL,
   if (!is.null(dbconn) && DBI::dbIsValid(dbconn)) {
     indb <- TRUE
     if (!is.null(schema)) {
-      dbobjectsdf <- dbListObjects(pgconn, DBI::Id(schema = schema))
+      dbobjectsdf <- DBI::dbListObjects(dbconn, DBI::Id(schema = schema))
       dbtabs <- as.character(dbobjectsdf[,"table"]) 
       dbtabs <- sapply(strsplit(dbtabs, '", table = \"', fixed = FALSE), "[", 2)
       dbtablst <- sapply(strsplit(dbtabs, '\"))', fixed = FALSE), "[", 1)
