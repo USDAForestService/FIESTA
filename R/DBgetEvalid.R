@@ -65,7 +65,6 @@
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed.
 #' @param returnPOP Logical. If TRUE, returns pop tables (SURVEY, 
 #' POP_PLOT_STRATUM_ASSGN) as R objects instead of table names, if in db.
-#' @param gui Logical. If TRUE, gui windows pop up for parameter selection.
 #' @return A list of the following objects: \item{states}{ String vector. State
 #' names. } \item{rslst}{ String vector. FIA research station names included in
 #' output. } \item{evalidlist}{ Named list. evalid by state. } \item{invtype}{
@@ -115,8 +114,7 @@ DBgetEvalid <- function(states = NULL,
                         dbconn = NULL,
                         schema = NULL,
                         dbconnopen = FALSE,
-                        returnPOP = FALSE,
-                        gui = FALSE) {
+                        returnPOP = FALSE) {
   ###############################################################################
   ## DESCRIPTION: Get or check evalid from FIA database.
   ## You must have the following variables in dat: STATECD, INVYR, a uniqueid.
@@ -127,9 +125,10 @@ DBgetEvalid <- function(states = NULL,
   ##   POP_EVAL        	## To get EVALID and EVALID years
   ################################################################################
   
-  if (!gui) {
-    gui <- ifelse(nargs() == 0, TRUE, FALSE)
-  }
+  # if (!gui) {
+  #   gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  # }
+  gui <- FALSE
   
   ## Set global variables
   EVAL_GRP_Endyr=evalTypelist=STATECD=EVALID=evaltyp=invyrs=pltflds=plotnm <- NULL
@@ -209,7 +208,21 @@ DBgetEvalid <- function(states = NULL,
   ######################################################
   if (!is.null(dbconn) && DBI::dbIsValid(dbconn)) {
     indb <- TRUE
-    dbtablst <- DBI::dbListTables(dbconn)
+    if (!is.null(schema)) {
+      dbobjectsdf <- dbListObjects(pgconn, DBI::Id(schema = schema))
+      dbtabs <- as.character(dbobjectsdf[,"table"]) 
+      dbtabs <- sapply(strsplit(dbtabs, '", table = \"', fixed = FALSE), "[", 2)
+      dbtablst <- sapply(strsplit(dbtabs, '\"))', fixed = FALSE), "[", 1)
+    } else {
+      dbtablst <- DBI::dbListTables(dbconn)
+    }
+    qry <- "select matviewname AS view_name from pg_matviews order by view_name"
+    dbviews <- tryCatch(
+      DBI::dbGetQuery(dbconn, qry)[[1]],
+      error = function(e) {
+        return(NULL) })
+    dbtablst <- unique(c(dbtablst, dbviews))
+    
     if (length(dbtablst) == 0) {
       stop("no data in database")
     }
@@ -232,7 +245,7 @@ DBgetEvalid <- function(states = NULL,
       }
     }
   }
-  
+
   ## Check evalid, invyrtab, and state/RS parameters
   ######################################################
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
@@ -334,9 +347,9 @@ DBgetEvalid <- function(states = NULL,
     }
     if (!is.null(ppsanm)) {
       ppsaindb <- TRUE
-      ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
+      ppsaflds <- names(DBI::dbGetQuery(dbconn, 
+                    paste0("select * from ", ppsanm, " limit 0")))
     }
-
   } else if (datsource == "datamart") {
     if (!is.null(survey_layer) && is.data.frame(survey_layer)) {
       SURVEY <- survey_layer

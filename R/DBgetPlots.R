@@ -473,6 +473,7 @@ DBgetPlots <- function (states = NULL,
                         isseed = FALSE,                      
                         greenwt = FALSE,
                         addplotgeom = FALSE, 
+                        addfvsid = FALSE,
                         othertables = NULL, 
                         getxy = TRUE,
                         xy_datsource = NULL, 
@@ -540,9 +541,9 @@ DBgetPlots <- function (states = NULL,
 	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=SEEDSUBP6=
 	PREV_PLT_CN=dbqueries=REF_SPECIES=PLOT=PLOTe=POP_PLOT_STRATUM_ASSGNe=TRE_CN <- NULL
   plotnm=plotgeomnm=ppsanm=condnm=treenm=seednm=
-  vsubpsppnm=vsubpstrnm=invsubpnm=
-	subplotnm=subpcondnm=sccmnm=grmnm=dwmnm=surveynm=evalidnm=
-  pltcondx=GREENBIO_AG=DRYBIO_AG=DRYWT_TO_GREENWT_CONVERSION <- NULL
+  vsubpsppnm=vsubpstrnm=invsubpnm=fvsstandplotnm=fvsstandcondnm=
+	subplotnm=subpcondnm=sccmnm=grmnm=dwmnm=surveynm=evalidnm=condcnnm=
+  pltcondx=GREENBIO_AG=DRYBIO_AG=DRYWT_TO_GREENWT_CONVERSION=pltflds=condflds <- NULL
 
 
   ## Define functions
@@ -866,8 +867,7 @@ DBgetPlots <- function (states = NULL,
                           evalAll = evalAll, 
                           evalType = Type, 
                           dbTabs = dbTabs,
-                          returnPOP = returnPOP,
-                          gui = gui),
+                          returnPOP = returnPOP),
 			              error = function(e) {
                       message(e,"\n")
                       return(NULL) })
@@ -889,8 +889,7 @@ DBgetPlots <- function (states = NULL,
                           evalAll = evalAll, 
                           evalType = Type, 
                           dbTabs = dbTabs,
-                          returnPOP = returnPOP,
-                          gui = gui),
+                          returnPOP = returnPOP),
 			                error = function(e) {
                         message(e,"\n")
                         return(NULL) })
@@ -923,8 +922,7 @@ DBgetPlots <- function (states = NULL,
                           evalAll = evalAll, 
                           evalType = Type, 
                           dbTabs = dbTabs,
-                          returnPOP = returnPOP,
-                          gui = gui),
+                          returnPOP = returnPOP),
 			error = function(e) {
                   message(e,"\n")
                   return(NULL) })
@@ -1196,6 +1194,10 @@ DBgetPlots <- function (states = NULL,
 		regionVars=regionVars)
     for (nm in names(DBvars)) assign(nm, DBvars[[nm]])
     for (nm in names(filtervarlst)) assign(nm, filtervarlst[[nm]])
+    
+    if (addfvsid) {
+      condvarlst <- c("CN", condvarlst)
+    }
   } 
   sppvars <- {}
   if (biojenk) sppvars <- c(sppvars, "JENKINS_TOTAL_B1", "JENKINS_TOTAL_B2")
@@ -1239,7 +1241,7 @@ DBgetPlots <- function (states = NULL,
       } 
     }
   }
-
+print("TEST")
   ## Check data tables
   ##########################################################
   if (datsource == "sqlite" && !is.null(dbconn)) {
@@ -1253,6 +1255,13 @@ DBgetPlots <- function (states = NULL,
     } else {
       pltflds <- DBI::dbListFields(dbconn, plotnm)
     }
+    ## Check if cond is in database
+    condnm <- chkdbtab(dbtablst, cond_layer, stopifnull=TRUE)
+    if (is.null(condnm)) {
+      message("there is no COND table in database")
+    }
+    condflds <- DBI::dbListFields(dbconn, condnm)
+    
 	  if (addplotgeom) {
       plotgeomnm <- chkdbtab(dbtablst, plotgeom_layer)
       if (is.null(plotgeomnm)) {
@@ -1263,11 +1272,31 @@ DBgetPlots <- function (states = NULL,
 		    pgeomvarlst <- pgeomvarlst[pgeomvarlst %in% plotgeomflds]
         pltflds <- unique(c(pltflds, pgeomvarlst))
       }
-    } 
+	  } 
+    if (addfvsid) {
+      fvsstandplotnm <- chkdbtab(dbtablst, fvsstandplot_layer)
+      if (is.null(fvsstandplotnm)) {
+        message("there is no fvs_standinit_plot table in database")
+        addfvsid <- FALSE
+      } else {
+        fvsstandpvar <- "STAND_ID AS FVS_STAND_ID_PLOT"  ## joins with PLOT$CN
+        pltflds <- unique(c(pltflds, fvsstandpvar))
+      }
+      fvsstandcondnm <- chkdbtab(dbtablst, fvsstandcond_layer)
+      if (is.null(fvsstandcondnm)) {
+        message("there is no fvs_standinit_cond table in database")
+        addfvsid <- FALSE
+      } else {
+        fvsstandcvar <- "STAND_ID AS FVS_STAND_ID_COND"  ## joins with COND$CN
+        cnnm <- findnm("CN", condflds,  returnNULL = TRUE)
+        if (!is.null(cnnm)) {
+          fvsstandcvar <- toString(c(fvsstandcvar, paste0("c.", cnnm, " AS COND_CN")))
+          condcnnm <- "COND_CN"
+        }
+        condflds <- unique(c(condflds, fvsstandcvar))
+      }
+    }
 
-    ## Check if cond is in database
-    condnm <- chkdbtab(dbtablst, cond_layer, stopifnull=TRUE)
-    condflds <- DBI::dbListFields(dbconn, condnm)
     if (is.null(condnm)) {
       pltcondflds <- pltflds
     } else {
@@ -1392,6 +1421,12 @@ DBgetPlots <- function (states = NULL,
         pltflds <- names(PLOT)
         setkey(PLOT, "STATECD", "UNITCD", "COUNTYCD", "PLOT", "INVYR")
       } 
+      ## COND table 
+      COND <- DBgetCSV("COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
+      condnm <- "COND"
+      condflds <- names(COND)
+      setkey(COND, "PLT_CN", "CONDID")
+      
       ## PLOTGEOM table  
       if (addplotgeom) {
         PLOTGEOM <- DBgetCSV("PLOTGEOM", stabbr, returnDT=TRUE, stopifnull=FALSE)
@@ -1404,12 +1439,32 @@ DBgetPlots <- function (states = NULL,
           message("there is no plotgeom table in datamart")
         }
       }
-
-      ## COND table 
-      COND <- DBgetCSV("COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
-      condnm <- "COND"
-      condflds <- names(COND)
-      setkey(COND, "PLT_CN", "CONDID")
+      ## FVS tables  
+      if (addfvsid) {
+        FVS_STANDINIT_PLOT <- DBgetCSV("FVS_STANDINIT_PLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
+        if (!is.null(FVS_STANDINIT_PLOT)) { 
+          fvsstandplotnm <- "FVS_STANDINIT_PLOT"
+          fvsstandpvar <- "STAND_ID AS FVS_STAND_ID_PLOT"  ## joins with PLOT$CN
+          pltflds <- unique(pltflds, fvsstandpvar)
+        } else {
+          message("there is no fvs_standinit_plot in datamart")
+        }
+        FVS_STANDINIT_COND <- DBgetCSV("FVS_STANDINIT_COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
+        if (!is.null(FVS_STANDINIT_COND)) { 
+          fvsstandcondnm <- "FVS_STANDINIT_COND"
+          fvsstandcvar <- "STAND_ID AS FVS_STAND_ID_COND"  ## joins with COND$CN
+          
+          cnnm <- findnm("CN", condflds,  returnNULL = TRUE)
+          if (!is.null(cnnm)) {
+            fvsstandcvar <- toString(c(fvsstandcvar, paste0("c.", cnnm, " AS COND_CN")))
+            condcnnm <- "COND_CN"
+          }
+          condflds <- unique(condflds, fvsstandcvar)
+          
+        } else {
+          message("there is no fvs_standinit_cond in datamart")
+        }
+      }  
 
       ## Get pltcondflds
       if (!is.null(plotnm)) {
@@ -1473,6 +1528,15 @@ DBgetPlots <- function (states = NULL,
         plotnm <- "PLOT"
         pltflds <- names(PLOT)
       }
+      
+      ## COND table
+      COND <- pcheck.table(cond_layer, stopifnull=TRUE, stopifinvalid=TRUE)
+      if (is.null(COND)) {
+        message("the COND table does not exist")
+      }
+      condnm <- "COND"
+      condflds <- names(COND)
+      
  
       ## PLOTGEOM table  
       if (addplotgeom) {
@@ -1486,12 +1550,27 @@ DBgetPlots <- function (states = NULL,
           message("there is no plotgeom table")
         }
       }
-
-      ## COND table
-      COND <- pcheck.table(cond_layer, stopifnull=TRUE, stopifinvalid=TRUE)
-      condnm <- "COND"
-      condflds <- names(COND)
-
+      
+      ## FVS tables  
+      if (addfvsid) {
+        FVS_STANDINIT_PLOT <- pcheck.table(fvsstandplot_layer, stopifnull=FALSE, stopifinvalid=FALSE)
+        if (!is.null(FVS_STANDINIT_PLOT)) { 
+          fvsstandplotnm <- "FVS_STANDINIT_PLOT"
+          fvsstandpvar <- "STAND_ID AS FVS_STAND_ID_PLOT"  ## joins with PLOT$CN
+          pltflds <- unique(pltflds, fvsstandpvar)
+        } else {
+          message("there is no fvs_standinit_plot table")
+        }
+        FVS_STANDINIT_COND <- pcheck.table(fvsstandcond_layer, stopifnull=FALSE, stopifinvalid=FALSE)
+        if (!is.null(FVS_STANDINIT_COND)) { 
+          fvsstandcondnm <- "FVS_STANDINIT_COND"
+          fvsstandcvar <- "STAND_ID AS FVS_STAND_ID_COND"  ## joins with COND$CN
+          condflds <- unique(condflds, fvsstandcvar)
+        } else {
+          message("there is no fvs_standinit_cond table")
+        }
+      }
+      
       ## Get pltcondflds
       if (!is.null(plotnm)) {
         pltcondflds <- unique(c(pltflds, condflds))
@@ -1593,10 +1672,22 @@ DBgetPlots <- function (states = NULL,
     pcfromqry <- paste0(pfromqry, " \nJOIN ", SCHEMA., 
 				condnm, " c ON (c.PLT_CN = p.", puniqueid, ")")
     if (addplotgeom && !is.null(plotgeomnm)) {
-      pcgeomfromqry <- paste0(pcfromqry, " \nJOIN ", SCHEMA., 
-			plotgeomnm, " pg ON (pg.CN = p.", puniqueid, ")")
+      pcplusfromqry <- paste0(pcfromqry, " \nJOIN ", SCHEMA., 
+			                plotgeomnm, " pg ON (pg.CN = p.", puniqueid, ")")
+    } else {
+      pcplusfromqry <- pcfromqry
     }
-
+    if (addfvsid) {
+      if (!is.null(fvsstandplotnm)) {
+        pcplusfromqry <- paste0(pcplusfromqry, " \nJOIN ", SCHEMA., 
+                            fvsstandplotnm, " fvsp ON (fvsp.STAND_CN = p.", puniqueid, ")")
+      }
+      if (!is.null(fvsstandcondnm)) {
+        pcplusfromqry <- paste0(pcplusfromqry, " \nJOIN ", SCHEMA., 
+                              fvsstandcondnm, " fvsc ON (fvsc.STAND_CN = ", condcnnm, ")")
+      }
+    }
+    
     ###########################################################################
     ## State filter 
     ###########################################################################
@@ -1765,6 +1856,10 @@ DBgetPlots <- function (states = NULL,
       if (is.null(plotgeomnm)) {
         addplotgeom <- FALSE
       }
+      if (is.null(fvsstandplotnm) && is.null(fvsstandcondnm)) {
+        addfvsid <- FALSE
+      }
+      
 
       if (!defaultVars) {
         pltvarlst <- pltflds
@@ -1794,27 +1889,24 @@ DBgetPlots <- function (states = NULL,
       pcvars <- NULL
       if (length(pltvarlst) > 0) {
         pcvars <- toString(paste0("p.", pltvarlst))
-        if (addplotgeom && !is.null(plotgeomnm)) {
-          pgeomvarlst <- pgeomvarlst[pgeomvarlst %in% plotgeomflds]
-          pcvars <- toString(c(paste0("p.", pltvarlst), paste0("pg.", pgeomvarlst))) 
-        }           
+        if (addplotgeom) {
+          #pgeomvarlst <- pgeomvarlst[pgeomvarlst %in% plotgeomflds]
+          pcvars <- toString(c(pcvars, paste0("pg.", pgeomvarlst)))
+        } 
+        if (addfvsid && !is.null(fvsstandplotnm)) {
+          pcvars <- toString(c(pcvars, paste0("fvsp.", fvsstandpvar)))
+        } 
       } 
+      ## Add condition level variables
       pcvars <- toString(c(pcvars, paste0("c.", condvarlst)))
-
-      # if (iseval) { 
-        # evalidnm <- findnm("EVALID", ppsaflds, returnNULL=TRUE)
-        # if (is.null(evalidnm)) {
-          # evalidnm <- findnm("EVALID", pltcondflds)
-          # pcvars <- paste0(pcvars, ", p.", evalidnm)
-        # } else {           
-          # pcvars <- paste0(pcvars, ", ppsa.", evalidnm)
-        # }
-      # }
+      if (addfvsid && !is.null(fvsstandcondnm)) {
+        pcvars <- toString(c(pcvars, paste0("fvsp.", fvsstandcvar)))
+      }           
 
       ## Create pltcond query
-      if (addplotgeom) {
+      if (addplotgeom || addfvsid) {
         pltcond.qry <- paste("select ", pcvars, 
-		                     "\nfrom", pcgeomfromqry, 
+		                     "\nfrom", pcplusfromqry, 
                              "\nwhere", xfilter)
       } else {  
         pltcond.qry <- paste("select ", pcvars, 
@@ -1826,8 +1918,6 @@ DBgetPlots <- function (states = NULL,
 	    }
 
       ## Run pltcond query
-      #message(pltcond.qry)
-
       if (datsource == "sqlite") {
         pltcondx <- tryCatch(
           DBI::dbGetQuery(dbconn, pltcond.qry),
@@ -1862,9 +1952,15 @@ DBgetPlots <- function (states = NULL,
       if (addplotgeom) {
         pltvarlst2 <- unique(c(pltvarlst2, pgeomvarlst))
       }
+      if (addfvsid) {
+        pltvarlst2 <- unique(c(pltvarlst2, "FVS_STAND_ID_PLOT"))
+      }
       #if (iseval) pltvarlst2 <- c(pltvarlst2, "EVALID")
       condvarlst2 <- condvarlst
- 
+      if (addfvsid) {
+        condvarlst2 <- unique(c(condvarlst2, "FVS_STAND_ID_COND"))
+      }
+      
       ## Filter pltcond with allFilter      
       ###########################################
       pltcondx <- datFilter(x=pltcondx, xfilter=allFilter)$xf
@@ -1886,10 +1982,12 @@ DBgetPlots <- function (states = NULL,
       ###########################################################
       if (!is.null(pltvarlst2)) {
         pltx <- unique(pltcondx[, pltvarlst2, with=FALSE])
-        pltx[, CN := as.character(CN)]
-        setkey(pltx, CN)
-        if ("PREV_PLTCN" %in% names(pltx)) {
-          pltx[, PREV_PLTCN := as.character(PREV_PLTCN)]  
+        pltx[[puniqueid]] <- as.character(pltx[[puniqueid]])
+        setkeyv(pltx, puniqueid)
+
+        prev_pltcnnm <- findnm("PREV_PLTCN", names(pltx), returnNULL = TRUE)
+        if (!is.null(prev_pltcnnm)) {
+          pltx[[prev_pltcnnm]] <- as.character(pltx[[prev_pltcnnm]])
         }           
       }         
       if (!is.null(condvarlst) && "CONDID" %in% names(pltcondx)) {
@@ -2274,8 +2372,8 @@ DBgetPlots <- function (states = NULL,
  	    pcvarsb <- gsub("p\\.", "pplot\\.", pcvars)
  	    pcvarsb <- gsub("c\\.", "pcond\\.", pcvarsb)
 	  
-      if (addplotgeom) {
-        chgfromqry <- paste0(pcgeomfromqry,
+      if (addplotgeom || addfvsid) {
+        chgfromqry <- paste0(pcplusfromqry,
            " \nJOIN ", SCHEMA., plot_layer, " pplot ON (pplot.CN = p.PREV_PLT_CN)",
 		       " \nJOIN ", SCHEMA., cond_layer, " pcond ON (pcond.PLT_CN = p.PREV_PLT_CN)")
       } else {
@@ -2700,7 +2798,7 @@ DBgetPlots <- function (states = NULL,
 		    }
       }
     }
-    
+
     ##############################################################
     ## Tree data
     ##############################################################
@@ -4214,6 +4312,7 @@ DBgetPlots <- function (states = NULL,
     ## Other tables
     ##############################################################
     if (!is.null(othertables) && length(othertables2) > 0 && !is.null(pltx)) {
+      ouniqueid <- NULL
 
       ## Other tables
       if (!is.null(othertables) && length(othertables) > 0) {
@@ -4247,7 +4346,7 @@ DBgetPlots <- function (states = NULL,
 						and x.COUNTYCD = p.COUNTYCD
 						and x.PLOT = p.PLOT)")
       for (j in 1:length(othertables2)) {
-        isref <- FALSE
+        isref=isfvs <- FALSE
         othertable <- othertables[j]
         othertablexnm <- paste0("otherx", j)
         if (!is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
@@ -4261,16 +4360,13 @@ DBgetPlots <- function (states = NULL,
           xqry <- paste0("SELECT x.*", 
                         "\nFROM ", sub("SUBX", othertable, xfromqryx),
 						            "\nWHERE ", xfilterpop)
-        } else if (othertable == "PLOTGEOM") {
-          joinid <- "CN"
-          xqry <- paste0("SELECT x.*", 
-                        "\nFROM ", sub("SUBX", othertable, xfromqry_plotgeom),
-						            "\nWHERE ", xfilter)
-        } else if (startsWith(othertable, "REF_") || startsWith(othertable, "ref_")) {
+        } else if (startsWith(toupper(othertable), "REF_")) {
           xqry <- paste("SELECT * FROM", othertable)
           isref <- TRUE
+        } else if (startsWith(toupper(othertable), "FVS_")) {
+          xqry <- paste("SELECT * FROM", othertable)
+          isfvs <- TRUE
         } else {
-          joinid <- "PLT_CN"
           xqry <- paste0("SELECT x.*",
                         "\nFROM ", sub("SUBX", othertable, xfromqry),
 						            "\nWHERE ", xfilter)
@@ -4315,7 +4411,6 @@ DBgetPlots <- function (states = NULL,
         if (is.null(otab)) {
           xqry <- paste0("SELECT *",
                          "\nFROM ", othertable)
-          
           if (datsource == "sqlite") {
             otab <- tryCatch( 
               DBI::dbGetQuery(dbconn, xqry),
@@ -4326,42 +4421,70 @@ DBgetPlots <- function (states = NULL,
               error=function(e) return(NULL))
           }
         }
+
         if (is.null(otab)) {
           message("invalid query for ", othertable)
-        }
-        
-        if (isref) {
-          othertables2 <- othertables2[othertables2 != othertable]
-        }
-        if (!isref) {
-          if (is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
-            ## Subset overall filters from condx
-            if ("CONDID" %in% names(otab)) {
-              otab <- otab[paste(otab$PLT_CN, otab$CONDID) %in% pcondID,]
+        } else {
+          otab <- setDT(otab)
+          otabnames <- names(otab)
+          
+          if (isref) {
+            othertables2 <- othertables2[othertables2 != othertable]
+          } else if (isfvs) {
+            if (toupper(othertable) %in% c("FVS_PLOTINIT_PLOT", "FVS_STANDINIT_PLOT", 
+                                           "FVS_TREEINIT_PLOT", "FVS_TREEINIT_COND")) {
+              stand_cn <- findnm("STAND_CN", otabnames, returnNULL = TRUE)
+              otab <- otab[otab[[stand_cn]] %in% unique(pltx[puniqueid]),]
+              otab[[stand_cn]] <- as.character(otab[[stand_cn]])
+              setkeyv(otab, stand_cn)
+              ouniqueid <- stand_cn
+              
+            } else if (toupper(othertable) %in% c("FVS_STANDINIT_COND") && !is.null(condcnnm)) {
+              stand_cn <- findnm("STAND_CN", otabnames, returnNULL = TRUE)
+              otab <- otab[otab[[stand_cn]] %in% unique(condx[condcnnm]),]
+              otab[[stand_cn]] <- as.character(otab[[stand_cn]])
+              setkeyv(otab, stand_cn)
+              ouniqueid <- stand_cn
+              
             } else {
-              otab <- otab[otab[[joinid]] %in% unique(pltx$CN),]
+              message("no id in FVS table to subset table... ")
+            }
+            
+          } else {
+            
+            ## Subset overall filters from condx
+            cn <- findnm("CN", otabnames, returnNULL = TRUE)
+            plt_cn <- findnm("PLT_CN", otabnames, returnNULL = TRUE)
+            condid <- findnm("CONDID", otabnames, returnNULL = TRUE)
+
+            if (is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
+              
+              if (!is.null(plt_cn) && !is.null(condid)) {
+                otab <- otab[paste(otab[[plt_cn]], otab[[condid]]) %in% pcondID,]
+                otab[[plt_cn]] <- as.character(otab[[plt_cn]])
+                setkeyv(otab, c(plt_cn, condid))
+                ouniqueid <- c(plt_cn, condid)
+                
+              } else if (!is.null(plt_cn)) {
+                otab <- otab[otab[[plt_cn]] %in% unique(pltx[puniqueid]),]
+                otab[[plt_cn]] <- as.character(otab[[plt_cn]])
+                setkeyv(otab, plt_cn)
+                ouniqueid <- plt_cn
+              } 
+            }
+            if (nrow(otab) == 0) {
+              message(othertable, " does not include PLT_CN... returning entire table")
+              #otab <- NULL
             }
           }
-          if (nrow(otab) == 0) {
-            message(othertable, " does not include PLT_CN... returning entire table")
-            #otab <- NULL
+          ## set names to lowercase
+          if (lowernames) {
+            names(otab) <- tolower(names(otab))
           }
-        }
-
-        if (!is.null(otab)) {
+          
+          ## assign names to table
           assign(othertablexnm, data.table::setDT(otab))
  
-          if ("PLT_CN" %in% names(get(othertablexnm))) {
-            get(othertablexnm)[, PLT_CN := as.character(PLT_CN)]
-            setkey(get(othertablexnm), "PLT_CN")
-
-            ## Subset overall filters from pltx
-            othertablex <- get(othertablexnm)[get(othertablexnm)[[joinid]] %in% unique(pltx$CN),]
-            if (lowernames) {
-              names(othertablex) <- tolower(names(othertablex))
-            }
-            assign(othertablexnm, othertablex)
-          }
           if (returndata) {
 		  	    if (tolower(othertable) %in% names(tabs)) {
               tabs[[tolower(othertable)]] <- 
@@ -4369,15 +4492,18 @@ DBgetPlots <- function (states = NULL,
 	          } else {
 	            tabs[[tolower(othertable)]] <- otab
 	          }
- 	          if (!tolower(othertable) %in% names(tabIDs)) {
+ 	          if (!tolower(othertable) %in% names(tabIDs) && "PLT_CN" %in% names(otab)) {
               tabIDs[[tolower(othertable)]] <- "PLT_CN"
 	          }
           }
           if (savedata) {
             message("saving ", tolower(othertable), " table...")
             index.unique.other <- NULL
+            if (!is.null(ouniqueid)) {
+              index.unique.other <- ouniqueid
+            }
             outlst$out_layer <- tolower(othertable)
-            datExportData(get(othertablexnm),
+            datExportData(otab,
                           index.unique = index.unique.other,
                           savedata_opts = outlst)
           }
@@ -4694,7 +4820,7 @@ DBgetPlots <- function (states = NULL,
       returnlst$evalInfo <- evalInfo
     }
   }
-  
+
   ## Disconnect database
   if (!is.null(dbconn)) {
     if (!dbconnopen && DBI::dbIsValid(dbconn)) {

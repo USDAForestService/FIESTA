@@ -234,13 +234,14 @@ DBgetXY <- function (states = NULL,
   ## Check XY database 
   ###########################################################################
   xyindb=plotindb=ppsaindb <- FALSE
+                   
   if (!is.null(dbconn) && DBI::dbIsValid(dbconn)) {
     xyconn <- dbconn
     xyisplot <- TRUE
-    xy_datsource=datsource <- "sqlite"
+    xyindb <- plotindb <- TRUE
     xytablst <- DBI::dbListTables(xyconn)
+    
   } else {
-
     xy_datsourcelst <- c("datamart", "sqlite", "csv", "obj")
     xy_datsource <- pcheck.varchar(var2check = xy_datsource, 
                                    varnm = "xy_datsource", gui=gui, 
@@ -259,6 +260,7 @@ DBgetXY <- function (states = NULL,
       if (length(xytablst) == 0) {
         stop("no data in ", xy_datsource)
       }
+      xyindb <- TRUE
     }
 
     ## Check xy database
@@ -311,6 +313,7 @@ DBgetXY <- function (states = NULL,
         message("no data in ", datsource)
 	      return(NULL)
       }
+      plotindb <- TRUE
     }
     if (datsource == "sqlite" && is.null(data_dsn)) {
       message("datsource=", datsource, " but data_dsn=NULL... returning NULL")
@@ -437,6 +440,7 @@ DBgetXY <- function (states = NULL,
     evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
 
   } else {
+
     evalInfo <- tryCatch(
 				DBgetEvalid(states = states, 
                     RS = RS, 
@@ -451,8 +455,7 @@ DBgetXY <- function (states = NULL,
                     evalEndyr = evalEndyr, 
                     evalAll = evalAll,
                     evalType = Type,
-						        returnPOP = TRUE,
-                    gui = gui),
+						        returnPOP = TRUE),
 			error = function(e) {
                   message(e,"\n")
                   return(NULL) })
@@ -460,6 +463,7 @@ DBgetXY <- function (states = NULL,
       iseval <- FALSE
     }
   }
+
   if (is.null(evalInfo)) {
     message("no data to return")
     return(NULL)
@@ -534,7 +538,35 @@ DBgetXY <- function (states = NULL,
   ####################################################################
   ## Check xy table
   ####################################################################
-  if (xy_datsource == "datamart") {
+  if (xyindb) {
+    
+    if (!is.character(xy)) {
+      message("invalid xy")
+      return(NULL)
+    }
+    ## Check pop_plot_stratum_assgn
+    if (iseval) {
+      if (!is.null(POP_PLOT_STRATUM_ASSGN) && is.data.frame(POP_PLOT_STRATUM_ASSGN)) {
+        ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+      } else if (is.null(POP_PLOT_STRATUM_ASSGN) || !is.character(POP_PLOT_STRATUM_ASSGN)) {
+        ppsanm <- chkdbtab(xytablst, "POP_PLOT_STRATUM_ASSGN", stopifnull=FALSE)
+        if (!is.null(ppsanm)) {
+          ppsaindb <- TRUE
+          ppsaflds <- DBI::dbListFields(xyconn, ppsanm)
+        }
+      } else if (is.character(POP_PLOT_STRATUM_ASSGN)) {
+        ppsanm <- POP_PLOT_STRATUM_ASSGN
+      } 	    
+    }
+    xynm <- chkdbtab(xytablst, xy, stopifnull=FALSE)
+    if (!is.null(xynm)) {
+      xyflds <- DBI::dbListFields(xyconn, xynm)
+    } else {
+      stop(xy, " does not exist in database\n ", toString(xytablst))
+    }
+    xyindb <- TRUE
+    
+  } else if (xy_datsource == "datamart") {
   
     ## Check pop_plot_stratum_assgn
     if (iseval) {
@@ -572,34 +604,7 @@ DBgetXY <- function (states = NULL,
       xynm <- "XYdf"
       xyflds <- names(XYdf)
     }
-  } else if (xy_datsource == "sqlite") {
-
-    if (!is.character(xy)) {
-      message("invalid xy")
-	    return(NULL)
-    }
-    ## Check pop_plot_stratum_assgn
-  	if (iseval) {
-	    if (!is.null(POP_PLOT_STRATUM_ASSGN) && is.data.frame(POP_PLOT_STRATUM_ASSGN)) {
-	      ppsanm <- "POP_PLOT_STRATUM_ASSGN"
-	    } else if (is.null(POP_PLOT_STRATUM_ASSGN) || !is.character(POP_PLOT_STRATUM_ASSGN)) {
-	      ppsanm <- chkdbtab(xytablst, "POP_PLOT_STRATUM_ASSGN", stopifnull=FALSE)
-		    if (!is.null(ppsanm)) {
-		      ppsaindb <- TRUE
-		      ppsaflds <- DBI::dbListFields(xyconn, ppsanm)
-		    }
-      } else if (is.character(POP_PLOT_STRATUM_ASSGN)) {
-	      ppsanm <- POP_PLOT_STRATUM_ASSGN
-	    } 	    
-	  }
-    xynm <- chkdbtab(xytablst, xy, stopifnull=FALSE)
-    if (!is.null(xynm)) {
-      xyflds <- DBI::dbListFields(xyconn, xynm)
-    } else {
-      stop(xy, " does not exist in database\n ", toString(xytablst))
-    }
-	  xyindb <- TRUE
-	
+    
   } else {
 
     if (iseval && is.null(POP_PLOT_STRATUM_ASSGN)) {
@@ -651,7 +656,6 @@ DBgetXY <- function (states = NULL,
     pvars2keep <- NULL
   }
 
-  
   ####################################################################
   ## Check plot table
   ####################################################################
@@ -659,7 +663,18 @@ DBgetXY <- function (states = NULL,
     
     ## Check plot table
     if (is.null(xynm) || !is.null(pvars2keep)) {
-      if (datsource == "datamart") {
+      
+      if (plotindb) {
+        ## If XY and plot data are from the same databases, 
+        ## we will query both
+        plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
+        if (!is.null(plotnm)) {
+          xyindb <- TRUE	 
+          xynm <- plotnm
+          pltflds=xyflds <- DBI::dbListFields(dbconn, xynm)     
+        }
+        
+      } else if (datsource == "datamart") {
         PLOTdf <- tryCatch( DBgetCSV("PLOT", 
                                    stabbrlst,
                                    returnDT = TRUE, 
@@ -671,17 +686,7 @@ DBgetXY <- function (states = NULL,
           plotnm=xynm <- "PLOTdf"
           pltflds=xyflds <- names(PLOTdf)
         }
-      } else if (datsource == "sqlite") {
-        ## If XY and plot data are from the same databases, 
-        ## we will query both
-        if (!plotindb) {
-          plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
-        }
-        if (!is.null(plotnm)) {
-          xyindb <- TRUE	 
-          xynm <- plotnm
-          pltflds=xyflds <- DBI::dbListFields(dbconn, xynm)     
-        }
+        
       } else {
         if (!is.null(plotnm)) {
           PLOTdf <- pcheck.table(plot_layer, stopifnull=TRUE, stopifinvalid=TRUE)
@@ -787,7 +792,75 @@ DBgetXY <- function (states = NULL,
 
     ## Check plot table
     ########################################################
-    if (datsource == "datamart") {
+    if (xyindb && plotindb) {
+
+      ## If XY and plot data are from the same databases, we will query both
+      if (all.equal(dbconn, xyconn)) {
+        #plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
+        
+        if (!is.null(plotnm)) {
+          plotindb <- TRUE	  
+          pltflds <- DBI::dbListFields(dbconn, plotnm)     
+          
+          ## Check for indices
+          if (evalCur || measCur) { 
+            pltindx <- sapply(c("STATECD", "UNITCD", "COUNTYCD", "PLOT"), findnm, pltflds, returnNULL = TRUE)
+            chk <- checkidx(dbconn, plotnm, pltindx)
+            if (is.null(chk)) {
+              message("to speed query... add an index to the plot table")
+              message("createidx(dbconn, '", plotnm, 
+                      "', c('statecd', 'unitcd', 'countycd', 'plot'))")
+            }
+          }
+        }
+      } else {
+        
+        ## If XY and plot are from different databases, extract both by state before querying
+        if (!is.null(plotnm)) {
+          pltflds <- DBI::dbListFields(dbconn, plotnm)
+          
+          if (is.null(pjoinid)) {
+            pjoinid <- findnm("CN", pltflds)
+            if (is.null(pjoinid)) {
+              pjoinid <- findnm("PLT_CN", pltflds)
+            }
+          }
+          
+          plot.qry <- paste0("SELECT DISTINCT ", toString(unique(c(pjoinid, pvars2keep))), 
+                             "\nFROM ", plotnm, 
+                             "\nWHERE statecd IN (", toString(stcdlst), ")")
+          PLOTdf <- tryCatch( DBI::dbGetQuery(dbconn, plot.qry),
+                              error = function(e) {
+                                message(e, "\n")
+                                return(NULL) })
+          if (is.null(PLOTdf)) {
+            message("invalid query: \n", plot.qry)
+            stop()
+          }
+          PLOTdf <- setDT(PLOTdf)
+          plotnm <- "PLOTdf"
+          datsource <- xy_datsource
+          plotindb <- FALSE
+        }
+        
+        if (datsource == "sqlite") {
+          xy.qry <- paste0("SELECT ", toString(xyvars), 
+                           "\nFROM ", xy, 
+                           "\nWHERE statecd IN (", toString(stcdlst), ")")
+          XYdf <- tryCatch( DBI::dbGetQuery(xyconn, xy.qry),
+                            error = function(e) {
+                              message(e, "\n")
+                              return(NULL) })
+          if (is.null(XYdf)) {
+            message("invalid query: \n", xy.qry)
+            stop()
+          }
+          XYdf <- setDT(XYdf)
+        } else {
+          xynm <- "XYdf"
+        }
+      }
+    } else if (datsource == "datamart") {
 	    ## If XY is from database and plot data are from datamart, 
 	    ## we will extract xy data by state first
       if (xy_datsource == "sqlite") {
@@ -822,78 +895,6 @@ DBgetXY <- function (states = NULL,
           pjoinid <- findnm("PLT_CN", pltflds)
         }
       }
-      
-    } else if (datsource == "sqlite") {
-
-	    ## If XY and plot data are from the same databases, 
-	    ## we will query both
-	    if (xy_datsource == "sqlite" && all.equal(dbconn, xyconn)) {
-	      if (!plotindb) {
-          plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
-	      }
-        if (!is.null(plotnm)) {
-          plotindb <- TRUE	  
-          pltflds <- DBI::dbListFields(dbconn, plotnm)     
-	  
-	        ## Check for indices
-          if (evalCur || measCur) { 
-            pltindx <- sapply(c("STATECD", "UNITCD", "COUNTYCD", "PLOT"), findnm, pltflds, returnNULL = TRUE)
-            chk <- checkidx(dbconn, plotnm, pltindx)
-            if (is.null(chk)) {
-              message("to speed query... add an index to the plot table")
-              message("createidx(dbconn, '", plotnm, 
-                 "', c('statecd', 'unitcd', 'countycd', 'plot'))")
-	          }
-          }
-        }
-      } else {
-
-	      ## If XY and plot data are from different databases, 
-		    ## extract both first by state before querying
-		    if (!is.null(plotnm)) {
-		      pltflds <- DBI::dbListFields(dbconn, plotnm)
-		      
-		      if (is.null(pjoinid)) {
-		        pjoinid <- findnm("CN", pltflds)
-		        if (is.null(pjoinid)) {
-		          pjoinid <- findnm("PLT_CN", pltflds)
-		        }
-		      }
-
-          plot.qry <- paste0("SELECT DISTINCT ", toString(unique(c(pjoinid, pvars2keep))), 
-		                         "\nFROM ", plotnm, 
-				                     "\nWHERE statecd IN (", toString(stcdlst), ")")
-          PLOTdf <- tryCatch( DBI::dbGetQuery(dbconn, plot.qry),
-                            error = function(e) {
-                              message(e, "\n")
-                              return(NULL) })
-          if (is.null(PLOTdf)) {
-            message("invalid query: \n", plot.qry)
-            stop()
-          }
-          PLOTdf <- setDT(PLOTdf)
-          plotnm <- "PLOTdf"
-		      datsource <- xy_datsource
-		      plotindb <- FALSE
-		    }
-      
-        if (datsource == "sqlite") {
-          xy.qry <- paste0("SELECT ", toString(xyvars), 
-		                     "\nFROM ", xy, 
-				                 "\nWHERE statecd IN (", toString(stcdlst), ")")
-          XYdf <- tryCatch( DBI::dbGetQuery(xyconn, xy.qry),
-                            error = function(e) {
-                              message(e, "\n")
-                              return(NULL) })
-          if (is.null(XYdf)) {
-            message("invalid query: \n", xy.qry)
-            stop()
-          }
-          XYdf <- setDT(XYdf)
-	      } else {
-	        xynm <- "XYdf"
-	      }
-	    }
     } else {
 	    if (!is.null(plotnm)) {
         PLOTdf <- pcheck.table(plot_layer, stopifnull=TRUE, stopifinvalid=TRUE)
@@ -1080,8 +1081,9 @@ DBgetXY <- function (states = NULL,
   if (iseval) {
   
     if (is.null(POP_PLOT_STRATUM_ASSGN)) {
+      
       ## Check ppsa_layer
-      if (datsource == "sqlite") {
+      if (plotindb) {
         ppsanm <- chkdbtab(dbtablst, ppsa_layer)
         ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
         evalidnm <- findnm("EVALID", ppsaflds) 
@@ -1098,6 +1100,7 @@ DBgetXY <- function (states = NULL,
           stop(ppsa_layer, " is missing evalids: ", toString(missevalid))
           ppsanm <- NULL
         }
+        
       } else if (datsource == "datamart") {
         POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbrlst, 
 			                              returnDT=TRUE, stopifnull=FALSE)
@@ -1110,6 +1113,7 @@ DBgetXY <- function (states = NULL,
         ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
 
       } else {
+        
         POP_PLOT_STRATUM_ASSGN <- pcheck.table(ppsa_layer, stopifnull=TRUE, stopifinvalid=TRUE)
                               evalidnm <- findnm("EVALID", names(POP_PLOT_STRATUM_ASSGN))
         if (!all(evalid %in% unique(POP_PLOT_STRATUM_ASSGN[[evalidnm]]))) {
@@ -1124,7 +1128,7 @@ DBgetXY <- function (states = NULL,
     }
 
 	  if (exists(pnm) && !is.function(get(pnm)) &&!is.null(get(pnm))) {
-      setkeyv(get(pnm), pid)
+      setkeyv(setDT(get(pnm)), pid)
 	  } 
     withqry <- getpwithqry(evalid = unlist(evalidlist), 
                            pjoinid = pid,
@@ -1214,9 +1218,8 @@ DBgetXY <- function (states = NULL,
   ## Create invyrtab query 
   ###########################################################
   xycoords.qry <- paste0(withqry, "\n", xyqry)
-  #message(xycoords.qry)
 
- if (xy_datsource == "sqlite") {
+ if (xyindb) {
     xyx <- tryCatch( DBI::dbGetQuery(xyconn, xycoords.qry),
 			          error = function(e) {
                   message(e, "\n")
@@ -1233,16 +1236,17 @@ DBgetXY <- function (states = NULL,
 # save(XYdf, file="E:/workspace/kabaab/XYdf.rda")
 # save(SURVEY, file="E:/workspace/kabaab/SURVEY.rda")
 # save(xycoords.qry, file="E:/workspace/kabaab/xycoordsqry.rda")
-    xyx <- tryCatch( sqldf::sqldf(xycoords.qry, connection = NULL,
-						   stringsAsFactors = FALSE), 
+    xyx <- tryCatch( 
+      sqldf::sqldf(xycoords.qry, connection = NULL, stringsAsFactors = FALSE), 
 			        error = function(e) {
                   message(e, "\n")
                   return(NULL) })
 
     if (!iseval && is.null(invyrtab) && !is.null(invyrtab.qry)) {
-      invyrtab <- tryCatch( sqldf::sqldf(invyrtab.qry, 
-						stringsAsFactors = FALSE),
-			error = function(e) {
+      invyrtab <- tryCatch( 
+        sqldf::sqldf(invyrtab.qry, stringsAsFactors = FALSE),
+			           error = function(e) {
+			             message(e, "\n")
                   return(NULL) }) 
     } 
     xyx <- setDT(xyx)     
