@@ -515,6 +515,16 @@ modGBp2veg <- function(GBpopdat,
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
   
+  ## if classified columns, create domclassify list for summarizing tree data
+  if (any(!is.null(classifyrow), !is.null(classifycol))) {
+    domclassify <- list()
+    if (!is.null(classifyrow)) {
+      domclassify[[rowvar]] <- classifyrow$row.classify
+    }
+    if (!is.null(classifycol)) {
+      domclassify[[colvar]] <- classifycol$col.classify
+    }
+  }
 
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
@@ -608,7 +618,20 @@ modGBp2veg <- function(GBpopdat,
   p2vegqry2 <- gsub("\\(t.", "\\(v.", p2vegqry2)
   #message(p2vegqry2)  
   
-  
+
+  ## If classified rowvar or colvar, get class names
+  if (!is.null(classifynmlst)) {
+    if (!is.null(classifynmlst[[rowvar]])) {
+      rowvar <- classifynmlst[[rowvar]]
+    }
+    if (!is.null(classifynmlst[[colvar]])) {
+      colvar <- classifynmlst[[colvar]]
+    }
+    if (!is.null(grpvar)) {
+      grpvar <- c(rowvar, colvar)
+    }
+  }
+
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################
@@ -636,7 +659,6 @@ modGBp2veg <- function(GBpopdat,
     estvard.name <- conddat$estnm
   }
   
-
   ###################################################################################
   ### Get titles for output tables
   ###################################################################################
@@ -671,6 +693,7 @@ modGBp2veg <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
+  
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
@@ -711,7 +734,7 @@ modGBp2veg <- function(GBpopdat,
   rowunit <- estdat$rowunit
   totunit <- estdat$totunit
   #unitvar <- estdat$unitvar
-  
+ 
   
   ###################################################################################
   ## GENERATE OUTPUT TABLES
