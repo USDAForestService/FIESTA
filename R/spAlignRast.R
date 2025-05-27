@@ -13,6 +13,8 @@
 #' @param clip Logical. If TRUE, subset raster to a boundary.
 #' @param bnd R object or Full path name to a shapefile or layer in a database.
 #' @param bnd_dsn String. Data source name of bnd, if bnd is a layer in a database.
+#' @param buffdist Number. The distance to buffer the polygon before clipping
+#' raster. Uses sf::st_buffer. The distance is based on units of the raster.
 #' @param tile Logical. If TRUE, tile the output raster.
 #' @param tile_blocksize Numeric. If tile = TRUE, define the size of tile block.
 #' @param makestack Logical. If TRUE, makes a raster stack with format 'GTIFF'.
@@ -31,6 +33,7 @@ spAlignRast <- function(ref_rastfn,
                         clip = FALSE,
                         bnd = NULL,
                         bnd_dsn = NULL,
+                        buffdist = NULL,
                         tile = TRUE,
                         tile_blocksize = 256,
                         makestack = FALSE,
@@ -149,7 +152,13 @@ spAlignRast <- function(ref_rastfn,
     if (validate) {
       bndx <- polyfix.sf(bndx)
     }
-
+    
+    ## Check buffer distance
+    if (!is.null(buffdist)) {
+      if (any(!is.vector(buffdist), length(buffdist) > 1, !is.numeric(buffdist))) {
+        message("invalid buffdist... must be a numeric vector of size 1")
+      }
+    }
     ## Check projection of bndx... make sure it matches ref rastfn
     bndx <- crsCompare(bndx, ref_crs)$x
   }
@@ -161,6 +170,7 @@ spAlignRast <- function(ref_rastfn,
   for (i in 1:length(rastlst)) {
     rastfn <- rastlst[i]
     outrastnm <- outrastnmlst[i]
+    message("aligning ", rastfn, "...")
 
     ## add extension to outrastfn
     if (out_fmt == "vrt") {
@@ -209,8 +219,12 @@ spAlignRast <- function(ref_rastfn,
     ## define target extent for raster if clipping to boundary (-te)
     #################################################################
     if (clip) {
-      ## get extent of bnd and add to argument list
-      bndext <- sf::st_bbox(sf::st_buffer(bndx, 100))
+      if (!is.null(buffdist)) {
+        ## get extent of bnd and add to argument list
+        bndext <- sf::st_bbox(sf::st_buffer(bndx, 100))
+      } else {
+        bndext <- sf::st_bbox(bndx, 100)
+      }
       #bndext <- sf::st_bbox(bndx)
       rast_extent <- c("-te", as.character(bndext))
       args <- rast_extent

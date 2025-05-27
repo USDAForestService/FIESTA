@@ -11,6 +11,7 @@ spAlignRast(
   clip = FALSE,
   bnd = NULL,
   bnd_dsn = NULL,
+  buffdist = NULL,
   tile = TRUE,
   tile_blocksize = 256,
   makestack = FALSE,
@@ -35,6 +36,9 @@ if raster type is continuous; 'bilinear', 'cubic'.}
 \item{bnd}{R object or Full path name to a shapefile or layer in a database.}
 
 \item{bnd_dsn}{String. Data source name of bnd, if bnd is a layer in a database.}
+
+\item{buffdist}{Number. The distance to buffer the polygon before clipping
+raster. Uses sf::st_buffer. The distance is based on units of the raster.}
 
 \item{tile}{Logical. If TRUE, tile the output raster.}
 
