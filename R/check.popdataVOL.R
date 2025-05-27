@@ -905,7 +905,6 @@ check.popdataVOL <-
       }
     }
 
-
     ##############################################################################
     ## 10. Check COND_STATUS_CD and generate table with number of conditions
     ##############################################################################
@@ -930,7 +929,7 @@ check.popdataVOL <-
       }
 
       ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
-      if (!pltcondindb) {
+      if (!pltcondindb && returndata) {
         condsampcnt <- pltcondx[, .N, by=cstatuscdnm]
         setnames(condsampcnt, "N", "NBRCONDS")
       } else {

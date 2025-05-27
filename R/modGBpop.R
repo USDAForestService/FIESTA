@@ -364,18 +364,20 @@ modGBpop <- function(popType = "VOL",
   
   ## Check returndata 
   returndata <- FIESTAutils::pcheck.logical(returndata, varnm="returndata", 
-                                            title="Return data as objectsd?", first="YES", gui=gui, stopifnull=TRUE)
-  
+                                            title="Return data as objectsd?", 
+                                            first="YES", gui=gui, stopifnull=TRUE)
   ## Check savedata 
   savedata <- FIESTAutils::pcheck.logical(savedata, varnm="savedata", 
-                                          title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+                                          title="Save data tables?", 
+                                          first="YES", gui=gui, stopifnull=TRUE)
   if (!savedata) {
     message("savedata=FALSE with savedata parameters... no data are saved")
   }
   
   ## Check saveobj 
   saveobj <- FIESTAutils::pcheck.logical(saveobj, varnm="saveobj", 
-                                         title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+                                         title="Save SApopdat object?", 
+                                         first="YES", gui=gui, stopifnull=TRUE)
   
   ## Check output
   ########################################################
@@ -582,6 +584,10 @@ modGBpop <- function(popType = "VOL",
     }
   }
   
+  if (datsource == "obj" && !returndata && !savedata) {
+    stop("datsource = 'obj' and returndata and savedata are FALSE...")
+  }
+
   ###################################################################################
   ## CHECK PLOT PARAMETERS AND DATA
   ## This function is used to perform several data checks on the input data and to 
@@ -1141,7 +1147,6 @@ modGBpop <- function(popType = "VOL",
     returnlst$adjvarlst <- adjvarlst
   }
   
-
   ## Save data frames
   ##################################################################
   if (returndata) {

@@ -362,7 +362,7 @@ modGBtree <- function(GBpopdat,
   for (i in 1:length(table_opts)) {
     assign(names(table_opts)[[i]], table_opts[[i]])
   }
-  
+
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -518,7 +518,6 @@ modGBtree <- function(GBpopdat,
   seedx <- estdatVOL$seedx
   seedflds <- estdatVOL$seedflds
   
-
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -544,7 +543,6 @@ modGBtree <- function(GBpopdat,
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL,
                  whereqry = pcwhereqry)
-  
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
@@ -625,7 +623,7 @@ modGBtree <- function(GBpopdat,
   estunits <- treedat$estunits
   treeqry <- treedat$treeqry
   classifynmlst <- treedat$classifynmlst
-  
+ 
   if (sum(tdomdat[[estvar.name]], na.rm=TRUE) == 0) {
     stop("invalid estimate... no tree data returned...")
   }
@@ -686,7 +684,6 @@ modGBtree <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
-  
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################

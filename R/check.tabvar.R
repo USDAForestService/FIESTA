@@ -98,6 +98,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
     tablut <- tablut[!duplicated(tablut)]
   }
 
+  
   ##################################################################################
   ## Check for lookup tables
   ##################################################################################
@@ -385,6 +386,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
 
       ## Build query for getting unique tabvarclass values within population
       if (!is.null(tab.classify)) {
+        tab.FIAname <- FALSE
         class. <- ifelse (tabvar %in% pltcondflds, "pc.", "t.")
         
         if (is.vector(tab.classify)) {
@@ -408,23 +410,52 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
                                      cutbreaks = tab.classify,
                                      class. = class.,
                                      fill = NULL)
-          
+
         } else if (is.data.frame(tab.classify)) {
           
+          tab.classify <- pcheck.table(tab.classify)
           if (ncol(tab.classify) < 2) {
-            message("invalid tab.classify... must be a data.frame with TO and FROM columns")
+            message("invalid tab.classify... must be a data.frame with 2 columns")
             stop()
           }
-          tabclassnm <- checknm(paste0(tabvar, "CL"), pltcondflds)
-          names(tab.classify) <- toupper(names(tab.classify))
-          if (!all(c("TO", "FROM") %in% names(tab.classify))) {
-            message("invalid classes for ", tabvar, 
-                    "... the data.frame must include columns: FROM and TO")
+
+          ## Check values in tab.classify
+          tablutvals <- tab.classify[[tabvar]]
+          if (!all(tablutvals %in% uniquex)) {
+            missvals <- tablutvals[!tablutvals %in% uniquex]
+            message("values in tablut are not in population: ", toString(missvals))
+          }
+
+          if (tabvar %in% names(tab.classify)) {
+            tabclassnm <- names(tab.classify)[names(tab.classify) != tabvar]
+            #tablut <- tab.classify
+
+            #setnames(tab.classify, tabvar, "FROM")
+            #setnames(tab.classify, tablcassnm, "TO")
+            fromval <- tab.classify[[tabvar]]
+            toval <- tab.classify[[tabclassnm]]
+          } else if (all(c("TO", "FROM") %in% toupper(names(tab.classify)))) {
+            fromcol <- findnm("FROM", names(tab.classify))
+            fromval <- tab.classify[[fromcol]]
+            tocol <- findnm("TO", names(tab.classify))
+            toval <- tab.classify[[tocol]]
+            
+            if (endsWith(tabvar, "CD")) {
+              tabclassnm <- paste0(substr(tabvar, 1, nchar(tabvar)-2), "CL")
+            } else {
+              tabclassnm <- paste0(tabvar, "CL")
+            }
+            tabclassnm <- checknm(tabclassnm, pltcondflds)
+            
+            tablut <- tab.classify
+            setnames(tablut, c(tabvar, tabclassnm))
+
+          } else {
+            message("invalid classify lookup table for ", tabvar, 
+                    "... the data.frame must include ", tabvar, ", or columns: FROM and TO")
             stop()
           }
-          fromval <- tab.classify$FROM
-          toval <- tab.classify$TO
-          
+
           ## Check values of fromval
           if (!any(!is.na(uniquex) %in% fromval)) {
             missvals <- uniquex[which(!uniquex %in% fromval)]
@@ -435,6 +466,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
                                   classnm = tabclassnm, 
                                   class. = class.,
                                   fill = NULL)
+          tabvarnm=tabvarnew <- tabclassnm
         } else {
           message("invalid tab.classify... must be a vector of class breaks or a data.frame with TO and FROM columns")
           stop()
@@ -442,13 +474,19 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
         
         ## Build query for getting unique tabclass values within population
         tabvarnm=tabvarnew <- tabclassnm
-        uniquex.qry <- 
-          paste0("SELECT DISTINCT \n", 
+        uniquex.qry <-
+          paste0("SELECT DISTINCT \n",
                  tabclassqry,
                  tabfromqry,
                  whereqry.tab,
                  "\nORDER BY ", tabclassnm)
-        
+
+        # uniquex.qry <- 
+        #   paste0("SELECT DISTINCT \n", 
+        #          tabvar,
+        #          tabfromqry,
+        #          whereqry.tab,
+        #          "\nORDER BY ", tabvar)
         
         ## get unique values for classified tabvar
         if (tabisdb) {
@@ -479,12 +517,12 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
           }
         }
       }   ## end tab.classify
-      
+
       if (any(is.na(uniquex)) && !keepNA) {
         uniquex <- uniquex[!is.na(uniquex)]
       }
       tabuniquex <- uniquex
-      
+
       ## Check seedling table
       if (tabvar %in% seedflds && estseed == "add") {
         
@@ -548,9 +586,11 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
         tabuniquex <- sort(unique(c(uniquex, suniquex)))
       }   ## end check seedling table
 
+      
       ## Check values in tablut
       if (!is.null(tablut)) {
         tablutvals <- tablut[[tabvar]]
+
         if (!all(tablutvals %in% tabuniquex)) {
           missvals <- tablutvals[!tablutvals %in% tabuniquex]
           message("values in tablut are not in population: ", toString(missvals))
@@ -656,7 +696,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
                                      LUT = NULL, 
                                      FIAname = tab.FIAname,
                                      group = tabLUTgrp, 
-                                     add0 = tab.add0, 
+                                     add0 = tab.add0,
                                      xtxt = "seed", 
                                      uniquex = suniquex)
                 }  
@@ -737,7 +777,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
     }  ## end !is.null(tab.orderby) && tab.orderby != "NONE"
   }  ## end domlut is null
   
-  
+
   ############################################################################
   ## create uniquetabvar add create factors
   ############################################################################
@@ -745,6 +785,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
   ## uniquetabvar
   #########################################################
   if (!is.null(tablut)) {
+
     #    if (sum(unlist(lapply(tablut, duplicated))) > 0) {
     #      print(tablut)
     #      stop("invalid tablut... no duplicates allowed")
@@ -791,7 +832,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
       uniquetabvar[[tabvarnew]] <- addNA(uniquetabvar[[tabvarnew]])
     }
     setkeyv(uniquetabvar, tabvarnew)
-    
+
   } else if (tabvar %in% pltcondflds && is.data.frame(pltcondx)) {
     if (!is.null(tab.orderby) && tab.orderby != "NONE") {
       uniquetabvar <- unique(pltcondx[,c(tabgrpord, tabgrpnm, tab.orderby, tabvar), with=FALSE])
@@ -883,7 +924,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
       setkeyv(uniquetabvar, tabvar)
     }		
   }
-  
+
   ## Check for duplicate values
   if (!popdatindb && any(duplicated(uniquetabvar[[tabvar]]))) {
     pcfields <- names(condx)
@@ -924,7 +965,6 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
     }
   }
 
-  
   ## Create factors for ordering tables
   ##############################################################################
   if (!is.null(uniquetabvar)) {

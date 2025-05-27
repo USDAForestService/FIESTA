@@ -285,6 +285,11 @@ datSumTreeDom <- function(tree = NULL,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
+  
+  ## check tdomvar
+  if (is.null(tdomvar)) stop("tdomvar must not be null...")
+  
+  ## set bydomainlst
   bydomainlst <- unique(c(tdomvar, tdomvar2, bydomainlst))
 
   ### Check tsumvar 

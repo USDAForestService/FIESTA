@@ -449,7 +449,7 @@ datSumCoverDom <- function(tab = NULL,
       bydomainlst <- c(bydomainlst, classifymiss)
     }
   }
-  
+ 
   ###############################################################################
   ## 10. Check bydomainlst
   ###############################################################################
@@ -470,7 +470,6 @@ datSumCoverDom <- function(tab = NULL,
   ###############################################################################
   tclassifyvars <- classifyvars[classifyvars %in% tdomainlst]
   pcclassifyvars <- classifyvars[classifyvars %in% pcdomainlst]
-  
   
 
   ###############################################################################
@@ -787,8 +786,7 @@ datSumCoverDom <- function(tab = NULL,
         message("must include cond and/or plot table for: ", toString(pcdomainlst))
       }
     }
-    
-    
+
     ## Check pcwhereqry
     if (!is.null(pcwhereqry)) {
       if (is.null(pcflds)) {
@@ -1227,6 +1225,7 @@ datSumCoverDom <- function(tab = NULL,
   ## add grpby variable to select qry query
   tselectqry <- paste0("\nSELECT ", toString(tgrpbyvars))
 
+
   ## Add classifications to select query
   domclassifyqry <- NULL
   if (!is.null(domclassify)) {
@@ -1237,12 +1236,9 @@ datSumCoverDom <- function(tab = NULL,
         classifynm <- paste0(classifyvar, "CL")
         if (classifyvar %in% pcclassifyvars) {
           classvar. <- "pc."
-          #pcdomainlst[pcdomainlst == classifyvar] <- classifynm
         } else {
           classvar. <- "tdat."
-          #tcdomainlst[tdomainlst == classifyvar] <- classifynm
         }
-        domainlst <- domainlst[domainlst != classifyvar]
 
         ## Get classification query
         cutbreaks <- domclassify[[classifyvar]]
@@ -1268,12 +1264,9 @@ datSumCoverDom <- function(tab = NULL,
         toval <- classifylut[[classifynm]]
         if (classifyvar %in% pcclassifyvars) {
           classvar. <- "pc."
-          #pcdomainlst[pcdomainlst == classifyvar] <- classifynm
         } else {
           classvar. <- "tdat."
-          #tdomainlst[tdomainlst == classifyvar] <- classifynm
         }
-        domainlst <- domainlst[domainlst != classifyvar]
 
         ## Get classification query
         domclassqry <- classqry(classifyvar, fromval, toval,
@@ -1283,6 +1276,17 @@ datSumCoverDom <- function(tab = NULL,
       }
       tgrpbyvars <- c(tgrpbyvars, domainlst)
       classifynmlst[[classifyvar]] <- classifynm
+      
+      ## change names in domain lists to classified variable name
+      domainlst <- domainlst[domainlst != classifyvar]
+      if (classifyvar %in% pcdomainlst) {
+        pcdomainlst <- pcdomainlst[pcdomainlst != classifyvar]
+        pcdomainlst <- c(pcdomainlst, classifynm)
+      }
+      if (classifyvar %in% tdomainlst) {
+        tdomainlst <- tdomainlst[tdomainlst != classifyvar]
+        tdomainlst <- c(tdomainlst, classifynm)
+      }
 
       domclassifyqry <- paste0(domclassifyqry, "\n", domclassqry)
       if (length(domclassify) > 1 && i < length(domclassify)) {
@@ -1298,7 +1302,6 @@ datSumCoverDom <- function(tab = NULL,
     tselectqry <- paste0(tselectqry, ", ", toString(domainlst))
     tgrpbyvars <- unique(c(tgrpbyvars, domainlst))
   }
-
 
   ## Build select tree query
   tselectqry <- paste0(tselectqry,
@@ -1368,7 +1371,6 @@ datSumCoverDom <- function(tab = NULL,
   if (!is.null(tround)) {
     sumdat[, (tsumvarnm) := round(.SD, tround), .SDcols=tsumvarnm]
   }
-  
 
   ######################################################################## 
   ## Check tdomvar and tdomvar2
@@ -1383,21 +1385,7 @@ datSumCoverDom <- function(tab = NULL,
     if (!is.null(tdomvar2) && !is.null(classifynmlst[[tdomvar2]])) {
       tdomvar2 <- classifynmlst[[tdomvar2]]
     }
-  
-    if (any(pcdomainlst %in% names(classifynmlst))) {
-      pcdomain <- pcdomainlst[!pcdomainlst %in% names(classifynmlst)]
-      bydomainlst <- c(pcdomain, unlist(classifynmlst[pcdomainlst]))
-    } else {
-      bydomainlst <- pcdomainlst
-    }
-    if (any(tdomainlst %in% names(classifynmlst))) {
-      tdomain <- tdomainlst[!tdomainlst %in% names(classifynmlst)]
-      bydomainlst <- c(bydomainlst, tdomain, unlist(classifynmlst[tdomainlst]))
-    } else {
-      bydomainlst <- c(bydomainlst)
-    }
-  
-  
+
     ## Get unique values of tdomvar
     tdoms <- sort(unique(tdomtree[[tdomvar]]))
  
@@ -1451,7 +1439,7 @@ datSumCoverDom <- function(tab = NULL,
     }
     sumbyvars <- unique(c(tsumuniqueid, pcdomainlst, tdomvarnm))
     
-    
+
     ## GET tdomvarlst2 or CHECK IF ALL tree domains IN tdomvar2lst ARE INCLUDED IN tdomvar2.
     if (!is.null(tdomvar2)) {
       tdoms2 <- sort(unique(tdomtree[[tdomvar2]]))
@@ -1513,7 +1501,7 @@ datSumCoverDom <- function(tab = NULL,
         tdomtotnm <- tsumvarnm
       }
     }
-   
+
     ## Sum tree (and seed) by tdomvarnm
     #####################################################################
     tdomtreef <- tdomtree[, lapply(.SD, sum, na.rm=TRUE), by=sumbyvars, .SDcols=tsumvarnm]
@@ -1677,6 +1665,7 @@ datSumCoverDom <- function(tab = NULL,
   if (!is.null(tfilter)) {
     returnlst$tfilter <- tfilter
   }
+
   if (!is.null(pcdomainlst)) {
     returnlst$pcdomainlst <- pcdomainlst
   }

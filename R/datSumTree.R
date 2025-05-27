@@ -167,7 +167,7 @@ datSumTree <- function(tree = NULL,
   talias. <- "t."
   salias. <- "s."
   
-  
+
   ## For documentation
   # subplot Dataframe or comma-delimited file (*.csv). If getadjplot=TRUE,
   # The subplot-level table with SUBP_STATUS_CD variable for calculating
@@ -761,7 +761,7 @@ datSumTree <- function(tree = NULL,
       tderivevars <- unique(unlist(tderivevars, use.names = FALSE))
     }
   }
-  
+
   ###############################################################################
   ## 9. Check domclassify
   ###############################################################################
@@ -784,7 +784,7 @@ datSumTree <- function(tree = NULL,
       bydomainlst <- c(bydomainlst, classifymiss)
     }
   }
-  
+
   ###############################################################################
   ## 10. Check bydomainlst
   ###############################################################################
@@ -808,7 +808,7 @@ datSumTree <- function(tree = NULL,
     }
   }
   if (length(pcdomainlst) == 0) pcdomainlst <- NULL
-  
+
   ###############################################################################
   ## 11. Get variables to classify from domainlst or domclassify list
   ###############################################################################
@@ -818,7 +818,7 @@ datSumTree <- function(tree = NULL,
   if (addseed || seedonly) {
     sclassifyvars <- classifyvars[classifyvars %in% seedflds]
   }
-  
+
   ###############################################################################
   ## 12. Check TPA and tree summary variables (tsumvarlst)
   ###############################################################################
@@ -1190,7 +1190,6 @@ datSumTree <- function(tree = NULL,
         message("must include cond and/or plot table for: ", toString(pcdomainlst))
       }
     }
-    
     
     ## Check pcwhereqry
     if (!is.null(pcwhereqry)) {
@@ -2221,44 +2220,92 @@ datSumTree <- function(tree = NULL,
   tgrpbyvars <- paste0(grpby., uniqueid)
   #tgrpbyvars <- paste0("tdat.", tsumuniqueid)
 
+
   ## add grpby variable to select qry query
   tselectqry <- paste0("\nSELECT ", toString(tgrpbyvars))
 
   ## Add classifications to select query
   domclassifyqry <- NULL
+
+  nbrclassify <- length(domclassify)
   if (!is.null(domclassify)) {
-    for (i in 1:length(domclassify)) {
-      classifyvar <- names(domclassify)[i]
-      classifylut <- domclassify[[i]]
+    classnames <- NULL
+    
+    ## keep track of classes in a list
+    classifylist <- list() 
+    
+    ## loop through domclassify
+    for (j in 1:nbrclassify) {
+      
+      ## create a nested list for class info
+      classifylist[[j]] <- list() 
+      
+      classifyvar <- names(domclassify)[j]
+      classifylut <- domclassify[[j]]
       if (is.vector(classifylut)) {
         classifynm <- paste0(classifyvar, "CL")
         if (classifyvar %in% pcclassifyvars) {
           classvar. <- "pc."
-          #pcdomainlst[pcdomainlst == classifyvar] <- classifynm
+          pcdomainlst[pcdomainlst == classifyvar] <- classifynm
         } else {
           classvar. <- "tdat."
-          #tcdomainlst[tdomainlst == classifyvar] <- classifynm
+          tdomainlst[tdomainlst == classifyvar] <- classifynm
         }
         domainlst <- domainlst[domainlst != classifyvar]
 
         ## Get classification query
-        cutbreaks <- domclassify[[classifyvar]]
+        cutbreaks <- classifylut
         fill <- NULL
         if ((addseed || seedonly) && min(cutbreaks) == 0) {
           fill <- "<1"
         }
+        
+        ## create labels for cutbreaks
+        cutlabels <- {}
+        for (i in 1:length(cutbreaks)) {
+          brk <- cutbreaks[i]
+          if (i == length(cutbreaks)) {
+            cutlabels <- c(cutlabels, paste0(brk, "+"))
+          } else {
+            cutlabels <- c(cutlabels, paste0(brk, "-", cutbreaks[i+1]))
+          }
+        }
+        
+        ## create class name 
+        classifynm <- paste0(classifyvar, "CL")
+        classifynm <- checknm(classifynm, classnames)
+        classnames <- unique(c(classnames, classifynm))
+        classifylist[[j]]$classifynm <- classifynm
+        tgrpbyvars <- c(tgrpbyvars, classifynm)
+
+        ## define factor levels for new class
+        classifylist[[j]]$factorlevels <- cutlabels
+        
         domclassqry <- classifyqry(classcol = classifyvar,
                                    cutbreaks = cutbreaks,
+                                   cutlabels = cutlabels,
                                    classnm = classifynm,
                                    class. = classvar.,
                                    fill = fill)
+
       } else if (is.data.frame(classifylut)) {
         if (ncol(classifylut) != 2) {
           message("invalid number of columns for ", classifyvar,
                     "... must be a vector of class breaks or a data.frame with 2 columns")
           stop()
         }
+        
+        ## get class name
         classifynm <- names(classifylut)[!names(classifylut) %in% classifyvar]
+        classifynm <- checknm(classifynm, classnames)
+        classnames <- unique(c(classnames, classifynm))
+        classifylist[[j]]$classifynm <- classifynm
+        tgrpbyvars <- c(tgrpbyvars, classifynm)
+        
+        
+        ## define factor levels for new class
+        classifylist[[j]]$factorlevels <- unique(classifylut[[classifynm]])
+        
         if (length(classifynm) != 1) {
           message("invalid column names for ", classifyvar,
                     "... the data.frame must include name of variable to domclassify: ", classifyvar)
@@ -2268,10 +2315,10 @@ datSumTree <- function(tree = NULL,
         toval <- classifylut[[classifynm]]
         if (classifyvar %in% pcclassifyvars) {
           classvar. <- "pc."
-          #pcdomainlst[pcdomainlst == classifyvar] <- classifynm
+          pcdomainlst[pcdomainlst == classifyvar] <- classifynm
         } else {
           classvar. <- "tdat."
-          #tdomainlst[tdomainlst == classifyvar] <- classifynm
+          tdomainlst[tdomainlst == classifyvar] <- classifynm
         }
         domainlst <- domainlst[domainlst != classifyvar]
 
@@ -2281,20 +2328,22 @@ datSumTree <- function(tree = NULL,
                                   class. = classvar.,
                                   fill = NULL)
       }
-      tgrpbyvars <- c(tgrpbyvars, domainlst)
       classifynmlst[[classifyvar]] <- classifynm
 
       domclassifyqry <- paste0(domclassifyqry, "\n", domclassqry)
-      if (length(domclassify) > 1 && i < length(domclassify)) {
+      if (nbrclassify > 1 && j < nbrclassify) {
         domclassifyqry <- paste0(domclassifyqry, ",")
       }
     }
+    tgrpbyvars <- c(domainlst, tgrpbyvars)
+    
     if (length(domainlst) > 0) {
       tselectqry <- paste0(tselectqry, ", ", toString(domainlst), ", ", domclassifyqry)
     } else {
       tselectqry <- paste0(tselectqry, ", ", domclassifyqry)
     }
   } else if (!is.null(domainlst) && length(domainlst) > 0) {
+    
     tselectqry <- paste0(tselectqry, ", ", toString(domainlst))
     tgrpbyvars <- unique(c(tgrpbyvars, domainlst))
   }
@@ -2380,6 +2429,15 @@ datSumTree <- function(tree = NULL,
   # }
   # setkeyv(setDT(sumdat), uniqueidchk)
   setkeyv(setDT(sumdat), uniqueid)
+
+
+  ## set factors to classify variables, if any
+  if (!is.null(domclassify)) {
+    for (i in 1:length(classifylist)) {
+      sumdat[[classifylist[[i]]$classifynm]] <- 
+        factor(sumdat[[classifylist[[i]]$classifynm]], levels=classifylist[[i]]$factorlevels)
+    }
+  }
 
   ## Round digits
   if (!is.null(tround)) {
