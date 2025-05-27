@@ -203,6 +203,11 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   ## row estimates
   if (rowvar != "TOTAL") {
     
+    ## check row.NAname
+    if (!is.vector(row.NAname) || length(row.NAname) > 1) {
+      message("row.NAname is invalid... using 'Other'")
+      row.NAname = "Other"
+    }
     ## Check uniquerow - add NA factor value
     uniquerow <- check.unique(x = domdat, 
                               uniquex = uniquerow,

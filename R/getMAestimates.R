@@ -171,6 +171,11 @@ getMAestimates <- function(esttype,
   
   if (rowvar != "TOTAL") {
     
+    ## check row.NAname
+    if (!is.vector(row.NAname) || length(row.NAname) > 1) {
+      message("row.NAname is invalid... using 'Other'")
+      row.NAname = "Other"
+    }
     ## Check uniquerow - add NA factor value
     uniquerow <- check.unique(x = domdatn, 
                               uniquex = uniquerow,
@@ -199,6 +204,11 @@ getMAestimates <- function(esttype,
     
     if (colvar != "NONE") {
       
+      ## check col.NAname
+      if (!is.vector(col.NAname) || length(col.NAname) > 1) {
+        message("col.NAname is invalid... using 'Other'")
+        col.NAname = "Other"
+      }
       ## Check uniquercol- add NA factor value
       uniquecol <- check.unique(x = domdatn, 
                                 uniquex = uniquecol,

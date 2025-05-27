@@ -509,6 +509,11 @@ modSApop <- function(popType = "VOL",
       popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]
     }
   }
+  
+  if (datsource == "obj" && !returndata && !savedata) {
+    stop("datsource = 'obj' and returndata and savedata are FALSE...")
+  }
+  
 
   pvars2keep <- unique(c(largebnd.unique, "AOI", pvars2keep))
   ###################################################################################

@@ -182,7 +182,12 @@ getGBestimates <- function(esttype,
   #############################################################################
   if (is.null(rowvar) || rowvar == "NONE") rowvar <- "TOTAL"
   if (rowvar != "TOTAL") {
-
+    
+    ## check row.NAname
+    if (!is.vector(row.NAname) || length(row.NAname) > 1) {
+      message("row.NAname is invalid... using 'Other'")
+      row.NAname = "Other"
+    }
     ## Check uniquerow with domain-level data - add NA factor values if necessary
     uniquerow <- check.unique(x = domdatn,
                               uniquex = uniquerow,
@@ -245,13 +250,17 @@ getGBestimates <- function(esttype,
   #############################################################################
   if (is.null(colvar)) colvar <- "NONE"
   if ( colvar != "NONE") {
-
+    
+    ## check col.NAname
+    if (!is.vector(col.NAname) || length(col.NAname) > 1) {
+      message("col.NAname is invalid... using 'Other'")
+      col.NAname = "Other"
+    }
     ## Check uniquecol with domain-level data - add NA factor values if necessary
     uniquecol <- check.unique(x = domdatn,
                               uniquex = uniquecol,
                               xvar = colvar,
                               NAname = col.NAname)
-
 
     ## sum estimation variable to plot/domain-level by rowvar
     ###########################################################################
