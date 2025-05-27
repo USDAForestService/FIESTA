@@ -1,7 +1,7 @@
 #' Data - Create a variable with classified values.
 #' 
 #' Merge a look-up table to define categories of continuous data in x (e.g.,
-#' DIA).  Adds a variable to x, defining as: xvar >= MIN (and xvar < MAX).
+#' DIA). Adds a variable to x, defining as: xvar >= MIN and xvar < MAX.
 #' 
 #' Use datLUTclass() to prompt for input.
 #' 
@@ -16,7 +16,8 @@
 #' class value (>= minvar).
 #' @param maxvar String. Optional. If LUT is not null, name of variable with
 #' maximum class value (<= maxvar).
-#' @param cutbreaks Numeric vector. Vector of numbers for minimum class values.
+#' @param cutbreaks Numeric vector. Vector of numbers for minimum class values
+#' (e.g., c(0,25,50): >=0 and < 25 (0-25); >=25 and <50 (25-50), >=50 (50+)).
 #' @param cutlabels String vector. Optional. Vector of names for classes. If
 #' NULL, class names are generated from cutbreaks.
 #' @param LUTclassnm String. Optional. Name of classified variable in x. If LUT
@@ -299,7 +300,8 @@ datLUTclass <- function(x,
       LUTx$MAX <- c(LUTx[[minvar]][-1] - val, round(xvar.max + 1, label.dec)) 
       maxvar <- "MAX"
     }  
-    cutbreaks <- c(LUTx[[minvar]], LUTx[[maxvar]][nrow(LUTx)])
+    #cutbreaks <- c(LUTx[[minvar]], LUTx[[maxvar]][nrow(LUTx)])
+    cutbreaks <- LUTx[[minvar]]
 
     ## Check LUTclassnm - get cutlabels
     ########################################################
@@ -314,14 +316,14 @@ datLUTclass <- function(x,
     } else {
       cutlabels <- LUTx[[LUTclassnm]]
     }
-	
-	## Check vars2keep
-	if (!is.null(vars2keep)) {
-	  if (any(!vars2keep %in% names(LUTx))) {
-	    missvars <- vars2keep[!vars2keep %in% names(LUTx)]
-      message("vars2keep not in LUT: ", toString(missvars))
-		  if (length(missvars) > 0) {
-		    vars2keep <- vars2keep[vars2keep %in% names(LUTx)]
+
+	  ## Check vars2keep
+	  if (!is.null(vars2keep)) {
+	    if (any(!vars2keep %in% names(LUTx))) {
+	      missvars <- vars2keep[!vars2keep %in% names(LUTx)]
+        message("vars2keep not in LUT: ", toString(missvars))
+		    if (length(missvars) > 0) {
+		      vars2keep <- vars2keep[vars2keep %in% names(LUTx)]
 		    }
       }
     }	  
@@ -334,26 +336,23 @@ datLUTclass <- function(x,
   } else if (!is.vector(cutbreaks) || !is.numeric(cutbreaks)) {
     message("cutbreaks must be a numeric vector")
 	  return(NULL)
-  } else if (all(cutbreaks < xvar.min) || all(cutbreaks > xvar.max)) {
+  } else if (all(cutbreaks < xvar.min)) {
     message("all cutbreaks values are outside range of xvar values")
 	  return(NULL)
-  } else if (any(uniqueval < min(cutbreaks)) || any(uniqueval >= max(cutbreaks))) {
-    gtvals <- sort(unique(uniqueval[which(uniqueval < min(cutbreaks) | 
-                          uniqueval >= max(cutbreaks))]))
-    message(paste("values are outside of cutbreaks range:", 
-			         paste(gtvals, collapse=", ")))
   } 
-  
+
   ## Check cutlabels
   if (is.null(cutlabels)) {
     val <- as.numeric(ifelse(label.dec == 0, 0, 
     ifelse(label.dec == 1, 0.1, paste0(".", rep(0, label.dec-1), 1))))
     maxbreaks <- c(cutbreaks[-1] - val) 
     cutlabels <- paste(cutbreaks[-length(cutbreaks)], maxbreaks, sep="-")
-    cutlabels[length(cutlabels)] <- paste0(cutbreaks[length(cutbreaks)-1],"+")
+    #cutlabels[length(cutlabels)] <- paste0(cutbreaks[length(cutbreaks)-1],"+")
+    cutlabels <- c(cutlabels, paste0(cutbreaks[length(cutbreaks)],"+"))
   } else {
-    if (length(cutlabels) != length(cutbreaks)-1) {
-      message("cutlabels must be length ", length(cutbreaks)-1)
+    #if (length(cutlabels) != length(cutbreaks)-1) {
+    if (length(cutlabels) != length(cutbreaks)) {
+        message("cutlabels must be length ", length(cutbreaks)-1)
       return(NULL)
     }
   }  
@@ -430,22 +429,25 @@ datLUTclass <- function(x,
 			                 classnm = LUTclassnm,
 			                 overwrite = overwrite,
 			                 NAto0 = NAto0)
-	if (is.null(dbcl)) {
-	  return(NULL)
-	}
+	  if (is.null(dbcl)) {
+	    return(NULL)
+	  }
   } 
   
   if (!isdb || dbreturn && !is.null(datx)) {
-    datx[, (LUTclassnm) := cut(datx[[xvar]], breaks=cutbreaks, 
-	         labels=cutlabels, right=FALSE)] 
-    datx[[LUTclassnm]] <- factor(datx[[LUTclassnm]], levels=cutlabels)			 
 
+    maxbreaks <- c(cutbreaks, (max(uniqueval) + 1))
+    datx[, (LUTclassnm) := cut(datx[[xvar]], breaks = maxbreaks, 
+	         labels = cutlabels, right = FALSE)] 
+
+    datx[[LUTclassnm]] <- factor(datx[[LUTclassnm]], levels=cutlabels)			 
     if (NAto0) {
       datx[is.na(datx[[LUTclassnm]]), (LUTclassnm) := 0] 
     }
   }
 
-  LUTx2 <- data.table(cutbreaks[-length(cutbreaks)], cutlabels)
+  #LUTx2 <- data.table(cutbreaks[-length(cutbreaks)], cutlabels)
+  LUTx2 <- data.table(cutbreaks, cutlabels)
   names(LUTx2) <- c(paste0(xvar, "_cutbreaks"), LUTclassnm)  
 
   ## Append vars2keep if LUTx
@@ -495,7 +497,7 @@ datLUTclass <- function(x,
       setnames(datx, cutbreakvar, paste0(LUTclassnm, "_brks"))
     }
   }    
-       
+      
   ## Output list
   ########################################################
   if (!isdb) {

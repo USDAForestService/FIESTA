@@ -45,7 +45,8 @@ class value (>= minvar).}
 \item{maxvar}{String. Optional. If LUT is not null, name of variable with
 maximum class value (<= maxvar).}
 
-\item{cutbreaks}{Numeric vector. Vector of numbers for minimum class values.}
+\item{cutbreaks}{Numeric vector. Vector of numbers for minimum class values
+(e.g., c(0,25,50): >=0 and < 25 (0-25); >=25 and <50 (25-50), >=50 (50+)).}
 
 \item{cutlabels}{String vector. Optional. Vector of names for classes. If
 NULL, class names are generated from cutbreaks.}
@@ -97,7 +98,7 @@ outfn.  If outfn = NULL, the name of the file will be datlut_'date'.csv.
 }
 \description{
 Merge a look-up table to define categories of continuous data in x (e.g.,
-DIA).  Adds a variable to x, defining as: xvar >= MIN (and xvar < MAX).
+DIA). Adds a variable to x, defining as: xvar >= MIN and xvar < MAX.
 }
 \details{
 Use datLUTclass() to prompt for input.
