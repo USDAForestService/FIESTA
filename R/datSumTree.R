@@ -808,6 +808,13 @@ datSumTree <- function(tree = NULL,
     }
   }
   if (length(pcdomainlst) == 0) pcdomainlst <- NULL
+  
+  if (!is.null(pcdomainlst) && !bycond) {
+    warning("variables in bydomainlst may result in condition-level data summaries")
+  }
+  
+  
+  
 
   ###############################################################################
   ## 11. Get variables to classify from domainlst or domclassify list
