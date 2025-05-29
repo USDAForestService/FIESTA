@@ -62,7 +62,7 @@ FIA Research Station is desired, set states=NULL and use RS argument to
 define RS.}
 
 \item{RS}{String vector. Name of research station(s) to get public XY
-coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
+coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states
 is populated. See FIESTA::ref_statecd for reference to RS and states.}
 
 \item{datsource}{String. Source of data ('datamart', 'sqlite', 'postgres').}
@@ -72,12 +72,12 @@ is populated. See FIESTA::ref_statecd for reference to RS and states.}
 
 \item{dbTabs}{List. Source of tables needed for estimation based on what
 is defined in eval_opts(Type). The source can be a layer in data_dsn or
-a comma delimited file. For example, if Type='P2VEG', vsubpspp_layer 
+a comma delimited file. For example, if Type='P2VEG', vsubpspp_layer
 and/or vsubpstr_layer must be defined. Defaults are 'P2VEG_SUBPLOT_SPP'
 and 'P2VEG_SUBP_STRUCTURE', respectively.
  See help(dbTables) for a list of options.}
 
-\item{eval}{String. Type of evaluation time frame for data extraction 
+\item{eval}{String. Type of evaluation time frame for data extraction
 ('FIA', 'custom'). See eval_opts for more further options.}
 
 \item{eval_opts}{List of evaluation options for 'FIA' or 'custom'
@@ -107,7 +107,7 @@ appended to the plot table.}
 FVS_STANDINIT_PLOT table to the plot table and the stand_id variable from the
 FVS_STANDINIT_COND table to the cond table.}
 
-\item{addexpns}{Logical. If TRUE, the EXPNS variable from the pop_stratum table 
+\item{addexpns}{Logical. If TRUE, the EXPNS variable from the pop_stratum table
 is appended to the plot table.}
 
 \item{othertables}{String Vector. Name of other table(s) in FIADB to include
@@ -124,10 +124,10 @@ the sqlite database (*.sqlite) where XY data are.}
 polygon object, data frame, full pathname to a shapefile, or name of a layer
 within a database.}
 
-\item{xy_opts}{List of xy data options to specify if xy is NOT NULL. 
+\item{xy_opts}{List of xy data options to specify if xy is NOT NULL.
 See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').}
 
-\item{xymeasCur}{Logical. If TRUE, include XY coordinates from the most 
+\item{xymeasCur}{Logical. If TRUE, include XY coordinates from the most
 current sampled measurement of each plot.}
 
 \item{coordType}{String. Type of xy coordinates using ('PUBLIC', 'ACTUAL')}
@@ -205,28 +205,28 @@ of options. Only used when savedata = TRUE. If out_layer = NULL,}
 FIESTA functions.}
 }
 \value{
-if returndata=TRUE, a list of the following objects: 
-\item{states}{ Vector. Input state(s) (full state names: Arizona). } 
-\item{tabs}{ List. A list of data frames from FIA database, including 
-plt and cond; and tree (if Type='VOL'); seed (if isseed=TRUE), 
-p2veg_subplot_spp, p2veg_subp_structure, and invasive_subplot_spp 
-(if Type='P2VEG'). See below 'Output Tables - FIA Table Names' 
+if returndata=TRUE, a list of the following objects:
+\item{states}{ Vector. Input state(s) (full state names: Arizona). }
+\item{tabs}{ List. A list of data frames from FIA database, including
+plt and cond; and tree (if Type='VOL'); seed (if isseed=TRUE),
+p2veg_subplot_spp, p2veg_subp_structure, and invasive_subplot_spp
+(if Type='P2VEG'). See below 'Output Tables - FIA Table Names'
 for reference to FIA database tables.
-See FIESTA:ref_* for variable descriptions (e.g., FIESTAutils::ref_tree). 
-If istree and the number of states > 3, tree data are saved to outfolder 
-and not returned to accommodate R memory issues. } 
-\item{xy*_PUBLIC}{ Data frame. XY data from FIA's public database. If 
-measCur=TRUE, named xyCur_PUBLIC, else named xy_PUBLIC. The data frame 
+See FIESTA:ref_* for variable descriptions (e.g., FIESTAutils::ref_tree).
+If istree and the number of states > 3, tree data are saved to outfolder
+and not returned to accommodate R memory issues. }
+\item{xy*_PUBLIC}{ Data frame. XY data from FIA's public database. If
+measCur=TRUE, named xyCur_PUBLIC, else named xy_PUBLIC. The data frame
 has 10 columns ('PLT_CN', 'LON_PUBLIC', 'LAT_PUBLIC', 'STATECD', 'UNITCD',
-'COUNTYCD', 'PLOT', 'INTENSITY', 'PLOT_ID' (ID+STATECD+UNTCD+COUNTYCD+PLOT), 
+'COUNTYCD', 'PLOT', 'INTENSITY', 'PLOT_ID' (ID+STATECD+UNTCD+COUNTYCD+PLOT),
 'COUNTYFIPS'. If issp=TRUE, returns an sf object. }
-\item{spconddat}{ If spcond=TRUE, the condition variables representing 
-each plot for spatial display. For plots with multiple conditions, 
-the selected condition is based on CONDID=1 (if spcondid1=TRUE) or a 
+\item{spconddat}{ If spcond=TRUE, the condition variables representing
+each plot for spatial display. For plots with multiple conditions,
+the selected condition is based on CONDID=1 (if spcondid1=TRUE) or a
 set if criteria defined in Details - spcond (if spcondid1=FALSE). }
 \item{evalid}{ Number. If evalCur=TRUE or evalEndyr is not NULL, the
-Evalidation ID from the FIA database used to define the output data. } 
-\item{pltcnt}{ Data frame. Number of plots (NBRPLOTS) by state, cycle, 
+Evalidation ID from the FIA database used to define the output data. }
+\item{pltcnt}{ Data frame. Number of plots (NBRPLOTS) by state, cycle,
 inventory year, and plot status. }
 \item{pop_plot_stratum_assgn}{ Data frame. If savePOP=TRUE, and FIA Evaluations
 are used to extract data from database, return the POP_PLOT_STRATUM_ASSGN
@@ -234,31 +234,31 @@ table or, if more than one Type and savePOP=FALSE. If more than one
 Type, only the records for the evalTypes are returned, otherwise all
 Types for the state evaluation are returned. }
 
-*Output Tables - FIA Table Names*\cr \tabular{lll}{ 
-\tab \bold{tab} \tab \bold{FIA Table}\cr 
+*Output Tables - FIA Table Names*\cr \tabular{lll}{
+\tab \bold{tab} \tab \bold{FIA Table}\cr
 \tab plt \tab plot\cr
 \tab cond \tab cond\cr
-\tab tree \tab tree\cr 
-\tab p2veg_subplot_spp \tab P2VEG_SUBPLOT_SPP\cr 
-\tab p2veg_subp_structure \tab P2VEG_SUBP_STRUCTURE\cr 
-\tab invsubp \tab INVASIVE_SUBPLOT_SPP\cr 
-\tab subplot \tab SUBPLOT\cr 
-\tab subp_cond \tab SUBP_COND\cr 
-\tab cond_dwm_calc \tab COND_DWM_CALC\cr 
-\tab grm \tab TREE_GRM_COMPONENT\cr 
+\tab tree \tab tree\cr
+\tab p2veg_subplot_spp \tab P2VEG_SUBPLOT_SPP\cr
+\tab p2veg_subp_structure \tab P2VEG_SUBP_STRUCTURE\cr
+\tab invsubp \tab INVASIVE_SUBPLOT_SPP\cr
+\tab subplot \tab SUBPLOT\cr
+\tab subp_cond \tab SUBP_COND\cr
+\tab cond_dwm_calc \tab COND_DWM_CALC\cr
+\tab grm \tab TREE_GRM_COMPONENT\cr
 \tab issccm \tab SUBP_COND_CHNG_MTRX\cr }
 
 
-#' Outputs to outfolder (if savedata=TRUE): 
-\tabular{ll}{ 
-\tab - If saveqry=TRUE, text file(s) of SQL queries used to extract data 
+#' Outputs to outfolder (if savedata=TRUE):
+\tabular{ll}{
+\tab - If saveqry=TRUE, text file(s) of SQL queries used to extract data
 from database (_.txt). Note: one query is used for extracting both plt
 and cond (pltcondqry*.txt). \cr
-\tab - CSV file of plot and condition counts (pltcnt*.txt).\cr 
-\tab - Layers in a database or CSV files of output tables.\cr 
-\tab - If issp=TRUE, a feature class or ESRI shapefile of plot-level 
-level attributes. If shapefile (.shp), variable names are truncated to 
-10 characters or less. See notes for more info.\cr 
+\tab - CSV file of plot and condition counts (pltcnt*.txt).\cr
+\tab - Layers in a database or CSV files of output tables.\cr
+\tab - If issp=TRUE, a feature class or ESRI shapefile of plot-level
+level attributes. If shapefile (.shp), variable names are truncated to
+10 characters or less. See notes for more info.\cr
 \tab - If issp=TRUE and out_fmt='sqlite', the SQLite data is SpatiaLite.\cr }
 
 To deal with limitations of R object size and/or computer memory issues, if
@@ -279,7 +279,7 @@ To qualify, the area must be >= 1.0 acre in size and 120.0 feet wide (See
 Burrill et al. 2018).
 
 *ACI (All Condition Inventory)*\cr RMRS National Forest plots. For nonforest
-conditions that have been visited in the field (NF_SAMPLING_STATUS_CD = 
+conditions that have been visited in the field (NF_SAMPLING_STATUS_CD =
 if trees exist on the condition, the data exist in the tree table. If you do
 not want these trees included, ACI=FALSE. This will filter the data to only
 forested conditions (COND_STATUS_CD = 1)
@@ -296,15 +296,15 @@ sample, and thus, removed from database.
 \bold{FIA DataMart Data}
 
 FIA data available on FIA DataMart include the following information.\cr
-\tabular{ll}{ 
-\tab - the PLOT variable is renumbered.\cr 
-\tab - the LON/LAT coordinates are fuzzed & swapped.\cr 
-\tab - the OWNERCD variable is based on fuzzed & swapped locations.\cr 
-\tab - ECOSUBCD, CONGCD, ELEV, and EMAP_HEX are GIS-extracted values 
-based on fuzzed & swapped locations.\cr 
-\tab - For annual data, forested plots represent the current definition 
-of >= 10 percent cover...\cr 
-\tab - For periodic data, forested plots are defined by a definition 
+\tabular{ll}{
+\tab - the PLOT variable is renumbered.\cr
+\tab - the LON/LAT coordinates are fuzzed & swapped.\cr
+\tab - the OWNERCD variable is based on fuzzed & swapped locations.\cr
+\tab - ECOSUBCD, CONGCD, ELEV, and EMAP_HEX are GIS-extracted values
+based on fuzzed & swapped locations.\cr
+\tab - For annual data, forested plots represent the current definition
+of >= 10 percent cover...\cr
+\tab - For periodic data, forested plots are defined by a definition
 of Other Wooded Land (OWL), including >= 5 percent cover...\cr
 }
 
@@ -336,15 +336,15 @@ previous Evaluations may change, depending on when missed plot are measured.
 In the PNW Research Station, plots are brought forward to replace missed
 plots in an evaluation, depending on the Type.
 
-EVAL_TYP\cr 
-\tabular{llll}{ 
-\tab \bold{EVALIDCD} \tab \bold{EVAL_TYP} \tab \bold{Description}\cr 
-\tab 00 \tab EXPALL \tab All area\cr 
-\tab 01 \tab EXPVOL/EXPCURR \tab Area/Volume\cr 
-\tab 03 \tab EXPCHNG/EXPGROW/EXPMORT/EXPREMV \tab Area Change/GRM\cr 
-\tab 07 \tab EXPDWM \tab DWM\cr 
-\tab 08 \tab EXPREGEN \tab Regeneration\cr 
-\tab 09 \tab EXPINV \tab Invasive\cr \tab 10 \tab EXPP2VEG \tab Veg profile\cr 
+EVAL_TYP\cr
+\tabular{llll}{
+\tab \bold{EVALIDCD} \tab \bold{EVAL_TYP} \tab \bold{Description}\cr
+\tab 00 \tab EXPALL \tab All area\cr
+\tab 01 \tab EXPVOL/EXPCURR \tab Area/Volume\cr
+\tab 03 \tab EXPCHNG/EXPGROW/EXPMORT/EXPREMV \tab Area Change/GRM\cr
+\tab 07 \tab EXPDWM \tab DWM\cr
+\tab 08 \tab EXPREGEN \tab Regeneration\cr
+\tab 09 \tab EXPINV \tab Invasive\cr \tab 10 \tab EXPP2VEG \tab Veg profile\cr
 \tab 12 \tab EXPCRWN \tab Crown\cr }
 
 \bold{Inventory span defining variables}
@@ -367,7 +367,7 @@ available states in database (states=NULL, RS=NULL).
 \tab Endyr \tab Most current measurement of plot in database in or
 before year\cr
 \tab All \tab All years for invtype (ANNUAL or PERIODIC or BOTH)\cr
-\tab Type \tab Type of custom Evaluation (response)\cr 
+\tab Type \tab Type of custom Evaluation (response)\cr
 \tab invyrs \tab Specified inventory years (e.g., 2015:2018)\cr }
 
 \bold{Spatial data}
@@ -387,11 +387,11 @@ CONDID1=FALSE, the condition is selected based on the following criteria. A
 column named CONDMETHOD is added to the attribute table to show the method
 and steps used, identified by the abbreviation in parentheses.
 
-\tabular{ll}{ 
-\tab (1) minimum COND_STATUS_CD (_ST)\cr 
-\tab (2) maximum condition proportion (_CP)\cr 
+\tabular{ll}{
+\tab (1) minimum COND_STATUS_CD (_ST)\cr
+\tab (2) maximum condition proportion (_CP)\cr
 \tab (3) maximum live_canopy_cvr_pct (_CC)\cr
-\tab (4) minimum STDSZCD (_SZ)\cr 
+\tab (4) minimum STDSZCD (_SZ)\cr
 \tab (5) minimum CONDID (_C1)\cr }
 
 \bold{Derived Variables}
@@ -399,76 +399,76 @@ and steps used, identified by the abbreviation in parentheses.
 If defaultVars=TRUE, the following derived variables are calculated after
 extracting data from the FIA database.
 
-Plot-level variables:\cr 
-\tabular{ll}{ 
-\tab NBRCND - Number of conditions on plot, including nonsampled conditions 
-(COND_STATUS_CD = 5)\cr 
-\tab NBRCNDSAMP - Number of sampled conditions on plot.\cr 
-\tab NBRCNDFOR - Number of sampled forested conditions on plot.\cr 
-\tab NBRCNDFTYP - Number of sampled forested conditions with different 
-forest types on plot.\cr 
+Plot-level variables:\cr
+\tabular{ll}{
+\tab NBRCND - Number of conditions on plot, including nonsampled conditions
+(COND_STATUS_CD = 5)\cr
+\tab NBRCNDSAMP - Number of sampled conditions on plot.\cr
+\tab NBRCNDFOR - Number of sampled forested conditions on plot.\cr
+\tab NBRCNDFTYP - Number of sampled forested conditions with different
+forest types on plot.\cr
 \tab NBRCNDFGRP - Number of sampled forested conditions with different forest
-type groups on plot.\cr 
-\tab CCLIVEPLT - Percent live canopy cover of condition aggregated to plot-level 
-(LIVE_CANOPY_CVR_PCT * CONDPROP_UNADJ).\cr 
-\tab PLOT_ID - Unique Identifier for a plot ('PID' + STATECD(2) + UNITCD(2) + 
-COUNTYCD(3) + PLOT(5)).  This variable can be used to identify multiple records 
+type groups on plot.\cr
+\tab CCLIVEPLT - Percent live canopy cover of condition aggregated to plot-level
+(LIVE_CANOPY_CVR_PCT * CONDPROP_UNADJ).\cr
+\tab PLOT_ID - Unique Identifier for a plot ('PID' + STATECD(2) + UNITCD(2) +
+COUNTYCD(3) + PLOT(5)).  This variable can be used to identify multiple records
 for each measurement of plot.\cr }
 
-Condition-level variables:\cr 
-\tabular{ll}{ 
-\tab FORTYPGRP - TYPGRPCD merged to FORTYPCD\cr 
-\tab FLDTYPGRP - TYPGRPCD merged to FLDTYPCD\cr 
+Condition-level variables:\cr
+\tabular{ll}{
+\tab FORTYPGRP - TYPGRPCD merged to FORTYPCD\cr
+\tab FLDTYPGRP - TYPGRPCD merged to FLDTYPCD\cr
 \tab FORNONSAMP - Combination of PLOT_STATUS_CD and PLOT_NONSAMPLE_REASN_CD\cr
 \tab QMD - Quadratic Mean Diameter\cr }
 
-Tree-level variables:\cr 
-\tabular{ll}{ 
+Tree-level variables:\cr
+\tabular{ll}{
 \tab BA - the basal area of a tree (BA = DIA * DIA * 0.005454)\cr }
 
-\tabular{ll}{ 
-\tab TREE AGE Notes:\cr 
-\tab - Available for live timber and woodland trees in the following states: 
-AZ,CO,ID,MT,NV,UT,OR,WA.\cr 
-\tab - BHAGE - Breast height age (4.5' above ground) of timber trees.\cr 
-\tab - PNW - one tree is sampled for each species, within each crown class, 
-and for each condition class present on plot. Age of saplings (<5.0" DIA) 
-may be aged by counting branch whorls above 4.5ft. No timber hardwood species 
-other than red alder are bored for age.\cr 
-\tab - RMRS - one tree is sampled for each species and broad diameter 
+\tabular{ll}{
+\tab TREE AGE Notes:\cr
+\tab - Available for live timber and woodland trees in the following states:
+AZ,CO,ID,MT,NV,UT,OR,WA.\cr
+\tab - BHAGE - Breast height age (4.5' above ground) of timber trees.\cr
+\tab - PNW - one tree is sampled for each species, within each crown class,
+and for each condition class present on plot. Age of saplings (<5.0" DIA)
+may be aged by counting branch whorls above 4.5ft. No timber hardwood species
+other than red alder are bored for age.\cr
+\tab - RMRS - one tree is sampled for each species and broad diameter
 class present on plot.\cr }
 
-\tabular{ll}{ \tab DRYBIO Notes:\cr 
-\tab DRYBIO_AG - Aboveground oven-dry biomass, in pounds (DRYBIO_AG = 
-(DRYBIO_BOLE + DRYBIO_STUMP + DRYBIO_TOP + DRYBIO_SAPLING + DRYBIO_WDLD_SPP).\cr 
-\tab - Available for both timber and woodland species, live trees >= 1.0" 
-DIA and dead trees >= 5.0" DIA. Summed dry biomass of the top, bole, and 
-stump of a tree, excluding foliage based on component ratio method 
-(Heath and others, 2009).\cr 
-\tab - DRYBIO_BOLE - dry biomass of sound wood in live and dead trees, 
-including bark, from a 1-foot stump to a min 4-inch top DIA of central stem 
-(Calculated for timber trees >= 5.0" DIA).\cr 
-\tab - DRYBIO_STUMP - dry biomass in the tree stump, including the portion 
-of the tree from the ground to the bottom of merchantable bole, 1-foot 
-(Calculated for live and dead trees >= 5.0" DIA).\cr 
-\tab - DRYBIO_TOP - dry biomass in the top of the tree, including the 
-portion of the tree above merchantable bole, 4-inch top, and all branches, 
-excludes foliage (Calculated for live and dead trees >= 5.0" DIA).\cr 
-\tab - DRYBIO_SAPLING - dry biomass of saplings, including aboveground 
-portion, excluding foliage, of live timber trees >=1.0" and <5.0" DIA.\cr 
-\tab - DRYBIO_WDLD_SPP - dry biomass of woodland trees, live or dead, 
+\tabular{ll}{ \tab DRYBIO Notes:\cr
+\tab DRYBIO_AG - Aboveground oven-dry biomass, in pounds (DRYBIO_AG =
+(DRYBIO_BOLE + DRYBIO_STUMP + DRYBIO_TOP + DRYBIO_SAPLING + DRYBIO_WDLD_SPP).\cr
+\tab - Available for both timber and woodland species, live trees >= 1.0"
+DIA and dead trees >= 5.0" DIA. Summed dry biomass of the top, bole, and
+stump of a tree, excluding foliage based on component ratio method
+(Heath and others, 2009).\cr
+\tab - DRYBIO_BOLE - dry biomass of sound wood in live and dead trees,
+including bark, from a 1-foot stump to a min 4-inch top DIA of central stem
+(Calculated for timber trees >= 5.0" DIA).\cr
+\tab - DRYBIO_STUMP - dry biomass in the tree stump, including the portion
+of the tree from the ground to the bottom of merchantable bole, 1-foot
+(Calculated for live and dead trees >= 5.0" DIA).\cr
+\tab - DRYBIO_TOP - dry biomass in the top of the tree, including the
+portion of the tree above merchantable bole, 4-inch top, and all branches,
+excludes foliage (Calculated for live and dead trees >= 5.0" DIA).\cr
+\tab - DRYBIO_SAPLING - dry biomass of saplings, including aboveground
+portion, excluding foliage, of live timber trees >=1.0" and <5.0" DIA.\cr
+\tab - DRYBIO_WDLD_SPP - dry biomass of woodland trees, live or dead,
 including the aboveground portion, excluding foliage, the top of
 the tree above 1.5" DIA, and a portion of the stump from ground to DRC
 (Calculated for woodland trees >= 1.0" DIA.\cr }
 
-ABOVEGROUND CARBON ESTIMATES (IN POUNDS)\cr 
-Available for both timber and woodland species, live trees >= 1.0" DIA 
-and dead trees >= 5.0" DIA. Calculated as 1/2 of the aboveground 
+ABOVEGROUND CARBON ESTIMATES (IN POUNDS)\cr
+Available for both timber and woodland species, live trees >= 1.0" DIA
+and dead trees >= 5.0" DIA. Calculated as 1/2 of the aboveground
 estimates of biomass: \cr CARBON_AG = 0.5 * (DRYBIO_AG)
 
-TREE AGE DATA ONLY IN FOR ("AZ", "CO", "ID", "MT", "NV", "UT") \cr 
-FMORTCFAL includes trees >= 5.0" DIA and greater and is not populated 
-for states("CA", "OR", "WA", "OK") \cr Mortality variables only 
+TREE AGE DATA ONLY IN FOR ("AZ", "CO", "ID", "MT", "NV", "UT") \cr
+FMORTCFAL includes trees >= 5.0" DIA and greater and is not populated
+for states("CA", "OR", "WA", "OK") \cr Mortality variables only
 available in: AZ, CO, ID, MT, NV, NM, UT, WY, ND, SD, NE, KS, OK.
 
 \bold{TPA} If TPA=TRUE and istree=TRUE or isseed=TRUE, the following
@@ -509,7 +509,7 @@ Spatial Data Services
 \examples{
 \dontrun{
 # Extract the most current evaluation of data for Utah
-UTdat <- DBgetPlots(states = "Utah", 
+UTdat <- DBgetPlots(states = "Utah",
                     eval = "FIA",
                     eval_opts = list(Cur = TRUE))
 names(UTdat)
@@ -526,7 +526,7 @@ table(UTdat$plot$INVYR)
 # Extract specified inventory years 2012:2014 and spatial information
 UTdat2 <- DBgetPlots(states = "Utah",
                      eval = "custom",
-                     eval_opts = list(invyrs = 2012:2014), 
+                     eval_opts = list(invyrs = 2012:2014),
                      issp = TRUE)
 names(UTdat2)
 UTdat2$pltcnt

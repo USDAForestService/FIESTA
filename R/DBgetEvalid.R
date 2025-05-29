@@ -897,7 +897,7 @@ DBgetEvalid <- function(states = NULL,
       if (!all(states %in% names(stinvyr.vals))) {
         missnames <- states[!states %in% names(stinvyr.vals)]
         misscodes <- pcheck.states(missnames, "VALUE")
-        warning("there is no data in the database for: ", toString(missnames))
+        warning("there is no data in the database for: ", toString(missnames), "\n")
         stcdlst <- stcdlst[!stcdlst %in% misscodes]
         states <- states[!states %in% missnames]
       }

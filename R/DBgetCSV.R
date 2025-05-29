@@ -1,14 +1,14 @@
 #' Database - Extracts data table(s) from FIA DataMart.
-#' 
+#'
 #' Downloads and extracts compressed comma-delimited file(s) (*.zip) from FIA
 #' DataMart (https://apps.fs.usda.gov/fia/datamart/CSV/datamart_csv.html).
 #' Only 1 table can be specified, but multiple states may be included.
-#' 
+#'
 #' The compressed data files are downloaded from FIA DataMart; saved to a
 #' temporary space; extracted and imported; and deleted from temporary space.
 #' Accessibility and download time depends on access and speed of internet
 #' connection.
-#' 
+#'
 #' @param DBtable String. Name of table to download. Only 1 table allowed.
 #' @param states String or numeric vector. Name (e.g., "Arizona", "New Mexico")
 #' or code (e.g., 4, 35) of states to download data. If NULL, tables that are
@@ -27,10 +27,10 @@
 #' table(FIAplots$STATECD)
 #' }
 #' @export DBgetCSV
-DBgetCSV <- function(DBtable, 
-                     states = NULL, 
-                     returnDT = FALSE, 
-                     stopifnull = TRUE, 
+DBgetCSV <- function(DBtable,
+                     states = NULL,
+                     returnDT = FALSE,
+                     stopifnull = TRUE,
                      noIDate = TRUE) {
   # DESCRIPTION: Import data tables from FIA Datamart
 
@@ -44,15 +44,15 @@ DBgetCSV <- function(DBtable,
   if (nargs() == 0) {
     stop("must include DBtable")
   }
-  
+
   ## Set global variables
   ZIP <- TRUE
-  
+
   ## Set URL where data files are
   downloadfn <- "https://apps.fs.usda.gov/fia/datamart/CSV/"
 
-  
-    
+
+
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -73,7 +73,7 @@ DBgetCSV <- function(DBtable,
   if (!is.vector(DBtable) || !is.character(DBtable) || !length(DBtable) == 1) {
     stop("DBtable must be a character vector of length 1")
   }
- 
+
   ## Check states and get in proper format (abbr)
   stabbrs <- pcheck.states(states, "ABBR")
 
@@ -81,9 +81,9 @@ DBgetCSV <- function(DBtable,
   ###################################################################
   ## Define gettab function
   ###################################################################
-    
+
   gettab <- function(stabbr = NULL, DBtable) {
-    
+
     if (is.null(stabbr)) {
       fn <- paste0(downloadfn, toupper(DBtable), ".zip")
       message(paste("downloading and extracting", DBtable, "..."))
@@ -94,7 +94,7 @@ DBgetCSV <- function(DBtable,
 
     temp <- tempfile()
     tempdir <- tempdir()
-    
+
     tab <- tryCatch(
       {
         utils::download.file(fn, temp, mode = "wb", quiet = TRUE)
@@ -104,7 +104,7 @@ DBgetCSV <- function(DBtable,
 		    return(NULL)
       }
     )
-    
+
     # if download.file fails it either throws an error or invisibly returns a non-zero integer value
     if (is.null(tab) || tab != 0) {
       stop("Download of ", DBtable, " was unsuccessful")
@@ -112,21 +112,21 @@ DBgetCSV <- function(DBtable,
 
     filenm <- utils::unzip(temp, exdir = tempdir)
     tab_out <- fread(filenm, integer64 = "character")
-    
+
     if (nrow(tab_out) == 0) {
       stop("Attempted download of ", DBtable, " returned zero rows.")
     }
-    
+
     tab_out <- changeclass(tab_out)
 
     unlink(temp)
     unlink(tempdir)
     file.remove(filenm)
-    
+
     return(tab_out)
-    
+
   }
-  
+
 
   ###################################################################
   ## Get tables
@@ -141,7 +141,7 @@ DBgetCSV <- function(DBtable,
       }
     )
   }
-      
+
 
   if (is.null(csvtable)) {
     stop("Unable to download table(s).")
@@ -157,11 +157,11 @@ DBgetCSV <- function(DBtable,
       csvtable <- setDT(csvtable)
     }
   }
-    
+
   if (!returnDT) {
     csvtable <- data.frame(csvtable, stringsAsFactors=FALSE)
   }
-  
+
   return(csvtable)
 }
 
