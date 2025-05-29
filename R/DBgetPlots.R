@@ -18,7 +18,7 @@
 #' conditions that have been visited in the field (NF_SAMPLING_STATUS_CD = 
 #' if trees exist on the condition, the data exist in the tree table. If you do
 #' not want these trees included, ACI=FALSE. This will filter the data to only
-#' forested conditions (COND_STATUS_CD = 1)
+#' forested conditions (COND_STATUS_CD = 1).
 #' 
 #' *Nevada*\cr In 2016, the population area of Nevada changed to exclude the
 #' large restricted area owned by Department of Defense (Area 51) from the
