@@ -308,6 +308,5 @@ spClipRast <- function(rast,
 			       init = nodata, 
 			       dstnodata = nodata, 
              options = co)
-   
   return(outfilenm)    
 }

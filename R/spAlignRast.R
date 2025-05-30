@@ -33,7 +33,7 @@ spAlignRast <- function(ref_rastfn,
                         clip = FALSE,
                         bnd = NULL,
                         bnd_dsn = NULL,
-                        buffdist = NULL,
+                        buffdist = 90,
                         tile = TRUE,
                         tile_blocksize = 256,
                         makestack = FALSE,
@@ -221,15 +221,15 @@ spAlignRast <- function(ref_rastfn,
     if (clip) {
       if (!is.null(buffdist)) {
         ## get extent of bnd and add to argument list
-        bndext <- sf::st_bbox(sf::st_buffer(bndx, 100))
+        bndext <- sf::st_bbox(sf::st_buffer(bndx, buffdist))
       } else {
-        bndext <- sf::st_bbox(bndx, 100)
+        bndext <- sf::st_bbox(bndx, buffdist)
       }
       #bndext <- sf::st_bbox(bndx)
-      rast_extent <- c("-te", as.character(bndext))
-      args <- rast_extent
+      outrast_extent <- c("-te", as.character(bndext))
+      args <- outrast_extent
     } else {
-      rast_extent <- NULL
+      outrast_extent <- NULL
     }
 
     ## define pixel resolution based on ref_rastfn (-tr)
@@ -255,17 +255,22 @@ spAlignRast <- function(ref_rastfn,
     datatype <- c("\n-wt", rast_info$datatype)
 
 
-    ## create cl argument list
-    args <- c(rast_extent, pixel_res, resample_method, datatype)
+    ## create cl argument list with:
+    ## output raster extent (te), pixel res (tr), and datatype (wt)
+    args <- c(outrast_extent, pixel_res, resample_method, datatype)
 
     if (clip) {
       args_vrt <- args
+      dst_filename <- tempfile(tmpdir = outfolder, fileext = ".vrt")
+    } else {
+      dst_filename <- outrastfn
     }
 
     ## define format/compression and add to argument list
     if (out_fmt == "vrt") {
       #format <- c("\n-of", "VRT")
       #args <- c(args, format)
+      
     } else if (out_fmt == "img") {
 
       ## only works if it is < 2GB
@@ -278,7 +283,7 @@ spAlignRast <- function(ref_rastfn,
       ## If not compressing, the default is to use if needed
       ## BIGTIFF=IF_SAFER
       BIGTIFF <- TRUE
-      if (BIGTIFF) {
+      if (BIGTIFF && !clip) {
         compress <- c("\n-co", "COMPRESS=LZW", "-co", "BIGTIFF=YES")
       } else {
         compress <- c("\n-co", "COMPRESS=LZW")
@@ -287,7 +292,7 @@ spAlignRast <- function(ref_rastfn,
       args <- c(args, compress)
 
       ## set tile blocksize
-      if (tile) {
+      if (tile && !clip) {
         blockxsize <- paste0("BLOCKXSIZE = ", tile_blocksize)
         blockysize <- paste0("BLOCKYSIZE = ", tile_blocksize)
         args <- c(args, "\n-co", "TILED=YES", "-co", blockxsize, "-co", blockysize)
@@ -310,7 +315,7 @@ spAlignRast <- function(ref_rastfn,
     }
 
     ## append overwrite to argument string
-    if (overwrite) {
+    if (overwrite && file.exists(outrastfn)) {
       args <- c(args, "\n-overwrite")
     }
 
@@ -322,63 +327,28 @@ spAlignRast <- function(ref_rastfn,
     message("\nprocessing ", basename(rastfn), "...")
     message("warp arguments:\n", toString(args))
 
+    ## Use warp to resample to same pixel size and extent
+    gdalraster::warp(rastfn, dst_filename = dst_filename, t_srs = t_srs, cl_arg = cl_arg)
 
-    ## If clip = TRUE, save to a temporary file first
-    if (clip) {
-      #message("\nclipping ", basename(rastfn), "...")
-
-      ## define temporary outrastnm
-      #outvrtfn <- file.path(outfolder, "temp.vrt")
-      outvrtfn <- tempfile(fileext = ".vrt")
-
-      ## Use warp to resample to same pixel size and extent
-      gdalraster::warp(rastfn, dst_filename = outvrtfn, t_srs = t_srs, cl_arg = cl_arg_vrt)
-
-
-      ## Opens a dataset to name the band
-      ds <- new(gdalraster::GDALRaster, outvrtfn, read_only = FALSE)
-      ds$setDescription(band = 1, desc = outrastnm)
-      ds$close()     ## we need to keep the dataset open for virtual raster ?????
-      #ds$getDescription(band = 1)
-
-      # ## Clip raster to boundary of AOI
-      # chk <- tryCatch(
-      #   clipRaster(src = bndx,
-      #              srcfile = outvrtfn,
-      #              src_band = NULL,
-      #              dstfile = normalizePath(outrastfn),
-      #              maskByPolygons = TRUE,
-      #              options = 'COMPRESS = LZW')
-
-      chk <- tryCatch(
-        spClipRast(rast = outvrtfn,
-                   clippolyv = bndx,
-                   clippolyv_dsn = bnd_dsn,
-                   compress = TRUE,
-                   compressType = "LZW",
-                   outfn = outrastfn,
-                   outfolder = outfolder,
-                   overwrite = overwrite,
-                   showext = TRUE),
-        error=function(e) {
-          message(e,"\n")
-          return(NULL)})
-      if (is.null(chk)) {
-        message("clip failed...")
-        stop()
-      }
-
-      #ds$close()
-      file.remove(outvrtfn)
-    } else {
-
-      ## Use warp to resample to same pixel size and extent
-      gdalraster::warp(rastfn, dst_filename = outrastfn, t_srs = t_srs, cl_arg = cl_arg)
-    }
-
-    ds <- new(gdalraster::GDALRaster, outrastfn, read_only = FALSE)
+    
+    ds <- new(gdalraster::GDALRaster, dst_filename, read_only = FALSE)
     ds$getDescription(band = 1)
     ds$close()
+    
+    
+    if (clip) {
+      ## Clip raster
+      clipRaster(src = bndx, 
+                 srcfile = dst_filename, 
+                 src_band = 1, 
+                 dstfile = outrastfn, 
+                 fmt = out_fmt, 
+                 maskByPolygons = TRUE, 
+                 init = nodata_value, 
+                 dstnodata = nodata_value, 
+                 options = "COMPRESS=LZW")
+      file.remove(dst_filename)
+    }
 
     outrastlst <- c(outrastlst, outrastfn)
   }
