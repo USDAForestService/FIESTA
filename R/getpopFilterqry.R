@@ -727,11 +727,11 @@ getpopFilterqry <- function(popType,
           pltassgnvars <- c(pltassgnvars, nfpstatuscdnm)
         }
         if (!is.null(nonsamp.pfilter)) {
-          nonsamp.pfilter <- paste0(nonsamp.pfilter, " AND ", nfnonsamp.pfilter)
+          nonsamp.pfilter <- paste0(nonsamp.pfilter, " OR ", nfnonsamp.pfilter)
         } else {
           nonsamp.pfilter <- nfnonsamp.pfilter
         }
-        message("removing nonsampled nonforest plots...")
+        message("and removing nonsampled nonforest plots for ACI estimates...")
         message(nonsamp.pfilter)
       }
     }
