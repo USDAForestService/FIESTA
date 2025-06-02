@@ -11,7 +11,7 @@ spAlignRast(
   clip = FALSE,
   bnd = NULL,
   bnd_dsn = NULL,
-  buffdist = NULL,
+  buffdist = 90,
   tile = TRUE,
   tile_blocksize = 256,
   makestack = FALSE,

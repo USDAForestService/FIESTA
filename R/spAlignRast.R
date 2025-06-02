@@ -285,7 +285,7 @@ spAlignRast <- function(ref_rastfn,
       BIGTIFF <- TRUE
       if (BIGTIFF && !clip) {
         compress <- c("\n-co", "COMPRESS=LZW", "-co", "BIGTIFF=YES")
-      } else {
+      } else if (!clip) {
         compress <- c("\n-co", "COMPRESS=LZW")
       }
       #args <- c(args, format, compress)
