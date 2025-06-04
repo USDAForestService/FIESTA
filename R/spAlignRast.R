@@ -279,7 +279,6 @@ spAlignRast <- function(ref_rastfn,
 
     } else {
       #format <- c("\n-of", "GTiff")
-
       ## If not compressing, the default is to use if needed
       ## BIGTIFF=IF_SAFER
       BIGTIFF <- TRUE
@@ -287,7 +286,10 @@ spAlignRast <- function(ref_rastfn,
         compress <- c("\n-co", "COMPRESS=LZW", "-co", "BIGTIFF=YES")
       } else if (!clip) {
         compress <- c("\n-co", "COMPRESS=LZW")
+      } else {
+        compress <- NULL
       }
+
       #args <- c(args, format, compress)
       args <- c(args, compress)
 
