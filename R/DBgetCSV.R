@@ -82,7 +82,7 @@ DBgetCSV <- function(DBtable,
   ## Define gettab function
   ###################################################################
 
-  gettab <- function(stabbr = NULL, DBtable) {
+  gettab <- function(stabbr = NULL, DBtable, stopifnull = FALSE) {
 
     if (is.null(stabbr)) {
       fn <- paste0(downloadfn, toupper(DBtable), ".zip")
@@ -107,14 +107,24 @@ DBgetCSV <- function(DBtable,
 
     # if download.file fails it either throws an error or invisibly returns a non-zero integer value
     if (is.null(tab) || tab != 0) {
-      stop("Download of ", DBtable, " was unsuccessful")
+      message("download of ", DBtable, " was unsuccessful for ", stabbr)
+      if (stopifnull) {
+        stop("")
+      } else {
+        return(NULL)
+      }
     }
 
     filenm <- utils::unzip(temp, exdir = tempdir)
     tab_out <- fread(filenm, integer64 = "character")
 
     if (nrow(tab_out) == 0) {
-      stop("Attempted download of ", DBtable, " returned zero rows.")
+      message("attempted download of ", DBtable, " returned zero rows")
+      if (stopifnull) {
+        stop()
+      } else {
+        return(NULL)
+      }
     }
 
     tab_out <- changeclass(tab_out)
@@ -134,14 +144,8 @@ DBgetCSV <- function(DBtable,
   if (is.null(stabbrs)) {
     csvtable <- gettab(DBtable=DBtable)
   } else {
-    csvtable <- tryCatch(
-      rbindlist(lapply(stabbrs, gettab, DBtable), fill=TRUE),
-      error=function(e) {
-        stop(e, "\n")
-      }
-    )
+    csvtable <- rbindlist(lapply(stabbrs, gettab, DBtable, stopifnull), fill=TRUE)
   }
-
 
   if (is.null(csvtable)) {
     stop("Unable to download table(s).")

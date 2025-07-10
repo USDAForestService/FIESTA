@@ -559,16 +559,16 @@ check.popdataVOL <-
       propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
 
       if ("COND" %in% names(propvars)) {
-        adjcase <- adjvars['COND']
+        adjcase <- paste0("pltidsadj.", adjvars['COND'])
 
       } else if (is.null(propbasisnm)) {
         adjcase <- paste0("CASE pc.", propvars['MACR'], " IS NULL",
-                          " THEN ", adjvars['SUBP'],
-                          " ELSE ", adjvars['MACR'], " END")
+                          " THEN pltidsadj.", adjvars['SUBP'],
+                          " ELSE pltidsadj.", adjvars['MACR'], " END")
       } else {
         adjcase <- paste0("CASE pc.", propbasisnm,
-                          " WHEN 'MACR' THEN ", adjvars['MACR'],
-                          " ELSE ", adjvars['SUBP'], " END")
+                          " WHEN 'MACR' THEN pltidsadj.", adjvars['MACR'],
+                          " ELSE pltidsadj.", adjvars['SUBP'], " END")
       }
     }
 

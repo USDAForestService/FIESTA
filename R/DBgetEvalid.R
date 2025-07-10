@@ -357,7 +357,11 @@ DBgetEvalid <- function(states = NULL,
       SURVEY <- survey_layer
     } else {
       SURVEY <- DBgetCSV("SURVEY", stcdlst, 
-                         returnDT=TRUE, stopifnull=FALSE)
+                         returnDT=TRUE, stopifnull=FALSE) 
+      if (length(unique(SURVEY$STATECD)) < length(stcdlst)) {
+        stcdlst <- stcdlst[stcdlst %in% unique(SURVEY$STATECD)]
+        states <- pcheck.states(stcdlst)
+      }
     }
     if (!is.null(SURVEY)) {
       surveynm <- "SURVEY"
