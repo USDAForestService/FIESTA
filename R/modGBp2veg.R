@@ -341,10 +341,10 @@ modGBp2veg <- function(GBpopdat,
   adjcase <- GBpopdat$adjcase
   pltidsid <- GBpopdat$pjoinid
   pltassgnid <- GBpopdat$pltassgnid
-  pltcondflds <- GBpopdat$pltcondflds
+  pltflds <- GBpopdat$pltflds
+  condflds <- GBpopdat$condflds
   estvar.name <- GBpopdat$estvar.area
   estvar <- "COVER_PCT_SUM"
-  
   
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
@@ -356,12 +356,6 @@ modGBp2veg <- function(GBpopdat,
         stop("invalid database connection")
       }
     }
-    #pltcondx <- dbqueries$pltcondx
-    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
-    pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
-  } else {
-    pltcondxWITHqry <- NULL
-    pltcondxadjWITHqry <- NULL
   }
   
   
@@ -413,7 +407,10 @@ modGBp2veg <- function(GBpopdat,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondx = pltcondx,
-                  pltcondflds = pltcondflds,
+                  pltflds = pltflds, 
+                  condflds = condflds,
+                  dbqueriesWITH = dbqueriesWITH,
+                  dbqueries = dbqueries,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
@@ -451,6 +448,8 @@ modGBp2veg <- function(GBpopdat,
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
+  pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
+  pltcondxWITHqry <- estdat$pltcondxWITHqry
   
 
   ## Check p2vegtype 
@@ -490,7 +489,7 @@ modGBp2veg <- function(GBpopdat,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL, 
-                 whereqry = pcwhereqry, tfilter = vfilter)
+                 tfilter = vfilter)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
@@ -552,7 +551,6 @@ modGBp2veg <- function(GBpopdat,
                    pivot = pivot,
                    dbconn = popconn,
                    pltidsWITHqry = pltcondxadjWITHqry,
-                   pcwhereqry = pcwhereqry,
                    pltidsid = pltidsid,
                    datSum_opts = datSum_options(adjtree = adjtree,
                                                 adjvar = "vadjfac",

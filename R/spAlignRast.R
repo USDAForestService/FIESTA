@@ -33,7 +33,7 @@ spAlignRast <- function(ref_rastfn,
                         clip = FALSE,
                         bnd = NULL,
                         bnd_dsn = NULL,
-                        buffdist = 90,
+                        buffdist = NULL,
                         tile = TRUE,
                         tile_blocksize = 256,
                         makestack = FALSE,
@@ -223,7 +223,7 @@ spAlignRast <- function(ref_rastfn,
         ## get extent of bnd and add to argument list
         bndext <- sf::st_bbox(sf::st_buffer(bndx, buffdist))
       } else {
-        bndext <- sf::st_bbox(bndx, buffdist)
+        bndext <- sf::st_bbox(bndx)
       }
       #bndext <- sf::st_bbox(bndx)
       outrast_extent <- c("-te", as.character(bndext))
@@ -257,7 +257,7 @@ spAlignRast <- function(ref_rastfn,
 
     ## create cl argument list with:
     ## output raster extent (te), pixel res (tr), and datatype (wt)
-    args <- c(outrast_extent, pixel_res, resample_method, datatype)
+    args <- c(args, pixel_res, resample_method, datatype)
 
     if (clip) {
       args_vrt <- args
@@ -323,11 +323,13 @@ spAlignRast <- function(ref_rastfn,
 
     ## remove returns from argument list
     cl_arg <- sub("\n", "", args)
-    cl_arg_vrt <- c(sub("\n", "", args_vrt), "-overwrite")
-
+    
+    if (clip) {
+      cl_arg_vrt <- c(sub("\n", "", args_vrt), "-overwrite")
+    }
 
     message("\nprocessing ", basename(rastfn), "...")
-    message("warp arguments:\n", toString(args))
+    message("warp arguments:\n", toString(cl_arg))
 
     ## Use warp to resample to same pixel size and extent
     gdalraster::warp(rastfn, dst_filename = dst_filename, t_srs = t_srs, cl_arg = cl_arg)

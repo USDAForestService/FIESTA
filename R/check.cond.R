@@ -95,9 +95,13 @@ check.cond <- function(areawt,
   ## Build cdomdat FROM query
   joinqry <- getjoinqry(joinid1 = cuniqueid, joinid2 = pltidsid,
                         alias1 = "pc.", alias2 = "pltidsadj.")
+  # cdomdatfromqry <- 
+  #   paste0("\nFROM pltidsadj",
+  #          "\nLEFT JOIN pltcondx pc ", joinqry)
+  
   cdomdatfromqry <- 
     paste0("\nFROM pltidsadj",
-           "\nLEFT JOIN pltcondx pc ", joinqry)
+           "\nJOIN pltcondx pc ", joinqry)
   
   ## Build cdomdat query
   cdomdatqry <- 

@@ -366,6 +366,8 @@ modMAratio <- function(MApopdat,
   adjcase <- MApopdat$adjcase
   pltidsid <- MApopdat$pjoinid
   pltassgnid <- MApopdat$pltassgnid
+  pltflds <- MApopdat$pltflds
+  condflds <- MApopdat$condflds
   
   if (is.null(prednames)) {
     prednames <- MApopdat$prednames
@@ -392,14 +394,7 @@ modMAratio <- function(MApopdat,
         stop("invalid database connection")
       }
     }
-    #pltcondx <- dbqueries$pltcondx
-    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
-    pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
-  } else {
-    pltcondxWITHqry <- NULL
-    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
   }
-  
   
   
   ########################################
@@ -424,6 +419,10 @@ modMAratio <- function(MApopdat,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondx = pltcondx,
+                  pltflds = pltflds, 
+                  condflds = condflds,
+                  dbqueriesWITH = dbqueriesWITH,
+                  dbqueries = dbqueries,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   landarea = landarea,
@@ -459,6 +458,8 @@ modMAratio <- function(MApopdat,
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
+  pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
+  pltcondxWITHqry <- estdat$pltcondxWITHqry
   
   
   ###################################################################################
@@ -508,8 +509,7 @@ modMAratio <- function(MApopdat,
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                 rowgrpord = rowgrpord, title.rowgrp = NULL, 
-                 whereqry = pcwhereqry)
+                 rowgrpord = rowgrpord, title.rowgrp = NULL)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
@@ -558,11 +558,6 @@ modMAratio <- function(MApopdat,
   #################################################################################
   if (rowvar == "TOTAL") rowcol.total <- TRUE
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  if (popdatindb) {
-    pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
-  } else {
-    pltidsWITHqry <- NULL
-  }
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -588,8 +583,7 @@ modMAratio <- function(MApopdat,
                ACI = ACI,
                domclassify = domclassify,
                dbconn = popconn, schema = pop_schema,
-               pltidsWITHqry = pltidsWITHqry,
-               pcwhereqry = pcwhereqry,
+               pltidsWITHqry = pltcondxadjWITHqry,
                pltidsid = pltidsid,
                bytdom = bytdom,
                gui = gui)

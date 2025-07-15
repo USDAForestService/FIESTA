@@ -465,8 +465,6 @@ check.popdataVOL <-
     }
     condvars <- unique(c(condvars, cvars2keep))[!unique(c(condvars, cvars2keep)) %in% pvars]
     cselectqry <- toString(paste0(conda., condvars))
-    pltcondflds <- unique(c(condvars, pvars))
-
 
     ## 6.2. Add FORTYPGRP to SELECT query
     ###############################################################
@@ -478,11 +476,13 @@ check.popdataVOL <-
                           classnm = "FORTYPGRPCD")
       cselectqry <- paste0(cselectqry, ", ",
                          "\n ", ftypqry)
-      pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
+      condvars <- c(condvars, "FORTYPGRPCD")
     }
 
     ## 6.3. Build query for pltcondx
     ###############################################################
+    pltcondflds <- unique(c(condvars, pvars))
+    
     if (is.null(pvars)) {
       ## Build query for pltcondx
       pltcondx.qry <- paste0("SELECT ", cselectqry, ", 1 AS TOTAL",
@@ -499,19 +499,19 @@ check.popdataVOL <-
     ## 6.4. Build WITH queries for pltcondx
     ###############################################################
 
-    ## Build WITH query for pltcondx, including pltids WITH query
-    pltcondxWITHqry <- paste0(pltidsWITHqry, ", ",
-                               "\n----- pltcondx",
-                               "\npltcondx AS",
-                               "\n(", pltcondx.qry, ")")
-    dbqueriesWITH$pltcondxWITH <- pltcondxWITHqry
-
-    ## Build WITH query for pltcondx, including pltidsadj WITH query
-    pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
-                               "\n----- pltcondx",
-                               "\npltcondx AS",
-                               "\n(", pltcondx.qry, ")")
-    dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
+    # ## Build WITH query for pltcondx, including pltids WITH query
+    # pltcondxWITHqry <- paste0(pltidsWITHqry, ", ",
+    #                            "\n----- pltcondx",
+    #                            "\npltcondx AS",
+    #                            "\n(", pltcondx.qry, ")")
+    # dbqueriesWITH$pltcondxWITH <- pltcondxWITHqry
+    # 
+    # ## Build WITH query for pltcondx, including pltidsadj WITH query
+    # pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
+    #                            "\n----- pltcondx",
+    #                            "\npltcondx AS",
+    #                            "\n(", pltcondx.qry, ")")
+    # dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
 
 
     ## 6.5. If returndata or savedata, run query for pltcondx
@@ -576,6 +576,8 @@ check.popdataVOL <-
     ## 8. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
     ##############################################################################
     returnlst <- list(pltcondflds = pltcondflds, ## vector of field names in pltcondx
+                      pltflds = pvars,
+                      condflds = condvars,
                       cuniqueid = cuniqueid,     ## unique identifier of plots in pltcondx
                       condid = condid,           ## unique identifier of conditions
                       areawt = areawt,           ## variable names used to calcuate area

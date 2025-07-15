@@ -375,7 +375,8 @@ modMAarea <- function(MApopdat,
   adjcase <- MApopdat$adjcase
   pltidsid <- MApopdat$pjoinid
   pltassgnid <- MApopdat$pltassgnid
-  pltcondflds <- MApopdat$pltcondflds
+  pltflds <- MApopdat$pltflds
+  condflds <- MApopdat$condflds
   
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
@@ -404,11 +405,6 @@ modMAarea <- function(MApopdat,
         stop("invalid database connection")
       }
     }
-    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
-    pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
-  } else {
-    pltcondxWITHqry <- NULL
-    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
   }
 
   
@@ -416,7 +412,7 @@ modMAarea <- function(MApopdat,
   ## Check area units
   ########################################
   unitchk <- pcheck.areaunits(unitarea=unitarea, areavar=areavar, 
-			areaunits=areaunits, metric=metric)
+			                        areaunits=areaunits, metric=metric)
   unitarea <- unitchk$unitarea
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
@@ -434,7 +430,10 @@ modMAarea <- function(MApopdat,
                   popdatindb = popdatindb,
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondx = pltcondx,
-                  pltcondflds = pltcondflds,
+                  pltflds = pltflds, 
+                  condflds = condflds,
+                  dbqueriesWITH = dbqueriesWITH,
+                  dbqueries = dbqueries,
                   totals = totals,
                   pop_fmt=pop_fmt, pop_dsn=pop_dsn,
                   landarea = landarea,
@@ -470,6 +469,8 @@ modMAarea <- function(MApopdat,
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
+  pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
+  pltcondxWITHqry <- estdat$pltcondxWITHqry
   
   
   ###################################################################################
@@ -492,8 +493,7 @@ modMAarea <- function(MApopdat,
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                 rowgrpord = rowgrpord, title.rowgrp = NULL,
-                 whereqry = pcwhereqry)
+                 rowgrpord = rowgrpord, title.rowgrp = NULL)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   bydomainlst <- rowcolinfo$domainlst
@@ -534,7 +534,6 @@ modMAarea <- function(MApopdat,
                pltidsadj = pltidsadj,
                pltidsid = pltidsid,
                pltcondxadjWITHqry = pltcondxadjWITHqry,
-               pcwhereqry = pcwhereqry,
                classifyrow = classifyrow,
                classifycol = classifycol)
   if (is.null(conddat)) stop(NULL)

@@ -438,7 +438,8 @@ modGBratio <- function(GBpopdat,
   adjcase <- GBpopdat$adjcase
   pltidsid <- GBpopdat$pjoinid
   pltassgnid <- GBpopdat$pltassgnid
-  pltcondflds <- GBpopdat$pltcondflds
+  pltflds <- GBpopdat$pltflds
+  condflds <- GBpopdat$condflds
   
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
@@ -450,12 +451,6 @@ modGBratio <- function(GBpopdat,
         stop("invalid database connection")
       }
     }
-    #pltcondx <- dbqueries$pltcondx
-    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
-    pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
-  } else {
-    pltcondxWITHqry <- NULL
-    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
   }
   
 
@@ -482,7 +477,10 @@ modGBratio <- function(GBpopdat,
                   popdatindb = popdatindb, 
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondx = pltcondx,
-                  pltcondflds = pltcondflds,
+                  pltflds = pltflds, 
+                  condflds = condflds,
+                  dbqueriesWITH = dbqueriesWITH,
+                  dbqueries = dbqueries,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
@@ -520,6 +518,8 @@ modGBratio <- function(GBpopdat,
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
+  pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
+  pltcondxWITHqry <- estdat$pltcondxWITHqry
   
   
   ###################################################################################
@@ -568,8 +568,7 @@ modGBratio <- function(GBpopdat,
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                 rowgrpord = rowgrpord, title.rowgrp = NULL, 
-                 whereqry = pcwhereqry)
+                 rowgrpord = rowgrpord, title.rowgrp = NULL)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
@@ -618,12 +617,6 @@ modGBratio <- function(GBpopdat,
   ### Get estimation data from tree table
   ###############################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  if (popdatindb) {
-    pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
-  } else {
-    pltidsWITHqry <- NULL
-  }
-  
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -649,8 +642,7 @@ modGBratio <- function(GBpopdat,
                ACI = ACI,
                domclassify = domclassify,
                dbconn = popconn, schema = pop_schema,
-               pltidsWITHqry = pltidsWITHqry,
-               pcwhereqry = pcwhereqry,
+               pltidsWITHqry = pltcondxadjWITHqry,
                pltidsid = pltidsid,
                bytdom = bytdom)
   if (is.null(treedat)) return(NULL) 

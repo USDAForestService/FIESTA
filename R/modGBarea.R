@@ -378,7 +378,8 @@ modGBarea <- function(GBpopdat,
   adjcase <- GBpopdat$adjcase
   pltidsid <- GBpopdat$pjoinid
   pltassgnid <- GBpopdat$pltassgnid
-  pltcondflds <- GBpopdat$pltcondflds
+  pltflds <- GBpopdat$pltflds
+  condflds <- GBpopdat$condflds
 
   if (popdatindb) {
     if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
@@ -390,10 +391,6 @@ modGBarea <- function(GBpopdat,
         stop("invalid database connection")
       }
     }
-    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
-    pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
-  } else {
-    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
   }
 
   ########################################
@@ -418,7 +415,10 @@ modGBarea <- function(GBpopdat,
                   popdatindb = popdatindb,
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondx = pltcondx,
-                  pltcondflds = pltcondflds,
+                  pltflds = pltflds, 
+                  condflds = condflds,
+                  dbqueriesWITH = dbqueriesWITH,
+                  dbqueries = dbqueries,
                   totals = totals,
                   pop_fmt = pop_fmt, pop_dsn = pop_dsn,
                   sumunits = sumunits,
@@ -456,7 +456,9 @@ modGBarea <- function(GBpopdat,
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
-
+  pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
+  pltcondxWITHqry <- estdat$pltcondxWITHqry
+  
 
   ###################################################################################
   ### Check row and column data
@@ -478,8 +480,7 @@ modGBarea <- function(GBpopdat,
                  title.rowvar = title.rowvar, title.colvar = title.colvar,
                  rowlut = rowlut, collut = collut,
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm,
-                 rowgrpord = rowgrpord, title.rowgrp = NULL,
-                 whereqry = pcwhereqry)
+                 rowgrpord = rowgrpord, title.rowgrp = NULL)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   bydomainlst <- rowcolinfo$domainlst

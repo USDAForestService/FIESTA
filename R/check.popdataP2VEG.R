@@ -639,7 +639,6 @@ check.popdataP2VEG <-
   }
   condvars <- unique(c(condvars, cvars2keep))[!unique(c(condvars, cvars2keep)) %in% pvars]
   cselectqry <- toString(paste0(conda., unique(c(condvars, cvars2keep))))
-  pltcondflds <- unique(c(condvars, pvars))
   
   
   ## 6.2. Add FORTYPGRP to SELECT query
@@ -652,7 +651,7 @@ check.popdataP2VEG <-
                         classnm = "FORTYPGRPCD")
     cselectqry <- paste0(cselectqry, ", ",
                          "\n ", ftypqry)
-    pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
+    condvars <- c(condvars, "FORTYPGRPCD")
   }
   
   ## Define P2VEG summed condprop_unadj to use for peracre area estimates
@@ -661,6 +660,8 @@ check.popdataP2VEG <-
   
   ## 6.3. Build query for pltcondx
   ###############################################################
+  pltcondflds <- unique(c(condvars, pvars))
+  
   if (is.null(pvars)) {
     ## Build query for pltcondx
     pltcondx.qry <- paste0("SELECT ", cselectqry, ", 1 AS TOTAL",
@@ -749,6 +750,8 @@ check.popdataP2VEG <-
   ## 8. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
   ##############################################################################  
   returnlst <- list(pltcondflds = pltcondflds, ## vector of field names in pltcondx
+                    pltflds = pltflds,
+                    condflds = condflds,
                     cuniqueid = cuniqueid,     ## unique identifier of plots in pltcondx
                     condid = condid,           ## unique identifier of conditions
                     areawt = areawt,           ## variable names used to calcuate area

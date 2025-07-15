@@ -656,6 +656,8 @@ modMApop <- function(popType="VOL",
     pltidsadj <- popcheck$pltidsadj
     pltcondx <- popcheck$pltcondx
     pltcondflds <- popcheck$pltcondflds
+    pltflds <- popcheck$pltflds
+    condflds <- popcheck$condflds
     cuniqueid <- popcheck$cuniqueid
     condid <- popcheck$condid
     adjfactors <- popcheck$adjfactors
@@ -789,7 +791,7 @@ modMApop <- function(popType="VOL",
 
     ## Move new columns to end of table
     setcolorder(pltcondx, c(pltcondxcols, newcols))
-    pltcondflds <- c(pltcondflds, newcols)
+    condflds <- c(condflds, newcols)
     setkeyv(pltcondx, pltcondxkey)
   }
 
@@ -816,20 +818,32 @@ modMApop <- function(popType="VOL",
     returnlst$bndx <- bndx
   }
   returnlst <- append(returnlst, list(
-    pltidsadj = pltidsadj, pltcondx=pltcondx,
-    pltcondflds = pltcondflds, pjoinid = pjoinid,
-    cuniqueid = cuniqueid, pltassgnid = pltassgnid,
-    condid = condid, ACI = ACI,
-    areawt = areawt, areawt2 = areawt2, adjcase = adjcase,
-    dbqueries = dbqueries, dbqueriesWITH = dbqueriesWITH,
-    pltassgnx = pltassgnx, unitlut = data.table(unitlut),
-    unitarea = unitarea, npixels = npixels,
-    npixelvar = npixelvar, estvar.area = estvar.area,
-    areavar = areavar, areaunits = areaunits,
-    unitvar = unitvar, unitvars = unitvars,
-    plotsampcnt = plotsampcnt, condsampcnt = condsampcnt,
-    states = states, invyrs = invyrs, adj = adj,
-    P2POINTCNT = P2POINTCNT, plotunitcnt = plotunitcnt))
+    pltidsadj = pltidsadj, 
+    pltcondx = pltcondx,
+    #pltcondflds = pltcondflds, 
+    pltflds = pltflds,
+    condflds = condflds,
+    pjoinid = pjoinid,
+    cuniqueid = cuniqueid, condid = condid, 
+    ACI = ACI,
+    areawt = areawt, areawt2 = areawt2, 
+    adjcase = adjcase,
+    dbqueries = dbqueries, 
+    dbqueriesWITH = dbqueriesWITH,
+    pltassgnx = pltassgnx, 
+    pltassgnid = pltassgnid,
+    unitarea = unitarea, 
+    areavar = areavar, areaunits = areaunits, 
+    unitvar = unitvar, unitvars = unitvars, 
+    unitlut = data.table(unitlut),
+    npixels = npixels,
+    npixelvar = npixelvar, 
+    estvar.area = estvar.area,
+    plotsampcnt = plotsampcnt, 
+    condsampcnt = condsampcnt,
+    states = states, invyrs = invyrs, 
+    adj = adj, P2POINTCNT = P2POINTCNT, 
+    plotunitcnt = plotunitcnt))
 
   if (popType == "VOL") {
     if (!is.null(treex)) {

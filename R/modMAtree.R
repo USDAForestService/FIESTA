@@ -395,6 +395,8 @@ modMAtree <- function(MApopdat,
   pltidsid <- MApopdat$pjoinid
   pltassgnid <- MApopdat$pltassgnid
   pltcondflds <- MApopdat$pltcondflds
+  pltflds <- MApopdat$pltflds
+  condflds <- MApopdat$condflds
   
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
@@ -423,12 +425,6 @@ modMAtree <- function(MApopdat,
         stop("invalid database connection")
       }
     }
-    #pltcondx <- dbqueries$pltcondx
-    pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
-    pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
-  } else {
-    pltcondxWITHqry <- NULL
-    pltcondxWITHqry=pltcondxadjWITHqry <- NULL
   }
 
   
@@ -454,7 +450,10 @@ modMAtree <- function(MApopdat,
                   popdatindb = popdatindb,
                   popconn = popconn, pop_schema = pop_schema,
                   pltcondx = pltcondx,
-                  pltcondflds = pltcondflds,
+                  pltflds = pltflds, 
+                  condflds = condflds,
+                  dbqueriesWITH = dbqueriesWITH,
+                  dbqueries = dbqueries,
                   totals = totals,
                   pop_fmt=pop_fmt, pop_dsn=pop_dsn,
                   landarea = landarea,
@@ -490,6 +489,8 @@ modMAtree <- function(MApopdat,
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
+  pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
+  pltcondxWITHqry <- estdat$pltcondxWITHqry
   
   
   ###################################################################################
@@ -538,8 +539,7 @@ modMAtree <- function(MApopdat,
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                 rowgrpord = rowgrpord, title.rowgrp = NULL, 
-                 whereqry = pcwhereqry)
+                 rowgrpord = rowgrpord, title.rowgrp = NULL)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
@@ -579,11 +579,6 @@ modMAtree <- function(MApopdat,
   ### GET ESTIMATION DATA FROM TREE TABLE
   #################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  if (popdatindb) {
-    pltidsWITHqry <- dbqueriesWITH$pltcondxadjWITH
-  } else {
-    pltidsWITHqry <- NULL
-  }
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -605,8 +600,7 @@ modMAtree <- function(MApopdat,
                ACI = ACI,
                domclassify = domclassify,
                dbconn = popconn, schema = pop_schema,
-               pltidsWITHqry = pltidsWITHqry,
-               pcwhereqry = pcwhereqry,
+               pltidsWITHqry = pltcondxadjWITHqry,
                pltidsid = pltidsid,
                bytdom = bytdom,
                gui = gui)

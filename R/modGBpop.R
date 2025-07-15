@@ -796,6 +796,8 @@ modGBpop <- function(popType = "VOL",
     pltidsadj <- popcheck$pltidsadj
     pltcondx <- popcheck$pltcondx
     pltcondflds <- popcheck$pltcondflds
+    pltflds <- popcheck$pltflds
+    condflds <- popcheck$condflds
     cuniqueid <- popcheck$cuniqueid
     condid <- popcheck$condid
     adjfactors <- popcheck$adjfactors
@@ -851,6 +853,8 @@ modGBpop <- function(popType = "VOL",
     pltidsadj <- popcheck$pltidsadj
     pltcondx <- popcheck$pltcondx
     pltcondflds <- popcheck$pltcondflds
+    pltflds <- popcheck$pltflds
+    condflds <- popcheck$condflds
     cuniqueid <- popcheck$cuniqueid
     condid <- popcheck$condid
     adjfactors <- popcheck$adjfactors
@@ -861,16 +865,15 @@ modGBpop <- function(popType = "VOL",
     ACI.filter <- popcheck$ACI.filter
     adjcase <- popcheck$adjcase
     sccmx <- popcheck$sccmx
+    areawt <- popcheck$areawt
     
-    if (returndata) {
-      if (popType == "GRM") {
-        treex <- popcheck$treex
-        tuniqueid <- popcheck$tuniqueid
-        grmx <- popcheck$grmx
-        beginx <- popcheck$beginx
-        midptx <- popcheck$midptx
-      }
-    }
+    # if (popType == "GRM") {
+    #   treex <- popcheck$treex
+    #   tuniqueid <- popcheck$tuniqueid
+    #   grmx <- popcheck$grmx
+    #   beginx <- popcheck$beginx
+    #   midptx <- popcheck$midptx
+    # }
   }
   
   if (popType == "P2VEG") {
@@ -1043,7 +1046,7 @@ modGBpop <- function(popType = "VOL",
     
     ## Move new columns to end of table
     setcolorder(pltcondx, c(pltcondxcols, newcols))
-    pltcondflds <- c(pltcondflds, newcols)
+    condflds <- c(condflds, newcols)
     setkeyv(pltcondx, pltcondxkey)
   }
   
@@ -1071,7 +1074,9 @@ modGBpop <- function(popType = "VOL",
     popdatindb = popdatindb,
     pltidsadj = pltidsadj,
     pltcondx = pltcondx, 
-    pltcondflds = pltcondflds, 
+    #pltcondflds = pltcondflds, 
+    pltflds = pltflds,
+    condflds = condflds,
     pjoinid = pjoinid,
     cuniqueid = cuniqueid, condid = condid, 
     ACI = ACI,
@@ -1135,11 +1140,12 @@ modGBpop <- function(popType = "VOL",
   if (popType %in% c("CHNG")) {
     returnlst$sccmx <- sccmx
   }
+
   if (popType %in% c("GRM")) {
-    returnlst$treex <- popcheck$treef
-    returnlst$grmx <- popcheck$grmf
-    returnlst$beginx <- popcheck$beginf
-    returnlst$midptx <- popcheck$midptf
+    returnlst$treex <- popcheck$treex
+    returnlst$grmx <- popcheck$grmx
+    returnlst$beginx <- popcheck$beginx
+    returnlst$midptx <- popcheck$midptx
   }
   
   if (adj != "none") {

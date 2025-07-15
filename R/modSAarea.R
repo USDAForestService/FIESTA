@@ -524,7 +524,8 @@ modSAarea <- function(SApopdatlst = NULL,
     pltassgnid <- SApopdat$pltassgnid
     SAdoms <- SApopdat$SAdoms
     largebnd.unique <- SApopdat$largebnd.unique
-    pltcondflds <- SApopdat$pltcondflds
+    pltflds <- SApopdat$pltflds
+    condflds <- SApopdat$condflds
     
     ## check smallbnd.dom
     ########################################################
@@ -568,11 +569,6 @@ modSAarea <- function(SApopdatlst = NULL,
           stop("invalid database connection")
         }
       }
-      #pltcondx <- dbqueries$pltcondx
-      pltcondxWITHqry <- dbqueriesWITH$pltcondxWITH
-      pltcondxadjWITHqry <- dbqueriesWITH$pltcondxadjWITH
-    } else {
-      pltcondxWITHqry=pltcondxadjWITHqry <- NULL
     }
     
     ########################################
@@ -601,7 +597,10 @@ modSAarea <- function(SApopdatlst = NULL,
                     popdatindb = popdatindb, 
                     popconn = popconn, pop_schema = pop_schema,
                     pltcondx = pltcondx,
-                    pltcondflds = pltcondflds,
+                    pltflds = pltflds, 
+                    condflds = condflds,
+                    dbqueriesWITH = dbqueriesWITH,
+                    dbqueries = dbqueries,
                     totals = totals,
                     pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                     landarea = landarea,
@@ -637,6 +636,8 @@ modSAarea <- function(SApopdatlst = NULL,
     pcwhereqry <- estdat$where.qry
     SCHEMA. <- estdat$SCHEMA.
     pltcondflds <- estdat$pltcondflds
+    pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
+    pltcondxWITHqry <- estdat$pltcondxWITHqry
     
     
     ###################################################################################
@@ -659,8 +660,7 @@ modSAarea <- function(SApopdatlst = NULL,
                    title.rowvar = title.rowvar, title.colvar = title.colvar, 
                    rowlut = rowlut, collut = collut, 
                    rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                   rowgrpord = rowgrpord, title.rowgrp = NULL, 
-                   whereqry = pcwhereqry)
+                   rowgrpord = rowgrpord, title.rowgrp = NULL)
     uniquerow <- rowcolinfo$uniquerow
     uniquecol <- rowcolinfo$uniquecol
     bydomainlst <- rowcolinfo$domainlst
@@ -712,7 +712,6 @@ modSAarea <- function(SApopdatlst = NULL,
                  pltidsadj = pltidsadj,
                  pltidsid = pltidsid,
                  pltcondxadjWITHqry = pltcondxadjWITHqry,
-                 pcwhereqry = pcwhereqry,
                  classifyrow = classifyrow,
                  classifycol = classifycol)
     if (is.null(conddat)) stop(NULL)

@@ -31,50 +31,50 @@ check.condCHNG <- function(areawt, areawt2,
   ### Get condition-level domain data
   ###################################################################################
   estnm <- "ESTIMATED_VALUE"
-  estvara. <- "sccm."
-  sccmnm <- ifelse(popdatindb, sccmx, "sccmx")
-
-
-  ## Define select query for estimates
-  estvarqry <- paste0(estvara., areawt)
-  if (!is.null(areawt2)) {
-    estvarqry <- areawt * areawt2
-  }
   
-  ## Define select query for estimates
-  if (chngtype == "annual") {
-    estvarqry <- paste0(estvarqry, " / 4 / pc.REMPER")
+  if (adj == "none") {
+    sccmnm <- ifelse(popdatindb, sccmx, "sccmx")
+    
+    ## Define select query for estimates
+    estvarqry <- paste0("sccm.", areawt)
+    if (!is.null(areawt2)) {
+      estvarqry <- areawt * areawt2
+    }
+    
+    ## Define select query for estimates
+    if (chngtype == "annual") {
+      estvarqry <- paste0(estvarqry, " / 4 / pc.REMPER")
+    } else {
+      estvarqry <- paste0(estvarqry, " / 4")
+    }
   } else {
-    estvarqry <- paste0(estvarqry, " / 4")
-  }
-  
-  if (adj %in% c("samp", "plot")) {
+    
+    ## Define select query for estimates
+    estvarqry <- paste0("subpcprop.", areawt)
+    if (!is.null(areawt2)) {
+      estvarqry <- areawt * areawt2
+    }
     estvarqry <- paste0(estvarqry, " * ", adjcase)
+    
+    ## Define select query for estimates
+    if (chngtype == "annual") {
+      estvarqry <- paste0(estvarqry, " / pc.REMPER")
+    }
   }
   
   ## Define select query for estimates
-  if (chngtype == "annual") {
-    estvarqry <- paste0("SUM(COALESCE(", estvarqry, ", 0)) AS ", estnm)
-  } else {
-    estvarqry <- paste0("SUM(COALESCE(", estvarqry, ", 0)) AS ", estnm)
-  }
-  
+  estvarqry <- paste0("SUM(COALESCE(", estvarqry, ", 0)) AS ", estnm)
+
 
   ## Build WHERE statement
-  if (is.null(pcwhereqry)) {
-    pcwhereqry <- paste0(
+  whereqry <- NULL
+  if (adj == "none") {
+    whereqry <- paste0(
       "\nWHERE pc.CONDPROP_UNADJ IS NOT NULL",
-      "\n    AND ((sccm.SUBPTYP = 3 AND pc.PROP_BASIS = 'MACR') OR 
+      "\n    AND ((sccm.SUBPTYP = 3 AND pc.PROP_BASIS = 'MACR') OR
               (sccm.SUBPTYP = 1 AND pc.PROP_BASIS = 'SUBP'))",
       "\n    AND COALESCE(pc.COND_NONSAMPLE_REASN_CD, 0) = 0",
       "\n    AND COALESCE(pc.PREV_COND_NONSAMPLE_REASN_CD, 0) = 0")
-  } else {
-    pcwhereqry <- paste0(pcwhereqry, 
-                         "\n    AND pc.CONDPROP_UNADJ IS NOT NULL",
-                         "\n    AND ((sccm.SUBPTYP = 3 AND pc.PROP_BASIS = 'MACR') OR 
-                                    (sccm.SUBPTYP = 1 AND pc.PROP_BASIS = 'SUBP'))",
-                         "\n    AND COALESCE(pc.COND_NONSAMPLE_REASN_CD, 0) = 0",
-                         "\n    AND COALESCE(pc.PREV_COND_NONSAMPLE_REASN_CD, 0) = 0")
   }
   
   ## Build SELECT query
@@ -140,18 +140,27 @@ check.condCHNG <- function(areawt, areawt2,
     paste0("\nFROM pltidsadj",
            "\nJOIN pltcondx pc ", joinqry)
   
-  cdomdatfromqry <- 
-    paste0(cdomdatfromqry, 
-           "\nJOIN ", sccmnm, " sccm ON (sccm.plt_cn = pc.plt_cn 
-                          AND sccm.prev_plt_cn = pc.prev_plt_cn 
-                          AND sccm.condid = pc.condid 
-                          AND sccm.prevcond = pc.prev_condid)")
-    
+  if (adj == "none") {
+    cdomdatfromqry <-
+      paste0(cdomdatfromqry,
+             "\nJOIN ", sccmnm, " sccm ON (sccm.plt_cn = pc.plt_cn
+                    AND sccm.prev_plt_cn = pc.prev_plt_cn
+                    AND sccm.condid = pc.condid
+                    AND sccm.prevcond = pc.prev_condid)")
+  } else {
+    cdomdatfromqry <- 
+      paste0(cdomdatfromqry, 
+             "\nJOIN subpcprop ON (subpcprop.plt_cn = pc.plt_cn 
+                    AND subpcprop.prev_plt_cn = pc.prev_plt_cn 
+                    AND subpcprop.condid = pc.condid 
+                    AND subpcprop.prevcond = pc.prev_condid)")
+  }
+  
   ## Build cdomdat query
   cdomdat.qry <- 
     paste0(cdomdatselectqry, 
            cdomdatfromqry,
-           pcwhereqry,
+           whereqry,
            "\nGROUP BY ", toString(byvars))
 
   #Run query for cdomdat

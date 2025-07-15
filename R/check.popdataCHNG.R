@@ -105,7 +105,7 @@ check.popdataCHNG <-
     conda. <- "c."
     sccma. <- "sccm."
     pltidsa. <- "pltids."
-
+    
     ## subp_cond_chng_mtrx table
     sccmlst <- popTabchk(c("subp_cond_chng_mtrx", "sccm"), 
                          tabtext = "subp_cond_chng_mtrx",
@@ -606,10 +606,9 @@ check.popdataCHNG <-
     } else {
       condvars <- "*"
     }
-    cvars <- unique(c(condvars, cvars2keep))
-    cselectqry <- toString(paste0(conda., cvars))
-    pcondselectqry <- toString(paste0("pcond.", cvars, " AS PREV_", cvars))
-    pltcondflds <- unique(c(cvars, paste0("PREV_", cvars), pvars), paste0("PREV_", pvars))
+    condvars <- unique(c(condvars, cvars2keep))[!unique(c(condvars, cvars2keep)) %in% pvars]
+    cselectqry <- toString(paste0(conda., condvars))
+    pcondselectqry <- toString(paste0("pcond.", condvars, " AS PREV_", condvars))
     
     
     ## 6.2. Add FORTYPGRP to SELECT query
@@ -629,45 +628,47 @@ check.popdataCHNG <-
                            classnm = "FORTYPGRPCD")
       pcondselectqry <- paste0(pcondselectqry, ", ",
                                "\n ", pftypqry)
-      
-      pltcondflds <- c(pltcondflds, "FORTYPGRPCD")
+      #condvars <- c(condvars, "FORTYPGRPCD")
     }
     
     
     ## 6.3. Build query for pltcondx
     ###############################################################
+    pltcondflds <- unique(c(condvars, paste0("PREV_", condvars), pvars), paste0("PREV_", pvars))
+    
     pltcondx.qry <- paste0("SELECT ", cselectqry, ", ",
                            "\n", pcondselectqry, ", ",
                            "\n", pselectqry, ", 1 AS TOTAL,",
                            "\n", pplotselectqry, ", 1 AS PREV_TOTAL",
                            ppcfromqry)
-    pltcondxqry <- paste0(pltidsWITHqry,
-                          "\n", pltcondx.qry)
-    dbqueries$pltcondx <- pltcondxqry
+    dbqueries$pltcondx <- pltcondx.qry
     
     
     ## 6.4. Build WITH queries for pltcondx
     ###############################################################
     
-    ## Build WITH query for pltcondx, including pltids WITH query
-    pltcondxWITH.qry <- paste0(pltidsWITHqry, ", ",
-                               "\n----- get pltcondx",
-                               "\npltcondx AS",
-                               "\n(", pltcondx.qry, ")")
-    dbqueriesWITH$pltcondxWITH <- pltcondxWITH.qry
-    
-    ## Build WITH query for pltcondx, including pltidsadj WITH query
-    pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
-                                 "\n----- pltcondx",
-                                 "\npltcondx AS",
-                                 "\n(", pltcondx.qry, ")")
-    dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
+    # ## Build WITH query for pltcondx, including pltids WITH query
+    # pltcondxWITH.qry <- paste0(pltidsWITHqry, ", ",
+    #                            "\n----- get pltcondx",
+    #                            "\npltcondx AS",
+    #                            "\n(", pltcondx.qry, ")")
+    # dbqueriesWITH$pltcondxWITH <- pltcondxWITH.qry
+    # 
+    # ## Build WITH query for pltcondx, including pltidsadj WITH query
+    # pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
+    #                              "\n----- pltcondx",
+    #                              "\npltcondx AS",
+    #                              "\n(", pltcondx.qry, ")")
+    # dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
     
     
     ## 6.5. If returndata or savedata, run query for pltcondx
     ##################################################################
     if (returndata || savedata) {
       pltcondindb <- FALSE
+      
+      pltcondxqry <- paste0(pltidsWITHqry,
+                            "\n", pltcondx.qry)
       
       ## Run final plot/cond query, including pltidsqry
       if (pltaindb) {
@@ -707,6 +708,7 @@ check.popdataCHNG <-
     ## 7. Build CASE statement for adding adjustment factors to SELECT
     ##################################################################
     if (adj %in% c("samp", "plot")) {
+      areawt <- "CONDPROP_UNADJ"
       propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
       
       if ("COND" %in% names(propvars) && adjvars['COND'] %in% names(adjfactors)) {
@@ -728,6 +730,8 @@ check.popdataCHNG <-
     ## 8.	Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE. 
     ##############################################################################  
     returnlst <- list(pltcondflds = pltcondflds, ## vector of field names in pltcondx
+                      pltflds = pvars,
+                      condflds = condvars,
                       cuniqueid = cuniqueid,     ## unique identifier of plots in pltcondx
                       condid = condid,           ## unique identifier of conditions
                       sccmid = sccmid,           ## unique identifier of plots in sccm
@@ -999,14 +1003,18 @@ check.popdataCHNG <-
           treevars <- "*"
         }
         tselectqry <- toString(paste0(treea., unique(c(tuniqueid, treevars))))
-        ptreeselectqry <- toString(paste0(ptreea., unique(c(tuniqueid, treevars))))
+        ptreeselectqry <- toString(paste0(ptreea., treevars, " AS PREV_", treevars))
         
         ## Build final tree query, including pltidsqry
+        # treeqry <- paste0(pltidsWITHqry,
+        #                   "\n SELECT ", tselectqry,
+        #                   tfromqry,
+        #                   "\nUNION",
+        #                   "\n SELECT ", ptreeselectqry, 
+        #                   tfromqry)
         treeqry <- paste0(pltidsWITHqry,
-                          "\n SELECT ", tselectqry,
-                          tfromqry,
-                          "\nUNION",
-                          "\n SELECT ", ptreeselectqry,
+                          "\n SELECT ", tselectqry, ", ",
+                          "\n", ptreeselectqry,
                           tfromqry)
         dbqueries$tree <- treeqry
         
@@ -1083,7 +1091,6 @@ check.popdataCHNG <-
         ## Build final grm query, including pltidsqry
         grmqry <- paste0(pltidsWITHqry,
                          "\n SELECT ", grmselectqry,
-                         "\n FROM pltids",
                          grmfromqry)
         dbqueries$grm <- grmqry
         

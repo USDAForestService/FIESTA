@@ -3,7 +3,8 @@ check.estdata <-
            popType, 
            popdatindb, popconn = NULL, pop_schema = pop_schema,
            pltcondx, totals,
-           pltcondflds,
+           pltflds, condflds,
+           dbqueriesWITH = NULL, dbqueries = NULL,
            pop_fmt = NULL, pop_dsn = NULL, 
            sumunits = FALSE, 
            landarea = NULL, landarea_both = TRUE, 
@@ -95,88 +96,55 @@ check.estdata <-
   
   # ## Get table fields - this will get any new fields added to pltcondx
   # ###########################################################################
-  if (!popdatindb) {
+  if (popdatindb) {
+    pltidsWITHqry <- dbqueriesWITH$pltidsWITH
+    pltidsadjWITHqry <- dbqueriesWITH$pltidsadjWITH
+    pltcondxqry <- dbqueries$pltcondx
+    pltcondflds <- c(pltflds, condflds)
+  } else {
     pltcondflds <- names(pltcondx)
+    pltidsadjWITHqry=pltidsWITH <- NULL
   }
 
   ## Build where statement with plot/condition filters
   ###########################################################################
-  where.qry <- {}
+  pcwhereqry <- {}
   
 
-  ## Check pcfilter (plot and cond filters) and add to where.qry
+  ## Check pcfilter (plot and cond filters) and add to pcwhereqry
   ###########################################################################
-  pcfilter <- check.logic(pltcondflds, pcfilter, syntax="SQL", filternm="pcfilter")
   if (!is.null(pcfilter)) {
-    
-    ## Check to make sure variable in pcfilter are in pltcondflds
-    pcfiltervars  <- unlist(lapply(pcfilter, 
-        function(x) pltcondflds[sapply(pltcondflds, function(y) grepl(y, x))]))
-    if (length(pcfiltervars) == 0) {
-      stop("pcfilter is invalid: ", pcfilter)
-    }
-    pcfiltertmp <- pcfilter
-    for (pcfiltervar in pcfiltervars) {
-      pcfiltertmp <- gsub(pcfiltervar, paste0("pc.", pcfiltervar), pcfiltertmp)
-    }
-    
-    pcfiltertmp <- RtoSQL(pcfiltertmp)
-    where.qry <- paste0("\nWHERE ", pcfiltertmp)
+    pcfilter <- check.pcfilter(pcfilter, pltflds = pltflds, condflds = condflds)
+    pcwhereqry <- paste0("\nWHERE ", pcfilter)
   }
+
   
-  
-  ## Check T1filter (plot and cond filters) and add to where.qry
+  ## Check T1filter (plot and cond filters) and add to pcwhereqry
   ###########################################################################
-  T1filter <- check.logic(pltcondflds, T1filter, syntax="SQL", filternm="T1filter")
   if (!is.null(T1filter)) {
+    T1filter <- check.pcfilter(T1filter, pltflds = pltflds, condflds = condflds)
     
-    ## Check to make sure variable in pcfilter are in pltcondflds
-    T1filtervars  <- unlist(lapply(T1filter, 
-            function(x) pltcondflds[sapply(pltcondflds, function(y) grepl(y, x))]))
-    if (length(T1filtervars) == 0) {
-      stop("T1filter is invalid: ", T1filter)
-    }
-    T1filtertmp <- T1filter
-    for (T1filtervar in T1filtervars) {
-      T1filtertmp <- gsub(T1filtervar, paste0("pc.", T1filtervar), T1filtertmp)
-    }
-    
-    T1filtertmp <- RtoSQL(T1filtertmp)
-    if (is.null(where.qry)) {
-      where.qry <- paste0("\nWHERE ", T1filtertmp)
+    if (is.null(pcwhereqry)) {
+      pcwhereqry <- paste0("\n WHERE ", T1filter)
     } else {
-      where.qry <- paste0(where.qry, " AND ", T1filtertmp)
+      pcwhereqry <- paste0(pcwhereqry, " AND ", T1filter)
     }
   }
   
-  
-  ## Check T1filter (plot and cond filters) and add to where.qry
+  ## Check T1filter (plot and cond filters) and add to pcwhereqry
   ###########################################################################
-  T2filter <- check.logic(pltcondflds, T2filter, syntax="SQL", filternm="T2filter")
   if (!is.null(T2filter)) {
+    T2filter <- check.pcfilter(T2filter, pltflds = pltflds, condflds = condflds)
     
-    ## Check to make sure variable in pcfilter are in pltcondflds
-    T2filtervars  <- unlist(lapply(T2filter, 
-            function(x) pltcondflds[sapply(pltcondflds, function(y) grepl(y, x))]))
-    if (length(T2filtervars) == 0) {
-      stop("T2filter is invalid: ", T2filter)
-    }
-    T2filtertmp <- T2filter
-    for (T2filtervar in T2filtervars) {
-      T2filtertmp <- gsub(T2filtervar, paste0("ppc.", T2filtervar), T2filtertmp)
-    }
-    
-    T2filtertmp <- RtoSQL(T2filtertmp)
-    if (is.null(where.qry)) {
-      where.qry <- paste0("\nWHERE ", T2filtertmp)
+    if (is.null(pcwhereqry)) {
+      pcwhereqry <- paste0("\n WHERE ", T2filter)
     } else {
-      where.qry <- paste0(where.qry, " AND ", T2filtertmp)
+      pcwhereqry <- paste0(pcwhereqry, " AND ", T2filter)
     }
   }
-  
   
 
-  ## Check landarea and add to where.qry
+  ## Check landarea and add to pcwhereqry
   #############################################################################
   landarealst <- c("FOREST", "ALL", "TIMBERLAND")
   landarea <- pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
@@ -186,8 +154,8 @@ check.estdata <-
   landarea.filter <- NULL
   landcols <- {}
   if (landarea == "ALL") {
-    if ("COND_STATUS_CD" %in% pltcondflds) {
-      landarea.filter <- "pc.COND_STATUS_CD <> 5"
+    if ("COND_STATUS_CD" %in% condflds) {
+      landarea.filter <- "c.COND_STATUS_CD <> 5"
       landcols <- "COND_STATUS_CD"
     } else {
       message("COND_STATUS_CD not in pltcond")
@@ -195,8 +163,8 @@ check.estdata <-
     }
     
   } else if (landarea %in% "FOREST") {
-    if ("COND_STATUS_CD" %in% pltcondflds) {
-      landarea.filter <- "pc.COND_STATUS_CD = 1"
+    if ("COND_STATUS_CD" %in% condflds) {
+      landarea.filter <- "c.COND_STATUS_CD = 1"
       landcols <- "COND_STATUS_CD"
     } else {
 	     message("COND_STATUS_CD not in pltcond")
@@ -204,47 +172,87 @@ check.estdata <-
     }
   } else if (landarea == "TIMBERLAND") {
     landcols <- c("SITECLCD", "RESERVCD")
-    if (any(!landcols %in% pltcondflds)) {
-      landcols.miss <- landcols[which(!landcols %in% pltcondflds)]
+    if (any(!landcols %in% condflds)) {
+      landcols.miss <- landcols[which(!landcols %in% condflds)]
       stop(paste("missing variables for TIMBERLAND landarea filter:",
 		                paste(landcols.miss, collapse=", ")))
     }
-    landarea.filter <- paste0("pc.SITECLCD IN(1,2,3,4,5,6) AND pc.RESERVCD = 0")
+    landarea.filter <- paste0("c.SITECLCD IN(1,2,3,4,5,6) AND c.RESERVCD = 0")
   }
     
   ## Check for missing landcols
   if (length(landcols) > 0) {
-    landcolsmiss <- landcols[which(!landcols %in% pltcondflds)]
+    landcolsmiss <- landcols[which(!landcols %in% condflds)]
     if (length(landcolsmiss) > 0) {
       message("missing variables: ", paste(landcolsmiss, collapse=", "))
 		  return(NULL)
     }
   }
 
-  ## Add landarea filter to where.qry
+  ## Add landarea filter to pcwhereqry
   if (!is.null(landarea.filter)) {
     if (popType == "CHNG" && landarea_both) {
-      landarea.filterCHNG <- gsub("pc.", "pc.PREV_", landarea.filter)
+      landarea.filterCHNG <- gsub("c.", "pcond.", landarea.filter)
       landarea.filter <- paste0("(", landarea.filter, 
                        "\n  AND ", landarea.filterCHNG, ")")
     }
-    if (!is.null(where.qry)) {
-      where.qry <- paste0(where.qry,
+    if (!is.null(pcwhereqry)) {
+      pcwhereqry <- paste0(pcwhereqry,
                         "\n  AND ", landarea.filter)
     } else {
-      where.qry <- paste0("\nWHERE ", landarea.filter)
+      pcwhereqry <- paste0("\n WHERE ", landarea.filter)
     }
   }
 
-  ## Add ACI.filter to where.qry
+  ## Add ACI.filter to pcwhereqry
   ###################################################################################
   if (esttype %in% c("TREE", "RATIO") && !ACI && landarea != "FOREST") {
-    ACI.filter <- "pc.COND_STATUS_CD = 1"
-    if (!is.null(where.qry)) {
-      where.qry <- paste0(where.qry,
+    ACI.filter <- "c.COND_STATUS_CD = 1"
+    if (!is.null(pcwhereqry)) {
+      pcwhereqry <- paste0(pcwhereqry,
                           "\n  AND ", ACI.filter)
     } else {
-      where.qry <- paste0("\nWHERE ", ACI.filter)
+      pcwhereqry <- paste0("\n WHERE ", ACI.filter)
+    }
+  }
+  
+  
+  ## Update pltcondx  or pltcondxqry with pcwhereqry
+  ########################################################
+  pltcondxadjWITHqry=pltcondxWITHqry <- NULL
+  if (!is.null(pcwhereqry)) {
+    if (!popdatindb && is.data.frame(pltcondx)) {
+      pcwhereqry <- gsub("p.", "pc.", pcwhereqry)
+      pcwhereqry <- gsub("c.", "pc.", pcwhereqry)
+    
+      pcqry <- paste0("SELECT * FROM pltcondx pc",
+                      pcwhereqry)
+      pcchk <- tryCatch(sqldf::sqldf(pcqry),
+                        error=function(e) {
+                          warning(e)
+                          return(NULL)})
+      if (is.null(pcchk) || nrow(pcchk) == 1) {
+        stop("invalid filter: \n", pcwhereqry)
+      } else {
+        pltcondx <- pcchk
+      }
+    } else {
+      pltcondx.qry <- paste0(pltcondxqry,
+                            pcwhereqry)
+      
+      ## Build WITH query for pltcondx, including pltids WITH query
+      pltcondxWITHqry <- paste0(pltidsWITHqry, ", ",
+                                "\n----- pltcondx",
+                                "\npltcondx AS",
+                                "\n(", pltcondx.qry, ")")
+      #dbqueriesWITH$pltcondxWITH <- pltcondxWITHqry
+
+      ## Build WITH query for pltcondx, including pltidsadj WITH query
+      pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
+                                 "\n----- pltcondx",
+                                 "\npltcondx AS",
+                                 "\n(", pltcondx.qry, ")")
+      #dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
     }
   }
   
@@ -337,6 +345,7 @@ check.estdata <-
       warning("check pseround... very high number, setting to ", pseround)
     }
   }
+  
 
   ## Set up list of variables to return
   ######################################################################################
@@ -344,6 +353,8 @@ check.estdata <-
                     sumunits = sumunits,
                     totals = totals,
                     pltcondflds = pltcondflds,
+                    pltcondxWITHqry = pltcondxWITHqry,
+                    pltcondxadjWITHqry = pltcondxadjWITHqry,
                     landarea = landarea, 
                     allin1 = allin1, 
                     divideby = divideby,
@@ -360,8 +371,7 @@ check.estdata <-
                     rawfolder = rawfolder, 
                     raw_fmt = raw_fmt, 
                     raw_dsn = raw_dsn, 
-                    landarea.filter = landarea.filter,
-                    where.qry = where.qry)
+                    landarea.filter = landarea.filter)
   if (popdatindb) {
     returnlst$popconn <- popconn
     returnlst$SCHEMA. <- SCHEMA.

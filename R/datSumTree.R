@@ -1236,6 +1236,12 @@ datSumTree <- function(tree = NULL,
                  grepl("COND_STATUS_CDin(1)", gsub(" ", "", pcwhereqry), ignore.case = TRUE)))) {
             pcwhereqry <- paste0(pcwhereqry, " AND pc.COND_STATUS_CD = 1")
           }
+        } else if (!is.null(pltidsWITHqry)) {
+          if (!(grepl("COND_STATUS_CD", pltidsWITHqry, ignore.case = TRUE) &&
+                (grepl("COND_STATUS_CD=1", gsub(" ", "", pltidsWITHqry), ignore.case = TRUE) ||
+                 grepl("COND_STATUS_CDin(1)", gsub(" ", "", pltidsWITHqry), ignore.case = TRUE)))) {
+            pcwhereqry <- paste0(pcwhereqry, " AND pc.COND_STATUS_CD = 1")
+          }
         } else {
           pcwhereqry <- "\n WHERE pc.COND_STATUS_CD = 1"
         }
