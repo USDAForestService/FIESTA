@@ -4621,11 +4621,14 @@ DBgetPlots <- function (states = NULL,
                      stringsAsFactors=FALSE, connection = NULL),
                              error=function(e) return(NULL))
         }
+        popstratumx <- popstratumx[order(popstratumx$STATECD, popstratumx$ESTN_UNIT, popstratumx$STRATUMCD),]
+        popestnunitx <- popestnunitx[order(popestnunitx$STATECD, popestnunitx$ESTN_UNIT),]
+        
         if (lowernames) {
           names(popstratumx) <- tolower(names(popstratumx))
           names(popestnunitx) <- tolower(names(popestnunitx))
         }
-
+        
         if (returndata) {
           popstratum <- rbind(popstratum, popstratumx)
           popestnunit <- rbind(popestnunit, popestnunitx)
