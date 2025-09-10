@@ -414,6 +414,7 @@ modGBratio <- function(GBpopdat,
   areaunits <- GBpopdat$areaunits
   unitvar <- GBpopdat$unitvar
   unitvars <- GBpopdat$unitvars
+  unit.action <- GBpopdat$unit.action
   stratalut <- GBpopdat$stratalut
   strvar <- GBpopdat$strvar
   expcondtab <- GBpopdat$expcondtab
@@ -778,6 +779,7 @@ modGBratio <- function(GBpopdat,
                    strwtvar = strwtvar,
                    totals = totals,
                    sumunits = sumunits,
+                   unit.action = unit.action,
                    uniquerow = uniquerow,
                    uniquecol = uniquecol,
                    row.orderby = row.orderby,

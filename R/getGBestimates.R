@@ -20,6 +20,7 @@ getGBestimates <- function(esttype,
                            strwtvar,
                            totals,
                            sumunits,
+                           unit.action,
                            rowvar = NULL,
                            colvar = NULL,
                            grpvar = NULL,
@@ -59,6 +60,8 @@ getGBestimates <- function(esttype,
   }
 
   ## Join domdat to pltassgnx using data.table key and all.y=TRUE
+  estunits <- unique(pltassgnx[[unitvar]])
+  nbrunits <- length(estunits)
   domdatn <- pltassgnx[domdatn]
   
   if (esttype == "RATIO") {
@@ -243,6 +246,16 @@ getGBestimates <- function(esttype,
                  unitvar = unitvar,
                  strvar = strvar,
                  domain = rowvar)
+    
+    if (unit.action %in% c("keep", "combine") && 
+        length(unique(unit_rowest[[unitvar]])) < nbrunits) {
+      missunits <- estunits[!estunits %in% unique(unit_rowest[[unitvar]])]
+      missunitsdf <- data.frame(missunits)
+      names(missunitsdf) <- unitvar
+      unit_rowest <-rbindlist(list(unit_rowest, missunitsdf), fill=TRUE)
+      unit_rowest <- DT_NAto0(unit_rowest, cols = c("nhat", "nhat.var", "NBRPLT.gt0"))
+      unit_rowest <- setorderv(unit_rowest, unitvar)
+    } 
   }
 
 
@@ -311,7 +324,16 @@ getGBestimates <- function(esttype,
                  strvar = strvar,
                  domain = colvar)
 
-
+    if (unit.action %in% c("keep", "combine") && 
+        length(unique(unit_colest[[unitvar]])) < nbrunits) {
+      missunits <- estunits[!estunits %in% unique(unit_colest[[unitvar]])]
+      missunitsdf <- data.frame(missunits)
+      names(missunitsdf) <- unitvar
+      unit_colest <-rbindlist(list(unit_colest, missunitsdf), fill=TRUE)
+      unit_colest <- DT_NAto0(unit_colest, cols = c("nhat", "nhat.var", "NBRPLT.gt0"))
+      unit_colest <- setorderv(unit_colest, unitvar)
+    } 
+    
     ## Get estimates for cell values (grpvar)
     #############################################################################
 
@@ -351,6 +373,14 @@ getGBestimates <- function(esttype,
     } else {
       domdatgrp <- domdatcond[, lapply(.SD, sum, na.rm=TRUE),
                               by = c(byvarsplt, grpvar), .SDcols = estvarn.name]
+      
+      
+      if (length(domvarsrow) > 0) {
+        domdatgrp <- domdatgrp[!is.na(domdatgrp[[domvarsrow]]),]
+      }
+      if (length(domvarscol) > 0) {
+        domdatgrp <- domdatgrp[!is.na(domdatgrp[[domvarscol]]),]
+      }
     }
 
     unit_grpest <-
@@ -364,6 +394,17 @@ getGBestimates <- function(esttype,
                  unitvar = unitvar,
                  strvar = strvar,
                  domain = grpvar)
+    
+    if (unit.action %in% c("keep", "combine") && 
+        length(unique(unit_grpest[[unitvar]])) < nbrunits) {
+      missunits <- estunits[!estunits %in% unique(unit_grpest[[unitvar]])]
+      missunitsdf <- data.frame(missunits)
+      names(missunitsdf) <- unitvar
+      unit_grpest <-rbindlist(list(unit_grpest, missunitsdf), fill=TRUE)
+      unit_grpest <- DT_NAto0(unit_grpest, cols = c("nhat", "nhat.var", "NBRPLT.gt0"))
+      unit_grpest <- setorderv(unit_grpest, unitvar)
+    } 
+    
   }
 
   ###################################################################################

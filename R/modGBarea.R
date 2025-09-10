@@ -353,6 +353,7 @@ modGBarea <- function(GBpopdat,
   areaunits <- GBpopdat$areaunits
   unitvar <- GBpopdat$unitvar
   unitvars <- GBpopdat$unitvars
+  unit.action = GBpopdat$unit.action
   strata <- GBpopdat$strata
   stratalut <- GBpopdat$stratalut
   strvar <- GBpopdat$strvar
@@ -593,6 +594,7 @@ modGBarea <- function(GBpopdat,
                    strwtvar = strwtvar,
                    totals = totals,
                    sumunits = sumunits,
+                   unit.action = unit.action,
                    uniquerow = uniquerow,
                    uniquecol = uniquecol,
                    row.orderby = row.orderby,
@@ -661,6 +663,7 @@ modGBarea <- function(GBpopdat,
     returnlst$titlelst <- alltitlelst
   }
 
+  
   if (rawdata) {
     ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
     UNITStot <- sort(unique(unit_totest[[unitvar]]))
@@ -669,10 +672,17 @@ modGBarea <- function(GBpopdat,
 
 	  if ("unit_totest" %in% names(tabs$rawdat)) {
 	    tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
+	    tabs$rawdat$unit_totest <- setorderv(tabs$rawdat$unit_totest, unitvars)
 	  }
 	  if (sumunits && "totest" %in% names(tabs$rawdat)) {
 	    tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
 	  }
+    if ("unit_rowest" %in% names(tabs$rawdat)) {
+      tabs$rawdat$unit_rowest <- setorderv(tabs$rawdat$unit_rowest, unitvars)
+    }
+    if ("unit_colest" %in% names(tabs$rawdat)) {
+      tabs$rawdat$unit_colest <- setorderv(tabs$rawdat$unit_colest, unitvars)
+    }
 
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(cdomdat)

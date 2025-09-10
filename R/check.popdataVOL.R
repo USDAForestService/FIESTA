@@ -337,7 +337,6 @@ check.popdataVOL <-
     }
     dbqueries$adjfactors <- adjfactors.qry
 
-
     ## 5.4 Build query for plot-level adjustment factors
     ###################################################################
     adja. <- "adj."
