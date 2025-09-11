@@ -863,6 +863,7 @@ modGBratio <- function(GBpopdat,
 
 	  if ("unit_totest" %in% names(tabs$rawdat)) {
 	    tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
+	    tabs$rawdat$unit_totest <- setorderv(tabs$rawdat$unit_totest, unitvars)
 	  }
 	  if (sumunits && "totest" %in% names(tabs$rawdat)) {
 	    tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))

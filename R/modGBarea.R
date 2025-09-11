@@ -677,12 +677,6 @@ modGBarea <- function(GBpopdat,
 	  if (sumunits && "totest" %in% names(tabs$rawdat)) {
 	    tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
 	  }
-    if ("unit_rowest" %in% names(tabs$rawdat)) {
-      tabs$rawdat$unit_rowest <- setorderv(tabs$rawdat$unit_rowest, unitvars)
-    }
-    if ("unit_colest" %in% names(tabs$rawdat)) {
-      tabs$rawdat$unit_colest <- setorderv(tabs$rawdat$unit_colest, unitvars)
-    }
 
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(cdomdat)
