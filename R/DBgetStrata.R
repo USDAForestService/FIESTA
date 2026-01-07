@@ -42,7 +42,6 @@
 #' @param dbconn Open database connection.
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
 #' @param evalInfo List. List object output from DBgetEvalid or DBgetXY 
-#' @param ... For extendibility.
 #' FIESTA functions.   
 #' 
 #' @return FIAstrata - a list of the following objects: \item{pltassgn}{ Data
@@ -126,9 +125,7 @@ DBgetStrata <- function(dat = NULL,
                         savedata_opts = NULL,
                         dbconn = NULL,
                         dbconnopen = FALSE,
-                        evalInfo = NULL,
-                        ...
-                        ) {
+                        evalInfo = NULL) {
   ######################################################################################
   ## DESCRIPTION: This function gets the strata info and area by estimation unit from 
   ##		FIA Database, extracts and merges plot-level assignments to data file, and 
@@ -143,10 +140,10 @@ DBgetStrata <- function(dat = NULL,
   ##   POP_STRATUM 	## To get pixel counts by estimation unit and stratum.
   ##   POP_PLOT_STRATUM_ASSGN	## To get estimation unit & stratum assignment for each plot.  
   ####################################################################################
-
+  gui <- FALSE
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## Set global variables  
   INVYR=PLOT_STATUS_CD=PLT_CN=STATECD=UNITCD=ESTUNIT=FIAPLOTS=P2POINTCNT=EVALID=invyrtab <- NULL
@@ -164,11 +161,11 @@ DBgetStrata <- function(dat = NULL,
   ##################################################################
   matchargs <- as.list(match.call()[-1])
 
-  dotargs <- c(list(...))
-  args <- as.list(environment())
-  args <- args[!names(args) %in% names(dotargs)]
-  args <- args[names(args) %in% names(matchargs)]
-  args <- append(args, dotargs)
+  # dotargs <- c(list(...))
+  # args <- as.list(environment())
+  # args <- args[!names(args) %in% names(dotargs)]
+  # args <- args[names(args) %in% names(matchargs)]
+  # args <- append(args, dotargs)
   
   ## Check arguments
   input.params <- names(as.list(match.call()))[-1]
@@ -178,27 +175,27 @@ DBgetStrata <- function(dat = NULL,
   } 
  
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
+  pcheck.params(input.params, 
+                savedata_opts = savedata_opts,
+                eval_opts = eval_opts)
 
-
-  ## Set eval_options defaults
-  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))] 
-  for (i in 1:length(eval_defaults_list)) {
-    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
-  } 
-  ## Set user-supplied eval_opts values
-  if (length(eval_opts) > 0) {
-    for (i in 1:length(eval_opts)) {
-      if (names(eval_opts)[[i]] %in% names(eval_defaults_list)) {
-        assign(names(eval_opts)[[i]], eval_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
-      }
-    }
-  } else {
+  
+  ## Check eval_opts
+  if (length(eval_opts) == 0) {
     message("no evaluation timeframe specified...")
     message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
     stop()
+  }
+  
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts,
+                         eval_opts = eval_opts))
+  savedata_opts <- optslst$savedata_opts
+  eval_opts <- optslst$eval_opts
+
+  for (i in 1:length(eval_opts)) {
+    assign(names(eval_opts)[[i]], eval_opts[[i]])
   }
 
 
@@ -215,27 +212,6 @@ DBgetStrata <- function(dat = NULL,
   }
 
   
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-
   #############################################################################
   ## Set datsource
   ########################################################
@@ -378,14 +354,12 @@ DBgetStrata <- function(dat = NULL,
                           datsource = datsource, 
                           data_dsn = data_dsn, 
                           dbconn = dbconn,
-                          dbconnopen = TRUE,
                           invyrtab = invyrtab, 
                           evalid = evalid, 
                           evalCur = evalCur, 
                           evalEndyr = evalEndyr, 
                           evalAll = evalAll, 
-                          evalType = evalType, 
-                          gui = gui),
+                          evalType = evalType),
 			error = function(e) {
                   message(e,"\n")
                   return(NULL) })
@@ -413,17 +387,8 @@ DBgetStrata <- function(dat = NULL,
 
   ## Check outfolder/outfn
   if (savedata) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-            add_layer=add_layer, append_layer=append_layer, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst$add_layer <- TRUE
   }
 
 
@@ -440,7 +405,7 @@ DBgetStrata <- function(dat = NULL,
   ## Define variables
   POP_ESTN_UNIT_VARS <- c("STATECD", "ESTN_UNIT", "ESTN_UNIT_DESCR", "AREA_USED", "EVALID")
   POP_STRATUM_VARS <- c("STATECD", "ESTN_UNIT", "STRATUMCD", "STRATUM_DESCR",
-	"P2POINTCNT", "P1POINTCNT", "EVALID")
+	                      "P2POINTCNT", "P1POINTCNT", "EVALID")
 
 
 ############ CSV only
@@ -485,12 +450,14 @@ DBgetStrata <- function(dat = NULL,
         POP_PLOT_STRATUM_ASSGN <- NULL
       }
       POP_PLOT_STRATUM_ASSGN_VARS <- POP_PLOT_STRATUM_ASSGN_VARS[POP_PLOT_STRATUM_ASSGN_VARS %in% 
-		names(POP_PLOT_STRATUM_ASSGN)]
+		                names(POP_PLOT_STRATUM_ASSGN)]
     }
     if (is.null(POP_PLOT_STRATUM_ASSGN)) {
       if (datsource == "datamart") {
-        POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbrlst, 
-		returnDT=TRUE, stopifnull=FALSE)
+        POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", 
+                                           stabbrlst, 
+		                                       returnDT = TRUE, 
+		                                       stopifnull = FALSE)
       } else {
         if (!"POP_PLOT_STRATUM_ASSGN" %in% dsn_tables) {
           stop("POP_PLOT_STRATUM_ASSGN not in database")
@@ -557,7 +524,7 @@ DBgetStrata <- function(dat = NULL,
       stcdlst <- pcheck.states(states, "VALUE")
       strassgn_qry <- paste0("select ", paste0(POP_PLOT_STRATUM_ASSGN_VARS, collapse=", "),
   		" from ", SCHEMA., "POP_PLOT_STRATUM_ASSGN where STATECD in (", stcdlst, ")",
-		" and EVALID like '%0'")
+		  " and EVALID like '%0'")
     } else {
       strassgn_qry <- paste0("select ", paste0(POP_PLOT_STRATUM_ASSGN_VARS, collapse=", "),
   		" from ", SCHEMA., "POP_PLOT_STRATUM_ASSGN where evalid in (", 
@@ -581,21 +548,22 @@ DBgetStrata <- function(dat = NULL,
 
       ## Check that the values of PLT_CN in POP_PLOT_STRATUM_ASSGN are all in datx
       check.matchval(datx, POP_PLOT_STRATUM_ASSGN, uniqueid, "PLT_CN",
-		tab1txt="dat", tab2txt="POP_PLOT_STRATUM_ASSGN")
+		                 tab1txt = "dat", tab2txt = "POP_PLOT_STRATUM_ASSGN")
 
       ## Attribute sampled plots outside of evaluation with the values from the 
       if (PLTdups) {
         datstrat <- merge(datx, unique(POP_PLOT_STRATUM_ASSGN[, c("PLT_CN", "ESTN_UNIT", "STRATUMCD")]),
- 		by.x=uniqueid, by.y="PLT_CN")
+ 		                      by.x=uniqueid, by.y="PLT_CN")
       } else {
         if ("EVALID" %in% names(datx)) {
           datstrat <- merge(datx, unique(POP_PLOT_STRATUM_ASSGN[, 
-			c("EVALID", "PLT_CN", "ESTN_UNIT", "STRATUMCD")]),
- 			by.x=c("EVALID", uniqueid), by.y=c("EVALID", "PLT_CN"))
+			                                    c("EVALID", "PLT_CN", "ESTN_UNIT", "STRATUMCD")]),
+ 			                      by.x=c("EVALID", uniqueid), by.y=c("EVALID", "PLT_CN"))
         } else {
           datstrat <- merge(datx, 
-			unique(POP_PLOT_STRATUM_ASSGN[, c("PLT_CN", "ESTN_UNIT", "STRATUMCD")]),
- 			by.x=uniqueid, by.y="PLT_CN")
+			                      unique(POP_PLOT_STRATUM_ASSGN[, 
+			                                    c("PLT_CN", "ESTN_UNIT", "STRATUMCD")]),
+ 			                      by.x=uniqueid, by.y="PLT_CN")
         }
         datstratid <- uniqueid
       }
@@ -604,7 +572,7 @@ DBgetStrata <- function(dat = NULL,
         nostrata <- datx[!get(uniqueid) %in% datstrat[[uniqueid]], uniqueid, with=FALSE][[1]]
         if (!all(datx[nostrata, "PLOT_STATUS_CD"][[1]] < 3)) {
           warn1 <- paste("no strata assignment for", length(nostrata), 
-			"plots with PLOT_STATUS_CD = 3")
+			                   "plots with PLOT_STATUS_CD = 3")
           if (length(nostrata) <= 20) {
             warning(paste0(warn1, ": ", paste(nostrata, collapse=", ")))
           } else {
@@ -640,48 +608,32 @@ DBgetStrata <- function(dat = NULL,
   }
 
   if (savedata) {
+    outlst$out_layer <- "unitarea"
     datExportData(unitarea,           
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-                              out_dsn=out_dsn, 
-                              out_layer="unitarea",
-                              outfn.pre=outfn.pre, 
-                              outfn.date=outfn.date, 
-                              overwrite_layer=overwrite_layer,
-                              append_layer=append_layer,
-                              add_layer=TRUE))
+                  savedata_opts = outlst)
     
-    datExportData(stratalut,           
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-                              out_dsn=out_dsn, 
-                              out_layer="stratalut",
-                              outfn.pre=outfn.pre, 
-                              outfn.date=outfn.date, 
-                              overwrite_layer=overwrite_layer,
-                              append_layer=append_layer,
-                              add_layer=TRUE))
-    
+    outlst$out_layer <- "stratalut"
+    datExportData(stratalut, 
+                  savedata_opts = outlst)
 
     if (getassgn) {
+      outlst$out_layer <- "pltassgn"
       datExportData(datstrat,           
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="pltassgn",
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                add_layer=TRUE))
+                    savedata_opts = outlst)
     }
   }
 
 
   ## GET VALUES TO RETURN
-  FIAstrata <- list(unitarea=setDF(unitarea), unitvar=unitvar, unitvar2="STATECD", 
-		areavar=areavar, stratalut=setDF(stratalut), 
-		strvar=strvar, getwt=TRUE, getwtvar="P1POINTCNT", evalid=evalidlist)
+  FIAstrata <- list(unitarea = setDF(unitarea), 
+                    unitvar = unitvar, 
+                    unitvar2 = "STATECD", 
+		                areavar = areavar, 
+		                stratalut = setDF(stratalut), 
+		                strvar = strvar, 
+		                getwt = TRUE, 
+		                getwtvar = "P1POINTCNT", 
+		                evalid = evalidlist)
  
   if (getassgn) {
     FIAstrata$pltassgn <- setDF(datstrat)
