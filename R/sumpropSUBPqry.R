@@ -49,14 +49,13 @@ sumpropSUBPqry <- function(fromqry = NULL,
   
   ## Sum condition proportions by subplot
   ############################################################
+  subpids <- c("subpc.PLT_CN", "subpc.SUBP", "subpc.CONDID")
   if (!is.null(selectvars)) {
-    selectgrpvars <- paste0(selectvars, ", 
-          c.PLT_CN, subp.SUBP, c.CONDID")
-    grpvars <- paste0(selectvars, ", 
-          c.PLT_CN, subp.SUBP, c.CONDID")
+    selectgrpvars <- paste0(selectvars, ", ", toString(subpids))
+    grpvars <- paste0(selectvars, ", ", toString(subpids))
   } else {
-    selectgrpvars <- "c.PLT_CN, subp.SUBP, c.CONDID"
-    grpvars <- "c.PLT_CN, subp.SUBP, c.CONDID"
+    selectgrpvars <- toString(subpids)
+    grpvars <- toString(subpids)
   }
   
   

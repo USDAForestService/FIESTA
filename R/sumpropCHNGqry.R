@@ -37,7 +37,8 @@ sumpropCHNGqry <- function(fromqry = NULL,
   if (!frompltcondx && is.null(whereqry)) {
 
     ## Remove nonsampled conditions
-    whereqry <- "\n WHERE c.COND_STATUS_CD <> 5"
+    whereqry <- paste0("\n WHERE c.COND_STATUS_CD < 5",
+                       "\n    AND pcond.COND_STATUS_CD < 5")
     if (ACI) {
       whereqry <- paste0(whereqry, 
             "\n    AND (c.NF_COND_STATUS_CD IS NULL OR NF_COND_STATUS_CD != 5)")
