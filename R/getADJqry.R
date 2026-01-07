@@ -42,7 +42,7 @@ getADJqry <- function(popType,
   ## 1. Get list of condition proportion variables for calculating adjustments
   ##########################################################################
   propvars <- unique(propvars)
-  
+
   if (popType == "DWM") {
     dwmvarlst <- lapply(dwmpropvars, 
                         function(x) paste0("ADJ_FACTOR_", sub("CONDPROP_", "", x)))
@@ -59,7 +59,7 @@ getADJqry <- function(popType,
   } 
   areawtadj <- adjvarlst[[1]][1]
   popwtadj <- unlist(adjvarlst[!adjvarlst %in% areawtadj])
-  
+
 
   ## 2. Build query to calculate adjustment factors
   ##########################################################################

@@ -11,7 +11,7 @@ getADJwherePLOT <- function(condflds, ACI = FALSE, conda.="c.", adjwhereqry = NU
     message("COND_STATUS_CD is not in dataset... assuming all conditions are sampled")
   } else {
     ## Build where query to remove conditions that were not sampled
-    cstatus.filter <- paste0(conda., cstatusnm, " <> 5")
+    cstatus.filter <- paste0(conda., cstatusnm, " < 5")
     if (is.null(adjwhereqry)) {
       adjwhereqry <- paste0("\n WHERE ", cstatus.filter)
     } else {
@@ -54,7 +54,7 @@ getADJwhereSUBP <- function(subplotflds, ACI = FALSE, adjwhereqry = NULL) {
     message("SUBP_STATUS_CD is not in dataset... assuming all subplots are sampled")
   } else {
     ## Build where query to remove subplots that wasn't sampled
-    subpstatus.filter <- paste0(subpa., subpstatusnm, " <> 3")
+    subpstatus.filter <- paste0(subpa., subpstatusnm, " < 3")
     if (is.null(adjwhereqry)) {
       adjwhereqry <- paste0("\n WHERE ", subpstatus.filter)
     } else {
