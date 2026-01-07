@@ -10,6 +10,7 @@ check.condCHNG <- function(areawt, areawt2,
                            popdatindb,
                            popconn = NULL,
                            pltcondx,
+                           subpcprop,
                            sccmx,
                            pltidsadj = NULL,
                            pltcondxadjWITHqry = NULL,
@@ -160,7 +161,7 @@ check.condCHNG <- function(areawt, areawt2,
   cdomdat.qry <- 
     paste0(cdomdatselectqry, 
            cdomdatfromqry,
-           whereqry,
+           pcwhereqry,
            "\nGROUP BY ", toString(byvars))
 
   #Run query for cdomdat
@@ -176,17 +177,20 @@ check.condCHNG <- function(areawt, areawt2,
       cdomdat.qry <- paste0(pltcondxadjWITHqry,
                             "\n-------------------------------------------",
                             "\n", cdomdat.qry)
-      cdomdat <- tryCatch(
-        DBI::dbGetQuery(popconn, cdomdat.qry),
-        error = function(e) {
-          message(e,"\n")
-          return(NULL) })
-    }  
+    }
+    cdomdat <- tryCatch(
+      DBI::dbGetQuery(popconn, cdomdat.qry),
+      error = function(e) {
+        message(e,"\n")
+        return(NULL) })
+    
   }
   if (is.null(cdomdat) || nrow(cdomdat) == 0) {
     message("invalid cdomdat query...\n")
     message(cdomdat.qry)
     return(NULL)
+  } else {
+    names(cdomdat) <- toupper(names(cdomdat))
   }
   setkeyv(setDT(cdomdat), c(cuniqueid, condid)) 
   

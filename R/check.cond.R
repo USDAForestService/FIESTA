@@ -135,10 +135,12 @@ check.cond <- function(areawt,
   if (is.null(cdomdat) || nrow(cdomdat) == 0) {
     message(cdomdatqry)
     return(NULL)
+  } else {
+    names(cdomdat) <- toupper(names(cdomdat))
   }
   setkeyv(setDT(cdomdat), c(cuniqueid, condid))
   
-  
+
   if (rowvar == "ALP_ADFORCD" && any(cdomdat[[rowvar]] == 9999)) {
     #cdomdat[cdomdat[[rowvar]] == 9999, rowvar] <- NA
     cdomdat[is.na(cdomdat[[rowvar]]), rowvar] <- 9999
@@ -147,8 +149,8 @@ check.cond <- function(areawt,
   return(list(cdomdat = cdomdat, 
               cdomdatqry = cdomdatqry,
               estnm = estnm,
-              rowvar = rowvarnm, 
-              colvar = colvarnm, 
+              rowvar = toupper(rowvarnm), 
+              colvar = toupper(colvarnm), 
               grpvar = c(rowvarnm, colvarnm)))
   
 }

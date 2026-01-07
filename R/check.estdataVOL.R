@@ -1,35 +1,25 @@
 check.estdataVOL <- 
-  function(esttype, 
-           popdatindb, popconn = NULL, 
-           cuniqueid = "PLT_CN", condid = "CONDID", 
-           treex = NULL, seedx = NULL, 
-           tuniqueid = "PLT_CN", 
+  function(datsource,
+           popdatindb, 
+           poptablst, 
+           treex = NULL, 
+           seedx = NULL, 
+           treeflds = NULL,
+           seedflds = NULL,
            estseed = "none", 
-           woodland = "Y", 
-           TPA = TRUE, 
-           tfilter = NULL,
+           woodland = "Y",
            gui = FALSE){
 
+    
   ###################################################################################
-  ## DESCRIPTION: Check data tables for VOL estimates
+  ### Check parameters for VOL estimation
   ###################################################################################
-
-  ## Define returnlst
-  returnlst <- list()
-  
-  ## Check database connection
-  if (popdatindb) {
-    if (!DBI::dbIsValid(popconn)) {
-      stop("database connection is invalid")
-    }
-    tablst <- DBI::dbListTables(popconn)
-  }
-
+    
   ## Check estseed
-  ########################################################
   estseedlst <- c("none", "only", "add")
-  estseed <- pcheck.varchar(var2check=estseed, varnm="estseed",
-		             checklst=estseedlst, caption="Seedlings", stopifnull=FALSE)
+  estseed <- pcheck.varchar(var2check = estseed, varnm = "estseed",
+		             checklst = estseedlst, gui = gui, 
+		             caption="Seedlings", stopifnull=FALSE)
   if (is.null(estseed)) {
     message("estseed must be one of the following: ", toString(estseedlst))
     stop()
@@ -43,6 +33,18 @@ check.estdataVOL <-
     }
   }
 
+  ## Check woodland
+  woodlandlst <- c("Y", "N", "only")
+  woodland <- pcheck.varchar(var2check = woodland, varnm = "woodland", 
+                             checklst = woodlandlst, gui = gui, 
+                             caption = "Woodland?") 
+  
+  
+  ###################################################################################
+  ## DESCRIPTION: Check data tables for VOL estimates
+  ###################################################################################
+  treenm = seednm <- NULL
+
  	## Check treex and seedx
   ###########################################################################
   if (estseed != "only") {
@@ -50,26 +52,20 @@ check.estdataVOL <-
       if (!is.character(treex)) {
         stop("treex must be name of table in database")
       } 
-      treenm <- findnm(treex, tablst, returnNULL = TRUE)
+      treenm <- findnm(treex, poptablst, returnNULL = TRUE)
       if (is.null(treenm)) {
         stop("treex table is not in database")
       }
-      treeflds <- DBI::dbListFields(popconn, treenm)
     } else {
       if (!is.data.frame(treex)) {
         stop("treex must be a data.frame object")
       }
       treex <- pcheck.table(treex, stopifnull = TRUE, 
-                       stopifinvalid = TRUE)				
-		  treeflds <- names(treex)
+                       stopifinvalid = TRUE)		
+      treenm <- "treex"
+      names(treex) <- toupper(names(treex))
+      treeflds <- names(treex)
     } 
-	  returnlst$treex <- treex
-	  returnlst$treeflds <- treeflds
-	  
-    
-    ## check tuniqueid in tree table
-    tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui,
-	                   checklst=treeflds, caption="tuniqueid")
   }
  
   if (estseed %in% c("add", "only")) {
@@ -77,38 +73,28 @@ check.estdataVOL <-
       if (!is.character(seedx)) {
         stop("seedx must be name of table in database")
       } 
-      seednm <- findnm(seedx, tablst, returnNULL = TRUE)
+      seednm <- findnm(seedx, poptablst, returnNULL = TRUE)
       if (is.null(seednm)) {
         stop("seedx table is not in database")
       }
-      seedflds <- DBI::dbListFields(popconn, seednm)
     } else {
       if (!is.data.frame(seedx)) {
         stop("seedx must be a data.frame object")
       }
       seedx <- pcheck.table(seedx, stopifnull = TRUE, 
-                            stopifinvalid = TRUE)				
+                            stopifinvalid = TRUE)
+      seednm <- "seedx"
+      names(seedx) <- toupper(names(seedx))
       seedflds <- names(seedx)
     } 
-    returnlst$seedx <- seedx
-    returnlst$seedflds <- seedflds
-    
-	  ## check tuniqueid in seed table	
-    if (!tuniqueid %in% seedflds) {
-	    message(tuniqueid, " not in seed table")
-	    return(NULL)
-	  }
   }
-  
-  returnlst$tuniqueid <- tuniqueid
-  returnlst$estseed <- estseed
-	
-  ## Check woodland
-  woodlandlst <- c("Y", "N", "only")
-  woodland <- pcheck.varchar(var2check=woodland, varnm="woodland", 
-		                checklst=woodlandlst, gui=gui, caption="Woodland?") 
-	returnlst$woodland <- woodland
-  
+ 
 
-  return(returnlst)
+  return(list(treenm = treenm,
+              seednm = seednm,
+              treeflds = treeflds,
+              seedflds = seedflds,
+              estseed = estseed,
+              woodland = woodland
+              ))
 }
