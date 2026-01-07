@@ -47,6 +47,9 @@
 #' @param colvar String. Name of column domain variable in cond.
 #' @param sumunits Logical. If TRUE, estimation units are summed and returned
 #' in one table.
+#' @param pltids Vector. String or numberic vector of FIA plot CN values that
+#' intesect an area of interest within the population. These values are used
+#' to filter the output table of estimates. 
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
@@ -259,6 +262,7 @@ modGBarea <- function(GBpopdat,
                       rowvar = NULL,
                       colvar = NULL,
                       sumunits = TRUE,
+                      pltids = NULL,
                       returntitle = FALSE,
                       savedata = FALSE,
                       table_opts = NULL,
@@ -288,14 +292,13 @@ modGBarea <- function(GBpopdat,
   ## INITIALIZE SETTINGS
   esttype <- "AREA"
   popType <- "CURR"
-  nonresp <- FALSE
+  nonresp = addtitle <- FALSE
   substrvar <- NULL
   rawdata <- TRUE
   returnlst <- list()
 
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder <- NULL
-  #estvar <- "CONDPROP_ADJ"
+  n.strata=outfn.pre <- NULL
 
 
   ##################################################################
@@ -319,9 +322,9 @@ modGBarea <- function(GBpopdat,
 
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-    title_opts = title_opts,
-    table_opts = table_opts,
-    savedata_opts = savedata_opts))
+                         title_opts = title_opts,
+                         table_opts = table_opts,
+                         savedata_opts = savedata_opts))
   title_opts <- optslst$title_opts
   table_opts <- optslst$table_opts
   savedata_opts <- optslst$savedata_opts
@@ -346,8 +349,9 @@ modGBarea <- function(GBpopdat,
   pltcondx <- GBpopdat$pltcondx
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
-  ACI <- GBpopdat$ACI
   pltassgnx <- GBpopdat$pltassgnx
+  pltassgnid <- GBpopdat$pltassgnid
+  ACI <- GBpopdat$ACI
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
   areaunits <- GBpopdat$areaunits
@@ -367,32 +371,19 @@ modGBarea <- function(GBpopdat,
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
   strata <- GBpopdat$strata
-  popdatindb <- GBpopdat$popdatindb
-  pop_fmt <- GBpopdat$pop_fmt
-  pop_dsn <- GBpopdat$pop_dsn
-  pop_schema <- GBpopdat$pop_schema
-  popconn <- GBpopdat$popconn
   dbqueries <- GBpopdat$dbqueries
   dbqueriesWITH <- GBpopdat$dbqueriesWITH
   areawt <- GBpopdat$areawt
   areawt2 <- GBpopdat$areawt2
   adjcase <- GBpopdat$adjcase
   pltidsid <- GBpopdat$pjoinid
-  pltassgnid <- GBpopdat$pltassgnid
   pltflds <- GBpopdat$pltflds
   condflds <- GBpopdat$condflds
-
-  if (popdatindb) {
-    if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
-      if (!is.null(pop_dsn)) {
-        if (pop_fmt == "sqlite") {
-          popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
-        }
-      } else {
-        stop("invalid database connection")
-      }
-    }
-  }
+  
+  pop_datsource <- GBpopdat$pop_datsource
+  popdatindb <- GBpopdat$popdatindb
+  popdbinfo <- GBpopdat$popdbinfo
+  
 
   ########################################
   ## Check area units
@@ -406,6 +397,31 @@ modGBarea <- function(GBpopdat,
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
+  
+  
+  ########################################
+  ## Check pltids
+  ########################################
+  if (!is.null(pltids)) {
+    if (is.data.frame(pltids) && ncol > 1) {
+      stop("invalid pltids... must be a vector of cn values")
+    }
+    pltids <- as.vector(pltids)
+    if (!is.vector(pltids)) {
+      message("invalid pltids.. must be a vector of cn values")
+    }
+    
+    if (!all(pltids %in% pltassgnx[[pltassgnid]])) {
+      misspltids <- pltids[!pltids %in% pltassgnx[[pltassgnid]]]
+      message("there are ", length(misspltids), " plots not in the population")
+      
+      if (length(misspltids) < 20) {
+        message(toString(misspltids))
+      }
+      stop("")
+    }
+  }
+  
 
   ###################################################################################
   ## Check parameter inputs and plot/condition filters
@@ -413,15 +429,15 @@ modGBarea <- function(GBpopdat,
   estdat <-
     check.estdata(esttype = esttype,
                   popType = popType,
-                  popdatindb = popdatindb,
-                  popconn = popconn, pop_schema = pop_schema,
+                  pop_datsource,
+                  popdatindb = popdatindb, 
+                  popdbinfo = popdbinfo, 
                   pltcondx = pltcondx,
                   pltflds = pltflds, 
                   condflds = condflds,
                   dbqueriesWITH = dbqueriesWITH,
                   dbqueries = dbqueries,
                   totals = totals,
-                  pop_fmt = pop_fmt, pop_dsn = pop_dsn,
                   sumunits = sumunits,
                   landarea = landarea,
                   ACI = ACI,
@@ -442,25 +458,31 @@ modGBarea <- function(GBpopdat,
   divideby <- estdat$divideby
   estround <- estdat$estround
   pseround <- estdat$pseround
-  addtitle <- estdat$addtitle
   returntitle <- estdat$returntitle
-  rawonly <- estdat$rawonly
-  savedata <- estdat$savedata
-  outfolder <- estdat$outfolder
-  overwrite_layer <- estdat$overwrite_layer
-  outfn.pre <- estdat$outfn.pre
-  outfn.date <- estdat$outfn.date
-  append_layer = estdat$append_layer
-  rawfolder <- estdat$rawfolder
-  raw_fmt <- estdat$raw_fmt
-  raw_dsn <- estdat$raw_dsn
+  addtitle <- estdat$addtitle
+  
   pcwhereqry <- estdat$where.qry
-  SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
   pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
   pltcondxWITHqry <- estdat$pltcondxWITHqry
+  pop_datsource <- estdat$pop_datsource
+  popdatindb <- estdat$popdatindb
+  popconn <- estdat$popconn
+  pop_schema <- estdat$pop_schema
+  SCHEMA. <- estdat$SCHEMA.
+  poptablst <- estdat$poptablst
   
-
+  if (savedata) {
+    rawonly <- estdat$rawonly
+    savedata <- estdat$savedata
+    outfolder <- estdat$outfolder
+    overwrite_layer <- estdat$overwrite_layer
+    outfn.pre <- estdat$outfn.pre
+    outfn.date <- estdat$outfn.date
+    append_layer = estdat$append_layer
+    rawoutlst <- estdat$rawoutlst
+  }
+  
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -479,6 +501,7 @@ modGBarea <- function(GBpopdat,
                  row.add0 = row.add0, col.add0 = col.add0,
                  row.classify = row.classify, col.classify = col.classify,
                  title.rowvar = title.rowvar, title.colvar = title.colvar,
+                 whereqry = pcwhereqry,
                  rowlut = rowlut, collut = collut,
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm,
                  rowgrpord = rowgrpord, title.rowgrp = NULL)
@@ -501,6 +524,7 @@ modGBarea <- function(GBpopdat,
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
+  
 
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
@@ -508,6 +532,7 @@ modGBarea <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
+
 
   ###################################################################################
   ### Get condition-level domain data
@@ -575,6 +600,7 @@ modGBarea <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
+
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
@@ -594,6 +620,7 @@ modGBarea <- function(GBpopdat,
                    strwtvar = strwtvar,
                    totals = totals,
                    sumunits = sumunits,
+                   pltids = pltids,
                    unit.action = unit.action,
                    uniquerow = uniquerow,
                    uniquecol = uniquecol,
@@ -624,6 +651,7 @@ modGBarea <- function(GBpopdat,
     est.outtabs(esttype = esttype,
                 sumunits = sumunits, areavar = areavar,
 	              unitvar = unitvar, unitvars = unitvars,
+                unitarea = unitarea,
                 unit_totest = unit_totest,
 	              unit_rowest = unit_rowest, unit_colest = unit_colest,
                 unit_grpest = unit_grpest,
@@ -663,7 +691,6 @@ modGBarea <- function(GBpopdat,
     returnlst$titlelst <- alltitlelst
   }
 
-  
   if (rawdata) {
     ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
     UNITStot <- sort(unique(unit_totest[[unitvar]]))
@@ -691,23 +718,23 @@ modGBarea <- function(GBpopdat,
         tabnm <- names(rawdat[i])
         rawtab <- rawdat[[i]]
         outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm)
+        
         if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
-          write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab,
-			        outfn.date=outfn.date, overwrite=overwrite_layer)
+          write2csv(rawtab, 
+                    outfolder = rawoutlst$rawfolder, 
+                    outfilenm = outfn.rawtab,
+			              outfn.date = outfn.date, 
+			              appendfile = append_layer,
+			              overwrite = overwrite_layer)
+          
         } else if (is.data.frame(rawtab)) {
-          if (raw_fmt != "csv") {
-            out_layer <- tabnm
+          if (rawoutlst$raw_fmt != "csv") {
+            rawoutlst$out_layer <- tabnm
           } else {
-            out_layer <- outfn.rawtab
+            rawoutlst$out_layer <- outfn.rawtab
           }
           datExportData(rawtab,
-                savedata_opts = list(outfolder = rawfolder,
-                                     out_fmt = raw_fmt,
-                                     out_dsn = raw_dsn,
-                                     out_layer = out_layer,
-                                     overwrite_layer = overwrite_layer,
-                                     append_layer = append_layer,
-                                     add_layer = TRUE))
+                        savedata_opts = rawoutlst)
         }
       }
     }

@@ -1,9 +1,9 @@
 check.popdataCHNG <- 
   function(tabs, tabIDs, popType, 
-           datindb, pltaindb, 
+           datindb, pltaindb, popdatindb, 
            pltidsWITHqry,
-           pltidsid, pltidvars, 
-           plotnm,
+           pltidsid, projidvars = NULL, 
+           pltidvars,
            pdoms2keep = NULL, 
            pltidsadjindb = FALSE, 
            defaultVars = TRUE,
@@ -20,7 +20,8 @@ check.popdataCHNG <-
            strunitvars = NULL, 
            nonsamp.cfilter = NULL, 
            cvars2keep = NULL, 
-           dbconn = NULL, SCHEMA. = "",
+           dbconn = NULL, schema = NULL, 
+           datsource = NULL, dbtablst = NULL,
            getdataWITHqry = NULL,
            getdataCNs = NULL,
            returndata = FALSE, 
@@ -37,29 +38,39 @@ check.popdataCHNG <-
     ## - PLOT; COND; SUBP_COND_CHNG_MTRX
     ## - TREE (if popType = 'GRM'); SEEDLING (if popType = 'GRM')
     ## - TREE_GRM_COMPONENT, TREE_GRM_BEGIN, TREE_GRM_MIDPT (if popType = 'GRM')
-    ## 4.	Check for necessary variables in tables.
-    ##    plot - PREV_PLT_CN
+    ## 4. Check for variables in tables and define SELECT variable in cond, plot
     ##    cond - (cuniqueid, condid, cvars2keep)
     ##    subp_cond_chng_mtrx - PREVCOND
-    ## 5. Build query for adjustment factors
-    ## 6. Build queries for PLOT/COND (pltcondx)
-    ## 7. Build CASE statement for adding adjustment factors to SELECT
-    ## 8. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
-    ## 9. Build and run queries for other necessary tables (if returndata/savedata = TRUE)
-    ## 10. Check COND_STATUS_CD and generate table with number of conditions
-    ## 11. Build FROM statement for estimation queries
-    ## 12. Return data objects
+    ##    area weight variables - (SUBPPROP_UNADJ, MACRPROP_UNADJ, MICRPROP_UNADJ)
+    ## 5. Extract tables used to calculate adjustment factors from database if
+    ##    pltassgn is not in database
+    ## 6. Build query for adjustment factors.
+    ## 7. Build queries for PLOT/COND (pltcondx)
+    ## 8. Build CASE statement for adding adjustment factors to SELECT
+    ## 9. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
+    ## 10. Build and run queries for other necessary tables (if returndata/savedata = TRUE)
+    ## 11. Check COND_STATUS_CD and generate table with number of conditions
+    ## 12. Build FROM statement for estimation queries
+    ## 13. Return data objects
     ###################################################################################
     
     ## Set global variables
-    grmx=beginx=midptx=SUBPTYP_PROP_ADJ=SUBPTYP_PROP_CHNG=ADJ_FACTOR_COND <- NULL
+    grmx=beginx=midptx=SUBPTYP_PROP_ADJ=SUBPTYP_PROP_CHNG=ADJ_FACTOR_COND=SCHEMA. <- NULL
     dbqueries=dbqueriesWITH <- list()
     cpropvars <- list(COND="CONDPROP_UNADJ", SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ")
     tpropvars <- list(SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ", MICR="MICRPROP_UNADJ")
     diavar <- "DIA"
-    pltcondindb <- datindb
+    popdatindb <- datindb
+    addfortypgrp <- TRUE
     returnadj <- TRUE
     
+    ## Get variables from outlst
+    if (savedata) {
+      append_layer <- outlst$append_layer
+      poptablst <- {}
+    } else {
+      poptablst <- dbtablst
+    }
     
     ###################################################################################
     ## 1. Define variables necessary for estimation
@@ -74,13 +85,14 @@ check.popdataCHNG <-
       if (is.null(dbconn) || !DBI::dbIsValid(dbconn)) {
         message("the database connection is invalid")
         stop()
-      } else {
-        dbtablst <- DBI::dbListTables(dbconn)
+      }
+      if (!is.null(schema)) {
+        SCHEMA. <- paste0(schema, ".")
       }
     }
     
     ##############################################################################
-    ## 3. Get table names used in estimation from tabs
+    ## 3. Get tables used in estimation from tabs
     ##############################################################################
     
     ## plot table
@@ -88,57 +100,274 @@ check.popdataCHNG <-
     puniqueid <- plotlst$tabid
     pltx <- plotlst$tabx
     pltflds <- plotlst$tabflds
-    if (is.null(pltx)) {
-      pltxnm <- plotnm
-    } else {
-      pltxnm <- "pltx"
-    }
+    pltxnm <- plotnm
+    if (!is.null(pltx)) pltxnm <- "pltx"
     
     ## cond table
     condlst <- popTabchk(c("condu", "cond"), tabtext = "cond", 
-                         tabs, tabIDs, dbtablst, dbconn, datindb) 
+                         tabs, tabIDs, 
+                         dbtablst = dbtablst, 
+                         dbconn = dbconn, schema = schema, 
+                         datindb = datindb) 
     condnm <- condlst$tabnm
     condflds <- condlst$tabflds
     cuniqueid <- condlst$tabid
     condx <- condlst$tabx
-    plota. <- "p."
-    conda. <- "c."
-    sccma. <- "sccm."
-    pltidsa. <- "pltids."
-    
+    condxnm <- condnm
+    if (!is.null(condx)) condxnm <- "condx"
+
     ## subp_cond_chng_mtrx table
     sccmlst <- popTabchk(c("subp_cond_chng_mtrx", "sccm"), 
-                         tabtext = "subp_cond_chng_mtrx",
-                         tabs, tabIDs, dbtablst, dbconn, datindb)
+                         tabtext = "sccmx",
+                         tabs, tabIDs, 
+                         dbtablst = dbtablst, 
+                         dbconn = dbconn, schema = schema, 
+                         datindb = datindb)
     sccmnm <- sccmlst$tabnm
     sccmflds <- sccmlst$tabflds
     sccmid <- sccmlst$tabid
     sccmx <- sccmlst$tabx
-    if (!is.null(sccmx) && is.data.frame(sccmx)) {
-      sccmnm <- "sccmx"
-    }
+    sccmxnm <- sccmnm
+    if (!is.null(sccmx)) sccmxnm <- "sccmx"
     
-    if (is.null(condnm)) {
+    if (is.null(condxnm)) {
       stop("must include cond for CHNG estimates")
     }
+    if (is.null(sccmxnm)) {
+      stop("must include subp_cond_chng_mtrx for CHNG estimates")
+    }
+    
+    ## define aliases
+    plota. <- "p."
+    conda. <- "c."
+    pltidsa. <- "pltids."
+    sccma. <- "sccm."
     
     
-    ## Note: If pltassgn is not in database but all other tables are in database, 
-    ## we need to import the cond and subplot tables to memory and subset for calculating 
-    ## adjustment factors.
+    if (popType == "GRM") {
+      
+      ## tree table
+      treelst <- popTabchk(c("tree"), tabtext = "tree",
+                           tabs, tabIDs, 
+                           dbtablst = dbtablst, 
+                           dbconn = dbconn, schema = schema, 
+                           datindb = datindb)
+      treenm <- treelst$tabnm
+      treeflds <- treelst$tabflds
+      tuniqueid <- treelst$tabid
+      treex <- treelst$tabx
+      
+      if (is.null(treenm)) {
+        stop("must include tree for estimation")
+      }
+      
+      ## seedling table
+      seedlst <- popTabchk(c("seed", "seedling"), tabtext = "seed",
+                           tabs, tabIDs, 
+                           dbtablst = dbtablst, 
+                           dbconn = dbconn, schema = schema, 
+                           datindb = datindb)
+      seednm <- seedlst$tabnm
+      seedflds <- seedlst$tabflds
+      suniqueid <- seedlst$tabid
+      seedx <- seedlst$tabx
+      
+      
+      ## tree_grm_component table
+      grmlst <- popTabchk(c("grm", "tree_grm_component"), tabtext = "tree_grm_component",
+                          tabs, tabIDs, 
+                          dbtablst = dbtablst, 
+                          dbconn = dbconn, schema = schema, 
+                          datindb = datindb)
+      grmnm <- grmlst$tabnm
+      grmflds <- grmlst$tabflds
+      grmid <- grmlst$tabid
+      grmx <- grmlst$tabx
+      
+      if (is.null(grmnm)) {
+        stop("must include tree_grm_component for estimation")
+      }
+      
+      ## tree_grm_begin table
+      beginlst <- popTabchk(c("begin", "tree_grm_begin"), tabtext = "tree_grm_begin",
+                            tabs, tabIDs, 
+                            dbtablst = dbtablst, 
+                            dbconn = dbconn, schema = schema, 
+                            datindb = datindb)
+      beginnm <- beginlst$tabnm
+      beginflds <- beginlst$tabflds
+      beginid <- beginlst$tabid
+      beginx <- beginlst$tabx
+      
+      if (is.null(beginnm)) {
+        stop("must include tree_grm_begin for estimation")
+      }
+      
+      ## tree_grm_midpt table
+      midptlst <- popTabchk(c("midpt", "tree_grm_midpt"), tabtext = "tree_grm_midpt",
+                            tabs, tabIDs, 
+                            dbtablst = dbtablst, 
+                            dbconn = dbconn, schema = schema, 
+                            datindb = datindb)
+      midptnm <- midptlst$tabnm
+      midptflds <- midptlst$tabflds
+      midptid <- midptlst$tabid
+      midptx <- midptlst$tabx
+      
+      if (is.null(midptnm)) {
+        stop("must include tree_grm_midpt for estimation")
+      }
+    }  
+    
+    
+    ##############################################################################
+    ## 4. Check for variables in tables and define SELECT variables
+    ##############################################################################
+    
+    ## 4.1. Check unique identifiers and necessary variables to keep
+    ##############################################################################
+    
+    ## Check cuniqueid in cond
+    cuniqueid <- pcheck.varchar(var2check = cuniqueid, varnm="cuniqueid", gui=gui,
+                                checklst = condflds, caption="Unique identifier of plot in cond",
+                                warn = paste(cuniqueid, "not in cond"), stopifnull = TRUE)
+    
+    ## Check condid in cond
+    condid <- pcheck.varchar(var2check = condid, varnm="condid", gui=gui,
+                             checklst = condflds, caption="Unique identifier of conditions in cond",
+                             warn = paste(condid, "not in cond"), stopifnull = TRUE)
+    
+    ## Check cvars2keep in cond
+    if (!is.null(cvars2keep)) {
+      cvars2keepchk <- unlist(sapply(cvars2keep, findnm, 
+                                     condflds, returnNULL = TRUE))
+      if (length(cvars2keep) < length(cvars2keep)) {
+        message("variables are missing from dataset: ", 
+                toString(cvars2keep[!cvars2keep %in% cvars2keepchk]))
+        return(NULL)
+      } else {
+        cvars2keep <- cvars2keepchk
+      }	  
+    }
+    
+    
+    ## Check prev_plt_cn in plot
+    prevpltcnnm <- findnm("PREV_PLT_CN", pltflds, returnNULL = TRUE)
+    if (is.null(prevpltcnnm)) {
+      message("need PREV_PLT_CN in plot table for CHNG estimates")
+      stop()
+    }
+    
+    ## Check prevcond in subp_cond_chng_mtrx 
+    prevcondnm <- findnm("PREVCOND", sccmflds, returnNULL = TRUE)
+    if (is.null(prevcondnm)) {
+      message("need PREVCOND in subp_cond_chng_mtrx table for CHNG estimates")
+    }
+    
+    
+    ## 4.2. Check condition proportion variables for calculating area weights
+    ##############################################################################
+    cpropvars <- check.PROPvars(condflds,
+                                propvars = unlist(cpropvars))
+    areawt <- findnm(areawt, sccmflds, returnNULL = TRUE)
+    if (is.null(areawt)) {
+      stop("areawt not in dataset: ", areawt)
+    }
+    propvars <- cpropvars
+    
+    if (popType == "VOL") {
+      tpropvars <- check.PROPvars(condflds, treeflds = treeflds,
+                                  propvars = unlist(tpropvars),
+                                  MICRO_BREAKPOINT_DIA = MICRO_BREAKPOINT_DIA,
+                                  MACRO_BREAKPOINT_DIA = MACRO_BREAKPOINT_DIA)
+      cvars2keep <- unique(c(cvars2keep, tpropvars))
+      propvars <- c(cpropvars, tpropvars)
+      propvars <- propvars[!duplicated(propvars)]
+    }
+    
+    
+    ## 4.3. Define SELECT variables for cond and plot
+    ##############################################################################
+    
+    ## Define SELECT variables for cond
+    if (defaultVars) {
+      condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
+    } else {
+      condvars <- condflds
+    }
+    
+    ## Define SELECT variables for plot
+    if (!is.null(plotnm)) {
+      if (defaultVars) {
+        pvars <- pdoms2keep
+      } else {
+        pvars <- pltflds
+      }
+    } else {
+      pvars <- NULL
+    }
+    
+    ## Define SELECT variables for subp_cond_chng_mtrx
+    sccmvars <- sccmflds
+    
+
+    if (popType == "GRM") {
+      
+      ## Define SELECT variables for tree
+      if (!is.null(treenm)) {
+        if (defaultVars) {
+          treevars <- treeflds[treeflds %in% c(DBvars.default(istree=TRUE)$treevarlst,
+                                               DBvars.default(istree=TRUE)$tsumvarlst)]
+        } else {
+          treevars <- treeflds
+        }
+      }  
+      ## Define SELECT variables for tree_grm_component
+      if (defaultVars) {
+        grmvars <- grmflds[grmflds %in% DBvars.default(isgrm=TRUE)$grmvarlst]
+      } else {
+        grmvars <- grmflds
+      }
+      
+      ## Define SELECT variables for tree_grm_begin
+      beginvars <- beginflds
+      
+      ## Define SELECT variables for tree_grm_midpt
+      midptvars <- midptflds 
+      
+      
+      ## Define SELECT variables for seedling
+      if (!is.null(seednm)) {
+        if (defaultVars) {
+          seedvars <- seedflds[seedflds %in% c(DBvars.default(isseed=TRUE)$seedvarlst,
+                                               DBvars.default(isseed=TRUE)$ssumvarlst)]
+        } else {
+          seedvars <- seedflds
+        }
+      }
+    }
+    
+    
+    ##############################################################################
+    ## 5. Extract tables used to calculate adjustment factors from database 
+    ##    if pltassgn is not in database.
+    ## Note: If pltassgn is not in database but all other tables are in database,
+    ##       import the cond table to memory and subset for calculating
+    ##       adjustment factors.
+    ##############################################################################
     if (datindb && !pltaindb) {
       
-      ## Build cond FROM query
+      ## 5.1. Extract cond table
+      ###################################################################
+      
+      ## Build cond query
       if (!is.null(getdataWITHqry) && !is.null(getdataCNs)) {
+        
+        ## Build cond FROM query
         condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
-        condfromqry <- paste0("\n JOIN ", SCHEMA., condnm, " c ", condjoinqry)
+        condfromqry <- paste0("\n JOIN ", SCHEMA., condxnm, " c ", condjoinqry)
         
         ## Build cond SELECT query
-        if (defaultVars) {
-          condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
-        } else {
-          condvars <- "*"
-        }
         condselectqry <- toString(paste0(conda., condvars))
         
         ## Build final cond query, including getdataWITHqry
@@ -164,28 +393,55 @@ check.popdataCHNG <-
               return(NULL) })
         }
         if (is.null(condx) || nrow(condx) == 0) {
+          message("invalid cond query...")
           message(condqry)
           return(NULL)
+        } else {
+          names(condx) <- toupper(names(condx))
         }
         
         ## Return and/or save cond data
         condkey <- c(cuniqueid, condid)
         setkeyv(setDT(condx), condkey)
         
-        ## Subset condx to plots in pltassgn
-        condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
+        ## Subset condx to plots in pltassgn using getdataCNs
+        if (!is.null(getdataCNs)) {
+          condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
+        }
         
+      } else {
+        assign(condnm, DBI::dbReadTable(dbconn, condnm))
+      }
+      
+      ## Save data
+      if (savedata) {
+        message("saving cond table...")
+        outlst$out_layer <- "cond"
+        if (!append_layer) index.unique.cond <- condkey
+        datExportData(condx,
+                      savedata_opts = outlst)
+        if (!returndata) {
+          poptablst <- c(poptablst, "cond")
+          condnm <- "cond"
+        } else {
+          condnm=condxnm <- "condx"
+        }
+      } else {
+        condnm=condxnm <- "condx"
+      }
+     
+        
+      ## Build cond query
+      if (!is.null(getdataWITHqry) && !is.null(getdataCNs)) {
+        
+        ## 5.2. Extract subp_cond_chng_mtrx table (sccm)
+        ###################################################################
         
         ## Build sccm FROM query
         sccmjoinqry <- getjoinqry(sccmid, pltidsid, sccma., pltidsa.)
-        sccmfromqry <- paste0("\n JOIN ", SCHEMA., sccmnm, " c ", sccmjoinqry)
+        sccmfromqry <- paste0("\n JOIN ", SCHEMA., sccmnm, " sccm ", sccmjoinqry)
         
         ## Build sccm SELECT query
-        if (defaultVars) {
-          sccmvars <-  sccmflds[sccmflds %in% DBvars.default()$sccmvarlst]
-        } else {
-          sccmvars <- "*"
-        }
         sccmselectqry <- toString(paste0(sccma., sccmvars))
         
         ## Build final sccm query, including getdataWITHqry
@@ -214,160 +470,72 @@ check.popdataCHNG <-
           message("invalid cond query...")
           message(sccmqry)
           return(NULL)
+        } else {
+          names(sccmx) <- toupper(names(sccmx))
         }
         
         ## Set key on data.table
         sccmkey <- c("PLT_CN", "CONDID", "PREV_PLT_CN", "PREVCOND")
         setkeyv(setDT(sccmx), sccmkey)
         
-        ## Subset condx to plots in pltassgn
-        sccmx <- sccmx[sccmx[[sccmid]] %in% getdataCNs,]
+        ## Subset sccmx to plots in pltassgn using getdataCNs
+        if (!is.null(getdataCNs)) {
+          sccmx <- sccmx[sccmx[[sccmid]] %in% getdataCNs,]
+        }
         
       } else {
-        assign(condnm, DBI::dbReadTable(dbconn, condnm))
         assign(sccmnm, DBI::dbReadTable(dbconn, sccmnm))
       }
       
       ## Save data
       if (savedata) {
-        message("saving SUBP_COND_CHNG_MTRX...")
-        outlst$out_layer <- "SUBP_COND_CHNG_MTRX"
+        message("saving subp_cond_chng_mtrx...")
+        outlst$out_layer <- "subp_cond_chng_mtrx"
         if (!append_layer) index.unique.sccm <- sccmkey
         datExportData(sccmx, 
                       savedata_opts = outlst)
-      }
-    }
-    
-    if (popType == "GRM") {
-      
-      ## tree table
-      treelst <- popTabchk(c("tree"), tabtext = "tree",
-                           tabs, tabIDs, dbtablst, dbconn, datindb)
-      treenm <- treelst$tabnm
-      treeflds <- treelst$tabflds
-      tuniqueid <- treelst$tabid
-      treex <- treelst$tabx
-      
-      if (is.null(treenm)) {
-        stop("must include tree for estimation")
-      }
-      
-      ## seedling table
-      seedlst <- popTabchk(c("seed", "seedling"), tabtext = "seed",
-                           tabs, tabIDs, dbtablst, dbconn, datindb)
-      seednm <- seedlst$tabnm
-      seedflds <- seedlst$tabflds
-      suniqueid <- seedlst$tabid
-      seedx <- seedlst$tabx
-      
-      
-      ## tree_grm_component table
-      grmlst <- popTabchk(c("grm", "tree_grm_component"), tabtext = "tree_grm_component",
-                          tabs, tabIDs, dbtablst, dbconn, datindb)
-      grmnm <- grmlst$tabnm
-      grmflds <- grmlst$tabflds
-      grmid <- grmlst$tabid
-      grmx <- grmlst$tabx
-      
-      if (is.null(grmnm)) {
-        stop("must include tree_grm_component for estimation")
-      }
-      
-      ## tree_grm_begin table
-      beginlst <- popTabchk(c("begin", "tree_grm_begin"), tabtext = "tree_grm_begin",
-                            tabs, tabIDs, dbtablst, dbconn, datindb)
-      beginnm <- beginlst$tabnm
-      beginflds <- beginlst$tabflds
-      beginid <- beginlst$tabid
-      beginx <- beginlst$tabx
-      
-      if (is.null(beginnm)) {
-        stop("must include tree_grm_begin for estimation")
-      }
-      
-      ## tree_grm_midpt table
-      midptlst <- popTabchk(c("midpt", "tree_grm_midpt"), tabtext = "tree_grm_midpt",
-                            tabs, tabIDs, dbtablst, dbconn, datindb)
-      midptnm <- midptlst$tabnm
-      midptflds <- midptlst$tabflds
-      midptid <- midptlst$tabid
-      midptx <- midptlst$tabx
-      
-      if (is.null(midptnm)) {
-        stop("must include tree_grm_midpt for estimation")
-      }
-    }
-    
-    ##############################################################################
-    ## 4. Check for necessary variables in tables
-    ##############################################################################
-    condxnm <- ifelse (!is.null(condx), "condx", condnm) 
-    
-    ## plot table
-    ##############################################################################
-    prevpltcnnm <- findnm("PREV_PLT_CN", pltflds, returnNULL = TRUE)
-    if (is.null(prevpltcnnm)) {
-      message("need PREV_PLT_CN in plot table for CHNG estimates")
-      stop()
-    }
-    
-    ## cond table
-    ##############################################################################
-    
-    ## Check cuniqueid
-    cuniqueid <- pcheck.varchar(var2check = cuniqueid, varnm="cuniqueid", gui=gui,
-                                checklst = condflds, caption="Unique identifier of plot in cond",
-                                warn = paste(cuniqueid, "not in cond"), stopifnull = TRUE)
-    
-    ## Check condid
-    condid <- pcheck.varchar(var2check = condid, varnm="condid", gui=gui,
-                             checklst = condflds, caption="Unique identifier of conditions in cond",
-                             warn = paste(condid, "not in cond"), stopifnull = TRUE)
-    
-    ## Check cvars2keep in cond
-    if (!is.null(cvars2keep)) {
-      cvars2keepchk <- unlist(sapply(cvars2keep, findnm, 
-                                     condflds, returnNULL = TRUE))
-      if (length(cvars2keep) < length(cvars2keep)) {
-        message("variables are missing from dataset: ", 
-                toString(cvars2keep[!cvars2keep %in% cvars2keepchk]))
-        return(NULL)
+        if (!returndata) {
+          poptablst <- c(poptablst, "subp_cond_chng_mtrx")
+          sccmnm <- "subp_cond_chng_mtrx"
+        } else {
+          sccmnm=sccmxnm <- "sccmx"
+        }
       } else {
-        cvars2keep <- cvars2keepchk
-      }	  
+        sccmnm=sccmxnm <- "sccmx"
+      }
     }
     
-    ## subp_cond_chng_mtrx table
-    prevcondnm <- findnm("PREVCOND", sccmflds, returnNULL = TRUE)
-    if (is.null(prevcondnm)) {
-      message("need PREVCOND in subp_cond_chng_mtrx table for CHNG estimates")
+
+    ## 5.3. Set output data formats for population data
+    ###################################################################
+    
+    ## Set popdatindb if returning data or saving to a database
+    if (returndata) {
+      popdatindb <- FALSE
+      pop_dsn = popconn <- NULL
+      pop_datsource <- "obj"
+    }
+    ## If pop data are not in a database, but is saved to sqlite database
+    if (popdatindb) {
+      if (savedata && outlst$out_fmt == "sqlite") {
+        pop_dsn <- file.path(outlst$outfolder, outlst$out_dsn)
+        popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
+        pop_datsource <- "sqlite"
+        pop_schema <- NULL
+      } else {
+        popconn <- dbconn
+        pop_datsource <- datsource
+        pop_dsn <- NULL
+        pop_schema <- schema
+      }
     }
     
     
     ##############################################################################
-    ## 5. Build query for adjustment factors and append to pltids
+    ## 6. Build query for adjustment factors
     ##############################################################################
     
-    ## 5.1. Check proportion variables, including area weight 
-    #######################################################################
-    cpropvars <- check.PROPvars(condflds,
-                                propvars = unlist(cpropvars))
-    if (!areawt %in% sccmflds) {
-      stop("areawt not in dataset: ", areawt)
-    }
-    propvars <- cpropvars
-    if (popType == "VOL") {
-      tpropvars <- check.PROPvars(condflds, treeflds = treeflds,
-                                  propvars = unlist(tpropvars),
-                                  MICRO_BREAKPOINT_DIA = MICRO_BREAKPOINT_DIA,
-                                  MACRO_BREAKPOINT_DIA = MACRO_BREAKPOINT_DIA)
-      cvars2keep <- unique(c(cvars2keep, tpropvars))
-      propvars <- c(cpropvars, tpropvars)
-      propvars <- propvars[!duplicated(propvars)]
-    }
-    
-    
-    ## 5.2. Build query for adjustment factors (ADJqry) based on popType  
+    ## 6.1. Build query for adjustment factors (ADJqry) based on popType  
     ###################################################################
     pplota. <- "pplot."
     pconda. <- "pcond."
@@ -375,7 +543,7 @@ check.popdataCHNG <-
     ## Build FROM statement
     pjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
     pfromqry <- paste0("\n FROM pltids",
-                       "\n JOIN ", SCHEMA., plotnm, " p ", pjoinqry)
+                       "\n JOIN ", SCHEMA., pltxnm, " p ", pjoinqry)
 
     ## Add FROM statement for remeasured plots
     pplotjoinqry <- getjoinqry(puniqueid, prevpltcnnm, pplota., plota.)
@@ -384,8 +552,8 @@ check.popdataCHNG <-
     pcfromqry <- paste0(
       pfromqry,
       #"\n JOIN ", SCHEMA., plotnm, " pplot ", pplotjoinqry,
-      "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry,
-      "\n JOIN ", SCHEMA., condnm, " pcond ", pcondjoinqry)
+      "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry,
+      "\n JOIN ", SCHEMA., condxnm, " pcond ", pcondjoinqry)
 
     ## Add FROM statement for subp_cond_chng_matrx
     sccmjoinqry <- getjoinqry(c(sccmid, prevpltcnnm), c(pltidsid, prevpltcnnm), sccma., plota.)
@@ -395,7 +563,7 @@ check.popdataCHNG <-
       " AND ", sccma., prevcondnm, " = ", pconda., condid)
 
     sccmfromqry <- paste0(pcfromqry,  
-                      "\n JOIN ", SCHEMA., sccmnm, " sccm ", sccmjoinqry) 
+                      "\n JOIN ", SCHEMA., sccmxnm, " sccm ", sccmjoinqry) 
     
     
     ## Build WHERE statement for subplots (i.e., excluding nonresponse)
@@ -414,6 +582,53 @@ check.popdataCHNG <-
                                  selectvars = NULL,
                                  SCHEMA. = SCHEMA.)
     #message(sumpropqry) 
+    
+    ## If returndata or savedata, return subpcprop  
+    ###################################################################
+    if (returndata || savedata) {
+      
+      subpcprop.qry <- paste0(
+        pltidsWITHqry,
+        "\n-------------------------------------------",
+        "\n", sumpropqry)
+        
+      ## Run query to calculate adjustment factors
+      if (pltaindb) {
+        subpcprop <- tryCatch(
+          DBI::dbGetQuery(dbconn, subpcprop.qry),
+          error=function(e) {
+            message(e,"\n")
+            return(NULL)})
+      } else {
+        subpcprop <- tryCatch(
+          sqldf::sqldf(subpcprop.qry, connection = NULL),
+          error = function(e) {
+            message(e,"\n")
+            return(NULL) })
+      }
+      if (is.null(subpcprop) || nrow(subpcprop) == 0) {
+        message("invalid adjustment query...")
+        message(subpcprop.qry)
+        return(NULL)
+      } else {
+        names(subpcprop) <- toupper(names(subpcprop))
+      }
+      subpcpropkey <- c(cuniqueid, condid, prevpltcnnm, prevcondnm)
+      setkeyv(setDT(subpcprop), c(cuniqueid, condid))
+      dbqueries$subpcprop <- subpcprop.qry
+      
+      ## Save data
+      if (savedata) {
+        message("saving subpcprop...")
+        outlst$out_layer <- "subpcprop"
+        if (!append_layer) index.unique.subpcprop <- subpcpropkey
+        datExportData(subpcprop, 
+                      savedata_opts = outlst)
+        if (!returndata) {
+          poptablst <- c(poptablst, "subpcprop")
+        }
+      }
+    }
     
     ## Build FROM statement for summarized subplot proportions
     adjjoinqry <- getjoinqry(sccmid, pltidsid, "c.", pltidsa.)
@@ -445,7 +660,8 @@ check.popdataCHNG <-
     )
     #message(adjfactors.qry)
     
-    ## 5.3. If returnadj = TRUE, return adjustment factors  
+    
+    ## 6.2. If returnadj = TRUE, return adjustment factors  
     ###################################################################
     if (adj != "samp") returnadj <- FALSE
     if (returnadj) {
@@ -467,6 +683,8 @@ check.popdataCHNG <-
         message("invalid adjustment query...")
         message(adjfactors.qry)
         return(NULL)
+      } else {
+        names(adjfactors) <- toupper(names(adjfactors))
       }
       if (adj == "samp") {
         setkeyv(setDT(adjfactors), strunitvars)
@@ -477,15 +695,15 @@ check.popdataCHNG <-
     dbqueries$adjfactors <- adjfactors.qry
 
 
-    ## 5.4 Build query for plot-level adjustment factors
+    ## 6.3 Build query for plot-level adjustment factors
     ###################################################################
     adja. <- "adj."
-    adjvars <- sapply(propvars, function(x) {
-      ifelse(grepl("PROP_UNADJ", x), paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)), 
-             ifelse (grepl("prop_unadj", x), paste0("ADJ_FACTOR_", toupper(sub("prop_unadj", "", x))), 
-                     paste0(x, "_ADJ"))) })
-    selectvars <- toString(c(paste0(pltidsa., pltidsid), paste0(adja., adjvars)))
-
+    adjvars <- sapply(toupper(propvars), function(x) {
+      ifelse(grepl("PROP_UNADJ", x), paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)),
+             paste0(x, "_ADJ")) })
+    pltidsadjSELECT.qry <- paste0(
+      "SELECT ", toString(c(paste0(pltidsa., pltidsid), paste0(adja., adjvars))))
+    
     ## if adj='samp', append query for plot-level adjustment factors 
     if (adj == "samp") {
       
@@ -510,7 +728,7 @@ check.popdataCHNG <-
       pltidsadj.qry <- paste0(
         adjfactorsWITHqry,
         "\n-------------------------------------------",
-        paste0("\nSELECT ", selectvars,
+        paste0("\n", pltidsadjSELECT.qry,
                pltidsadjFROM.qry))
       ## message(pltidsadj.qry)
     
@@ -519,7 +737,7 @@ check.popdataCHNG <-
         adjfactorsWITHqry, ",",
         "\n----- get plot-level adjustment factors",
         "\npltidsadj AS ",
-        "\n(SELECT ", selectvars,
+        "\n(", pltidsadjSELECT.qry,
         pltidsadjFROM.qry, ")")
     
     } else {
@@ -548,10 +766,10 @@ check.popdataCHNG <-
     dbqueriesWITH$pltidsadjWITH <- pltidsadjWITHqry   
 
     
-    ## 5.6. Run query to identify plotids, including adjustment factors
+    ## 6.4. Run query to identify plotids, including adjustment factors
     ###################################################################
     if (returndata || savedata) {
-      if (datindb) {
+      if (pltaindb) {
         pltidsadj <- tryCatch(
           DBI::dbGetQuery(dbconn, pltidsadj.qry),
           error=function(e) {
@@ -568,50 +786,54 @@ check.popdataCHNG <-
         message("invalid adjustment query...")
         message(pltidsadj.qry)
         return(NULL)
+      } else {
+        names(pltidsadj) <- toupper(names(pltidsadj))
       }
       setkeyv(setDT(pltidsadj), pltidsid)
+      
+      ## Save data
+      if (savedata) {
+        message("saving pltidsadj...")
+        outlst$out_layer <- "pltidsadj"
+        if (!append_layer) index.unique.subpcprop <- pltidsid
+        datExportData(pltidsadj, 
+                      savedata_opts = outlst)
+        if (!returndata) {
+          poptablst <- c(poptablst, "pltidsadj")
+        }
+      }
     }
     dbqueries$pltidsadj <- pltidsadj.qry
     
  
     ##############################################################################
-    ## 6. Build and run queries for PLOT/COND (pltcondx).
+    ## 7. Build and run queries for PLOT/COND (pltcondx).
     ##############################################################################
 
-    ## 6.1. Build FROM query for pltcondx query
+    ## 7.1. Build FROM query for pltcondx query
     ##################################################################
     pplotfromqry <- paste0(
       pfromqry,
-      "\n JOIN ", SCHEMA., plotnm, " pplot ", pplotjoinqry)
+      "\n JOIN ", SCHEMA., pltxnm, " pplot ", pplotjoinqry)
     
     ppcfromqry <- paste0(
       pplotfromqry,
-      "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry,
-      "\n JOIN ", SCHEMA., condnm, " pcond ", pcondjoinqry)
+      "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry,
+      "\n JOIN ", SCHEMA., condxnm, " pcond ", pcondjoinqry)
     
     
     ## Build SELECT query for pltcondx query
-    ##################################################################
-    if (defaultVars) {
-      pvars <- pdoms2keep
-    } else {
-      pvars <- "*"
-    }
     pvars <- pvars[pvars != "PREV_PLT_CN"]
     pselectqry <- toString(paste0(plota., pvars))
     pplotselectqry <- toString(paste0(pplota.,  pvars, " AS PREV_", pvars))
 
-    if (defaultVars) {
-      condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
-    } else {
-      condvars <- "*"
-    }
+    ## Build SELECT query for pltcondx query
     condvars <- unique(c(condvars, cvars2keep))[!unique(c(condvars, cvars2keep)) %in% pvars]
     cselectqry <- toString(paste0(conda., condvars))
     pcondselectqry <- toString(paste0("pcond.", condvars, " AS PREV_", condvars))
     
     
-    ## 6.2. Add FORTYPGRP to SELECT query
+    ## 7.2. Add FORTYPGRP to SELECT query
     ###############################################################
     addfortypgrp <- FALSE
     if (addfortypgrp) {
@@ -632,9 +854,11 @@ check.popdataCHNG <-
     }
     
     
-    ## 6.3. Build query for pltcondx
+    ## 7.3. Build query for pltcondx
     ###############################################################
-    pltcondflds <- unique(c(condvars, paste0("PREV_", condvars), pvars), paste0("PREV_", pvars))
+    pvars <- c(paste0("PREV_", pvars), pvars)
+    condvars <- c(paste0("PREV_", condvars), condvars)
+    pltcondflds <- unique(condvars, pvars)
     
     pltcondx.qry <- paste0("SELECT ", cselectqry, ", ",
                            "\n", pcondselectqry, ", ",
@@ -644,7 +868,7 @@ check.popdataCHNG <-
     dbqueries$pltcondx <- pltcondx.qry
     
     
-    ## 6.4. Build WITH queries for pltcondx
+    ## 7.4. Build WITH queries for pltcondx
     ###############################################################
     
     # ## Build WITH query for pltcondx, including pltids WITH query
@@ -662,11 +886,9 @@ check.popdataCHNG <-
     # dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
     
     
-    ## 6.5. If returndata or savedata, run query for pltcondx
+    ## 7.5. If returndata or savedata, run query for pltcondx
     ##################################################################
     if (returndata || savedata) {
-      pltcondindb <- FALSE
-      
       pltcondxqry <- paste0(pltidsWITHqry,
                             "\n", pltcondx.qry)
       
@@ -689,24 +911,18 @@ check.popdataCHNG <-
         message("invalid pltcondx query...")
         message(pltcondxqry)
         return(NULL)
+      } else {
+        names(pltcondx) <- toupper(names(pltcondx))
       }
       ## Set key on data.table
       pltcondkey <- c(cuniqueid, condid)
       setkeyv(setDT(pltcondx), pltcondkey)
-      
-      ## Save data
-      if (savedata) {
-        message("saving pltcondx...")
-        outlst$out_layer <- "pltcondx"
-        if (!append_layer) index.unique.pltcondx <- pltcondkey
-        datExportData(pltcondx, 
-                      savedata_opts = outlst)
-      }
     }
     
-  
-    ## 7. Build CASE statement for adding adjustment factors to SELECT
-    ##################################################################
+    
+    ##############################################################################
+    ## 8. Build CASE statement for adding adjustment factors to SELECT
+    ##############################################################################
     if (adj %in% c("samp", "plot")) {
       areawt <- "CONDPROP_UNADJ"
       propbasisnm <- findnm("PROP_BASIS", condflds, returnNULL=TRUE)
@@ -727,9 +943,10 @@ check.popdataCHNG <-
     
    
     ##############################################################################
-    ## 8.	Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE. 
+    ## 9.	Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE. 
     ##############################################################################  
-    returnlst <- list(pltcondflds = pltcondflds, ## vector of field names in pltcondx
+    returnlst <- list(popdatindb = popdatindb,   ## logical. if TRUE, population data are in database
+                      pltcondflds = pltcondflds, ## vector of field names in pltcondx
                       pltflds = pvars,
                       condflds = condvars,
                       cuniqueid = cuniqueid,     ## unique identifier of plots in pltcondx
@@ -743,9 +960,14 @@ check.popdataCHNG <-
     if (returndata || savedata) {
       returnlst$pltcondx <- pltcondx    ## data frame of plot/condition variables
       returnlst$pltidsadj <- pltidsadj  ## data frame of plot-level adjustment factors
+      
+      if (returndata) {
+        returnlst$subpcprop <- subpcprop
+      }
     } else {
       returnlst$pltcondx <- "pltcondx"
       returnlst$pltidsadj <- "pltidsadj"
+      returnlst$subpcprop <- "subpcprop"
     }
     if (returnadj) {
       returnlst$adjfactors <- adjfactors   ## data frame with adjustment factors
@@ -753,12 +975,12 @@ check.popdataCHNG <-
     
 
     ##############################################################################
-    ## 9. Build and run queries for other necessary tables (if returndata = TRUE) 
+    ## 10. Build and run queries for other necessary tables (if returndata/savedata = TRUE)
     ##############################################################################  
     if (returndata || savedata) {
       message("returning data needed for estimation...")
       
-      # ## 7.1 Return and/or save plot data (pltx / PLOT)
+      # ## 10.1 Return and/or save plot data (pltx / PLOT)
       # ##################################################################
       # 
       # if (is.null(pltx) && !is.null(plotnm)) {
@@ -818,7 +1040,7 @@ check.popdataCHNG <-
       # }
       # 
       # 
-      # ## 7.2 Return and/or save cond data (condx / COND)
+      # ## 10.2 Return and/or save cond data (condx / COND)
       # ##################################################################
       # 
       # if (is.null(condx)) {
@@ -890,22 +1112,18 @@ check.popdataCHNG <-
       #                 savedata_opts = outlst)
       # }
       # rm(condx)  
-      
 
-      ## 9.1. Return and/or save subplot change data (sccmx / SUBP_COND_CHNG_MTRX)
+
+      ## 10.3. Return and/or save subplot change data (sccmx / SUBP_COND_CHNG_MTRX)
       ##################################################################
       if (is.null(sccmx)) {    
 
         ## Build sccm FROM query
         sccmjoinqry <- getjoinqry(sccmid, pltidsid, sccma., pltidsa.)
         sccmfromqry <- paste0(
-          "\nJOIN ", SCHEMA., sccmnm, " sccm ", sccmjoinqry)
+          "\nJOIN ", SCHEMA., sccmxnm, " sccm ", sccmjoinqry)
        
         ## Build sccm SELECT query
-        if (defaultVars) {
-          sccmvars <- "*"
-        }
-        #sccmselectqry <- toString(c(paste0("pltids.", strunitvars), paste0(sccma., sccmvars)))
         sccmselectqry <- toString(paste0(sccma., sccmvars))
        
         ## Build final sccm query, including pltidsqry
@@ -914,380 +1132,438 @@ check.popdataCHNG <-
                           "\n SELECT ", sccmselectqry,
                           "\n FROM pltids",
                           sccmfromqry) 
+        dbqueries$SUBP_COND_CHNG_MTRX <- sccmqry
         
         ## Run final sccm query, including pltidsqry
         if (datindb) {
+          
+          ## check for index
+          idxchk <- checkidx(dbconn, sccmxnm, schema = schema)
+          if (nrow(idxchk) == 0) {
+            message("no index exists on ", sccmxnm, " query may be slow")
+          }
+          
           sccmx <- tryCatch(
             DBI::dbGetQuery(dbconn, sccmqry),
             error=function(e) {
-              message("invalid subp_cond_chng_matrx query...")
               warning(e)
               return(NULL)})
         } else {
           sccmx <- tryCatch(
             sqldf::sqldf(sccmqry, connection = NULL),
             error = function(e) {
-              message("invalid subp_cond_chng_matrx query...")
               message(e,"\n")
               return(NULL) })
         }
         if (is.null(sccmx) || nrow(sccmx) == 0) {
+          message("invalid subp_cond_chng_matrx query...")
           message(sccmqry)
           return(NULL)
+        } else {
+          names(sccmx) <- toupper(names(sccmx))
         }
-
-        ## Return and/or save sccm data
-        sccmkey <- c("PLT_CN", "CONDID", "PREV_PLT_CN", "PREVCOND")
-        setkeyv(setDT(sccmx), sccmkey)
-        if (!is.null(getdataCNs)) { 
-          sccmx <- sccmx[sccmx[[sccmid]] %in% getdataCNs,]
-        }
+      }  
+      
+      ## Set key and subset subp_cond_chng_mtrx data
+      sccmkey <- c("PLT_CN", "CONDID", "PREV_PLT_CN", "PREVCOND")
+      setkeyv(setDT(sccmx), sccmkey)
+      if (!is.null(getdataCNs)) { 
+        sccmx <- sccmx[sccmx[[sccmid]] %in% getdataCNs,]
       }
       
       ## Append adjusted SUBPTYP_PROP_CHNG
       sccmx[pltidsadj, 
             SUBPTYP_PROP_ADJ := SUBPTYP_PROP_CHNG * ADJ_FACTOR_COND]
       
-      
+
       ## Add to returnlst and remove sccmx object
       if (returndata) {
         returnlst$sccmx <- sccmx
         returnlst$sccmid <- sccmid
+        returnlst$sccmflds <- sccmflds
       }
       ## Save data
       if (savedata) {
-        message("saving SUBP_COND_CHNG_MATRX...")
-        outlst$out_layer <- "SUBP_COND_CHNG_MATRX"
+        message("saving SUBP_COND_CHNG_MTRX...")
+        outlst$out_layer <- "subp_cond_chng_mtrx"
         if (!append_layer) index.unique.subp_cond_chng_mtrx <- sccmkey
         datExportData(sccmx, 
                       savedata_opts = outlst)
+        if (!returndata) {
+          poptablst <- c(poptablst, "subp_cond_chng_mtrx")
+          sccmnm <- "subp_cond_chng_mtrx"
+        }
       }
       rm(sccmx)
-      
-     
+    
+    
       ##########################################################################
       ## If popType = 'GRM', get remeasured tree and seed data queries for GRM
       ##    and TREE_GRM_COMPENENT, TREE_GRM_BEGIN and TREE_GRM_MIDPT queries
       ##########################################################################
       if (popType == "GRM") {
         
-        ## 7.4. Return and/or save seedling data (treex / TREE)
+        ## 7.4. Return and/or save tree data (treex / TREE)
         ##################################################################
-        treea. <- "t."
-        ptreea. <- "ptree."
+        if (!is.null(treenm)) {
+          treea. <- "t."
+          ptreea. <- "ptree."
+          
+          ## check key variables
+          tsubp <- findnm("SUBP", treeflds, returnNULL = TRUE)
+          ttree <- findnm("TREE", treeflds, returnNULL = TRUE)
+          keyvars <- c(treecnnm, prevtrecnnm, tprevcondnm, tsubp, ttree)
+          if (any(sapply(keyvars, is.null))) {
+            keymiss <- keyvars[sapply(keyvars, is.null)]
+            stop("missing key variables in tree data: ", toString(keymiss))
+          }
+          
+          ## Check join variables
+          treecnnm <- findnm("CN", treeflds, returnNULL = TRUE)
+          prevtrecnnm <- findnm("PREV_TRE_CN", treeflds, returnNULL = TRUE)
+          tprevcondnm <- findnm("PREVCOND", treeflds, returnNULL = TRUE)
+          
+          ## Build tree FROM query
+          tfromqry <- paste0(pcfromqry, 
+                             "\n JOIN ", SCHEMA., treenm, " t ON (", treea., tuniqueid, " = ", conda., cuniqueid, 
+                             "\n    AND t.", condid, " = c.", condid, " AND ", treea., tprevcondnm, " = ", pconda., condid, ")",
+                             "\n LEFT JOIN ", SCHEMA., treenm, " ptree ON (", ptreea., treecnnm, " = ", treea., prevtrecnnm, ")")
+          
+          
+          ## Build tree SELECT query
+          tselectqry <- toString(paste0(treea., unique(c(tuniqueid, treevars))))
+          ptreeselectqry <- toString(paste0(ptreea., treevars, " AS PREV_", treevars))
+          
+          ## Build final tree query, including pltidsqry
+          # treeqry <- paste0(pltidsWITHqry,
+          #                   "\n SELECT ", tselectqry,
+          #                   tfromqry,
+          #                   "\nUNION",
+          #                   "\n SELECT ", ptreeselectqry, 
+          #                   tfromqry)
+          treeqry <- paste0(pltidsWITHqry,
+                            "\n SELECT ", tselectqry, ", ",
+                            "\n", ptreeselectqry,
+                            tfromqry)
+          dbqueries$tree <- treeqry
+          
+          ## Run final tree query, including pltidsqry
+          if (datindb) {
+            message("query ", treenm, "...")
+            treex <- tryCatch(
+              DBI::dbGetQuery(dbconn, treeqry),
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
+          } else {    
+            treex <- tryCatch(
+              sqldf::sqldf(treeqry, connection = NULL),
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
+          }
+          if (is.null(treex) || nrow(treex) == 0) {
+            message("invalid tree query...")
+            message(treeqry)
+            return(NULL)
+          } else {
+            names(treex) <- toupper(names(treex))
+          }
         
-        ## Check variables
-        treecnnm <- findnm("CN", treeflds, returnNULL = TRUE)
-        prevtrecnnm <- findnm("PREV_TRE_CN", treeflds, returnNULL = TRUE)
-        tprevcondnm <- findnm("PREVCOND", treeflds, returnNULL = TRUE)
-        tsubp <- findnm("SUBP", treeflds, returnNULL = TRUE)
-        ttree <- findnm("TREE", treeflds, returnNULL = TRUE)
-        keyvars <- c(treecnnm, prevtrecnnm, tprevcondnm, tsubp, ttree)
-        if (any(sapply(keyvars, is.null))) {
-          keymiss <- keyvars[sapply(keyvars, is.null)]
-          stop("missing key variables in tree data: ", toString(keymiss))
+  
+          ## Set key and subset tree data
+          treedataCNs <- NULL
+          treekey <- c(tuniqueid, condid, tsubp, ttree)
+          setkeyv(setDT(treex), treekey)
+          if (!is.null(getdataCNs)) { 
+            treex <- treex[treex[[tuniqueid]] %in% getdataCNs,]
+            if (!is.null(treecnnm)) {
+              treedataCNs <- unique(treex[[treecnnm]])
+            }
+          }
+          
+          ## Add to returnlst and remove treex object
+          if (returndata) {
+            returnlst$treex <- treex
+            returnlst$tuniqueid <- tuniqueid
+            returnlst$treeflds <- treevars
+          }
+          
+          ## Save data
+          if (savedata) {
+            message("saving TREE...")
+            outlst$out_layer <- "TREE"
+            if (!append_layer) index.unique.tree <- treekey
+            datExportData(treex, 
+                          savedata_opts = outlst)
+            if (!returndata) {
+              poptablst <- c(poptablst, "tree")
+              treenm <- "tree"
+              
+              outlst$out_layer <- "ref_species"
+              datExportData(ref_species,
+                            savedata_opts = outlst)
+            }
+          }
+          rm(treex)
         }
-        
-        ## Build tree FROM query
-        tfromqry <- paste0(pcfromqry, 
-                           "\n JOIN ", SCHEMA., treenm, " t ON (", treea., tuniqueid, " = ", conda., cuniqueid, 
-                           "\n    AND t.", condid, " = c.", condid, " AND ", treea., tprevcondnm, " = ", pconda., condid, ")",
-                           "\n LEFT JOIN ", SCHEMA., treenm, " ptree ON (", ptreea., treecnnm, " = ", treea., prevtrecnnm, ")")
-        
-        
-        ## Build tree SELECT query
-        if (defaultVars) {
-          treevars <- treeflds[treeflds %in% c(DBvars.default(istree=TRUE)$treevarlst,
-                                               DBvars.default(istree=TRUE)$tsumvarlst)]
-        } else {
-          treevars <- "*"
-        }
-        tselectqry <- toString(paste0(treea., unique(c(tuniqueid, treevars))))
-        ptreeselectqry <- toString(paste0(ptreea., treevars, " AS PREV_", treevars))
-        
-        ## Build final tree query, including pltidsqry
-        # treeqry <- paste0(pltidsWITHqry,
-        #                   "\n SELECT ", tselectqry,
-        #                   tfromqry,
-        #                   "\nUNION",
-        #                   "\n SELECT ", ptreeselectqry, 
-        #                   tfromqry)
-        treeqry <- paste0(pltidsWITHqry,
-                          "\n SELECT ", tselectqry, ", ",
-                          "\n", ptreeselectqry,
-                          tfromqry)
-        dbqueries$tree <- treeqry
-        
-        ## Run final tree query, including pltidsqry
-        if (datindb) {
-          message("query ", treenm, "...")
-          treex <- tryCatch(
-            DBI::dbGetQuery(dbconn, treeqry),
-            error = function(e) {
-              message("invalid tree query...")
-              message(e,"\n")
-              return(NULL) })
-        } else {    
-          treex <- tryCatch(
-            sqldf::sqldf(treeqry, connection = NULL),
-            error = function(e) {
-              message("invalid tree query...")
-              message(e,"\n")
-              return(NULL) })
-        }
-        if (is.null(treex)) {
-          message(treeqry)
-        }
-        
-        ## 8.2.6. Return and/or save tree data
-        treekey <- c(tuniqueid, condid, tsubp, ttree)
-        setkeyv(setDT(treex), treekey)
-        if (!is.null(getdataCNs)) { 
-          treex <- treex[treex[[tuniqueid]] %in% getdataCNs,]
-        }
-        
-        ## Add to returnlst and remove treex object
-        if (returndata) {
-          returnlst$treex <- treex
-          returnlst$tuniqueid <- tuniqueid
-        }
-        ## Save data
-        if (savedata) {
-          message("saving TREE...")
-          outlst$out_layer <- "TREE"
-          if (!append_layer) index.unique.tree <- treekey
-          datExportData(treex, 
-                        savedata_opts = outlst)
-        }
-        rm(treex)
-        
-        
-        ## 7.5. Return grm data (grmx / TREE_GRM_COMPONENT)
+      
+      
+        ## 10.5. Return grm data (grmx / TREE_GRM_COMPONENT)
         ##############################################################
-        grma. <- "grm."
+        if (is.null(grmnm)) {
+          grma. <- "grm."
+          
+          ## Check key variables
+          grmtrecn <- findnm("TRE_CN", grmflds, returnNULL = TRUE)      
+          keyvars <- grmtrecn
+          if (any(sapply(keyvars, is.null))) {
+            keymiss <- keyvars[sapply(keyvars, is.null)]
+            stop("missing key variables in tree_grm_component data: ", toString(keymiss))
+          }
+          
+          ## Build grm FROM query
+          grmtrecn <- findnm("TRE_CN", grmflds, returnNULL = TRUE)      
+          grmjoinqry <- getjoinqry(grmtrecn, treecnnm, grma., treea.)
+          grmfromqry <- paste0(tfromqry, 
+                               "\n LEFT JOIN ", SCHEMA., grmnm, " grm ", grmjoinqry)
+          
+          
+          ## Build grm SELECT query
+          grmselectqry <- toString(paste0("grm.", unique(c(grmid, grmvars))))
+          
+          ## Build final grm query, including pltidsqry
+          grmqry <- paste0(pltidsWITHqry,
+                           "\n SELECT ", grmselectqry,
+                           grmfromqry)
+          dbqueries$grm <- grmqry
+          
+          
+          ## Run final grm query, including pltidsqry
+          if (datindb) {
+            message("query ", grmnm, "...")
+            grmx <- tryCatch(
+              DBI::dbGetQuery(dbconn, grmqry),
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
+          } else {    
+            grmx <- tryCatch(
+              sqldf::sqldf(grmqry, connection = NULL),
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
+          }
+          if (is.null(grmx) || nrow(grmx) == 0) {
+            message("invalid tree_grm_component query...")
+            message(grmqry)
+            return(NULL)
+          } else {
+            names(grmx) <- toupper(names(grmx))
+          }
         
-        ## Check variables
-        grmtrecn <- findnm("TRE_CN", grmflds, returnNULL = TRUE)      
-        keyvars <- grmtrecn
-        if (any(sapply(keyvars, is.null))) {
-          keymiss <- keyvars[sapply(keyvars, is.null)]
-          stop("missing key variables in tree_grm_component data: ", toString(keymiss))
-        }
-        
-        ## Build grm FROM query
-        grmjoinqry <- getjoinqry(grmtrecn, treecnnm, grma., treea.)
-        grmfromqry <- paste0(tfromqry, 
-                             "\n LEFT JOIN ", SCHEMA., grmnm, " grm ", grmjoinqry)
-        
-        
-        ## Build grm SELECT query
-        if (defaultVars) {
-          grmvars <- grmflds[grmflds %in% DBvars.default(isgrm=TRUE)$grmvarlst]
-        } else {
-          grmvars <- "*"
-        }
-        grmselectqry <- toString(paste0("grm.", unique(c(grmid, grmvars))))
-        
-        ## Build final grm query, including pltidsqry
-        grmqry <- paste0(pltidsWITHqry,
-                         "\n SELECT ", grmselectqry,
-                         grmfromqry)
-        dbqueries$grm <- grmqry
-        
-        
-        ## Run final grm query, including pltidsqry
-        if (datindb) {
-          message("query ", grmnm, "...")
-          grmx <- tryCatch(
-            DBI::dbGetQuery(dbconn, grmqry),
-            error = function(e) {
-              message("invalid tree_grm_component query...")
-              message(e,"\n")
-              return(NULL) })
-        } else {    
-          grmx <- tryCatch(
-            sqldf::sqldf(grmqry, connection = NULL),
-            error = function(e) {
-              message("invalid tree_grm_component query...")
-              message(e,"\n")
-              return(NULL) })
-        }
-        if (is.null(grmx)) {
-          message(grmqry)
-          return(NULL)
-        }
+          ## Set key and subset grm data
+          grmkey <- c(grmtrecn)
+          setkeyv(setDT(grmx), grmkey)
+          if (!is.null(treedataCNs)) {
+            grmx <- grmx[grmx[[grmtrecn]] %in% treedataCNs,]
+          }
+          
+          ## Add to returnlst 
+          if (returndata) {
+            returnlst$grmx <- grmx
+            returnlst$grmflds <- grmvars
+          }
+          
+          ## Save data
+          if (savedata) {
+            message("saving TREE_GRM_COMPONENT...")
+            outlst$out_layer <- "tree_grm_component"
+            if (!append_layer) index.unique.tree_grm_component <- grmkey
+            datExportData(grmx, 
+                          savedata_opts = outlst)
+            if (!returndata) {
+              poptablst <- c(poptablst, "tree_grm_component")
+              treenm <- "tree_grm_component"
+            }
+          }
+          rm(grmx)
+        }  
         
         
-        ## Return and/or save grm data
-        grmkey <- c(grmtrecn)
-        setkeyv(setDT(grmx), grmkey)
-
-        ## Add to returnlst 
-        if (returndata) {
-          returnlst$grmx <- grmx
-        }
-        ## Save data
-        if (savedata) {
-          message("saving TREE_GRM_COMPONENT...")
-          outlst$out_layer <- "TREE_GRM_COMPONENT"
-          if (!append_layer) index.unique.tree_grm_component <- grmkey
-          datExportData(grmx, 
-                        savedata_opts = outlst)
-        }
-        rm(grmx)
-        
-        
-        ## 7.6. Return grm begin data (beginx / TREE_GRM_BEGIN)
+        ## 10.6. Return grm begin data (beginx / TREE_GRM_BEGIN)
         ##############################################################
-        begina. <- "begin."
+        if (is.null(beginnm)) {
+          begina. <- "begin."
+          
+          
+          ## Check key variables
+          begintrecn <- findnm("TRE_CN", beginflds, returnNULL = TRUE)      
+          keyvars <- begintrecn
+          if (any(sapply(keyvars, is.null))) {
+            keymiss <- keyvars[sapply(keyvars, is.null)]
+            stop("missing key variables in tree_grm_begin data: ", toString(keymiss))
+          }
+          
+          ## Build begin FROM query
+          beginjoinqry <- getjoinqry(begintrecn, treecnnm, begina., treea.)
+          beginfromqry <- paste0(tfromqry, 
+                                 "\n LEFT JOIN ", SCHEMA., beginnm, " begin ", beginjoinqry)
+          
+          
+          ## Build begin SELECT query
+          beginselectqry <- toString(paste0(begina., unique(c(grmid, beginvars))))
+          
+          ## Build final begin query, including pltidsqry
+          ###################################################
+          beginqry <- paste0(pltidsWITHqry,
+                             "\n SELECT distinct ", beginselectqry,
+                             beginfromqry)
+          dbqueries$begin <- beginqry
+          
+          
+          ## Run final begin query, including pltidsqry
+          if (datindb) {
+            message("query ", beginnm, "...")
+            beginx <- tryCatch(
+              DBI::dbGetQuery(dbconn, beginqry),
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
+          } else {    
+            beginx <- tryCatch(
+              sqldf::sqldf(beginqry, connection = NULL),
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
+          }
+          if (is.null(beginx) || nrow(beginx) == 0) {
+            message("invalid tree_grm_begin query...")
+            message(beginqry)
+            return(NULL)
+          } else {
+            names(beginx) <- toupper(names(beginx))
+          }
         
-        ## Check variables
-        begintrecn <- findnm("TRE_CN", beginflds, returnNULL = TRUE)      
-        keyvars <- begintrecn
-        if (any(sapply(keyvars, is.null))) {
-          keymiss <- keyvars[sapply(keyvars, is.null)]
-          stop("missing key variables in tree_grm_begin data: ", toString(keymiss))
-        }
+          ## Set key and subset begin data
+          beginkey <- c(begintrecn)
+          setkeyv(setDT(beginx), beginkey)
+          if (!is.null(treedataCNs)) {
+            beginx <- beginx[beginx[[grmtrecn]] %in% treedataCNs,]
+          }
+          
+          ## Add to returnlst 
+          if (returndata) {
+            returnlst$beginx <- beginx
+            returnlst$beginflds <- beginvars
+          }
+          
+          ## Save data
+          if (savedata) {
+            message("saving TREE_GRM_BEGIN...")
+            outlst$out_layer <- "tree_grm_begin"
+            if (!append_layer) index.unique.tree_grm_begin <- beginkey
+            datExportData(beginx, 
+                          savedata_opts = outlst)
+            if (!returndata) {
+              poptablst <- c(poptablst, "tree_grm_begin")
+              beginnm <- "tree_grm_begin"
+            }
+          }
+          rm(beginx)
+        }  
         
-        ## Build begin FROM query
-        beginjoinqry <- getjoinqry(begintrecn, treecnnm, begina., treea.)
-        beginfromqry <- paste0(tfromqry, 
-                               "\n LEFT JOIN ", SCHEMA., beginnm, " begin ", beginjoinqry)
+       
         
-        
-        ## Build begin SELECT query
-        beginvars <- "*"
-        beginselectqry <- toString(paste0(begina., unique(c(grmid, beginvars))))
-        
-        ## Build final begin query, including pltidsqry
-        ###################################################
-        beginqry <- paste0(pltidsWITHqry,
-                           "\n SELECT distinct ", beginselectqry,
-                           beginfromqry)
-        dbqueries$begin <- beginqry
-        
-        
-        ## Run final begin query, including pltidsqry
-        if (datindb) {
-          message("query ", beginnm, "...")
-          beginx <- tryCatch(
-            DBI::dbGetQuery(dbconn, beginqry),
-            error = function(e) {
-              message("invalid tree_grm_begin query...")
-              message(e,"\n")
-              return(NULL) })
-        } else {    
-          beginx <- tryCatch(
-            sqldf::sqldf(beginqry, connection = NULL),
-            error = function(e) {
-              message("invalid tree_grm_begin query...")
-              message(e,"\n")
-              return(NULL) })
-        }
-        if (is.null(beginx)) {
-          message(beginqry)
-          return(NULL)
-        }
-        
-        ## Return and/or save begin data
-        beginkey <- c(begintrecn)
-        setkeyv(setDT(beginx), beginkey)
-        
-        ## Add to returnlst 
-        if (returndata) {
-          returnlst$beginx <- beginx
-        }
-        ## Save data
-        if (savedata) {
-          message("saving TREE_GRM_BEGIN...")
-          outlst$out_layer <- "TREE_GRM_BEGIN"
-          if (!append_layer) index.unique.tree_grm_begin <- beginkey
-          datExportData(beginx, 
-                       savedata_opts = outlst)
-        }
-        rm(beginx)
-        
-        
-        ## 7.7. Return grm begin data (midptx / TREE_GRM_MIDPT)
+        ## 10.7. Return grm begin data (midptx / TREE_GRM_MIDPT)
         ##############################################################
-        midpta. <- "midpt."
+        if (is.null(midptnm)) {
+          midpta. <- "midpt."
         
-        ## Check variables
-        midpttrecn <- findnm("TRE_CN", midptflds, returnNULL = TRUE)      
-        keyvars <- midpttrecn
-        if (any(sapply(keyvars, is.null))) {
-          keymiss <- keyvars[sapply(keyvars, is.null)]
-          stop("missing key variables in tree_grm_midpt data: ", toString(keymiss))
-        }
+          ## Check key variables
+          midpttrecn <- findnm("TRE_CN", midptflds, returnNULL = TRUE)      
+          keyvars <- midpttrecn
+          if (any(sapply(keyvars, is.null))) {
+            keymiss <- keyvars[sapply(keyvars, is.null)]
+            stop("missing key variables in tree_grm_midpt data: ", toString(keymiss))
+          }
+          
+          ## Build midpt FROM query
+          midptjoinqry <- getjoinqry(midpttrecn, treecnnm, midpta., treea.)
+          midptfromqry <- paste0(tfromqry, 
+                                 "\nLEFT JOIN ", SCHEMA., midptnm, " midpt ", midptjoinqry)
+          
+          ## Build midpt SELECT query
+          midptselectqry <- toString(paste0(midpta., unique(c(grmid, midptvars))))
+          
+          ## Build final midpt query, including pltidsqry
+          midptqry <- paste0(pltidsWITHqry,
+                             "\n SELECT distinct ", midptselectqry,
+                             midptfromqry)
+          dbqueries$midpt <- midptqry
+          
+          
+          ## Run final midpt query, including pltidsqry
+          if (datindb) {
+            message("query ", midptnm, "...")
+            midptx <- tryCatch(
+              DBI::dbGetQuery(dbconn, midptqry),
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
+          } else {    
+            midptx <- tryCatch(
+              sqldf::sqldf(midptqry, connection = NULL),
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
+          }
+          if (is.null(midptx) || nrow(midptx) == 0) {
+            message("invalid tree_grm_midpt query...")
+            message(midptqry)
+            return(NULL)
+          } else {
+            names(midptx) <- toupper(names(midptx))
+          }
         
-        ## Build midpt FROM query
-        midptjoinqry <- getjoinqry(midpttrecn, treecnnm, midpta., treea.)
-        midptfromqry <- paste0(tfromqry, 
-                               "\nLEFT JOIN ", SCHEMA., midptnm, " midpt ", midptjoinqry)
+          ## Set key and subset midpt data
+          midptkey <- c(midpttrecn)
+          setkeyv(setDT(midptx), midptkey)
+          if (!is.null(treedataCNs)) {
+            midptx <- midptx[midptx[[grmtrecn]] %in% treedataCNs,]
+          }
+          
+          ## Add to returnlst 
+          if (returndata) {
+            returnlst$midptx <- midptx
+          }
+          ## Save data
+          if (savedata) {
+            message("saving TREE_GRM_MIDPT...")
+            outlst$out_layer <- "tree_grm_midpt"
+            if (!append_layer) index.unique.tree_grm_midpt <- midptkey
+            datExportData(midptx, 
+                          savedata_opts = outlst)
+            if (!returndata) {
+              poptablst <- c(poptablst, "tree_grm_midpt")
+              midptnm <- "tree_grm_midpt"
+            }
+          }
+          rm(midptx)
+        }  
         
-        ## Build midpt SELECT query
-        midptvars <- "*"
-        midptselectqry <- toString(paste0(midpta., unique(c(grmid, midptvars))))
-        
-        ## Build final midpt query, including pltidsqry
-        midptqry <- paste0(pltidsWITHqry,
-                           "\n SELECT distinct ", midptselectqry,
-                           midptfromqry)
-        dbqueries$midpt <- midptqry
-        
-        
-        ## Run final midpt query, including pltidsqry
-        if (datindb) {
-          message("query ", midptnm, "...")
-          midptx <- tryCatch(
-            DBI::dbGetQuery(dbconn, midptqry),
-            error = function(e) {
-              message("invalid tree_grm_midpt query...")
-              message(e,"\n")
-              return(NULL) })
-        } else {    
-          midptx <- tryCatch(
-            sqldf::sqldf(midptqry, connection = NULL),
-            error = function(e) {
-              message("invalid tree_grm_midpt query...")
-              message(e,"\n")
-              return(NULL) })
-        }
-        if (is.null(midptx)) {
-          message(midptqry)
-          return(NULL)
-        }
-        
-        ## Return and/or save midpt data
-        midptkey <- c(midpttrecn)
-        setkeyv(setDT(midptx), midptkey)
-        
-        ## Add to returnlst 
-        if (returndata) {
-          returnlst$midptx <- midptx
-        }
-        ## Save data
-        if (savedata) {
-          message("saving TREE_GRM_MIDPT...")
-          outlst$out_layer <- "TREE_GRM_MIDPT"
-          if (!append_layer) index.unique.tree_grm_midpt <- midptkey
-          datExportData(midptx, 
-                        savedata_opts = outlst)
-        }
-        rm(midptx)
-        
-        ## 7.8. Return seedling data (seedx / SEEDLING)
+       
+      
+        ## 10.8. Return seedling data (seedx / SEEDLING)
         ##############################################################
         if (!is.null(seednm)) {
           seeda. <- "s."
           
-          ## Check variables
-          treecnnm <- findnm("CN", treeflds, returnNULL = TRUE)
-          prevtrecnnm <- findnm("PREV_TRE_CN", treeflds, returnNULL = TRUE)
-          tprevcondnm <- findnm("PREVCOND", treeflds, returnNULL = TRUE)
+          
+          ## Check key variables
           scondidnm <- findnm("CONDID", seedflds, returnNULL = TRUE)
           ssubp <- findnm("SUBP", seedflds, returnNULL = TRUE)
-          keyvars <- c(treecnnm, prevtrecnnm, tprevcondnm, scondidnm, ssubp)
+          keyvars <- c(suniqueid, scondidnm, ssubp)
           if (any(sapply(keyvars, is.null))) {
             keymiss <- keyvars[sapply(keyvars, is.null)]
             stop("missing key variables in seedling data: ", toString(keymiss))
@@ -1300,12 +1576,6 @@ check.popdataCHNG <-
                              seedjoinqry)
           
           ## Build seed SELECT query
-          if (defaultVars) {
-            seedvars <- seedflds[seedflds %in% c(DBvars.default(isseed=TRUE)$seedvarlst,
-                                                 DBvars.default(isseed=TRUE)$ssumvarlst)]
-          } else {
-            seedvars <- "*"
-          }
           sselectqry <- toString(paste0("s.", unique(c(suniqueid, seedvars))))
           
           ## Build final seed query, including pltidsqry
@@ -1320,46 +1590,56 @@ check.popdataCHNG <-
             seedx <- tryCatch(
               DBI::dbGetQuery(dbconn, seedqry),
               error = function(e) {
-                message("invalid seedling query...")
                 message(e,"\n")
                 return(NULL) })
           } else {    
             seedx <- tryCatch(
               sqldf::sqldf(seedqry, connection = NULL),
               error = function(e) {
-                message("invalid seedling query...")
                 message(e,"\n")
                 return(NULL) })
           }
-          if (is.null(seedx)) {
+          if (is.null(seedx) || nrow(seedx) == 0) {
+            message("invalid seedling query...")
             message(seedqry)
+            return(NULL)
+          } else {
+            names(seedx) <- toupper(names(seedx))
           }
-          
+        
           ## Return and/or save seedling data
           seedkey <- c(suniqueid, condid, ssubp)
           setkeyv(setDT(seedx), seedkey)
+          if (!is.null(getdataCNs)) { 
+            seedx <- seedx[seedx[[suniqueid]] %in% getdataCNs,]
+          }
           
           ## Add to returnlst 
           if (returndata) {
             returnlst$seedx <- seedx
           }
+          
           ## Save data
           if (savedata) {
             message("saving SEEDLING...")
-            outlst$out_layer <- "SEEDLING"
+            outlst$out_layer <- "seedling"
             if (!append_layer) index.unique.seedling <- seedkey
             datExportData(seedx, 
                           savedata_opts = outlst)
+            if (!returndata) {
+              poptablst <- c(poptablst, "seedling")
+              seednm <- "seedling"
+            }
           }
           rm(seedx)
         }
-      }
-    }
-    
-    if (popType == "LULC") {
-      
-      lulcqry <- 
-        "SELECT distinct c.PLT_CN, c.CONDID, 
+      }  
+    }  
+
+      if (popType == "LULC") {
+        
+        lulcqry <- 
+          "SELECT distinct c.PLT_CN, c.CONDID, 
 			pcond.COND_STATUS_CD PREV_COND_STATUS_CD, c.COND_STATUS_CD, 
 			pcond.LAND_COVER_CLASS_CD PREV_LAND_COVER_CLASS_CD, c.LAND_COVER_CLASS_CD, 
 			pcond.PRESNFCD PREV_PRESNFCD, c.PRESNFCD,
@@ -1375,20 +1655,20 @@ check.popdataCHNG <-
                 JOIN sccm_condx chg ON(chg.PLT_CN = c.PLT_CN and chg.CONDID = c.CONDID)
            WHERE COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0 
 				AND COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0" 
-      
-      lulcx <- sqldf::sqldf(lulcqry)
-    }
-    
+        
+        lulcx <- sqldf::sqldf(lulcqry)
+      }
+   
     
     ##############################################################################
-    ## 8. Check COND_STATUS_CD and generate table with number of conditions
+    ## 11. Check COND_STATUS_CD and generate table with number of conditions
     ##############################################################################
     
     ## condfromqry
     condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
     condfromqry <- paste0("\nJOIN ", SCHEMA., condnm, " c ", condjoinqry)
     
-    ## 8.1. Sampled conditions
+    ## 11.1. Sampled conditions
     ##########################################################################
     condsampcnt <- NULL
     cstatuschk <- findnm("COND_STATUS_CD", pltcondflds, returnNULL=TRUE)
@@ -1404,7 +1684,7 @@ check.popdataCHNG <-
       }  
       
       ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
-      if (!pltcondindb) {
+      if (returndata || savedata) {
         condsampcnt <- pltcondx[, .N, by=cstatuscdnm]
         setnames(condsampcnt, "N", "NBRCONDS")
       } else {
@@ -1416,23 +1696,17 @@ check.popdataCHNG <-
         condsampcntqry <- paste0(getdataWITHqry,
                                  condsampcntqry)
         
-        if (pltcondindb) {      
-          condsampcnt <- tryCatch(
-            DBI::dbGetQuery(dbconn, condsampcntqry),
-            error = function(e) {
-              message(e,"\n")
-              return(NULL) })
-        } else {
-          condsampcnt <- tryCatch(
-            sqldf::sqldf(condsampcntqry, connection = NULL),
-            error = function(e) {
-              message(e,"\n")
-              return(NULL) })
-        }
+        condsampcnt <- tryCatch(
+          DBI::dbGetQuery(dbconn, condsampcntqry),
+          error = function(e) {
+            message(e,"\n")
+            return(NULL) })
         
         if (is.null(condsampcnt)) {
           message("invalid condsampcnt query")
           message(condsampcntqry)
+        } else {
+          names(condsampcnt) <- toupper(names(condsampcnt))
         }
       }
       if (!is.null(condsampcnt)) {
@@ -1447,7 +1721,7 @@ check.popdataCHNG <-
       }
     } 
     
-    ## 8.2. Sampled nonforest conditions
+    ## 11.2. Sampled nonforest conditions
     ##########################################################################
     
     ## If ACI, check NF_PLOT_STATUS_CD and generate table with number of plots
@@ -1465,7 +1739,7 @@ check.popdataCHNG <-
           nfcstatuscdnm <- nfcstatuschk
         }  
         
-        if (!pltcondindb) {
+        if (returndata || savedata) {
           nfcondsampcnt <- pltcondx[, .N, by=nfcstatuscdnm]
           setnames(nfcondsampcnt, "N", "NBRCONDS")
         } else {
@@ -1479,22 +1753,16 @@ check.popdataCHNG <-
           nfcondsampcntqry <- paste0(getdataWITHqry,
                                      nfcondsampcntqry)
           
-          if (pltcondindb) {      
-            nfcondsampcnt <- tryCatch(
-              DBI::dbGetQuery(dbconn, nfcondsampcntqry),
-              error = function(e) {
-                message(e,"\n")
-                return(NULL) })
-          } else {
-            nfcondsampcnt <- tryCatch(
-              sqldf::sqldf(nfcondsampcntqry, connection = NULL),
-              error = function(e) {
-                message(e,"\n")
-                return(NULL) })
-          }
+          nfcondsampcnt <- tryCatch(
+            DBI::dbGetQuery(dbconn, nfcondsampcntqry),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
           if (is.null(nfcondsampcnt)) {
             message("invalid nfcondsampcnt query")
             message(nfcondsampcntqry)
+          } else {
+            names(nfcondsampcnt) <- toupper(names(nfcondsampcnt))
           }
         }
         if (!is.null(nfcondsampcnt)) {
@@ -1533,7 +1801,7 @@ check.popdataCHNG <-
       returnlst$condsampcnt <- as.data.frame(condsampcnt)
     }
     
-    ## 9. Build FROM statement for estimation queries
+    ## 12. Build FROM statement for estimation queries
     ######################################################################################
     if (datindb) {
       estpcfromqry <- paste0(
@@ -1555,18 +1823,34 @@ check.popdataCHNG <-
                          "\n   AND ", sccma., prevcondnm, " = ", pconda., condid, ") ") 
     
     
-    ## 10. Return data objects
+    ## 13. Return data objects
     ######################################################################################
-    if (!returndata) {
+    if (popdatindb || savedata) {
+      returnlst$pop_datsource <- pop_datsource
+      returnlst$popdbinfo <- list(popconn = popconn, 
+                                  pop_dsn = pop_dsn,
+                                  pop_schema = pop_schema,
+                                  pop_datsource = pop_datsource,
+                                  poptablst = poptablst)
+    }
+    
+    if (popdatindb) {
       returnlst$sccmx <- sccmnm
+      returnlst$sscmflds <- sccmvars
+      
       if (popType == "GRM") {
         if (!is.null(treenm)) {
           returnlst$treex <- treenm
           returnlst$tuniqueid <- tuniqueid
         }
         returnlst$grmx <- grmnm
+        returnlst$grmflds <- grmvars
+        
         returnlst$beginx <- beginnm
+        returnlst$beginflds <- beginvars
+        
         returnlst$midptx <- midptnm
+        returnlst$midptflds <- midptvars
         
         if (!is.null(seednm)) {
           returnlst$seedx <- seednm

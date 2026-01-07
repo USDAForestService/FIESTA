@@ -1,20 +1,28 @@
-#' Model-Assisted module - Generate model-assisted tree estimates.
+#' Green-Book module - Generate tree estimates.
 #' 
-#' Generates tree estimates by estimation unit. Estimates are calculated from
-#' McConville et al. (2018)'s mase R package.
+#' Generates tree and or seedling estimates by domain and/or tree domain (and
+#' estimation unit).  Calculations are based on Scott et al. 2005 ('the
+#' green-book') for mapped forest inventory plots. The non-ratio estimator for
+#' estimating tree attributes by stratum and domain is used. Plots that are
+#' totally nonsampled are excluded from estimation dataset. Next, an adjustment
+#' factor is calculated by strata to adjust for nonsampled (nonresponse)
+#' conditions that have proportion less than 1. Attributes adjusted to a
+#' per-acre value are summed by plot, divided by the adjustment factor, and
+#' averaged by stratum. Strata means are combined using the strata weights and
+#' then expanded to using the total land area in the population.
 #' 
 #' If variables are NULL, then it will prompt user to input variables.
 #' 
 #' Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
 #' \bold{Variable} \tab \bold{Description}\cr \tab tree \tab tuniqueid \tab
-#' Unique identifier for each plot, to link to pltassgn (e.g. PLT_CN).\cr \tab
+#' Unique identifier for each plot, to link to pltassgn (ex. PLT_CN).\cr \tab
 #' \tab CONDID \tab Unique identifier of each condition on plot, to link to
 #' cond.  Set CONDID=1, if only 1 condition per plot.\cr \tab \tab TPA_UNADJ
-#' \tab Number of trees per acre each sample tree represents (e.g., DESIGNCD=1:
+#' \tab Number of trees per acre each sample tree represents (ex. DESIGNCD=1:
 #' TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on
 #' microplot).\cr \tab cond \tab cuniqueid \tab Unique identifier for each
 #' plot, to link to pltassgn (ex. PLT_CN).\cr \tab \tab CONDID \tab Unique
-#' identifier of each condition on plot.  Set CONDID=1, if only 1 condition per
+#' identfier of each condition on plot.  Set CONDID=1, if only 1 condition per
 #' plot.\cr \tab \tab CONDPROP_UNADJ \tab Unadjusted proportion of condition on
 #' each plot.  Set CONDPROP_UNADJ=1, if only 1 condition per plot.\cr \tab \tab
 #' COND_STATUS_CD \tab Status of each forested condition on plot (i.e.
@@ -36,28 +44,14 @@
 #' PLOT_STATUS_CD \tab Status of each plot (i.e. sampled, nonsampled).  If not
 #' included, all plots are assumed as sampled.\cr }
 #' 
-#' Reference names are available for the following variables: \cr ADFORCD,
-#' AGENTCD, CCLCD, DECAYCD, DSTRBCD, KINDCD, OWNCD, OWNGRPCD, FORTYPCD,
-#' FLDTYPCD, FORTYPCDCALC, TYPGRPCD, FORINDCD, RESERVCD, LANDCLCD, STDSZCD,
-#' FLDSZCD, PHYSCLCD, MIST_CL_CD, PLOT_STATUS_CD, STATECD, TREECLCD, TRTCD,
-#' SPCD, SPGRPCD
+#' For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
 #' 
-#' @param MApopdat List. Population data objects returned from modMApop().
-#' @param MAmethod String. mase (i.e., model-assisted) method to use 
-#' ('greg', 'gregEN', 'ratio').
-#' @param estvar String. Name of the tree-level estimate variable (e.g.,
-#' 'VOLCFNET').
-#' @param estvar.filter String. A tree-level filter for estvar. Must be R
-#' syntax (e.g., 'STATUSCD == 1').
-#' @param estvar.derive List. A derivation of a tree variable to estimate.
-#' Must be a named list with one element (e.g., 
-#' list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.
-#' @param estseed String. Use seedling data only or add to tree data. Seedling
-#' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
-#' @param woodland String. If woodland = 'Y', include woodland tree species  
-#' where measured. If woodland = 'N', only include timber species. See 
-#' FIESTA::ref_species$WOODLAND ='Y/N'. If woodland = 'only', only include
-#' woodland species.
+#' @param GBpopdat List. Population data objects returned from
+#' FIESTA::modGBpop().
+#' @param dwmtype String. Type of down woody material to estimate ('cwd', 
+#' 'fwd_sm','fwd_md', 'fwd_lg').
+#' @param estdwm String. Name of the down woody estimate variable ('drybio',
+#' 'carbon', 'volcf').
 #' @param landarea String. The condition-level filter for defining land area
 #' ('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1;
 #' if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0.
@@ -70,16 +64,11 @@
 #' @param colvar String. Optional. If rowvar != NULL, name of domain variable
 #' to group estvar by for columns in table output. Colvar must be included in
 #' an input data frame (i.e., plt, cond, tree).
-#' @param prednames String vector. Name(s) of predictor variables to include in
-#' model.
-#' @param modelselect Logical. If TRUE, an elastic net regression model is fit 
-#' to the entire plot level data, and the variables selected in that model are 
-#' used for the proceeding estimation.
-#' @param FIA Logical. If TRUE, the finite population term is removed from
-#' estimator to match FIA estimates.
-#' @param bootstrap Logical. If TRUE, returns bootstrap variance estimates,
-#' otherwise uses Horvitz-Thompson estimator under simple random sampling
-#' without replacement.
+#' @param sumunits Logical. If TRUE, estimation units are summed and returned
+#' in one table.
+#' @param pltids Vector. String or numberic vector of FIA plot CN values that
+#' intesect an area of interest within the population. These values are used
+#' to filter the output table of estimates. 
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
@@ -88,74 +77,72 @@
 #' @param title_opts List. See help(title_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
-#' @param modelselect_bydomain Logical. If TRUE, modelselection will occur at 
-#' the domain level as specified by rowvar and/or colvar and not at the level of
-#' the entire sample.
-#' @param ...  Parameters for modMApop() if MApopdat is NULL.
-#' @return If FIA=TRUE or unitvar=NULL and colvar=NULL, one data frame is
-#' returned with tree estimates and percent sample errors. Otherwise, a list is
-#' returned with tree estimates in one data frame (est) and percent sample
-#' errors in another data frame (est.pse). If rawdata=TRUE, another list is
-#' returned including raw data used in the estimation process.  If
-#' addtitle=TRUE and returntitle=TRUE, the title for est/pse is returned. If
-#' savedata=TRUE, all data frames are written to outfolder.
+#' @param ...  Parameters for modGBpop() if GBpopdat is NULL.
+#' @return A list with estimates with percent sampling error for rowvar (and
+#' colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
+#' is returned.  Otherwise, a list object is returned with the following
+#' information.  If savedata=TRUE, all data frames are written to outfolder.
 #' 
 #' \item{est}{ Data frame. Tree estimates by rowvar, colvar (and estimation
-#' unit). If FIA=TRUE or one estimation unit and colvar=NULL, estimates and
-#' percent sampling error are in one data frame. } \item{pse}{ Data frame.
-#' Percent sampling errors for estimates by rowvar and colvar (and estimation
-#' unit). } \item{titlelst}{ List with 1 or 2 string vectors. If
-#' returntitle=TRUE a list with table title(s). The list contains one title if
-#' est and pse are in the same table and two titles if est and pse are in
-#' separate tables. } \item{raw}{ List of data frames. If rawdata=TRUE, a list
-#' including: number of plots by plot status, if in dataset (plotsampcnt);
-#' number of conditions by condition status (condsampcnt); data used for
-#' post-stratification (stratdat); and 1-8 tables with calculated variables
-#' used for processing estimates and percent sampling error for table cell
-#' values and totals (See processing data below). }
+#' unit). If sumunits=TRUE or one estimation unit and colvar=NULL, estimates
+#' and percent sampling error are in one data frame. } \item{pse}{ Data frame.
+#' Percent sampling errors (Confidence level 68%) for estimates by rowvar and
+#' colvar (and estimation unit). Note: for 95% confidence level, multiply
+#' percent sampling error by 1.96. } \item{titlelst}{ List with 1 or 2 string
+#' vectors. If returntitle=TRUE a list with table title(s). The list contains
+#' one title if est and pse are in the same table and two titles if est and pse
+#' are in separate tables. } \item{raw}{ List of data frames. If rawdata=TRUE,
+#' a list including the processing data used for estimation including: number
+#' of plots and conditions; stratification information; and 1 to 8 tables with
+#' calculated values for table cells and totals (See processing data below). }
 #' 
 #' Raw data
 #' 
 #' \item{plotsampcnt}{ Table. Number of plots by plot status (ex. sampled
 #' forest on plot, sampled nonforest, nonsampled). } \item{condsampcnt}{ DF.
 #' Number of conditions by condition status (forest land, nonforest land,
-#' noncensus water, census water, nonsampled). }
+#' noncensus water, census water, nonsampled). } \item{unitarea}{ DF. Area by
+#' estimation unit. } \item{expcondtab}{ DF. Condition-level area expansion
+#' factors. } \item{tdomdat}{ DF. Final data table used for estimation. }
 #' 
 #' \item{stratdat}{ Data frame. Strata information by estimation unit. }
-#' \tabular{lll}{ \tab \bold{Variable} \tab \bold{Description}\cr \tab ESTUNIT
-#' \tab estimation unit\cr \tab STRATA \tab strata \cr \tab ACRES \tab area by
-#' strata for estimation unit\cr \tab n.strata \tab number of plots in strata
-#' (and estimation unit) \cr \tab n.total \tab number of plots for estimation
-#' unit \cr \tab TOTACRES \tab total area for estimation unit \cr \tab strwt
-#' \tab proportion of area (or number of plots) by strata (strata weight) \cr
-#' \tab expfac.strata \tab expansion factor (in area unit (e.g., acres) by
-#' strata (areavar/n.strata) \cr }
+#' \tabular{lll}{ \tab \bold{Variable} \tab \bold{Description}\cr \tab unitvar
+#' \tab estimation unit \cr \tab strvar \tab stratum value \cr \tab strwtvar
+#' \tab number of pixels by strata and estimation unit \cr \tab n.strata \tab
+#' number of plots in strata (after totally nonsampled plots removed) \cr \tab
+#' n.total \tab number of plots for estimation unit \cr \tab strwt \tab
+#' proportion of area (or plots) by strata and estimation unit (i.e., strata
+#' weight) \cr \tab CONDPROP_UNADJ_SUM \tab summed condition proportion by
+#' strata and estimation unit \cr \tab CONDPROP_ADJFAC \tab adjusted condition
+#' proportion by strata after nonsampled plots removed \cr }
 #' 
 #' \item{processing data}{ Data frames. Separate data frames containing
 #' calculated variables used in estimation process. The number of processing
 #' tables depends on the input parameters. The tables include: total by
 #' estimation unit (unit.totest); rowvar totals (unit.rowest), and if colvar is
 #' not NULL, colvar totals, (unit.colvar); and a combination of rowvar and
-#' colvar (unit.grpvar). If FIA=TRUE, the raw data for the summed estimation
-#' units are also included (totest, rowest, colest, grpest, respectively).
-#' These tables do not included estimate proportions (nhat and nhat.var).
+#' colvar (unit.grpvar). If sumunits=TRUE, the raw data for the summed
+#' estimation units are also included (totest, rowest, colest, grpest,
+#' respectively). These tables do not included estimate proportions (nhat and
+#' nhat.var).
 #' 
 #' The data frames include the following information: \tabular{lll}{ \tab
 #' \bold{Variable} \tab \bold{Description}\cr \tab nhat \tab estimated
-#' proportion of trees \cr \tab nhat.var \tab estimated variance of estimated
-#' proportion of trees \cr \tab ACRES \tab total area for estimation unit \cr
-#' \tab est \tab estimated area of trees nhat*ACRES \cr \tab est.var \tab
-#' estimated variance of estimated area of trees nhat.var*areavar^2 \cr \tab
-#' est.se \tab standard error of estimated area of trees sqrt(est.var) \cr \tab
-#' est.cv \tab coefficient of variation of estimated area of trees est.se/est
-#' \cr \tab pse \tab percent sampling error of estimate est.cv*100 \cr \tab
-#' CI99left \tab left tail of 99 percent confidence interval for estimated area
-#' \cr \tab CI99right \tab right tail of 99 percent confidence interval for
-#' estimated area \cr \tab CI95left \tab left tail of 95 percent confidence
-#' interval for estimated area \cr \tab CI95right \tab right tail of 95 percent
-#' confidence interval for estimated area \cr \tab CI67left \tab left tail of
-#' 67 percent confidence interval for estimated area \cr \tab CI67right \tab
-#' right tail of 67 percent confidence interval for estimated area \cr } }
+#' proportion of trees \cr \tab nhat.var \tab variance estimate of estimated
+#' proportion of trees \cr \tab NBRPLT.gt0 \tab Number of non-zero plots used
+#' in estimates \cr \tab ACRES \tab total area for estimation unit \cr \tab est
+#' \tab estimated area of trees nhat*ACRES \cr \tab est.var \tab variance
+#' estimate of estimated area of trees nhat.var*areavar^2 \cr \tab est.se \tab
+#' standard error of estimated area of trees sqrt(est.var) \cr \tab est.cv \tab
+#' coefficient of variation of estimated area of trees est.se/est \cr \tab pse
+#' \tab percent sampling error of estimate est.cv*100 \cr \tab CI99left \tab
+#' left tail of 99 percent confidence interval for estimated area \cr \tab
+#' CI99right \tab right tail of 99 percent confidence interval for estimated
+#' area \cr \tab CI95left \tab left tail of 95 percent confidence interval for
+#' estimated area \cr \tab CI95right \tab right tail of 95 percent confidence
+#' interval for estimated area \cr \tab CI67left \tab left tail of 67 percent
+#' confidence interval for estimated area \cr \tab CI67right \tab right tail of
+#' 67 percent confidence interval for estimated area \cr } }
 #' 
 #' Table(s) are also written to outfolder.
 #' @note
@@ -179,12 +166,32 @@
 #' interested in estimates for all lands or nonforest lands in the
 #' All-Condition-Inventory.
 #' 
-#' autoxreduce:\cr If MAmethod='GREG', and autoxreduce=TRUE, and there is an
-#' error because of multicolinearity, a variable reduction method is applied to
-#' remove correlated variables. The method used is based on the
-#' variance-inflation factor (vif) from a linear model. The vif estimates how
-#' much the variance of each x variable is inflated due to mulitcolinearity in
-#' the model.
+#' sumunits:\cr An estimation unit is a population, or area of interest, with
+#' known area and number of plots. Individual counties or combined
+#' Super-counties are common estimation units for FIA. An estimation unit may
+#' also be a subpopulation of a larger population (e.g., Counties within a
+#' State). Subpopulations are mutually exclusive and independent within a
+#' population, therefore estimated totals and variances are additive. For
+#' example, State-level estimates are generated by summing estimates from all
+#' subpopulations within the State (Bechtold and Patterson. 2005. Chapter 2).
+#' Each plot must be assigned to only one estimation unit.
+#' 
+#' If sumunits=TRUE, estimates are generated by estimation unit, summed
+#' together, and returned as one estimate. If rawdata=TRUE, estimates by
+#' individual estimation unit are also returned.
+#' 
+#' If sumunits=FALSE, estimates are generated and returned by estimation unit
+#' as one data frame. If savedata=TRUE, a separate file is written for each
+#' estimation unit.
+#' 
+#' stratcombine:\cr If TRUE and less than 2 plots in any one estimation unit,
+#' all estimation units with 10 or less plots are combined. The current method
+#' for combining is to group the estimation unit with less than 10 plots with
+#' the estimation unit following in consecutive order (numeric or
+#' alphabetical), restrained by survey unit (UNITCD) if included in dataset,
+#' and continuing until the number of plots equals 10. If there are no
+#' estimation units following in order, it is combined with the estimation unit
+#' previous in order.
 #' 
 #' rowlut/collut:\cr There are several objectives for including rowlut/collut
 #' look-up tables: 1) to include descriptive names that match row/column codes
@@ -220,96 +227,74 @@
 #' "TPAMORT_UNADJ > 0" \tab Mortality trees \cr \tab "STATUSCD == 2 & DIA >=
 #' 5.0" \tab Dead trees >= 5.0 inches diameter \cr \tab "STATUSCD == 2 &
 #' AGENTCD == 30" \tab Dead trees from fire \cr }
-#' @author Tracey S. Frescino
-#' @references Kelly McConville, Becky Tang, George Zhu, Shirley Cheung, and
-#' Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
-#' 0.1.2 https://cran.r-project.org/package=mase
+#' @author Tracey S. Frescino, Paul L. Patterson, Elizabeth A. Freeman
+#' @references Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.;
+#' Smith, William D.; Westfall, James A.; Hansen, Mark H.; Moisen, Gretchen G.
+#' 2005. Sample-based estimators used by the Forest Inventory and Analysis
+#' national information management system. Gen. Tech. Rep. SRS-80. Asheville,
+#' NC: U.S. Department of Agriculture, Forest Service, Southern Research
+#' Station, p.53-77.
 #' @keywords data
-#' @examples
-#' \donttest{
-#' # Set up population dataset (see ?modMApop() for more information)
-#' MApopdat <- modMApop(popTabs = list(tree = FIESTA::WYtree,
-#'                                     cond = FIESTA::WYcond),
-#'                      pltassgn = FIESTA::WYpltassgn,
-#'                      pltassgnid = "CN",
-#'                      unitarea = FIESTA::WYunitarea,
-#'                      unitvar = "ESTN_UNIT",
-#'                      unitzonal = FIESTA::WYunitzonal,
-#'                      prednames = c("dem", "tcc", "tpi", "tnt"),
-#'                      predfac = "tnt")
-#'                      
-#' # Use GREG Estimator to Estimate cubic foot volume of live trees in our
-#' # population
-#' mod1 <- modMAtree(MApopdat = MApopdat,
-#'           MAmethod = "greg",
-#'           estvar = "VOLCFNET",
-#'           estvar.filter = "STATUSCD == 1")
-#'           
-#' str(mod1)
-#' }
-#' @export modMAtree
-modMAtree <- function(MApopdat, 
-                      MAmethod, 
-                      estvar, 
-                      estvar.filter = NULL, 
-                      estvar.derive = NULL,
-                      estseed = "none",
-                      woodland = "Y",
-                      landarea = "FOREST", 
-                      pcfilter = NULL, 
-                      rowvar = NULL, 
-                      colvar = NULL, 
-                      prednames = NULL, 
-                      modelselect = FALSE, 
-                      FIA = TRUE,
-                      bootstrap = FALSE,
-                      returntitle = FALSE, 
-                      savedata = FALSE, 
-                      table_opts = NULL, 
-                      title_opts = NULL, 
-                      savedata_opts = NULL, 
-                      modelselect_bydomain = FALSE,
-                      ...){
+#' @export modGBdwm
+modGBdwm <- function(GBpopdat, 
+                     dwmtype, ## cwd, fwd_sm, fwd_md, fwd_lg
+                     estdwm,  ## drybio, carbon, volcf
+                     landarea = "FOREST", 
+                     pcfilter = NULL, 
+                     rowvar = NULL, 
+                     colvar = NULL, 
+                     sumunits = TRUE, 
+                     pltids = NULL,
+                     returntitle = FALSE, 
+                     savedata = FALSE, 
+                     table_opts = NULL, 
+                     title_opts = NULL, 
+                     savedata_opts = NULL, 
+                     ...){
 
   ##################################################################################
-  ## DESCRIPTION: 
-  ## Generates model-assisted estimates by domain (and estimation unit)
+  ## DESCRIPTION:
+  ## Generates estimates of trees by domain using non-ratio estimators.
   ##################################################################################
 
+  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
+  #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
   gui <- FALSE
-  
+ 
   ## If gui.. set variables to NULL
   if (gui) { 
-    tree=landarea=strvar=areavar <- NULL
-    if (!row.FIAname) row.FIAname <- NULL
-    if (!col.FIAname) col.FIAname <- NULL
+    landarea=strvar=areavar=sumunits=adjplot=strata=getwt=cuniqueid=ACI=
+      tuniqueid=savedata=addtitle=returntitle=rawdata=rawonly=unitvar <- NULL
+    #if (!row.FIAname) row.FIAname <- NULL 
+    #if (!col.FIAname) col.FIAname <- NULL 
   }
   
-  ## Set parameters
+  ## Set parameter
   esttype <- "TREE"
-  popType <- "VOL"
-  rawdata <- TRUE 
-  sumunits = addtitle <- FALSE
+  popType <- "DWM"
+  nonresp = addtitle <- FALSE
+  substrvar <- FALSE
+  rawdata <- TRUE  
   returnlst <- list()
-  
+  TPA <- TRUE
+
   ## Set global variables
-  n.total=n.strata=domclassify=outfn.pre <- NULL
+  n.strata=domclassify=estvard.name=outfn.pre <- NULL
   
-  
+ 
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
   
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(modMAtree)),
-		names(formals(modMApop))) 
+  formallst <- c(names(formals(modGBdwm)),
+		names(formals(modGBpop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-
-
+ 
   ## Check parameter lists
   pcheck.params(input.params = input.params,
                 title_opts = title_opts, 
@@ -331,95 +316,59 @@ modMAtree <- function(MApopdat,
   for (i in 1:length(table_opts)) {
     assign(names(table_opts)[[i]], table_opts[[i]])
   }
-  
-  
+
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
+  list.items <- c("pltcondx", "cuniqueid", "condid", 
+	                "dwmx", "dwmuniqueid", 
+                  "unitarea", "unitvar", "stratalut", "strvar",
+                  "plotsampcnt", "condsampcnt")
   
-  ## Check MAmethod 
-  MAmethodlst <- c("greg", "gregEN", "ratio")
-  MAmethod <- pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
-		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
-
-  if (MAmethod %in% c("greg", "gregEN")) {
-    predselectlst <- list()
+  GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
+  if (is.null(GBpopdat)) return(NULL)
+  pltidsadj <- GBpopdat$pltidsadj
+  pltcondx <- GBpopdat$pltcondx
+  cuniqueid <- GBpopdat$cuniqueid
+  condid <- GBpopdat$condid
+  pltassgnx <- GBpopdat$pltassgnx
+  pltassgnid <- GBpopdat$pltassgnid
+  ACI <- GBpopdat$ACI
+  unitarea <- GBpopdat$unitarea
+  areavar <- GBpopdat$areavar
+  areaunits <- GBpopdat$areaunits
+  unitvar <- GBpopdat$unitvar
+  unitvars <- GBpopdat$unitvars
+  unit.action <- GBpopdat$unit.action
+  stratalut <- GBpopdat$stratalut
+  strvar <- GBpopdat$strvar
+  expcondtab <- GBpopdat$expcondtab
+  plotsampcnt <- GBpopdat$plotsampcnt
+  condsampcnt <- GBpopdat$condsampcnt
+  states <- GBpopdat$states
+  invyrs <- GBpopdat$invyrs
+  stratcombinelut <- GBpopdat$stratcombinelut
+  strwtvar <- GBpopdat$strwtvar
+  adj <- GBpopdat$adj
+  strunitvars <- c(unitvar, strvar)
+  strata <- GBpopdat$strata
+  dbqueries <- GBpopdat$dbqueries
+  dbqueriesWITH <- GBpopdat$dbqueriesWITH
+  adjcase <- GBpopdat$adjcase
+  pltidsid <- GBpopdat$pjoinid
+  pltflds <- GBpopdat$pltflds
+  condflds <- GBpopdat$condflds
+  
+  pop_datsource <- GBpopdat$pop_datsource
+  popdatindb <- GBpopdat$popdatindb
+  popdbinfo <- GBpopdat$popdbinfo
+  
+  dwmx <- GBpopdat$dwmx
+  if (is.null(dwmx)) {
+    stop("must include dwm data for estimates")
   }
+  dwmuniqueid <- GBpopdat$dwmuniqueid
 
-  ###################################################################################
-  ## Check data and generate population information 
-  ###################################################################################
-  list.items <- c("pltcondx", "cuniqueid", "condid",
-                  "treex", "tuniqueid",
-                  "unitarea", "unitvar", "unitlut", "npixels",
-		              "npixelvar", "plotsampcnt", "condsampcnt")
-
-  MApopdat <- pcheck.object(MApopdat, "MApopdat", list.items=list.items)
-  if (is.null(MApopdat)) return(NULL)	
-  pltidsadj <- MApopdat$pltidsadj
-  pltcondx <- MApopdat$pltcondx
-  cuniqueid <- MApopdat$cuniqueid
-  condid <- MApopdat$condid
-  pltassgnx <- MApopdat$pltassgnx
-  pltassgnid <- MApopdat$pltassgnid
-  ACI <- MApopdat$ACI
-  unitarea <- MApopdat$unitarea
-  areavar <- MApopdat$areavar
-  areaunits <- MApopdat$areaunits
-  unitvar <- MApopdat$unitvar
-  unitlut <- MApopdat$unitlut
-  unitvars <- MApopdat$unitvars
-  npixels <- MApopdat$npixels
-  npixelvar <- MApopdat$npixelvar
-  expcondtab <- MApopdat$expcondtab
-  plotsampcnt <- MApopdat$plotsampcnt
-  condsampcnt <- MApopdat$condsampcnt
-  states <- MApopdat$states
-  invyrs <- MApopdat$invyrs
-  predfac <- MApopdat$predfac
-  adj <- MApopdat$adj
-  dbqueries <- MApopdat$dbqueries
-  dbqueriesWITH <- MApopdat$dbqueriesWITH
-  adjcase <- MApopdat$adjcase
-  pltidsid <- MApopdat$pjoinid
-  pltcondflds <- MApopdat$pltcondflds
-  pltflds <- MApopdat$pltflds
-  condflds <- MApopdat$condflds
-  
-  pop_datsource <- MApopdat$pop_datsource
-  popdatindb <- MApopdat$popdatindb
-  popdbinfo <- MApopdat$popdbinfo
-  
-  treex <- MApopdat$treex
-  seedx <- MApopdat$seedx
-  if (is.null(treex) && is.null(seedx)) {
-    stop("must include tree data for tree estimates")
-  }
-  tuniqueid <- MApopdat$tuniqueid
-  suniqueid <- MApopdat$suniqueid
-  treeflds <- MApopdat$treeflds
-  seedflds <- MApopdat$seedflds
-  
-  
-  ## Check prednames
-  ########################################
-  if (MAmethod %in% c("greg", "gregEN", "ratio")) {
-    if (is.null(prednames)) {
-      prednames <- MApopdat$prednames
-    } else {
-      if (!all(prednames %in% MApopdat$prednames)) {
-        if (any(prednames %in% MApopdat$predfac)) {
-          predfacnames <- prednames[prednames %in% MApopdat$predfac]
-          for (nm in predfacnames) {           
-            prednames[prednames == nm] <- MApopdat$prednames[grepl(nm, MApopdat$prednames)]
-          }
-        } else {
-          stop("invalid prednames... must be in: ", toString(MApopdat$prednames))
-        }
-      }
-    }
-  } 
-  
   
   ########################################
   ## Check area units
@@ -433,12 +382,34 @@ modMAtree <- function(MApopdat,
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
-     
+  
+  
+  ########################################
+  ## Check pltids
+  ########################################
+  if (!is.null(pltids)) {
+    pltids <- as.vector(pltids)
+    if (!is.vector(pltids)) {
+      message("invalid pltids.. must be a vector of cn values")
+    }
+    
+    if (!all(pltids %in% pltassgnx[[pltassgnid]])) {
+      misspltids <- pltids[!pltids %in% pltassgnx[[pltassgnid]]]
+      message("there are ", length(misspltids), " not in the population")
+      
+      if (length(misspltids) < 20) {
+        message(toString(misspltids))
+      }
+      stop("")
+    }
+  }
+  
+
   ###################################################################################
-  ## Check parameters and apply plot and condition filters
+  ## Check parameter inputs and plot/condition filters
   ###################################################################################
   estdat <- 
-    check.estdata(esttype = esttype,
+    check.estdata(esttype = esttype, 
                   popType = popType,
                   pop_datsource = pop_datsource,
                   popdatindb = popdatindb, 
@@ -449,18 +420,20 @@ modMAtree <- function(MApopdat,
                   dbqueriesWITH = dbqueriesWITH,
                   dbqueries = dbqueries,
                   totals = totals,
+                  sumunits = sumunits, 
                   landarea = landarea,
-                  ACI = ACI,
+                  ACI = ACI, 
                   pcfilter = pcfilter,
                   allin1 = allin1, divideby = divideby,
                   estround = estround, pseround = pseround,
-                  returntitle = returntitle,
-                  rawonly = rawonly,
-                  savedata = savedata,
+                  returntitle = returntitle, 
+                  rawonly = rawonly, 
+                  savedata = savedata, 
                   savedata_opts = savedata_opts, 
                   gui = gui)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
+  sumunits <- estdat$sumunits
   totals <- estdat$totals
   landarea <- estdat$landarea
   allin1 <- estdat$allin1
@@ -469,7 +442,7 @@ modMAtree <- function(MApopdat,
   pseround <- estdat$pseround
   returntitle <- estdat$returntitle
   addtitle <- estdat$addtitle
-
+  
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
@@ -496,22 +469,22 @@ modMAtree <- function(MApopdat,
   
   
   ###################################################################################
-  ## Check parameter inputs and tree filters
+  ## Check parameter inputs and tables 
   ###################################################################################
-  estdatVOL <- 
-    check.estdataVOL(datsource = pop_datsource,
-                     popdatindb = popdatindb,
+  estdatDWM <- 
+    check.estdataDWM(popdatindb = popdatindb,
                      poptablst = poptablst,
-                     treex = treex, seedx = seedx,
-                     treeflds = treeflds, seedflds = seedflds,
-                     estseed = estseed,
-                     woodland = woodland,
+                     dwmx = dwmx,
+                     dwmtype = dwmtype,
+                     estdwm = estdwm,
+                     adj = adj,
                      gui = gui)
-  estseed <- estdatVOL$estseed
-  woodland <- estdatVOL$woodland
-  treeflds <- estdatVOL$treeflds
-  seedflds <- estdatVOL$seedflds
-  
+  dwmnm <- estdatDWM$dwmnm
+  dwmtype <- estdatDWM$dwmtype
+  estdwm <- estdatDWM$estdwm
+  dwmsumvar <- estdatDWM$dwmsumvar
+  dwmadjvar <- estdatDWM$dwmadjvar
+
   
   ###################################################################################
   ### Check row and column data
@@ -524,9 +497,6 @@ modMAtree <- function(MApopdat,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
                  withqry = pltcondxWITHqry,
-                 estseed = estseed,
-                 treex = treex, treeflds = treeflds,
-                 seedx = seedx, seedflds = seedflds,
                  cuniqueid = cuniqueid, condid = condid,
                  rowvar = rowvar, colvar = colvar, 
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
@@ -561,7 +531,7 @@ modMAtree <- function(MApopdat,
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
-  
+
   ## if classified columns, create domclassify list for summarizing tree data
   if (any(!is.null(classifyrow), !is.null(classifycol))) {
     domclassify <- list()
@@ -573,90 +543,70 @@ modMAtree <- function(MApopdat,
     }
   }
 
-  #################################################################################
-  ### GET ESTIMATION DATA FROM TREE TABLE
-  #################################################################################
-  adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  treedat <- 
-    check.tree(treex = treex, 
-               seedx = seedx, 
-               estseed = estseed,
-               bycond = TRUE, 
-               condx = pltcondx, 
-               tuniqueid = tuniqueid, cuniqueid = cuniqueid, 
-               esttype = esttype, 
-               estvarn = estvar, 
-               estvarn.filter = estvar.filter, 
-               estvarn.derive = estvar.derive,
-               esttotn = TRUE, 
-               bydomainlst = c(domainlst, "TOTAL"),
-               tdomvar = tdomvar, tdomvar2 = tdomvar2,
-               adjtree = adjtree, 
-               adjvar = "tadjfac",
-               metric = metric, 
-               woodland = woodland,
-               ACI = ACI,
-               domclassify = domclassify,
-               datsource = pop_datsource,
-               dbconn = popconn, schema = pop_schema,
-               pltidsWITHqry = pltcondxadjWITHqry,
-               pltidsid = pltidsid,
-               bytdom = bytdom,
-               pcwhereqry = pcwhereqry,
-               gui = gui)
-  if (is.null(treedat)) stop(NULL) 
-  tdomdat <- treedat$tdomdat
-  estvar <- treedat$estvar
-  estvar.name <- treedat$estvar.name
-  estvar.filter <- treedat$estvar.filter
-  tdomvarlst <- treedat$tdomvarlst
-  estunits <- treedat$estunits
-  treeqry <- treedat$treeqry
-  classifynmlst <- treedat$classifynmlst
-  
-  ## If classified rowvar or colvar, get class names
-  if (!is.null(classifynmlst)) {
-    if (!is.null(classifynmlst[[rowvar]])) {
-      rowvar <- classifynmlst[[rowvar]]
-    }
-    if (!is.null(classifynmlst[[colvar]])) {
-      colvar <- classifynmlst[[colvar]]
-    }
-    if (!is.null(grpvar)) {
-      grpvar <- c(rowvar, colvar)
-    }
+  ## Generate a uniquecol for estimation units
+  if (!sumunits && colvar == "NONE") {
+    uniquecol <- data.table(unitarea[[unitvar]])
+    setnames(uniquecol, unitvar)
+    uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
 
-  #################################################################################
-  ### GET TITLES FOR OUTPUT TABLES
-  #################################################################################
+  
+  #####################################################################################
+  ### Get estimation data from vsubpx table
+  #####################################################################################
+  adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
+
+  dwmdat <-
+    datSumDWM(dwm = dwmx,
+              dwmsumvar = dwmsumvar,
+              cond = pltcondx,
+              bycond = TRUE,
+              bydomainlst = domainlst,
+              domclassify = domclassify,
+              dbconn = popconn,
+              pltidsWITHqry = pltcondxadjWITHqry,
+              pltidsid = pltidsid,
+              datSum_opts = datSum_options(adjtree = adjtree,
+                                           adjvar = dwmadjvar,
+                                           ACI = ACI,
+                                           metric = metric),
+              database_opts = database_options(schema = pop_schema))
+  dwmdomdat <- dwmdat$sumdat
+  estvarn <- dwmdat$sumvar
+  estvarn.name <- dwmdat$sumvar
+  dwmqry <- dwmdat$dwmqry
+  classifynmlst <- dwmdat$classifynmlst
+  pcdomainlst <- dwmdat$pcdomainlst
+  estunits <- dwmdat$estunits
+
+  
+  ###############################################################################
+  ### Get titles for output tables
+  ###############################################################################
   alltitlelst <- 
-    check.titles(dat = tdomdat,
+    check.titles(dat = dwmdomdat, 
                  esttype = esttype, 
-                 estseed = estseed,
-                 woodland = woodland,
-                 sumunits = sumunits,
-                 title.main = title.main,
+	               sumunits = sumunits, 
+                 title.main = title.main, 
                  title.ref = title.ref, 
-                 title.rowvar = title.rowvar,
+                 title.rowvar = title.rowvar, 
                  title.rowgrp = title.rowgrp, 
-                 title.colvar = title.colvar,
+	               title.colvar = title.colvar, 
                  title.unitvar = title.unitvar, 
-                 title.filter = title.filter,
-                 title.unitsn = estunits, 
+	               title.filter = title.filter, 
+                 title.unitsn = estunits,
                  title.estvarn = title.estvar, 
-                 unitvar = unitvar,
+	               unitvar = unitvar, 
                  rowvar = rowvar, colvar = colvar, 
-                 estvarn = estvar,
-                 estvarn.filter = estvar.filter, 
-                 addtitle = addtitle,
+ 	               estvarn = estvarn.name, 
+	               addtitle = addtitle, 
                  returntitle = returntitle, 
-                 rawdata = rawdata,
-                 states = states, invyrs = invyrs, 
-                 landarea = landarea,
-                 pcfilter =pcfilter,
+	               rawdata = rawdata, 
+                 states = states, invyrs = invyrs,
+	               landarea = landarea, 
+                 pcfilter = pcfilter, 
                  allin1 = allin1, 
-                 divideby = divideby,
+	               divideby = divideby, 
                  outfn.pre = outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
@@ -667,34 +617,29 @@ modMAtree <- function(MApopdat,
   outfn.param <- alltitlelst$outfn.param
   if (rawdata) {
     outfn.rawdat <- alltitlelst$outfn.rawdat
-    outfn.rawdat <- paste0(outfn.rawdat, "_modMA_mase", "_", MAmethod) 
-  } 
-  ## Append name of package and method to outfile name
-  outfn.estpse <- paste0(outfn.estpse, "_modMA_mase", "_", MAmethod) 
+  }
 
- 
-  #################################################################################
+  ###################################################################################
   ## GENERATE ESTIMATES
-  #################################################################################
+  ###################################################################################
   estdat <- 
-    getMAestimates(esttype = esttype,
-                   domdatn = tdomdat,
-                   uniqueid = pltassgnid,
-                   estvarn.name = estvar.name,
+    getGBestimates(esttype = esttype,
+                   domdatn = dwmdomdat,
+                   uniqueid = pltassgnid, condid = condid,
+                   estvarn.name = estvarn.name,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
-                   MAmethod = MAmethod,
-                   modelselect = modelselect,
-                   prednames = prednames,
-                   FIA = FIA,
-                   bootstrap = bootstrap,
                    pltassgnx = pltassgnx,
                    unitarea = unitarea,
                    unitvar = unitvar,
                    areavar = areavar,
-                   unitlut = unitlut,
-                   npixels = npixels,
+                   stratalut = stratalut,
+                   strvar = strvar,
+                   strwtvar = strwtvar,
                    totals = totals,
+                   sumunits = sumunits,
+                   pltids = pltids,
+                   unit.action = unit.action,
                    uniquerow = uniquerow,
                    uniquecol = uniquecol,
                    row.orderby = row.orderby,
@@ -703,22 +648,22 @@ modMAtree <- function(MApopdat,
                    col.add0 = col.add0,
                    row.NAname = row.NAname,
                    col.NAname = col.NAname)
-  
   if (is.null(estdat)) stop()
   unit_totest <- estdat$unit_totest
   unit_rowest <- estdat$unit_rowest
   unit_colest <- estdat$unit_colest
   unit_grpest <- estdat$unit_grpest
-  predselectlst <- estdat$predselectlst
-  predselect.overall <- estdat$predselect.overall
-  unit_weights <- estdat$unit_weights
- 
+  rowunit <- estdat$rowunit
+  totunit <- estdat$totunit
+  unitvar <- estdat$unitvar
+
   
-  ###############################################################################
+  ###################################################################################
   ## GENERATE OUTPUT TABLES
-  ###############################################################################
+  ###################################################################################
   message("getting output...")
-  estnm <- "est"
+  estnm <- "est" 
+  
   tabs <- 
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 
@@ -730,6 +675,7 @@ modMAtree <- function(MApopdat,
                 rowvar = rowvarnm, colvar = colvarnm, 
                 uniquerow = uniquerow, uniquecol = uniquecol,
                 rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
+                rowunit = rowunit, totunit = totunit, 
                 allin1 = allin1, 
                 savedata = savedata, addtitle = addtitle, 
                 title.ref = title.ref, 
@@ -768,64 +714,76 @@ modMAtree <- function(MApopdat,
   if(returntitle) {
     returnlst$titlelst <- alltitlelst
   }
-  
+
   if (rawdata) {
+    ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
+    UNITStot <- sort(unique(unit_totest[[unitvar]]))
+    NBRPLTtot <- stratalut[stratalut[[unitvar]] %in% UNITStot, list(NBRPLT = sum(n.strata, na.rm=TRUE)), 
+	                 by=unitvars]
+
+    #setnames(NBRPLTtot, "V1", "NBRPLT")
+    if ("unit_totest" %in% names(tabs$rawdat)) {
+      tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
+      tabs$rawdat$unit_totest <- setorderv(tabs$rawdat$unit_totest, unitvars)
+    }
+    if (sumunits && "totest" %in% names(tabs$rawdat)) {
+      tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
+    }
+    
     rawdat <- tabs$rawdat
-    rawdat$domdat <- setDF(tdomdat)
-    rawdat$plotweights <- unit_weights
-    rawdat$estvar <- estvar.name
-    rawdat$estvar.filter <- estvar.filter
-  
+    rawdat$domdat <- setDF(dwmdomdat)
+    rawdat$domdatqry <- dwmqry
+    rawdat$estvar <- estvarn.name
+    rawdat$estunits <- estunits
+    
+    if (esttype == "RATIO") {
+      rawdat$estvard <- estvard.name
+      rawdat$areaunits <- areaunits
+    }
+
     if (savedata) {
       if (!is.null(title.estpse)) {
         title.raw <- paste(title.estpse, title.ref)
       } else {
         title.raw <- title.est
       }
-
       for (i in 1:length(rawdat)) {
         tabnm <- names(rawdat[i])
-        if (!tabnm %in% c(estvar, prednames)) {
-          rawtab <- rawdat[[i]]
-          outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
+        rawtab <- rawdat[[i]]
+        outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
+        
+        if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
+          write2csv(rawtab, 
+                    outfolder = rawoutlst$rawfolder, 
+                    outfilenm = outfn.rawtab, 
+			              outfn.date = outfn.date,
+			              appendfile = append_layer,
+			              overwrite = overwrite_layer)
           
-          if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
-            write2csv(rawtab, 
-                      outfolder = rawoutlst$rawfolder, 
-                      outfilenm = outfn.rawtab, 
-                      outfn.date = outfn.date, 
-                      appendfile = append_layer,
-                      overwrite = overwrite_layer)
-            
-          } else if (is.data.frame(rawtab)) {
-            if (rawoutlst$out_fmt != "csv") {
-              rawoutlst$out_layer <- tabnm
-            } else {
-              rawoutlst$out_layer <- outfn.rawtab
-            }
-            datExportData(rawtab,
-                          savedata_opts = rawoutlst)
+        } else if (is.data.frame(rawtab)) {
+          if (rawoutlst$out_fmt != "csv") {
+            rawoutlst$out_layer <- tabnm
+          } else {
+            rawoutlst$out_layer <- outfn.rawtab
           }
+          datExportData(rawtab,
+                        savedata_opts = rawoutlst)
         }
       }
     }
-    rawdat$module <- "MA"
-    rawdat$esttype <- "TREE"
-    rawdat$MAmethod <- MAmethod
-    rawdat$predselect.overall <- predselect.overall
-    rawdat$predselectlst <- predselectlst
-    rawdat$estvar <- estvar
-    rawdat$estvar.filter <- estvar.filter
+    
+    rawdat$module <- "GB"
+    rawdat$esttype <- esttype
+    rawdat$GBmethod <- ifelse(strata, "PS", "HT")
+
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
-    rawdat$areaunits <- areaunits
-    rawdat$estunits <- estunits
     returnlst$raw <- rawdat
   }
+  
   returnlst$statecd <- sort(pcheck.states(states, statereturn = "VALUE"))
   returnlst$states <- states
   returnlst$invyr <- sort(unique(unlist(invyrs)))
-    
+  
   return(returnlst)
 }
-
