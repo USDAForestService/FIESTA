@@ -32,7 +32,7 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  If out_layer = NULL,
 #' default = 'datf'.
-#' @param gui Logical. If TRUE, pop-up windows will appear for user-interface.
+#' @param gui Logical. If TRUE, a gui interface for parameters.
 #'
 #' @return A list of the following items:
 #'
@@ -71,7 +71,9 @@ datFilter <- function(x,
 
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0 | gui, TRUE, FALSE)
+  #gui <- FALSE
+  
+  #gui <- ifelse(nargs() == 0 | gui, TRUE, FALSE)
   if (gui) {uniqueid=savedata <- NULL}
 
   ## Adds to file filters to Cran R Filters table.
@@ -92,29 +94,16 @@ datFilter <- function(x,
   }
  
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
+  pcheck.params(input.params, 
+                savedata_opts = savedata_opts)
+  
+  
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts))
+  savedata_opts <- optslst$savedata_opts  
 
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-
+  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################

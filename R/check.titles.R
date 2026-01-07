@@ -24,7 +24,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
 
   ## Initialize variables
   title.est=title.pse=title.estpse=title.row=title.col=outfn.estpse=
-	 title.part2.row=title.part2.col=title.estvar=title.yvar=title.yvard <- NULL
+	 title.part2.row=title.part2.col=title.estvar=title.yvar=title.yvard=title.tot <- NULL
 
   ## Title for landarea
   title.landarea <- ifelse (landarea == "FOREST", "forest land",
@@ -54,17 +54,16 @@ check.titles <- function(dat=NULL, esttype, estseed="none",
     ########################################################
     ## Reference title
     if (is.null(title.ref)) {
-      title.state <- NULL
-      if (!is.null(states))
-        title.state <- paste(as.character(states), collapse=" and ")
-        if (!is.null(invyrs)) {
-        if (is.null(states) && !is.null(names(invyrs)))
-          title.state <- paste(as.character(states), collapse=" and ")
+
+      if (!is.null(states)) {
+        title.ref <- paste(as.character(states), collapse=" and ")
+      }
+      if (!is.null(invyrs)) {
         invyrs <- as.numeric(as.character(unlist(invyrs)))
         if (length(unique(invyrs)) > 1) {
-          title.ref <- paste0(title.state, ", ", min(invyrs), "-", max(invyrs))
+          title.ref <- paste0(title.ref, ", ", min(invyrs), "-", max(invyrs))
         } else {
-          title.ref <- paste0(title.state, ", ", invyrs)
+          title.ref <- paste0(title.ref, ", ", invyrs)
         }
       }
       if (is.null(title.ref)) title.ref <- ""

@@ -42,7 +42,6 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'datlutcl'. 
-#' @param gui Logical. If gui, user is prompted for parameters.
 #'
 #' @return \item{xLUT}{ Input data table with look-up table variable(s). }
 #' \item{LUTclassnm}{ Name of the classified variable. } \item{LUT}{ Look-up
@@ -110,15 +109,15 @@ datLUTclass <- function(x,
                         dbreturn = TRUE, 
                         overwrite = TRUE,
                         savedata = FALSE,
-                        savedata_opts = NULL, 
-                        gui = FALSE){
+                        savedata_opts = NULL){
   #################################################################################
   ## DESCRIPTION: Function to get variable name from a table stored within FIESTA 
   ##      or a look-up table (*.csv FILE).
   #################################################################################
+  gui <- FALSE
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   if (gui) x=xvar=LUT=xLUT=LUTvar=LUTnewvar=varclass=minvar=maxvar=VALUE <- NULL 
 
@@ -139,11 +138,12 @@ datLUTclass <- function(x,
   }
   
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts = savedata_opts)
+  pcheck.params(input.params, 
+                savedata_opts = savedata_opts)
   
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-    savedata_opts = savedata_opts))
+                         savedata_opts = savedata_opts))
   savedata_opts <- optslst$savedata_opts 
   
 
@@ -397,11 +397,7 @@ datLUTclass <- function(x,
   
   ## Check output parameters
   if (savedata) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-        out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-        overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-        add_layer=add_layer, append_layer=append_layer, gui=gui,
-        out_conn=dbconn, dbconnopen=dbconnopen)
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
     outfolder <- outlst$outfolder
     out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
@@ -409,10 +405,10 @@ datLUTclass <- function(x,
     append_layer <- outlst$append_layer
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
-    if (is.null(out_layer)) {
+    if (is.null(outlst$out_layer)) {
       out_layer <- "datlutcl"
     }
-    outconn <- outlst$out_conn
+    outconn <- outlst$outconn
   }
 
   ############################################################################
@@ -524,27 +520,10 @@ datLUTclass <- function(x,
   if (savedata) {
     if ("sf" %in% class(datx)) {
       spExportSpatial(datx, 
-            savedata_opts=list(outfolder=outfolder, 
-                                  out_fmt=outsp_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer=out_layer,
-                                  outfn.pre=outfn.pre, 
-                                  outfn.date=outfn.date, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer, 
-                                  add_layer=TRUE))
+                      savedata_opts = outlst)
     } else {
-      datExportData(datx, dbconn=dbconn,
-            savedata_opts=list(outfolder=outfolder, 
-                                  out_fmt=out_fmt, 
-                                  out_dsn=out_dsn, 
-                                  out_layer=out_layer,
-                                  outfn.pre=outfn.pre, 
-                                  outfn.date=outfn.date, 
-                                  overwrite_layer=overwrite_layer,
-                                  append_layer=append_layer,
-                                  add_layer=TRUE))
-      
+      datExportData(datx, 
+                    savedata_opts = outlst)
     }
   }
 

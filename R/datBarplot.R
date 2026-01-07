@@ -162,8 +162,8 @@ datBarplot <- function(x,
   }
 
   ## Check xvar
-  xvar <- pcheck.varchar(var2check=xvar, varnm="xvar", checklst=xvarlst, 
-                         caption="X variable", warn="xvar not in data table") 
+  xvar <- pcheck.varchar(var2check=xvar, varnm = "xvar", checklst = xvarlst, 
+                         caption = "X variable", warn = "xvar not in data table") 
 
   ## Modify list of possible variables to check or select from
   if (is.null(xvar)) {

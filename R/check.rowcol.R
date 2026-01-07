@@ -145,7 +145,6 @@ check.rowcol <-
 		   warn=paste(rowvar, "not found"))
   if (is.null(rowvar)) rowvar <- "NONE"
 
-
   ## If rowvar == "NONE", set rowvar = "TOTAL" and exit, returning short list
   if (rowvar == "NONE") {
     rowvar=domainlst <- "TOTAL"
@@ -180,7 +179,7 @@ check.rowcol <-
   ## ROW VARIABLE
   ##############################################################
   if (rowvar != "NONE") { 
-    
+
     ## if popType == "CHNG" and no colvar is defined...
     ## assume rowvar is previous rowvar and colvar is current rowvar 
     if (popType == "CHNG" && (is.null(colvar) || colvar == "NONE")) {
@@ -191,8 +190,16 @@ check.rowcol <-
       col.add0 = row.add0
       collut <- rowlut
       col.classify <- row.classify
+      
+      rowvar <- paste0("PREV_", rowvar)
+      if (!is.null(row.orderby)) {
+        row.orderby <- paste0("PREV_", row.orderby)
+      }
+      if (!is.null(title.rowvar)) {
+        title.rowvar <- paste0("Previous ", title.rowvar)
+      }
     }
-    
+
     rowvardat <- 
       check.tabvar(popType = popType, tabvartype = "row", 
                    tabvar = rowvar, tab.orderby = row.orderby, 
@@ -208,7 +215,6 @@ check.rowcol <-
                    tfilter = tfilter,
                    popdatindb = popdatindb, popconn = popconn, SCHEMA. = SCHEMA.,
                    domlut = domlut, domvarlst = domvarlst, spcdname = spcdname)
-                              
     uniquerow <- rowvardat$uniquetabvar
     rowvar <- rowvardat$tabvar
     rowvarnm <- rowvardat$tabvarnm
@@ -227,7 +233,7 @@ check.rowcol <-
     }
   }
   
-  
+
   ##############################################################
   ## COLUMN VARIABLE
   ##############################################################
@@ -275,20 +281,6 @@ check.rowcol <-
     
     if (colbypcdom) {
       pcdomainlst <- c(pcdomainlst, colvar)
-    }
-  }
-  
-  ## Rename rowvar variables with prefix 'PREV_'
-  if (popType %in% c("CHNG", "GRM")) {
-
-    names(uniquerow) <- paste0("PREV_", names(uniquerow))
-    rowvar <- paste0("PREV_", rowvar)
-    rowvarnm <- paste0("PREV_", rowvarnm)
-    if (!is.null(row.orderby)) {
-      row.orderby <- paste0("PREV_", row.orderby)
-    }
-    if (!is.null(title.rowvar)) {
-      title.rowvar <- paste0("Previous ", title.rowvar)
     }
   }
 
