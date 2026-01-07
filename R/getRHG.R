@@ -7,6 +7,10 @@ getRHG <- function(pltx, puniqueid, unitvars, strvar, nonresp.minplotnum=5) {
 
   ## Get plot column names
   pltnmlst <- names(pltx)
+  
+  if (!"data.table" %in% class(pltx)) {
+    pltx <- setDT(pltx)
+  }
 
   ## Set minimum plot number of nonresp 
   #nonresp.minplotnum <- 5

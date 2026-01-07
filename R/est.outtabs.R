@@ -1,14 +1,34 @@
-est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FALSE,
-	areavar, unitvar, unitvars=NULL, unit_totest, unit_rowest=NULL, unit_colest=NULL,
-	unit_grpest=NULL, rowvar=NULL, colvar=NULL, uniquerow=NULL, uniquecol=NULL,
-	rowgrp=FALSE, rowgrpnm=NULL, rowunit=NULL, totunit=NULL, allin1=FALSE,
-	savedata=FALSE, addtitle=FALSE, returntitle=FALSE, title.ref=NULL,
-	title.colvar=NULL, title.rowvar=NULL, title.rowgrp=NULL, title.unitvar=NULL,
-	title.estpse=NULL, title.est=NULL, title.pse=NULL, outfn.estpse=NULL,
-	outfolder=NULL, outfn.date=TRUE, overwrite=FALSE, estnm, psenm="pse",
-	estround=0, pseround=2, estnull="--", psenull="--", divideby=NULL,
-	coltitlerow=TRUE, rowtotal=TRUE, rawdata=TRUE, CI=TRUE, rawdat=NULL,
-	char.width=NULL, rawonly=FALSE, raw.keep0=FALSE, percent=FALSE){
+est.outtabs <- function(esttype, 
+                        phototype = "PCT", photoratio = FALSE, 
+                        sumunits = FALSE,
+                        areavar, unitvar, unitvars = NULL, 
+                        unit.action = 'keep', unitarea = NULL,
+                        unit_totest, unit_rowest = NULL, 
+                        unit_colest = NULL, unit_grpest = NULL, 
+                        rowvar = NULL, colvar = NULL, 
+                        uniquerow = NULL, uniquecol = NULL,
+	                      rowgrp = FALSE, rowgrpnm = NULL, 
+                        rowunit = NULL, totunit = NULL, 
+                        allin1 = FALSE,
+	                      savedata = FALSE, 
+                        addtitle = FALSE, returntitle = FALSE, 
+                        title.ref = NULL,
+	                      title.rowvar = NULL, title.colvar = NULL, 
+                        title.rowgrp = NULL, title.unitvar = NULL,
+	                      title.estpse = NULL, 
+                        title.est = NULL, title.pse = NULL, 
+                        outfn.estpse = NULL,
+	                      outfolder = NULL, outfn.date = TRUE, 
+                        overwrite = FALSE, 
+                        estnm, psenm = "pse",
+	                      estround = 0, pseround = 2, 
+                        estnull = "--", psenull = "--", 
+                        divideby = NULL,
+	                      coltitlerow = TRUE, rowtotal = TRUE, 
+                        rawdata = TRUE, CI = TRUE, rawdat = NULL,
+	                      char.width = NULL, 
+                        rawonly = FALSE, raw.keep0 = FALSE, 
+                        percent = FALSE){
 
   ## Set global variables
   estn=pse=keepvars=TOTAL=totest=rowest=colest=grpest <- NULL
@@ -340,10 +360,18 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
       if (savedata) {
         suppressWarnings(
-        save1tab(tab=setDF(estpse), tab.title=title.estpse, outfn=outfn.estpse,
-			           outfolder=outfolder, allin1=allin1, coltitlerow=FALSE,
-			           addtitle=addtitle, rowtotal=rowtotal, outfn.date=outfn.date,
-			           overwrite=overwrite, charvars=title.rnames, cols2format=title.yhat) )
+        save1tab(tab = setDF(estpse), 
+                 tab.title = title.estpse, 
+                 outfn = outfn.estpse,
+			           outfolder = outfolder, 
+			           allin1 = allin1, 
+			           coltitlerow = FALSE,
+			           addtitle = addtitle, 
+			           rowtotal = rowtotal, 
+			           outfn.date = outfn.date,
+			           overwrite = overwrite, 
+			           charvars = title.rnames, 
+			           cols2format = title.yhat) )
       }
 
     } else {  ## colvar == NONE, sumunits = FALSE
@@ -415,10 +443,17 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
         if (savedata)
           suppressWarnings(
-          save1tab(tab=est2return, tab.title=title.estpse,
-			             outfn=outfn.estpse, outfolder=outfolder, allin1=allin1,
-			             coltitlerow=FALSE, rowtotal=FALSE, addtitle=addtitle,
-			             outfn.date=outfn.date, overwrite=overwrite, cols2format=title.yhat))
+          save1tab(tab = est2return, 
+                   tab.title = title.estpse,
+			             outfn = outfn.estpse, 
+			             outfolder = outfolder, 
+			             allin1 = allin1,
+			             coltitlerow = FALSE, 
+			             rowtotal = FALSE, 
+			             addtitle = addtitle,
+			             outfn.date = outfn.date, 
+			             overwrite = overwrite, 
+			             cols2format = title.yhat))
 
       } else {  ## rowvar != "TOTAL"
 
@@ -625,6 +660,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   if (rawdata) {
     rawdat.tabs <- {}
     if (is.null(rawdat)) rawdat <- list()
+    
+    if (raw.keep0) {
+      unitvalues <- unitarea[[unitvar]]
+    }
 
     ## Append totest to rawdat
     if (!is.null(unit_totest)) {
@@ -638,10 +677,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       ## Split columns if unitvars exists
       if (!is.null(unitvars) && length(unitvars) > 1) {
         suppressWarnings(unit_totest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)])
-        unit_totest[, (unitvar) := NULL]
+        #unit_totest[, (unitvar) := NULL]
         setcolorder(unit_totest, c(unitvars,
 		    names(unit_totest)[!names(unit_totest) %in% unitvars]))
-      }
+      } 
       rawdat$unit_totest <- setDF(unit_totest)
       rawdat.tabs <- c(rawdat.tabs, "unit_totest")
 
@@ -653,17 +692,40 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     if (!rowvar %in% c("NONE", "TOTAL")) {
       if (!is.null(unit_rowest)) {
 
+        if (!raw.keep0) {
+          if ("NBRPLT.gt0" %in% names(unit_rowest)) {
+            unit_rowest <- unit_rowest[unit_rowest[["NBRPLT.gt0"]] > 0,]
+          }
+        } else if (!is.null(unitvalues) && length(unitvalues) > 0) {
+          rowunits <- unique(unit_rowest[[unitvar]])
+          missunits <- unitvalues[!unitvalues %in% rowunits]
+          if (length(missunits) > 0) {
+            if (!is.null(unitarea)) {
+              missunitsdf <- unitarea[unitarea[[unitvar]] %in% missunits,]
+            } else {
+              missunitsdf <- data.frame(missunits)
+              names(missunitsdf) <- unitvar
+            }
+            if ("NBRPLT.gt0" %in% names(unit_rowest)) {
+              missunitsdf$NBRPLT.gt0 <- 0
+            }
+            unit_rowest <- rbindlist(list(unit_rowest, missunitsdf), fill=TRUE)
+          }
+        }
+ 
+        ## Set order of table by unitvar and rowvar
+        setorderv(unit_rowest, c(unitvar, rowvar))
+        setnames(unit_rowest, rowvar, title.rowvar)
+        
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
           suppressWarnings(unit_rowest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)])
           unit_rowest[, (unitvar) := NULL]
           setcolorder(unit_rowest, c(unitvars,
-			    names(unit_rowest)[!names(unit_rowest) %in% unitvars]))
+                                     names(unit_rowest)[!names(unit_rowest) %in% unitvars]))
         }
-
-        ## Set order of table
-        setorderv(unit_rowest, c(unitvars, rowvar))
-        setnames(unit_rowest, rowvar, title.rowvar)
+        
+        ## save table to rawdat list
         rawdat$unit_rowest <- setDF(unit_rowest)
         rawdat.tabs <- c(rawdat.tabs, "unit_rowest")
 
@@ -676,6 +738,31 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     }
     if (colvar != "NONE") {
       if (!is.null(unit_colest)) {
+        
+        if (!raw.keep0) {
+          if ("NBRPLT.gt0" %in% names(unit_colest)) {
+            unit_colest <- unit_colest[unit_colest[["NBRPLT.gt0"]] > 0,]
+          }
+        } else if (!is.null(unitvalues) && length(unitvalues) > 0) {
+          colunits <- unique(unit_colest[[unitvar]])
+          missunits <- unitvalues[!unitvalues %in% colunits]
+          if (length(missunits) > 0) {
+            if (!is.null(unitarea)) {
+              missunitsdf <- unitarea[unitarea[[unitvar]] %in% missunits,]
+            } else {
+              missunitsdf <- data.frame(missunits)
+              names(missunitsdf) <- unitvar
+            }
+            if ("NBRPLT.gt0" %in% names(unit_colest)) {
+              missunitsdf$NBRPLT.gt0 <- 0
+            }
+            unit_colest <- rbindlist(list(unit_colest, missunitsdf), fill=TRUE)
+          }
+        }
+        
+        ## Set order of table by unitvar and colvar
+        setorderv(unit_colest, c(unitvar, colvar))
+        setnames(unit_colest, colvar, title.colvar)
 
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
@@ -684,10 +771,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           setcolorder(unit_colest, c(unitvars,
 			    names(unit_colest)[!names(unit_colest) %in% unitvars]))
         }
-        ## Set order of table
-        setorderv(unit_colest, c(unitvars, colvar))
-
-        setnames(unit_colest, colvar, title.colvar)
+        
+        ## save table to rawdat list
         rawdat$unit_colest <- setDF(unit_colest)
         rawdat.tabs <- c(rawdat.tabs, "unit_colest")
 
@@ -699,10 +784,33 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       }
 
       if (!is.null(unit_grpest)) {
-        if (!raw.keep0 && "NBRPLT.gt0" %in% names(unit_grpest)) {
-          unit_grpest <- unit_grpest[unit_grpest[["NBRPLT.gt0"]] > 0,]
+        
+        if (!raw.keep0) {
+          if ("NBRPLT.gt0" %in% names(unit_grpest)) {
+            unit_grpest <- unit_grpest[unit_grpest[["NBRPLT.gt0"]] > 0,]
+          }
+        } else if (!is.null(unitvalues) && length(unitvalues) > 0) {
+          grpunits <- unique(unit_grpest[[unitvar]])
+          missunits <- unitvalues[!unitvalues %in% grpunits]
+          if (length(missunits) > 0) {
+            if (!is.null(unitarea)) {
+              missunitsdf <- unitarea[unitarea[[unitvar]] %in% missunits,]
+            } else {
+              missunitsdf <- data.frame(missunits)
+              names(missunitsdf) <- unitvar
+            }
+            if ("NBRPLT.gt0" %in% names(unit_grpest)) {
+              missunitsdf$NBRPLT.gt0 <- 0
+            }
+            unit_grpest <- rbindlist(list(unit_grpest, missunitsdf), fill=TRUE)
+          }
         }
-
+        
+        ## Set order of table by unitvar, rowvar and colvar
+        setorderv(unit_grpest, c(unitvar, rowvar, colvar))
+        setnames(unit_grpest, rowvar, title.rowvar)
+        setnames(unit_grpest, colvar, title.colvar)
+        
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
           suppressWarnings(unit_grpest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)])
@@ -710,11 +818,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           setcolorder(unit_grpest, c(unitvars,
 			    names(unit_grpest)[!names(unit_grpest) %in% unitvars]))
         }
-        ## Set order of table
-        setorderv(unit_grpest, c(unitvars, rowvar, colvar))
-
-        setnames(unit_grpest, rowvar, title.rowvar)
-        setnames(unit_grpest, colvar, title.colvar)
+        
+        ## save table to rawdat list
         rawdat$unit_grpest <- setDF(unit_grpest)
         rawdat.tabs <- c(rawdat.tabs, "unit_grpest")
       }
