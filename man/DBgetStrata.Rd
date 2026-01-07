@@ -17,8 +17,7 @@ DBgetStrata(
   savedata_opts = NULL,
   dbconn = NULL,
   dbconnopen = FALSE,
-  evalInfo = NULL,
-  ...
+  evalInfo = NULL
 )
 }
 \arguments{
@@ -55,9 +54,7 @@ of options. Only used when savedata = TRUE.}
 
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 
-\item{evalInfo}{List. List object output from DBgetEvalid or DBgetXY}
-
-\item{...}{For extendibility.
+\item{evalInfo}{List. List object output from DBgetEvalid or DBgetXY 
 FIESTA functions.}
 }
 \value{

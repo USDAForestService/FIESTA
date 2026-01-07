@@ -24,8 +24,7 @@ spExtractRast(
   exportsp = FALSE,
   exportNA = FALSE,
   spMakeSpatial_opts = NULL,
-  savedata_opts = NULL,
-  gui = FALSE
+  savedata_opts = NULL
 )
 }
 \arguments{
@@ -94,8 +93,6 @@ of options. Use to convert X/Y values to simple feature (sf) coordinates.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'rastext'.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 \item{sppltext}{ sf object or data frame. Input xyplt data with

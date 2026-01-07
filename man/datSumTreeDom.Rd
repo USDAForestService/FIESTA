@@ -42,6 +42,7 @@ datSumTreeDom(
   pltidsid = NULL,
   pcwhereqry = NULL,
   savedata = FALSE,
+  dbconnopen = TRUE,
   tabIDs = tableIDs(),
   datSum_opts = datSum_options(),
   database_opts = NULL,
@@ -166,6 +167,8 @@ QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454)
 included.}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
+
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.}
 
 \item{tabIDs}{List of unique IDs corresponding to the tables. See
 See help(tableIDs) for a list of options.}

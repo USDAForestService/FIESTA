@@ -11,7 +11,7 @@ modGBpop(
   popFilter = popFilters(),
   pltassgn = NULL,
   pltassgnid = "PLT_CN",
-  datsource = "sqlite",
+  datsource = "obj",
   dsn = NULL,
   dbconn = NULL,
   pjoinid = "CN",
@@ -197,18 +197,14 @@ conditions removed (AREA_USED/n.strata) \cr
 Table(s) are also written to outfolder.
 }
 \description{
-Generates population data for generating 'green-book' estimates (Scott et
-al. 2005).  Plots that are totally nonsampled are excluded from estimation
-dataset. Next, an adjustment factor is calculated by strata to adjust for
-nonsampled (nonresponse) conditions that have proportion less than 1.
-Attributes adjusted to a per-acre value are summed by plot, divided by the
-adjustment factor, and averaged by stratum.  Strata means are combined using
-the strata weights and then expanded to using the total land area in the
-population.
+The mod*pop functions are extremely important for defining all the 
+necessary data used for generating estimates for a given population, 
+including the FIA plot data, associated auxiliary information, and 
+calculated adjustment factors for nonresponse. This is similar to 
+an FIA Evaluation within the FIA database.
 }
 \details{
-Population types \cr \tabular{lll}{ \tab \bold{popType}
-\bold{Description}\cr 
+Population types \cr \tabular{lll}{ \tab \bold{popType} \tab \bold{Description}\cr 
 \tab ALL \tab Population data, including nonsampled plots.\cr 
 \tab CURR \tab Population data for area estimates, excluding nonsampled 
 plots.\cr 

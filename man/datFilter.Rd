@@ -62,7 +62,7 @@ data frame.}
 of options. Only used when savedata = TRUE.  If out_layer = NULL,
 default = 'datf'.}
 
-\item{gui}{Logical. If TRUE, pop-up windows will appear for user-interface.}
+\item{gui}{Logical. If TRUE, a gui interface for parameters.}
 }
 \value{
 A list of the following items:

@@ -24,8 +24,7 @@ datLUTclass(
   dbreturn = TRUE,
   overwrite = TRUE,
   savedata = FALSE,
-  savedata_opts = NULL,
-  gui = FALSE
+  savedata_opts = NULL
 )
 }
 \arguments{
@@ -85,8 +84,6 @@ in x, overwrites class name.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'datlutcl'.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 \item{xLUT}{ Input data table with look-up table variable(s). }

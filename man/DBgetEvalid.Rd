@@ -20,10 +20,9 @@ DBgetEvalid(
   invyrtab = NULL,
   dbTabs = dbTables(),
   dbconn = NULL,
-  schema = NULL,
-  dbconnopen = FALSE,
-  returnPOP = FALSE,
-  gui = FALSE
+  dbconnopen = TRUE,
+  database_opts = database_options(),
+  returnPOP = FALSE
 )
 }
 \arguments{
@@ -73,14 +72,13 @@ See help(dbTables) for a list of options.}
 
 \item{dbconn}{Open database connection.}
 
-\item{schema}{String. Schema in database where tables are.}
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.}
 
-\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
+\item{database_opts}{List. See help(database_options()) for a list
+of options. Only used when datsource = 'postgres'.}
 
 \item{returnPOP}{Logical. If TRUE, returns pop tables (SURVEY, 
 POP_PLOT_STRATUM_ASSGN) as R objects instead of table names, if in db.}
-
-\item{gui}{Logical. If TRUE, prompts user (deprecated).}
 }
 \value{
 A list of the following objects: \item{states}{ String vector. State

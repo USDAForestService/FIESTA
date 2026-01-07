@@ -5,7 +5,7 @@
 \title{Data - Aggregates numeric condition data to plot level.}
 \usage{
 datSumCond(
-  cond = NULL,
+  cond,
   datsource = "obj",
   dbconn = NULL,
   dsn = NULL,
@@ -18,11 +18,17 @@ datSumCond(
   csumvarnm = NULL,
   cfilter = NULL,
   getadjplot = FALSE,
+  pltidsWITHqry = NULL,
+  pltidsid = NULL,
+  pcwhereqry = NULL,
   adjcond = FALSE,
   cround = 5,
   savedata = FALSE,
+  dbconnopen = TRUE,
   tabIDs = tableIDs(),
-  savedata_opts = NULL
+  datSum_opts = datSum_options(),
+  savedata_opts = NULL,
+  database_opts = NULL
 )
 }
 \arguments{
@@ -65,6 +71,14 @@ variable(s).  Default = csumvar + '_PLT'.}
 \item{getadjplot}{Logical. If TRUE, adjustments are calculated for
 nonsampled conditions on plot.}
 
+\item{pltidsWITHqry}{SQL query. A query identifying plots to sum (e.g.,
+'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')}
+
+\item{pltidsid}{Sting. Name of unique identifier in pltidsWITHqry.}
+
+\item{pcwhereqry}{String. Plot/Condition filter if plot and/or cond table is
+included.}
+
 \item{adjcond}{Logical. If TRUE, csumvar condition variables are adjusted
 for nonsampled conditions by plot.}
 
@@ -72,12 +86,21 @@ for nonsampled conditions by plot.}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
 
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.}
+
 \item{tabIDs}{List of unique IDs corresponding to the tables. See
 See help(tableIDs) for a list of options.}
+
+\item{datSum_opts}{List. Options for summarizing tree data, such as TPA,
+rounding, and adjusting TPA. See help(datSum_options()) for a list of
+options.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'condsum'.}
+
+\item{database_opts}{List. Options for database, such as schema and
+password. See help(database_options()) for a list of options.}
 }
 \value{
 A list of the following items: \item{condsum}{ Data frame.
@@ -106,6 +129,7 @@ condsum <- datSumCond(cond = FIESTA::WYcond,
 # Check results
 condsum[condsum$PLT_CN == 40404737010690,]
 FIESTA::WYcond[FIESTA::WYcond$PLT_CN == 40404737010690,]
+
 }
 \author{
 Tracey S. Frescino

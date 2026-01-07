@@ -11,7 +11,7 @@ modSApop(
   popFilter = popFilters(),
   pltassgn = NULL,
   pltassgnid = "PLT_CN",
-  datsource = "sqlite",
+  datsource = "obj",
   dsn = NULL,
   dbconn = NULL,
   pjoinid = "CN",

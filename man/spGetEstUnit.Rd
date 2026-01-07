@@ -24,8 +24,7 @@ spGetEstUnit(
   exportNA = FALSE,
   spMakeSpatial_opts = NULL,
   savedata_opts = NULL,
-  vars2keep = NULL,
-  gui = FALSE
+  vars2keep = NULL
 )
 }
 \arguments{
@@ -81,8 +80,6 @@ of options. Only used when savedata = TRUE.}
 
 \item{vars2keep}{String vector. Attributes in SAdoms, other than domvar to
 include in dunitlut output and extract to pltassgn points.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 \item{pltunit}{ Data frame. Input point data with extracted

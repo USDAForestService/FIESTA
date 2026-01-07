@@ -29,6 +29,7 @@ datSumTree(
   pltidsid = NULL,
   pcwhereqry = NULL,
   savedata = FALSE,
+  dbconnopen = TRUE,
   tabIDs = tableIDs(),
   datSum_opts = datSum_options(),
   database_opts = NULL,
@@ -118,6 +119,8 @@ included.}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
 
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.}
+
 \item{tabIDs}{List of unique IDs corresponding to the tables. See
 See help(tableIDs) for a list of options.}
 
@@ -128,7 +131,9 @@ options.}
 \item{database_opts}{List. Options for database, such as schema and
 password. See help(database_options()) for a list of options.}
 
-\item{savedata_opts}{List. See help(savedata_options()) for a list}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE. If out_layer = NULL,
+default = 'treedat'.}
 }
 \value{
 A list of the following items: \item{treedat}{ Data frame. Plot or

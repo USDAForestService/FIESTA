@@ -31,7 +31,8 @@ spGetXY(
   exportsp = FALSE,
   savedata_opts = NULL,
   dbconn = NULL,
-  dbconnopen = FALSE
+  dbconnopen = TRUE,
+  database_opts = database_options()
 )
 }
 \arguments{
@@ -118,7 +119,10 @@ of options. Only used when savedata = TRUE.}
 
 \item{dbconn}{Open database connection.}
 
-\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.}
+
+\item{database_opts}{List. See help(database_options()) for a list
+of options. Only used when datsource = 'postgres'.}
 }
 \value{
 \item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }

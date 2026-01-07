@@ -6,10 +6,12 @@
 \usage{
 datSumCoverDom(
   tab = NULL,
+  tabnm = NULL,
   cond = NULL,
   plt = NULL,
   subp_cond = NULL,
   subplot = NULL,
+  tabid = "PLT_CN",
   datsource = "obj",
   dbconn = NULL,
   dsn = NULL,
@@ -18,6 +20,7 @@ datSumCoverDom(
   bydomainlst = NULL,
   covtype = "P2VEG",
   tsumvar = "COVER_PCT",
+  tsumunits = "pct",
   tfilter = NULL,
   tdomvar = NULL,
   tdomvarlst = NULL,
@@ -30,6 +33,7 @@ datSumCoverDom(
   pltidsid = NULL,
   pcwhereqry = NULL,
   savedata = FALSE,
+  dbconnopen = TRUE,
   tabIDs = tableIDs(),
   datSum_opts = datSum_options(),
   database_opts = NULL,
@@ -39,6 +43,9 @@ datSumCoverDom(
 \arguments{
 \item{tab}{Dataframe or comma-delimited file (*.csv). The table with percent 
 cover.}
+
+\item{tabnm}{String. Name of input table. If tabnm = NULL and tab is a
+string, tabnm = tab, otherwise tabnm = 'tab'.}
 
 \item{cond}{Dataframe or comma-delimited file (*.csv). Condition-level table
 to join the aggregated tree data to, if bycond=TRUE. This table also may be
@@ -57,6 +64,8 @@ if bysubp=TRUE.}
 Subplot-level table to used to calculate adjustment factors, to remove
 nonsampled conditions (SUBP_STATUS_CD = 3). This table is optional. If
 included the aggregated tree data are joined to subplot before returning.}
+
+\item{tabid}{String. Name of variable in tab defining unique identifier of plot.}
 
 \item{datsource}{String. Source of data ('obj', 'csv', 'sqlite', 'gdb').}
 
@@ -78,10 +87,13 @@ plt/cond table if tables are provided.}
 
 \item{covtype}{String. Cover type for estimates (e.g. 'P2VEG')}
 
-\item{tsumvar}{String. Variable (or derivation) in tree to summarize.
+\item{tsumvar}{String. Variable (or derivation) in tab to summarize.
 If covtype = 'P2VEG' and summing by plot or condition, the COVER_PCT
 variable in table is divided by 4 number of subplots and by 100 to convert
-percent to proportion ('SUM(COVER_PCT) / 4 / 100').}
+percent to proportion ('SUM(COVER_PCT) / 4').}
+
+\item{tsumunits}{String. c('prop', 'pct'). If 'prop', the output is 
+proportion, if 'pct', the output is as a percent.}
 
 \item{tfilter}{String. Filter to subset the tree data before aggregating
 (e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is
@@ -119,6 +131,8 @@ included.}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
 
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.}
+
 \item{tabIDs}{List of unique IDs corresponding to the tables. See
 See help(tableIDs) for a list of options.}
 
@@ -129,10 +143,12 @@ options.}
 \item{database_opts}{List. Options for database, such as schema and
 password. See help(database_options()) for a list of options.}
 
-\item{savedata_opts}{List. See help(savedata_options()) for a list}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE. If out_layer = NULL,
+default = 'condsum'.}
 }
 \value{
-A list of the following items: \item{treedat}{ Data frame. Plot or
+A list of the following items: \item{tdat}{ Data frame. Plot or
 condition-level table with aggregated tree attributes. } \item{sumvars}{
 String vector. Name(s) of the output aggregated tree attributes. }
 
@@ -150,7 +166,7 @@ proportions (adjplot), you need to include CONDID & CONDPROP_UNADJ in cond
 or tree table and COND_STATUS_CD. \cr
 }
 \note{
-If a dat table is provided, the aggregated tree data will be merged to
+If a dat table is provided, the aggregated data will be merged to
 table and NULL values will be output as 0.
 }
 \author{

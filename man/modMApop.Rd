@@ -11,7 +11,7 @@ modMApop(
   popFilter = popFilters(),
   pltassgn = NULL,
   pltassgnid = "PLT_CN",
-  datsource = "sqlite",
+  datsource = "obj",
   dsn = NULL,
   dbconn = NULL,
   pjoinid = "CN",
@@ -55,7 +55,7 @@ list of options.}
 
 \item{pltassgn}{DF/DT, Optional. R object, sf R object, comma-delimited
 file(.csv), layer or spatial layer in dsn, or shapefile(.shp). Plot-level
-assignment of estimation unit and/or strata, with one record for each plot.}
+assignment of estimation unit model preditors, with one record for each plot.}
 
 \item{pltassgnid}{String.}
 
@@ -76,7 +76,7 @@ CONDPROP_UNADJ).}
 
 \item{adj}{String. How to calculate adjustment factors for nonsampled
 (nonresponse) conditions based on summed proportions for by plot ('samp',
-'plot', 'none').  'samp' - adjustments are calculated at strata/estimation unit
+'plot', 'none').  'samp' - adjustments are calculated at estimation unit
 level; 'plot' - adjustments are calculated at plot-level. Adjustments are
 only calculated for annual inventory plots (DESIGNCD=1).}
 
@@ -135,8 +135,7 @@ FIESTA::spGetPlots().}
 A list with population data for Green-Book estimates.
 
 \item{condx}{ Data frame. Condition-level data including plot-level
-assignment of estimation unit and stratum (if strata=TRUE) and adjusted
-condition proportion. }
+assignment of estimation unit and adjusted condition proportion. }
 \item{pltcondx}{ Data frame. Condition-level data, merged with plot data. }
 \item{cuniqueid}{ String. Unique identifier of plot in condx and pltcondx. }
 \item{condid}{ String. Unique identifier of condition in condx and pltcondx. }
@@ -157,14 +156,14 @@ treex. }
 \tabular{lll}{ \tab \bold{Variable} \tab \bold{Description}\cr
 \tab unitvar \tab estimation unit \cr
 \tab n.total \tab number of plots for estimation unit \cr
-\tab CONDPROP_UNADJ_SUM \tab summed condition proportion by strata and
-estimation unit \cr
-\tab CONDPROP_ADJFAC \tab adjusted condition proportion by strata after
+\tab CONDPROP_UNADJ_SUM \tab summed condition proportion by estimation
+unit \cr
+\tab CONDPROP_ADJFAC \tab adjusted condition proportion after
 nonsampled plots removed \cr
 \tab AREA_USED \tab total area of estimation unit \cr
-\tab expfac \tab strata-level expansion factor after nonsampled plots and
-conditions removed (AREA_USED/n.strata) \cr
-\tab EXPNS \tab strata-level area expansions (expfac * strwt)\cr }
+\tab expfac \tab estimation unit-level expansion factor after nonsampled plots
+and conditions removed \cr
+\tab EXPNS \tab area expansions \cr }
 
 Table(s) are also written to outfolder.
 }
@@ -221,10 +220,10 @@ For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \c
 }
 \note{
 ADJUSTMENT FACTOR:\cr The adjustment factor is necessary to account for
-nonsampled conditions. It is calculated for each estimation unit by strata.
+nonsampled conditions. It is calculated for each estimation unit.
 by summing the unadjusted proportions of the subplot, microplot, and
 macroplot (i.e. *PROP_UNADJ) and dividing by the number of plots in the
-strata/estimation unit).
+estimation unit).
 
 An adjustment factor is determined for each tree based on the size of the
 plot it was measured on. This is identified using TPA_UNADJ as follows:
@@ -249,15 +248,6 @@ alphabetical), restrained by survey unit (UNITCD) if included in dataset,
 and continuing until the number of plots equals 10. If there are no
 estimation units following in order, it is combined with the estimation unit
 previous in order.
-
-stratcombine:\cr If TRUE and less than 2 plots in any one strata class
-within an estimation unit, all strata classes with 2 or less plots are
-combined. The current method for combining is to group the strata with less
-than 2 plots with the strata class following in consecutive order (numeric
-or alphabetical), restrained by estimation unit (if unitcombine=FALSE), and
-continuing until the number of plots equals 10. If there are no strata
-classes following in order, it is combined with the estimation unit previous
-in order.
 }
 \examples{
 \donttest{

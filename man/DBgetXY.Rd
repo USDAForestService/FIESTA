@@ -31,6 +31,7 @@ DBgetXY(
   SURVEY = NULL,
   dbconn = NULL,
   dbconnopen = TRUE,
+  database_opts = database_options(),
   evalInfo = NULL
 )
 }
@@ -120,7 +121,10 @@ if it has been already downloaded and stored in environment.}
 
 \item{dbconn}{Open database connection.}
 
-\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.}
+
+\item{database_opts}{List. See help(database_options()) for a list
+of options. Only used when datsource = 'postgres'.}
 
 \item{evalInfo}{List. List object output from DBgetEvalid or DBgetXY 
 FIESTA functions.}
