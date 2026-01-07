@@ -397,6 +397,7 @@ modPBpop <- function(pntdat = NULL,
   ## Applies plot and condition filters
   ###################################################################################
   unitcombine <- ifelse(unit.action == "combine", TRUE, FALSE)
+
   popcheck <- check.popdataPB(gui=gui, pnt=pntdat, pltpct=pltpct, pltpctvars=pltpctvars, 
                       plt=plt, pltassgn=pltassgn, plotid=plotid, pntid=pntid, 
                       puniqueid=puniqueid, pltassgnid=pltassgnid, 
@@ -443,6 +444,7 @@ modPBpop <- function(pntdat = NULL,
 		unitvar2=unitvar2, areavar=areavar, minplotnum.unit=minplotnum.unit, 
 		minplotnum.strat=minplotnum.strat, getwt=getwt, getwtvar=getwtvar,
 		strwtvar=strwtvar)  
+
   pltassgnx <- stratcheck$pltx
   unitarea <- stratcheck$unitarea
   unitvar <- stratcheck$unitvar

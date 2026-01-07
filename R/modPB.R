@@ -47,7 +47,6 @@
 #' @param title_opts List. See help(title_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modPBpop() if PBpopdat is NULL.
 #' 
 #' @return A list with estimates with percent sampling error for rowvar (and
@@ -284,18 +283,18 @@ modPB <- function(PBpopdat = NULL,
                   savedata = FALSE,
                   table_opts = NULL,
                   title_opts = NULL,
-                  savedata_opts = NULL,
-                  gui = FALSE, 
+                  savedata_opts = NULL, 
                   ...){
   ###################################################################################
   ## DESCRIPTION: 
   ## Generates percent or acre estimates by domain (and estimation unit)
   ###################################################################################
-
+  gui <- FALSE
+  
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(PBpopdat)) {
-    gui <- TRUE
-  } 
+  # if (nargs() == 0 && is.null(PBpopdat)) {
+  #   gui <- TRUE
+  # } 
 
   ## If gui.. set variables to NULL
   if (gui) {
@@ -1100,17 +1099,17 @@ modPB <- function(PBpopdat = NULL,
     numvars <- c("gain.est", "gain.se", "loss.est", "loss.se", "diff.est", "diff.se")
     charvars <- c(unitvars, "gain.val", "loss.val")
 
-    if (length(rowcolvals) == 2) {
+    # if (length(rowcolvals) == 2) {
+    #   est.gainloss <- data.frame(t(sapply(gainloss.vals, getgainloss, 
+    #                         pltdom.grp, plotid, rowvar, colvar, 
+    #                         stratalut, unitvars, strvar, 
+    #                         tabtype, areavar, unitarea, sumunits)))
+#    } else {
       est.gainloss <- data.frame(t(sapply(gainloss.vals, getgainloss, 
                             pltdom.grp, plotid, rowvar, colvar, 
                             stratalut, unitvars, strvar, 
                             tabtype, areavar, unitarea, sumunits)))
-    } else {
-      est.gainloss <- data.frame(t(sapply(gainloss.vals, getgainloss, 
-                            pltdom.grp, plotid, rowvar, colvar, 
-                            stratalut, unitvars, strvar, 
-                            tabtype, areavar, unitarea, sumunits)))
-    }
+#    }
     est.gainloss[, numvars] <- lapply(est.gainloss[, numvars], as.numeric)
     est.gainloss[, charvars] <- lapply(est.gainloss[, charvars], as.character)
 
