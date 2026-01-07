@@ -142,49 +142,29 @@ spExtractPoly <- function(xyplt,
   }
 
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
+  pcheck.params(input.params, 
+                spMakeSpatial_opts = spMakeSpatial_opts, 
+                savedata_opts = savedata_opts)
   
   
-  ## Set spMakeSpatial defaults
-  spMakeSpatial_defaults_list <- formals(spMakeSpatial_options)[-length(formals(spMakeSpatial_options))]
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts,
+                         spMakeSpatial_opts = spMakeSpatial_opts))
+  savedata_opts <- optslst$savedata_opts  
+  spMakeSpatial_opts <- optslst$spMakeSpatial_opts
   
-  for (i in 1:length(spMakeSpatial_defaults_list)) {
-    assign(names(spMakeSpatial_defaults_list)[[i]], spMakeSpatial_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied spMakeSpatial values
-  if (length(spMakeSpatial_opts) > 0) {
-    for (i in 1:length(spMakeSpatial_opts)) {
-      if (names(spMakeSpatial_opts)[[i]] %in% names(spMakeSpatial_defaults_list)) {
-        assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(spMakeSpatial_opts)[[i]]))
-      }
+  ## Assign user-supplied spMakeSpatial values to objects
+  for (i in 1:length(spMakeSpatial_opts)) {
+    if (names(spMakeSpatial_opts)[[i]] %in% names(spMakeSpatial_opts)) {
+      assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
+    } else {
+      stop(paste("Invalid parameter: ", names(spMakeSpatial_opts)[[i]]))
     }
   }
   
   
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
- 
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################  
@@ -198,11 +178,11 @@ spExtractPoly <- function(xyplt,
 
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- spMakeSpatialPoints(xyplt=sppltx, 
-                                  xy.uniqueid=xy.uniqueid, 
-                                  xvar=xvar, 
-                                  yvar=yvar,
-                                  xy.crs=xy.crs)   
+    sppltx <- spMakeSpatialPoints(xyplt = sppltx, 
+                                  xy.uniqueid = xy.uniqueid, 
+                                  xvar = xvar, 
+                                  yvar = yvar,
+                                  xy.crs = xy.crs)   
   } else {
     ## GET xy.uniqueid
     sppltnames <- names(sppltx)
@@ -284,19 +264,10 @@ spExtractPoly <- function(xyplt,
 
   ## Check outfolder
   if (savedata || exportsp || exportNA) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-          out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-          overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-          add_layer=add_layer, append_layer=append_layer, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
-    if (is.null(out_layer)) {
-      out_layer <- "polyext"
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst$add_layer <- TRUE
+    if (is.null(outlst$out_layer)) {
+      outlst$out_layer <- "polyext"
     }
   }
   
@@ -451,15 +422,7 @@ spExtractPoly <- function(xyplt,
     if (exportNA) {
       outfn.na <- paste0(out_layer, "_", polyvnm, "_NAvals")
       spExportSpatial(sppltout, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-                              out_dsn=out_dsn, 
-                              out_layer=outfn.na,
-                              outfn.pre=outfn.pre, 
-                              outfn.date=outfn.date, 
-                              overwrite_layer=overwrite_layer,
-                              append_layer=append_layer, 
-                              add_layer=TRUE))
+                      savedata_opts = outlst)
     }
  
     if (i > 1) {
@@ -479,33 +442,18 @@ spExtractPoly <- function(xyplt,
 
   if (savedata) {
     datExportData(spxyext, 
-      savedata_opts=list(outfolder=outfolder, 
-                          out_fmt=out_fmt, 
-                          out_dsn=out_dsn, 
-                          out_layer=out_layer,
-                          outfn.pre=outfn.pre, 
-                          outfn.date=outfn.date, 
-                          overwrite_layer=overwrite_layer,
-                          append_layer=append_layer,
-                          add_layer=TRUE)) 
+                  savedata_opts = outlst) 
   }
 
   ## Export to shapefile
   if (exportsp) {
     spExportSpatial(spxyext, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer=out_layer,
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer, 
-                            add_layer=TRUE))
+                    savedata_opts = outlst)
     
   }
   
-  returnlst <- list(spxyext=spxyext, outnames=unlist(polyvarnmlst))
+  returnlst <- list(spxyext = spxyext, 
+                    outnames = unlist(polyvarnmlst))
 
   if (length(NAlst) > 0) {
     returnlst$NAlst <- NAlst

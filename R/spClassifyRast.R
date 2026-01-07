@@ -50,43 +50,24 @@ spClassifyRast <- function(rastfn,
   }
 
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
-
-
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
+  pcheck.params(input.params, 
+                savedata_opts = savedata_opts)
   
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
   
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-    }
-  }
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts))
+  savedata_opts <- optslst$savedata_opts  
 
+  
   ## Check overwrite, outfn.date, outfolder, outfn
   ########################################################
   if (savedata) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-                  outfolder=outfolder, outfn.pre=outfn.pre, 
-                  outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, 
-                  overwrite_layer=overwrite_layer, 
-                  append_layer=append_layer, createSQLite=FALSE, gui=gui)
-    out_dsn <- outlst$out_dsn
-    outfolder <- outlst$outfolder
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    overwrite_dsn <- outlst$overwrite_dsn
-    append_layer <- outlst$append_layer
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst$add_layer <- TRUE
   } 
-  if (is.null(out_layer)) {
-    out_layer <- "rastcl"
+  if (is.null(outlst$out_layer)) {
+    out_layer <- "rastcl_lut"
   }
 
   ## Verify ref raster
@@ -220,11 +201,10 @@ spClassifyRast <- function(rastfn,
   ## Save lookup table to outfolder
   ####################################################################
   datExportData(lut, 
-          savedata_opts = list(outfolder = outfolder, 
-		                           out_fmt = "csv", 
-							                 out_layer = paste0(out_layer, "_lut")))
+                savedata_opts = outlst)
 
-  returnlst <- list(outfn=outfn, lut=lut)
+  
+  returnlst <- list(outfn = outfn, lut  =lut)
   
   
   if (gethist) {

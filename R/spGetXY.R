@@ -83,7 +83,9 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @param dbconn Open database connection.
-#' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
+#' @param dbconnopen Logical. If TRUE, keep database connection open.
+#' @param database_opts List. See help(database_options()) for a list
+#' of options. Only used when datsource = 'postgres'.  
 #'
 #' @return \item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }
 #' \item{pltids}{ data frame. A table of pltids that are within bnd. }
@@ -156,7 +158,9 @@ spGetXY <- function(bnd,
                     exportsp = FALSE, 
                     savedata_opts = NULL,
 					          dbconn = NULL,
-					          dbconnopen = FALSE){
+					          dbconnopen = TRUE,
+					          database_opts = database_options()
+					          ){
   ##############################################################################
   ## DESCRIPTION
   ## Get FIA plots within the boundary population (area of interest)
@@ -178,6 +182,7 @@ spGetXY <- function(bnd,
   gui <- FALSE
   coordtype <- "public"
   
+
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -212,9 +217,7 @@ spGetXY <- function(bnd,
   for (i in 1:length(xy_opts)) {
     assign(names(xy_opts)[[i]], xy_opts[[i]])
   }
-  for (i in 1:length(savedata_opts)) {
-    assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-  }
+
   
   ## Set user-supplied dbTabs options
   dbTables_defaults_list <- formals(dbTables)[-length(formals(dbTables))]
@@ -283,28 +286,28 @@ spGetXY <- function(bnd,
   ## check savedata
   savedata <- pcheck.logical(savedata, varnm="savedata", 
                              title="Save data?", first="NO", gui=gui) 
-  if (savedata && returnxy) {
-    ## Check exportsp
-    exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
-                             title="Export spatial XY?", first="NO", gui=gui) 
+
+  ## Check exportsp
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
+                             title="Save XY spatial?", first="NO", gui=gui) 
+  if (exportsp) {
+    issp <- TRUE
   }
+
+  ## Check dbconnopen
+  dbconnopen <- pcheck.logical(dbconnopen, varnm="dbconnopen", 
+                             title="keep db open?", first="YES", gui=gui) 
   
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  if (savedata) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-            add_layer=add_layer, append_layer=append_layer, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
+  if (savedata || exportsp) {
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst$add_layer <- TRUE
+    outlst$outconnopen <- TRUE
+    out_layer <- outlst$out_layer
   }
- 
+  
+  
   ########################################################################
   ### DO THE WORK
   ########################################################################
@@ -479,42 +482,22 @@ spGetXY <- function(bnd,
   pltids <- sf::st_drop_geometry(spxy)
   pltids <- pltids[,which(!names(pltids) %in% c(xvar, yvar))]
   
+  
+  if (exportsp) {
+    if (is.null(out_layer)) outlst$out_layer <- "spxyplt"
+    spExportSpatial(spxy, 
+                    savedata_opts = outlst)
+
   if (savedata) {
     if (returnxy) {
+      if (is.null(out_layer)) outlst$out_layer <- "xyplt"
       datExportData(sf::st_drop_geometry(spxy), 
-         savedata_opts=list(outfolder = outfolder, 
-                            out_fmt = out_fmt, 
-                            out_dsn = out_dsn, 
-                            out_layer = "xyplt",
-                            outfn.pre = outfn.pre, 
-                            outfn.date = outfn.date, 
-                            overwrite_layer = overwrite_layer,
-                            append_layer = append_layer,
-                            add_layer = TRUE)) 
-   
-      if (exportsp) {
-        spExportSpatial(spxy, 
-            savedata_opts=list(outfolder=outfolder, 
-                            out_fmt = out_fmt, 
-                            out_dsn = out_dsn, 
-                            out_layer = "spxyplt",
-                            outfn.pre = outfn.pre, 
-                            outfn.date = outfn.date, 
-                            overwrite_layer = overwrite_layer,
-                            append_layer = append_layer, 
-                            add_layer=TRUE))
+                    savedata_opts = outlst) 
       }
     } else {
+      if (is.null(out_layer)) outlst$out_layer <- "pltids"
       datExportData(pltids, 
-            savedata_opts=list(outfolder = outfolder, 
-                            out_fmt = out_fmt, 
-                            out_dsn = out_dsn, 
-                            out_layer = "pltids",
-                            outfn.pre = outfn.pre, 
-                            outfn.date = outfn.date, 
-                            overwrite_layer = overwrite_layer,
-                            append_layer = append_layer,
-                            add_layer = TRUE)) 
+                    savedata_opts = outlst) 
     }
   }
 
@@ -552,7 +535,7 @@ spGetXY <- function(bnd,
   
   ## Disconnect database
   if (!is.null(dbconn)) {
-    if (!dbconnopen && DBI::dbIsValid(dbconn)) {
+    if (!is.null(dbconn) && !dbconnopen && DBI::dbIsValid(dbconn)) {
       DBI::dbDisconnect(dbconn)
     } else {
       returnlst$dbconn <- dbconn

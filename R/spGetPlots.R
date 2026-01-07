@@ -85,7 +85,9 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. 
 #' @param dbconn Open database connection.
-#' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
+#' @param dbconnopen Logical. If TRUE, keep database connection open.
+#' @param database_opts List. See help(database_options()) for a list
+#' of options. Only used when datsource = 'postgres'.  
 #' @param spXYdat R list object. Output from spGetXY().
 #' @param ... parameters passed to DBgetPlots().
 #' 
@@ -173,7 +175,8 @@ spGetPlots <- function(bnd = NULL,
                        exportsp = FALSE, 
                        savedata_opts = NULL,
                        dbconn = NULL,
-                       dbconnopen = FALSE,
+                       dbconnopen = TRUE,
+                       database_opts = database_options(),
                        spXYdat = NULL,
                        ...) {
 
@@ -296,27 +299,40 @@ spGetPlots <- function(bnd = NULL,
 
   ## Check xy_datsource and datsource
   ########################################################
-  datsourcelst <- c("sqlite", "datamart", "csv", "obj")
-  xy_datsource <- pcheck.varchar(var2check=xy_datsource, varnm="xy_datsource", 
-		gui=gui, checklst=datsourcelst, caption="XY data source?",
-           stopifinvalid=TRUE)
+  
+  ## Check xy_datsource
+  xydbinfo <- pcheck.datsource(dbconn = dbconn, 
+                               datsource = xy_datsource, 
+                               dsn = xy_dsn, 
+                               database_opts = database_opts)
+  if (is.null(xydbinfo)) {
+    stop()
+  } else {
+    xyindb <- xydbinfo$indb
+    xy_datsource <- xydbinfo$datsource
+    xy_dbtablst <- xydbinfo$dbtablst
+    xy_schema <- xydbinfo$schema
+    xy_SCHEMA. <- xydbinfo$SCHEMA.
+    xy_dbconn <- xydbinfo$dbconn
+  }
 
-  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
-		gui=gui, checklst=datsourcelst, caption="Plot data source?",
-           stopifinvalid=TRUE)
-  
-  
-  if (!is.null(dbconn)) {
-    if (!DBI::dbIsValid(dbconn)) {
-      stop("dbconn is invalid: ")
-    } else {
-      dbtablst <- DBI::dbListTables(dbconn)
-      if (length(dbtablst) == 0) {
-        stop("no data in ", datsource)
-      }
-    }
-  } 
- 
+  ## Check datsource
+  dbinfo <- pcheck.datsource(dbconn = dbconn, 
+                             datsource = datsource, 
+                             dsn = data_dsn, 
+                             database_opts = database_opts)
+  if (is.null(dbinfo)) {
+    stop()
+  } else {
+    datindb <- dbinfo$indb
+    datsource <- dbinfo$datsource
+    dbtablst <- dbinfo$dbtablst
+    schema <- dbinfo$schema
+    SCHEMA. <- dbinfo$SCHEMA.
+    dbconn <- dbinfo$dbconn
+  }
+
+  ## Check if xy_datsource and datsource are the same or is null
   if (is.null(xy_datsource) && is.null(datsource) && is.null(dbconn)) {
     stop("xy_datsource and/or datsource are invalid")
   } else if (is.null(xy_datsource)) {
@@ -327,25 +343,6 @@ spGetPlots <- function(bnd = NULL,
     data_dsn <- xy_dsn
   }
 
-  ## Check xy_dsn
-  if (xy_datsource %in% c("sqlite", "gdb")) {
-    if (is.null(xy_dsn)) {
-      stop("xy_dsn is NULL")
-    }
-    if (!file.exists(data_dsn)) {
-      stop(xy_dsn, " is invalid")
-    }
-  }
-  ## Check data_dsn
-  if (datsource %in% c("sqlite", "gdb")) {
-    if (is.null(data_dsn)) {
-      stop("data_dsn is NULL")
-    }
-    if (!file.exists(data_dsn)) {
-      stop(data_dsn, " is invalid")
-    }
-  }
-
   ## Message for data sources
   if (datsource == xy_datsource) {
     message("source of xy data and plot data is ", datsource)
@@ -353,24 +350,6 @@ spGetPlots <- function(bnd = NULL,
     message("source of xy data is ", xy_datsource, " and plot data is ", datsource) 
   }
 
-  ## Check database connection - xy_dsn
-  ########################################################
-  if (xy_datsource == "sqlite" && !is.null(xy_dsn)) {
-    suppressMessages(DBtestSQLite(xy_dsn, showlist=FALSE))
-  }
- 
-  ## Check database connection - data_dsn
-  ########################################################
-  if (datsource == "sqlite" && !is.null(data_dsn)) {
-    #suppressMessages(DBtestSQLite(data_dsn, showlist=FALSE))
-    dbconn <- suppressMessages(
-      DBtestSQLite(data_dsn, showlist=FALSE, dbconnopen=TRUE))
-    dbtablst <- DBI::dbListTables(dbconn)
-    if (length(dbtablst) == 0) {
-      stop("no data in ", datsource)
-    }
-  }
-  
   ## check showsteps
   showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
                               title="Show steps?", first="NO", gui=gui) 
@@ -406,16 +385,13 @@ spGetPlots <- function(bnd = NULL,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || savebnd) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-                            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outlst <- pcheck.output(savedata_opts = savedata_opts,
                             createSQLite = TRUE)
     outfolder <- outlst$outfolder
-    #out_dsn <- outlst$out_dsn
-    #out_fmt <- outlst$out_fmt
+    out_dsn <- outlst$out_dsn
+    out_fmt <- outlst$out_fmt
     outlst$add_layer <- TRUE
+    outlst$dbconnopen <- TRUE
     append_layer <- savedata_opts$append_layer
     overwrite_layer <- savedata_opts$overwrite_layer
     if (!is.null(outlst$out_conn) && is.null(outlst$outconn)) {
@@ -424,16 +400,6 @@ spGetPlots <- function(bnd = NULL,
     outlst$out_conn <- NULL
   }
  
-
-  ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
-  ###########################################################
-#   if (gui) {
-#     Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", 
-# 				"GROW", "MORT", "REMV", "GRM")
-#     Type <- select.list(Typelst, title="eval type", 
-# 		preselect="VOL", multiple=TRUE)
-#     if (length(Type)==0) Type <- "VOL"
-#   } 
 
   ## Get DBgetEvalid parameters from eval_opts
   ################################################
@@ -466,7 +432,7 @@ spGetPlots <- function(bnd = NULL,
       Endyr.filter <- check.logic(pltids, Endyr.filter, stopifnull=FALSE)
 
       ## Check xyjoinid
-      xyjoinidchk <- sapply(xyjoinid, findnm, names(pltids), returnNULL = TRUE) 
+      xyjoinidchk <- findnms(xyjoinid, names(pltids))
       if (length(xyjoinidchk) < length(xyjoinid)) {
         message("no xyjoinid defined... using the xy.uniqueid: ", xy.uniqueid)
         xyjoinid <- xy.uniqueid         
@@ -475,8 +441,11 @@ spGetPlots <- function(bnd = NULL,
       }		  
  
       ## Check stbnd.att
-      stbnd.att <- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
-		        checklst=names(pltids), gui=gui, caption="State attribute?") 
+      stbnd.att <- pcheck.varchar(var2check = stbnd.att, 
+                                  varnm = "stbnd.att", 
+		                              checklst = names(pltids), 
+		                              caption="State attribute?",
+		                              gui=gui) 
       
       ## Get state codes
       if (is.null(stbnd.att)) {
@@ -604,8 +573,7 @@ spGetPlots <- function(bnd = NULL,
                            bndvars2keep = bndvars2keep,
                            showsteps = FALSE, 
                            returnxy = TRUE,
-                           dbconn = dbconn,
-                           dbconnopen = TRUE)
+                           dbconn = dbconn)
 
         if (is.null(spXYdat)) {
           return(NULL)
@@ -745,7 +713,6 @@ spGetPlots <- function(bnd = NULL,
   }
 
   
-  
   #######################################################################
   ## Loop through states
   #######################################################################
@@ -803,7 +770,6 @@ spGetPlots <- function(bnd = NULL,
                          stateFilter = stateFilterDB1, 
                          returndata = TRUE,
                          dbconn = dbconn,
-                         dbconnopen = TRUE,
                          ...
                          )
         tabs1 <- dat1$tabs
@@ -904,7 +870,6 @@ spGetPlots <- function(bnd = NULL,
                          stateFilter = stateFilterDB2, 
                          returndata = TRUE,
                          dbconn = dbconn,
-                         dbconnopen = TRUE,
                          ...
                          )
         tabs2 <- dat2$tabs
@@ -1000,7 +965,8 @@ spGetPlots <- function(bnd = NULL,
         stateFilterDB <- paste(stateFilterDB, "&", stateFilter) 
         rm(stateFilter)
       }
-      dat <- DBgetPlots(states = stcd, 
+      
+     dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 
                          dbTabs = dbTabs,
@@ -1012,7 +978,6 @@ spGetPlots <- function(bnd = NULL,
                          stateFilter = stateFilterDB, 
                          returndata = TRUE,
                          evalInfo = evalInfost,
-                         dbconnopen = TRUE,
                          dbconn = dbconn,
                          ...
                          )
@@ -1202,14 +1167,6 @@ spGetPlots <- function(bnd = NULL,
     } 
   }
   
-  ## Disconnect database
-  if (!is.null(dbconn)) {
-    if (!dbconnopen && DBI::dbIsValid(dbconn)) {
-      DBI::dbDisconnect(dbconn)
-    }
-  }
-  
-  
   if (returnxy && !is.null(spxy)) {
     returnlst$spxy <- spxy
   }
@@ -1248,15 +1205,18 @@ spGetPlots <- function(bnd = NULL,
       returnlst$evalid <- unlist(evalidlst)
     }
     
+    ## Disconnect database
+    if (!is.null(dbconn) && !dbconnopen && DBI::dbIsValid(dbconn)) {
+      DBI::dbDisconnect(dbconn)
+    } else {
+      returnlst$dbconn <- dbconn
+    }
+    
+    
     if (returndata) {
       returnlst$args <- args
       return(returnlst)
     }
-    
-    ## Disconnect database
-    if (!is.null(dbconn) && DBI::dbIsValid(dbconn)) {
-      returnlst$dbconn <- dbconn
-    } 
   }
 }
 

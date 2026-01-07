@@ -88,10 +88,11 @@ spPoly2Rast <- function(polyv,
   #####################################################################################
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  gui <- FALSE
 
   ## If gui.. set variables to NULL
-  if(gui){poly=clippoly=unionpoly=savedata <- NULL}
+  if (gui) {poly=clippoly=unionpoly=savedata <- NULL}
 
   drivers <- data.frame(
 	fmt = c("raster", "ascii", "SAGA", "IDRISI", "CDF", "GTiff", "ENVI", 
@@ -111,10 +112,6 @@ spPoly2Rast <- function(polyv,
   ## Check validate
   if (validate) {
     polyv1x <- polyfix.sf(polyv1x)
-    # polyvx <- sf::st_make_valid(polyvx, 
-    #                             geos_method = 'valid_structure', 
-    #                             geos_keep_collapsed = FALSE)
-    # polyvx <- sf::st_cast(polyvx)
   }
 
   ## Check polyv.att

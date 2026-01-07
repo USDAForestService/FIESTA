@@ -118,40 +118,41 @@ spZonalRast <- function(polyv,
   ##################################################################################### 
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE 
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)  
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)  
+  gui <- FALSE
 
   if (gui) showext=savedata=overwrite <- NULL 
  
   ## Set global variables
   count=ignoreValue <- NULL
+
   
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
- 
   ################################################################## 
   ## CHECK INPUT PARAMETERS 
   ################################################################## 
+  
+  
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(spZonalRast))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  ## Check parameter lists
+  pcheck.params(input.params, 
+                savedata_opts = savedata_opts)
+  
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+    savedata_opts = savedata_opts))
+  savedata_opts <- optslst$savedata_opts  
+  
   ## Check dsn, layer 
-  spobj <- pcheck.spatial(layer=polyv, dsn=polyv_dsn, gui=gui, 
-		                      caption="Polygon zones?") 
+  spobj <- pcheck.spatial(layer = polyv, dsn = polyv_dsn, 
+		                      caption = "Polygon zones?", gui = gui) 
   
   ## Validate polygon
   if (validate) {
@@ -162,9 +163,9 @@ spZonalRast <- function(polyv,
   }
  
   ## Check polyv.att 
-  polyv.att <- pcheck.varchar(var2check=polyv.att, varnm="polyv.att", 
-		             gui=gui, checklst=names(spobj), caption="Zonal attribute",  
-		             warn=paste(polyv.att, "not in polyv"), stopifnull=TRUE) 
+  polyv.att <- pcheck.varchar(var2check = polyv.att, varnm = "polyv.att", 
+		             gui=gui, checklst = names(spobj), caption = "Zonal attribute",  
+		             warn = paste(polyv.att, "not in polyv"), stopifnull = TRUE) 
     
   ## Get raster info 
   ########################################################  
@@ -188,9 +189,9 @@ spZonalRast <- function(polyv,
   ## Check zonalstat     
   zonalstatlst <- c("mean", "sum", "majority", "minority", "variety", 
 	                  "npixels", "count", "proportion") 
-  zonalstat <- pcheck.varchar(var2check=zonalstat, varnm="zonalstat", 
-	         gui=gui, checklst=zonalstatlst, caption="Zonal statistic(s)", 
-	         stopifnull=TRUE, multiple=TRUE) 
+  zonalstat <- pcheck.varchar(var2check = zonalstat, varnm = "zonalstat", 
+	         gui=gui, checklst = zonalstatlst, caption = "Zonal statistic(s)", 
+	         stopifnull = TRUE, multiple = TRUE) 
     
   ## Check bands 
   if (!is.null(bands)) { 
@@ -237,19 +238,10 @@ spZonalRast <- function(polyv,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-          out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-          overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-          add_layer=add_layer, append_layer=append_layer, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
-    if (is.null(out_layer)) {
-      out_layer <- "zonalext"
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst$add_layer <- TRUE
+    if (is.null(outlst$out_layer)) {
+      outlst$out_layer <- "zonalext"
     }
   }
  
@@ -307,9 +299,13 @@ spZonalRast <- function(polyv,
       atts <- zonalstat[which(zonalstat %in% c("mean", "min", "max", "sum", "npixels"))] 
 #      atts[atts == "sum"] <- "sumvalues" 
       atts[atts == "count"] <- "npixels"  
-      zstats <- setDT(zonalStats(src=spobjprj, attribute=polyv.att, 
-                            rasterfile=rastfn, pixelfun=pixelfun, band=b, na.rm=TRUE, 
-                            ignoreValue=ignoreValue)) 
+      zstats <- setDT(zonalStats(src = spobjprj, 
+                                 attribute = polyv.att, 
+                                 rasterfile = rastfn, 
+                                 pixelfun = pixelfun, 
+                                 band = b, 
+                                 na.rm = TRUE, 
+                                 ignoreValue = ignoreValue)) 
       zstats <- zstats[, c("zoneid", atts), with=FALSE] 
       var.name <- paste(prename, atts, sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 
@@ -328,8 +324,12 @@ spZonalRast <- function(polyv,
     }  
 
     if (any(zonalstat == "majority")) { 
-      zstats <- setDT(zonalMajority(src=spobjprj, attribute=polyv.att, rasterfile=rastfn,
-		                        band=b, na.rm=TRUE, ignoreValue=ignoreValue)) 
+      zstats <- setDT(zonalMajority(src = spobjprj, 
+                                    attribute = polyv.att, 
+                                    rasterfile = rastfn,
+		                                band = b, 
+		                                na.rm = TRUE,  
+		                                ignoreValue = ignoreValue)) 
       zstats <- zstats[, c("zoneid", "value")] 
       var.name <- paste(prename, "majority", sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 
@@ -345,9 +345,12 @@ spZonalRast <- function(polyv,
     }  
 
     if (any(zonalstat == "minority")) { 
-      zstats <- setDT(zonalMinority(src=spobjprj, attribute=polyv.att, 
-                            rasterfile=rastfn, band=b, na.rm=TRUE, 
-                            ignoreValue=rast.NODATA)) 
+      zstats <- setDT(zonalMinority(src = spobjprj, 
+                                    attribute = polyv.att, 
+                                    rasterfile = rastfn,
+                                    band = b,  
+                                    na.rm = TRUE, 
+                                    ignoreValue = rast.NODATA)) 
       zstats <- zstats[, c("zoneid", "value")] 
       var.name <- paste(prename, "minority", sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 
@@ -449,19 +452,12 @@ spZonalRast <- function(polyv,
 
   if (savedata) {
     datExportData(zonalext, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer=out_layer,
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            add_layer=TRUE)) 
+                  savedata_opts = outlst) 
   }
   
   
-  returnlst <- list(zonalext=setDF(zonalext), outname=outnames,  
-					rasterfile=rep(rastfn, length(outnames))) 
+  returnlst <- list(zonalext = setDF(zonalext), 
+                    outname = outnames,  
+					          rasterfile = rep(rastfn, length(outnames))) 
   return(returnlst) 
 } 

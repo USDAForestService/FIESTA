@@ -129,9 +129,10 @@ spClipRast <- function(rast,
   ## DESCRIPTION: 
   ## Clips a raster with a polygon.
   #####################################################################################
+  gui <- FALSE
   
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
   
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]

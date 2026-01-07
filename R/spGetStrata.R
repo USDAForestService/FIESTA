@@ -209,46 +209,23 @@ spGetStrata <- function(xyplt,
   }
 
   ## Check parameter lists
-  pcheck.params(input.params, spMakeSpatial_opts=spMakeSpatial_opts, savedata_opts=savedata_opts)
-
-  ## Set spMakeSpatial defaults
-  spMakeSpatial_defaults_list <- formals(spMakeSpatial_options)[-length(formals(spMakeSpatial_options))]
+  pcheck.params(input.params, 
+                spMakeSpatial_opts = spMakeSpatial_opts, 
+                savedata_opts = savedata_opts)
   
-  for (i in 1:length(spMakeSpatial_defaults_list)) {
-    assign(names(spMakeSpatial_defaults_list)[[i]], spMakeSpatial_defaults_list[[i]])
-  }
   
-  ## Set user-supplied spMakeSpatial values
-  if (length(spMakeSpatial_opts) > 0) {
-    for (i in 1:length(spMakeSpatial_opts)) {
-      if (names(spMakeSpatial_opts)[[i]] %in% names(spMakeSpatial_defaults_list)) {
-        assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(spMakeSpatial_opts)[[i]]))
-      }
-    }
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts,
+                         spMakeSpatial_opts = spMakeSpatial_opts))
+  savedata_opts <- optslst$savedata_opts  
+  spMakeSpatial_opts <- optslst$spMakeSpatial_opts
+  
+  ## Assign user-supplied spMakeSpatial values to objects
+  for (i in 1:length(spMakeSpatial_opts)) {
+    assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
   }
   
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
 
   ## Check ncores
   if (!is.null(ncores)) {
@@ -279,11 +256,11 @@ spGetStrata <- function(xyplt,
  
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- spMakeSpatialPoints(xyplt=sppltx, 
-                                  xy.uniqueid=uniqueid, 
-                                  xvar=xvar, 
-                                  yvar=yvar,
-                                  xy.crs=xy.crs)
+    sppltx <- spMakeSpatialPoints(xyplt = sppltx, 
+                                  xy.uniqueid = uniqueid, 
+                                  xvar = xvar, 
+                                  yvar = yvar,
+                                  xy.crs = xy.crs)
     sppltnames <- names(sppltx)
   } else {
     ## GET uniqueid
@@ -352,10 +329,8 @@ spGetStrata <- function(xyplt,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || exportNA) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-            add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst$outconnopen <- TRUE
     outlst$add_layer <- TRUE
   }
 
@@ -397,8 +372,10 @@ spGetStrata <- function(xyplt,
     if (strattype == "POLY") {
       message("converting strat_layer to raster...")
 
-      polyrast <- spPoly2Rast(polyv=strat_layer, polyv_dsn=strat_dsn, 
-		                  polyv.att=strvar, outfolder=outfolder)
+      polyrast <- spPoly2Rast(polyv = strat_layer, 
+                              polyv_dsn = strat_dsn, 
+		                          polyv.att = strvar, 
+		                          outfolder = outfolder)
       strat_layer <- polyrast$rastfn
       polyv.lut <- polyrast$polyv.lut
       strat_dsn <- NULL

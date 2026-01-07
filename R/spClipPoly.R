@@ -118,26 +118,15 @@ spClipPoly <- function(polyv,
   }
 
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
+  pcheck.params(input.params, 
+                savedata_opts = savedata_opts)
   
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-  
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts))
+  savedata_opts <- optslst$savedata_opts  
+
 
   ##################################################################
   ## CHECK PARAMETER INPUTS
@@ -155,14 +144,8 @@ spClipPoly <- function(polyv,
   
   ## Check output parameters
   if (exportsp) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-                            add_layer=add_layer, append_layer=append_layer, gui=gui)
-    if (is.null(out_layer)) {
-      out_layer <- "polyclip"
-    }
-    outlst$out_layer <- out_layer
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst$add_layer <- TRUE
   }
   
   
@@ -233,7 +216,7 @@ spClipPoly <- function(polyv,
  
   ## Export clipped poly
   if (exportsp) {
-    outlst$add_layer <- TRUE
+    outlst$out_layer <- "polyclip"
     spExportSpatial(ipoly, savedata_opts = outlst)
   }
 

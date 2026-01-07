@@ -49,7 +49,6 @@
 #' of options. Only used when savedata = TRUE.  
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
 #' include in dunitlut output and extract to pltassgn points.
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' 
 #' @return \item{pltunit}{ Data frame. Input point data with extracted
 #' estimation unit and strata values appended. } \item{sppltunit}{
@@ -126,11 +125,11 @@ spGetEstUnit <- function(xyplt,
                          exportNA = FALSE, 
                          spMakeSpatial_opts = NULL,
                          savedata_opts = NULL, 
-                         vars2keep = NULL, 
-                         gui = FALSE){
+                         vars2keep = NULL){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  gui <- FALSE
 
   if (gui) {dat=xytable=uniqueid=unionshpnm=savedata=parameters <- NULL}
 
@@ -161,49 +160,24 @@ spGetEstUnit <- function(xyplt,
 
 
   ## Check parameter lists
-  pcheck.params(input.params, spMakeSpatial_opts=spMakeSpatial_opts, savedata_opts=savedata_opts)
+  pcheck.params(input.params, 
+                spMakeSpatial_opts = spMakeSpatial_opts, 
+                savedata_opts = savedata_opts)
   
   
-  ## Set spMakeSpatial defaults
-  spMakeSpatial_defaults_list <- formals(spMakeSpatial_options)[-length(formals(spMakeSpatial_options))]
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts,
+                         spMakeSpatial_opts = spMakeSpatial_opts))
+  savedata_opts <- optslst$savedata_opts  
+  spMakeSpatial_opts <- optslst$spMakeSpatial_opts
   
-  for (i in 1:length(spMakeSpatial_defaults_list)) {
-    assign(names(spMakeSpatial_defaults_list)[[i]], spMakeSpatial_defaults_list[[i]])
+  ## Assign user-supplied spMakeSpatial values to objects
+  for (i in 1:length(spMakeSpatial_opts)) {
+    assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
   }
   
-  ## Set user-supplied spMakeSpatial values
-  if (length(spMakeSpatial_opts) > 0) {
-    for (i in 1:length(spMakeSpatial_opts)) {
-      if (names(spMakeSpatial_opts)[[i]] %in% names(spMakeSpatial_defaults_list)) {
-        assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(spMakeSpatial_opts)[[i]]))
-      }
-    }
-  }
-  
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-  
-  
+    
   ##################################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################################
@@ -214,11 +188,11 @@ spGetEstUnit <- function(xyplt,
  
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- spMakeSpatialPoints(xyplt=sppltx, 
-                                  xy.uniqueid=uniqueid, 
-                                  xvar=xvar, 
-                                  yvar=yvar,
-                                  xy.crs=xy.crs)
+    sppltx <- spMakeSpatialPoints(xyplt = sppltx, 
+                                  xy.uniqueid = uniqueid, 
+                                  xvar = xvar, 
+                                  yvar = yvar,
+                                  xy.crs = xy.crs)
   } else {
     ## GET uniqueid
     sppltnames <- names(sppltx)
@@ -270,18 +244,11 @@ spGetEstUnit <- function(xyplt,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || exportsp || exportNA) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-            add_layer=add_layer, append_layer=append_layer, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst$outconnopen <- TRUE
+    outlst$add_layer <- TRUE
   }
+  
 
   ##################################################################
   ## DO WORK
@@ -328,9 +295,12 @@ spGetEstUnit <- function(xyplt,
     }
   
     ## Extract values of polygon unitlayer to points
-    extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerx, 
-                        xy.uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
-                        keepNA=keepNA, exportNA=exportNA)
+    extpoly <- spExtractPoly(sppltx, 
+                             polyvlst = unitlayerx, 
+                             xy.uniqueid = uniqueid, 
+                             polyvarlst = unique(c(unitvar, vars2keep)), 
+                             keepNA = keepNA, 
+                             exportNA = exportNA)
     sppltx <- extpoly$spxyext
     NAlst <- extpoly$NAlst[[1]]
     outname <- extpoly$outname
@@ -356,15 +326,14 @@ spGetEstUnit <- function(xyplt,
   } else { # unittype = "RASTER"
  
     ## Extract values of raster layer to points
-    extrast <- spExtractRast(sppltx, rastlst=unitlayerx, 
-                      var.name=unitvar, xy.uniqueid=uniqueid, 
-                      keepNA=keepNA, exportNA=exportNA, 
-                      savedata_opts = list(
-			                    outfolder=outfolder, 
-			                    outfn.pre=outfn.pre, 
-			                    outfn.date=outfn.date, 
-			                    overwrite_layer=overwrite_layer)
-                      )
+    extrast <- spExtractRast(sppltx, 
+                             rastlst = unitlayerx, 
+                             var.name = unitvar, 
+                             xy.uniqueid = uniqueid, 
+                             keepNA = keepNA, 
+                             exportNA = exportNA, 
+                             savedata_opts = savedata_opts
+                             )
     sppltx <- extrast$spplt
     NAlst <- extrast$NAlst[[1]]
 
@@ -389,54 +358,40 @@ spGetEstUnit <- function(xyplt,
   ## Saving data
   ##################################################################
   pltassgn <- sf::st_drop_geometry(sppltx)
-
-  if (savedata) {
-    datExportData(pltassgn, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="pltassgn",
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            add_layer=TRUE)) 
-    
-    datExportData(unitarea, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="unitarea",
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            add_layer=TRUE)) 
-  }
-
+  
   ## Export to shapefile
   if (exportsp) {
+    outlst$out_layer <- "bnd"
     spExportSpatial(sppltx, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="bnd",
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer, 
-                            add_layer=TRUE))
+                    savedata_opts = outlst)
   }
+  
+  if (savedata) {
+    outlst$out_layer <- "pltassgn"
+    datExportData(pltassgn, 
+                  savedata_opts = outlst) 
+    
+    outlst$out_layer <- "unitarea"
+    datExportData(unitarea, 
+                  savedata_opts = outlst) 
+  }
+
+  
 
   if (showext) {
     plot(sf::st_geometry(unitlayerx)) 
     plot(sf::st_geometry(sppltx), add=TRUE) 
   }
   
-  returnlst <- list(bndx=unitlayerx, pltassgn=setDF(pltassgn), 
-		pltassgnid=uniqueid, unitarea=setDF(unitarea), 
-		unitvar=unitvar, areavar=areavar, areaunits=areaunits)
+  returnlst <- list(bndx = unitlayerx, 
+                    pltassgn = setDF(pltassgn), 
+		                pltassgnid = uniqueid,
+		                unitarea = setDF(unitarea), 
+		                unitvar = unitvar, 
+		                areavar = areavar, 
+		                areaunits = areaunits)
 
+  
   ## Returnxy
   if (returnxy) {
     ## Add coordinate variables

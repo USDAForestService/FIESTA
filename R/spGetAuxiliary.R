@@ -246,49 +246,29 @@ spGetAuxiliary <- function(xyplt = NULL,
   }
  
   ## Check parameter lists
-  pcheck.params(input.params, spMakeSpatial_opts=spMakeSpatial_opts, 
-                    savedata_opts=savedata_opts)
+  pcheck.params(input.params, 
+                spMakeSpatial_opts = spMakeSpatial_opts, 
+                savedata_opts = savedata_opts)
   
   
-  ## Set spMakeSpatial defaults
-  spMakeSpatial_defaults_list <- formals(spMakeSpatial_options)[-length(formals(spMakeSpatial_options))]
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts,
+                         spMakeSpatial_opts = spMakeSpatial_opts))
+  savedata_opts <- optslst$savedata_opts  
+  spMakeSpatial_opts <- optslst$spMakeSpatial_opts
   
-  for (i in 1:length(spMakeSpatial_defaults_list)) {
-    assign(names(spMakeSpatial_defaults_list)[[i]], spMakeSpatial_defaults_list[[i]])
-  }
   
-  ## Set user-supplied spMakeSpatial values
-  if (length(spMakeSpatial_opts) > 0) {
-    for (i in 1:length(spMakeSpatial_opts)) {
-      if (names(spMakeSpatial_opts)[[i]] %in% names(spMakeSpatial_defaults_list)) {
-        assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(spMakeSpatial_opts)[[i]]))
-      }
+  ## Assign user-supplied spMakeSpatial values to objects
+  for (i in 1:length(spMakeSpatial_opts)) {
+    if (names(spMakeSpatial_opts)[[i]] %in% names(spMakeSpatial_opts)) {
+      assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
+    } else {
+      stop(paste("Invalid parameter: ", names(spMakeSpatial_opts)[[i]]))
     }
   }
-
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
   
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
-
   ## Check ncores
   if (!is.null(ncores)) {
     if (length(ncores) != 1) {
@@ -551,10 +531,8 @@ spGetAuxiliary <- function(xyplt = NULL,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || exportNA) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-            add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst$outconnopen <- TRUE
     outlst$add_layer <- TRUE
   }
 
@@ -688,8 +666,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                               keepNA = keepNA, 
                               exportNA = exportNA, 
                               ncores = ncores,
-                              savedata_opts = list(outfolder=outfolder, 
-                              overwrite_layer=overwrite_layer)
+                              savedata_opts = savedata_opts
                               )
       sppltx <- unique(extdat.rast.cont$spplt)
       prednames.cont <- extdat.rast.cont$outnames
@@ -873,9 +850,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                               keepNA = keepNA, 
                               ncores = ncores,
                               exportNA = exportNA, 
-                              savedata_opts = list(outfolder=outfolder,
-		                          overwrite_layer=overwrite_layer)
-		               )
+                              savedata_opts = savedata_opts)
       sppltx <- extdat.rast.cat$sppltext
       prednames.cat <- extdat.rast.cat$outnames
       inputdf.cat <- extdat.rast.cat$inputdf

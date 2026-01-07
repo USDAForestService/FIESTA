@@ -132,7 +132,7 @@ spReprojectRaster <- function(rastfn,
   ##################################################################################
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## Set global variables
   s_srs=of=ot=te=tr=r=dstnodata=co=addOptions <- NULL

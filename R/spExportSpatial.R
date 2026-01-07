@@ -29,7 +29,7 @@
 #'                                      outfolder = tempdir(), 
 #'                                      overwrite_dsn = TRUE))
 #' @export spExportSpatial
-spExportSpatial <- function(sfobj, savedata_opts=NULL) {
+spExportSpatial <- function(sfobj, savedata_opts = NULL) {
   ###########################################################################
   ## DESCRIPTION: Exports an S4 Spatial object to an ArcGIS shapefile (*.shp).
   ## out_fmt	Output format ('sqlite', 'gpkg', 'shp')		
@@ -46,7 +46,8 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
   ##################################################################
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  #gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  gui <- FALSE
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
@@ -56,51 +57,29 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
   }
  
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
+  pcheck.params(input.params, 
+                savedata_opts = savedata_opts)
+  
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts))
+  savedata_opts <- optslst$savedata_opts  
+  
 
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
-  }
+  ## Check output data
+  outlst <- pcheck.output(savedata_opts = savedata_opts)
 
 
   ## Check sfobj
   ###########################################################
-#  if (is.null(sfobj)) {
-#    sfnm <- select.list(ls(pos=1, all.names=TRUE), title="sf object?", 
-#		multiple=FALSE)
-#    sfobj <- get(sfnm)
-#  }
-#  if (!"sf" %in% class(sfobj)) {
-#    stop("the object must be of class sf")
-#  }
   sfobj <- pcheck.spatial(sfobj)
 
-  if (out_fmt == "sqlite" && !is.null(out_dsn) && outsp_fmt == "shp") {
-    outsp_fmt <- out_fmt
-  }
  
   ## Check out_fmt
   ###########################################################
-  outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=outsp_fmt, 
-                outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-                overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
-                add_layer=add_layer, append_layer=append_layer,
- 	              createSQLite=FALSE)
+  outlst <- pcheck.output(savedata_opts = savedata_opts)
   out_fmt <- outlst$out_fmt
+  outsp_fmt <- outlst$outsp_fmt
   out_dsn <- outlst$out_dsn
   outfolder <- outlst$outfolder
   overwrite_dsn <- outlst$overwrite_dsn
@@ -108,11 +87,20 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
   append_layer <- outlst$append_layer
   outfn.date <- outlst$outfn.date
   outfn.pre <- outlst$outfn.pre
+  out_layer <- outlst$out_layer
+  
+
+  if (out_fmt == "sqlite" && !is.null(out_dsn)) {
+    if (is.null(outsp_fmt)) {
+      outsp_fmt <- out_fmt
+    }
+  }
 
   ## Check out_layer
   if (is.null(out_layer)) {
     out_layer <- "datsp"
   } 
+
   
   ## Write sf layer
   ########################################################
@@ -124,9 +112,16 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
 #      out_dsn <- paste0(out_dsn, ".", out_fmt)
 #    }
 
+    ## Check if object is spatial
+    issp <- ifelse("sf" %in% class(sfobj), TRUE, FALSE)
+    
     ## Test and get filename of SQLite database
-    out_dsn <- DBtestSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, showlist=FALSE,
-		                        createnew=FALSE)
+    out_dsn <- DBtestSQLite(out_dsn, 
+                            issp = issp,
+                            gpkg = gpkg, 
+                            outfolder = outfolder, 
+                            showlist = FALSE,
+		                        createnew = FALSE)
 
     ## Write to SQLite database
     if (!file.exists(out_dsn)) {
@@ -140,6 +135,9 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
                    delete_dsn = overwrite_dsn, 
                    delete_layer = overwrite_layer, 
                    quiet = FALSE) 
+      
+         #print(DBI::dbCanConnect(RSQLite::SQLite(), out_dsn))
+
     } else {
    
       ## If file exists, check if spatiaLite database

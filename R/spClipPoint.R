@@ -137,46 +137,21 @@ spClipPoint <- function(xyplt,
   }
 
   ## Check parameter lists
-  pcheck.params(input.params, spMakeSpatial_opts=spMakeSpatial_opts, savedata_opts=savedata_opts)
+  pcheck.params(input.params, 
+                spMakeSpatial_opts = spMakeSpatial_opts, 
+                savedata_opts = savedata_opts)
   
   
-  ## Set spMakeSpatial defaults
-  spMakeSpatial_defaults_list <- formals(spMakeSpatial_options)[-length(formals(spMakeSpatial_options))]
+  ## Check parameter option lists
+  optslst <- pcheck.opts(optionlst = list(
+                         savedata_opts = savedata_opts,
+                         spMakeSpatial_opts = spMakeSpatial_opts))
+  savedata_opts <- optslst$savedata_opts  
+  spMakeSpatial_opts <- optslst$spMakeSpatial_opts
   
-  for (i in 1:length(spMakeSpatial_defaults_list)) {
-    assign(names(spMakeSpatial_defaults_list)[[i]], spMakeSpatial_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied spMakeSpatial values
-  if (length(spMakeSpatial_opts) > 0) {
-    for (i in 1:length(spMakeSpatial_opts)) {
-      if (names(spMakeSpatial_opts)[[i]] %in% names(spMakeSpatial_defaults_list)) {
-        assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(spMakeSpatial_opts)[[i]]))
-      }
-    }
-  }
-  
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
-    for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
-    }
+  ## Assign user-supplied spMakeSpatial values to objects
+  for (i in 1:length(spMakeSpatial_opts)) {
+    assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
   }
   
 
@@ -241,20 +216,8 @@ spClipPoint <- function(xyplt,
   
   ## Check output parameters
   if (exportsp || savedata) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-          out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-          overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-          add_layer=add_layer, append_layer=append_layer, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
-    if (is.null(out_layer)) {
-      out_layer <- "pntclip"
-    }
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst$add_layer <- TRUE
   }
   
   if (!is.null(othertabnms) && !is.character(othertabnms)) {
@@ -327,45 +290,26 @@ spClipPoint <- function(xyplt,
       message("cannot export shapefile... more than 1 record per uniqueid")
     }
     
+    outlst$out_layer <- "pntclip"
     spExportSpatial(inpnts, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer=out_layer,
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer, 
-                            add_layer=TRUE))
+                    savedata_opts = outlst)
     
-    spExportSpatial(clippolyvx, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer="bnd",
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer, 
-                            add_layer=TRUE))
+    outlst$out_layer <- "bnd"
+    spExportSpatial(clippolyvx,
+                    savedata_opts = outlst)
   } 
 
   if (savedata) {
+    outlst$out_layer <- "pntclip"
     datExportData(inpnts, 
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer=out_layer,
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            add_layer=TRUE)) 
+                  savedata_opts = outlst) 
   }
     
 
   if (!returnsp) inpnts <- sf::st_drop_geometry(inpnts)
-  returnlst <- list(clip_xyplt=inpnts, uniqueid=uniqueid, clip_polyv=clippolyvx)
+  returnlst <- list(clip_xyplt = inpnts, 
+                    uniqueid = uniqueid, 
+                    clip_polyv  =clippolyvx)
   if (!is.null(intabs)) returnlst$clip_tabs <- intabs
   
   return(returnlst)

@@ -22,7 +22,11 @@
 #'                                     "sp_data/WYbighorn_adminbnd.shp",
 #'                                     package = "FIESTA"))
 #' @export spImportSpatial
-spImportSpatial <- function(layer=NULL, dsn=NULL, sql=NULL, polyfix=FALSE, gui=FALSE){
+spImportSpatial <- function(layer = NULL, 
+                            dsn = NULL, 
+                            sql = NULL, 
+                            polyfix = FALSE, 
+                            gui = FALSE){
   ###################################################################################
   ## PURPOSE: Import a spatial layer (e.g., ESRI shapefile, feature layer).  
   ##
@@ -35,9 +39,9 @@ spImportSpatial <- function(layer=NULL, dsn=NULL, sql=NULL, polyfix=FALSE, gui=F
   }
 
   ## Check sql
-  spobj <- tryCatch(pcheck.spatial(dsn=dsn, layer=layer, 
-			polyfix=polyfix, sql=sql, gui=gui),
-     	 error=function(e) {
+  spobj <- tryCatch(pcheck.spatial(dsn = dsn, layer = layer, 
+			polyfix = polyfix, sql = sql, gui = gui),
+     	 error = function(e) {
 			message("invalid spatial layer\n")
 			return(NULL) })
 
