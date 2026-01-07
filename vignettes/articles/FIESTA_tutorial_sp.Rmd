@@ -227,17 +227,19 @@ WYspplt[ ,c("CN", "geometry")]
 And finally we export the spatial points to an outfolder. 
 
 ```{r}
-WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
-                               xy.uniqueid = "CN", 
-                               xvar = "LON_PUBLIC", 
-                               yvar = "LAT_PUBLIC",
-                               xy.crs = 4269,
-                               exportsp = TRUE,
-                               savedata_opts = savedata_options(out_dsn = "spplt",
-                                                                out_fmt = "shp",
-                                                                outfolder = outfolder,
-                                                                out_layer = "WYplots",
-                                                                overwrite_layer = TRUE))
+WYspplt <- 
+  spMakeSpatialPoints(xyplt = WYplt,
+                      xy.uniqueid = "CN", 
+                      xvar = "LON_PUBLIC", 
+                      yvar = "LAT_PUBLIC",
+                      xy.crs = 4269,
+                      exportsp = TRUE,
+                      savedata_opts = 
+                        savedata_options(out_dsn = "spplt",
+                                         out_fmt = "shp",
+                                         outfolder = outfolder,
+                                         out_layer = "WYplots",
+                                         overwrite_layer = TRUE))
 ```
 
 </details>
@@ -342,17 +344,18 @@ spExportSpatial(WYbhspplt,
 Finally, we can get points within Bighorn National Forest boundary (project on the fly) and save to an outfolder. 
 
 ```{r}
-WYbhptslst <- spClipPoint(xyplt = WYplt, 
-                          uniqueid = "CN", 
-                          clippolyv = WYbh, 
-                          othertabnms = c("WYcond", "WYtree"), 
-                          exportsp = TRUE, 
-                          spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
-                                                    yvar = "LAT_PUBLIC", 
-                                                    xy.crs = 4269), 
-                          savedata_opts = list(outfolder = outfolder, 
-                                               overwrite_layer = TRUE,
-                                               outfn.pre = "clip"))
+WYbhptslst <- 
+  spClipPoint(xyplt = WYplt, 
+              uniqueid = "CN", 
+              clippolyv = WYbh, 
+              othertabnms = c("WYcond", "WYtree"), 
+              exportsp = TRUE, 
+              spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
+                                        yvar = "LAT_PUBLIC", 
+                                        xy.crs = 4269), 
+              savedata_opts = list(outfolder = outfolder, 
+                                   overwrite_layer = TRUE,
+                                   outfn.pre = "clip"))
 
 names(WYbhptslst)
 ```

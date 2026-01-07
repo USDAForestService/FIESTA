@@ -768,6 +768,7 @@ head(tdomdat.tree)
   <summary>View Example</summary>
 
 ```{r}
+
 treedomCNTs <- datSumTreeDom(
                 cond = WYcond, 
                 plt = WYplt, 

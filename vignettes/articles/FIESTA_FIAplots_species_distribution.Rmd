@@ -54,6 +54,7 @@ WYpltsp <- spMakeSpatialPoints(xyplt = WYplt,
 Finally we can put all of the pieces together to get plot level species presence/absence:
 
 ```{r message = FALSE, warning = FALSE}
+
 pltdomdat <- datSumTreeDom(plt = WYpltsp,
                            tree = WYtree,
                            seed = WYseed,

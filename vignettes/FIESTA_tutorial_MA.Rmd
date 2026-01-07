@@ -152,11 +152,12 @@ asp <- terra::terrain(dem,
 Next, we can get our FIA plot data and set up our auxiliary data. We can get our FIA plot data with the `spMakeSpatialPoints` function from `FIESTA`. 
 
 ```{r}
-WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
-                               xy.uniqueid = "CN",
-                               xvar = "LON_PUBLIC",
-                               yvar = "LAT_PUBLIC",
-                               xy.crs = 4269)
+WYspplt <- 
+  spMakeSpatialPoints(xyplt = WYplt,
+                      xy.uniqueid = "CN",
+                      xvar = "LON_PUBLIC",
+                      yvar = "LAT_PUBLIC",
+                      xy.crs = 4269)
 
 rastlst.cont <- c(demfn, slpfn, aspfn)
 rastlst.cont.name <- c("dem", "slp", "asp")
@@ -168,20 +169,21 @@ Next, we must prepare auxiliary data for model-assisted estimation. We can do th
  
 ```{r, results='hide'}
 
-modeldat <- spGetAuxiliary(xyplt = WYspplt,
-                           uniqueid = "CN",
-                           unit_layer = WYbhfn,
-                           unitvar = NULL,
-                           rastlst.cont = rastlst.cont,
-                           rastlst.cont.name = rastlst.cont.name,
-                           rastlst.cat = rastlst.cat,
-                           rastlst.cat.name = rastlst.cat.name,
-                           rastlst.cont.stat = "mean",
-                           asptransform = TRUE,
-                           rast.asp = aspfn,
-                           keepNA = FALSE,
-                           showext = FALSE,
-                           savedata = FALSE)
+modeldat <- 
+  spGetAuxiliary(xyplt = WYspplt,
+                 uniqueid = "CN",
+                 unit_layer = WYbhfn,
+                 unitvar = NULL,
+                 rastlst.cont = rastlst.cont,
+                 rastlst.cont.name = rastlst.cont.name,
+                 rastlst.cat = rastlst.cat,
+                 rastlst.cat.name = rastlst.cat.name,
+                 rastlst.cont.stat = "mean",
+                 asptransform = TRUE,
+                 rast.asp = aspfn,
+                 keepNA = FALSE,
+                 showext = FALSE,
+                 savedata = FALSE)
 
 ```
 
@@ -203,10 +205,11 @@ str(modeldat, max.level = 1)
 We can create our population data for model-assisted estimation. To do so, we use the `modMApop` function in `FIESTA`. We must assign our population tables with the `popTabs` argument (and unique identifiers for these tables with the `popTabIDs` argument if they are not the default). Because we used `spGetAuxiliary` to create our model data we can simply pass the object returned by that function into the `auxdat` argument in `modMApop`. This is a shortcut that allows you to avoid manually specifying all of the necessary tables as function arguments in `modMApop`.
  
 ```{r}
-MApopdat <- modMApop(popTabs = popTables(tree = WYtree, 
-                                         cond = WYcond, 
-                                         plt = WYplt),
-                     auxdat = modeldat)
+MApopdat <- 
+  modMApop(popTabs = popTables(tree = WYtree, 
+                               cond = WYcond, 
+                               plt = WYplt),
+           auxdat = modeldat)
 ```
 
 Note that the `modMApop` function returns a list with lots of information and data for us to use. For a quick look at what this list includes we can use the `str` function: 
@@ -229,10 +232,11 @@ Now that we've created our population data set, we can move on to estimation.
 In this example, we look at estimating the area of forest land in Wyoming from 2011 to 2013 with the generalized regression estimator (`MAmethod = "greg"`). We can specify a set of auxiliary variables that we want to use in the model using the `prednames` argument.
 
 ```{r}
-area1 <- modMAarea(MApopdat = MApopdat,             # pop - population calculations for WY
-                   MAmethod = "greg",               # est - model-assisted method
-                   prednames = c("dem", "fornf"),   # est - predictors to use in model
-                   landarea = "FOREST")             # est - forest land filter
+area1 <- 
+  modMAarea(MApopdat = MApopdat,             # pop - population calculations for WY
+            MAmethod = "greg",               # est - model-assisted method
+            prednames = c("dem", "fornf"),   # est - predictors to use in model
+            landarea = "FOREST")             # est - forest land filter
 ```
 
 We can look at the structure of this output with `str` and the estimates below. Note that again `FIESTA` outputs a list. 
@@ -253,10 +257,11 @@ area1$est
 Here, we fit the same model as the above example, but we don't specify predictors and instead include `modelselect =  TRUE` which internally uses an elastic net model for variable selection. 
 
 ```{r}
-area2 <- modMAarea(MApopdat = MApopdat,          # pop - population calculations for WY
-                   MAmethod = "greg",
-                   modelselect = TRUE,           # est - model-assisted method
-                   landarea = "FOREST")          # est - forest land filter
+area2 <-
+  modMAarea(MApopdat = MApopdat,     # pop - population calculations for WY
+            MAmethod = "greg",
+            modelselect = TRUE,      # est - model-assisted method
+            landarea = "FOREST")     # est - forest land filter
 ```
 
 We can again see that the structure of the list is very similar to that in the above example:
@@ -288,11 +293,12 @@ area2$est
 In this example, we look at adding rows to the output and include `returntitle = TRUE` to return title information. Note that when we do not explicitly supply `prednames` and do not set `modelselect` to TRUE, FIESTA defaults to using all of the available predictors.
 
 ```{r}
-area3 <- modMAarea(MApopdat = MApopdat,          # pop - population calculations for WY, post-stratification
-                   MAmethod = "greg",            # est - model-assisted method
-                   landarea = "FOREST",          # est - forest land filter
-                   rowvar = "FORTYPCD",          # est - row domain
-                   returntitle = TRUE)           # out - return title information
+area3 <- 
+  modMAarea(MApopdat = MApopdat,      # pop - population calculations for WY, post-stratification
+            MAmethod = "greg",        # est - model-assisted method
+            landarea = "FOREST",      # est - forest land filter
+            rowvar = "FORTYPCD",      # est - row domain
+            returntitle = TRUE)       # out - return title information
 ```
 
 Again, we can look at the contents of the output list. The output now includes titlelst, a list of associated titles.
@@ -331,22 +337,23 @@ titlelst3
 In this example, we look at adding rows and columns to output, including FIA names. We also output estimates and percent standard error in the same cell with the `allin1` argument in `table_options` and save data to an outfolder with the `outfolder` argument in `savedata_options`. 
 
 ```{r}
-area4 <- modMAarea(MApopdat = MApopdat,                 # pop - population calculations for WY, post-stratification
-                   MAmethod = "greg",                   # est - model-assisted method
-                   landarea = "FOREST",                 # est - forest land filter
-                   rowvar = "FORTYPCD",                 # est - row domain
-                   colvar = "STDSZCD",                  # est - column domain
-                   savedata = TRUE,                     # out - save data to outfolder
-                   returntitle = TRUE,                  # out - return title information
-                   table_opts = table_options(
-                     row.FIAname = TRUE,                # table - row domain names
-                     col.FIAname = TRUE,                # table - column domain names
-                     allin1 = TRUE                      # table - return output with est(pse)
-                   ),
-                   savedata_opts = savedata_options(
-                     outfolder = outfolder,             # save - outfolder for saving data
-                     outfn.pre = "WY"                   # save - prefix for output files
-                   ))
+area4 <- 
+  modMAarea(MApopdat = MApopdat,                 # pop - population calculations for WY, post-stratification
+            MAmethod = "greg",                   # est - model-assisted method
+            landarea = "FOREST",                 # est - forest land filter
+            rowvar = "FORTYPCD",                 # est - row domain
+            colvar = "STDSZCD",                  # est - column domain
+            savedata = TRUE,                     # out - save data to outfolder
+            returntitle = TRUE,                  # out - return title information
+            table_opts = table_options(
+                row.FIAname = TRUE,                # table - row domain names
+                col.FIAname = TRUE,                # table - column domain names
+                allin1 = TRUE                      # table - return output with est(pse)
+                ),
+            savedata_opts = savedata_options(
+                outfolder = outfolder,             # save - outfolder for saving data
+                outfn.pre = "WY"                   # save - prefix for output files
+            ))
 ```
 
 We can again look at the output list, estimates, raw data, and titles:
@@ -398,13 +405,14 @@ live_trees <- "STATUSCD == 1"
 
 
 ```{r}
-tree1 <- modMAtree(MApopdat = MApopdat,            # pop - population calculations
-                   MAmethod = "greg",              # est - model-assisted method
-                   landarea = "FOREST",            # est - forest land filter
-                   prednames = c("dem", "fornf"),  # est - predictors to use in model
-                   estvar = estvar,                # est - net cubic-foot volume
-                   estvar.filter = live_trees,     # est - live trees only
-                   returntitle = TRUE)             # out - return title information
+tree1 <-
+  modMAtree(MApopdat = MApopdat,            # pop - population calculations
+            MAmethod = "greg",              # est - model-assisted method
+            landarea = "FOREST",            # est - forest land filter
+            prednames = c("dem", "fornf"),  # est - predictors to use in model
+            estvar = estvar,                # est - net cubic-foot volume
+            estvar.filter = live_trees,     # est - live trees only
+            returntitle = TRUE)             # out - return title information
 
 tree1$est
 ```
@@ -419,13 +427,14 @@ tree1$est
 Here, we fit the same model as the above example, but rather than using `"greg"` are our model-assisted method, we can use `"gregEN"` where the EN stands for "elastic net". The elastic net performs variable selection for us, grabbing predictors it finds to be most useful in the model. 
 
 ```{r}
-tree2 <- modMAtree(MApopdat = MApopdat,            # pop - population calculations
-                   MAmethod = "greg",              # est - model-assisted method
-                   modelselect = TRUE,             # est - perform variable selection internally
-                   landarea = "FOREST",            # est - forest land filter
-                   estvar = estvar,                # est - net cubic-foot volume
-                   estvar.filter = live_trees,     # est - live trees only
-                   returntitle = TRUE)             # out - return title information
+tree2 <- 
+  modMAtree(MApopdat = MApopdat,            # pop - population calculations
+            MAmethod = "greg",              # est - model-assisted method
+            modelselect = TRUE,             # est - perform variable selection internally
+            landarea = "FOREST",            # est - forest land filter
+            estvar = estvar,                # est - net cubic-foot volume
+            estvar.filter = live_trees,     # est - live trees only
+            returntitle = TRUE)             # out - return title information
 ```
 
 We can again see that the structure of the list is very similar to that in the above example:
@@ -457,14 +466,15 @@ tree2$est
 This example adds rows to the output for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type, Wyoming, 2011-2013. We also choose to return titles with `returntitle = TRUE`. 
 
 ```{r}
-tree3 <- modMAtree(MApopdat = MApopdat,               # pop - population calculations
-                   MAmethod = "greg",                 # est - model-assisted method
-                   prednames = c("dem", "fornf"),     # est - predictors to use in model  
-                   landarea = "FOREST",               # est - forest land filter
-                   estvar = "VOLCFNET",               # est - net cubic-foot volume
-                   estvar.filter = "STATUSCD == 1",   # est - live trees only
-                   rowvar = "FORTYPCD",               # est - row domain 
-                   returntitle = TRUE)                # out - return title information
+tree3 <- 
+  modMAtree(MApopdat = MApopdat,               # pop - population calculations
+            MAmethod = "greg",                 # est - model-assisted method
+            prednames = c("dem", "fornf"),     # est - predictors to use in model  
+            landarea = "FOREST",               # est - forest land filter
+            estvar = "VOLCFNET",               # est - net cubic-foot volume
+            estvar.filter = "STATUSCD == 1",   # est - live trees only
+            rowvar = "FORTYPCD",               # est - row domain 
+            returntitle = TRUE)                # out - return title information
 ```
 
 Again, we investigate the output:
@@ -508,25 +518,26 @@ datBarplot(raw3$unit_rowest,
 This examples adds rows and columns to the output, including FIA names, for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type and stand-size class, Wyoming, 2011-2013. We also use the `*_options` functions to return output with estimates (est) and percent standard error (pse) in same cell - est(pse) with `allin1 = TRUE` and save data to an outfolder with `savedata = TRUE` and `outfolder = outfolder`. 
 
 ```{r}
-tree4 <- modMAtree(MApopdat = MApopdat,                # pop - population calculations
-                   MAmethod = "greg",                  # est - model-assisted method
-                   landarea = "FOREST",                # est - forest land filter
-                   prednames = c("dem", "slp"),        # est - predictors to use in model
-                   estvar = "VOLCFNET",                # est - net cubic-foot volume
-                   estvar.filter = "STATUSCD  == 1",   # est - live trees only
-                   rowvar = "FORTYPCD",                # est - row domain
-                   colvar = "STDSZCD",                 # est - column domain
-                   returntitle = TRUE,                 # out - return title information
-                   savedata = TRUE,                    # out - save data to outfolder
-                   table_opts = table_options(
-                     row.FIAname = TRUE,               # est - row domain names
-                     col.FIAname = TRUE,               # est - column domain names
-                     allin1 = TRUE                     # out - return output with est(pse)
-                   ),
-                   savedata_opts = savedata_options(
-                     outfolder = outfolder,            # out - outfolder for saving data
-                     outfn.pre = "WY"                  # out - prefix for output files
-                   ))
+tree4 <- 
+  modMAtree(MApopdat = MApopdat,                # pop - population calculations
+            MAmethod = "greg",                  # est - model-assisted method
+            landarea = "FOREST",                # est - forest land filter
+            prednames = c("dem", "slp"),        # est - predictors to use in model
+            estvar = "VOLCFNET",                # est - net cubic-foot volume
+            estvar.filter = "STATUSCD  == 1",   # est - live trees only
+            rowvar = "FORTYPCD",                # est - row domain
+            colvar = "STDSZCD",                 # est - column domain
+            returntitle = TRUE,                 # out - return title information
+            savedata = TRUE,                    # out - save data to outfolder
+            table_opts = table_options(
+                row.FIAname = TRUE,               # est - row domain names
+                col.FIAname = TRUE,               # est - column domain names
+                allin1 = TRUE                     # out - return output with est(pse)
+                ),
+            savedata_opts = savedata_options(
+                outfolder = outfolder,            # out - outfolder for saving data
+                outfn.pre = "WY"                  # out - prefix for output files
+                ))
 ```
 
 Again, we investigate the output of the returned list:
@@ -571,28 +582,30 @@ Note: seedling data are only available for number of trees (estvar = TPA_UNADJ).
 Note: must include seedling data in population data calculations.
 
 ```{r}
-MApopdat_seed <- modMApop(popTabs = popTables(tree = WYtree,
-                                              cond = WYcond,
-                                              seed = WYseed),
-                          pltassgn = WYpltassgn,
-                          auxdat = modeldat)
+MApopdat_seed <-
+  modMApop(popTabs = popTables(tree = WYtree,
+                               cond = WYcond,
+                               seed = WYseed),
+           pltassgn = WYpltassgn,
+           auxdat = modeldat)
 ```
 
 
 ```{r}
-tree5 <- modMAtree(MApopdat = MApopdat_seed,              # pop - population calculations
-                   MAmethod = "greg",                     # est - model-assisted method
-                   prednames = c("dem", "slp", "fornf"),
-                   estseed = "add",                       # est - add seedling data
-                   landarea = "FOREST",                   # est - forest land filter
-                   estvar = "TPA_UNADJ",                  # est - number of trees per acre 
-                   estvar.filter = "STATUSCD == 1",       # est - live trees only
-                   rowvar = "SPCD",                       # est - row domain
-                   returntitle = TRUE,                    # out - return title information
-                   table_opts = table_options(
-                     row.FIAname = TRUE,                  # est - row domain names
-                     allin1 = FALSE                       # out - return output with est and pse
-                   ))
+tree5 <- 
+  modMAtree(MApopdat = MApopdat_seed,              # pop - population calculations
+            MAmethod = "greg",                     # est - model-assisted method
+            prednames = c("dem", "slp", "fornf"),
+            estseed = "add",                       # est - add seedling data
+            landarea = "FOREST",                   # est - forest land filter
+            estvar = "TPA_UNADJ",                  # est - number of trees per acre 
+            estvar.filter = "STATUSCD == 1",       # est - live trees only
+            rowvar = "SPCD",                       # est - row domain
+            returntitle = TRUE,                    # out - return title information
+            table_opts = table_options(
+                  row.FIAname = TRUE,                  # est - row domain names
+                  allin1 = FALSE                       # out - return output with est and pse
+                  ))
 ```
 
 And again we can look at our outputs and compare estimates:

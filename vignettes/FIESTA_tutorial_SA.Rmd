@@ -151,23 +151,24 @@ Next, we can get our FIA plot data and set up our auxiliary data. We can get our
 For this example we define a custom evaluation (`eval = 'custom'`) which consists of plots from inventory years 2011-2013.
 
 ```{r}
-SApltdat <- spGetPlots(bnd = WYbhdistfn,
-                       xy_datsource = "obj",
-                       xy = WYplt,
-                       xy_opts = xy_options(xy.uniqueid = "CN",
-                                            xvar = "LON_PUBLIC", 
-                                            yvar = "LAT_PUBLIC",
-                                            xy.crs = 4269),
-                       datsource = "obj",
-                       dbTabs = dbTables(plot_layer = WYplt,
-                                         cond_layer = WYcond,
-                                         tree_layer = WYtree, 
-                                         seed_layer = WYseed),
-                       eval = "custom",
-                       eval_opts = eval_options(invyrs = 2011:2013),
-                       showsteps = TRUE,
-                       returnxy = TRUE,
-                       savedata_opts = savedata_options(outfolder = outfolder))
+SApltdat <- 
+  spGetPlots(bnd = WYbhdistfn,
+             xy_datsource = "obj",
+             xy = WYplt,
+             xy_opts = xy_options(xy.uniqueid = "CN",
+                                  xvar = "LON_PUBLIC", 
+                                  yvar = "LAT_PUBLIC",
+                                  xy.crs = 4269),
+             datsource = "obj",
+             dbTabs = dbTables(plot_layer = WYplt,
+                               cond_layer = WYcond,
+                               tree_layer = WYtree, 
+                               seed_layer = WYseed),
+             eval = "custom",
+             eval_opts = eval_options(invyrs = 2011:2013),
+             showsteps = TRUE,
+             returnxy = TRUE,
+             savedata_opts = savedata_options(outfolder = outfolder))
 ```
 
 ```{r}
@@ -185,21 +186,22 @@ rastlst.cat.name <- "fornf"
 unit_layer <- WYbhdistfn
 unitvar <- "DISTRICTNA"
 
-auxdat <- spGetAuxiliary(xyplt = SApltdat$spxy,
-                         uniqueid = "PLT_CN",
-                         unit_layer = unit_layer,
-                         unitvar = "DISTRICTNA",
-                         rastlst.cont = rastlst.cont,
-                         rastlst.cont.name = rastlst.cont.name,
-                         rastlst.cont.stat = "mean",
-                         rastlst.cont.NODATA = 0,
-                         rastlst.cat = rastlst.cat,
-                         rastlst.cat.name = rastlst.cat.name,
-                         asptransform = TRUE,
-                         rast.asp = aspfn,
-                         keepNA = FALSE,
-                         showext = FALSE,
-                         savedata = FALSE)
+auxdat <- 
+  spGetAuxiliary(xyplt = SApltdat$spxy,
+                 uniqueid = "PLT_CN",
+                 unit_layer = unit_layer,
+                 unitvar = "DISTRICTNA",
+                 rastlst.cont = rastlst.cont,
+                 rastlst.cont.name = rastlst.cont.name,
+                 rastlst.cont.stat = "mean",
+                 rastlst.cont.NODATA = 0,
+                 rastlst.cat = rastlst.cat,
+                 rastlst.cat.name = rastlst.cat.name,
+                 asptransform = TRUE,
+                 rast.asp = aspfn,
+                 keepNA = FALSE,
+                 showext = FALSE,
+                 savedata = FALSE)
 ```
 
 ```{r}
@@ -252,11 +254,12 @@ all_preds <- c("slp", "dem", "asp_cos", "asp_sin", "fornf")
 Next, we fit the unit-level EBLUP using all of the predictors with the `JoSAE` R package. 
 
 ```{r}
-area1 <- modSAarea(SApopdatlst = SApopdat,        # pop - population calculations for WY, post-stratification
-                   prednames = all_preds,         # est - character vector of predictors to be used in the model
-                   SApackage = "JoSAE",           # est - character string of the R package to do the estimation
-                   SAmethod = "unit",             # est - method of small area estimation. Either "unit" or "area"
-                   multest = FALSE)               # est - whether to also run all other available small area estimators
+area1 <- 
+  modSAarea(SApopdatlst = SApopdat,   # pop - population calculations for WY, post-stratification
+            prednames = all_preds,    # est - character vector of predictors to be used in the model
+            SApackage = "JoSAE",      # est - character string of the R package to do the estimation
+            SAmethod = "unit",        # est - method of small area estimation. Either "unit" or "area"
+            multest = FALSE)          # est - whether to also run all other available small area estimators
 ```
 
 The `modSAarea` function outputs both the estimates:
@@ -281,11 +284,12 @@ str(area1$raw, max.level = 1)
 In this example, we fit an area-level EBLUP with `JoSAE`, while only using slp as a predictor. We use only one predictor in the area level model because at the area level, we only have three rows in our dataset. Since we also have a random effect term, the model we fit can have a maximum of one predictor without being exactly singular. We also set `multest = TRUE` which will cause the function to produce estimates using all of the available small area estimators and output these in a separate table.
 
 ```{r}
-area2 <- modSAarea(SApopdatlst = SApopdat,   # pop - population calculations for WY, post-stratification
-                   prednames = "dem",        # est - character vector of predictors to be used in the model
-                   SApackage = "JoSAE",      # est - character string of the R package to do the estimation
-                   SAmethod = "area",        # est - method of small area estimation. Either "unit" or "area"
-                   multest = TRUE)           # est - whether to also run all other available small area estimators
+area2 <- 
+  modSAarea(SApopdatlst = SApopdat,   # pop - population calculations for WY, post-stratification
+            prednames = "dem",        # est - character vector of predictors to be used in the model
+            SApackage = "JoSAE",      # est - character string of the R package to do the estimation
+            SAmethod = "area",        # est - method of small area estimation. Either "unit" or "area"
+            multest = TRUE)           # est - whether to also run all other available small area estimators
 ```
 
 We again can see our estimates. Notably, we have slightly larger percent sampling errors to the unit-level model fit in Example 2. This is likely due to only being able to incorporate one predictor's worth of information to the model. 
