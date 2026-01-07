@@ -96,17 +96,15 @@ DBgetCSV <- function(DBtable,
     tempdir <- tempdir()
 
     tab <- tryCatch(
-      {
-        utils::download.file(fn, temp, mode = "wb", quiet = TRUE)
-      },
+        utils::download.file(fn, temp, mode = "wb", quiet = TRUE),
 		  error = function(e) {
-		    message(e)
-		    return(NULL)
+		    #message(e)
+		    return(999)
       }
     )
 
     # if download.file fails it either throws an error or invisibly returns a non-zero integer value
-    if (is.null(tab) || tab != 0) {
+    if (is.null(tab) || tab == 999) {
       message("download of ", DBtable, " was unsuccessful for ", stabbr)
       if (stopifnull) {
         stop("")
@@ -136,7 +134,6 @@ DBgetCSV <- function(DBtable,
     return(tab_out)
 
   }
-
 
   ###################################################################
   ## Get tables
