@@ -197,7 +197,7 @@ modSApop <- function(popType = "VOL",
                      popFilter = popFilters(),
                      pltassgn = NULL,
                      pltassgnid = "PLT_CN",
-                     datsource = "obj",
+                     datsource = "sqlite",
                      dsn = NULL,
                      dbconn = NULL,
                      pjoinid = "CN",
@@ -255,7 +255,7 @@ modSApop <- function(popType = "VOL",
   ONEUNIT=n.total=n.strata=strwt=TOTAL=stratcombinelut <- NULL
   condid <- "CONDID"
   areawt2 <- NULL
-  pvars2keep=unitlevels <- NULL
+  pvars2keep <- NULL
   pltidsadjindb=savepltids=dsnreadonly <- FALSE
 
   ##################################################################
@@ -328,7 +328,6 @@ modSApop <- function(popType = "VOL",
     if (savedata) {
       if (outlst$out_fmt == "sqlite" && is.null(outlst$out_dsn)) {
         outlst$out_dsn <- "SApopdat.db"
-        outlst$outconnopen <- TRUE
       }
       outlst$add_layer <- TRUE
     }
@@ -523,7 +522,6 @@ modSApop <- function(popType = "VOL",
   ## Remove nonsampled plots (if nonsamp.pfilter != "NONE")
   ## Applies plot filters
   ###################################################################################
-  popdatindb <- ifelse(returndata, FALSE, TRUE)
   pltcheck <-
     check.popdataPLT(dsn = dsn, dbconn = dbconn, schema = schema,
                      datsource = datsource,
@@ -559,29 +557,23 @@ modSApop <- function(popType = "VOL",
   areavar <- pltcheck$areavar
   areaunits <- pltcheck$areaunits
   dunit.action <- pltcheck$unit.action
-  unitlevels <- unitlevels
   P2POINTCNT <- pltcheck$P2POINTCNT
   plotsampcnt <- pltcheck$plotsampcnt
   states <- pltcheck$states
   invyrs <- pltcheck$invyrs
   dbconn <- pltcheck$dbconn
-  datsource <- pltcheck$datsource
-  schema <- pltcheck$schema
-  dbtablst <- pltcheck$dbtablst
+  SCHEMA. <- pltcheck$SCHEMA.
   pltaindb <- pltcheck$pltaindb
   datindb <- pltcheck$datindb
   POP_PLOT_STRATUM_ASSGN <- pltcheck$POP_PLOT_STRATUM_ASSGN
+  getdataWITHqry <- pltcheck$getdataWITHqry
+  getdataCNs <- pltcheck$getdataCNs
   plotunitcnt <- pltcheck$plotunitcnt
   prednames <- pltcheck$prednames
   predfac <- pltcheck$predfac
   auxlut <- dunitzonal
-  
-  pltselectqry <- pltcheck$pltselectqry
-  pltafromqry <- pltcheck$pltafromqry
-  pwhereqry <- pltcheck$pwhereqry
   getdataWITHqry <- pltcheck$getdataWITHqry
   getdataCNs <- pltcheck$getdataCNs
-  
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
@@ -659,7 +651,6 @@ modSApop <- function(popType = "VOL",
       check.popdataVOL(tabs = popTabs, tabIDs = popTabIDs,
                        popType = popType,
                        datindb = datindb, pltaindb = pltaindb,
-                       popdatindb = popdatindb,
                        pltidsWITHqry = pltidsWITHqry,
                        pltidsid = pltidsid,
                        pltidvars = pltidvars, projidvars = projidvars,
@@ -675,8 +666,7 @@ modSApop <- function(popType = "VOL",
                        areawt = areawt, areawt2 = areawt2,
                        unitvars = dunitvars,
                        nonsamp.cfilter = nonsamp.cfilter,
-                       dbconn = dbconn, schema = schema, 
-                       datsource = datsource, dbtablst = dbtablst,
+                       dbconn = dbconn, SCHEMA. = SCHEMA.,
                        getdataWITHqry = getdataWITHqry,
                        getdataCNs = getdataCNs,
                        returndata = returndata,
@@ -684,9 +674,6 @@ modSApop <- function(popType = "VOL",
                        outlst = outlst,
                        cvars2keep = c("AOI", largebnd.unique))
     if (is.null(popcheck)) return(NULL)
-    popdatindb <- popcheck$popdatindb
-    pop_datsource <- popcheck$pop_datsource
-    popdbinfo <- popcheck$popdbinfo
     pltidsadj <- popcheck$pltidsadj
     pltcondx <- popcheck$pltcondx
     pltcondflds <- popcheck$pltcondflds
@@ -888,47 +875,21 @@ modSApop <- function(popType = "VOL",
     setcolorder(pltcondx, c(pltcondxcols, newcols))
     condflds <- c(condflds, newcols)
     setkeyv(pltcondx, pltcondxkey)
-    
-    ## Save data
-    if (savedata) {
-      message("saving pltcondx...")
-      outlst$out_layer <- "pltcondx"
-      if (!append_layer) index.unique.pltcondx <- pltcondxkey
-      datExportData(pltcondx,
-                    savedata_opts = outlst)
-      if (!returndata) {
-        popdbinfo$poptablst <- c(popdbinfo$poptablst, "pltcondx")
-        pltcondx <- "pltcondx"
-      }
-    }
   }
 
-  ## Save pltids, including adjustment factors
   if (savepltids) {
-    ## Add PROJECTID to pltassgnx
-    if (!is.null(projectid)) {
-      pltidsadj$PROJECTID <- projectid
-    }
-    
     message("saving pltids...")
     outlst$out_layer <- "pltids"
     if (!append_layer) index.unique.pltids <- c(projectid, puniqueid)
-    datExportData(pltidsadj, 
-                  savedata_opts = outlst)
-    if (!returndata) {
-      popdbinfo$poptablst <- c(popdbinfo$poptablst, "pltidsadj")
-      pltidsadj <- "pltidsadj"
-    }
+    datExportData(pltidsadj, savedata_opts = outlst)
   }
-  
+
   ## Build list of data to return
   ###################################################################################
   returnlst$popType <- popType
 
   returnlst <- append(returnlst, list(
-    popdatindb = popdatindb,
-    pltidsadj = pltidsadj, 
-    pltcondx=pltcondx,
+    pltidsadj = pltidsadj, pltcondx=pltcondx,
     #pltcondflds = pltcondflds,
     pltflds = pltflds,
     condflds = condflds,
@@ -980,43 +941,7 @@ modSApop <- function(popType = "VOL",
   returnlst$prednames <- prednames
   returnlst$predfac <- predfac
   returnlst$largebnd.unique <- largebnd.unique
-  
-  
-  ## Save data frames
-  ##################################################################
-  # if (returndata) {
-  #   returnlst$popconn <- NULL
-  # }  
-  if (savedata) {
-    
-    message("saving pltassgnx...")
-    outlst$out_layer <- "pltassgn"
-    datExportData(pltassgnx, 
-                  savedata_opts = outlst)
-    
-    message("saving dunitarea...")
-    outlst$out_layer <- "dunitarea"
-    datExportData(dunitarea, 
-                  savedata_opts = outlst)
-    
-    message("saving dunitlut...")
-    outlst$out_layer <- "dunitlut"
-    datExportData(dunitlut, 
-                  savedata_opts = outlst)
-    
-    if (!returndata) {
-      pltassgnx <- "pltassgnx"
-      unitarea <- "dunitarea"
-      dunitlut <- "dunitlut"
-    }
-    popdbinfo$poptablst <- c(popdbinfo$poptablst, "pltassgn", "unitarea", "dunitlut")
-  }
-  
-  returnlst$pop_datsource <- pop_datsource
-  if (popdatindb) {
-    returnlst$popdbinfo <- popdbinfo
-  }
-  
+
 
   ## Save list object
   ##################################################################
@@ -1029,6 +954,149 @@ modSApop <- function(popType = "VOL",
       save(returnlst, objfn)
     } else {
       message("invalid object name... must end in: ", toString(c("rds", "rda")))
+    }
+  }
+
+  ## Save data frames
+  ##################################################################
+  if (savedata) {
+    datExportData(pltidsadj,
+          savedata_opts=list(outfolder=outfolder,
+                              out_fmt=out_fmt,
+                              out_dsn=out_dsn,
+                              out_layer="condx",
+                              outfn.pre=outfn.pre,
+                              outfn.date=outfn.date,
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    datExportData(pltcondx,
+          savedata_opts=list(outfolder=outfolder,
+                              out_fmt=out_fmt,
+                              out_dsn=out_dsn,
+                              out_layer="pltcondx",
+                              outfn.pre=outfn.pre,
+                              outfn.date=outfn.date,
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+
+    if (!is.null(treex)) {
+      datExportData(treex,
+            savedata_opts=list(outfolder=outfolder,
+                                out_fmt=out_fmt,
+                                out_dsn=out_dsn,
+                                out_layer="treex",
+                                outfn.pre=outfn.pre,
+                                outfn.date=outfn.date,
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                add_layer=TRUE))
+    }
+    if (!is.null(seedx)) {
+      datExportData(seedx,
+            savedata_opts=list(outfolder=outfolder,
+                                out_fmt=out_fmt,
+                                out_dsn=out_dsn,
+                                out_layer="seedx",
+                                outfn.pre=outfn.pre,
+                                outfn.date=outfn.date,
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                add_layer=TRUE))
+    }
+
+    datExportData(pltassgnx,
+          savedata_opts=list(outfolder=outfolder,
+                              out_fmt=out_fmt,
+                              out_dsn=out_dsn,
+                              out_layer="pltassgn",
+                              outfn.pre=outfn.pre,
+                              outfn.date=outfn.date,
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    datExportData(dunitarea,
+          savedata_opts=list(outfolder=outfolder,
+                              out_fmt=out_fmt,
+                              out_dsn=out_dsn,
+                              out_layer="dunitarea",
+                              outfn.pre=outfn.pre,
+                              outfn.date=outfn.date,
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    datExportData(dunitlut,
+          savedata_opts=list(outfolder=outfolder,
+                              out_fmt=out_fmt,
+                              out_dsn=out_dsn,
+                              out_layer="dunitlut",
+                              outfn.pre=outfn.pre,
+                              outfn.date=outfn.date,
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+  }
+
+
+  ## Save data frames
+  ##################################################################
+  if (returndata) {
+    returnlst$popdatindb <- FALSE
+  } else {
+    returnlst$popdatindb <- TRUE
+
+    if (savedata) {
+      if (outlst$out_fmt == "sqlite") {
+        returnlst$pop_fmt <- "sqlite"
+        returnlst$pop_dsn <- file.path(outlst$outfolder, outlst$out_dsn)
+        returnlst$pop_schema <- NULL
+      }
+
+      message("saving pltassgnx...")
+      outlst$out_layer <- "pltassgn"
+      datExportData(pltassgnx,
+                    savedata_opts = outlst)
+
+      message("saving dunitarea...")
+      outlst$out_layer <- "dunitarea"
+      datExportData(dunitarea,
+                    savedata_opts = outlst)
+
+      rm(pltassgnx)
+      rm(dunitarea)
+
+
+      # if (popType %in% c("TREE", "GRM")) {
+      #   message("saving REF_SPECIES...")
+      #   outlst$out_layer <- "REF_SPECIES"
+      #   datExportData(REF_SPECIES,
+      #                 savedata_opts = outlst)
+      # }
+
+
+      if (!is.null(vcondsppx)) {
+        message("saving vcondsppx...")
+        outlst$out_layer <- "vcondsppx"
+        datExportData(vcondsppx,
+                      savedata_opts = outlst)
+        rm(vcondsppx)
+        # gc()
+      }
+      if (!is.null(vcondstrx)) {
+        message("saving vcondstrx...")
+        outlst$out_layer <- "vcondstrx"
+        datExportData(vcondstrx,
+                      savedata_opts = outlst)
+        rm(vcondstrx)
+      }
+
+    } else if (datindb) {
+
+      returnlst$pop_fmt <- datsource
+      returnlst$pop_dsn <- dsn
+      returnlst$pop_schema <- schema
+      returnlst$popconn <- dbconn
     }
   }
 

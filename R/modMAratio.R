@@ -251,7 +251,7 @@ modMAratio <- function(MApopdat,
   ##################################################################################
   
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  #if (nargs() == 0 && is.null(MApopdat)) gui <- TRUE
+  #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
   gui <- FALSE 
   
   ## If gui.. set variables to NULL
@@ -264,12 +264,13 @@ modMAratio <- function(MApopdat,
   esttype <- "RATIO"
   popType <- "VOL"
   rowcol.total <- TRUE
-  rawdata = addtitle <- TRUE
+  rawdata <- TRUE
   returnlst <- list()
   sumunits <- FALSE
 
   ## Set global variables
-  n.total=tdom=estvard.name=outfn.pre <- NULL
+  ONEUNIT=n.total=TOTAL=tdom=estvar.name=
+    variable=estvard.name=rhat=rhat.se=rhat.var=rhat.cv=pse <- NULL
 
   
   ##################################################################
@@ -325,11 +326,19 @@ modMAratio <- function(MApopdat,
   condx <- MApopdat$condx
   pltidsadj <- MApopdat$pltidsadj
   pltcondx <- MApopdat$pltcondx	
+  treex <- MApopdat$treex
+  seedx <- MApopdat$seedx
+  if (is.null(treex) && is.null(seedx)) {
+    stop("must include tree data for ratio estimates")
+  }
   cuniqueid <- MApopdat$cuniqueid
-  condid <- MApopdat$condid
-  pltassgnx <- MApopdat$pltassgnx
   pltassgnid <- MApopdat$pltassgnid
+  npixels <- MApopdat$npixels
+  npixelvar <- MApopdat$npixelvar
+  condid <- MApopdat$condid
+  tuniqueid <- MApopdat$tuniqueid
   ACI <- MApopdat$ACI
+  pltassgnx <- MApopdat$pltassgnx
   unitarea <- MApopdat$unitarea
   areavar <- MApopdat$areavar
   areaunits <- MApopdat$areaunits
@@ -337,58 +346,55 @@ modMAratio <- function(MApopdat,
   unitvars <- MApopdat$unitvars
   unitlut <- MApopdat$unitlut
   unitvars <- MApopdat$unitvars
-  npixels <- MApopdat$npixels
-  npixelvar <- MApopdat$npixelvar
   expcondtab <- MApopdat$expcondtab
   plotsampcnt <- MApopdat$plotsampcnt
   condsampcnt <- MApopdat$condsampcnt
+  predfac <- MApopdat$predfac
   states <- MApopdat$states
   invyrs <- MApopdat$invyrs
   estvar.area <- MApopdat$estvar.area
-  predfac <- MApopdat$predfac
   adj <- MApopdat$adj
+  popdatindb <- MApopdat$popdatindb
+  pop_fmt <- MApopdat$pop_fmt
+  pop_dsn <- MApopdat$pop_dsn
+  pop_schema <- MApopdat$pop_schema
+  popconn <- MApopdat$popconn
   dbqueries <- MApopdat$dbqueries
   dbqueriesWITH <- MApopdat$dbqueriesWITH
   areawt <- MApopdat$areawt
   areawt2 <- MApopdat$areawt2
   adjcase <- MApopdat$adjcase
   pltidsid <- MApopdat$pjoinid
+  pltassgnid <- MApopdat$pltassgnid
   pltflds <- MApopdat$pltflds
   condflds <- MApopdat$condflds
   
-  ## Check prednames
-  ########################################
-  if (MAmethod %in% c("greg", "gregEN", "ratio")) {
-    if (is.null(prednames)) {
+  if (is.null(prednames)) {
     prednames <- MApopdat$prednames
-    } else {
-      if (!all(prednames %in% MApopdat$prednames)) {
-        if (any(prednames %in% MApopdat$predfac)) {
-          predfacnames <- prednames[prednames %in% MApopdat$predfac]
-          for (nm in predfacnames) {           
-            prednames[prednames == nm] <- MApopdat$prednames[grepl(nm, MApopdat$prednames)]
-          }
-        } else {
-          stop("invalid prednames... must be in: ", toString(MApopdat$prednames))
+  } else {
+    if (!all(prednames %in% MApopdat$prednames)) {
+      if (any(prednames %in% MApopdat$predfac)) {
+        predfacnames <- prednames[prednames %in% MApopdat$predfac]
+        for (nm in predfacnames) {           
+          prednames[prednames == nm] <- MApopdat$prednames[grepl(nm, MApopdat$prednames)]
         }
+      } else {
+        stop("invalid prednames... must be in: ", toString(MApopdat$prednames))
       }
     }
   }
   
-  pop_datsource <- MApopdat$pop_datsource
-  popdatindb <- MApopdat$popdatindb
-  popdbinfo <- MApopdat$popdbinfo
-  
-  treex <- MApopdat$treex
-  seedx <- MApopdat$seedx
-  if (is.null(treex) && is.null(seedx)) {
-    stop("must include tree data for tree estimates")
+  if (popdatindb) {
+    if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
+      if (!is.null(pop_dsn)) {
+        if (pop_fmt == "sqlite") {
+          popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
+        }
+      } else {
+        stop("invalid database connection")
+      }
+    }
   }
-  tuniqueid <- MApopdat$tuniqueid
-  suniqueid <- MApopdat$suniqueid
-  treeflds <- MApopdat$treeflds
-  seedflds <- MApopdat$seedflds
-  
   
   
   ########################################
@@ -410,15 +416,15 @@ modMAratio <- function(MApopdat,
   estdat <- 
     check.estdata(esttype = esttype, 
                   popType = popType,
-                  pop_datsource = pop_datsource,
                   popdatindb = popdatindb, 
-                  popdbinfo = popdbinfo,
+                  popconn = popconn, pop_schema = pop_schema,
                   pltcondx = pltcondx,
                   pltflds = pltflds, 
                   condflds = condflds,
                   dbqueriesWITH = dbqueriesWITH,
                   dbqueries = dbqueries,
                   totals = totals,
+                  pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   landarea = landarea,
                   ACI = ACI, 
                   pcfilter = pcfilter,
@@ -437,48 +443,45 @@ modMAratio <- function(MApopdat,
   divideby <- estdat$divideby
   estround <- estdat$estround
   pseround <- estdat$pseround
-  returntitle <- estdat$returntitle
   addtitle <- estdat$addtitle
-  
+  returntitle <- estdat$returntitle
+  rawonly <- estdat$rawonly
+  savedata <- estdat$savedata
+  outfolder <- estdat$outfolder
+  overwrite_layer <- estdat$overwrite_layer
+  outfn.pre <- estdat$outfn.pre
+  outfn.date <- estdat$outfn.date
+  append_layer = estdat$append_layer
+  rawfolder <- estdat$rawfolder
+  raw_fmt <- estdat$raw_fmt
+  raw_dsn <- estdat$raw_dsn
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
   pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
   pltcondxWITHqry <- estdat$pltcondxWITHqry
-  pop_datsource <- estdat$pop_datsource
-  popdatindb <- estdat$popdatindb
-  popconn <- estdat$popconn
-  pop_schema <- estdat$pop_schema
-  SCHEMA. <- estdat$SCHEMA.
-  poptablst <- estdat$poptablst
-  
-  if (savedata) {
-    rawonly <- estdat$rawonly
-    savedata <- estdat$savedata
-    outfolder <- estdat$outfolder
-    overwrite_layer <- estdat$overwrite_layer
-    outfn.pre <- estdat$outfn.pre
-    outfn.date <- estdat$outfn.date
-    append_layer = estdat$append_layer
-    rawoutlst <- estdat$rawoutlst
-  }
   
   
   ###################################################################################
   ## Check parameter inputs and tree filters
   ###################################################################################
   estdatVOL <- 
-    check.estdataVOL(datsource = pop_datsource,
+    check.estdataVOL(esttype = esttype,
                      popdatindb = popdatindb,
-                     poptablst = poptablst,
+                     popconn = popconn,
+                     cuniqueid = cuniqueid, condid = condid,
                      treex = treex, seedx = seedx,
-                     treeflds = treeflds, seedflds = seedflds,
+                     tuniqueid = tuniqueid,
                      estseed = estseed,
                      woodland = woodland,
                      gui = gui)
+  treex <- estdatVOL$treex
+  treeflds <- estdatVOL$treeflds
+  tuniqueid <- estdatVOL$tuniqueid
   estseed <- estdatVOL$estseed
   woodland <- estdatVOL$woodland
-  treeflds <- estdatVOL$treeflds
+  
+  seedx <- estdatVOL$seedx
   seedflds <- estdatVOL$seedflds
   
   
@@ -489,11 +492,11 @@ modMAratio <- function(MApopdat,
   rowcolinfo <- 
     check.rowcol(esttype = esttype, 
                  popType = popType,
-                 popdatindb = popdatindb,
+                 popdatindb = FALSE,
                  popconn = popconn, SCHEMA. = SCHEMA.,
                  pltcondx = pltcondx,
                  pltcondflds = pltcondflds,
-                 withqry = pltcondxWITHqry,
+                 withqry = withqry,
                  estseed = estseed,
                  treex = treex, treeflds = treeflds,
                  seedx = seedx, seedflds = seedflds,
@@ -504,7 +507,6 @@ modMAratio <- function(MApopdat,
                  row.classify = row.classify, col.classify = col.classify,
                  row.add0 = row.add0, col.add0 = col.add0, 
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
-                 whereqry = pcwhereqry,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL)
@@ -580,12 +582,10 @@ modMAratio <- function(MApopdat,
                woodland = woodland,
                ACI = ACI,
                domclassify = domclassify,
-               datsource = pop_datsource,
                dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltcondxadjWITHqry,
                pltidsid = pltidsid,
                bytdom = bytdom,
-               pcwhereqry = pcwhereqry,
                gui = gui)
   if (is.null(treedat)) return(NULL) 
   tdomdat <- treedat$tdomdat
@@ -747,8 +747,7 @@ modMAratio <- function(MApopdat,
   tabs <- 
     est.outtabs(esttype = "TREE", 
                 sumunits = sumunits, areavar = areavar, 
-                unitvar = unitvar, unitvars = unitvars,
-                unitarea = unitarea,
+                unitvar = unitvar, unitvars = unitvars, 
                 unit_totest = unit_totest, 
                 unit_rowest = unit_rowest, unit_colest = unit_colest, 
                 unit_grpest = unit_grpest,
@@ -808,23 +807,23 @@ modMAratio <- function(MApopdat,
         if (!tabnm %in% c(estvarn, prednames)) {
           rawtab <- rawdat[[i]]
           outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
-          
           if (tabnm %in% c("plotsampcnt", "condsampcnt")) {
-            write2csv(rawtab, 
-                      outfolder = rawoutlst$rawfolder, 
-                      outfilenm = outfn.rawtab, 
-                      outfn.date = outfn.date, 
-                      appendfile = append_layer,
-                      overwrite = overwrite_layer)
-            
+            write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
+                      outfn.date=outfn.date, overwrite=overwrite_layer)
           } else if (is.data.frame(rawtab)) {
-            if (rawoutlst$out_fmt != "csv") {
-              rawoutlst$out_layer <- tabnm
+            if (raw_fmt != "csv") {
+              out_layer <- tabnm 
             } else {
-              rawoutlst$out_layer <- outfn.rawtab
+              out_layer <- outfn.rawtab
             }
-            datExportData(rawtab,
-                          savedata_opts = rawoutlst)
+            datExportData(rawtab, 
+                          savedata_opts=list(outfolder=rawfolder, 
+                                             out_fmt=raw_fmt, 
+                                             out_dsn=raw_dsn, 
+                                             out_layer=out_layer,
+                                             overwrite_layer=overwrite_layer,
+                                             append_layer=append_layer,
+                                             add_layer=TRUE))
           }
         }
       }

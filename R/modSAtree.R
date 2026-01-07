@@ -218,7 +218,7 @@ modSAtree <- function(SApopdatlst = NULL,
   rawdata <- TRUE 
   vars2keep <- c("AOI")
   returnSApopdat <- TRUE
-  sumunits = addtitle <- FALSE
+  sumunits=FALSE
   SAdomsdf=multestdf_row <- NULL
   colvar=NULL
   col.FIAname=FALSE
@@ -236,8 +236,11 @@ modSAtree <- function(SApopdatlst = NULL,
   savemultest <- savedata
   
   ## Set global variables
-  domclassify=nhat.var=predselect.areadf=predselect.unitdf=TOTAL <- NULL
-  
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=AOI=
+  title.rowvar=title.colvar=title.rowgrp=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
+	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var=
+  SAEarea_estimators=SAEunit_estimators=predselect.areadf=predselect.unitdf <- NULL
+
   ## Set estimator list
   estimatorlst <- c('JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA')
   
@@ -516,10 +519,16 @@ modSAtree <- function(SApopdatlst = NULL,
     pltidsadj <- SApopdat$pltidsadj
     pltcondx <- SApopdat$pltcondx
     cuniqueid <- SApopdat$cuniqueid
-    condid <- SApopdat$condid
-    pltassgnx <- SApopdat$pltassgnx
     pltassgnid <- SApopdat$pltassgnid
+    condid <- SApopdat$condid
+    treex <- SApopdat$treex
+    seedx <- SApopdat$seedx
+    if (is.null(treex) && is.null(seedx)) {
+      stop("must include tree data for tree estimates")
+    }
+    tuniqueid <- SApopdat$tuniqueid
     ACI <- SApopdat$ACI
+    pltassgnx <- SApopdat$pltassgnx
     dunitarea <- setDT(SApopdat$dunitarea)
     areavar <- SApopdat$areavar
     areaunits <- SApopdat$areaunits
@@ -533,29 +542,21 @@ modSAtree <- function(SApopdatlst = NULL,
     adj <- SApopdat$adj
     estvar.area <- SApopdat$estvar.area
     predfac <- SApopdat$predfac
+    popdatindb <- SApopdat$popdatindb
+    pop_fmt <- SApopdat$pop_fmt
+    pop_dsn <- SApopdat$pop_dsn
+    pop_schema <- SApopdat$pop_schema
+    popconn <- SApopdat$popconn
     dbqueries <- SApopdat$dbqueries
     dbqueriesWITH <- SApopdat$dbqueriesWITH
     adjcase <- SApopdat$adjcase
     pltidsid <- SApopdat$pjoinid
+    pltassgnid <- SApopdat$pltassgnid
     SAdoms <- SApopdat$SAdoms
     largebnd.unique <- SApopdat$largebnd.unique
+    pltcondflds <- SApopdat$pltcondflds
     pltflds <- SApopdat$pltflds
     condflds <- SApopdat$condflds
-    
-    pop_datsource <- SApopdat$pop_datsource
-    popdatindb <- SApopdat$popdatindb
-    popdbinfo <- SApopdat$popdbinfo
-    
-    treex <- SApopdat$treex
-    seedx <- SApopdat$seedx
-    if (is.null(treex) && is.null(seedx)) {
-      stop("must include tree data for tree estimates")
-    }
-    tuniqueid <- SApopdat$tuniqueid
-    suniqueid <- SApopdat$suniqueid
-    treeflds <- SApopdat$treeflds
-    seedflds <- SApopdat$seedflds
-    
     
     ## check smallbnd.dom
     ########################################################
@@ -574,7 +575,6 @@ modSAtree <- function(SApopdatlst = NULL,
     } 
  
     ## Check prednames
-    ########################################################
     if (is.null(prednames)) {
       prednames <- SApopdat$prednames
     } else {
@@ -590,6 +590,18 @@ modSAtree <- function(SApopdatlst = NULL,
       }
     }
     
+    if (popdatindb) {
+      if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
+        if (!is.null(pop_dsn)) {
+          if (pop_fmt == "sqlite") {
+            popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
+          }
+        } else {
+          stop("invalid database connection")
+        }
+      }
+    }
+
     
     ########################################
     ## Check area units
@@ -613,15 +625,15 @@ modSAtree <- function(SApopdatlst = NULL,
     estdat <- 
       check.estdata(esttype = esttype,
                     popType = popType,
-                    pop_datsource = pop_datsource,
-                    popdatindb = popdatindb, 
-                    popdbinfo = popdbinfo,
+                    popdatindb = popdatindb,
+                    popconn = popconn, pop_schema = pop_schema,
                     pltcondx = pltcondx,
                     pltflds = pltflds, 
                     condflds = condflds,
                     dbqueriesWITH = dbqueriesWITH,
                     dbqueries = dbqueries,
                     totals = totals,
+                    pop_fmt=pop_fmt, pop_dsn=pop_dsn,
                     landarea = landarea,
                     ACI = ACI,
                     pcfilter = pcfilter,
@@ -640,50 +652,45 @@ modSAtree <- function(SApopdatlst = NULL,
     divideby <- estdat$divideby
     estround <- estdat$estround
     pseround <- estdat$pseround
-    returntitle <- estdat$returntitle
     addtitle <- estdat$addtitle
-    
+    returntitle <- estdat$returntitle
+    rawonly <- estdat$rawonly
+    savedata <- estdat$savedata
+    outfolder <- estdat$outfolder
+    overwrite_layer <- estdat$overwrite_layer
+    append_layer = estdat$append_layer
+    rawfolder <- estdat$rawfolder
+    raw_fmt <- estdat$raw_fmt
+    raw_dsn <- estdat$raw_dsn
     pcwhereqry <- estdat$where.qry
     SCHEMA. <- estdat$SCHEMA.
     pltcondflds <- estdat$pltcondflds
     pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
     pltcondxWITHqry <- estdat$pltcondxWITHqry
-    pop_datsource <- estdat$pop_datsource
-    popdatindb <- estdat$popdatindb
-    popconn <- estdat$popconn
-    pop_schema <- estdat$pop_schema
-    SCHEMA. <- estdat$SCHEMA.
-    poptablst <- estdat$poptablst
-    
-    if (savedata) {
-      rawonly <- estdat$rawonly
-      savedata <- estdat$savedata
-      outfolder <- estdat$outfolder
-      overwrite_layer <- estdat$overwrite_layer
-      outfn.pre <- estdat$outfn.pre
-      outfn.date <- estdat$outfn.date
-      append_layer = estdat$append_layer
-      rawoutlst <- estdat$rawoutlst
-    }
     
     
     ###################################################################################
     ## Check parameter inputs and tree filters
     ###################################################################################
     estdatVOL <- 
-      check.estdataVOL(datsource = pop_datsource,
+      check.estdataVOL(esttype = esttype,
                        popdatindb = popdatindb,
-                       poptablst = poptablst,
+                       popconn = popconn,
+                       cuniqueid = cuniqueid, condid = condid,
                        treex = treex, seedx = seedx,
-                       treeflds = treeflds, seedflds = seedflds,
+                       tuniqueid = tuniqueid,
                        estseed = estseed,
                        woodland = woodland,
                        gui = gui)
+    treex <- estdatVOL$treex
+    treeflds <- estdatVOL$treeflds
+    tuniqueid <- estdatVOL$tuniqueid
     estseed <- estdatVOL$estseed
     woodland <- estdatVOL$woodland
-    treeflds <- estdatVOL$treeflds
-    seedflds <- estdatVOL$seedflds
     
+    seedx <- estdatVOL$seedx
+    seedflds <- estdatVOL$seedflds
+  
 
     ###################################################################################
     ### Check row and column data
@@ -706,7 +713,6 @@ modSAtree <- function(SApopdatlst = NULL,
                    row.classify = row.classify, col.classify = col.classify,
                    row.add0 = row.add0, col.add0 = col.add0, 
                    title.rowvar = title.rowvar, title.colvar = title.colvar, 
-                   whereqry = pcwhereqry,
                    rowlut = rowlut, collut = collut, 
                    rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                    rowgrpord = rowgrpord, title.rowgrp = NULL)
@@ -775,12 +781,10 @@ modSAtree <- function(SApopdatlst = NULL,
                    woodland = woodland,
                    ACI = ACI,
                    domclassify = domclassify,
-                   datsource = pop_datsource,
                    dbconn = popconn, schema = pop_schema,
                    pltidsWITHqry = pltcondxadjWITHqry,
                    pltidsid = pltidsid,
                    bytdom = bytdom,
-                   pcwhereqry = pcwhereqry,
                    gui = gui)
     if (is.null(treedat)) stop(NULL) 
     tdomdat <- treedat$tdomdat
@@ -896,10 +900,6 @@ modSAtree <- function(SApopdatlst = NULL,
     estdf$AOI <- 1
   }	
 
-  SAEunit_estimators <- c("all", "saeU", "JU.EBLUP", "JU.EBLUP.se.1", "JU.GREG", "JU.GREG.se", 
-                          "JU.Synth", "hbsaeU", "hbsaeU.se")
-  SAEarea_estimators <- c("all", "saeA", "JFH", "JFH.se", "JA.Synth", "hbsaeA", "hbsaeA.se")
-  
   if ((multest && any(multest_estimators %in% SAEunit_estimators)) || SAmethod == "unit" &&
       length(predselectlst.unit) > 0) {
 
@@ -1220,8 +1220,7 @@ modSAtree <- function(SApopdatlst = NULL,
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, 
                 areavar = areavar, 
-                unitvar = "DOMAIN", 
-                unitarea = dunitarea,
+                unitvar="DOMAIN", 
                 unit_totest = dunit_totest, 
                 unit_rowest = dunit_rowest, 
                 unit_colest = dunit_colest, 
@@ -1302,15 +1301,15 @@ modSAtree <- function(SApopdatlst = NULL,
       ## Export multestdf
       overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
       datExportData(multestdf, 
-                    savedata_opts=list(outfolder = multest_outfolder, 
-                                       out_fmt = multest_fmt, 
-                                       out_dsn = multest_dsn, 
-                                       out_layer = multest_layer,
-                                       outfn.pre = outfn.pre, 
-                                       outfn.date = outfn.date, 
-                                       overwrite_laye = overwrite_layer,
-                                       append_layer = multest.append,
-                                       add_layer = TRUE))
+                    savedata_opts=list(outfolder=multest_outfolder, 
+                                       out_fmt=multest_fmt, 
+                                       out_dsn=multest_dsn, 
+                                       out_layer=multest_layer,
+                                       outfn.pre=outfn.pre, 
+                                       outfn.date=outfn.date, 
+                                       overwrite_layer=overwrite_layer,
+                                       append_layer=multest.append,
+                                       add_layer=TRUE))
     }
   } 
 
@@ -1358,15 +1357,15 @@ modSAtree <- function(SApopdatlst = NULL,
       ## Export multestdf
       overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
       datExportData(multestdf_row, 
-            savedata_opts=list(outfolder =multest_outfolder, 
-                                out_fmt = multest_fmt, 
-                                out_dsn = multest_dsn, 
-                                out_layer = multest_layer_row,
-                                outfn.pre = outfn.pre, 
-                                outfn.date = outfn.date, 
-                                overwrite_layer = overwrite_layer,
-                                append_layer = multest.append,
-                                add_layer = TRUE))
+            savedata_opts=list(outfolder=multest_outfolder, 
+                                out_fmt=multest_fmt, 
+                                out_dsn=multest_dsn, 
+                                out_layer=multest_layer_row,
+                                outfn.pre=outfn.pre, 
+                                outfn.date=outfn.date, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=multest.append,
+                                add_layer=TRUE))
     }
   } 
 
@@ -1391,21 +1390,24 @@ modSAtree <- function(SApopdatlst = NULL,
 
           outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
           if (tabnm %in% c("plotsampcnt", "condsampcnt")) {
-            write2csv(rawtab, 
-                      outfolder = rawfolder, 
-                      outfilenm = outfn.rawtab, 
-                      outfn.date = outfn.date, 
-                      appendfile = append_layer,
-                      overwrite = overwrite_layer)
-            
+            write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
+                    outfn.date=outfn.date, overwrite=overwrite_layer)
           } else if (is.data.frame(rawtab)) {
-            if (rawoutlst$out_fmt != "csv") {
-              rawoutlst$out_layer <- tabnm
+            if (raw_fmt != "csv") {
+              out_layer <- tabnm 
             } else {
-              rawoutlst$out_layer <- outfn.rawtab
+              out_layer <- outfn.rawtab
             }
-            datExportData(rawtab,
-                          savedata_opts = rawoutlst)
+            datExportData(rawtab, 
+                  savedata_opts=list(outfolder=rawfolder, 
+                                      out_fmt=raw_fmt, 
+                                      out_dsn=raw_dsn, 
+                                      out_layer=out_layer,
+                                      outfn.pre=outfn.pre, 
+                                      outfn.date=outfn.date, 
+                                      overwrite_layer=overwrite_layer,
+                                      append_layer=append_layer,
+                                      add_layer=TRUE))
           }
         }
       }

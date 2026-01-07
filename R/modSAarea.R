@@ -199,7 +199,7 @@ modSAarea <- function(SApopdatlst = NULL,
   rawdata <- TRUE 
   vars2keep <- c("DOMAIN", "AOI")
   returnSApopdat <- TRUE
-  sumunits = addtitle <- FALSE
+  sumunits=FALSE
   SAdomsdf=multestdf_row <- NULL
   colvar=NULL
   col.FIAname=FALSE
@@ -217,7 +217,10 @@ modSAarea <- function(SApopdatlst = NULL,
   savemultest <- savedata
   
   ## Set global variables
-  domclassify=nhat.var=predselect.areadf=predselect.unitdf=TOTAL <- NULL
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=domclassify=AOI=
+    title.rowvar=title.colvar=title.rowgrp=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
+    JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var=
+    SAEarea_estimators=SAEunit_estimators=predselect.areadf=predselect.unitdf <- NULL
   
   ## Set estimator list
   estimatorlst <- c('JU.GREG','JU.EBLUP','JFH','hbsaeU','hbsaeA')
@@ -490,10 +493,10 @@ modSAarea <- function(SApopdatlst = NULL,
     pltidsadj <- SApopdat$pltidsadj
     pltcondx <- SApopdat$pltcondx
     cuniqueid <- SApopdat$cuniqueid
-    condid <- SApopdat$condid
-    pltassgnx <- SApopdat$pltassgnx
     pltassgnid <- SApopdat$pltassgnid
+    condid <- SApopdat$condid
     ACI <- SApopdat$ACI
+    pltassgnx <- SApopdat$pltassgnx
     dunitarea <- setDT(SApopdat$dunitarea)
     areavar <- SApopdat$areavar
     areaunits <- SApopdat$areaunits
@@ -507,21 +510,22 @@ modSAarea <- function(SApopdatlst = NULL,
     adj <- SApopdat$adj
     estvar.area <- SApopdat$estvar.area
     predfac <- SApopdat$predfac
+    popdatindb <- SApopdat$popdatindb
+    pop_fmt <- SApopdat$pop_fmt
+    pop_dsn <- SApopdat$pop_dsn
+    pop_schema <- SApopdat$pop_schema
+    popconn <- SApopdat$popconn
     dbqueries <- SApopdat$dbqueries
     dbqueriesWITH <- SApopdat$dbqueriesWITH
     areawt <- SApopdat$areawt
     areawt2 <- SApopdat$areawt2
     adjcase <- SApopdat$adjcase
     pltidsid <- SApopdat$pjoinid
+    pltassgnid <- SApopdat$pltassgnid
     SAdoms <- SApopdat$SAdoms
     largebnd.unique <- SApopdat$largebnd.unique
     pltflds <- SApopdat$pltflds
     condflds <- SApopdat$condflds
-    
-    pop_datsource <- SApopdat$pop_datsource
-    popdatindb <- SApopdat$popdatindb
-    popdbinfo <- SApopdat$popdbinfo
-    
     
     ## check smallbnd.dom
     ########################################################
@@ -540,7 +544,6 @@ modSAarea <- function(SApopdatlst = NULL,
     } 
     
     ## Check prednames
-    ########################################
     if (is.null(prednames)) {
       prednames <- SApopdat$prednames
     } else {
@@ -556,6 +559,18 @@ modSAarea <- function(SApopdatlst = NULL,
       }
     }
 
+    if (popdatindb) {
+      if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
+        if (!is.null(pop_dsn)) {
+          if (pop_fmt == "sqlite") {
+            popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
+          }
+        } else {
+          stop("invalid database connection")
+        }
+      }
+    }
+    
     ########################################
     ## Check area units
     ########################################
@@ -579,15 +594,15 @@ modSAarea <- function(SApopdatlst = NULL,
     estdat <- 
       check.estdata(esttype = esttype, 
                     popType = popType,
-                    pop_datsource = pop_datsource,
                     popdatindb = popdatindb, 
-                    popdbinfo = popdbinfo,
+                    popconn = popconn, pop_schema = pop_schema,
                     pltcondx = pltcondx,
                     pltflds = pltflds, 
                     condflds = condflds,
                     dbqueriesWITH = dbqueriesWITH,
                     dbqueries = dbqueries,
                     totals = totals,
+                    pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                     landarea = landarea,
                     ACI = ACI, 
                     pcfilter = pcfilter,
@@ -606,33 +621,25 @@ modSAarea <- function(SApopdatlst = NULL,
     divideby <- estdat$divideby
     estround <- estdat$estround
     pseround <- estdat$pseround
-    returntitle <- estdat$returntitle
     addtitle <- estdat$addtitle
-    
+    returntitle <- estdat$returntitle
+    rawonly <- estdat$rawonly
+    savedata <- estdat$savedata
+    outfolder <- estdat$outfolder
+    overwrite_layer <- estdat$overwrite_layer
+    outfn.pre <- estdat$outfn.pre
+    outfn.date <- estdat$outfn.date
+    append_layer = estdat$append_layer
+    rawfolder <- estdat$rawfolder
+    raw_fmt <- estdat$raw_fmt
+    raw_dsn <- estdat$raw_dsn
     pcwhereqry <- estdat$where.qry
     SCHEMA. <- estdat$SCHEMA.
     pltcondflds <- estdat$pltcondflds
     pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
     pltcondxWITHqry <- estdat$pltcondxWITHqry
-    pop_datsource <- estdat$pop_datsource
-    popdatindb <- estdat$popdatindb
-    popconn <- estdat$popconn
-    pop_schema <- estdat$pop_schema
-    SCHEMA. <- estdat$SCHEMA.
-    poptablst <- estdat$poptablst
     
-    if (savedata) {
-      rawonly <- estdat$rawonly
-      savedata <- estdat$savedata
-      outfolder <- estdat$outfolder
-      overwrite_layer <- estdat$overwrite_layer
-      outfn.pre <- estdat$outfn.pre
-      outfn.date <- estdat$outfn.date
-      append_layer = estdat$append_layer
-      rawoutlst <- estdat$rawoutlst
-    }
     
-
     ###################################################################################
     ### Check row and column data
     ###################################################################################
@@ -650,8 +657,7 @@ modSAarea <- function(SApopdatlst = NULL,
                    row.orderby = row.orderby, col.orderby = col.orderby, 
                    row.add0 = row.add0, col.add0 = col.add0, 
                    row.classify = row.classify, col.classify = col.classify,
-                   title.rowvar = title.rowvar, title.colvar = title.colvar,
-                   whereqry = pcwhereqry,
+                   title.rowvar = title.rowvar, title.colvar = title.colvar, 
                    rowlut = rowlut, collut = collut, 
                    rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                    rowgrpord = rowgrpord, title.rowgrp = NULL)
@@ -1091,7 +1097,6 @@ modSAarea <- function(SApopdatlst = NULL,
                 sumunits = sumunits, 
                 areavar = areavar, 
                 unitvar ="DOMAIN", 
-                unitarea = dunitarea,
                 unit_totest = dunit_totest, 
                 unit_rowest = dunit_rowest, 
                 unit_colest = dunit_colest, 
@@ -1172,15 +1177,15 @@ modSAarea <- function(SApopdatlst = NULL,
       ## Export multestdf
       overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)     
       datExportData(multestdf, 
-                    savedata_opts=list(outfolder = multest_outfolder, 
-                                        out_fmt = multest_fmt, 
-                                        out_dsn = multest_dsn, 
-                                        out_layer = multest_layer,
-                                        outfn.pre = outfn.pre, 
-                                        outfn.date = outfn.date, 
-                                        overwrite_layer = overwrite_layer,
-                                        append_layer = multest.append,
-                                        add_layer = TRUE))
+                    savedata_opts=list(outfolder=multest_outfolder, 
+                                        out_fmt=multest_fmt, 
+                                        out_dsn=multest_dsn, 
+                                        out_layer=multest_layer,
+                                        outfn.pre=outfn.pre, 
+                                        outfn.date=outfn.date, 
+                                        overwrite_layer=overwrite_layer,
+                                        append_layer=multest.append,
+                                        add_layer=TRUE))
     }
   } 
 
@@ -1261,23 +1266,25 @@ modSAarea <- function(SApopdatlst = NULL,
           rawtab <- rawdat[[i]]
 
           outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
-          
           if (tabnm %in% c("plotsampcnt", "condsampcnt")) {
-            write2csv(rawtab, 
-                      outfolder = rawfolder, 
-                      outfilenm = outfn.rawtab, 
-                      outfn.date = outfn.date, 
-                      appendfile = append_layer,
-                      overwrite = overwrite_layer)
-            
+            write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
+                      outfn.date=outfn.date, overwrite=overwrite_layer)
           } else if (is.data.frame(rawtab)) {
-            if (rawoutlst$out_fmt != "csv") {
-              rawoutlst$out_layer <- tabnm
+            if (raw_fmt != "csv") {
+              out_layer <- tabnm 
             } else {
-              rawoutlst$out_layer <- outfn.rawtab
+              out_layer <- outfn.rawtab
             }
-            datExportData(rawtab,
-                          savedata_opts = rawoutlst)
+            datExportData(rawtab, 
+                          savedata_opts=list(outfolder=rawfolder, 
+                                              out_fmt=raw_fmt, 
+                                              out_dsn=raw_dsn, 
+                                              out_layer=out_layer,
+                                              outfn.pre=outfn.pre, 
+                                              outfn.date=outfn.date, 
+                                              overwrite_layer=overwrite_layer,
+                                              append_layer=append_layer,
+                                              add_layer=TRUE))
           }
         }
       }
