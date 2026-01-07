@@ -21,6 +21,7 @@ getGBestimates <- function(esttype,
                            totals,
                            sumunits,
                            unit.action,
+                           pltids = NULL,
                            rowvar = NULL,
                            colvar = NULL,
                            grpvar = NULL,
@@ -58,11 +59,17 @@ getGBestimates <- function(esttype,
   if (addtotal && !"TOTAL" %in% names(domdatn)) {
     domdatn$TOTAL <- 1
   }
+  
+  ## Subset domdatn with pltids
+  if (!is.null(pltids)) {
+    domdatn <- domdatn[domdatn[[uniqueid]] %in% pltids, ]
+  }
 
   ## Join domdat to pltassgnx using data.table key and all.y=TRUE
   estunits <- unique(pltassgnx[[unitvar]])
   nbrunits <- length(estunits)
   domdatn <- pltassgnx[domdatn]
+  
   
   if (esttype == "RATIO") {
     ## Append TOTAL to domdatn
@@ -76,6 +83,9 @@ getGBestimates <- function(esttype,
     domdatd <- chk$tab1
     domdatn <- chk$tab2
   }
+  
+  ## Check datasets and subset using uniquerow and uniquecol
+  
 
   ## Get total estimate
   #############################################################################
@@ -181,6 +191,9 @@ getGBestimates <- function(esttype,
                           by = byvarsn, .SDcols = estvarn.name]
   }
 
+  
+  
+  #############################################################################
   ## Get row estimate
   #############################################################################
   if (is.null(rowvar) || rowvar == "NONE") rowvar <- "TOTAL"
@@ -191,23 +204,29 @@ getGBestimates <- function(esttype,
       message("row.NAname is invalid... using 'Other'")
       row.NAname = "Other"
     }
+    
     ## Check uniquerow with domain-level data - add NA factor values if necessary
     uniquerow <- check.unique(x = domdatn,
                               uniquex = uniquerow,
                               xvar = rowvar,
                               NAname = row.NAname)
-
+    
 
     ## sum estimation variable to plot/domain-level by rowvar
     ###########################################################################
     if (esttype == "RATIO") {
-
+      
       ## denominator: sum estimates by rowvar and plot if in denominator
       domvardrow <- domvard[domvard %in% rowvar]
       domdatdplt <- domdatdcond[, lapply(.SD, sum, na.rm=TRUE),
                                 by = c(byvarsplt, domvardrow), .SDcols = estvard.name]
 
       if (!is.null(tdomvar) && (!is.null(tdomvar2) || tdomvar == rowvar)) {
+        
+        ## First, make sure same class, and if factor, that levels match
+        chk <- suppressMessages(check.matchclass(uniquerow, domdatncondt, matchcol = rowvar))
+        domdatncondt <- chk$tab2
+        
         ## numerator: sum estimates by rowvar
         domdatnplt <- domdatncondt[, lapply(.SD, sum, na.rm=TRUE),
                                    by = c(byvarsplt, rowvar), .SDcols = estvarn.name]
@@ -225,7 +244,7 @@ getGBestimates <- function(esttype,
       }
 
     } else {
-
+      
       domvarsrow <- domvars[domvars %in% rowvar]
       domdatrow <- domdatcond[, lapply(.SD, sum, na.rm=TRUE),
                               by = c(byvarsplt, domvarsrow), .SDcols = estvarn.name]
@@ -246,19 +265,10 @@ getGBestimates <- function(esttype,
                  unitvar = unitvar,
                  strvar = strvar,
                  domain = rowvar)
-    
-    if (unit.action %in% c("keep", "combine") && 
-        length(unique(unit_rowest[[unitvar]])) < nbrunits) {
-      missunits <- estunits[!estunits %in% unique(unit_rowest[[unitvar]])]
-      missunitsdf <- data.frame(missunits)
-      names(missunitsdf) <- unitvar
-      unit_rowest <-rbindlist(list(unit_rowest, missunitsdf), fill=TRUE)
-      unit_rowest <- DT_NAto0(unit_rowest, cols = c("nhat", "nhat.var", "NBRPLT.gt0"))
-      unit_rowest <- setorderv(unit_rowest, unitvar)
-    } 
   }
 
 
+  #############################################################################
   ## Get column (and cell) estimate
   #############################################################################
   if (is.null(colvar)) colvar <- "NONE"
@@ -269,21 +279,30 @@ getGBestimates <- function(esttype,
       message("col.NAname is invalid... using 'Other'")
       col.NAname = "Other"
     }
+  
+    
     ## Check uniquecol with domain-level data - add NA factor values if necessary
     uniquecol <- check.unique(x = domdatn,
                               uniquex = uniquecol,
                               xvar = colvar,
                               NAname = col.NAname)
+    
 
     ## sum estimation variable to plot/domain-level by rowvar
     ###########################################################################
     if (esttype == "RATIO") {
+      
       ## denominator: sum estimates by colvar if in denominator
       domvardcol <- domvard[domvard == colvar]
       domdatdplt <- domdatdcond[, lapply(.SD, sum, na.rm=TRUE),
                                 by = c(byvarsplt, domvardcol), .SDcols = estvard.name]
 
       if (!is.null(tdomvar) && (!is.null(tdomvar2) || tdomvar == colvar)) {
+        
+        ## First, make sure same class, and if factor, that levels match
+        chk <- suppressMessages(check.matchclass(uniquecol, domdatncondt, matchcol = colvar))
+        domdatncondt <- chk$tab2
+        
         ## numerator: sum estimates by rowvar
         domdatnplt <- domdatncondt[, lapply(.SD, sum, na.rm=TRUE),
                                    by = c(byvarsplt, colvar), .SDcols = estvarn.name]
@@ -324,15 +343,15 @@ getGBestimates <- function(esttype,
                  strvar = strvar,
                  domain = colvar)
 
-    if (unit.action %in% c("keep", "combine") && 
-        length(unique(unit_colest[[unitvar]])) < nbrunits) {
-      missunits <- estunits[!estunits %in% unique(unit_colest[[unitvar]])]
-      missunitsdf <- data.frame(missunits)
-      names(missunitsdf) <- unitvar
-      unit_colest <-rbindlist(list(unit_colest, missunitsdf), fill=TRUE)
-      unit_colest <- DT_NAto0(unit_colest, cols = c("nhat", "nhat.var", "NBRPLT.gt0"))
-      unit_colest <- setorderv(unit_colest, unitvar)
-    } 
+    # if (unit.action %in% c("keep", "combine") && 
+    #     length(unique(unit_colest[[unitvar]])) < nbrunits) {
+    #   missunits <- estunits[!estunits %in% unique(unit_colest[[unitvar]])]
+    #   missunitsdf <- data.frame(missunits)
+    #   names(missunitsdf) <- unitvar
+    #   unit_colest <-rbindlist(list(unit_colest, missunitsdf), fill=TRUE)
+    #   unit_colest <- DT_NAto0(unit_colest, cols = c("nhat", "nhat.var", "NBRPLT.gt0"))
+    #   unit_colest <- setorderv(unit_colest, unitvar)
+    # } 
     
     ## Get estimates for cell values (grpvar)
     #############################################################################
@@ -395,15 +414,15 @@ getGBestimates <- function(esttype,
                  strvar = strvar,
                  domain = grpvar)
     
-    if (unit.action %in% c("keep", "combine") && 
-        length(unique(unit_grpest[[unitvar]])) < nbrunits) {
-      missunits <- estunits[!estunits %in% unique(unit_grpest[[unitvar]])]
-      missunitsdf <- data.frame(missunits)
-      names(missunitsdf) <- unitvar
-      unit_grpest <-rbindlist(list(unit_grpest, missunitsdf), fill=TRUE)
-      unit_grpest <- DT_NAto0(unit_grpest, cols = c("nhat", "nhat.var", "NBRPLT.gt0"))
-      unit_grpest <- setorderv(unit_grpest, unitvar)
-    } 
+    # if (unit.action %in% c("keep", "combine") && 
+    #     length(unique(unit_grpest[[unitvar]])) < nbrunits) {
+    #   missunits <- estunits[!estunits %in% unique(unit_grpest[[unitvar]])]
+    #   missunitsdf <- data.frame(missunits)
+    #   names(missunitsdf) <- unitvar
+    #   unit_grpest <-rbindlist(list(unit_grpest, missunitsdf), fill=TRUE)
+    #   unit_grpest <- DT_NAto0(unit_grpest, cols = c("nhat", "nhat.var", "NBRPLT.gt0"))
+    #   unit_grpest <- setorderv(unit_grpest, unitvar)
+    # } 
     
   }
 
@@ -422,9 +441,15 @@ getGBestimates <- function(esttype,
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
 
+    ## order rows
     if (!is.null(row.orderby) && row.orderby != "NONE") {
       setorderv(unit_rowest, c(row.orderby))
     }
+    ## order columns
+    ordercols <- unique(c(unitvar, rowvar, names(uniquerow)))
+    unit_rowest <- setcolorder(unit_rowest, unique(c(ordercols, names(unit_rowest))))
+    
+    ## setkey and merge area
     setkeyv(unit_rowest, unitvar)
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
 
@@ -452,9 +477,16 @@ getGBestimates <- function(esttype,
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
 
+    ## order rows
     if (!is.null(col.orderby) && col.orderby != "NONE") {
       setorderv(unit_colest, c(col.orderby))
     }
+    
+    ## order columns
+    ordercols <- unique(c(unitvar, colvar, names(uniquecol)))
+    unit_colest <- setcolorder(unit_colest, unique(c(ordercols, names(unit_colest))))
+    
+    ## setkey and merge area
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
 
@@ -489,6 +521,7 @@ getGBestimates <- function(esttype,
     #  unit_grpest <- unit_rowest[unit_grpest$nhat > 0,]
     #}
 
+    ## order rows
     if (!is.null(row.orderby) && row.orderby != "NONE") {
       if (!is.null(col.orderby) && col.orderby != "NONE") {
         setorderv(unit_grpest, c(row.orderby, col.orderby))
@@ -498,6 +531,12 @@ getGBestimates <- function(esttype,
     } else if (!is.null(col.orderby) && col.orderby != "NONE") {
       setorderv(unit_grpest, c(col.orderby))
     }
+    
+    ## order columns
+    ordercols <- unique(c(unitvar, rowvar, names(uniquerow), colvar, names(uniquecol)))
+    unit_grpest <- setcolorder(unit_grpest, unique(c(ordercols, names(unit_grpest))))
+    
+    ## setkey and merge area
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
 
