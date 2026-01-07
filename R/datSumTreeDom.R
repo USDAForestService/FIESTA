@@ -110,16 +110,17 @@
 #' @param pcwhereqry String. Plot/Condition filter if plot and/or cond table is 
 #' included.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
+#' @param dbconnopen Logical. If TRUE, keep database connection open.
 #' @param tabIDs List of unique IDs corresponding to the tables. See
 #' See help(tableIDs) for a list of options.
 #' @param datSum_opts List. Options for summarizing tree data, such as TPA,
 #' rounding, and adjusting TPA. See help(datSum_options()) for a list of 
 #' options. 
-#' @param database_opts List. Options for database, such as schema and 
-#' password. See help(database_options()) for a list of options.  
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'tdomsum'. 
+#' @param database_opts List. Options for database, such as schema and 
+#' password. See help(database_options()) for a list of options.  
 #' 
 #' @return tdomdata - a list of the following objects:
 #' 
@@ -200,6 +201,7 @@ datSumTreeDom <- function(tree = NULL,
                           pltidsid = NULL,
                           pcwhereqry = NULL,
                           savedata = FALSE,
+                          dbconnopen = TRUE,
                           tabIDs = tableIDs(),
                           datSum_opts = datSum_options(),
                           database_opts = NULL,
@@ -258,7 +260,7 @@ datSumTreeDom <- function(tree = NULL,
   tpavars <- c("TPA_UNADJ", "TPAMORT_UNADJ", "TPAGROW_UNADJ", "TPAREMV_UNADJ")
   propvar <- "CONDPROP_UNADJ"
 
-  
+ 
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -366,19 +368,16 @@ datSumTreeDom <- function(tree = NULL,
   
   ## Check output parameters
   if (savedata) {
-    outlst <- pcheck.output(savedata_opts = savedata_opts, 
-                            dbconnopen=TRUE, gui=gui)
-    outfolder <- outlst$outfolder
-    out_dsn <- outlst$out_dsn
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-    append_layer <- outlst$append_layer
-    outfn.date <- outlst$outfn.date
-    outfn.pre <- outlst$outfn.pre
-    if (is.null(out_layer)) {
-      out_layer <- "tdomsum"
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    if (savedata) {
+      if (outlst$out_fmt == "sqlite" && is.null(outlst$out_dsn)) {
+        outlst$out_dsn <- "GBpopdat.db"
+      }
+      outlst$add_layer <- TRUE
     }
-    outconn = outlst$out_conn
+    if (is.null(out_layer)) {
+      outlst$out_layer <- "tdomsum"
+    }
   }
 
   ##############################################################################
@@ -419,9 +418,9 @@ datSumTreeDom <- function(tree = NULL,
   tround <- sumdat$tround
   domainlst <- c(pcdomainlst, tdomainlst)
   pltsp <- sumdat$pltsp
-
+  
   if (pltsp) {
-    sppltx <- tdomtree[, names(tdomtree)[!names(tdomtree) %in% tsumvarnm]]
+    sppltx <- tdomtree[, names(tdomtree)[!names(tdomtree) %in% tsumvarnm], with = FALSE]
     tdomtree <- setDT(sf::st_drop_geometry(tdomtree))
   }
 
@@ -622,7 +621,6 @@ datSumTreeDom <- function(tree = NULL,
     }
   }
 
-
   ## GET NAME FOR SUMMED TREE VARIABLE FOR FILTERED TREE DOMAINS 
   if (tdomtot && is.null(tdomtotnm) && pivot) {
     if (is.null(tdomprefix)) {
@@ -668,10 +666,11 @@ datSumTreeDom <- function(tree = NULL,
                    ifelse(spcd_name == "SYMBOL", "SPECIES_SYMBOL", 
                           ifelse(spcd_name == "SCIENTIFIC", "SCIENTIFIC_NAME")))
     if (tdomvarnm == "SPCD") {
-      tdomvarlut <- merge(FIESTAutils::ref_species[, c("SPCD", refcol)], 
+      ref_spcd <- setDF(FIESTAutils::ref_species)
+      tdomvarlut <- merge(ref_spcd[, c("SPCD", refcol)], 
                         tdomvarlut, by="SPCD")
     } else {
-      tdomvar2lut <- merge(FIESTAutils::ref_species[, c("SPCD", refcol)], 
+      tdomvar2lut <- merge(ref_spcd[, c("SPCD", refcol)], 
                           tdomvar2lut, by="SPCD")
     }
   } else if (any(c(tdomvarnm, tdomvar2nm) == "SPGRPCD")) {
@@ -776,7 +775,7 @@ datSumTreeDom <- function(tree = NULL,
   }
 
   ## Merge if keepall
-  if (keepall) {
+  if (!bysubp && keepall) {
 
     NAcols <- c(tdomscols, tdomtotnm)
     if (pltsp) {
@@ -846,118 +845,51 @@ datSumTreeDom <- function(tree = NULL,
   if (proportion) sumtreef.prop <- tdoms.prop 
   if (presence) sumtreef.pres <- tdoms.pres
   
+  
+  
   if (savedata) {
     if (pltsp) {
       spExportSpatial(sumtreef, 
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer=out_layer,
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer, 
-                                add_layer=TRUE))
+                      savedata_opts = outlst)
     } else {
-      datExportData(sumtreef, dbconn = outconn, dbconnopen = TRUE,
-          savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer=out_layer,
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                add_layer=TRUE)) 
+      datExportData(sumtreef, 
+                    savedata_opts = outlst) 
     }
     
     if (proportion) {
+      outlst$out_layer <- paste0(outlst$out_layer, "_prop")
       if (pltsp) {
         spExportSpatial(sumtreef.prop,
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=outsp_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer=paste0(out_layer, "_prop"),
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer, 
-                                add_layer=TRUE))
+                        savedata_opts = outlst)
       } else {
-        datExportData(sumtreef.prop, dbconn = outconn, dbconnopen = TRUE,
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer=paste0(out_layer, "_prop"),
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                add_layer=TRUE)) 
+        datExportData(sumtreef.prop, 
+                      savedata_opts = outlst) 
       }
     }
     if (presence) {
+      outlst$out_layer <- paste0(outlst$out_layer, "_pres")
       if (pltsp) {
-        spExportSpatial(sumtreef.pres, 
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=outsp_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer=paste0(out_layer, "_pres"),
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer, 
-                                add_layer=TRUE))
+        spExportSpatial(sumtreef.pres,
+                        savedata_opts = outlst)
       } else {
-        datExportData(sumtreef.pres, dbconn = outconn, dbconnopen = TRUE,
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer=paste0(out_layer, "_pres"),
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                add_layer=TRUE)) 
+        datExportData(sumtreef.pres, 
+                      savedata_opts = outlst) 
       }
     }
     if (cover) {
+      outlst$out_layer <- paste0(outlst$out_layer, "_cov")
       if (pltsp) {
         spExportSpatial(sumtreef.cov,
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=outsp_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer=paste0(out_layer, "_cov"),
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer, 
-                                add_layer=TRUE))
+                        savedata_opts = outlst)
       } else {
-        datExportData(sumtreef.cov, dbconn = outconn, dbconnopen = TRUE,
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer=paste0(out_layer, "_cov"),
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                add_layer=TRUE)) 
+        datExportData(sumtreef.cov, 
+                      savedata_opts = outlst) 
       }
     }
     
-    
-    datExportData(tdomvarlut, dbconn = outconn, dbconnopen = TRUE,
-        savedata_opts=list(outfolder=outfolder, 
-                            out_fmt=out_fmt, 
-                            out_dsn=out_dsn, 
-                            out_layer=paste0(out_layer, "_lut"),
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_layer=overwrite_layer,
-                            append_layer=append_layer,
-                            add_layer=TRUE))   
+    outlst$out_layer <- paste0(outlst$out_layer, "_lut")
+    datExportData(tdomvarlut, 
+                  savedata_opts = outlst)   
     
   
   }
@@ -1016,7 +948,7 @@ datSumTreeDom <- function(tree = NULL,
   }
   returnlst$treeqry <- treeqry
   
-  if (!is.null(dbconn) && database_opts$dbconnopen) {
+  if (!is.null(dbconn) && dbconnopen) {
     DBI::dbDisconnect(dbconn)
   }
  
