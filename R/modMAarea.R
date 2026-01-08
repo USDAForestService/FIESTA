@@ -275,13 +275,13 @@ modMAarea <- function(MApopdat,
   ## Set parameters
   esttype="AREA"
   popType <- "CURR"
-  title.rowgrp=NULL
+  title.rowgrp <- NULL
   rawdata <- TRUE
-  sumunits <- FALSE
+  sumunits = addtitle <- FALSE
   returnlst <- list()
   
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder=domclassify <- NULL
+  n.total=n.strata=domclassify=outfn.pre <- NULL
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -344,10 +344,10 @@ modMAarea <- function(MApopdat,
   pltidsadj <- MApopdat$pltidsadj
   pltcondx <- MApopdat$pltcondx
   cuniqueid <- MApopdat$cuniqueid
-  pltassgnid <- MApopdat$pltassgnid
   condid <- MApopdat$condid
-  ACI <- MApopdat$ACI
   pltassgnx <- MApopdat$pltassgnx
+  pltassgnid <- MApopdat$pltassgnid
+  ACI <- MApopdat$ACI
   unitarea <- MApopdat$unitarea
   areavar <- MApopdat$areavar
   areaunits <- MApopdat$areaunits
@@ -363,21 +363,22 @@ modMAarea <- function(MApopdat,
   invyrs <- MApopdat$invyrs
   predfac <- MApopdat$predfac
   adj <- MApopdat$adj
-  popdatindb <- MApopdat$popdatindb
-  pop_fmt <- MApopdat$pop_fmt
-  pop_dsn <- MApopdat$pop_dsn
-  pop_schema <- MApopdat$pop_schema
-  popconn <- MApopdat$popconn
   dbqueries <- MApopdat$dbqueries
   dbqueriesWITH <- MApopdat$dbqueriesWITH
   areawt <- MApopdat$areawt
   areawt2 <- MApopdat$areawt2
   adjcase <- MApopdat$adjcase
   pltidsid <- MApopdat$pjoinid
-  pltassgnid <- MApopdat$pltassgnid
   pltflds <- MApopdat$pltflds
   condflds <- MApopdat$condflds
   
+  pop_datsource <- MApopdat$pop_datsource
+  popdatindb <- MApopdat$popdatindb
+  popdbinfo <- MApopdat$popdbinfo
+  
+
+  ## Check prednames
+  ########################################
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
       prednames <- MApopdat$prednames
@@ -394,18 +395,6 @@ modMAarea <- function(MApopdat,
       }
     }
   } 
-  
-  if (popdatindb) {
-    if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
-      if (!is.null(pop_dsn)) {
-        if (pop_fmt == "sqlite") {
-          popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
-        }
-      } else {
-        stop("invalid database connection")
-      }
-    }
-  }
 
   
   ########################################
@@ -425,17 +414,17 @@ modMAarea <- function(MApopdat,
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- 
-    check.estdata(esttype=esttype,
+    check.estdata(esttype = esttype,
                   popType = popType,
-                  popdatindb = popdatindb,
-                  popconn = popconn, pop_schema = pop_schema,
+                  pop_datsource = pop_datsource,
+                  popdatindb = popdatindb, 
+                  popdbinfo = popdbinfo,
                   pltcondx = pltcondx,
                   pltflds = pltflds, 
                   condflds = condflds,
                   dbqueriesWITH = dbqueriesWITH,
                   dbqueries = dbqueries,
                   totals = totals,
-                  pop_fmt=pop_fmt, pop_dsn=pop_dsn,
                   landarea = landarea,
                   ACI = ACI,
                   pcfilter = pcfilter,
@@ -454,23 +443,31 @@ modMAarea <- function(MApopdat,
   divideby <- estdat$divideby
   estround <- estdat$estround
   pseround <- estdat$pseround
-  addtitle <- estdat$addtitle
   returntitle <- estdat$returntitle
-  rawonly <- estdat$rawonly
-  savedata <- estdat$savedata
-  outfolder <- estdat$outfolder
-  overwrite_layer <- estdat$overwrite_layer
-  outfn.pre <- estdat$outfn.pre
-  outfn.date <- estdat$outfn.date
-  append_layer = estdat$append_layer
-  rawfolder <- estdat$rawfolder
-  raw_fmt <- estdat$raw_fmt
-  raw_dsn <- estdat$raw_dsn
+  addtitle <- estdat$addtitle
+  
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
   pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
   pltcondxWITHqry <- estdat$pltcondxWITHqry
+  pop_datsource <- estdat$pop_datsource
+  popdatindb <- estdat$popdatindb
+  popconn <- estdat$popconn
+  pop_schema <- estdat$pop_schema
+  SCHEMA. <- estdat$SCHEMA.
+  poptablst <- estdat$poptablst
+  
+  if (savedata) {
+    rawonly <- estdat$rawonly
+    savedata <- estdat$savedata
+    outfolder <- estdat$outfolder
+    overwrite_layer <- estdat$overwrite_layer
+    outfn.pre <- estdat$outfn.pre
+    outfn.date <- estdat$outfn.date
+    append_layer = estdat$append_layer
+    rawoutlst <- estdat$rawoutlst
+  }
   
   
   ###################################################################################
@@ -491,6 +488,7 @@ modMAarea <- function(MApopdat,
                  row.add0 = row.add0, col.add0 = col.add0, 
                  row.classify = row.classify, col.classify = col.classify,
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
+                 whereqry = pcwhereqry,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL)
@@ -589,7 +587,7 @@ modMAarea <- function(MApopdat,
   estdat <- 
     getMAestimates(esttype = esttype,
                    domdatn = cdomdat,
-                   uniqueid = pltassgnid,
+                   uniqueid = pltassgnid, condid = condid,
                    estvarn.name = estnm,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
@@ -632,7 +630,8 @@ modMAarea <- function(MApopdat,
   tabs <- 
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 
-                unitvar = unitvar, unitvars = unitvars, 
+                unitvar = unitvar, unitvars = unitvars,
+                unitarea = unitarea,
                 unit_totest = unit_totest, 
                 unit_rowest = unit_rowest, unit_colest = unit_colest,
                 unit_grpest = unit_grpest, 
@@ -690,23 +689,23 @@ modMAarea <- function(MApopdat,
         if (!tabnm %in% c(prednames)) {
           rawtab <- rawdat[[i]]
           outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
+          
           if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
-            write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
-                    outfn.date=outfn.date, overwrite=overwrite_layer)
+            write2csv(rawtab, 
+                      outfolder = rawoutlst$rawfolder, 
+                      outfilenm = outfn.rawtab, 
+                      outfn.date = outfn.date, 
+                      appendfile = append_layer,
+                      overwrite = overwrite_layer)
+            
           } else if (is.data.frame(rawtab)) {
-            if (raw_fmt != "csv") {
-              out_layer <- tabnm 
+            if (rawoutlst$out_fmt != "csv") {
+              rawoutlst$out_layer <- tabnm
             } else {
-              out_layer <- outfn.rawtab
+              rawoutlst$out_layer <- outfn.rawtab
             }
-            datExportData(rawtab, 
-                  savedata_opts=list(outfolder = rawfolder, 
-                                      out_fmt = raw_fmt, 
-                                      out_dsn = raw_dsn, 
-                                      out_layer = out_layer,
-                                      overwrite_layer = overwrite_layer,
-                                      append_layer = append_layer,
-                                      add_layer = TRUE))
+            datExportData(rawtab,
+                          savedata_opts = rawoutlst)
           }
         }
       }

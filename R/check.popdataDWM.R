@@ -1,4 +1,4 @@
-check.popdataVOL <-
+check.popdataDWM <-
   function(tabs, tabIDs, popType,
            datindb, pltaindb, popdatindb,
            pltidsWITHqry,
@@ -14,6 +14,7 @@ check.popdataVOL <-
            plotlst,
            condid = "CONDID",
            areawt = "CONDPROP_UNADJ", areawt2 = NULL,
+           popevalid = NULL,
            MICRO_BREAKPOINT_DIA = 5,
            MACRO_BREAKPOINT_DIA = NULL,
            unitvars = NULL,
@@ -34,12 +35,14 @@ check.popdataVOL <-
     ## 1. Define variables necessary for estimation:
     ## - cvars2keep = 'PROP_BASIS'
     ## 2. Check if data are in a database (datindb) and if dbconn is valid.
-    ## 3. Get table names used in estimation.
+    ## 3. Get table names used in estimation from tabs.
     ## - PLOT; COND;
-    ## - TREE (if popType = 'VOL'); SEEDLING (if popType = 'VOL')
+    ## - COND_DWM_CALC - down woody material calculated variable
     ## 4. Check for variables in tables and define SELECT variable in cond, plot
     ##    cond - (cuniqueid, condid, cvars2keep)
     ##    area weight variables - (SUBPPROP_UNADJ, MACRPROP_UNADJ, MICRPROP_UNADJ)
+    ##    dwm area weight variables - (CONDPROP_CWD, CONDPROP_FWD_SM, CONDPROP_FWD_MD,
+    ##                                 CONDPROP_FWD_LG, CONDPROP_DUFF, CONDPROP_PILE)
     ## 5. Extract tables used to calculate adjustment factors from database if
     ##    pltassgn is not in database
     ## 6. Build query for adjustment factors.
@@ -53,13 +56,14 @@ check.popdataVOL <-
     ###################################################################################
 
     ## Set global variables
-    treenm=seednm=condsampcnt=areawt2nm=adjcase=tadjfac=TPA_UNADJ=SCHEMA. <- NULL
+    dwmnm=areawt2nm=adjcase=dwmadjfac=TPA_UNADJ=SCHEMA. <- NULL
     dbqueries=dbqueriesWITH <- list()
     cpropvars <- list(COND="CONDPROP_UNADJ", SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ")
-    tpropvars <- list(SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ", MICR="MICRPROP_UNADJ")
-    diavar <- "DIA"
+    dwmpropvars <- list(CWD="CONDPROP_CWD", FWD_SM="CONDPROP_FWD_SM", FWD_MD="CONDPROP_FWD_MD",
+                        FWD_LG="CONDPROP_FWD_LG", DUFF="CONDPROP_DUFF", PILE="CONDPROP_PILE")
     addfortypgrp <- TRUE
     returnadj <- TRUE
+    dwmvars2keep <- NULL
 
     ## Get variables from outlst
     if (savedata) {
@@ -68,7 +72,7 @@ check.popdataVOL <-
     } else {
       poptablst <- dbtablst
     }
-
+    
     ##############################################################################
     ## 1. Define variables necessary for estimation
     ##############################################################################
@@ -87,7 +91,6 @@ check.popdataVOL <-
         SCHEMA. <- paste0(schema, ".")
       }
     }
-
 
     ##############################################################################
     ## 3. Get tables used in estimation from tabs
@@ -113,44 +116,32 @@ check.popdataVOL <-
     condxnm <- condnm
     if (!is.null(condx)) condxnm <- "condx"
     
+    ## cond_dwm_calc table
+    dwmlst <- popTabchk("cond_dwm_calc", tabtext = "cond_dwm_calc",
+                         tabs, tabIDs, dbtablst = dbtablst, 
+                         dbconn = dbconn, schema = schema, 
+                         datindb = datindb)
+    dwmnm <- dwmlst$tabnm
+    dwmflds <- dwmlst$tabflds
+    dwmuniqueid <- dwmlst$tabid
+    dwmx <- dwmlst$tabx
+    dwmxnm <- dwmnm
+    if (!is.null(dwmx)) dwmxnm <- "dwmx"
+
     ## define aliases
     plota. <- "p."
     conda. <- "c."
     pltidsa. <- "pltids."
+    dwma. <- "dwm."
     
 
     if (is.null(condnm)) {
       stop("must include cond for estimation")
-    } 
-    
-    if (popType == "VOL") {
-     
-      ## tree table
-      treelst <- popTabchk(c("tree"), tabtext = "tree",
-                           tabs, tabIDs, 
-                           dbtablst = dbtablst, 
-                           dbconn = dbconn, schema = schema,
-                           datindb = datindb)
-      treenm <- treelst$tabnm
-      treeflds <- treelst$tabflds
-      tuniqueid <- treelst$tabid
-      treex <- treelst$tabx
-
-      ## seed table
-      seedlst <- popTabchk(c("seed", "seedling"), tabtext = "seed",
-                           tabs, tabIDs, 
-                           dbtablst = dbtablst, 
-                           dbconn = dbconn, schema = schema, 
-                           datindb = datindb)
-      seednm <- seedlst$tabnm
-      seedflds <- seedlst$tabflds
-      suniqueid <- seedlst$tabid
-      seedx <- seedlst$tabx
-      
-      if (is.null(treenm) && is.null(seednm)) {
-        stop("must include tree and/or seed for estimation")
-      }
     }
+    if (is.null(dwmnm)) {
+      stop("must include cond_dwm_calc for estimation")
+    }
+    
     
     ##############################################################################
     ## 4. Check for variables in tables and define SELECT variables
@@ -159,12 +150,15 @@ check.popdataVOL <-
     ## 4.1. Check unique identifiers and necessary variables to keep
     ##############################################################################
     
-    ## Check cuniqueid in cond
+    ## cond table
+    ##############################################################################
+    
+    ## Check cuniqueid
     cuniqueid <- pcheck.varchar(var2check = cuniqueid, varnm = "cuniqueid", gui=gui,
                                 checklst = condflds, caption = "Unique identifier of plot in cond",
                                 warn = paste(cuniqueid, "not in cond"), stopifnull = TRUE)
     
-    ## Check condid in cond
+    ## Check condid
     condid <- pcheck.varchar(var2check = condid, varnm = "condid", gui=gui,
                              checklst = condflds, caption = "Unique identifier of conditions in cond",
                              warn = paste(condid, "not in cond"), stopifnull = TRUE)
@@ -182,32 +176,48 @@ check.popdataVOL <-
       }
     }
     
+    ## cond_dwm_calc table
+    ##############################################################################
+    
+    ## Check dwmuniqueid
+    dwmuniqueid <- pcheck.varchar(var2check = dwmuniqueid, varnm = "dwmuniqueid", gui=gui,
+                                  checklst = dwmflds, caption = "Unique identifier of plot in cond_dwm_calc",
+                                  warn = paste(dwmuniqueid, "not in cond_dwm_calc"), stopifnull = TRUE)
+    
+    ## Check condid in cond_dwm_calc
+    condid <- pcheck.varchar(var2check = condid, varnm = "condid", gui=gui,
+                             checklst = dwmflds, caption = "Unique identifier of conditions in cond_dwm_calc",
+                             warn = paste(condid, "not in cond_dwm_calc"), stopifnull = TRUE)
+    
+    ## Check dwmvars2keep in cond_dwm_calc
+    if (!is.null(dwmvars2keep)) {
+      dwmvars2keepchk <- unlist(sapply(dwmvars2keep, findnm,
+                                       dwmflds, returnNULL = TRUE))
+      if (length(dwmvars2keep) < length(dwmvars2keep)) {
+        message("variables are missing from dataset: ",
+                toString(dwmvars2keep[!dwmvars2keep %in% dwmvars2keepchk]))
+        return(NULL)
+      } else {
+        dwmvars2keep <- dwmvars2keepchk
+      }
+    }
+    
     
     ## 4.2. Check condition proportion variables for calculating area weights
     ##############################################################################
-    cpropvars <- check.PROPvars(condflds,
-                                propvars = unlist(cpropvars))
-    areawt <- findnm(areawt, cpropvars, returnNULL = TRUE)
-    if (is.null(areawt)) {
-      stop("areawt not in dataset: ", areawt)
-    }
+    dwmpropvars <- check.PROPvars(dwmflds,
+                                  propvars = unlist(dwmpropvars))
+    #    areawt <- findnm(areawt, cpropvars, returnNULL = TRUE)
+    #    if (is.null(areawt)) {
+    #      stop("areawt not in dataset: ", areawt)
+    #    }
     propvars <- cpropvars
+   
     
-    if (popType == "VOL") {
-      tpropvars <- check.PROPvars(condflds, treeflds = treeflds,
-                                  propvars = unlist(tpropvars),
-                                  MICRO_BREAKPOINT_DIA = MICRO_BREAKPOINT_DIA,
-                                  MACRO_BREAKPOINT_DIA = MACRO_BREAKPOINT_DIA)
-      cvars2keep <- unique(c(cvars2keep, tpropvars))
-      propvars <- c(cpropvars, tpropvars)
-      propvars <- propvars[!duplicated(propvars)]
-    }
-    
-    
-    ## 4.3. Define SELECT variables for cond and plot
+    ## 4.3. Define SELECT variables for cond and plot and dwm
     ##############################################################################
     
-    ## Define SELECT variables for cond
+    ## Get SELECT variables for cond
     if (defaultVars) {
       condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
     } else {
@@ -224,40 +234,34 @@ check.popdataVOL <-
     } else {
       pvars <- NULL
     }
-    
-    if (popType == "VOL") {
-      
-      ## Define SELECT variables for tree
-      if (!is.null(treenm)) {
-        if (defaultVars) {
-          treevars <- treeflds[treeflds %in% c(DBvars.default(istree=TRUE)$treevarlst,
-                                               DBvars.default(istree=TRUE)$tsumvarlst)]
-        } else {
-          treevars <- treeflds
-        }
-      }  
-      ## Define SELECT variables for seedling
-      if (!is.null(seednm)) {
-        if (defaultVars) {
-          seedvars <- seedflds[seedflds %in% c(DBvars.default(isseed=TRUE)$seedvarlst,
-                                               DBvars.default(isseed=TRUE)$ssumvarlst)]
-        } else {
-          seedvars <- seedflds
-        }
-      }
+
+    ## Get SELECT variables for cond_dwm_calc
+    if (defaultVars) {
+      dwmvars <- c("PLT_CN", "CONDID",  
+                   "CONDPROP_CWD", "CONDPROP_FWD_SM", "CONDPROP_FWD_MD", "CONDPROP_FWD_LG", 
+                   "CONDPROP_DUFF", "CONDPROP_PILE", 
+                   "CWD_TL_UNADJ", "CWD_LPA_UNADJ", "CWD_VOLCF_UNADJ", "CWD_DRYBIO_UNADJ", "CWD_CARBON_UNADJ", 
+                   "FWD_SM_TL_UNADJ", "FWD_SM_VOLCF_UNADJ", "FWD_SM_DRYBIO_UNADJ", 
+                   "FWD_SM_CARBON_UNADJ", "FWD_MD_TL_UNADJ", "FWD_MD_VOLCF_UNADJ", "FWD_MD_DRYBIO_UNADJ", 
+                   "FWD_MD_CARBON_UNADJ", "FWD_LG_TL_UNADJ", "FWD_LG_VOLCF_UNADJ", "FWD_LG_DRYBIO_UNADJ", 
+                   "FWD_LG_CARBON_UNADJ", "PILE_SAMPLE_AREA_UNADJ", "PILE_VOLCF_UNADJ", 
+                   "PILE_DRYBIO_UNADJ", "PILE_CARBON_UNADJ", "DUFF_TC_UNADJ", "PILE_TL_UNADJ")
+      #dwmvars <-  dwmflds[dwmflds %in% DBvars.default(isdwm)$dwmvarlst]
+      dwmvars <-  dwmflds[dwmflds %in% dwmvars]
+    } else {
+      dwmvars <- dwmflds
     }
     
-   
+    
     ##############################################################################
     ## 5. Extract tables used to calculate adjustment factors from database 
     ##    if pltassgn is not in database.
     ## Note: If pltassgn is not in database but all other tables are in database,
-    ##       import the cond table to memory and subset for calculating
+    ##       we need to import the cond table to memory and subset for calculating
     ##       adjustment factors.
-    ## condnm changes from 'cond' to 'condx'
     ##############################################################################
     if (datindb && !pltaindb) {
-
+      
       ## 5.1. Extract cond table
       ###################################################################
       
@@ -300,25 +304,24 @@ check.popdataVOL <-
         } else {
           names(condx) <- toupper(names(condx))
         }
-
+        
         ## Return and/or save cond data
         condkey <- c(cuniqueid, condid)
         setkeyv(setDT(condx), condkey)
-
 
         ## Subset condx to plots in pltassgn using getdataCNs
         if (!is.null(getdataCNs)) {
           condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
         }
-
+        
       } else {
         assign(condnm, DBI::dbReadTable(dbconn, condnm))
       }
 
       ## Save data
       if (savedata) {
-        message("saving cond table...")
-        outlst$out_layer <- "cond"
+        message("saving COND...")
+        outlst$out_layer <- "COND"
         if (!append_layer) index.unique.cond <- condkey
         datExportData(condx,
                       savedata_opts = outlst)
@@ -331,8 +334,82 @@ check.popdataVOL <-
       } else {
         condnm=condxnm <- "condx"
       }
+      
+  
+      ## 5.2. Extract cond_dwm_calc table
+      ###################################################################
+      
+      ## Build cond_dwm_calc query
+      if (!is.null(getdataWITHqry) && !is.null(getdataCNs)) {
+        
+        ## Build cond_dwm_calc FROM query
+        dwmjoinqry <- getjoinqry(dwmuniqueid, pltidsid, dwma., pltidsa.)
+        dwmfromqry <- paste0("\n JOIN ", SCHEMA., dwmxnm, " dwm ", dwmjoinqry)
+        
+        ## Build dwm SELECT query
+        dwmselectqry <- toString(paste0(dwma., dwmvars))
+        
+        ## Build final dwm query, including getdataWITHqry
+        dwmqry <- paste0(getdataWITHqry,
+                          "\n-------------------------------------------",
+                          "\n SELECT DISTINCT ", dwmselectqry,
+                          "\n FROM pltids",
+                          dwmfromqry)
+        dbqueries$dwm_calc <- dwmqry
+        
+        ## Run final dwmquery, including pltidsqry
+        if (datindb) {
+          dwmx <- tryCatch(
+            DBI::dbGetQuery(dbconn, dwmqry),
+            error=function(e) {
+              message(e,"\n")
+              return(NULL)})
+        } else {
+          dwmx <- tryCatch(
+            sqldf::sqldf(dwmqry, connection = NULL),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
+        }
+        if (is.null(dwmx) || nrow(dwmx) == 0) {
+          message("invalid cond_dwm_calc query...")
+          message(dwmqry)
+          return(NULL)
+        } else {
+          names(dwmx) <- toupper(names(dwmx))
+        }
+
+        ## Return and/or save cond data
+        dwmkey <- c(dwmuniqueid, condid)
+        setkeyv(setDT(dwmx), dwmkey)
+        
+        ## Subset condx to plots in pltassgn
+        if (!is.null(getdataCNs)) {
+          dwmx <- dwmx[dwmx[[cuniqueid]] %in% getdataCNs,]
+        }
+        
+      } else {
+        assign(dwmnm, DBI::dbReadTable(dbconn, dwmnm))
+      }
+      
+      ## Save data
+      # if (savedata) {
+      #   message("saving cond_dwm_calc...")
+      #   outlst$out_layer <- "cond_dwm_calc"
+      #   if (!append_layer) index.unique.dwm <- dwmkey
+      #   datExportData(dwmx,
+      #                 savedata_opts = outlst)
+      #   if (!returndata) {
+      #     poptablst <- c(poptablst, "cond_dwm_calc")
+      #     dwmnm <- "cond_dwm_calc"
+      #   } else {
+      #     dwmnm=dwmxnm <- "dwmx"
+      #   }
+      # } else {
+        dwmnm=dwmxnm <- "dwmx"
+      #}
     }
-    
+      
     ## 5.2. Set output data formats for population data
     ###################################################################
 
@@ -364,11 +441,38 @@ check.popdataVOL <-
 
     ## 6.1. Build query for adjustment factors (ADJqry) based on popType
     ###################################################################
-
+    
+    ## check if EVALID is in cond_dwm_calc... if EVALID is in the table, we will
+    ## add WITH query to get distinct values by plot.
+    evalidchk <- findnm("EVALID", dwmflds, returnNULL = TRUE)
+    dwmSCHEMA. <- SCHEMA.
+    if (!is.null(evalidchk)) {
+      dwmWITHjoinqry <- getjoinqry(dwmuniqueid, pltidsid, "dwm.", pltidsa.)
+      dwmWITHqry <- paste0(
+        "dwm_calc AS ",
+        "\n(SELECT DISTINCT ", toString(dwmvars), 
+        "\n FROM pltids", 
+        "\n JOIN ", SCHEMA., dwmxnm, " dwm ", dwmWITHjoinqry) 
+      dwmxnm <- "dwm_calc"
+      dwmSCHEMA. <- ""
+      
+      pltidsWITHqry <- paste0(
+        pltidsWITHqry, ", ",
+        "\n----- get distinct down wood material plots",
+        "\n", dwmWITHqry, ")")
+      
+    }
+    
     ## Build FROM statement
     adjjoinqry <- getjoinqry(cuniqueid, pltidsid, "c.", pltidsa.)
     adjfromqry <- paste0("\n FROM pltids",
                          "\n JOIN ", SCHEMA., condxnm, " c ", adjjoinqry)
+    
+    ## Build FROM statement - DWM
+    dwmjoinqry <- getjoinqry(c(dwmuniqueid, condid), c(cuniqueid, condid), dwma., "c.")
+    adjfromqry <- paste0(adjfromqry,
+                         "\n JOIN ", dwmSCHEMA., dwmxnm, " dwm ", dwmjoinqry)
+    
 
     ## Build ADJqry WHERE statement (i.e., excluding nonresponse)
     adjwhereqry <- NULL
@@ -380,7 +484,8 @@ check.popdataVOL <-
     ADJqry <-
       getADJqry(popType = popType,
                 adj = adj,
-                propvars = propvars,
+                propvars = cpropvars,
+                dwmpropvars = dwmpropvars,
                 adjfromqry = adjfromqry,
                 pwhereqry = adjwhereqry,
                 pltidsid = pltidsid,
@@ -389,6 +494,7 @@ check.popdataVOL <-
                 pltidsa. = "pltids.",
                 propqry = NULL)
     #message(ADJqry)
+
 
     ## Build final query for adjustment factors, including pltids WITH query
     adjfactors.qry <- paste0(
@@ -433,15 +539,20 @@ check.popdataVOL <-
     dbqueries$adjfactors <- adjfactors.qry
 
     
-    ## 6.3 Build query for plot-level adjustment factors
+    ## 6.3. Build query for plot-level adjustment factors
     ###################################################################
     adja. <- "adj."
     adjvars <- sapply(toupper(propvars), function(x) {
       ifelse(grepl("PROP_UNADJ", x), paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)),
-             paste0(x, "_ADJ")) })
+                     paste0(x, "_ADJ")) })
+    dwmadjvars <- sapply(toupper(dwmpropvars), function(x) 
+      sub("CONDPROP_",  paste0("ADJ_FACTOR_"), x))
+      
     pltidsadjSELECT.qry <- paste0(
-      "SELECT ", toString(c(paste0(pltidsa., pltidsid), paste0(adja., adjvars))))
-
+      "SELECT ", toString(c(paste0(pltidsa., pltidsid), paste0(adja., adjvars))), ", ",
+      "\n       ", toString(paste0(adja., dwmadjvars)))
+    
+    
     ## if adj='samp', append query for plot-level adjustment factors
     if (adj == "samp") {
 
@@ -535,7 +646,7 @@ check.popdataVOL <-
 
 
     ##############################################################################
-    ## 7. Build queries for PLOT/COND (pltcondx)
+    ## 7. Build queries for PLOT/COND (pltcondx) and COND_DWM_CACL (dwmx)
     ##############################################################################
 
     ## 7.1. Build FROM and SELECT statements
@@ -554,7 +665,7 @@ check.popdataVOL <-
       pselectqry <- toString(paste0(plota., pvars))
 
     } else {
-      
+
       cjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
       pcfromqry <- paste0(
         "\n FROM pltids",
@@ -613,7 +724,7 @@ check.popdataVOL <-
     #                            "\npltcondx AS",
     #                            "\n(", pltcondx.qry, ")")
     # dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
-
+    
 
     ## 7.5. If returndata or savedata, run query for pltcondx
     ##################################################################
@@ -667,8 +778,9 @@ check.popdataVOL <-
       }
     }
 
+    
     ##############################################################################
-    ## 9. Create return list 
+    ## 9. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
     ##############################################################################
     returnlst <- list(popdatindb = popdatindb,   ## logical. if TRUE, population data are in database
                       pltcondflds = pltcondflds, ## vector of field names in pltcondx
@@ -770,6 +882,11 @@ check.popdataVOL <-
       #   condfromqry <- paste0("\n JOIN ", SCHEMA., condnm, " c ", condjoinqry)
       #
       #   ## Build cond SELECT query
+      #   if (defaultVars) {
+      #     condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
+      #   } else {
+      #     condvars <- "*"
+      #   }
       #   condselectqry <- toString(paste0(conda., condvars))
       #
       #   ## Build final cond query, including pltidsqry
@@ -824,198 +941,84 @@ check.popdataVOL <-
       # rm(condx)
       #
       
-      if (popType == "VOL") {
+      
+      ## 10.3 Return and/or save dwm data (dwmx / COND_DWM_CALC)
+      ##################################################################
+
+      if (is.null(dwmx)) {
+
+        ## Build dwm FROM query
+        dwmjoinqry <- getjoinqry(dwmuniqueid, pltidsid, dwma., pltidsa.)
+        dwmfromqry <- paste0("\n JOIN ", SCHEMA., dwmnm, " dwm ", dwmjoinqry)
+
+        ## Build dwm SELECT query
+        dwmselectqry <- toString(paste0(dwma., dwmvars))
         
-        ## 10.3. Return and/or save tree data (treex / TREE)
-        ##################################################################
-        if (!is.null(treenm)) {
-          treea. <- "t."
-          
-          ## Check key variables
-          tsubp <- findnm("SUBP", treeflds, returnNULL = TRUE)
-          ttree <- findnm("TREE", treeflds, returnNULL = TRUE)
-          keyvars <- c(tsubp, ttree)
-          if (any(sapply(keyvars, is.null))) {
-            keymiss <- keyvars[sapply(keyvars, is.null)]
-            stop("missing key variables in tree data: ", toString(keymiss))
-          }
-          
-          ## Build tree FROM query
-          tjoinqry <- getjoinqry(tuniqueid, pltidsid, treea., pltidsa.)
-          tfromqry <- paste0(
-            "\n JOIN ", SCHEMA., treenm, " t ", tjoinqry)
-          
-          ## Build tree SELECT query
-          tselectqry <- toString(paste0(treea., treevars))
-          
-          ## Build final tree query, including pltidsqry
-          treeqry <- paste0(getdataWITHqry,
-                            "\n-------------------------------------------",
-                            "\n SELECT ", tselectqry,
-                            "\n FROM pltids",
-                            tfromqry)
-          dbqueries$TREE <- treeqry
-          
-          ## Run final tree query, including pltidsqry
-          if (datindb) {
-            message("query ", treenm, "...")
-            treex <- tryCatch(
-              DBI::dbGetQuery(dbconn, treeqry),
-              error=function(e) {
-                message(e,"\n")
-                return(NULL)})
-          } else {
-            treex <- tryCatch(
-              sqldf::sqldf(treeqry, connection = NULL),
-              error = function(e) {
-                message(e,"\n")
-                return(NULL) })
-          }
-          if (is.null(treex) || nrow(treex) == 0) {
-            message("invalid tree query...")
-            message(treeqry)
-            return(NULL)
-          } else {
-            names(treex) <- toupper(names(treex))
-          }
-        
-          
-          ## Set key and subset tree data
-          treekey <- c(tuniqueid, condid, tsubp, ttree)
-          setkeyv(setDT(treex), treekey)
-          if (!is.null(getdataCNs)) {
-            treex <- treex[treex[[tuniqueid]] %in% getdataCNs,]
-          }
-          
-          treeclcd_rmrsnm <- findnm("TREECLCD_RMRS", names(treex), returnNULL = TRUE)
-          if (!is.null(treeclcd_rmrsnm) && is.character(treex[[treeclcd_rmrsnm]])) {
-            treex[, (treeclcd_rmrsnm) := as.numeric(get(treeclcd_rmrsnm))]
-          }
-          
-          ## Append adjustment factors to tree data
-          treex[pltidsadj,
-                tadjfac := ifelse(TPA_UNADJ > 50, get(adjvars[["MICR"]]),
-                                  ifelse(TPA_UNADJ > 0 & TPA_UNADJ < 5, get(adjvars[["MACR"]]),
-                                         get(adjvars[["SUBP"]])))]
-          treevars <- c(treevars, "tadjfac")
-          
-          ## Add to returnlst
-          if (returndata) {
-            returnlst$treex <- treex
-            returnlst$tuniqueid <- tuniqueid
-            returnlst$treeflds <- treevars
-          }
-          
-          ## Save data
-          if (savedata) {
-            message("saving tree table...")
-            outlst$out_layer <- "tree"
-            if (!append_layer) index.unique.tree <- treekey
-            datExportData(treex,
-                          savedata_opts = outlst)
-            if (!returndata) {
-              poptablst <- c(poptablst, "tree")
-              treenm <- "tree"
-              
-              outlst$out_layer <- "ref_species"
-              datExportData(ref_species,
-                            savedata_opts = outlst)
-            }
-          }
+        ## Build final cond query, including pltidsqry
+        dwmqry <- paste0(getdataWITHqry,
+                          "\n-------------------------------------------",
+                          "\n SELECT DISTINCT ", dwmselectqry,
+                          "\n FROM pltids",
+                          dwmfromqry)
+        dbqueries$COND_DWM_CALC <- dwmqry
+
+        ## Run final dwm query, including pltidsqry
+        if (datindb) {
+          dwmx <- tryCatch(
+            DBI::dbGetQuery(dbconn, dwmqry),
+            error=function(e) {
+              message(e,"\n")
+              return(NULL)})
+        } else {
+          dwmx <- tryCatch(
+            sqldf::sqldf(dwmqry, connection = NULL),
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
         }
-        rm(treex)
-
-        ## 10.4. Return and/or save seedling data (seedx / SEEDLING)
-        ##################################################################
-        if (!is.null(seednm)) {
-          seeda. <- "s."
-          
-          
-          ## Check key variables
-          scondid <- findnm("CONDID", seedflds, returnNULL = TRUE)
-          ssubp <- findnm("SUBP", seedflds, returnNULL = TRUE)
-          keyvars <- c(scondid, ssubp)
-          if (any(sapply(keyvars, is.null))) {
-            keymiss <- keyvars[sapply(keyvars, is.null)]
-            stop("missing key variables in seedling data: ", toString(keymiss))
-          }
-          
-          ## Build seedling FROM query
-          sjoinqry <- getjoinqry(suniqueid, pltidsid, seeda., pltidsa.)
-          sfromqry <- paste0(
-            "\n JOIN ", SCHEMA., seednm, " s ", sjoinqry)
-          
-          ## Build seedling SELECT query
-          sselectqry <- toString(paste0(seeda., seedvars))
-          
-          
-          ## Build final seedling query, including pltidsqry
-          seedqry <- paste0(getdataWITHqry,
-                            "\n-------------------------------------------",
-                            "\n SELECT ", sselectqry,
-                            "\n FROM pltids",
-                            sfromqry)
-          dbqueries$SEEDLING <- seedqry
-          
-          ## Run final seedling query, including pltidsqry
-          if (datindb) {
-            seedx <- tryCatch(
-              DBI::dbGetQuery(dbconn, seedqry),
-              error=function(e) {
-                message(e,"\n")
-                return(NULL)})
-          } else {
-            seedx <- tryCatch(
-              sqldf::sqldf(seedqry, connection = NULL),
-              error = function(e) {
-                message(e,"\n")
-                return(NULL) })
-          }
-          if (is.null(seedx) || nrow(seedx) == 0) {
-            message("invalid seedling query...")
-            message(seedqry)
-            return(NULL)
-          } else {
-            names(seedx) <- toupper(names(seedx))
-          }
+        if (is.null(dwmx) || nrow(dwmx) == 0) {
+          message("invalid dwm query...")
+          message(dwmqry)
+          return(NULL)
+        } else {
+          names(dwmx) <- toupper(names(dwmx))
+        }
+      }
+      
+      ## Return and/or save cond data
+      dwmkey <- c(dwmuniqueid, condid)
+      setkeyv(setDT(dwmx), dwmkey)
+      if (!is.null(getdataCNs)) {
+        dwmx <- dwmx[dwmx[[dwmuniqueid]] %in% getdataCNs,]
+      }
+      
+      ## Append adjustment factors to dwmx data
+      dwmx <- dwmx[pltidsadj]
+      dwmflds <- c(dwmflds, c(adjvars, dwmadjvars))
         
 
-          ## Set key and subset seedling data
-          seedkey <- c(suniqueid, scondid, ssubp)
-          setkeyv(setDT(seedx), seedkey)
-          if (!is.null(getdataCNs)) {
-            seedx <- seedx[seedx[[suniqueid]] %in% getdataCNs,]
-          }
-          
-          ## Add to returnlst
-          if (returndata || savedata) {
-            ## Append adjustment factors to tree data
-            seedx[pltidsadj, tadjfac := get(adjvars[["MICR"]])]
-            seedvars <- c(seedvars, "tadjfac")
-            
-            returnlst$seedx <- seedx
-            returnlst$suniqueid <- suniqueid
-            returnlst$seedvars <- seedvars
-          }
-          
-          ## Save data
-          if (savedata) {
-            message("saving seedling table...")
-            outlst$out_layer <- "seedling"
-            if (!append_layer) index.unique.seed <- seedkey
-            datExportData(seedx,
-                          savedata_opts = outlst)
-            if (!returndata) {
-              poptablst <- c(poptablst, "seedling")
-              seednm <- "seedling"
-            }
-          }
-          rm(seedx)
-        } 
+      ## Add to returnlst
+      if (returndata) {
+        returnlst$dwmuniqueid <- dwmuniqueid
+        returnlst$dwmx <- dwmx
+        returnlst$dwmflds <- dwmvars
       }
+      ## Save data
+      if (savedata) {
+        message("saving dwm_calc...")
+        outlst$out_layer <- "dwm_calc"
+        if (!append_layer) index.unique.dwm <- dwmkey
+        datExportData(dwmx,
+                      savedata_opts = outlst)
+        if (!returndata) {
+          poptablst <- c(poptablst, "dwm_calc")
+          #dwmnm <- "dwm_calc"
+        }
+      }
+      rm(dwmx)
+      
     }
 
-    
     ##############################################################################
     ## 11. Check COND_STATUS_CD and generate table with number of conditions
     ##############################################################################
@@ -1024,7 +1027,7 @@ check.popdataVOL <-
     condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
     condfromqry <- paste0("\nJOIN ", SCHEMA., condnm, " c ", condjoinqry)
 
-    ## 11.1. Sampled conditions
+    ## 10.1. Sampled conditions
     ##########################################################################
     condsampcnt <- NULL
     cstatuschk <- findnm("COND_STATUS_CD", pltcondflds, returnNULL=TRUE)
@@ -1054,9 +1057,9 @@ check.popdataVOL <-
 
         condsampcnt <- tryCatch(
           DBI::dbGetQuery(dbconn, condsampcntqry),
-          error = function(e) {
-            message(e,"\n")
-            return(NULL) })
+            error = function(e) {
+              message(e,"\n")
+              return(NULL) })
         
         if (is.null(condsampcnt)) {
           message("invalid condsampcnt query")
@@ -1111,10 +1114,9 @@ check.popdataVOL <-
 
           nfcondsampcnt <- tryCatch(
             DBI::dbGetQuery(dbconn, nfcondsampcntqry),
-            error = function(e) {
-              message(e,"\n")
-              return(NULL) })
-          
+              error = function(e) {
+                message(e,"\n")
+                return(NULL) })
           if (is.null(nfcondsampcnt)) {
             message("invalid nfcondsampcnt query")
             message(nfcondsampcntqry)
@@ -1160,7 +1162,7 @@ check.popdataVOL <-
 
     ## 12. Build FROM statement for estimation queries
     ######################################################################################
-    if (popdatindb) {
+    if (datindb) {
       estfromqry <- paste0(
         "\n FROM ", SCHEMA., plotnm, " p",
         "\n JOIN ", SCHEMA., condnm, " c ON (", conda., cuniqueid, " = ", plota., puniqueid, ")")
@@ -1176,22 +1178,15 @@ check.popdataVOL <-
       returnlst$popdbinfo <- list(popconn = popconn, 
                                   pop_dsn = pop_dsn,
                                   pop_schema = pop_schema,
+                                  pop_datsource = pop_datsource,
                                   poptablst = poptablst)
     }
 
     if (popdatindb) {
-      if (popType == "VOL") {
-        if (!is.null(treenm)) {
-          returnlst$treex <- treenm
-          returnlst$tuniqueid <- tuniqueid
-          returnlst$treeflds <- treevars
-        }
-        if (!is.null(seednm)) {
-          returnlst$seedx <- seednm
-          returnlst$suniqueid <- suniqueid
-          returnlst$seedflds <- seedvars
-        }
-      }
+      returnlst$dwmx <- dwmxnm
+      returnlst$dwmuniqueid <- dwmuniqueid
+      returnlst$dwmflds <- dwmvars
+      #returnlst$dwmnm <- dwmxnm
     }
     
     returnlst$dbqueries <- dbqueries

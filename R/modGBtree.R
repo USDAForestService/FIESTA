@@ -75,6 +75,9 @@
 #' an input data frame (i.e., plt, cond, tree).
 #' @param sumunits Logical. If TRUE, estimation units are summed and returned
 #' in one table.
+#' @param pltids Vector. String or numberic vector of FIA plot CN values that
+#' intesect an area of interest within the population. These values are used
+#' to filter the output table of estimates. 
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
@@ -291,6 +294,7 @@ modGBtree <- function(GBpopdat,
                       rowvar = NULL, 
                       colvar = NULL, 
                       sumunits = TRUE, 
+                      pltids = NULL,
                       returntitle = FALSE, 
                       savedata = FALSE, 
                       table_opts = NULL, 
@@ -318,14 +322,14 @@ modGBtree <- function(GBpopdat,
   ## Set parameter
   esttype <- "TREE"
   popType <- "VOL"
-  nonresp <- FALSE
-  substrvar <- FALSE
+  nonresp = addtitle <- FALSE
+  substrvar <- NULL
   rawdata <- TRUE  
   returnlst <- list()
   TPA <- TRUE
 
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rawfolder=domclassify <- NULL
+  n.total=n.strata=domclassify=outfn.pre <- NULL
   
  
   ##################################################################
@@ -377,20 +381,16 @@ modGBtree <- function(GBpopdat,
   pltcondx <- GBpopdat$pltcondx
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
-  treex <- GBpopdat$treex
-  seedx <- GBpopdat$seedx
-  if (is.null(treex) && is.null(seedx)) {
-    stop("must include tree data for tree estimates")
-  }
-  tuniqueid <- GBpopdat$tuniqueid
-  ACI <- GBpopdat$ACI
   pltassgnx <- GBpopdat$pltassgnx
+  pltassgnid <- GBpopdat$pltassgnid
+  ACI <- GBpopdat$ACI
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
   areaunits <- GBpopdat$areaunits
   unitvar <- GBpopdat$unitvar
   unitvars <- GBpopdat$unitvars
   unit.action <- GBpopdat$unit.action
+  strata <- GBpopdat$strata
   stratalut <- GBpopdat$stratalut
   strvar <- GBpopdat$strvar
   expcondtab <- GBpopdat$expcondtab
@@ -402,31 +402,26 @@ modGBtree <- function(GBpopdat,
   strwtvar <- GBpopdat$strwtvar
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
-  strata <- GBpopdat$strata
-  popdatindb <- GBpopdat$popdatindb
-  pop_fmt <- GBpopdat$pop_fmt
-  pop_dsn <- GBpopdat$pop_dsn
-  pop_schema <- GBpopdat$pop_schema
-  popconn <- GBpopdat$popconn
   dbqueries <- GBpopdat$dbqueries
   dbqueriesWITH <- GBpopdat$dbqueriesWITH
   adjcase <- GBpopdat$adjcase
   pltidsid <- GBpopdat$pjoinid
-  pltassgnid <- GBpopdat$pltassgnid
   pltflds <- GBpopdat$pltflds
   condflds <- GBpopdat$condflds
   
-  if (popdatindb) {
-    if (is.null(popconn) || !DBI::dbIsValid(popconn)) {
-      if (!is.null(pop_dsn)) {
-        if (pop_fmt == "sqlite") {
-          popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE)
-        }
-      } else {
-        stop("invalid database connection")
-      }
-    }
+  pop_datsource <- GBpopdat$pop_datsource
+  popdatindb <- GBpopdat$popdatindb
+  popdbinfo <- GBpopdat$popdbinfo
+
+  treex <- GBpopdat$treex
+  seedx <- GBpopdat$seedx
+  if (is.null(treex) && is.null(seedx)) {
+    stop("must include tree data for tree estimates")
   }
+  tuniqueid <- GBpopdat$tuniqueid
+  suniqueid <- GBpopdat$suniqueid
+  treeflds <- GBpopdat$treeflds
+  seedflds <- GBpopdat$seedflds
   
 
   ########################################
@@ -442,21 +437,42 @@ modGBtree <- function(GBpopdat,
     setkeyv(unitarea, unitvar)
   }
 
+
+  ########################################
+  ## Check pltids
+  ########################################
+  if (!is.null(pltids)) {
+    pltids <- as.vector(pltids)
+    if (!is.vector(pltids)) {
+      message("invalid pltids.. must be a vector of cn values")
+    }
+    
+    if (!all(pltids %in% pltassgnx[[pltassgnid]])) {
+      misspltids <- pltids[!pltids %in% pltassgnx[[pltassgnid]]]
+      message("there are ", length(misspltids), " not in the population")
+      
+      if (length(misspltids) < 20) {
+        message(toString(misspltids))
+      }
+      stop("")
+    }
+  }
+ 
   ###################################################################################
   ## Check parameter inputs and plot/condition filters
   ###################################################################################
   estdat <- 
     check.estdata(esttype = esttype, 
                   popType = popType,
+                  pop_datsource = pop_datsource,
                   popdatindb = popdatindb, 
-                  popconn = popconn, pop_schema = pop_schema,
+                  popdbinfo = popdbinfo, 
                   pltcondx = pltcondx,
                   pltflds = pltflds, 
                   condflds = condflds,
                   dbqueriesWITH = dbqueriesWITH,
                   dbqueries = dbqueries,
                   totals = totals,
-                  pop_fmt = pop_fmt, pop_dsn = pop_dsn, 
                   sumunits = sumunits, 
                   landarea = landarea,
                   ACI = ACI, 
@@ -477,47 +493,50 @@ modGBtree <- function(GBpopdat,
   divideby <- estdat$divideby
   estround <- estdat$estround
   pseround <- estdat$pseround
-  addtitle <- estdat$addtitle
   returntitle <- estdat$returntitle
-  rawonly <- estdat$rawonly
-  savedata <- estdat$savedata
-  outfolder <- estdat$outfolder
-  overwrite_layer <- estdat$overwrite_layer
-  outfn.pre <- estdat$outfn.pre
-  outfn.date <- estdat$outfn.date
-  append_layer = estdat$append_layer
-  rawfolder <- estdat$rawfolder
-  raw_fmt <- estdat$raw_fmt
-  raw_dsn <- estdat$raw_dsn
+  addtitle <- estdat$addtitle
+  
   pcwhereqry <- estdat$where.qry
-  SCHEMA. <- estdat$SCHEMA.
   pltcondflds <- estdat$pltcondflds
   pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
   pltcondxWITHqry <- estdat$pltcondxWITHqry
+  pop_datsource <- estdat$pop_datsource
+  popdatindb <- estdat$popdatindb
+  popconn <- estdat$popconn
+  pop_schema <- estdat$pop_schema
+  SCHEMA. <- estdat$SCHEMA.
+  poptablst <- estdat$poptablst
+  
+  if (savedata) {
+    rawonly <- estdat$rawonly
+    savedata <- estdat$savedata
+    outfolder <- estdat$outfolder
+    overwrite_layer <- estdat$overwrite_layer
+    outfn.pre <- estdat$outfn.pre
+    outfn.date <- estdat$outfn.date
+    append_layer = estdat$append_layer
+    rawoutlst <- estdat$rawoutlst
+  }
   
   
   ###################################################################################
   ## Check parameter inputs and tree filters
   ###################################################################################
   estdatVOL <- 
-    check.estdataVOL(esttype = esttype,
+    check.estdataVOL(datsource = pop_datsource,
                      popdatindb = popdatindb,
-                     popconn = popconn,
-                     cuniqueid = cuniqueid, condid = condid,
+                     poptablst = poptablst,
                      treex = treex, seedx = seedx,
-                     tuniqueid = tuniqueid,
+                     treeflds = treeflds, seedflds = seedflds,
                      estseed = estseed,
                      woodland = woodland,
                      gui = gui)
-  treex <- estdatVOL$treex
-  treeflds <- estdatVOL$treeflds
-  tuniqueid <- estdatVOL$tuniqueid
   estseed <- estdatVOL$estseed
   woodland <- estdatVOL$woodland
-  
-  seedx <- estdatVOL$seedx
+  treeflds <- estdatVOL$treeflds
   seedflds <- estdatVOL$seedflds
-  
+
+
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -532,6 +551,7 @@ modGBtree <- function(GBpopdat,
                  estseed = estseed,
                  treex = treex, treeflds = treeflds,
                  seedx = seedx, seedflds = seedflds,
+                 tuniqueid = tuniqueid, 
                  cuniqueid = cuniqueid, condid = condid,
                  rowvar = rowvar, colvar = colvar, 
                  row.FIAname = row.FIAname, col.FIAname = col.FIAname, 
@@ -539,6 +559,7 @@ modGBtree <- function(GBpopdat,
                  row.classify = row.classify, col.classify = col.classify,
                  row.add0 = row.add0, col.add0 = col.add0, 
                  title.rowvar = title.rowvar, title.colvar = title.colvar, 
+                 whereqry = pcwhereqry,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL)
@@ -588,6 +609,7 @@ modGBtree <- function(GBpopdat,
   ### Get estimation data from tree table
   ###############################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
+
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 
@@ -608,11 +630,14 @@ modGBtree <- function(GBpopdat,
                woodland = woodland,
                ACI = ACI,
                domclassify = domclassify,
+               datsource = pop_datsource,
                dbconn = popconn, schema = pop_schema,
                pltidsWITHqry = pltcondxadjWITHqry,
                pltidsid = pltidsid,
                bytdom = bytdom,
+               pcwhereqry = pcwhereqry,
                gui = gui)
+
   if (is.null(treedat)) stop() 
   tdomdat <- treedat$tdomdat
   estvar.name <- treedat$estvar.name
@@ -682,10 +707,11 @@ modGBtree <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
+  
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
-  estdat <- 
+  estimates <- 
     getGBestimates(esttype = esttype,
                    domdatn = tdomdat,
                    uniqueid = pltassgnid, condid = condid,
@@ -693,6 +719,7 @@ modGBtree <- function(GBpopdat,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
+                   pltassgnid = pltassgnid,
                    unitarea = unitarea,
                    unitvar = unitvar,
                    areavar = areavar,
@@ -701,6 +728,7 @@ modGBtree <- function(GBpopdat,
                    strwtvar = strwtvar,
                    totals = totals,
                    sumunits = sumunits,
+                   pltids = pltids,
                    unit.action = unit.action,
                    uniquerow = uniquerow,
                    uniquecol = uniquecol,
@@ -710,14 +738,14 @@ modGBtree <- function(GBpopdat,
                    col.add0 = col.add0,
                    row.NAname = row.NAname,
                    col.NAname = col.NAname)
-  if (is.null(estdat)) stop()
-  unit_totest <- estdat$unit_totest
-  unit_rowest <- estdat$unit_rowest
-  unit_colest <- estdat$unit_colest
-  unit_grpest <- estdat$unit_grpest
-  rowunit <- estdat$rowunit
-  totunit <- estdat$totunit
-  unitvar <- estdat$unitvar
+  if (is.null(estimates)) stop()
+  unit_totest <- estimates$unit_totest
+  unit_rowest <- estimates$unit_rowest
+  unit_colest <- estimates$unit_colest
+  unit_grpest <- estimates$unit_grpest
+  rowunit <- estimates$rowunit
+  totunit <- estimates$totunit
+  unitvar <- estimates$unitvar
 
   
   ###################################################################################
@@ -730,6 +758,7 @@ modGBtree <- function(GBpopdat,
     est.outtabs(esttype = esttype, 
                 sumunits = sumunits, areavar = areavar, 
                 unitvar = unitvar, unitvars = unitvars, 
+                unitarea = unitarea,
                 unit_totest = unit_totest, 
                 unit_rowest = unit_rowest, unit_colest = unit_colest, 
                 unit_grpest = unit_grpest,
@@ -780,17 +809,17 @@ modGBtree <- function(GBpopdat,
     ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
     UNITStot <- sort(unique(unit_totest[[unitvar]]))
     NBRPLTtot <- stratalut[stratalut[[unitvar]] %in% UNITStot, list(NBRPLT = sum(n.strata, na.rm=TRUE)), 
-	                 by=unitvars]
-
-	#setnames(NBRPLTtot, "V1", "NBRPLT")
-	if ("unit_totest" %in% names(tabs$rawdat)) {
-	  tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
-	  tabs$rawdat$unit_totest <- setorderv(tabs$rawdat$unit_totest, unitvars)
-	}
-	if (sumunits && "totest" %in% names(tabs$rawdat)) {
-	  tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
-	}
-
+                           by=unitvars]
+    
+    if ("unit_totest" %in% names(tabs$rawdat)) {
+      tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
+      tabs$rawdat$unit_totest <- setorderv(tabs$rawdat$unit_totest, unitvar)
+    }
+    
+    if (sumunits && "totest" %in% names(tabs$rawdat)) {
+      tabs$rawdat$totest <- data.frame(tabs$rawdat$totest, NBRPLT = sum(NBRPLTtot$NBRPLT))
+    }
+    
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(tdomdat)
     rawdat$domdatqry <- treeqry
@@ -807,24 +836,23 @@ modGBtree <- function(GBpopdat,
         tabnm <- names(rawdat[i])
         rawtab <- rawdat[[i]]
         outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
+        
         if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
-          write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
-			       outfn.date=outfn.date, overwrite=overwrite_layer)
+          write2csv(rawtab, 
+                    outfolder = rawoutlst$rawfolder, 
+                    outfilenm = outfn.rawtab, 
+			              outfn.date = outfn.date, 
+			              appendfile = append_layer,
+			              overwrite = overwrite_layer)
+          
         } else if (is.data.frame(rawtab)) {
-          if (raw_fmt != "csv") {
-            out_layer <- tabnm 
+          if (rawoutlst$out_fmt != "csv") {
+            rawoutlst$out_layer <- tabnm
           } else {
-            out_layer <- outfn.rawtab
+            rawoutlst$out_layer <- outfn.rawtab
           }
-          datExportData(rawtab, 
-                savedata_opts=list(outfolder = rawfolder, 
-                                   out_fmt = raw_fmt, 
-                                   out_dsn = raw_dsn, 
-                                   out_layer = out_layer,
-                                   overwrite_layer = overwrite_layer,
-                                   append_layer = append_layer,
-                                   add_layer = TRUE)
-          )
+          datExportData(rawtab,
+                        savedata_opts = rawoutlst)
         }
       }
     }

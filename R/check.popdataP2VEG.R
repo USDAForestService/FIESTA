@@ -1,9 +1,9 @@
 check.popdataP2VEG <- 
   function(tabs, tabIDs, popType, 
-           datindb, pltaindb, 
+           datindb, pltaindb, popdatindb,
            pltidsWITHqry,
-           pltidsid, pltidvars, projidvars = NULL,
-           plotnm,
+           pltidsid, projidvars = NULL,
+           pltidvars,
            pdoms2keep = NULL, 
            pltidsadjindb = FALSE, 
            defaultVars = TRUE,
@@ -19,7 +19,8 @@ check.popdataP2VEG <-
            strunitvars = NULL, 
            nonsamp.cfilter = NULL, 
            cvars2keep = NULL, 
-           dbconn = NULL, SCHEMA. = "",
+           dbconn = NULL, schema = NULL, 
+           datsource = NULL, dbtablst = NULL,
            getdataWITHqry = NULL,
            getdataCNs = NULL,
            returndata = FALSE, 
@@ -35,25 +36,26 @@ check.popdataP2VEG <-
   ## 3. Get table names used in estimation from tabs.
   ## - PLOT; COND; SUBPLOT; SUBP_COND; P2VEG_SUBP_STRUCTURE; P2VEG_SUBPLOT_SPP
   ## - TREE (if popType = 'VOL'); SEEDLING (if popType = 'VOL')
-  ## 4. Check for necessary variables in tables.
+  ## 4. Check for variables in tables and define SELECT variable in cond, plot
   ##    cond - (cuniqueid, condid, cvars2keep)
-  ## 5. Build query for adjustment factors
-  ## 6. Build queries for PLOT/COND (pltcondx)
-  ## 7. Build CASE statement for adding adjustment factors to SELECT
-  ## 8. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
-  ## 9. Build and run queries for other necessary tables (if returndata/savedata = TRUE)
-  ## 10. Check COND_STATUS_CD and generate table with number of conditions
-  ## 11. Build FROM statement for estimation queries
-  ## 12. Return data objects
+  ##    area weight variables - (SUBPPROP_UNADJ, MACRPROP_UNADJ, MICRPROP_UNADJ)
+  ## 5. Extract tables used to calculate adjustment factors from database if
+  ##    pltassgn is not in database
+  ## 6. Build query for adjustment factors.
+  ## 7. Build queries for PLOT/COND (pltcondx)
+  ## 8. Build CASE statement for adding adjustment factors to SELECT
+  ## 9. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
+  ## 10. Build and run queries for other necessary tables (if returndata/savedata = TRUE)
+  ## 11. Check COND_STATUS_CD and generate table with number of conditions
+  ## 12. Build FROM statement for estimation queries
+  ## 13. Return data objects
   ###################################################################################
     
   ## Set global variables
-  vsubpsppx=vadjfac=ADJ_FACTOR_P2VEG_SUBP <- NULL
+  vsubpsppx=vadjfac=ADJ_FACTOR_P2VEG_SUBP=SCHEMA. <- NULL
   dbqueries=dbqueriesWITH <- list()
   propvars <- list(COND="CONDPROP_UNADJ", SUBP="SUBPPROP_UNADJ", MACR="MACRPROP_UNADJ", MICR="MICRPROP_UNADJ")
-  diavar <- "DIA"
   subpid <- "SUBP"
-  pltcondindb <- datindb
   addfortypgrp <- TRUE
   returnadj <- TRUE
   #if (!returndata && !savedata) returndata <- TRUE
@@ -61,8 +63,10 @@ check.popdataP2VEG <-
   ## Get variables from outlst
   if (savedata) {
     append_layer <- outlst$append_layer
+    poptablst <- {}
+  } else {
+    poptablst <- dbtablst
   }
-  
 
   ###################################################################################
   ## 1. Define variables necessary for estimation
@@ -77,11 +81,13 @@ check.popdataP2VEG <-
     if (is.null(dbconn) || !DBI::dbIsValid(dbconn)) {
       message("the database connection is invalid")
       stop()
-    } else {
-      dbtablst <- DBI::dbListTables(dbconn)
+    }
+    if (!is.null(schema)) {
+      SCHEMA. <- paste0(schema, ".")
     }
   }
-
+  
+  
   ##############################################################################
   ## 3. Get table names used in estimation from tabs
   ##############################################################################
@@ -91,26 +97,33 @@ check.popdataP2VEG <-
   puniqueid <- plotlst$tabid
   pltx <- plotlst$tabx
   pltflds <- plotlst$tabflds
-  if (is.null(pltx)) {
-    pltxnm <- plotnm
-  } else {
-    pltxnm <- "pltx"
-  }
+  pltxnm <- plotnm
+  if (!is.null(pltx)) pltxnm <- "pltx"
   
   ## cond table
   condlst <- popTabchk("cond", tabtext = "cond", 
-                       tabs, tabIDs, dbtablst, dbconn, datindb) 
+                       tabs, tabIDs, 
+                       dbtablst = dbtablst, 
+                       dbconn = dbconn, schema = schema, 
+                       datindb = datindb) 
   condnm <- condlst$tabnm
   condflds <- condlst$tabflds
   cuniqueid <- condlst$tabid
   condx <- condlst$tabx
+  condxnm <- condnm
+  if (!is.null(condx)) condxnm <- "condx"
+  
+  ## define aliases
   plota. <- "p."
   conda. <- "c."
   pltidsa. <- "pltids."
   
   ## subplot table
   subplotlst <- popTabchk(c("subplot"), tabtext = "subplot",
-                          tabs, tabIDs, dbtablst, dbconn, datindb)
+                          tabs, tabIDs, 
+                          dbtablst = dbtablst, 
+                          dbconn = dbconn, schema = schema, 
+                          datindb = datindb)
   subplotnm <- subplotlst$tabnm
   subplotflds <- subplotlst$tabflds
   subplotid <- subplotlst$tabid
@@ -123,7 +136,10 @@ check.popdataP2VEG <-
   ## subp_cond table
   subp_condlst <- popTabchk(c("subp_cond", "subpcond"), 
                             tabtext = "subp_cond",
-                            tabs, tabIDs, dbtablst, dbconn, datindb)
+                            tabs, tabIDs, 
+                            dbtablst = dbtablst, 
+                            dbconn = dbconn, schema = schema, 
+                            datindb = datindb)
   subp_condnm <- subp_condlst$tabnm
   subp_condflds <- subp_condlst$tabflds
   subp_condid <- subp_condlst$tabid
@@ -134,9 +150,12 @@ check.popdataP2VEG <-
   }
   
   ## p2veg_subp_structure table
-  vsubpstrlst <- popTabchk(c("p2veg_subp_structure", "vsubpstrx"), 
+  vsubpstrlst <- popTabchk(c("p2veg_subp_structure", "vsubpstr"), 
                            tabtext = "p2veg_subp_structure",
-                           tabs, tabIDs, dbtablst, dbconn, datindb)
+                           tabs, tabIDs, 
+                           dbtablst = dbtablst, 
+                           dbconn = dbconn, schema = schema, 
+                           datindb = datindb)
   vsubpstrnm <- vsubpstrlst$tabnm
   vsubpstrflds <- vsubpstrlst$tabflds
   vsubpstrid <- vsubpstrlst$tabid
@@ -148,9 +167,12 @@ check.popdataP2VEG <-
   }
   
   ## p2veg_subplot_spp table
-  vsubpspplst <- popTabchk(c("p2veg_subplot_spp", "vsubpsppx"), 
+  vsubpspplst <- popTabchk(c("p2veg_subplot_spp", "vsubpspp"), 
                            tabtext = "p2veg_subplot_spp",
-                           tabs, tabIDs, dbtablst, dbconn, datindb)
+                           tabs, tabIDs, 
+                           dbtablst = dbtablst, 
+                           dbconn = dbconn, schema = schema, 
+                           datindb = datindb)
   vsubpsppnm <- vsubpspplst$tabnm
   vsubpsppflds <- vsubpspplst$tabflds
   vsubpsppid <- vsubpspplst$tabid
@@ -160,22 +182,125 @@ check.popdataP2VEG <-
   }
   
   
-  ## Note: If pltassgn is not in database but all other tables are in database, 
-  ## we need to import the cond and subplot tables to memory and subset for calculating 
-  ## adjustment factors.
+  ##############################################################################
+  ## 4. Check for variables in tables and define SELECT variable for cond and plot
+  ##############################################################################
+
+  ## 4.1. Check unique identifiers and necessary variables to keep
+  ##############################################################################
+  
+  ## Check cuniqueid in cond
+  cuniqueid <- pcheck.varchar(var2check = cuniqueid, varnm="cuniqueid", gui=gui,
+                              checklst = condflds, caption="Unique identifier of plot in cond",
+                              warn = paste(cuniqueid, "not in cond"), stopifnull = TRUE)
+  
+  ## Check condid in cond
+  condid <- pcheck.varchar(var2check = condid, varnm="condid", gui=gui,
+                           checklst = condflds, caption="Unique identifier of conditions in cond",
+                           warn = paste(condid, "not in cond"), stopifnull = TRUE)
+  
+  ## Check cvars2keep in cond
+  if (!is.null(cvars2keep)) {
+    cvars2keepchk <- unlist(sapply(cvars2keep, findnm, 
+                                   condflds, returnNULL = TRUE))
+    if (length(cvars2keep) < length(cvars2keep)) {
+      message("variables are missing from dataset: ", 
+              toString(cvars2keep[!cvars2keep %in% cvars2keepchk]))
+      return(NULL)
+    } else {
+      cvars2keep <- cvars2keepchk
+    }	  
+  }
+  
+  ## Check subpid in subplot
+  subpid <- pcheck.varchar(var2check = subpid, varnm="subpid", gui=gui,
+                           checklst = subplotflds, caption="Unique identifier of subplots",
+                           warn = paste(subpid, "not in subplot"), stopifnull = TRUE)
+  
+  
+  ## 4.2. Check condition proportion variables for calculating area weights
+  ##############################################################################
+  propvars <- check.PROPvars(condflds,
+                             propvars = propvars)
+  if (!areawt %in% condflds) {
+    stop("areawt not in dataset: ", areawt)
+  }
+  
+  
+  ## 4.3. Define SELECT variables for cond and plot
+  ##############################################################################
+  
+  ## Define SELECT variables for cond
+  if (defaultVars) {
+    condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
+  } else {
+    condvars <- condflds
+  }
+  
+  ## Define SELECT variables for plot
+  if (!is.null(plotnm)) {
+    if (defaultVars) {
+      pvars <- pdoms2keep
+    } else {
+      pvars <- pltflds
+    }
+  } else {
+    pvars <- NULL
+  }
+  
+  ## Define SELECT variables for subplot
+  if (defaultVars) {
+    subpvars <-  subplotflds[subplotflds %in% DBvars.default(issubp = TRUE)$subpvarlst]
+  } else {
+    subpvars <- "*"
+  }
+  
+  ## Define SELECT variables for subp_cond
+  if (defaultVars) {
+    subpcvars <-  subp_condflds[subp_condflds %in% DBvars.default(issubp = TRUE)$subpcvarlst]
+  } else {
+    subpcvars <- "*"
+  }
+  
+  ## Define SELECT variables for p2veg_subp_structure
+  if (!is.null(vsubpstrnm)) {
+    if (defaultVars) {
+      vsubpstrvars <-  vsubpstrflds[vsubpstrflds %in% DBvars.default(isveg = TRUE)$vsubpstrvarlst]
+    } else {
+      vsubpstrvars <- vsubpstrflds
+    }
+  }
+  
+  ## Define SELECT variables for p2veg_subplot_spp
+  if (!is.null(vsubpsppnm)) {
+    if (defaultVars) {
+      vsubpsppvars <-  vsubpsppflds[vsubpsppflds %in% DBvars.default(isveg = TRUE)$vsubpsppvarlst]
+    } else {
+      vsubpsppvars <- vsubpsppflds
+    }
+  }
+  
+  
+  ##############################################################################
+  ## 5. Extract tables used to calculate adjustment factors from database 
+  ##    if pltassgn is not in database.
+  ## Note: If pltassgn is not in database but all other tables are in database,
+  ##       import the cond table to memory and subset for calculating
+  ##       adjustment factors.
+  ##############################################################################
   if (datindb && !pltaindb) {
     
-    ## Build cond FROM query
+    ## 5.1. Extract cond table
+    ###################################################################
+    
+    ## Build cond query
     if (!is.null(getdataWITHqry) && !is.null(getdataCNs)) {
+      
+      ## Build cond FROM query
       condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
-      condfromqry <- paste0("\n JOIN ", SCHEMA., condnm, " c ", condjoinqry)
+      condfromqry <- paste0("\n JOIN ", SCHEMA., condxnm, " c ", condjoinqry)
       
       ## Build cond SELECT query
-      if (defaultVars) {
-        condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
-      } else {
-        condvars <- "*"
-      }
       condselectqry <- toString(paste0(conda., condvars))
       
       ## Build final cond query, including getdataWITHqry
@@ -204,21 +329,42 @@ check.popdataP2VEG <-
         message("invalid cond query...")
         message(condqry)
         return(NULL)
+      } else {
+        names(condx) <- toupper(names(condx))
       }
       
       ## Return and/or save cond data
       condkey <- c(cuniqueid, condid)
       setkeyv(setDT(condx), condkey)
       
-      ## Subset condx to plots in pltassgn
-      condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
+      ## Subset condx to plots in pltassgn using getdataCNs
+      if (!is.null(getdataCNs)) {
+        condx <- condx[condx[[cuniqueid]] %in% getdataCNs,]
+      }
       
     } else {
       assign(condnm, DBI::dbReadTable(dbconn, condnm))
     }
     
+    ## Save data
+    if (savedata) {
+      message("saving cond table...")
+      outlst$out_layer <- "cond"
+      if (!append_layer) index.unique.cond <- condkey
+      datExportData(condx,
+                    savedata_opts = outlst)
+      if (!returndata) {
+        poptablst <- c(poptablst, "cond")
+        condnm <- "cond"
+      } else {
+        condnm=condxnm <- "condx"
+      }
+    } else {
+      condnm=condxnm <- "condx"
+    }
     
-    ## Get subplot data
+    
+    ## 5.2. Extract subplot table
     ###################################################################
     if (!is.null(getdataWITHqry) && !is.null(getdataCNs)) {
       
@@ -236,11 +382,6 @@ check.popdataP2VEG <-
         "\nJOIN ", SCHEMA., subplotnm, " subp ", subpjoinqry)
       
       ## Build subplot SELECT query
-      if (defaultVars) {
-        subpvars <-  subplotflds[subplotflds %in% DBvars.default(issubp = TRUE)$subpvarlst]
-      } else {
-        subpvars <- "*"
-      }
       subpselectqry <- toString(paste0(subpa., subpvars))
       
       ## Build final subplot query, including pltidsqry
@@ -269,15 +410,40 @@ check.popdataP2VEG <-
         message("invalid subplot query...")
         message(subplotqry)
         return(NULL)
+      } else {
+        names(subplotx) <- toupper(names(subplotx))
       }
       
       ## Set key on data.table
       subplotkey <- c(subplotid, subp)
       setkeyv(setDT(subplotx), subplotid)
       
+      ## Subset subplot to plots in pltassgn using getdataCNs
+      if (!is.null(getdataCNs)) {
+        subplotx <- subplotx[subplotx[[subplotid]] %in% getdataCNs,]
+      }
       
-      ## Get subp_cond data
-      ##################################################################
+      ## Save data
+      if (savedata) {
+        message("saving subplot table...")
+        outlst$out_layer <- "subplot"
+        if (!append_layer) index.unique.subplot <- subplotkey
+        datExportData(subplotx,
+                      savedata_opts = outlst)
+        if (!returndata) {
+          poptablst <- c(poptablst, "subplot")
+          subplotnm <- "subplot"
+        } else {
+          subplotnm=subplotxnm <- "subplotx"
+        }
+      } else {
+        subplotnm=subplotxnm <- "subplotx"
+      }
+      
+      
+      
+      ## 5.2. Extract subp_cond table
+      ###################################################################
       subpca. <- "subpc."
       
       ## Check variables
@@ -297,11 +463,6 @@ check.popdataP2VEG <-
       
       
       ## Build subp_cond SELECT query
-      if (defaultVars) {
-        subpcvars <-  subp_condflds[subp_condflds %in% DBvars.default(issubp = TRUE)$subpcvarlst]
-      } else {
-        subpcvars <- "*"
-      }
       subpcselectqry <- toString(paste0(subpca., subpcvars))
       
       ## Build final subp_cond query, including pltidsqry
@@ -329,11 +490,36 @@ check.popdataP2VEG <-
         message("invalid subp_cond query...")
         message(subp_condqry)
         return(NULL)
+      } else {
+        names(subp_condx) <- toupper(names(subp_condx))
       }
       
       ## Return and/or save subp_cond data
       subp_condkey <- c(subp_condid, subpcondid, subp)
       setkeyv(setDT(subp_condx), subp_condid)
+      
+      ## Subset subplot to plots in pltassgn using getdataCNs
+      if (!is.null(getdataCNs)) {
+        subp_condx <- subp_condx[subp_condx[[subp_condid]] %in% getdataCNs,]
+      }
+      
+      ## Save data
+      if (savedata) {
+        message("saving subp_cond table...")
+        outlst$out_layer <- "subp_cond"
+        if (!append_layer) index.unique.subp_cond <- subp_condkey
+        datExportData(subp_condx,
+                      savedata_opts = outlst)
+        if (!returndata) {
+          poptablst <- c(poptablst, "subp_cond")
+          subp_condnm <- "subp_cond"
+        } else {
+          subp_condnm=subp_condxnm <- "subp_condx"
+        }
+      } else {
+        subp_condnm=subp_condxnm <- "subp_condx"
+      }
+      
       
     } else {
       
@@ -342,70 +528,45 @@ check.popdataP2VEG <-
     }
   }  
   
-
-  ##############################################################################
-  ## 4. Check for necessary variables in tables
-  ##############################################################################
-  condxnm <- ifelse (!is.null(condx), "condx", condnm) 
-  
-  ## cond table
-  ##############################################################################
-  
-  ## Check cuniqueid
-  cuniqueid <- pcheck.varchar(var2check = cuniqueid, varnm="cuniqueid", gui=gui,
-        checklst = condflds, caption="Unique identifier of plot in cond",
-        warn = paste(cuniqueid, "not in cond"), stopifnull = TRUE)
-  
-  ## Check condid
-  condid <- pcheck.varchar(var2check = condid, varnm="condid", gui=gui,
-        checklst = condflds, caption="Unique identifier of conditions in cond",
-        warn = paste(condid, "not in cond"), stopifnull = TRUE)
-  
-  ## Check cvars2keep in cond
-  if (!is.null(cvars2keep)) {
-    cvars2keepchk <- unlist(sapply(cvars2keep, findnm, 
-                                   condflds, returnNULL = TRUE))
-    if (length(cvars2keep) < length(cvars2keep)) {
-      message("variables are missing from dataset: ", 
-              toString(cvars2keep[!cvars2keep %in% cvars2keepchk]))
-      return(NULL)
-    } else {
-      cvars2keep <- cvars2keepchk
-    }	  
-  }
-  
-  ## subplot table
-  ##############################################################################
-  
-  ## Check subpid
-  subpid <- pcheck.varchar(var2check = subpid, varnm="subpid", gui=gui,
-          checklst = subplotflds, caption="Unique identifier of subplots",
-          warn = paste(subpid, "not in subplot"), stopifnull = TRUE)
-  
-  
-  ##############################################################################
-  ## 5. Build query for adjustment factors 
-  ##############################################################################
-  
-  ## 5.1. Check proportion variables, including area weight 
-  #######################################################################
-  propvars <- check.PROPvars(condflds,
-                              propvars = propvars)
-  if (!areawt %in% condflds) {
-    stop("areawt not in dataset: ", areawt)
-  }
-
-  
-  ## 5.2. Build query for adjustment factors (ADJqry) based on popType  
+  ## 5.3. Set output data formats for population data
   ###################################################################
-
+  
+  ## Set popdatindb if returning data or saving to a database
+  if (returndata) {
+    popdatindb <- FALSE
+    pop_dsn = popconn <- NULL
+    pop_datsource <- "obj"
+  }
+  ## If pop data are not in a database, but is saved to sqlite database
+  if (popdatindb) {
+    if (savedata && outlst$out_fmt == "sqlite") {
+      pop_dsn <- file.path(outlst$outfolder, outlst$out_dsn)
+      popconn <- DBtestSQLite(pop_dsn, dbconnopen = TRUE, showlist = FALSE)
+      pop_datsource <- "sqlite"
+      pop_schema <- NULL
+    } else {
+      popconn <- dbconn
+      pop_datsource <- datsource
+      pop_dsn <- NULL
+      pop_schema <- schema
+    }
+  }
+  
+  
+  ##############################################################################
+  ## 6. Build query for adjustment factors
+  ##############################################################################
+  
+  ## 6.1. Build query for adjustment factors (ADJqry) based on popType
+  ###################################################################
+  
   ## Build FROM statement
   pjoinqry <- getjoinqry(puniqueid, pltidsid, plota., pltidsa.)
   cjoinqry <- getjoinqry(cuniqueid, puniqueid, conda., plota.)
   pcfromqry <- paste0(
     "\n FROM pltids",
-    "\n JOIN ", SCHEMA., plotnm, " p ", pjoinqry,
-    "\n JOIN ", SCHEMA., condnm, " c ", cjoinqry)
+    "\n JOIN ", SCHEMA., pltxnm, " p ", pjoinqry,
+    "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry)
   
   ## Add FROM statement for subplot and subp_cond		 
   P2VEGjoinqry <- getjoinqry(subplotid, puniqueid, subpa., plota.)
@@ -467,7 +628,7 @@ check.popdataP2VEG <-
   #message(adjfactors.qry)
   
   
-  ## 5.3. If returnadj = TRUE, return adjustment factors  
+  ## 6.2. If returnadj = TRUE, return adjustment factors  
   ###################################################################
   if (adj != "samp") returnadj <- FALSE
   if (returnadj) {
@@ -490,6 +651,8 @@ check.popdataP2VEG <-
     if (is.null(adjfactors) || nrow(adjfactors) == 0) {
       message(adjfactors.qry)
       return(NULL)
+    } else {
+      names(adjfactors) <- toupper(names(adjfactors))
     }
     if (adj == "samp") {
       setkeyv(setDT(adjfactors), strunitvars)
@@ -499,12 +662,13 @@ check.popdataP2VEG <-
   }  
   dbqueries$adjfactors <- adjfactors.qry
     
-  
-  ## 5.4 Build query for plot-level adjustment factors
+
+  ## 6.3 Build query for plot-level adjustment factors
   ###################################################################
   adja. <- "adj."
   adjvars <- "ADJ_FACTOR_P2VEG_SUBP"
-  selectvars <- toString(c(paste0(pltidsa., pltidsid), adjvars))
+  pltidsadjSELECT.qry <- paste0(
+    "SELECT ", toString(c(paste0(pltidsa., pltidsid), adjvars)))
   areawt <- "P2VEGPROP_UNADJ"
   
   ## if adj='samp', append query for plot-level adjustment factors 
@@ -531,7 +695,7 @@ check.popdataP2VEG <-
     pltidsadj.qry <- paste0(
       adjfactorsWITHqry,
       "\n-------------------------------------------",
-      paste0("\nSELECT ", selectvars,
+      paste0("\n", pltidsadjSELECT.qry,
              pltidsadjFROM.qry))
     ## message(pltidsadj.qry)
     
@@ -540,7 +704,7 @@ check.popdataP2VEG <-
       adjfactorsWITHqry, ",",
       "\n----- get plot-level adjustment factors",
       "\npltidsadj AS ",
-      "\n(SELECT ", selectvars,
+      "\n(", pltidsadjSELECT.qry,
       pltidsadjFROM.qry, ")")
     
   } else {
@@ -569,10 +733,10 @@ check.popdataP2VEG <-
   dbqueriesWITH$pltidsadjWITH <- pltidsadjWITHqry   
   
   
-  ## 5.6. Run query to identify plotids, including adjustment factors
+  ## 6.4. Run query to identify plotids, including adjustment factors
   ###################################################################
   if (returndata || savedata) {
-    if (datindb) {
+    if (pltaindb) {
       pltidsadj <- tryCatch(
         DBI::dbGetQuery(dbconn, pltidsadj.qry),
         error=function(e) {
@@ -589,17 +753,31 @@ check.popdataP2VEG <-
       message("invalid adjustment query...")
       message(pltidsadj.qry)
       return(NULL)
+    } else {
+      names(pltidsadj) <- toupper(names(pltidsadj))
     }
     setkeyv(setDT(pltidsadj), pltidsid)
+    
+    ## Save data
+    if (savedata) {
+      message("saving pltidsadj table...")
+      outlst$out_layer <- "pltidsadj"
+      if (!append_layer) index.unique.pltidsadj <- pltidsid
+      datExportData(pltidsadj,
+                    savedata_opts = outlst)
+      if (!returndata) {
+        poptablst <- c(poptablst, "pltidsadj")
+      }
+    }
   }
   dbqueries$pltidsadj <- pltidsadj.qry
 
   
   ##############################################################################
-  ## 6. Build and run queries for PLOT/COND (pltcondx).
+  ## 7. Build queries for PLOT/COND (pltcondx)
   ##############################################################################
 
-  ## 6.1. Build FROM and SELECT statements
+  ## 7.1. Build FROM and SELECT statements
   ###############################################################
   if (!is.null(plotnm)) {
     ## Build FROM query for pltcondx query
@@ -612,15 +790,10 @@ check.popdataP2VEG <-
       "\n JOIN ", SCHEMA., pltxnm, " p ", pjoinqry,
       "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry)
     subpcjoinqry <- getjoinqry(c(subplotid, condid), c(cuniqueid, condid), subpca., conda.)
-    pcfromqry <- paste0(pcfromqry,
+    P2VEGpcfromqry <- paste0(pcfromqry,
                         "\n JOIN subpcprop subpc ", subpcjoinqry)
     
     ## Build SELECT query for pltcondx query
-    if (defaultVars && !is.null(pdoms2keep)) {
-      pvars <- pdoms2keep
-    } else {
-      pvars <- "*"
-    }
     pselectqry <- toString(paste0(plota., pvars))
 
   } else {
@@ -630,18 +803,17 @@ check.popdataP2VEG <-
     pcfromqry <- paste0(
       "\n FROM pltids",
       "\n JOIN ", SCHEMA., condxnm, " c ", cjoinqry)
+    subpcjoinqry <- getjoinqry(c(subplotid, condid), c(cuniqueid, condid), subpca., conda.)
+    P2VEGpcfromqry <- paste0(pcfromqry,
+                        "\n JOIN subpcprop subpc ", subpcjoinqry)
   }  
   
-  if (defaultVars) {
-    condvars <-  condflds[condflds %in% DBvars.default()$condvarlst]
-  } else {
-    condvars <- "*"
-  }
+  ## Build SELECT query for pltcondx query
   condvars <- unique(c(condvars, cvars2keep))[!unique(c(condvars, cvars2keep)) %in% pvars]
   cselectqry <- toString(paste0(conda., unique(c(condvars, cvars2keep))))
   
   
-  ## 6.2. Add FORTYPGRP to SELECT query
+  ## 7.2. Add FORTYPGRP to SELECT query
   ###############################################################
   if (addfortypgrp) {
     ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
@@ -658,27 +830,36 @@ check.popdataP2VEG <-
   P2VEGselectqry <- paste0(subpca., "CONDPROP_UNADJ AS ", areawt)
   
   
-  ## 6.3. Build query for pltcondx
+  ## 7.3. Build query for pltcondx
   ###############################################################
   pltcondflds <- unique(c(condvars, pvars))
   
   if (is.null(pvars)) {
     ## Build query for pltcondx
     pltcondx.qry <- paste0("SELECT ", cselectqry, ", 1 AS TOTAL",
-                           "\n", P2VEGselectqry,
                            pcfromqry)
+    
+    ## Build query for pltcondxP2VEG
+    pltcondxP2VEG.qry <- paste0("SELECT ", cselectqry, ", 1 AS TOTAL,",
+                           "\n", P2VEGselectqry,
+                           P2VEGpcfromqry)
     
   } else {  
     ## Build query for pltcondx
     pltcondx.qry <- paste0("SELECT ", cselectqry, ", ",
+                           "\n", pselectqry, ", 1 AS TOTAL",
+                           pcfromqry)
+    ## Build query for pltcondxP2VEG
+    pltcondxP2VEG.qry <- paste0("SELECT ", cselectqry, ", ",
                            "\n", pselectqry, ", 1 AS TOTAL,",
                            "\n", P2VEGselectqry,
-                           pcfromqry)
+                           P2VEGpcfromqry)
   }
   dbqueries$pltcondx <- pltcondx.qry
+  dbqueries$pltcondxP2VEG <- pltcondxP2VEG.qry
+ 
   
-  
-  ## 6.4. Build WITH queries for pltcondx
+  ## 7.4. Build WITH queries for pltcondx
   ###############################################################
   
   ## Build WITH query for pltcondx, including pltids WITH query
@@ -688,17 +869,17 @@ check.popdataP2VEG <-
                             "\n(", sumpropqry, "),",
                             "\n----- pltcondx",
                             "\npltcondx AS",
-                            "\n(", pltcondx.qry, ")")
+                            "\n(", pltcondxP2VEG.qry, ")")
   dbqueriesWITH$pltcondxWITH <- pltcondxWITHqry
   
   ## Build WITH query for pltcondx, including pltidsadj WITH query
   pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
                                "\npltcondx AS",
-                               "\n(", pltcondx.qry, ")")
+                               "\n(", pltcondxP2VEG.qry, ")")
   dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
   
   
-  ## 6.5. If returndata or savedata, run query for pltcondx
+  ## 7.5. If returndata or savedata, run query for pltcondx
   ##################################################################
   if (returndata || savedata) {
     pltcondindb <- FALSE
@@ -708,7 +889,7 @@ check.popdataP2VEG <-
                           "\nsubpcprop AS ",
                           "\n(", sumpropqry, ")",
                           "\n-------------------------------------------",
-                          "\n", pltcondx.qry)
+                          "\n", pltcondxP2VEG.qry)
     if (pltaindb) {
       pltcondx <- tryCatch(
         DBI::dbGetQuery(dbconn, pltcondxqry),
@@ -726,7 +907,10 @@ check.popdataP2VEG <-
       message("invalid pltcondx query...")
       message(pltcondxqry)
       return(NULL)
+    } else {
+      names(pltcondx) <- toupper(names(pltcondx))
     }
+    
     ## Set key on data.table
     pltcondkey <- c(cuniqueid, condid)
     setkeyv(setDT(pltcondx), pltcondkey)
@@ -741,15 +925,18 @@ check.popdataP2VEG <-
     }
   }
   
-  ## 7. Build CASE statement for adding adjustment factors to SELECT
-  ##################################################################
+  
+  ##############################################################################
+  ## 8. Build CASE statement for adding adjustment factors to SELECT
+  ##############################################################################
   adjcase <- "ADJ_FACTOR_P2VEG_SUBP"
   
 
   ##############################################################################
-  ## 8. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
+  ## 9. Create return list with pltidsadj, adjfactors, and pltcondx/areawtx, if returndata=TRUE
   ##############################################################################  
-  returnlst <- list(pltcondflds = pltcondflds, ## vector of field names in pltcondx
+  returnlst <- list(popdatindb = popdatindb,   ## logical. if TRUE, population data are in database
+                    pltcondflds = pltcondflds, ## vector of field names in pltcondx
                     pltflds = pltflds,
                     condflds = condflds,
                     cuniqueid = cuniqueid,     ## unique identifier of plots in pltcondx
@@ -772,349 +959,7 @@ check.popdataP2VEG <-
   
 
   # ##############################################################################
-  # ## Create Area query (for per-acre estimates)
-  # ##############################################################################  
-  # 
-  # 
-  # ## Build query for Area estimates 
-  # ##################################################################
-  # subpcpropa. <- "subpc."
-  #   
-  # ## 8.5.2. Build vcondarea FROM query
-  # vcondareafromqry <- "\nFROM subpcprop subpc"
-  # if (!is.null(pcwhereqry)) {
-  #   pcjoinqry <- getjoinqry(c(cuniqueid, condid), c(subplotid, condid), "pc.", subpcpropa.)
-  #   vcondareafromqry <- paste0(vcondareafromqry,
-  #                             "\nJOIN pltcondx pc ", pcjoinqry,
-  #                             pcwhereqry)
-  # }
-  # 
-  #   
-  # ## Build vcondarea SELECT query for summarizing to condition
-  # vcondareagrpvars <- c(subplotid, condid)
-  # vcondareasumvar <- paste0("\n  COALESCE(SUM(", subpcpropa., areawt, "), 0) AS CONDPROP_SUM")
-  # vcondareaselectqry <- toString(c(paste0(subpcpropa., vcondareagrpvars), vcondareasumvar))
-  #   
-  #   
-  # ## Build final vcondarea query, including pltidsqry
-  # vcondareaqry <- paste0("SELECT ", vcondareaselectqry,
-  #                        vcondareafromqry, 
-  #                       "\nGROUP BY ", toString(paste0(subpcpropa., vcondareagrpvars)))
-  # 
-  # 
-  # ## Build final vcondarea query, including pltidsqry
-  # vcondarea.qry <- paste0( 
-  #   pltidsWITHqry, ", ",
-  #   "\n----- sum sampled subplot proportions",
-  #   "\nsubpcprop AS ",
-  #   "\n(", sumpropqry, "),",
-  #   "\n----- pltcondx",
-  #   "\npltcondx AS",
-  #   "\n(", pltcondx.qry, ")",
-  #   "\n-------------------------------------------",
-  #   "\n", vcondareaqry
-  # )
-  # dbqueries$vcondarea <- vcondarea.qry
-  #   
-  # ## Run final vcondstrx query, including pltidsqry
-  # if (datindb) {
-  #   vcondareax <- tryCatch(
-  #       DBI::dbGetQuery(dbconn, vcondarea.qry),
-  #       error=function(e) {
-  #         message(e,"\n")
-  #         return(NULL)})
-  # } else {
-  #   vcondareax <- tryCatch(
-  #       sqldf::sqldf(vcondarea.qry, connection = NULL),
-  #       error = function(e) {
-  #         message(e,"\n")
-  #         return(NULL) })
-  # }
-  # if (is.null(vcondareax) || nrow(vcondareax) == 0) {
-  #   message("invalid condition-level area query...")
-  #   message(vcondarea.qry)
-  #   return(NULL)
-  # }
-  #   
-  # ## Return vsubpstr data
-  # vcondareakey <- c(subplotid, condid)
-  # setkeyv(setDT(vcondareax), vcondareakey)
-  # if (!is.null(getdataCNs)) {
-  #   vcondareax <- vcondareax[vcondareax[[subplotid]] %in% getdataCNs,]
-  # }
-  # 
-  # ## Append adjustment factors to vsubpstr data
-  # vcondareax <- vcondareax[pltidsadj, vadjfac := ADJ_FACTOR_P2VEG_SUBP]
-  #   
-  # ## Save data
-  # if (returndata) {
-  #   returnlst$vcondareax <- vcondareax
-  # } else {
-  #   returnlst$vcondareax <- "vcondareax"
-  # }
-
-  
-  ##############################################################################
-  ## 9. Build and run queries for other necessary tables (if returndata/savedata = TRUE)
-  ##############################################################################  
-  #if (returndata) {
-
-#   ## Build query for p2veg_subp_structure
-#   ##################################################################
-#   if (is.null(vsubpstrx)) {
-#     vsubpstra. <- "vsubpstr."
-# 
-#     ## Check variables
-#     vcondid <- findnm("CONDID", vsubpstrflds, returnNULL = TRUE)
-#     vsubp <- findnm("SUBP", vsubpstrflds, returnNULL = TRUE)
-#     keyvars <- c(vsubpstrid, vcondid, vsubp)
-#     if (any(sapply(keyvars, is.null))) {
-#       keymiss <- keyvars[sapply(keyvars, is.null)]
-#       stop("missing key variables in subp_cond data: ", toString(keymiss))
-#     }
-# 
-#     ## 8.5.2. Build p2veg_subp_structure FROM query
-#     vsubpstrfromqry <- "\nFROM pltids"
-#     pcjoinqry <- getjoinqry(cuniqueid, pltidsid, "pc.", pltidsa.)
-#     # if (!is.null(pcwhereqry)) {
-#     #   vsubpstrfromqry <- paste0(vsubpstrfromqry,
-#     #                             "\nJOIN pltcondx pc ", pcjoinqry)
-#     #
-#     #   vsubpstrjoinqry <- getjoinqry(c(vsubpstrid, vcondid), c(cuniqueid, condid), vsubpstra., "pc.")
-#     #   vsubpstrfromqry <- paste0(vsubpstrfromqry,
-#     #                             "\nJOIN ", SCHEMA., vsubpstrnm, " vsubpstr ", vsubpstrjoinqry,
-#     #                             pcwhereqry)
-#     # } else {
-#       vsubpstrjoinqry <- getjoinqry(vsubpstrid, pltidsid, vsubpstra., pltidsa.)
-#       vsubpstrfromqry <- paste0(vsubpstrfromqry,
-#                                 "\nJOIN ", SCHEMA., vsubpstrnm, " vsubpstr ", vsubpstrjoinqry)
-# #    }
-# 
-# 
-#     ## 8.5.3. Build p2veg_subp_structure SELECT query for summarizing to condition
-#     # if (defaultVars) {
-#     #   vsubpstrvars <-  vsubpstrflds[vsubpstrflds %in% DBvars.default(isveg = TRUE)$vsubpstrvarlst]
-#     # } else {
-#     #   vsubpstrvars <- "*"
-#     # }
-#     vsubpstrvars <- c("GROWTH_HABIT_CD", "LAYER")
-#     vsubpstrgrpvars <- paste0(c(vsubpstrid, vcondid, vsubpstrvars))
-#     vsubpstrsumvar <- "\n  COALESCE(SUM(COVER_PCT * 1.0) / 4 / 100, 0) AS COVER_PCT_SUM"
-#     vsubpstrselectqry <- toString(c(paste0(vsubpstra., vsubpstrgrpvars), vsubpstrsumvar))
-# 
-# 
-#     ## Build final p2veg_subp_structure query, including pltidsqry
-#     vcondstrqry <- paste0("SELECT ", vsubpstrselectqry,
-#                           vsubpstrfromqry,
-#                           "\nGROUP BY ", toString(paste0(vsubpstra., vsubpstrgrpvars)))
-#     dbqueries$vcondstr <- vcondstrqry
-# 
-# 
-#     ## Build final p2veg_subp_structure query, including pltidsqry
-#     vcondstrxWITH.qry <- paste0(pltcondxWITHqry, ", ",
-#                                 "\n----- get condition-level vegetation structure data",
-#                                 "\nvcondstr AS ",
-#                                 "\n(", vcondstrqry, ")",
-#                                 "\n-------------------------------------------")
-#     dbqueriesWITH$vcondstrxWITH <- vcondstrxWITH.qry
-# 
-# 
-#     ## Build final p2veg_subp_structure query, including pltidsqry
-#     vcondstrxadjWITH.qry <- paste0(pltcondxadjWITHqry, ", ",
-#                                    "\n----- get condition-level vegetation structure data",
-#                                    "\nvcondstr AS ",
-#                                    "\n(", vcondstrqry, ")",
-#                                    "\n-------------------------------------------")
-#     dbqueriesWITH$vcondstrxadjWITH <- vcondstrxadjWITH.qry
-# 
-#     ## If returndata or savedata, run query for vcondstrx
-#     ##################################################################
-#     ## Build final vcondstrx query, including pltidsqry
-#     vcondstrx.qry <- paste0(
-#       pltcondxWITHqry,
-#       "\n-------------------------------------------",
-#       "\n", vcondstrqry
-#     )
-#     dbqueries$vcondstr <- vcondstrx.qry
-# 
-#     ## Run final vcondstrx query, including pltidsqry
-#     if (datindb) {
-#       vcondstrx <- tryCatch(
-#         DBI::dbGetQuery(dbconn, vcondstrx.qry),
-#         error=function(e) {
-#           message(e,"\n")
-#           return(NULL)})
-#     } else {
-#       vcondstrx <- tryCatch(
-#         sqldf::sqldf(vcondstrx.qry, connection = NULL),
-#         error = function(e) {
-#           message(e,"\n")
-#           return(NULL) })
-#     }
-#     if (is.null(vcondstrx) || nrow(vcondstrx) == 0) {
-#       message("invalid condition-level p2veg_subp_structure query...")
-#       message(vcondstrx.qry)
-#       return(NULL)
-#     }
-# 
-#     ## Return vsubpstr data
-#     vcondstrkey <- c(vsubpstrid, vcondid)
-#     setkeyv(setDT(vcondstrx), vsubpstrid)
-#     if (!is.null(getdataCNs)) {
-#       vcondstrx <- vcondstrx[vcondstrx[[vsubpstrid]] %in% getdataCNs,]
-#     }
-# 
-#     ## Append adjustment factors to vsubpstr data
-#     vcondstrx <- vcondstrx[pltidsadj, vadjfac := ADJ_FACTOR_P2VEG_SUBP]
-# 
-#     ## Save data
-#     if (returndata) {
-#       returnlst$vcondstrx <- vcondstrx
-#     } else {
-#       returnlst$vcondstrx <- "vcondstrx"
-#     }
-# 
-#     # if (savedata) {
-#     #   returnlst$vcondstrx <- "vcondstrx"
-#     #
-#     #   message("saving vcondstrx...")
-#     #   outlst$out_layer <- "vcondstrx"
-#     #   if (!append_layer) index.unique.vcondstrx <- vcondstrkey
-#     #   datExportData(vcondstrx,
-#     #                 savedata_opts = outlst)
-#     # }
-# 
-#     returnlst$vcondstrid <- vsubpstrid
-#     returnlst$vcondstrflds <- vsubpstrgrpvars
-#   }
-
-  #
-  # ## Build query for p2veg_subplot_spp
-  # ##################################################################
-  # if (!is.null(vsubpsppnm) && is.null(vsubpsppx)) {
-  #   vsubpsppa. <- "vsubpspp."
-  #
-  #   ## Check variables
-  #   vcondid <- findnm("CONDID", vsubpsppflds, returnNULL = TRUE)
-  #   vsubp <- findnm("SUBP", vsubpsppflds, returnNULL = TRUE)
-  #   keyvars <- c(vcondid, vsubp)
-  #   if (any(sapply(keyvars, is.null))) {
-  #     keymiss <- keyvars[sapply(keyvars, is.null)]
-  #     stop("missing key variables in subp_cond data: ", toString(keymiss))
-  #   }
-  #
-  #   ## Build p2veg_subplot_spp FROM query
-  #   vsubpsppfromqry <- "\nFROM pltids"
-  #   pcjoinqry <- getjoinqry(cuniqueid, pltidsid, "pc.", pltidsa.)
-  #   # if (!is.null(pcwhereqry)) {
-  #   #   vsubpsppfromqry <- paste0(vsubpsppfromqry,
-  #   #                             "\nJOIN pltcondx pc ", pcjoinqry)
-  #   #
-  #   #   vsubpsppjoinqry <- getjoinqry(c(vsubpsppid, vcondid), c(cuniqueid, condid), vsubpsppa., "pc.")
-  #   #   vsubpsppfromqry <- paste0(vsubpsppfromqry,
-  #   #                             "\nJOIN ", SCHEMA., vsubpsppnm, " vsubpspp ", vsubpsppjoinqry,
-  #   #                             pcwhereqry)
-  #   # } else {
-  #     vsubpsppjoinqry <- getjoinqry(vsubpsppid, pltidsid, vsubpsppa., pltidsa.)
-  #     vsubpsppfromqry <- paste0(vsubpsppfromqry,
-  #                               "\nJOIN ", SCHEMA., vsubpsppnm, " vsubpspp ", vsubpsppjoinqry)
-  #   # }
-  #
-  #   #vsubpsppjoinqry <- getjoinqry(vsubpsppid, pltidsid, vsubpsppa., pltidsa.)
-  #   #vsubpsppfromqry <- paste0(
-  #   #  "\nJOIN ", SCHEMA., vsubpsppnm, " vsubpspp ", vsubpsppjoinqry)
-  #
-  #   ## Build p2veg_subplot_spp SELECT query
-  #   # if (defaultVars) {
-  #   #   vsubpsppvars <-  vsubpsppflds[vsubpsppflds %in% DBvars.default(isveg = TRUE)$vsubpsppvarlst]
-  #   # } else {
-  #   #   vsubpsppvars <- "*"
-  #   # }
-  #   vsubpsppvars <- c("VEG_FLDSPCD", "VEG_SPCD", "GROWTH_HABIT_CD", "LAYER")
-  #   vsubpsppgrpvars <- paste0(c(vsubpsppid, vcondid, vsubpsppvars))
-  #   vsubpsppsumvar <- "\n  COALESCE(SUM(COVER_PCT * 1.0) / 4 / 100 ,0) AS COVER_PCT_SUM"
-  #   vsubpsppselectqry <- toString(c(paste0(vsubpsppa., vsubpsppgrpvars), vsubpsppsumvar))
-  #
-  #   ## Build final p2veg_subplot_spp query, including pltidsqry
-  #   vcondsppqry <- paste0("SELECT ", vsubpsppselectqry,
-  #                         vsubpsppfromqry,
-  #                         "\nGROUP BY ", toString(paste0(vsubpsppa., vsubpsppgrpvars)))
-  #   dbqueries$vcondspp <- vcondsppqry
-  #
-  #
-  #   ## Build final p2veg_subplot_spp query, including pltidsqry
-  #   vcondsppxWITH.qry <- paste0(pltcondxadjWITHqry, ", ",
-  #                               "\n----- get condition-level vegetation species data",
-  #                               "\nvcondspp AS ",
-  #                               "\n(", vcondsppqry, ")",
-  #                               "\n-------------------------------------------")
-  #   dbqueriesWITH$vcondsppWITH <- vcondsppxWITH.qry
-  #
-  #   ## If returndata or savedata, run query for vcondsppx
-  #   ##################################################################
-  #   ## Build final vcondsppx query, including pltidsqry
-  #   vcondsppx.qry <- paste0(
-  #     pltcondxWITHqry,
-  #     "\n-------------------------------------------",
-  #     "\n", vcondsppqry
-  #   )
-  #   dbqueries$vcondspp <- vcondsppx.qry
-  #
-  #   ## Run final vcondsppx query, including pltidsqry
-  #   if (datindb) {
-  #     vcondsppx <- tryCatch(
-  #       DBI::dbGetQuery(dbconn, vcondsppx.qry),
-  #       error=function(e) {
-  #         message(e,"\n")
-  #         return(NULL)})
-  #   } else {
-  #     vcondsppx <- tryCatch(
-  #       sqldf::sqldf(vcondsppx.qry, connection = NULL),
-  #       error = function(e) {
-  #         message(e,"\n")
-  #         return(NULL) })
-  #   }
-  #   if (is.null(vcondsppx) || nrow(vcondsppx) == 0) {
-  #     message("invalid condition-level p2veg_subp_structure query...")
-  #     message(vcondsppx.qry)
-  #     return(NULL)
-  #   }
-  #
-  #   ## Return vcondspp data
-  #   vcondsppkey <- c(vsubpsppid, vcondid)
-  #   setkeyv(setDT(vcondsppx), vsubpsppid)
-  #   if (!is.null(getdataCNs)) {
-  #     vcondsppx <- vcondsppx[vcondsppx[[vsubpsppid]] %in% getdataCNs,]
-  #   }
-  #
-  #   ## Append adjustment factors to vcondspp data
-  #   vcondsppx <- vcondsppx[pltidsadj, vadjfac := ADJ_FACTOR_P2VEG_SUBP]
-  #
-  #   ## Return data
-  #   if (returndata) {
-  #     returnlst$vcondsppx <- vcondsppx
-  #   } else {
-  #     returnlst$vcondsppx <- "vcondsppx"
-  #   }
-  #
-  #   ## Save data
-  #   # if (savedata) {
-  #   #   returnlst$vcondsppx <- "vcondsppx"
-  #   #
-  #   #   message("saving vcondsppx...")
-  #   #   outlst$out_layer <- "vcondsppx"
-  #   #   if (!append_layer) index.unique.vcondsppx <- vcondsppkey
-  #   #   datExportData(vcondsppx,
-  #   #                 savedata_opts = outlst)
-  #   # }
-  #
-  #   returnlst$vcondsppid <- vsubpsppid
-  #   returnlst$vcondsppflds <- vsubpsppgrpvars
-  # }
-  
-
-  # ##############################################################################
-  # ## 9. Build and run queries for other necessary tables (if returndata = TRUE) 
+  # ## 10. Build and run queries for other necessary tables (if returndata = TRUE) 
   # ##############################################################################  
   if (returndata || savedata) {
   #   message("returning data needed for estimation...")
@@ -1405,184 +1250,199 @@ check.popdataP2VEG <-
   #     #rm(subp_condx)
   #     
   #     
-      ## 7.1 Save p2veg_subp_structure (vsubstrx / P2VEG_SUBP_STRUCTRUE)
-      ##################################################################
-      vsubstra. <- "vsubstr."
+    ## 10.1 Save p2veg_subp_structure (vsubstrx / P2VEG_SUBP_STRUCTRUE)
+    ##################################################################
+    vsubstra. <- "vsubstr."
+    
+    ## Check variables
+    vsubpstr_condid <- findnm("CONDID", vsubpstrflds, returnNULL = TRUE)
+    subp <- findnm("SUBP", vsubpstrflds, returnNULL = TRUE)
+    keyvars <- c(vsubpstr_condid, subp)
+    if (any(sapply(keyvars, is.null))) {
+      keymiss <- keyvars[sapply(keyvars, is.null)]
+      stop("missing key variables in p2veg_subp_structure data: ", toString(keymiss))
+    }
+    
+    ## Build subp_cond FROM query
+    vsubpstrjoinqry <- getjoinqry(vsubpstrid, pltidsid, vsubstra., pltidsa.)
+    vsubpstrfromqry <- paste0(
+      "\nJOIN ", SCHEMA., vsubpstrnm, " vsubstr ", vsubpstrjoinqry)
+    
+    ## Build subplot SELECT query
+    vsubpstrselectqry <- toString(paste0(vsubstra., vsubpstrvars))
+    
+    ## Build final p2veg_subp_structure query, including pltidsqry
+    vsubpstr.qry <- paste0(getdataWITHqry,
+                           "\n-------------------------------------------",
+                           "\n SELECT ", vsubpstrselectqry,
+                           "\nFROM pltids",
+                           vsubpstrfromqry)
+    dbqueries$p2veg_subp_structure <- vsubpstr.qry
+    
+    
+    ## Run final p2veg_subp_structure query, including pltidsqry
+    if (datindb) {
+      
+      ## check for index
+      idxchk <- checkidx(dbconn, vsubpstrnm, schema = schema, datsource = datsource)
+      if (nrow(idxchk) == 0) {
+        message("no index exists on ", vsubpstrnm, " query may be slow")
+      }
+      
+      p2veg_subp_structurex <- tryCatch(
+        DBI::dbGetQuery(dbconn, vsubpstr.qry),
+        error=function(e) {
+          message(e,"\n")
+          return(NULL)})
+    } else {
+      p2veg_subp_structurex <- tryCatch(
+        sqldf::sqldf(vsubpstr.qry, connection = NULL),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
+    }
+    if (is.null(p2veg_subp_structurex) || nrow(p2veg_subp_structurex) == 0) {
+      message("invalid p2veg_subp_structure query...")
+      message(vsubpstr.qry)
+      return(NULL)
+    } else {
+      names(p2veg_subp_structurex) <- toupper(names(p2veg_subp_structurex))
+    }
+    
+    ## Return and/or save vsubpstr data
+    vsubpstrkey <- c(vsubpstrid, vsubpstr_condid)
+    setkeyv(setDT(p2veg_subp_structurex), vsubpstrid)
+    if (!is.null(getdataCNs)) {
+      p2veg_subp_structurex <- p2veg_subp_structurex[p2veg_subp_structurex[[vsubpstrid]] %in% getdataCNs,]
+    }
+    
+    ## Append adjustment factors to p2veg_subp_structurex data
+    p2veg_subp_structurex <- p2veg_subp_structurex[pltidsadj, vadjfac := ADJ_FACTOR_P2VEG_SUBP]
+    vsubpstrvars <- c(vsubpstrvars, "vadjfac")
+    
 
+    ## Add to returnlst
+    if (returndata) {
+      returnlst$p2veg_subp_structurex <- p2veg_subp_structurex
+      returnlst$vuniqueid <- vsubpstrid
+      returnlst$vsubpstrflds <- vsubpstrvars
+    }
+    if (savedata) {
+      message("saving P2VEG_SUBP_STRUCTURE...")
+      outlst$out_layer <- "p2veg_subp_structure"
+      if (!append_layer) index.unique.p2veg_subp_structure <- vsubpstrkey
+      datExportData(p2veg_subp_structurex,
+                    savedata_opts = outlst)
+      if (!returndata) {
+        poptablst <- c(poptablst, "p2veg_subp_structure")
+        vsubpstrnm <- "p2veg_subp_structure"
+      }
+    }
+    
+    # ## 10.2 Save p2veg_subplot_spp (vsubsppx / P2VEG_SUBPLOT_SPP)
+    # ##################################################################
+    if (is.null(vsubpsppx) && !is.null(vsubpsppnm)) {
+      
+      vsubstra. <- "vsubpspp."
+      
       ## Check variables
-      vsubpstr_condid <- findnm("CONDID", vsubpstrflds, returnNULL = TRUE)
-      subp <- findnm("SUBP", vsubpstrflds, returnNULL = TRUE)
-      keyvars <- c(vsubpstr_condid, subp)
+      vsubpspp_condid <- findnm("CONDID", vsubpsppflds, returnNULL = TRUE)
+      subp <- findnm("SUBP", vsubpsppflds, returnNULL = TRUE)
+      keyvars <- c(vsubpspp_condid, subp)
       if (any(sapply(keyvars, is.null))) {
         keymiss <- keyvars[sapply(keyvars, is.null)]
         stop("missing key variables in p2veg_subp_structure data: ", toString(keymiss))
       }
-
+      
       ## Build subp_cond FROM query
-      vsubpstrjoinqry <- getjoinqry(vsubpstrid, pltidsid, vsubstra., pltidsa.)
-      vsubpstrfromqry <- paste0(
-        "\nJOIN ", SCHEMA., vsubpstrnm, " vsubstr ", vsubpstrjoinqry)
-
+      vsubpsppjoinqry <- getjoinqry(vsubpsppid, pltidsid, vsubpsppa., pltidsa.)
+      vsubpsppfromqry <- paste0(
+        "\nJOIN ", SCHEMA., vsubpsppnm, " vsubpspp ", vsubpsppjoinqry)
+      
       ## Build subplot SELECT query
-      if (defaultVars) {
-        vsubpstrflds <-  vsubpstrflds[vsubpstrflds %in% DBvars.default(isveg = TRUE)$vsubpstrvarlst]
-      } else {
-        vsubpstrflds <- "*"
-      }
-      vsubpstrselectqry <- toString(paste0(vsubstra., vsubpstrflds))
-
-      ## Build final p2veg_subp_structure query, including pltidsqry
-      vsubpstr.qry <- paste0(getdataWITHqry,
+      vsubpsppselectqry <- toString(paste0(vsubpsppa., vsubpsppvars))
+      
+      ## Build final p2veg_subplot_spp query, including pltidsqry
+      vsubpspp.qry <- paste0(getdataWITHqry,
                              "\n-------------------------------------------",
-                             "\n SELECT ", vsubpstrselectqry,
+                             "\n SELECT ", vsubpsppselectqry,
                              "\nFROM pltids",
-                             vsubpstrfromqry)
-      dbqueries$p2veg_subp_structure <- vsubpstr.qry
-
-
-      ## Run final p2veg_subp_structure query, including pltidsqry
+                             vsubpsppfromqry)
+      dbqueries$p2veg_subplot_spp <- vsubpspp.qry
+      
+      
+      ## Run final p2veg_subplot_spp query, including pltidsqry
       if (datindb) {
-        p2veg_subp_structurex <- tryCatch(
-          DBI::dbGetQuery(dbconn, vsubpstr.qry),
+        ## check for index
+        idxchk <- checkidx(dbconn, vsubpsppnm, schema = schema, datsource = datsource)
+        if (nrow(idxchk) == 0) {
+          message("no index exists on ", vsubpsppnm, " query may be slow")
+        }
+        
+        p2veg_subplot_sppx <- tryCatch(
+          DBI::dbGetQuery(dbconn, vsubpspp.qry),
           error=function(e) {
             message(e,"\n")
             return(NULL)})
       } else {
-        p2veg_subp_structurex <- tryCatch(
-          sqldf::sqldf(vsubpstr.qry, connection = NULL),
+        p2veg_subplot_sppx <- tryCatch(
+          sqldf::sqldf(vsubpspp.qry, connection = NULL),
           error = function(e) {
             message(e,"\n")
             return(NULL) })
       }
-      if (is.null(p2veg_subp_structurex) || nrow(p2veg_subp_structurex) == 0) {
-        message("invalid p2veg_subp_structure query...")
-        message(vsubpstr.qry)
+      if (is.null(p2veg_subplot_sppx) || nrow(p2veg_subplot_sppx) == 0) {
+        message("invalid p2veg_subplot_spp query...")
+        message(vsubpspp.qry)
         return(NULL)
+      } else {
+        names(p2veg_subplot_sppx) <- toupper(names(p2veg_subplot_sppx))
       }
-
-      ## Return and/or save vsubpstr data
-      vsubpstrkey <- c(vsubpstrid, vsubpstr_condid)
-      setkeyv(setDT(p2veg_subp_structurex), vsubpstrid)
+      
+      ## Return and/or save vsubpspp data
+      vsubpsppkey <- c(vsubpsppid, vsubpspp_condid)
+      setkeyv(setDT(p2veg_subplot_sppx), vsubpsppid)
       if (!is.null(getdataCNs)) {
-        p2veg_subp_structurex <- p2veg_subp_structurex[p2veg_subp_structurex[[vsubpstrid]] %in% getdataCNs,]
+        p2veg_subplot_sppx <- p2veg_subplot_sppx[p2veg_subplot_sppx[[vsubpsppid]] %in% getdataCNs,]
       }
       
-      ## Append adjustment factors to p2veg_subp_structurex data
-      p2veg_subp_structurex <- p2veg_subp_structurex[pltidsadj, vadjfac := ADJ_FACTOR_P2VEG_SUBP]
+      ## Append adjustment factors to p2veg_subplot_sppx data
+      p2veg_subplot_sppx <- p2veg_subplot_sppx[pltidsadj, vadjfac := ADJ_FACTOR_P2VEG_SUBP]
+      vsubpsppflds <- c(vsubpsppflds, "vadjfac")
       
-
+      
       ## Add to returnlst
       if (returndata) {
-        returnlst$p2veg_subp_structurex <- p2veg_subp_structurex
-        returnlst$vuniqueid <- vsubpstrid
+        returnlst$p2veg_subplot_sppx <- p2veg_subplot_sppx
+        returnlst$vuniqueid <- vsubpsppid
+        returnlst$vsubpsppflds <- vsubpsppvars
       }
       if (savedata) {
-        message("saving P2VEG_SUBP_STRUCTRUE...")
-        outlst$out_layer <- "P2VEG_SUBP_STRUCTRUE"
-        if (!append_layer) index.unique.p2veg_subp_structure <- vsubpstrkey
-        datExportData(p2veg_subp_structurex,
-                    savedata_opts = outlst)
-      }
-
-      # ## 7.2 Save p2veg_subplot_spp (vsubsppx / P2VEG_SUBPLOT_SPP)
-      # ##################################################################
-      if (is.null(vsubpsppx) && !is.null(vsubpsppnm)) {
-
-        vsubstra. <- "vsubpspp."
-
-        ## Check variables
-        vsubpspp_condid <- findnm("CONDID", vsubpsppflds, returnNULL = TRUE)
-        subp <- findnm("SUBP", vsubpsppflds, returnNULL = TRUE)
-        keyvars <- c(vsubpspp_condid, subp)
-        if (any(sapply(keyvars, is.null))) {
-          keymiss <- keyvars[sapply(keyvars, is.null)]
-          stop("missing key variables in p2veg_subp_structure data: ", toString(keymiss))
-        }
-
-        ## Build subp_cond FROM query
-        vsubpsppjoinqry <- getjoinqry(vsubpsppid, pltidsid, vsubpsppa., pltidsa.)
-        vsubpsppfromqry <- paste0(
-          "\nJOIN ", SCHEMA., vsubpsppnm, " vsubpspp ", vsubpsppjoinqry)
-
-        ## Build subplot SELECT query
-        if (defaultVars) {
-          vsubpsppflds <-  vsubpsppflds[vsubpsppflds %in% DBvars.default(isveg = TRUE)$vsubpsppvarlst]
-        } else {
-          vsubpsppflds <- "*"
-        }
-        vsubpsppselectqry <- toString(paste0(vsubpsppa., vsubpsppflds))
-
-        ## Build final p2veg_subplot_spp query, including pltidsqry
-        vsubpspp.qry <- paste0(getdataWITHqry,
-                               "\n-------------------------------------------",
-                               "\n SELECT ", vsubpsppselectqry,
-                               "\nFROM pltids",
-                               vsubpsppfromqry)
-        dbqueries$p2veg_subplot_spp <- vsubpspp.qry
-
-
-        ## Run final p2veg_subplot_spp query, including pltidsqry
-        if (datindb) {
-          p2veg_subplot_sppx <- tryCatch(
-            DBI::dbGetQuery(dbconn, vsubpspp.qry),
-            error=function(e) {
-              message(e,"\n")
-              return(NULL)})
-        } else {
-          p2veg_subplot_sppx <- tryCatch(
-            sqldf::sqldf(vsubpspp.qry, connection = NULL),
-            error = function(e) {
-              message(e,"\n")
-              return(NULL) })
-        }
-        if (is.null(p2veg_subplot_sppx) || nrow(p2veg_subplot_sppx) == 0) {
-          message("invalid p2veg_subplot_spp query...")
-          message(vsubpspp.qry)
-          return(NULL)
-        }
-
-        ## Return and/or save vsubpspp data
-        vsubpsppkey <- c(vsubpsppid, vsubpspp_condid)
-        setkeyv(setDT(p2veg_subplot_sppx), vsubpsppid)
-        if (!is.null(getdataCNs)) {
-          p2veg_subplot_sppx <- p2veg_subplot_sppx[p2veg_subplot_sppx[[vsubpsppid]] %in% getdataCNs,]
-        }
-        
-        ## Append adjustment factors to p2veg_subplot_sppx data
-        p2veg_subplot_sppx <- p2veg_subplot_sppx[pltidsadj, vadjfac := ADJ_FACTOR_P2VEG_SUBP]
-        
-
-        ## Add to returnlst
-        if (returndata) {
-          returnlst$p2veg_subplot_sppx <- p2veg_subplot_sppx
-        }
-        if (savedata) {
-          message("saving P2VEG_SUBPLOT_SPP...")
-          outlst$out_layer <- "P2VEG_SUBPLOT_SPP"
-          if (!append_layer) index.unique.p2veg_subplot_spp <- vsubpsppkey
-          datExportData(p2veg_subplot_sppx,
-                        savedata_opts = outlst)
+        message("saving P2VEG_SUBPLOT_SPP...")
+        outlst$out_layer <- "p2veg_subplot_spp"
+        if (!append_layer) index.unique.p2veg_subplot_spp <- vsubpsppkey
+        datExportData(p2veg_subplot_sppx,
+                      savedata_opts = outlst)
+        if (!returndata) {
+          poptablst <- c(poptablst, "p2veg_subplot_spp")
+          vsubpsppnm <- "p2veg_subplot_spp"
         }
       }
-
-  #     }
-  #   }
-  # }  
+    }
   }   
 
   ##############################################################################
-  ## 10. Check COND_STATUS_CD and generate table with number of conditions
+  ## 11. Check COND_STATUS_CD and generate table with number of conditions
   ##############################################################################
 
   ## condfromqry
   condjoinqry <- getjoinqry(cuniqueid, pltidsid, conda., pltidsa.)
   condfromqry <- paste0("\nJOIN ", SCHEMA., condnm, " c ", condjoinqry)
   
-  ## 10.1. Sampled conditions
+  ## 11.1. Sampled conditions
   ##########################################################################
   condsampcnt <- NULL
   cstatuschk <- findnm("COND_STATUS_CD", pltcondflds, returnNULL=TRUE)
-  
   
   if (is.null(cstatuschk)) {
     message("COND_STATUS_CD not in dataset.. assuming all conditions are sampled")
@@ -1595,7 +1455,7 @@ check.popdataP2VEG <-
     }  
     
     ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
-    if (!pltcondindb) {
+    if (returndata || savedata) {
       condsampcnt <- pltcondx[, .N, by=cstatuscdnm]
       setnames(condsampcnt, "N", "NBRCONDS")
     } else {
@@ -1607,23 +1467,17 @@ check.popdataP2VEG <-
       condsampcntqry <- paste0(getdataWITHqry,
                                condsampcntqry)
       
-      if (pltcondindb) {      
-        condsampcnt <- tryCatch(
-          DBI::dbGetQuery(dbconn, condsampcntqry),
-          error = function(e) {
-            message(e,"\n")
-            return(NULL) })
-      } else {
-        condsampcnt <- tryCatch(
-          sqldf::sqldf(condsampcntqry, connection = NULL),
-          error = function(e) {
-            message(e,"\n")
-            return(NULL) })
-      }
+      condsampcnt <- tryCatch(
+        DBI::dbGetQuery(dbconn, condsampcntqry),
+        error = function(e) {
+          message(e,"\n")
+          return(NULL) })
       
       if (is.null(condsampcnt)) {
         message("invalid condsampcnt query")
         message(condsampcntqry)
+      } else {
+        names(condsampcnt) <- toupper(names(condsampcnt))
       }
     }
     if (!is.null(condsampcnt)) {
@@ -1638,7 +1492,7 @@ check.popdataP2VEG <-
     }
   } 
   
-  ## 10.2. Sampled nonforest conditions
+  ## 11.2. Sampled nonforest conditions
   ##########################################################################
   
   ## If ACI, check NF_PLOT_STATUS_CD and generate table with number of plots
@@ -1656,7 +1510,7 @@ check.popdataP2VEG <-
         nfcstatuscdnm <- nfcstatuschk
       }  
       
-      if (!pltcondindb) {
+      if (returndata || savedata) {
         nfcondsampcnt <- pltcondx[, .N, by=nfcstatuscdnm]
         setnames(nfcondsampcnt, "N", "NBRCONDS")
       } else {
@@ -1670,22 +1524,17 @@ check.popdataP2VEG <-
         nfcondsampcntqry <- paste0(getdataWITHqry,
                                    nfcondsampcntqry)
         
-        if (pltcondindb) {      
-          nfcondsampcnt <- tryCatch(
-            DBI::dbGetQuery(dbconn, nfcondsampcntqry),
-            error = function(e) {
-              message(e,"\n")
-              return(NULL) })
-        } else {
-          nfcondsampcnt <- tryCatch(
-            sqldf::sqldf(nfcondsampcntqry, connection = NULL),
-            error = function(e) {
-              message(e,"\n")
-              return(NULL) })
-        }
+        nfcondsampcnt <- tryCatch(
+          DBI::dbGetQuery(dbconn, nfcondsampcntqry),
+          error = function(e) {
+            message(e,"\n")
+            return(NULL) })
+        
         if (is.null(nfcondsampcnt)) {
           message("invalid nfcondsampcnt query")
           message(nfcondsampcntqry)
+        } else {
+          names(nfcondsampcnt) <- toupper(names(nfcondsampcnt))
         }
       }
       if (!is.null(nfcondsampcnt)) {
@@ -1724,7 +1573,7 @@ check.popdataP2VEG <-
     returnlst$condsampcnt <- as.data.frame(condsampcnt)
   }
 
-  ## 11. Build FROM statement for estimation queries
+  ## 12. Build FROM statement for estimation queries
   ######################################################################################
   if (datindb) {
     estpcfromqry <- paste0(
@@ -1744,19 +1593,31 @@ check.popdataP2VEG <-
       "\n JOIN ", SCHEMA., vsubpstrnm, " vsubpstr ON(", vsubpstra., vsubpstrid, " = c.", cuniqueid) 
   
 
-  ## 12. Return data objects
+  ## 13. Return data objects
   ######################################################################################
-  if (!returndata) {
+  returnlst$pop_datsource <- pop_datsource
+  if (popdatindb || savedata) {
+    returnlst$popdbinfo <- list(popconn = popconn, 
+                                pop_dsn = pop_dsn,
+                                pop_schema = pop_schema,
+                                pop_datsource = pop_datsource,
+                                poptablst = poptablst)
+  }
+
+  if (popdatindb) {
     
     if (!is.null(vsubpstrnm)) {
       returnlst$p2veg_subp_structurex <- vsubpstrnm
       returnlst$vuniqueid <- vsubpstrid
+      returnlst$vsubpstrflds <- vsubpstrvars
     }
     if (!is.null(vsubpsppnm)) {
       returnlst$p2veg_subplot_sppx <- vsubpsppnm
-      #returnlst$vuniqueid <- vsubpsppid
+      returnlst$vuniqueid <- vsubpstrid
+      returnlst$vsubsppflds <- vsubpsppvars
     }
   }
+  
   returnlst$dbqueries <- dbqueries
   returnlst$dbqueriesWITH <- dbqueriesWITH
   returnlst$estfromqry <- estfromqry
