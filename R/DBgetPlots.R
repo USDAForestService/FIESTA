@@ -1372,8 +1372,10 @@ DBgetPlots <- function (states = NULL,
         append_layer <- outlst$append_layer <- TRUE
         overwrite_layer <- outlst$overwrite_layer <- FALSE
       } else {
-        if (!outlst$overwrite_layer && !outlst$append_layer) {
-          append_layer <- outlst$append_layer <- TRUE
+        if (outlst$overwrite_layer) {
+          append_layer <- outlst$append_layer <- FALSE
+        } else {
+          append_layer <- outlst$append_layer 
         }
       }
     }
