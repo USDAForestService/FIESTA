@@ -392,6 +392,7 @@ modGBpop <- function(popType = "VOL",
         outlst$outconnopen <- TRUE
       }
       outlst$add_layer <- TRUE
+      append_layer <- outlst$append_layer
     }
   }
   

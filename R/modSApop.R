@@ -329,6 +329,7 @@ modSApop <- function(popType = "VOL",
       if (outlst$out_fmt == "sqlite" && is.null(outlst$out_dsn)) {
         outlst$out_dsn <- "SApopdat.db"
         outlst$outconnopen <- TRUE
+        append_layer <- outlst$append_layer
       }
       outlst$add_layer <- TRUE
     }

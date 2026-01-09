@@ -4422,6 +4422,7 @@ DBgetPlots <- function (states = NULL,
         if (!append_layer) {
           index.unique.condx <- c("PLT_CN", "CONDID")
         }
+
         outlst$out_layer <- "cond"
         datExportData(condx,
                       index.unique = index.unique.condx,
