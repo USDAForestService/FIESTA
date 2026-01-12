@@ -686,13 +686,18 @@ DBgetPlots <- function (states = NULL,
 
   if (!is.null(evalid)) {
     endType <- sort(unique(sapply(evalid, function(x) substr(x, nchar(x)-1, nchar(x)))))
-    Type <- ifelse(endType == "00", "ALL",
+    Typechk <- ifelse(endType == "00", "ALL",
                    ifelse(endType == "01", "VOL",
                           ifelse(endType == "10", "P2VEG",
                                  ifelse(endType == "07", "DWM",
                                         ifelse(endType == "09", "INV",
                                                ifelse(endType %in% c("04","05"), "GRM",
                                               "CHNG"))))))
+    if (Typechk == "CHNG") {
+      if (Type != "GRM") {
+        Type <- Typechk
+      }
+    }
 
   } else {
     Typelst <- c("ALL", "CURR", "VOL", "P2VEG", "DWM", "INV", "CHNG",
@@ -3111,7 +3116,7 @@ DBgetPlots <- function (states = NULL,
 		                            "\nFROM ", tchgfromqry,
 						                    "\nWHERE ", xfilter)
             treeu.qry <- paste(treea.qry, "UNION", treeb.qry)
-            cat("\n", "## STATUS: GETTING TREE CHANGE DATA (", stabbr, ") ...", "\n")
+            cat("\n", "## STATUS: Getting tree change data (", stabbr, ") ...", "\n")
 
 
 	        ## Query SQLite database or R object
