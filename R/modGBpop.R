@@ -373,9 +373,9 @@ modGBpop <- function(popType = "VOL",
   savedata <- FIESTAutils::pcheck.logical(savedata, varnm="savedata", 
                                           title="Save data tables?", 
                                           first="YES", gui=gui, stopifnull=TRUE)
-  if (!returndata && !savedata) {
-    stop("both returndata and savedata are FALSE...")
-  }
+  # if (!returndata && !savedata) {
+  #   stop("both returndata and savedata are FALSE...")
+  # }
   
   ## Check saveobj 
   saveobj <- FIESTAutils::pcheck.logical(saveobj, varnm="saveobj", 
@@ -897,13 +897,15 @@ modGBpop <- function(popType = "VOL",
       stop("must include sccmx data")
     }
     
-    # if (popType == "GRM") {
-    #   treex <- popcheck$treex
-    #   tuniqueid <- popcheck$tuniqueid
-    #   grmx <- popcheck$grmx
-    #   beginx <- popcheck$beginx
-    #   midptx <- popcheck$midptx
-    # }
+    if (popType == "GRM") {
+      treex <- popcheck$treex
+      tuniqueid <- popcheck$tuniqueid
+      treeflds <- popcheck$treeflds
+      
+      grmx <- popcheck$grmx
+      beginx <- popcheck$beginx
+      midptx <- popcheck$midptx
+    }
   }
   
   ###################################################################################
@@ -1271,7 +1273,10 @@ modGBpop <- function(popType = "VOL",
   }
 
   if (popType %in% c("GRM")) {
-    returnlst$treex <- popcheck$treex
+    returnlst$treex <- treex
+    returnlst$tuniqueid <- tuniqueid
+    returnlst$treeflds <- treeflds
+    
     returnlst$grmx <- popcheck$grmx
     returnlst$beginx <- popcheck$beginx
     returnlst$midptx <- popcheck$midptx

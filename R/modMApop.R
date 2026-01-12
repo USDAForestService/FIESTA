@@ -334,9 +334,9 @@ modMApop <- function(popType = "VOL",
   savedata <- pcheck.logical(savedata, varnm="savedata",
         title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
   
-  if (!returndata && !savedata) {
-    stop("both returndata and savedata are FALSE...")
-  }
+  # if (!returndata && !savedata) {
+  #   stop("both returndata and savedata are FALSE...")
+  # }
   
   ## Check saveobj
   saveobj <- pcheck.logical(saveobj, varnm="saveobj",
