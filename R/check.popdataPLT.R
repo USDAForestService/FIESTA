@@ -860,6 +860,26 @@ check.popdataPLT <-
  
     ## 12. Check grm_types if popType == 'GRM'
     ########################################################################
+    ## Note: GROW_TYP_CD and MORT_TYP_CD are variables in the FIADB plot table
+    ## that indicated how the volume growth/mortality is estimated. 
+    
+    ## GROW_TYP_CD
+    ## 1:Current annual - an estimate of the amount of volume that was added to a 
+    ##    tree in the year before the tree was sampled, based on the measured 
+    ##    diameter increment recorded when the tree was sampled or on a modeled
+    ##    diameter for the previous year.
+    ## 2:Periodic annual - an estimate of the average annual change in volume
+    ##    occurring between two measurements, usually current and previous inventory,
+    ##    where the same plot is evaluated twice (the increase in volume between 
+    ##    inventories divided by the number of years between each inventor (REMPER)).
+    ## MORT_TYP_CD
+    ## 1:Current annual - an estimate of the volume of trees dying in the year before
+    ##    the plot was measured, based on the year of death or on a modeled estimate.
+    ## 2:Periodic annual - an estimate of the average annual volume of trees dying
+    ##    between two measurements, usually the current inventory and previous inventory,
+    ##    where the same plot is evaluated twice (the loss of volume between inventories
+    ##    divided by the number of years between each inventory (REMPER)).
+    
     if (popType == "GRM") {
       grmvars <- c("GROW_TYP_CD", "MORT_TYP_CD")
       grmvarschk <- unlist(sapply(grmvars, findnm, pflds, returnNULL=TRUE))

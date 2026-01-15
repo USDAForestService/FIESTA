@@ -2232,17 +2232,17 @@ datSumTree <- function(tree = NULL,
   
   ## Build query to summarize tree data, including pcwhereqry
   ################################################################
-  tqry <- paste0(tselectqry,
-                 tfromqry,
-                 pcwhereqry,
-                 "\nGROUP BY ", toString(tgrpbyvars))
+  tree.qry <- paste0(tselectqry,
+                     tfromqry,
+                     pcwhereqry,
+                     "\nGROUP BY ", toString(tgrpbyvars))
 
   ## Build final query to summarize tree data including WITH queries
   ################################################################
   if (!is.null(pltidsWITHqry)) {
     tree.qry <- paste0(pltidsWITHqry,
                        "\n-------------------------------------------",
-                       tqry)
+                       tree.qry)
   }
 
   # replace instances of twithSelect vars with their double quoted versions in tree.qry

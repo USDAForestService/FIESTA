@@ -44,7 +44,7 @@ check.estdata <-
   #############################################################################
 
   ## Set global variables
-  rawfolder = pcwhereqry <- NULL
+  rawfolder = pcwhereqry = landarea.filter <- NULL
   rawdata <- TRUE
   SCHEMA. <- ""
   addtitle <- FALSE
@@ -167,70 +167,72 @@ check.estdata <-
   landarealst <- c("FOREST", "ALL", "TIMBERLAND")
   landarea <- pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
 	                  checklst=landarealst, caption="Sample land area?")
+  
+  if (popType != "GRM") {
 
-  ## Create landarea.filter
-  landarea.filter <- NULL
-  landcols <- {}
-  if (landarea == "ALL") {
-    if ("COND_STATUS_CD" %in% condflds) {
-      landarea.filter <- "c.COND_STATUS_CD < 5"
-      landcols <- "COND_STATUS_CD"
-    } else {
-      message("COND_STATUS_CD not in pltcond")
-      return(NULL)
-    }
-    
-  } else if (landarea %in% "FOREST") {
-    if ("COND_STATUS_CD" %in% condflds) {
-      landarea.filter <- "c.COND_STATUS_CD = 1"
-      landcols <- "COND_STATUS_CD"
-    } else {
-	     message("COND_STATUS_CD not in pltcond")
-		  return(NULL)
-    }
-  } else if (landarea == "TIMBERLAND") {
-    landcols <- c("SITECLCD", "RESERVCD")
-    if (any(!landcols %in% condflds)) {
-      landcols.miss <- landcols[which(!landcols %in% condflds)]
-      stop(paste("missing variables for TIMBERLAND landarea filter:",
-		                paste(landcols.miss, collapse=", ")))
-    }
-    landarea.filter <- "c.SITECLCD IN (1,2,3,4,5,6) AND c.RESERVCD = 0"
-  }
-    
-
-  ## Add landarea filter to pcwhereqry
-  if (!is.null(landarea.filter)) {
-    if (popType %in% c("CHNG", "GRM") && landarea_both) {
-      
-      if ((!popdatindb && is.data.frame(pltcondx)) ||
-          (popdatindb && "pltcondx" %in% poptablst)) {
-        
-        if (landarea == "ALL") {
-          landarea.filter <- paste0(landarea.filter, 
-                                    "\n  AND c.PREV_COND_STATUS_CD < 5")
-        } else if (landarea == "FOREST") {
-          landarea.filter <- paste0(landarea.filter, 
-                                    "\n  AND c.PREV_COND_STATUS_CD = 1")
-        } else if (landarea.filter == "TIMBERLAND") {
-          landarea.filter <- paste0(landarea.filter, 
-                                    "\n  AND c.PREV_SITECLCD IN (1,2,3,4,5,6) AND c.PREV_RESERVCD = 0")
-        }
+    ## Create landarea.filter
+    landarea.filter <- NULL
+    landcols <- {}
+    if (landarea == "ALL") {
+      if ("COND_STATUS_CD" %in% condflds) {
+        landarea.filter <- "c.COND_STATUS_CD < 5"
+        landcols <- "COND_STATUS_CD"
       } else {
+        message("COND_STATUS_CD not in pltcond")
+        return(NULL)
+      }
+      
+    } else if (landarea %in% "FOREST") {
+      if ("COND_STATUS_CD" %in% condflds) {
+        landarea.filter <- "c.COND_STATUS_CD = 1"
+        landcols <- "COND_STATUS_CD"
+      } else {
+        message("COND_STATUS_CD not in pltcond")
+        return(NULL)
+      }
+    } else if (landarea == "TIMBERLAND") {
+      landcols <- c("SITECLCD", "RESERVCD")
+      if (any(!landcols %in% condflds)) {
+        landcols.miss <- landcols[which(!landcols %in% condflds)]
+        stop(paste("missing variables for TIMBERLAND landarea filter:",
+                   paste(landcols.miss, collapse=", ")))
+      }
+      landarea.filter <- "c.SITECLCD IN (1,2,3,4,5,6) AND c.RESERVCD = 0"
+    }
+    
+    
+    ## Add landarea filter to pcwhereqry
+    if (!is.null(landarea.filter)) {
+      if (popType %in% c("CHNG") && landarea_both) {
         
-        landarea.filterCHNG <- gsub("c.", "pcond.", landarea.filter)
-        landarea.filter <- paste0("(", landarea.filter, 
-                                  "\n  AND ", landarea.filterCHNG, ")")
+        if ((!popdatindb && is.data.frame(pltcondx)) ||
+            (popdatindb && "pltcondx" %in% poptablst)) {
+          
+          if (landarea == "ALL") {
+            landarea.filter <- paste0(landarea.filter, 
+                                      "\n  AND c.PREV_COND_STATUS_CD < 5")
+          } else if (landarea == "FOREST") {
+            landarea.filter <- paste0(landarea.filter, 
+                                      "\n  AND c.PREV_COND_STATUS_CD = 1")
+          } else if (landarea.filter == "TIMBERLAND") {
+            landarea.filter <- paste0(landarea.filter, 
+                                      "\n  AND c.PREV_SITECLCD IN (1,2,3,4,5,6) AND c.PREV_RESERVCD = 0")
+          }
+        } else {
+          
+          landarea.filterCHNG <- gsub("c.", "pcond.", landarea.filter)
+          landarea.filter <- paste0("(", landarea.filter, 
+                                    "\n  AND ", landarea.filterCHNG, ")")
+        }
+      }
+      if (!is.null(pcwhereqry)) {
+        pcwhereqry <- paste0(pcwhereqry,
+                             "\n  AND ", landarea.filter)
+      } else {
+        pcwhereqry <- paste0("\n WHERE ", landarea.filter)
       }
     }
-    if (!is.null(pcwhereqry)) {
-      pcwhereqry <- paste0(pcwhereqry,
-                        "\n  AND ", landarea.filter)
-    } else {
-      pcwhereqry <- paste0("\n WHERE ", landarea.filter)
-    }
   }
-
   ## Add ACI.filter to pcwhereqry
   ###################################################################################
   if (esttype %in% c("TREE", "RATIO") && !ACI && landarea != "FOREST") {
@@ -247,10 +249,11 @@ check.estdata <-
   ## Update pltcondx  or pltcondxqry with pcwhereqry
   ########################################################
   pltcondxadjWITHqry=pltcondxWITHqry <- NULL
-  if (!is.null(pcwhereqry)) {
-    if ((!popdatindb && is.data.frame(pltcondx)) ||
-             (popdatindb && "pltcondx" %in% poptablst)) {
-
+  
+  if ((!popdatindb && is.data.frame(pltcondx)) ||
+      (popdatindb && "pltcondx" %in% poptablst)) {
+    
+    if (!is.null(pcwhereqry)) {
       pcwhereqry <- gsub("p.", "pc.", pcwhereqry)
       pcwhereqry <- gsub("c.", "pc.", pcwhereqry)
     
@@ -278,41 +281,42 @@ check.estdata <-
       } else if (is.data.frame(pltcondx)) {
         pltcondx <- pcchk
       }
-     
-    } else if (popdatindb && !"pltcondx" %in% poptablst) {
+    }
+    
+  } else if (popdatindb && !"pltcondx" %in% poptablst) {
 
-      pltcondx.qry <- paste0(pltcondxqry,
-                            pcwhereqry)
+    pltcondx.qry <- paste0(pltcondxqry,
+                           pcwhereqry)
+    
+    ## Build WITH query for pltcondx, including pltids WITH query
+    pltcondxWITHqry <- paste0(pltidsWITHqry, ", ",
+                              "\n----- pltcondx",
+                              "\npltcondx AS",
+                              "\n(", pltcondx.qry, ")")
+    #dbqueriesWITH$pltcondxWITH <- pltcondxWITHqry
+    
+    if (popType == "P2VEG") {
+      pltcondxP2VEG.qry <- paste0(pltcondxP2VEGqry,
+                                  pcwhereqry)
       
-      ## Build WITH query for pltcondx, including pltids WITH query
-      pltcondxWITHqry <- paste0(pltidsWITHqry, ", ",
-                                "\n----- pltcondx",
-                                "\npltcondx AS",
-                                "\n(", pltcondx.qry, ")")
-      #dbqueriesWITH$pltcondxWITH <- pltcondxWITHqry
-
-      if (popType == "P2VEG") {
-        pltcondxP2VEG.qry <- paste0(pltcondxP2VEGqry,
-                                    pcwhereqry)
-        
-        ## Build WITH query for pltcondx, including pltidsadj WITH query
-        pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
-                                     "\n----- pltcondx",
-                                     "\npltcondx AS",
-                                     "\n(", pltcondxP2VEG.qry, ")")
-        #dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
-        
-      } else {
-        
-        ## Build WITH query for pltcondx, including pltidsadj WITH query
-        pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
-                                     "\n----- pltcondx",
-                                     "\npltcondx AS",
-                                     "\n(", pltcondx.qry, ")")
-        #dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
-      }
+      ## Build WITH query for pltcondx, including pltidsadj WITH query
+      pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
+                                   "\n----- pltcondx",
+                                   "\npltcondx AS",
+                                   "\n(", pltcondxP2VEG.qry, ")")
+      #dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
+      
+    } else {
+      
+      ## Build WITH query for pltcondx, including pltidsadj WITH query
+      pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
+                                   "\n----- pltcondx",
+                                   "\npltcondx AS",
+                                   "\n(", pltcondx.qry, ")")
+      #dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
     }
   }
+  
 
   ## Check sumunits
   sumunits <- pcheck.logical(sumunits, varnm="sumunits",
@@ -459,6 +463,8 @@ check.estdata <-
     returnlst$pop_schema <- pop_schema
     returnlst$SCHEMA. <- SCHEMA.
     returnlst$poptablst <- poptablst
+  } else {
+    returnlst$SCHEMA. <- ""
   }
 
   if ((popdatindb && "pltcondx" %in% poptablst) || (!popdatindb && is.data.frame(pltcondx))) {

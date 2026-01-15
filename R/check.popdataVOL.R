@@ -60,6 +60,7 @@ check.popdataVOL <-
     diavar <- "DIA"
     addfortypgrp <- TRUE
     returnadj <- TRUE
+    isseed <- FALSE
 
     ## Get variables from outlst
     if (savedata) {
@@ -149,6 +150,9 @@ check.popdataVOL <-
       
       if (is.null(treenm) && is.null(seednm)) {
         stop("must include tree and/or seed for estimation")
+      }
+      if (!is.null(seednm)) {
+        isseed <- TRUE
       }
     }
     
@@ -996,6 +1000,7 @@ check.popdataVOL <-
             returnlst$seedx <- seedx
             returnlst$suniqueid <- suniqueid
             returnlst$seedvars <- seedvars
+            returnlst$isseed <- TRUE
           }
           
           ## Save data

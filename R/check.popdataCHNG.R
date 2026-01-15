@@ -20,6 +20,7 @@ check.popdataCHNG <-
            strunitvars = NULL, 
            nonsamp.cfilter = NULL, 
            cvars2keep = NULL, 
+           isseed = FALSE,
            dbconn = NULL, schema = NULL, 
            datsource = NULL, dbtablst = NULL,
            getdataWITHqry = NULL,
@@ -63,7 +64,7 @@ check.popdataCHNG <-
     popdatindb <- datindb
     addfortypgrp <- TRUE
     returnadj <- TRUE
-    
+
     ## Get variables from outlst
     if (savedata) {
       append_layer <- outlst$append_layer
@@ -71,7 +72,7 @@ check.popdataCHNG <-
     } else {
       poptablst <- dbtablst
     }
-    
+ 
     ###################################################################################
     ## 1. Define variables necessary for estimation
     ###################################################################################
@@ -275,7 +276,7 @@ check.popdataCHNG <-
     }
     propvars <- cpropvars
     
-    if (popType == "VOL") {
+    if (popType == "GRM") {
       tpropvars <- check.PROPvars(condflds, treeflds = treeflds,
                                   propvars = unlist(tpropvars),
                                   MICRO_BREAKPOINT_DIA = MICRO_BREAKPOINT_DIA,
@@ -323,11 +324,11 @@ check.popdataCHNG <-
         }
       }  
       ## Define SELECT variables for tree_grm_component
-      if (defaultVars) {
-        grmvars <- grmflds[grmflds %in% DBvars.default(isgrm=TRUE)$grmvarlst]
-      } else {
+      # if (defaultVars) {
+      #   grmvars <- grmflds[grmflds %in% DBvars.default(isgrm=TRUE)$grmvarlst]
+      # } else {
         grmvars <- grmflds
-      }
+      # }
       
       ## Define SELECT variables for tree_grm_begin
       beginvars <- beginflds
@@ -833,7 +834,23 @@ check.popdataCHNG <-
     pcondselectqry <- toString(paste0("pcond.", condvars, " AS PREV_", condvars))
     
     
-    ## 7.2. Add FORTYPGRP to SELECT query
+    ## 7.2a. Add LANDUSECD to SELECT query
+    ###############################################################
+    landuseqry <- paste0(
+      "\nCASE WHEN c.PRESNFCD IS NULL THEN c.COND_STATUS_CD",
+      "\n     ELSE c.PRESNFCD END AS LANDUSECD")
+    cselectqry <- paste0(cselectqry, ", ",
+                         landuseqry)
+    
+    prev_landuseqry <- paste0(
+        "\nCASE WHEN pcond.PRESNFCD IS NULL THEN pcond.COND_STATUS_CD", 
+                "\n     ELSE pcond.PRESNFCD END AS PREV_LANDUSECD")
+    pcondselectqry <- paste0(pcondselectqry, ", ",
+                             prev_landuseqry)
+    condvars <- c(condvars, "LANDUSECD")
+    
+    
+    ## 7.2b. Add FORTYPGRP to SELECT query
     ###############################################################
     addfortypgrp <- FALSE
     if (addfortypgrp) {
@@ -1196,7 +1213,7 @@ check.popdataCHNG <-
       }
       rm(sccmx)
     
-    
+
       ##########################################################################
       ## If popType = 'GRM', get remeasured tree and seed data queries for GRM
       ##    and TREE_GRM_COMPENENT, TREE_GRM_BEGIN and TREE_GRM_MIDPT queries
@@ -1209,6 +1226,11 @@ check.popdataCHNG <-
           treea. <- "t."
           ptreea. <- "ptree."
           
+          ## Check join variables
+          treecnnm <- findnm("CN", treeflds, returnNULL = TRUE)
+          prevtrecnnm <- findnm("PREV_TRE_CN", treeflds, returnNULL = TRUE)
+          tprevcondnm <- findnm("PREVCOND", treeflds, returnNULL = TRUE)
+          
           ## check key variables
           tsubp <- findnm("SUBP", treeflds, returnNULL = TRUE)
           ttree <- findnm("TREE", treeflds, returnNULL = TRUE)
@@ -1218,11 +1240,6 @@ check.popdataCHNG <-
             stop("missing key variables in tree data: ", toString(keymiss))
           }
           
-          ## Check join variables
-          treecnnm <- findnm("CN", treeflds, returnNULL = TRUE)
-          prevtrecnnm <- findnm("PREV_TRE_CN", treeflds, returnNULL = TRUE)
-          tprevcondnm <- findnm("PREVCOND", treeflds, returnNULL = TRUE)
-          
           ## Build tree FROM query
           tfromqry <- paste0(pcfromqry, 
                              "\n JOIN ", SCHEMA., treenm, " t ON (", treea., tuniqueid, " = ", conda., cuniqueid, 
@@ -1231,9 +1248,12 @@ check.popdataCHNG <-
           
           
           ## Build tree SELECT query
-          tselectqry <- toString(paste0(treea., unique(c(tuniqueid, treevars))))
-          ptreeselectqry <- toString(paste0(ptreea., treevars, " AS PREV_", treevars))
+          prev_treevars <- paste0("PREV_", treevars)
+          prev_treevars <- treevars[!prev_treevars %in% treevars]
           
+          tselectqry <- toString(paste0(treea., unique(c(tuniqueid, treevars))))
+          ptreeselectqry <- toString(paste0(ptreea., prev_treevars, " AS PREV_", prev_treevars))
+
           ## Build final tree query, including pltidsqry
           # treeqry <- paste0(pltidsWITHqry,
           #                   "\n SELECT ", tselectqry,
@@ -1311,7 +1331,7 @@ check.popdataCHNG <-
       
         ## 10.5. Return grm data (grmx / TREE_GRM_COMPONENT)
         ##############################################################
-        if (is.null(grmnm)) {
+        if (!is.null(grmnm)) {
           grma. <- "grm."
           
           ## Check key variables
@@ -1354,6 +1374,7 @@ check.popdataCHNG <-
                 message(e,"\n")
                 return(NULL) })
           }
+
           if (is.null(grmx) || nrow(grmx) == 0) {
             message("invalid tree_grm_component query...")
             message(grmqry)
@@ -1393,7 +1414,7 @@ check.popdataCHNG <-
         
         ## 10.6. Return grm begin data (beginx / TREE_GRM_BEGIN)
         ##############################################################
-        if (is.null(beginnm)) {
+        if (!is.null(beginnm)) {
           begina. <- "begin."
           
           
@@ -1477,7 +1498,7 @@ check.popdataCHNG <-
         
         ## 10.7. Return grm begin data (midptx / TREE_GRM_MIDPT)
         ##############################################################
-        if (is.null(midptnm)) {
+        if (!is.null(midptnm)) {
           midpta. <- "midpt."
         
           ## Check key variables
@@ -1552,11 +1573,10 @@ check.popdataCHNG <-
           rm(midptx)
         }  
         
-       
       
         ## 10.8. Return seedling data (seedx / SEEDLING)
         ##############################################################
-        if (!is.null(seednm)) {
+        if (isseed && !is.null(seednm)) {
           seeda. <- "s."
           
           
@@ -1636,29 +1656,6 @@ check.popdataCHNG <-
       }  
     }  
 
-      if (popType == "LULC") {
-        
-        lulcqry <- 
-          "SELECT distinct c.PLT_CN, c.CONDID, 
-			pcond.COND_STATUS_CD PREV_COND_STATUS_CD, c.COND_STATUS_CD, 
-			pcond.LAND_COVER_CLASS_CD PREV_LAND_COVER_CLASS_CD, c.LAND_COVER_CLASS_CD, 
-			pcond.PRESNFCD PREV_PRESNFCD, c.PRESNFCD,
-			case when pcond.PRESNFCD is null 
-				then pcond.COND_STATUS_CD 
-				else pcond.PRESNFCD end as PREV_LANDUSECD,
-			case when c.PRESNFCD is null 
-				then c.COND_STATUS_CD 
-				else c.PRESNFCD end as LANDUSECD, chg.*
-		FROM pltx p
-                JOIN cond_pcondx c ON (c.PLT_CN = p.CN) 
-                JOIN cond_pcondx pcond ON (pcond.PLT_CN = p.PREV_PLT_CN) 
-                JOIN sccm_condx chg ON(chg.PLT_CN = c.PLT_CN and chg.CONDID = c.CONDID)
-           WHERE COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0 
-				AND COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0" 
-        
-        lulcx <- sqldf::sqldf(lulcqry)
-      }
-   
     
     ##############################################################################
     ## 11. Check COND_STATUS_CD and generate table with number of conditions
@@ -1842,6 +1839,7 @@ check.popdataCHNG <-
         if (!is.null(treenm)) {
           returnlst$treex <- treenm
           returnlst$tuniqueid <- tuniqueid
+          returnlst$treeflds <- treevars
         }
         returnlst$grmx <- grmnm
         returnlst$grmflds <- grmvars
@@ -1855,6 +1853,7 @@ check.popdataCHNG <-
         if (!is.null(seednm)) {
           returnlst$seedx <- seednm
           returnlst$suniqueid <- suniqueid
+          returnlst$seedflds <- seedvars
         }
       }  
       if (popType == "LULC") {
