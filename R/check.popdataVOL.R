@@ -569,9 +569,12 @@ check.popdataVOL <-
     condvars <- unique(c(condvars, cvars2keep))[!unique(c(condvars, cvars2keep)) %in% pvars]
     cselectqry <- toString(paste0(conda., condvars))
 
-    
+
     ## 7.2. Add FORTYPGRP to SELECT query
     ###############################################################
+    fortypgrpchk <- findnm("FORTYPGRPCD", condvars, returnNULL = TRUE)
+    if (!is.null(fortypgrpchk)) addfortypgrp <- FALSE
+    
     if (addfortypgrp) {
       ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
       ftypqry <- classqry(classcol = "c.FORTYPCD",
@@ -583,7 +586,6 @@ check.popdataVOL <-
       condvars <- c(condvars, "FORTYPGRPCD")
     }
 
-    
     ## 7.3. Build query for pltcondx
     ###############################################################
     pltcondflds <- unique(c(condvars, pvars))
@@ -650,7 +652,6 @@ check.popdataVOL <-
       setkeyv(setDT(pltcondx), pltcondkey)
     }
 
-    
     ##############################################################################
     ## 8. Build CASE statement for adding adjustment factors to SELECT
     ##############################################################################

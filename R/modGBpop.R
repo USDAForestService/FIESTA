@@ -1048,8 +1048,8 @@ modGBpop <- function(popType = "VOL",
     dwmuniqueid <- popcheck$dwmuniqueid
     dwmnm <- popcheck$dwmnm
   }
-  
-  
+
+    
   ###################################################################################
   ## Add new variables to pltcondx for estimation
   ###################################################################################
@@ -1099,10 +1099,9 @@ modGBpop <- function(popType = "VOL",
         }
       }
     }
- 
+
     ## Add FORTYPGRPCD to pltcondx if not already in dataset
     fortypgrpnm <- findnm("FORTYPGRPCD", pltcondxcols, returnNULL=TRUE)
-
     if (is.null(fortypgrpnm)) {
       fortypnm <- findnm("FORTYPCD", pltcondxcols, returnNULL=TRUE)
      
@@ -1147,7 +1146,7 @@ modGBpop <- function(popType = "VOL",
         newcols <- c(newcols, ifelse(lower, "prev_dstrbgrp", "PREV_DSTRBGRP"))
       }  
     }
-    
+
     ## Move new columns to end of table
     setcolorder(pltcondx, c(pltcondxcols, newcols))
     condflds <- c(condflds, newcols)
