@@ -272,7 +272,7 @@ DBgetXY <- function (states = NULL,
   } else {
     xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
   }
-                   
+
   ###########################################################################
   ## Check plot database (if xyisplot = FALSE)
   ###########################################################################
@@ -287,7 +287,7 @@ DBgetXY <- function (states = NULL,
       data_dsn <- xy_dsn
       
     } else if (!identical(xy_datsource, datsource) || !identical(xy_dsn, data_dsn)) {
-      
+     
       ## Check database connection - data_dsn
       dbinfo <- pcheck.datsource(dbconn = NULL, 
                                  datsource = datsource, 
@@ -639,6 +639,7 @@ DBgetXY <- function (states = NULL,
     pvars2keep <- NULL
   }
 
+  
   ####################################################################
   ## Check plot table
   ####################################################################
@@ -650,7 +651,7 @@ DBgetXY <- function (states = NULL,
       if (plotindb) {
         ## If XY and plot data are from the same databases, 
         ## we will query both
-        plotnm <- chkdbtab(tablst, plot_layer, stopifnull=FALSE)
+        plotnm <- chkdbtab(xytablst, plot_layer, stopifnull=FALSE)
         if (!is.null(plotnm)) {
           xyindb <- TRUE	 
           xynm <- plotnm
