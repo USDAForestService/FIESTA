@@ -299,7 +299,7 @@ getpopFilterqry <- function(popType,
         }
       }
     }
-  } 
+  }
   
   ###################################################################################
   ## 5. Build WHERE statement (pltawhereqry and pwhereqry)
@@ -640,7 +640,8 @@ getpopFilterqry <- function(popType,
     #    if (!is.null(pwhereqry) || pwhereqry != "") {
     #      pltidsqry <- paste0(pltidsqry, pwhereqry)
     #    }
-  }
+  } 
+  
 
   ## 5.9 Check INTENSITY and add to where query.
   ########################################################################

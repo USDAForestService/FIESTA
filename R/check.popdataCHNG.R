@@ -1244,22 +1244,28 @@ check.popdataCHNG <-
           tfromqry <- paste0(pcfromqry, 
                              "\n JOIN ", SCHEMA., treenm, " t ON (", treea., tuniqueid, " = ", conda., cuniqueid, 
                              "\n    AND t.", condid, " = c.", condid, " AND ", treea., tprevcondnm, " = ", pconda., condid, ")",
-                             "\n LEFT JOIN ", SCHEMA., treenm, " ptree ON (", ptreea., treecnnm, " = ", treea., prevtrecnnm, ")")
+                             "\n LEFT OUTER JOIN ", SCHEMA., treenm, " ptree ON (", ptreea., treecnnm, " = ", treea., prevtrecnnm, ")")
           
           
           ## Build tree SELECT query
-          prev_treevars <- paste0("PREV_", treevars)
-          prev_treevars <- treevars[!prev_treevars %in% treevars]
-          
           tselectqry <- toString(paste0(treea., unique(c(tuniqueid, treevars))))
-          ptreeselectqry <- toString(paste0(ptreea., prev_treevars, " AS PREV_", prev_treevars))
 
+          prev_treevars <- paste0("PREV_", treevars)
+          prev_treevars <- prev_treevars[!startsWith(prev_treevars, "PREV_PREV_")]
+          prev_treevars <- prev_treevars[!prev_treevars %in% treevars]
+          prev_treevars <- prev_treevars[prev_treevars != "PREVCOND"]
+          ptreeselectqry <- toString(paste0(ptreea., sub("PREV_", "", prev_treevars), 
+                                            " AS ", prev_treevars))
+ 
+          
+          #ptreeselectqry <- toString(paste0(ptreea., treevars))
+          
           ## Build final tree query, including pltidsqry
           # treeqry <- paste0(pltidsWITHqry,
           #                   "\n SELECT ", tselectqry,
           #                   tfromqry,
           #                   "\nUNION",
-          #                   "\n SELECT ", ptreeselectqry, 
+          #                   "\n SELECT ", ptreeselectqry,
           #                   tfromqry)
           treeqry <- paste0(pltidsWITHqry,
                             "\n SELECT ", tselectqry, ", ",
@@ -1290,7 +1296,6 @@ check.popdataCHNG <-
             names(treex) <- toupper(names(treex))
           }
         
-  
           ## Set key and subset tree data
           treedataCNs <- NULL
           treekey <- c(tuniqueid, condid, tsubp, ttree)
@@ -1346,7 +1351,7 @@ check.popdataCHNG <-
           grmtrecn <- findnm("TRE_CN", grmflds, returnNULL = TRUE)      
           grmjoinqry <- getjoinqry(grmtrecn, treecnnm, grma., treea.)
           grmfromqry <- paste0(tfromqry, 
-                               "\n LEFT JOIN ", SCHEMA., grmnm, " grm ", grmjoinqry)
+                               "\n JOIN ", SCHEMA., grmnm, " grm ", grmjoinqry)
           
           
           ## Build grm SELECT query
@@ -1357,8 +1362,7 @@ check.popdataCHNG <-
                            "\n SELECT ", grmselectqry,
                            grmfromqry)
           dbqueries$grm <- grmqry
-          
-          
+
           ## Run final grm query, including pltidsqry
           if (datindb) {
             message("query ", grmnm, "...")
@@ -1382,7 +1386,7 @@ check.popdataCHNG <-
           } else {
             names(grmx) <- toupper(names(grmx))
           }
-        
+
           ## Set key and subset grm data
           grmkey <- c(grmtrecn)
           setkeyv(setDT(grmx), grmkey)
@@ -1410,7 +1414,7 @@ check.popdataCHNG <-
           }
           rm(grmx)
         }  
-        
+     
         
         ## 10.6. Return grm begin data (beginx / TREE_GRM_BEGIN)
         ##############################################################

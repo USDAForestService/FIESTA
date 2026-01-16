@@ -661,6 +661,7 @@ check.popdataPLT <-
       PLOT <- popFilterqry$PLOT  ## dataframe, if returndata = TRUE
     }
 
+    
     ###############################################################################
     ## 10. Build WITH query for returning data tables in a database (getdataWITHqry).
     ##  If pltassgn is not in the database (pltaindb = FALSE) and all other tables 
@@ -1626,6 +1627,56 @@ check.popdataPLT <-
       "\npltids AS",
       "\n(", pltidsqry, ")")
     pltidsa. <- "pltids."
+    
+    
+    
+    #############################################################################
+    ## 20. Get statecd and inventory years for population
+    #############################################################################
+    if (is.null(states) || is.null(invyrs)) {
+
+      if (!is.null(plotnm)) {
+        statechk <- findnm("STATECD", pltflds, returnNULL = TRUE)
+        invyrchk <- findnm("INVYR", pltflds, returnNULL = TRUE)
+        
+        if (!is.null(statechk) && !is.null(invyrchk)) {
+          invyr.qry <- paste0(pltidsWITHqry,
+                              "\nSELECT DISTINCT ", toString(c(statechk, invyrchk)), 
+                              "\nFROM ", plotnm,
+                              "\nORDER BY ", toString(c(statechk, invyrchk)))
+          
+          if (pltaindb) {
+            invyrtab <- tryCatch(
+              DBI::dbGetQuery(dbconn, invyr.qry),
+              error=function(e) {
+                message(e,"\n")
+                return(NULL)})
+          } else {
+            invyrtab <- tryCatch(
+              sqldf::sqldf(invyr.qry, connection = NULL),
+              error=function(e) {
+                message(e,"\n")
+                return(NULL)})
+          }
+          
+          if (!is.null(invyrtab)) {
+            if (is.null(states)) {
+              states <- sort(unique(invyrtab[[statechk]]))
+            }
+            states <- pcheck.states(states)
+            if (is.null(invyrs)) {
+              invyrs <- sort(unique(invyrtab[[invyrchk]]))
+            }
+          }
+        }
+      }
+    }
+    # pltidsWITHqry <- paste0(
+    #   "WITH",
+    #   "\npltids AS",
+    #   "\n(", pltidsqry, ")")
+    # pltidsa. <- "pltids."
+    
 
 
     #############################################################################

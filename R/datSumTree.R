@@ -2069,7 +2069,7 @@ datSumTree <- function(tree = NULL,
   }
   
   
-  ## Build SELECT statement 
+  ## 19.2 Build SELECT statement 
   ####################################################################
 
   #define grpby variables
