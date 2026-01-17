@@ -40,8 +40,6 @@
 #' @param landarea String. The sample area filter for estimates ("ALL",
 #' "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
 #' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.
-#' @param landarea_both Logical. If TRUE, both Time 1 and Time 2 measurements 
-#' have the same landarea.
 #' @param pcfilter String. A filter for plot or cond attributes. 
 #' Must be R logical syntax.
 #' @param estvar String. Name of the tree-level estimate variable (e.g.,
@@ -56,10 +54,6 @@
 #' @param pltids Vector. String or numberic vector of FIA plot CN values that
 #' intesect an area of interest within the population. These values are used
 #' to filter the output table of estimates. 
-#' @param T1filter String. A filter for plot or cond attributes for T1.
-#' Must be R logical syntax.
-#' @param T2filter String. A filter for plot or cond attributes for T2.  
-#' Must be R logical syntax.
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
@@ -440,10 +434,9 @@ modGBgrm <- function(GBpopdat,
                   dbqueries = dbqueries,
                   totals = totals,
                   sumunits = sumunits, 
-                  landarea = landarea, landarea_both = landarea_both,
+                  landarea = landarea,
                   ACI = ACI, 
                   pcfilter = pcfilter,
-                  T1filter = T1filter, T2filter = T2filter,
                   allin1 = allin1, divideby = divideby,
                   estround = estround, pseround = pseround,
                   returntitle = returntitle, 
@@ -509,7 +502,7 @@ modGBgrm <- function(GBpopdat,
                  rowgrpord = rowgrpord, title.rowgrp = NULL)
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
-  bydomainlst <- rowcolinfo$domainlst
+  domainlst <- rowcolinfo$domainlst
   rowvar <- rowcolinfo$rowvar
   colvar <- rowcolinfo$colvar
   rowvarnm <- rowcolinfo$rowvarnm
@@ -523,6 +516,10 @@ modGBgrm <- function(GBpopdat,
   rowgrpnm <- rowcolinfo$rowgrpnm
   title.rowgrp <- rowcolinfo$title.rowgrp
   grpvar <- rowcolinfo$grpvar
+  bytdom <- rowcolinfo$bytdom
+  bypcdom <- rowcolinfo$bypcdom
+  tdomvar <- rowcolinfo$tdomvar
+  tdomvar2 <- rowcolinfo$tdomvar2
   classifyrow <- rowcolinfo$classifyrow
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
@@ -545,8 +542,9 @@ modGBgrm <- function(GBpopdat,
                                    tree_grm_component = grmx,
                                    tree_grm_begin = beginx,
                                    tree_grm_midpt = midptx),
-                  datsource = datsource,
+                  datsource = pop_datsource,
                   bycond = TRUE,
+                  landarea = landarea,
                   tsumvar = estvar,
                   tstatus = eststatus,
                   bydomainlst = domainlst,
@@ -599,7 +597,7 @@ modGBgrm <- function(GBpopdat,
                  unitvar = unitvar, 
                  rowvar = rowvar, colvar = colvar, 
                  estvarn = estvar.name, 
-                 estvarn.filter = estvar.filter, 
+                 estvarn.filter = NULL, 
                  addtitle = addtitle, 
                  returntitle = returntitle, 
                  rawdata = rawdata, 
@@ -728,8 +726,8 @@ modGBgrm <- function(GBpopdat,
     }
     
     rawdat <- tabs$rawdat
-    rawdat$domdat <- setDF(cdomdat)
-    rawdat$domdatqry <- cdomdatqry
+    rawdat$domdat <- setDF(tdomdat)
+    rawdat$domdatqry <- treeqry
     if (savedata) {
       if (!is.null(title.estpse)) {
         title.raw <- paste(title.estpse, title.ref)

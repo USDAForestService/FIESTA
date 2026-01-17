@@ -21,6 +21,9 @@
 #' @param dbconn Open database connection.
 #' @param dsn String. If datsource='sqlite', the name of SQLite database
 #' (*.sqlite).
+#' @param landarea String. The sample area filter for estimates ("ALL",
+#' "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
+#' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.
 #' @param grmtyp String. Type of GRM to summarize ('GROW', 'MORT', 'REMV')
 #' @param tstatus String. The status type of GRM to summarize ('Sawtimber',
 #' 'Growing-stock', 'All live').
@@ -75,6 +78,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
                           datsource = "obj",
                           dbconn = NULL,
                           dsn = NULL,
+                          landarea,
                           tstatus,
                           grmtyp,
                           tsumvar,
@@ -113,7 +117,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   
   #ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry=pcfromqry=pcselectvars=tpavarnm=pcdomainlst=
-    tdomvarlst=tdomvarlst2=tsumvarnm=tdomtotnm=concatvar <- NULL
+    tdomvarlst=tdomvarlst2=tsumvarnm=tdomtotnm=concatvar=subpid <- NULL
   
   datindb <- FALSE
   pltassgnid <- "PLT_CN"
@@ -1149,23 +1153,13 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
       twithfromqry <- paste0("\n FROM ", treenm, " t")
     }
     
-    ## FROM statement (seedonly = FALSE) - adjustment factors / pltidsWITHqry
-    if (adjtree) {
-      adjvarchk <- findnm(adjvar, treeflds, returnNULL = TRUE)
-      if (is.null(adjvarchk)) {
-        tadjjoinqry <- getjoinqry(adjjoinid, cuniqueid, adjalias., talias.)
-        twithfromqry <- paste0(twithfromqry,
-                               "\n JOIN pltidsadj adj ", tadjjoinqry)
-      }
-    } else {
-      
-      if (!is.null(pltidsWITHqry)) {
-        tjoinqry <- getjoinqry(tuniqueid, pltidsid, talias., pltidsa.)
-        twithfromqry <- paste0(twithfromqry,
-                               "\n JOIN ", pltidsnm, " ", pltidsa, " ", tjoinqry)
-      }
+    ## FROM statement - adjustment factors / pltidsWITHqry
+    if (!is.null(pltidsWITHqry)) {
+      tjoinqry <- getjoinqry(tuniqueid, pltidsid, talias., pltidsa.)
+      twithfromqry <- paste0(twithfromqry,
+                             "\n JOIN ", pltidsnm, " ", pltidsa, " ", tjoinqry)
     }
-    
+
     ## Add previous tree data
     prev_tre_cnnm <- findnm("PREV_TRE_CN", treeflds, returnNULL = TRUE)
     prevtjoinqry <- getjoinqry(tuniqueid, prev_tre_cnnm, "ptree.", talias.)
@@ -1270,8 +1264,8 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   } else {
     
     fromqry <- paste0(fromqry,
-                      "\nJOIN ", SCHEMA., , pltnm, " p",
-                      "\nJOIN ", SCHEMA., , pltnm, " pplot ON (pplot.cn = p.prev_plt_cn)",
+                      "\nJOIN ", SCHEMA., , plotnm, " p",
+                      "\nJOIN ", SCHEMA., , plotnm, " pplot ON (pplot.cn = p.prev_plt_cn)",
                       "\nJOIN ", SCHEMA., , condnm, " c ON (c.plt_cn = p.cn)",
                       "\nJOIN ", SCHEMA., , condnm, " pcond ON (pcond.plt_cn = p.prev_plt_cn)")
   }
@@ -1345,10 +1339,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
         ## Get classification query
         cutbreaks <- classifylut
         fill <- NULL
-        if ((addseed || seedonly) && min(cutbreaks) == 0) {
-          fill <- "<1"
-        }
-        
+
         ## create labels for cutbreaks
         cutlabels <- {}
         for (i in 1:length(cutbreaks)) {
@@ -1880,10 +1871,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
                     tsumuniqueid = uniqueid,
                     pltsp = pltsp)
   
-  if (!is.null(tfilter)) {
-    returnlst$tfilter <- tfilter
-  }
-  
+
   if (!is.null(pcdomainlst)) {
     returnlst$pcdomainlst <- pcdomainlst
   }
