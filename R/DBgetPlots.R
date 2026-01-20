@@ -2216,7 +2216,7 @@ DBgetPlots <- function (states = NULL,
       ## xydata
       ##############################################################
       #xyx <- pltx[, c("CN", getcoords(coordType), "PLOT_ID"), with=FALSE]
-      
+
       ## Check for xy coordinates
       if (getxy) {
         xvarchk <- findnm(xvar, pltflds, returnNULL = TRUE)
@@ -2245,7 +2245,11 @@ DBgetPlots <- function (states = NULL,
           xy_dsn <- data_dsn
         }
 
-        if (is.data.frame(xy)) {
+        if (datsource == "datamart") {
+          if (i == 1) datamartnm <- xy
+          xy <- get(datamartnm)
+          xysource <- "obj"
+        } else if (is.data.frame(xy)) {
           xysource <- "obj"
         } else if (is.data.frame(get(xy))) {
           if (exists(xy)) {
