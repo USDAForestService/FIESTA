@@ -882,7 +882,6 @@ DBgetPlots <- function (states = NULL,
       }
 
     } else {
-
       evalInfo <- tryCatch( 
         DBgetEvalid(states = states,
                     RS = RS,
@@ -976,6 +975,7 @@ DBgetPlots <- function (states = NULL,
                              invyrs = invyrs,
                              measyrs = measyrs,
                              invyrtab = invyrtab)
+
     if (is.null(evalchk)) {
       stop("must specify an evaluation timeframe for data extraction... \n",
 		"...see eval_opts parameter, (e.g., eval_opts=eval_options(Cur=TRUE))")
@@ -1673,6 +1673,7 @@ DBgetPlots <- function (states = NULL,
                               surveynm = surveynm,
                               plotobj = plotobj,
                               Type = Type)
+
     } else {
       if (is.null(plotnm)) {
         pfromqry <- paste0(SCHEMA., condnm, " p")
@@ -2269,7 +2270,8 @@ DBgetPlots <- function (states = NULL,
 		    }
 
         if (!stcd %in% c(64,78) && xymeasCur) {
-          xydat <- DBgetXY(states = state,
+          xydat <- suppressMessages(
+            DBgetXY(states = state,
                            xy_datsource = xysource,
                            xy_dsn = xy_dsn,
                            xy = xy,
@@ -2283,7 +2285,7 @@ DBgetPlots <- function (states = NULL,
                            database_opts = database_opts,
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
-                           pvars2keep = c("INVYR", "PLOT_STATUS_CD", "INTENSITY"))
+                           pvars2keep = c("INVYR", "PLOT_STATUS_CD", "INTENSITY")))
 		      xyxnm <- paste0("xyCurx_", coordType)
 		      xynm <- paste0("xyCur_", coordType)
 		      xytable <- xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ]
@@ -3252,7 +3254,7 @@ DBgetPlots <- function (states = NULL,
 
             ##############################################################
             ## Tree Change, Growth, and Mortality
-		        ## (TREE_GRM_COMPONENT, TREE_GRM_BEGIN, TREE_GRM, MIDPT)
+		        ## (TREE_GRM_COMPONENT, TREE_GRM_BEGIN, TREE_GRM_MIDPT)
             ##############################################################
             message("\n",
              "## STATUS: Getting GRM data from TREE_GRM_COMPONENT (", stabbr, ") ...", "\n")

@@ -941,7 +941,8 @@ DBgetEvalid <- function(states = NULL,
                             evalidlist = NULL, 
                             invtype = invtype, 
                             invyrtab = invyrtab, 
-                            evalType = evalTypelist)
+                            evalType = evalTypelist
+                            )
           
           if (!is.null(invyrs)) {
             returnlst$invyrs <- invyrs
@@ -962,12 +963,16 @@ DBgetEvalid <- function(states = NULL,
               returnlst$PLOT <- PLOT
             }
           }
-          if (indb && !dbconnopen) {
-            DBI::dbDisconnect(dbconn)
-          } else {
-            returnlst$dbconn <- dbconn
-          }
           returnlst$datsource <- datsource
+          if (indb) {
+            if (!dbconnopen) {
+              DBI::dbDisconnect(dbconn)
+            } else {
+              returnlst$dbconn <- dbconn
+            }
+            returnlst$dbtablst <- dbtablst
+            returnlst$schema <- schema
+          }
           
           return(returnlst)
         }

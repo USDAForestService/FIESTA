@@ -171,11 +171,11 @@ est.outtabs <- function(esttype,
 
   if (sumunits) {
     ## Group estimates
-    #if (!is.null(uniquerow))
-    #  keepvars.row <- names(uniquerow)[names(uniquerow) != rowvar]
-    #if (!is.null(uniquecol))
-    #  keepvars.col <- names(uniquecol)[names(uniquecol) != colvar]
-	  keepvars.row=keepvars.col <- NULL
+    if (!is.null(uniquerow))
+     keepvars.row <- names(uniquerow)[names(uniquerow) != rowvar]
+    if (!is.null(uniquecol))
+     keepvars.col <- names(uniquecol)[names(uniquecol) != colvar]
+	  #keepvars.row=keepvars.col <- NULL
 
     ## GROUP TOTAL TABLE
     if (!is.null(unit_totest)) {
@@ -199,6 +199,7 @@ est.outtabs <- function(esttype,
         if (!is.null(char.width) && char.width == -Inf) char.width <- 0
       }
     }
+
     if (!is.null(unit_rowest)) {
       rowest <-
         groupUnits(tabest = unit_rowest, domain = rowvar,
@@ -223,6 +224,7 @@ est.outtabs <- function(esttype,
 		        max(nchar(na.omit(round(rowest[[psenm]], pseround)))))
       }
     }
+
 	  if (!is.null(unit_colest)) {
       colest <-
         groupUnits(tabest = unit_colest, domain = colvar,

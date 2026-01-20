@@ -751,10 +751,14 @@ DBgetXY <- function (states = NULL,
 	      gvar <- groupvars[i]
 	      xyfromqry2 <- paste0(xyfromqry2, "xy.", gvar, " = maxyear.", gvar)	   
 	      if (i < length(groupvars)) {
-	        xyfromqry2 <- paste0(xyfromqry2, " and ")
+	        if (i == 2) {
+	          xyfromqry2 <- paste0(xyfromqry2, "\n                       AND ")
+	        } else {
+	          xyfromqry2 <- paste0(xyfromqry2, " AND ")
+	        }
 	      }
 	    }
-	    xyfromqry2 <- paste0(xyfromqry2, " and xy.", varCur, " = maxyear.maxyr)")
+	    xyfromqry2 <- paste0(xyfromqry2, "\n                       AND xy.", varCur, " = maxyear.maxyr)")
 	  
 	  } else {
 	    xyfromqry2 <- paste0("\nINNER JOIN p ON (xy.", xyjoinid, " = p.", pjoinid, ")")

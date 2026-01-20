@@ -646,7 +646,7 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   message("getting output...")
   estnm <- "est"
-
+  
   tabs <-
     est.outtabs(esttype = esttype,
                 sumunits = sumunits, areavar = areavar,
