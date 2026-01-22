@@ -102,6 +102,9 @@ datSumDWM <- function(dwm,
   keepall = FALSE   ## if TRUE, keeps all variables in table, if included as inputs
   returnDT = TRUE
   FIAname <- FALSE
+  condid <- "CONDID"
+  subpid <- "SUBP"
+  
 
   ## Query alias.
   #dwmalias. <- "dwm."
@@ -340,7 +343,9 @@ datSumDWM <- function(dwm,
     
   }  
   
+  dwmdatuniqueid <- dwmuniqueid
   condinWITHqry <- FALSE
+  
   if (!is.null(pltidsWITHqry)) {
     
     if (!all(grepl("WITH", pltidsWITHqry))) {

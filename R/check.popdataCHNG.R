@@ -1860,9 +1860,6 @@ check.popdataCHNG <-
           returnlst$seedflds <- seedvars
         }
       }  
-      if (popType == "LULC") {
-        returnlst$lulcx <- lulcx
-      }
     }
     returnlst$dbqueries <- dbqueries
     returnlst$dbqueriesWITH <- dbqueriesWITH

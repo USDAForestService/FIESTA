@@ -13,7 +13,7 @@ datSumTreeGRM(
   dsn = NULL,
   landarea,
   tstatus,
-  grmtyp,
+  grmtype,
   tsumvar,
   tsumvarnm = "ESTIMATED_VALUE",
   tdomvar = NULL,
@@ -21,6 +21,7 @@ datSumTreeGRM(
   tdomvar2 = NULL,
   tdomvar2lst = NULL,
   bycond = FALSE,
+  bysubp = FALSE,
   bydomainlst = NULL,
   grm_typ_cd = 2,
   pivot = TRUE,
@@ -30,6 +31,7 @@ datSumTreeGRM(
   pltcondx = NULL,
   pltidsadj = NULL,
   savedata = FALSE,
+  dbconnopen = TRUE,
   tabIDs = tableIDs(),
   datSum_opts = datSum_options(),
   database_opts = NULL,
@@ -53,7 +55,7 @@ datSumTreeGRM(
 \item{tstatus}{String. The status type of GRM to summarize ('Sawtimber',
 'Growing-stock', 'All live').}
 
-\item{grmtyp}{String. Type of GRM to summarize ('GROW', 'MORT', 'REMV')}
+\item{grmtype}{String. Type of GRM to summarize ('GROW', 'MORT', 'REMV')}
 
 \item{tsumvar}{String. Tree-level variable to summarize (e.g., "VOLCFNET").}
 
@@ -78,6 +80,8 @@ level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
 level (by: puniqueid). If bysubp = TRUE and bycond = TRUE, data are
 aggregated by subplotid, subpid, condid.}
 
+\item{bysubp}{Logical. If TRUE, data are aggregated to the subplot level.}
+
 \item{bydomainlst}{String (vector). Categorical domain variables for
 summing tree data by (e.g., SPCD). Variables must be in tree table or
 plt/cond table if tables are provided.}
@@ -91,11 +95,17 @@ separate columns.}
 (e.g., DIA = c(10,20,30)).}
 
 \item{pltidsWITHqry}{SQL query. A query identifying plots to sum (e.g.,
-'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')}
+'WITH pltids AS (SELECT cn FROM plot WHERE statecd=49 and invyr=2018)')}
 
 \item{pltidsid}{Sting. Name of unique identifier in pltidsWITHqry.}
 
+\item{pltcondx}{Data table with plot / condition variables.}
+
+\item{pltidsadj}{Data table with plot adjustment factors.}
+
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
+
+\item{dbconnopen}{Logical. If TRUE, keep database connection open.}
 
 \item{tabIDs}{List of unique IDs corresponding to the tables. See
 See help(tableIDs) for a list of options.}

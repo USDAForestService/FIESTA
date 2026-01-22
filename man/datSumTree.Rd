@@ -110,7 +110,7 @@ QMD = 'SQRT(SUM(POWER(DIA,2) * 0.005454 * TPA_UNADJ) / (SUM(TPA_UNADJ)*0.005454)
 calculated for nonsampled conditions at plot-level.}
 
 \item{pltidsWITHqry}{SQL query. A query identifying plots to sum (e.g.,
-'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')}
+'WITH pltids AS (SELECT cn FROM plot WHERE statecd=49 and invyr=2018)')}
 
 \item{pltidsid}{Sting. Name of unique identifier in pltidsWITHqry.}
 

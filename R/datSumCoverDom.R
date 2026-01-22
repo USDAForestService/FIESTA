@@ -59,12 +59,10 @@
 #' tdomvar2 to aggregate.  If NULL, all domains of tdomvar2 are used.
 #' @param pivot Logical. If TRUE, tdomvar data are transposed (pivoted) to
 #' separate columns.
-#' @param getadjplot Logical. If TRUE, and adj='plot', adjfactors are
-#' calculated for nonsampled conditions at plot-level.
 #' @param domclassify List. List for classifying domain variables in bydomainlst
 #' (e.g., DIA = c(10,20,30)).
 #' @param pltidsWITHqry SQL query. A query identifying plots to sum (e.g.,
-#' 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')
+#' 'WITH pltids AS (SELECT cn FROM plot WHERE statecd=49 and invyr=2018)')
 #' @param pltidsid Sting. Name of unique identifier in pltidsWITHqry.
 #' @param pcwhereqry String. Plot/Condition filter if plot and/or cond table is
 #' included.
@@ -115,7 +113,6 @@ datSumCoverDom <- function(tab = NULL,
                            tdomvar2 = NULL, 
                            tdomvar2lst = NULL, 
                            pivot = TRUE,
-                           getadjplot = FALSE,
                            domclassify = NULL,
                            pltidsWITHqry = NULL,
                            pltidsid = NULL,
@@ -152,7 +149,10 @@ datSumCoverDom <- function(tab = NULL,
   returnDT = TRUE
   FIAname <- FALSE
   tdomtot <- TRUE
-
+  condid <- "CONDID"
+  subpid <- "SUBP"
+  getadjplot = FALSE   ## not ready yet
+  
   ## Query alias.
   talias. <- "t."
 
@@ -188,10 +188,10 @@ datSumCoverDom <- function(tab = NULL,
 
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-    savedata_opts = savedata_opts,
-    database_opts = database_opts,
-    datSum_opts = datSum_opts,
-    tabIDs = tabIDs))
+                         savedata_opts = savedata_opts,
+                         database_opts = database_opts,
+                         datSum_opts = datSum_opts,
+                         tabIDs = tabIDs))
   savedata_opts <- optslst$savedata_opts
   database_opts <- optslst$database_opts
   datSum_opts <- optslst$datSum_opts
@@ -222,7 +222,6 @@ datSumCoverDom <- function(tab = NULL,
     schema <- dbinfo$schema
     SCHEMA. <- dbinfo$SCHEMA.
     dbconn <- dbinfo$dbconn
-    dbconnopen <- dbinfo$dbconnopen
   }
 
 
@@ -305,15 +304,11 @@ datSumCoverDom <- function(tab = NULL,
   if (!is.null(tabx) && is.data.frame(tabx)) {
     tabnm <- "tabx"
   } else if (is.null(tabnm)) {
-     tabnm <- plotlst$tabnm
+    tabnm <- tablst$tabnm
   }
-  
 
   if (bycond) {
     condid <- tablst$condid
-  }
-  if (bysubp) {
-    subpid <- tablst$subpid
   }
 
   ## 3.2 Check plot, cond, and subplot tables (if bysubp)
@@ -366,9 +361,10 @@ datSumCoverDom <- function(tab = NULL,
     subplotnm = subp_condnm <- NULL
     
     ## Check subplot table
-    subplotlst <- datTabchk(tab = subplot, tabtext = "subplot", 
+    subplotlst <- suppressMessages(
+      datTabchk(tab = subplot, tabtext = "subplot", 
                             dbconn = dbconn, schema = schema, 
-                            dbtablst = dbtablst) 
+                            dbtablst = dbtablst))
     subplotflds <- subplotlst$tabflds
     subplotid <- subplotlst$uniqueid
     subplotx <- subplotlst$tabx
@@ -379,9 +375,10 @@ datSumCoverDom <- function(tab = NULL,
     }
     
     ## Check subp_cond table
-    subpcondlst <- datTabchk(tab = subp_cond, tabtext = "subplot", 
+    subpcondlst <- suppressMessages(
+      datTabchk(tab = subp_cond, tabtext = "subplot", 
                              dbconn = dbconn, schema = schema, 
-                             dbtablst = dbtablst) 
+                             dbtablst = dbtablst))
     subpcondflds <- subpcondlst$tabflds
     subpcondid <- subpcondlst$uniqueid
     subpcondx <- subpcondlst$tabx
@@ -390,12 +387,24 @@ datSumCoverDom <- function(tab = NULL,
     } else {
       subp_condnm <- subpcondlst$tabnm
     }
+    
+    if (getadjplot) {
+      if (is.null(subplotnm) && is.null(subp_condnm)) {
+        stop("must include subplot and subp_cond tables to calculate adjustment factors")
+      } else if (is.null(subplotnm)) {
+        stop("must include subplot to calculate adjustment factors")
+      } else if (is.null(subp_condnm)) {
+        stop("must include subp_cond to calculate adjustment factors")
+      }
+    }
   }  
   
   ###############################################################################
   ## 4. Check if condition table is in WITH queries (e.g., pltcondx)
   ###############################################################################
+  tdatuniqueid <- tuniqueid
   condinWITHqry <- FALSE
+  
   if (!is.null(pltidsWITHqry)) {
     
     if (!all(grepl("WITH", pltidsWITHqry))) {
@@ -421,7 +430,11 @@ datSumCoverDom <- function(tab = NULL,
     }
     chk <- check.logic.vars(pltidsid, pltidsWITHqry)
     if (!chk) {
-      stop("invalid pltidsid... make sure it is in pltidsWITHqry")
+      chk <- check.logic.vars(tolower(pltidsid), tolower(pltidsWITHqry))
+      if (!chk) {
+        chk <- check.logic.vars(tolower(pltidsid), tolower(pltidsWITHqry))
+        stop("invalid pltidsid... make sure it is in pltidsWITHqry")
+      }
     }
     
     ## Set name of pltids and alias path
@@ -577,25 +590,25 @@ datSumCoverDom <- function(tab = NULL,
   ###############################################################################
   pdomainlst <- cdomainlst <- tdomainlst <- NULL
   domainlst <- bydomainlst
-  
-  
+
+
   ## check if all variables in bydomainlst are in the input tables
   if (!all(bydomainlst %in% c(tabflds, pcflds))) {
     missdomain <- bydomainlst[!bydomainlst %in% c(tabflds, pcflds)]
     stop("invalid variable in bydomainlst: ", toString(missdomain))
   }
   
-  ## Check if domain variables are in tab or cond
+  ## Check if domain variables are in tree or seedling table
   if (!is.null(domainlst)) {
-    if (any(bydomainlst %in% tabflds)) {
-      tdomainlst <- bydomainlst[bydomainlst %in% tabflds]
-      pcdomainlst <- bydomainlst[!bydomainlst %in% tdomainlst]
+    if (any(domainlst %in% pcflds)) {
+      pcdomainlst <- domainlst[domainlst %in% pcflds]
+      tdomainlst <- domainlst[!domainlst %in% pcdomainlst]
     } else {
-      pcdomainlst <- bydomainlst
+      tdomainlst <- domainlst
     }
+    if (length(pcdomainlst) == 0) pcdomainlst <- NULL
+    if (length(tdomainlst) == 0) tdomainlst <- NULL
   }
-  if (length(pcdomainlst) == 0) pcdomainlst <- NULL
-  
   
   ## Check if domain variables are in the plot or cond table
   if (!is.null(pcdomainlst)) {
@@ -867,7 +880,8 @@ datSumCoverDom <- function(tab = NULL,
       
       
       pltidsnm <- "pltcondx"
-      pltidsid <- cuniqueid
+      pltidsid <- c(cuniqueid, condid)
+      tdatuniqueid <- c(tuniqueid, condid)
       pltidsa <- "pc"
       pltidsa. <- "pc."
     }
@@ -878,7 +892,7 @@ datSumCoverDom <- function(tab = NULL,
   ## 13. Build query for adjustment factors (if getadjplot = TRUE)
   #################################################################################
   pca. <- "pc."
-  
+
   if (adjtree) {
     if (getadjplot) {
       
@@ -888,6 +902,8 @@ datSumCoverDom <- function(tab = NULL,
       ## Build WHERE query to filter nonsampled plots
       pcADJwhereqry <- getADJwherePLOT(condflds, conda. = pca.)
       
+      ## Build FROM query based on pltcondx
+      pcfromqry <- "\nFROM pltcondx pc"
       
       if (bysubp) {
         adjjoinid <- subplotid
@@ -902,8 +918,8 @@ datSumCoverDom <- function(tab = NULL,
         subpfromqry <- paste0(
           pcfromqry,
           "\n JOIN ", SCHEMA., subplotnm, " subp ", subpjoinqry,
-          "\n JOIN ", SCHEMA., subp_condnm, " subpc ON (", subpca., subplotid, " = ", conda., cuniqueid,
-          " AND ", subpca., condid, " = ", conda., condid,
+          "\n JOIN ", SCHEMA., subp_condnm, " subpc ON (", subpca., subplotid, " = ", pca., cuniqueid,
+          " AND ", subpca., condid, " = ", pca., condid,
           " AND ", subpca., subpid, " = ", subpa., subpid, ")")
         
         
@@ -1025,9 +1041,9 @@ datSumCoverDom <- function(tab = NULL,
   } else {
     
     if (!is.null(pltidsWITHqry)) {
-      tjoinqry <- getjoinqry(tuniqueid, pltidsid, talias., "pltids.")
+      tjoinqry <- getjoinqry(tdatuniqueid, pltidsid, talias., pltidsa.)
       twithfromqry <- paste0(twithfromqry,
-                             "\n JOIN pltids ", tjoinqry)
+                             "\n JOIN ", pltidsnm, " ", pltidsa, " ", tjoinqry)
     }
   }
   
@@ -1045,7 +1061,7 @@ datSumCoverDom <- function(tab = NULL,
       }
     }
   }
- 
+  
   
   ## 14.3. SELECT statement for tdat WITH query
   #######################################################################
@@ -1248,13 +1264,13 @@ datSumCoverDom <- function(tab = NULL,
   tselectqry <- paste0(tselectqry,
                        ",\n   ", tsumvarnew, " AS ", tsumvarnm)
 
-  
   ## Build query to summarize data, including pcwhereqry
   ################################################################
   tqry <- paste0(tselectqry,
                  tfromqry,
                  pcwhereqry,
                  "\nGROUP BY ", toString(tgrpbyvars))
+
 
   ## Build final query to summarize data including WITH queries
   ################################################################
@@ -1263,6 +1279,7 @@ datSumCoverDom <- function(tab = NULL,
                        "\n-------------------------------------------",
                        tqry)
   }
+
 
   message("running query...")
   if (datindb) {
@@ -1620,7 +1637,7 @@ datSumCoverDom <- function(tab = NULL,
   
   
   ## Disconnect open connection
-  if (dbconnopen && !is.null(dbconn)) {
+  if (!dbconnopen && !is.null(dbconn)) {
     DBI::dbDisconnect(dbconn)
   }
   

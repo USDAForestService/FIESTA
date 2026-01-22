@@ -582,8 +582,6 @@ modGBgrm <- function(GBpopdat,
   alltitlelst <- 
     check.titles(dat = tdomdat, 
                  esttype = esttype, 
-                 estseed = estseed, 
-                 woodland = woodland, 
                  sumunits = sumunits, 
                  title.main = title.main, 
                  title.ref = title.ref, 

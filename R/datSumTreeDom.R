@@ -408,7 +408,7 @@ datSumTreeDom <- function(tree = NULL,
                datSum_opts = datSum_opts,
                tabIDs = tabIDs,
                database_opts = database_opts)
-  tdomtree <- sumdat$treedat
+  tdomtree <- setDT(sumdat$treedat)
   tsumvarnm <- sumdat$sumvars
   tsumuniqueid <- sumdat$tsumuniqueid
   treeqry <- sumdat$treeqry
@@ -520,6 +520,7 @@ datSumTreeDom <- function(tree = NULL,
       tdomdata <- datLUTnm(tdomtree, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
     }
     tdomtree <- tdomdata$xLUT
+
     tdomvarnm <- tdomdata$xLUTnm
     setkeyv(tdomtree, tsumuniqueid) 
     tdomvarlut <- unique(tdomtree[,c(tdomvar, tdomvarnm), with=FALSE]) 
@@ -546,7 +547,7 @@ datSumTreeDom <- function(tree = NULL,
     #names(tdomvarlut) <- tdomvarnm
     tdomvarlst2 <- as.character(tdomvarlst) 
   }
-  sumbyvars <- unique(c(tsumuniqueid, pcdomainlst, tdomvarnm))
+  sumbyvars <- unique(c(tsumuniqueid, pcdomainlst, tdomvar, tdomvarnm))
 
 
   ## GET tdomvarlst2 or CHECK IF ALL tree domains IN tdomvar2lst ARE INCLUDED IN tdomvar2.
@@ -948,7 +949,7 @@ datSumTreeDom <- function(tree = NULL,
   }
   returnlst$treeqry <- treeqry
   
-  if (!is.null(dbconn) && dbconnopen) {
+  if (!dbconnopen && !is.null(dbconn)) {
     DBI::dbDisconnect(dbconn)
   }
  

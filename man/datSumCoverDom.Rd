@@ -27,7 +27,6 @@ datSumCoverDom(
   tdomvar2 = NULL,
   tdomvar2lst = NULL,
   pivot = TRUE,
-  getadjplot = FALSE,
   domclassify = NULL,
   pltidsWITHqry = NULL,
   pltidsid = NULL,
@@ -115,14 +114,11 @@ tdomvar2 to aggregate.  If NULL, all domains of tdomvar2 are used.}
 \item{pivot}{Logical. If TRUE, tdomvar data are transposed (pivoted) to
 separate columns.}
 
-\item{getadjplot}{Logical. If TRUE, and adj='plot', adjfactors are
-calculated for nonsampled conditions at plot-level.}
-
 \item{domclassify}{List. List for classifying domain variables in bydomainlst
 (e.g., DIA = c(10,20,30)).}
 
 \item{pltidsWITHqry}{SQL query. A query identifying plots to sum (e.g.,
-'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')}
+'WITH pltids AS (SELECT cn FROM plot WHERE statecd=49 and invyr=2018)')}
 
 \item{pltidsid}{Sting. Name of unique identifier in pltidsWITHqry.}
 
