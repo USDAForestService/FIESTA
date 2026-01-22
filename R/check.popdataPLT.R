@@ -10,7 +10,6 @@ check.popdataPLT <-
            strata = FALSE, stratalut = NULL, auxlut = NULL,
            strvar = NULL, stratcombine = TRUE, pivot = FALSE,
            strwtvar = "strwt",
-           expnwt = FALSE,
            prednames = NULL, predfac = NULL,
            pvars2keep = NULL, pdoms2keep = NULL,
            unitlevels = NULL, defaultVars = FALSE,
@@ -1524,13 +1523,16 @@ check.popdataPLT <-
     ## 17. Get plot-level expansion factors from database
     ###############################################################################
     
-    if (expnwt) {
+    if (iseval) {
+      EXPNSWT <- EXPNS <- NULL
       ppsanm <- findnm("pop_plot_stratum_assgn", dbtablst, returnNULL = TRUE)
       pop_stratumnm <- findnm("pop_stratum", dbtablst, returnNULL = TRUE)
 
       if (!is.null(ppsanm) && !is.null(pop_stratumnm)) {
+        expnwtvars <- c("plt_cn", unitvar2, unitvar, strvar)
+        
         expnwtqry <- paste0(
-          " SELECT plta.plt_cn, plta.statecd, plta.unitcd, plta.countycd, plta.plot, expns",
+          " SELECT ", toString(paste0("plta.", expnwtvars)), ", pop.expns",
           "\n FROM ", SCHEMA., ppsanm, " plta",
           "\n JOIN ", SCHEMA., pop_stratumnm, " pop ON(pop.CN = plta.STRATUM_CN)",
           pwhereqry)
@@ -1552,6 +1554,7 @@ check.popdataPLT <-
           message("invalid query for expansion factors")
           message(expnwtqry) 
         } else {
+          setDT(expnwts)[, EXPNSWT := EXPNS / sum(EXPNS), by = c(unitvar2, unitvar, strvar)]
           names(expnwts) <- toupper(names(expnwts))
           #expnwts <- setDT(expnwts)
         }
@@ -1754,7 +1757,7 @@ check.popdataPLT <-
       returnlst$mort_typ_cd <- mort_typ_cd
     }
 
-    if (!is.null(expnwt)) {
+    if (iseval) {
       returnlst$expnwts <- expnwts
     }
    

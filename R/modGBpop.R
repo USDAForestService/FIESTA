@@ -660,6 +660,7 @@ modGBpop <- function(popType = "VOL",
   datindb <- pltcheck$datindb
   POP_PLOT_STRATUM_ASSGN <- pltcheck$POP_PLOT_STRATUM_ASSGN
   plotunitcnt <- pltcheck$plotunitcnt
+  expnwts <- pltcheck$expnwts
   
   pltselectqry <- pltcheck$pltselectqry
   pltafromqry <- pltcheck$pltafromqry
@@ -1239,6 +1240,7 @@ modGBpop <- function(popType = "VOL",
   }
   if (!is.null(popevalid)) {
     returnlst$evalid <- popevalid
+    returnlst$expnwts <- expnwts
   }
   if (popType == "P2VEG") {
     # returnlst$vcondareax <- vcondareax

@@ -586,6 +586,7 @@ modMApop <- function(popType = "VOL",
   prednames <- pltcheck$prednames
   predfac <- pltcheck$predfac
   auxlut <- unitzonal
+  expnwts <- pltcheck$expnwts
   
   pltselectqry <- pltcheck$pltselectqry
   pltafromqry <- pltcheck$pltafromqry
