@@ -2237,7 +2237,7 @@ DBgetPlots <- function (states = NULL,
           getxy <- FALSE
         }
       }
-      
+    
       if (getxy) {
         if (is.null(pjoinid)) pjoinid <- puniqueid
         if (is.null(xy_datsource)) {
@@ -2273,7 +2273,8 @@ DBgetPlots <- function (states = NULL,
 		      dbTabs$survey_layer <- SURVEY
 		    }
 
-        if (!stcd %in% c(64,78) && xymeasCur) {
+        #if (!stcd %in% c(64,78) && xymeasCur) {
+        if (!stcd %in% c(78) && xymeasCur) {
           xydat <- suppressMessages(
             DBgetXY(states = state,
                            xy_datsource = xysource,
@@ -2292,7 +2293,11 @@ DBgetPlots <- function (states = NULL,
                            pvars2keep = c("INVYR", "PLOT_STATUS_CD", "INTENSITY")))
 		      xyxnm <- paste0("xyCurx_", coordType)
 		      xynm <- paste0("xyCur_", coordType)
-		      xytable <- xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ]
+		      
+		      xytable <- xydat[[xynm]]
+		      xytable <- xytable[xytable[[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ]
+		      #xytable <- xydat[[1]][xydat[[1]][[xydat$xy_opts$xyjoinid]] %in% pltx[[xydat$pjoinid]], ]
+
 		      if (lowernames) {
 		        names(xytable) <- tolower(names(xytable))
 		      }
@@ -2430,7 +2435,7 @@ DBgetPlots <- function (states = NULL,
 		    }
       }
     }
-    
+
     ## if getxy = FALSE... and out_fmt = "sqlite", open database connection
     if (savedata && out_fmt == "sqlite" && !is.null(outlst$outconn)) {
       outlst$outconn <- DBI::dbConnect(RSQLite::SQLite(), 

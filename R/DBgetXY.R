@@ -1299,7 +1299,6 @@ DBgetXY <- function (states = NULL,
     assign(xyoutnm, xyx)
   } 
 
-
   if (issp) {
     spxyoutnm <- paste0("sp", xyoutnm)
     

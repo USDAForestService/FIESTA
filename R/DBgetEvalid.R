@@ -1179,9 +1179,10 @@ DBgetEvalid <- function(states = NULL,
 
           stinvyrs <- unique(stinvyr.vals[[state]])
           invtype.invyrs <- setDT(invyrtab)[invyrtab$STATECD == stcd][["INVYR"]]
-          if (stcd == 64) {
-            invtype.invyrs[invtype.invyrs == 2016] <- 6416
-          }
+
+          # if (stcd == 64) {
+          #   invtype.invyrs[invtype.invyrs == 2016] <- 6416
+          # }
 
           ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
           ## Remove East and West in LOCATION_NM and EVAL_DESCR
