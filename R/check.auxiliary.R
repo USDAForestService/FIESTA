@@ -280,7 +280,7 @@ check.auxiliary <- function(pltx, puniqueid, module = "GB",
     }
   }
  
-  ## Get order of unitvar for collapsing
+  ## Get order of unitvar for collapsing, if unitlevels was given by user
   ###########################################################
   if (!is.null(unitlevels) && !is.factor(auxlut[[unitvar]])) {
     auxlut[[unitvar]] <- factor(auxlut[[unitvar]], levels = unitlevels)
@@ -353,15 +353,19 @@ check.auxiliary <- function(pltx, puniqueid, module = "GB",
   ## Redefine strunitvars
   strunitvars <- c(unitvar, strvar)
 
-  ## Make unitvar a factor for retaining order for collapsing{
+  ## Make unitvar a factor for retaining order for collapsing
   if (!is.factor(auxlut[[unitvar]])) {
     if (is.null(unitlevels)) {
       unitlevels <- unique(auxlut[[unitvar]])
     }
     auxlut[[unitvar]] <- factor(auxlut[[unitvar]], levels=unitlevels)
-    pltx[[unitvar]] <- factor(pltx[[unitvar]], levels=unitlevels)
   }
-  
+  pltx[[unitvar]] <- factor(pltx[[unitvar]], levels=unitlevels)
+
+  if (!is.null(unitarea)) {
+    unitarea[[unitvar]] <- factor(unitarea[[unitvar]], levels=unitlevels)
+  }
+
   # ## Make strvar a factor for retaining order for collapsing
   # if (!is.factor(auxlut[[strvar]])) {
   #   if (is.null(stratalevels)) {

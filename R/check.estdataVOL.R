@@ -39,7 +39,7 @@ check.estdataVOL <-
                              checklst = woodlandlst, gui = gui, 
                              caption = "Woodland?") 
   
-  
+
   ###################################################################################
   ## DESCRIPTION: Check data tables for VOL estimates
   ###################################################################################
@@ -67,7 +67,7 @@ check.estdataVOL <-
       treeflds <- names(treex)
     } 
   }
- 
+
   if (estseed %in% c("add", "only")) {
     if (popdatindb) {
       if (!is.character(seedx)) {
@@ -89,7 +89,6 @@ check.estdataVOL <-
     } 
   }
  
-
   return(list(treenm = treenm,
               seednm = seednm,
               treeflds = treeflds,

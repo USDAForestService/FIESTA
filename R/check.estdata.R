@@ -168,6 +168,9 @@ check.estdata <-
   landarea <- pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
 	                  checklst=landarealst, caption="Sample land area?")
   
+  
+  ## if popType is GRM, we do not add landare to pcwhereqry
+  ####################################################################
   if (popType != "GRM") {
 
     ## Create landarea.filter
@@ -233,8 +236,9 @@ check.estdata <-
       }
     }
   }
+  
   ## Add ACI.filter to pcwhereqry
-  ###################################################################################
+  #############################################################################
   if (esttype %in% c("TREE", "RATIO") && !ACI && landarea != "FOREST") {
     ACI.filter <- "c.COND_STATUS_CD = 1"
     if (!is.null(pcwhereqry)) {
@@ -246,10 +250,11 @@ check.estdata <-
   }
 
 
-  ## Update pltcondx  or pltcondxqry with pcwhereqry
-  ########################################################
+  ## Update pltcondx or pltcondxqry to add where statement (pcwhereqry)
+  #############################################################################
   pltcondxadjWITHqry=pltcondxWITHqry <- NULL
   
+  ## if pltcondx is a data.frame
   if ((!popdatindb && is.data.frame(pltcondx)) ||
       (popdatindb && "pltcondx" %in% poptablst)) {
     
@@ -261,7 +266,7 @@ check.estdata <-
       pcqry <- paste0("SELECT *", 
                       pcfromqry,
                       pcwhereqry)
-      
+
       if (popdatindb) {
         pcchk <- tryCatch(
           DBI::dbGetQuery(popconn, pcqry),
@@ -283,6 +288,7 @@ check.estdata <-
       }
     }
     
+  ## if pltcondx is in database
   } else if (popdatindb && !"pltcondx" %in% poptablst) {
 
     pltcondx.qry <- paste0(pltcondxqry,
@@ -434,6 +440,7 @@ check.estdata <-
   returnlst <- list(esttype = esttype, 
                     sumunits = sumunits,
                     totals = totals,
+                    pltcondx = pltcondx,
                     pltcondflds = pltcondflds,
                     pltcondxWITHqry = pltcondxWITHqry,
                     pltcondxadjWITHqry = pltcondxadjWITHqry,
@@ -467,9 +474,9 @@ check.estdata <-
     returnlst$SCHEMA. <- ""
   }
 
-  if ((popdatindb && "pltcondx" %in% poptablst) || (!popdatindb && is.data.frame(pltcondx))) {
-    returnlst$where.qry <- pcwhereqry
-  }
+  # if ((popdatindb && "pltcondx" %in% poptablst) || (!popdatindb && is.data.frame(pltcondx))) {
+  #   returnlst$where.qry <- pcwhereqry
+  # }
 
   return(returnlst)
 }

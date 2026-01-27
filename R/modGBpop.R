@@ -605,6 +605,7 @@ modGBpop <- function(popType = "VOL",
   ##     nonsampled plots.
   ###################################################################################
   popdatindb <- ifelse(returndata, FALSE, TRUE)
+
   pltcheck <- 
     check.popdataPLT(dsn = dsn, dbconn = dbconn, schema = schema,
                      datsource = datsource, 
@@ -626,6 +627,7 @@ modGBpop <- function(popType = "VOL",
                      unitlevels = unit_opts$unitlevels,
                      projectid = projectid,
                      database_opts = database_opts)
+
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
@@ -706,6 +708,7 @@ modGBpop <- function(popType = "VOL",
                     P2POINTCNT = P2POINTCNT,
                     auxtext = "stratalut",
                     AOI = popFilter$AOIonly)
+
   if (is.null(auxcheck)) return(0)
   pltassgnx <- setDT(auxcheck$pltx)
   unitarea <- auxcheck$unitarea
@@ -750,7 +753,8 @@ modGBpop <- function(popType = "VOL",
   
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
-  
+
+
   ## calculate strata-level expansion factors
   ## Check if class of unitvar in auxlut matches class of unitvar in pltx
   tabs <- check.matchclass(stratalut, unitarea, unitvar)
