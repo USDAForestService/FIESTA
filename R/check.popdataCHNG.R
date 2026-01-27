@@ -1826,7 +1826,9 @@ check.popdataCHNG <-
     
     ## 13. Return data objects
     ######################################################################################
-    if (popdatindb || savedata) {
+    
+    ## if popdata is from a database
+    if (popdatindb || (savedata && !returndata)) {
       returnlst$pop_datsource <- pop_datsource
       returnlst$popdbinfo <- list(popconn = popconn, 
                                   pop_dsn = pop_dsn,

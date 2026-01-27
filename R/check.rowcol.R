@@ -199,7 +199,6 @@ check.rowcol <-
         title.rowvar <- paste0("Previous ", title.rowvar)
       }
     }
-
     rowvardat <- 
       check.tabvar(popType = popType, tabvartype = "row", 
                    tabvar = rowvar, tab.orderby = row.orderby, 
@@ -215,6 +214,7 @@ check.rowcol <-
                    tfilter = tfilter,
                    popdatindb = popdatindb, popconn = popconn, SCHEMA. = SCHEMA.,
                    domlut = domlut, domvarlst = domvarlst, spcdname = spcdname)
+
     uniquerow <- rowvardat$uniquetabvar
     rowvar <- rowvardat$tabvar
     rowvarnm <- rowvardat$tabvarnm

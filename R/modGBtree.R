@@ -495,6 +495,7 @@ modGBtree <- function(GBpopdat,
   pseround <- estdat$pseround
   returntitle <- estdat$returntitle
   addtitle <- estdat$addtitle
+  pltcondx <- estdat$pltcondx
   
   pcwhereqry <- estdat$where.qry
   pltcondflds <- estdat$pltcondflds
@@ -531,6 +532,9 @@ modGBtree <- function(GBpopdat,
                      estseed = estseed,
                      woodland = woodland,
                      gui = gui)
+  if (is.null(estdatVOL)) {
+    stop()
+  }
   estseed <- estdatVOL$estseed
   woodland <- estdatVOL$woodland
   treeflds <- estdatVOL$treeflds

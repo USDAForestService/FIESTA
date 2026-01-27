@@ -1596,7 +1596,9 @@ check.popdataP2VEG <-
   ## 13. Return data objects
   ######################################################################################
   returnlst$pop_datsource <- pop_datsource
-  if (popdatindb || savedata) {
+  
+  ## if popdata is from a database
+  if (popdatindb || (savedata && !returndata)) {
     returnlst$popdbinfo <- list(popconn = popconn, 
                                 pop_dsn = pop_dsn,
                                 pop_schema = pop_schema,

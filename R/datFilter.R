@@ -135,11 +135,8 @@ datFilter <- function(x,
 		first="NO", gui=gui)
 
   ## Check output parameters
-  if (savedata) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn,
-        out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date,
-		    overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-		    add_layer=add_layer, append_layer=append_layer, gui=gui)
+  #if (savedata) {
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
     outfolder <- outlst$outfolder
     out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
@@ -147,10 +144,10 @@ datFilter <- function(x,
     append_layer <- outlst$append_layer
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
-    if (is.null(out_layer)) {
+    if (is.null(outlst$out_layer)) {
       out_layer <- "datf"
     }
-  }
+  #}
 
   ################################################################################
   ### DO WORK

@@ -349,10 +349,7 @@ datSumTree <- function(tree = NULL,
   
   ## Check output parameters
   if (savedata) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn,
-                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date,
-                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-                            add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
     out_layer <- outlst$out_layer
   }
 
@@ -660,7 +657,7 @@ datSumTree <- function(tree = NULL,
         check.logic.vars(condnm, pltidsWITHqry, ignore.case=TRUE)) {
       condinWITHqry <- TRUE
     }
-    
+
     if (condinWITHqry) {
 
       condflds.qry <- paste0(
@@ -981,6 +978,15 @@ datSumTree <- function(tree = NULL,
   ###############################################################################
   pwhereqry = cwhereqry <- NULL
   
+  palias. <- "pc."
+  calias. <- "pc."
+  
+  if (!is.null(condnm) && condnm != "pltcondx") {
+    palias. <- "p."
+    calias. <- "c."
+  }
+  
+
   if (!is.null(pcwhereqry)) {
     if (is.null(pcflds)) {
       stop("must include plot and/or cond if including pcwhereqry")
@@ -995,8 +1001,8 @@ datSumTree <- function(tree = NULL,
         if (!is.null(pwhereqry)) {
           pchkvars <- check.logic.vars(pltflds, pcwhereqry, returnVars = TRUE)
           for (pchkvar in pchkvars) {
-            if (!grepl(paste0("pc.", pchkvar), pcwhereqry)) {
-              pcwhereqry <- sub(pchkvar, paste0("pc.", pchkvar), pcwhereqry)
+            if (!grepl(paste0(palias., pchkvar), pcwhereqry)) {
+              pcwhereqry <- sub(pchkvar, paste0(palias., pchkvar), pcwhereqry)
             }
           }
           pvars <- c(pvars, pchkvars)
@@ -1009,8 +1015,8 @@ datSumTree <- function(tree = NULL,
         if (!is.null(cwhereqry)) {
           cchkvars <- check.logic.vars(condflds, pcwhereqry, returnVars = TRUE)
           for (cchkvar in cchkvars) {
-            if (!grepl(paste0("pc.", cchkvar), pcwhereqry)) {
-              pcwhereqry <- sub(cchkvar, paste0("pc.", cchkvar), pcwhereqry)
+            if (!grepl(paste0(calias., cchkvar), pcwhereqry)) {
+              pcwhereqry <- sub(cchkvar, paste0(calias., cchkvar), pcwhereqry)
             }
           }
           cvars <- c(cvars, cchkvars)
@@ -1053,8 +1059,8 @@ datSumTree <- function(tree = NULL,
       }
       cvars <- unique(c(cvars, cond_status_cdnm))
       
-      if (!is.null(pcwhereqry) && !grepl(paste0("pc.", cond_status_cdnm), pcwhereqry)) {
-        pcwhereqry <- sub(cond_status_cdnm, paste0("pc.", cond_status_cdnm), pcwhereqry)
+      if (!is.null(pcwhereqry) && !grepl(paste0(calias., cond_status_cdnm), pcwhereqry)) {
+        pcwhereqry <- sub(cond_status_cdnm, paste0(calias., cond_status_cdnm), pcwhereqry)
       }
     }
   }
@@ -1184,7 +1190,7 @@ datSumTree <- function(tree = NULL,
   cjoin <- ifelse((!is.null(cdomainlst) || !is.null(cwhereqry) || getadjplot), TRUE, FALSE)
   
   if (!condinWITHqry && (!is.null(condnm) && condnm != "pltcondx")) {
-    
+
     ## FROM statement for pltcondx WITH query
     ##################################################################
     if (pjoin) {
@@ -1244,13 +1250,15 @@ datSumTree <- function(tree = NULL,
           "\n----- get pltcondx data",
           "\npltcondx AS", 
           pltcondxSELECTqry,
-          pltcondxFROMqry, ")")
+          pltcondxFROMqry, 
+          pcwhereqry, ")")
       } else {
         pltidsWITHqry <- paste0(
           "WITH ",
           "\npltcondx AS", 
           pltcondxSELECTqry,
-          pltcondxFROMqry, ")")
+          pltcondxFROMqry, 
+          pcwhereqry, ")")
       }
       
       
@@ -1259,6 +1267,7 @@ datSumTree <- function(tree = NULL,
       tdatuniqueid <- c(tuniqueid, condid)
       pltidsa <- "pc"
       pltidsa. <- "pc."
+      pcwhereqry <- NULL
     }
   }
 
@@ -1696,7 +1705,6 @@ datSumTree <- function(tree = NULL,
     }
   }
   
-  
   ## Add tfilter to tsumvardf
   if (!is.null(tfilter) && getnm) {
     ref <- ref_estvar[ref_estvar$ESTVAR %in% tsumvarlst, ]
@@ -1736,7 +1744,6 @@ datSumTree <- function(tree = NULL,
   adjalias. <- "adj."
   twithalias <- "tdat."
 
-
   ## 18.1. FROM statement for tdat WITH query
   ##########################################################################
   if (!seedonly) {
@@ -1753,6 +1760,22 @@ datSumTree <- function(tree = NULL,
       swithfromqry <- paste0("\n FROM ", seednm, " s")
     }
   }
+  
+  ## Add pltcondx if pjoin or cjoin variables 
+  if (!seedonly) {
+    if (!is.null(pcdomainlst)) {
+      pctjoinqry <- getjoinqry(c(cuniqueid, condid), c(tuniqueid, condid), "pc.", "t.")
+      twithfromqry <- paste0(twithfromqry,
+                             "\n JOIN pltcondx pc ", pctjoinqry)
+    }
+  }
+  if (seedonly || addseed) {
+    if (!is.null(pcdomainlst)) {
+      pcsjoinqry <- getjoinqry(c(cuniqueid, condid), c(tuniqueid, condid), "pc.", "s.")
+      swithfromqry <- paste0(swithfromqry,
+                             "\n JOIN pltcondx pc ", pcsjoinqry)
+    }
+  }
 
   ## FROM statement (seedonly = FALSE) - adjustment factors / pltidsWITHqry
   if (!seedonly) {
@@ -1763,15 +1786,15 @@ datSumTree <- function(tree = NULL,
         twithfromqry <- paste0(twithfromqry,
                                "\n JOIN pltidsadj adj ", tadjjoinqry)
       }
-    } else {
-      
-      if (!is.null(pltidsWITHqry)) {
-        tjoinqry <- getjoinqry(tdatuniqueid, pltidsid, talias., pltidsa.)
-        twithfromqry <- paste0(twithfromqry,
-                               "\n JOIN ", pltidsnm, " ", pltidsa, " ", tjoinqry)
-      }
+    # } else {
+    #   
+    #   if (!is.null(pltidsWITHqry)) {
+    #     tjoinqry <- getjoinqry(tdatuniqueid, pltidsid, talias., pltidsa.)
+    #     twithfromqry <- paste0(twithfromqry,
+    #                            "\n JOIN ", pltidsnm, " ", pltidsa, " ", tjoinqry)
+    #   }
     }
-    
+
     ## FROM statement - woodland
     if (!is.null(woodland) && woodland %in% c("N", "only")) {
       twithfromqry <- paste0(twithfromqry, wtfromqry)
@@ -1787,15 +1810,13 @@ datSumTree <- function(tree = NULL,
         swithfromqry <- paste0(swithfromqry,
                                "\n JOIN pltidsadj adj ", sadjjoinqry)
       }
-    } else if (!is.null(pltidsWITHqry)) {
-      
-      sjoinqry <- getjoinqry(tdatuniqueid, pltidsid, salias., pltidsa.)
-      swithfromqry <- paste0(swithfromqry,
-                             "\n JOIN ", pltidsnm, " ", pltidsa, " ", sjoinqry)
+    # } else if (!is.null(pltidsWITHqry)) {
+    #   
+    #   sjoinqry <- getjoinqry(tdatuniqueid, pltidsid, salias., pltidsa.)
+    #   swithfromqry <- paste0(swithfromqry,
+    #                          "\n JOIN ", pltidsnm, " ", pltidsa, " ", sjoinqry)
     }
   }
-  
-
   
   ## 18.2. WHERE statement for tdat WITH query - tfilter
   ##########################################################################
@@ -1813,7 +1834,7 @@ datSumTree <- function(tree = NULL,
         }
       }
     }
-
+    
     if (addseed || seedonly) {
       sfilter <- suppressMessages(check.logic(seedflds,
                                               statement=tfilter, stopifinvalid=FALSE))
@@ -1842,7 +1863,7 @@ datSumTree <- function(tree = NULL,
       }
     }
   }
-
+  
   ## WHERE statement (addseed = TRUE) - woodland
   if (addseed || seedonly) {
     swithwhereqry <- swhereqry
@@ -1855,16 +1876,16 @@ datSumTree <- function(tree = NULL,
       }
     }
   }
-
+  
   
   ## 18.3. SELECT statement for tdat WITH query
   #######################################################################
-  
+ 
   ## SELECT statement (seedonly = FALSE)
   if (!seedonly) {
     
     ## Compile initial select variables
-    twithqry <- "SELECT 'TREE' src,"
+    twithSelect <- paste0("SELECT 'TREE' src")
     twithvars <- c("CONDID", "SUBP", "TREE")
     twithvarschk <- sapply(twithvars, findnm, treeflds, returnNULL = TRUE)
     if (all(is.null(twithvarschk))) {
@@ -1872,62 +1893,53 @@ datSumTree <- function(tree = NULL,
     } else {
       twithvars <- unlist(twithvarschk)
     }
-    twithSelect <- paste0(talias., unique(c(tsumuniqueid, twithvars)))
+    twithSelect <- paste0(twithSelect, ", ", 
+                          toString(paste0(talias., unique(c(tsumuniqueid, twithvars)))))
+    
+    ## Get list of tree estimation variables
     tvarlst <- unique(c(tdomainlst, tsumvarlst, tpavarnm))
-    alltvarlst <- unique(c(tsumuniqueid, twithvars, tvarlst))
 
     if (addseed) {
+      
+      ## First, make sure SPCD is in the list of estimation tree variables
       if (!is.null(tvarlst)) {
         spcdnm <- findnm("SPCD", tvarlst, returnNULL = TRUE)
         if (is.null(spcdnm)) {
           spcdnm <- findnm("SPCD", treeflds, returnNULL = TRUE)
-        } else {
-          tvarlst <- tvarlst[tvarlst != spcdnm]
         }
-        if (!is.null(spcdnm)) {
-          twithSelect <- c(twithSelect, paste0(talias., spcdnm))
-          alltvarlst <- unique(c(alltvarlst, spcdnm))
-        }
+        ## Next, make sure TPA_UNADJ is the list of estimation tree variables
         tpanm <- findnm("TPA_UNADJ", tvarlst, returnNULL = TRUE)
-        if (!is.null(tpanm)) {
-          twithSelect <- c(twithSelect, paste0(talias., tpanm))
-          tvarlst <- tvarlst[tvarlst != tpanm]
-        }
-      }
-      if (length(tvarlst) != 0) {
-        twithSelect <- unique(c(twithSelect, paste0(talias., tvarlst)))
-      }
-    } else {
-      if (!is.null(tvarlst)) {
-        twithSelect <- unique(c(twithSelect, paste0(talias., tvarlst)))
       }
     }
 
     ## Add tderive variables to SELECT statement for tdat WITH query
     if (!is.null(tderive)) {
-      tderivevars <- tderivevars[!tderivevars %in% alltvarlst]
+      tderivevars <- tderivevars[!tderivevars %in% tvarlst]
+      tvarlst <- unique(c(tvarlst, tderivevars))
+    }
 
-      if (length(tderivevars) > 0) {
-        twithSelect <- c(twithSelect, paste0(talias., tderivevars))
-      }
-      alltvarlst <- unique(c(alltvarlst, tderivevars))
+    ## Add estimation tree variable twithSelect query
+    if (length(tvarlst) > 0) {
+      tselectvars <- paste0(talias., tvarlst)
+      twithSelect <- paste0(twithSelect, ", ", 
+                          "\n       ", toString(tselectvars))
     }
     
-    ## Build final SELECT statement 
-    twithqry <- paste(twithqry, toString(twithSelect))
-    
+    ## Add any domains from plot / cond table
+    if (length(pcdomainlst) > 0) {
+      twithSelect <- paste0(twithSelect, ", ", toString(paste0(pca., pcdomainlst)))
+    }
+
     ## Add adjustment variables
     if (adjtree) {
-      twithqry <- paste0(twithqry, ", ", tadjcase)
+      twithSelect <- paste0(twithSelect, ", ", tadjcase)
     }
     
     ## Build final tree WITH query
-    twithqry <- paste0(twithqry,
+    twithqry <- paste0(twithSelect,
                        twithfromqry,
                        twithwhereqry)
-
-    
-
+ 
     ## SELECT statement (addseed = TRUE)
     if (addseed) {
       swithalias <- "sdat"
@@ -1936,50 +1948,64 @@ datSumTree <- function(tree = NULL,
       ## Compile initial select variables
       nbrvar <- length(tsumvardf$TSUMVAR[tsumvardf$TABLE == "TREE"][
         !tsumvardf$TSUMVAR[tsumvardf$TABLE == "TREE" & !tsumvardf$DERIVE] %in% tpavarnm])
-      swithqry <- paste0("\n SELECT 'SEED' src, ")
-      swithSelect <- unique(c(paste0("s.", tsumuniqueid), "s.CONDID", "s.SUBP", 0))
-      allsvarlst <- unique(c(tsumuniqueid, swithvars))
+      swithSelect <- paste0("\n SELECT 'SEED' src")
+      swithvars <- c(paste0(salias., c("CONDID", "SUBP")), 0)
+      swithSelect <- paste0(swithSelect, ", ", 
+                            toString(unique(c(paste0(salias., tsumuniqueid), swithvars))))
+      
+      ## Get list of seedling estimation variables
+      svarlst <- {}
 
-      spcdanm <- findnm("t.SPCD", twithSelect, returnNULL = TRUE)
+      ## First, see if SPCD is in twithSelect
+      spcdanm <- findnm("SPCD", tvarlst, returnNULL = TRUE)
       if (!is.null(spcdanm)) {
-        swithSelect <- c(swithSelect, paste0(salias., spcdnm))
-        allsvarlst <- c(allsvarlst, spcdnm)
+        svarlst <- c(svarlst, spcdnm)
       }
-      tpaanm <- findnm("t.TPA_UNADJ", twithSelect, returnNULL = TRUE)
+      ## First, see if TPA_UNADJ is in twithSelect
+      tpaanm <- findnm("TPA_UNADJ", tvarlst, returnNULL = TRUE)
       if (!is.null(tpaanm)) {
-        swithSelect <- c(swithSelect, paste0("s.", tpanm))
-        allsvarlst <- c(allsvarlst, tpanm)
+        #swithSelect <- c(swithSelect, paste0("s.", tpanm))
+        svarlst <- c(svarlst, tpanm)
       }
-      swithqry <- paste0(swithqry, toString(swithSelect))
 
       sdomainlst <- NULL
       if (!is.null(tdomainlst)) {
         for (tdomain in tdomainlst) {
           if (tdomain == "DIACL") {
-            swithqry <- paste0(swithqry, ", '<1' AS DIACL")
-            sdomainlst <- c(sdomainlst, tdomain)
+            swithSelect <- paste0(swithSelect, ", '<1' AS DIACL")
+            sdomainlst <- c(sdomainlst, "'<1' AS DIACL")
           } else if (tdomain %in% seedflds && tdomain != "SPCD") {
-            swithqry <- paste0(swithqry, ", s.", tdomain)
-            sdomainlst <- c(sdomainlst, tdomain)
+            swithSelect <- paste0(swithSelect, ", s.", tdomain)
+            sdomainlst <- c(sdomainlst, paste0(salias., tdomain))
           }
         }
       }
-      allsvarlst <- c(allsvarlst, sdomainlst)
       
-
-      #nbrvar <- nbrvar + (length(tvarlst) - length(sdomainlst))
-      nbrvar <- length(alltvarlst) - length(allsvarlst)
-      if (nbrvar > 0) {
-        swithqry <- paste0(swithqry, ", ", toString(rep("'null'", nbrvar)))
+      if (length(svarlst > 0)) {
+        sselectvars <- paste0(salias., svarlst)
+        swithSelect <- paste0(swithSelect, ", ", 
+                              "\n       ", toString(sselectvars))
       }
 
+      ## Add null for variables not in seedling table
+      nbrvar <- length(tvarlst) - length(c(svarlst, sdomainlst))
+      if (nbrvar > 0) {
+        swithSelect <- paste0(swithSelect, ", ", 
+                              "\n       ", toString(rep("'null'", nbrvar)))
+      }
+
+      ## Add any domains from plot / cond table
+      if (length(pcdomainlst) > 0) {
+        swithSelect <- paste0(swithSelect, ", ", toString(paste0(pca., pcdomainlst)))
+      }
+      
       ## Add adjustment variables
       if (adjtree) {
-        swithqry <- paste0(swithqry, ", ", sadjcase)
+        swithSelect <- paste0(swithSelect, ", ", sadjcase)
       }
  
       ## Build final seedling WITH query
-      swithqry <- paste0(swithqry,
+      swithqry <- paste0(swithSelect,
                          swithfromqry,
                          swithwhereqry)
 
@@ -1999,24 +2025,29 @@ datSumTree <- function(tree = NULL,
     
     ## SELECT statement for sdat WITH query (seedonly = TRUE)
     #######################################################################
-    swithqry <- "SELECT 'SEED' src,"
+    swithSelect <- "SELECT 'SEED' src,"
     spcdnm <- findnm("SPCD", tdomainlst, returnNULL = TRUE)
     if (is.null(spcdnm) && !is.null(findnm("SPCD", seedflds, returnNULL = TRUE))) {
       tdomainlst <- c(spcdnm, tdomainlst)
     }
-    swithSelect <- unique(c(tsumuniqueid, "CONDID", "SUBP", tdomainlst,
+    swithvars <- unique(c(tsumuniqueid, "CONDID", "SUBP", tdomainlst,
                             unique(c(tpavarnm, tsumvardf$TSUMVAR[tsumvardf$TABLE == "SEED" & !tsumvardf$DERIVE]))))
     if (!is.null(tderive)) {
-      tderivevars <- tderivevars[!tderivevars %in% swithSelect]
+      tderivevars <- tderivevars[!tderivevars %in% swithvars]
       if (length(tderivevars) > 0) {
-        swithSelect <- c(swithSelect, tderivevars)
+        swithvars <- c(swithvars, tderivevars)
       }
     }
     ## Build final select statement for tdat WITH query
-    swithqry <- paste(swithqry, toString(paste0(salias., swithSelect)))
+    swithSelect <- paste(swithSelect, toString(paste0(salias., swithvars)))
 
+    ## Add any domains from plot / cond table
+    if (length(pcdomainlst) > 0) {
+      swithSelect <- paste0(swithSelect, ", ", toString(paste0(pca., pcdomainlst)))
+    }
+    
     if (adjtree) {
-      swithqry <- paste0(swithqry, ", ", sadjcase)
+      swithSelect <- paste0(swithSelect, ", ", sadjcase)
     }
 
     
@@ -2033,7 +2064,7 @@ datSumTree <- function(tree = NULL,
     # }
 
     ## Build final seedling WITH query
-    twithqry <- paste0(swithqry,
+    twithqry <- paste0(swithSelect,
                        swithfromqry,
                        swithwhereqry)
   }
@@ -2065,12 +2096,12 @@ datSumTree <- function(tree = NULL,
   tfromqry <- paste0("\nFROM tdat")
   
   
-  ## Add pltcondx if pjoin or cjoin variables 
-  if (pjoin || cjoin) {
-    tjoinqry <- getjoinqry(c(cuniqueid, condid), c(tuniqueid, condid), "pc.", "tdat.")
-    tfromqry <- paste0(tfromqry,
-                       "\nJOIN pltcondx pc ", tjoinqry)
-  }
+  # ## Add pltcondx if pjoin or cjoin variables 
+  # if (pjoin || cjoin) {
+  #   tjoinqry <- getjoinqry(c(cuniqueid, condid), c(tuniqueid, condid), "pc.", "tdat.")
+  #   tfromqry <- paste0(tfromqry,
+  #                      "\nJOIN pltcondx pc ", tjoinqry)
+  # }
   
   
   ## 19.2 Build SELECT statement 
@@ -2172,7 +2203,7 @@ datSumTree <- function(tree = NULL,
         fromval <- classifylut[[classifyvar]]
         toval <- classifylut[[classifynm]]
         if (classifyvar %in% pcclassifyvars) {
-          classvar. <- "pc."
+          classvar. <- "tdat."
           pcdomainlst[pcdomainlst == classifyvar] <- classifynm
         } else {
           classvar. <- "tdat."
@@ -2201,14 +2232,14 @@ datSumTree <- function(tree = NULL,
       tselectqry <- paste0(tselectqry, ", ", domclassifyqry)
     }
   } else if (!is.null(domainlst) && length(domainlst) > 0) {
-    
+
     if (length(tdomainlst) > 0) {
       tselectqry <- paste0(tselectqry, ", ", toString(paste0("tdat.", tdomainlst)))
       tgrpbyvars <- unique(c(tgrpbyvars, paste0("tdat.", tdomainlst)))
-    } 
+    }
     if (length(pcdomainlst) > 0) {
-      tselectqry <- paste0(tselectqry, ", ", toString(paste0(pca., pcdomainlst)))
-      tgrpbyvars <- unique(c(tgrpbyvars, paste0(pca., pcdomainlst)))
+      tselectqry <- paste0(tselectqry, ", ", toString(paste0("tdat.", pcdomainlst)))
+      tgrpbyvars <- unique(c(tgrpbyvars, paste0("tdat.", pcdomainlst)))
     }
   }
 
@@ -2233,6 +2264,14 @@ datSumTree <- function(tree = NULL,
                                        collapse=",\n  "))
   }
 
+  
+  # ## Add pltcondx if pjoin or cjoin variables 
+  # if (!is.null(pcdomainlst)) {
+  #   tjoinqry <- getjoinqry(c(cuniqueid, condid), c(tuniqueid, condid), "pc.", "tdat.")
+  #   tfromqry <- paste0(tfromqry,
+  #                      "\nJOIN pltcondx pc ", tjoinqry)
+  # }
+  
   
   ## Build query to summarize tree data, including pcwhereqry
   ################################################################

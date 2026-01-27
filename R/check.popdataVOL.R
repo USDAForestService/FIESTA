@@ -426,7 +426,7 @@ check.popdataVOL <-
         message(adjfactors.qry)
         return(NULL)
       } else {
-        names(adjfactors) <- toupper(names(adjfactors))
+        #names(adjfactors) <- toupper(names(adjfactors))
       }
       if (adj == "samp") {
         setkeyv(setDT(adjfactors), strunitvars)
@@ -1046,7 +1046,7 @@ check.popdataVOL <-
       }
 
       ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
-      if (returndata || savedata) {
+      if (!datindb) {
         condsampcnt <- pltcondx[, .N, by=cstatuscdnm]
         setnames(condsampcnt, "N", "NBRCONDS")
       } else {
@@ -1101,7 +1101,7 @@ check.popdataVOL <-
           nfcstatuscdnm <- nfcstatuschk
         }
 
-        if (returndata || savedata) {
+        if (!datindb) {
           nfcondsampcnt <- pltcondx[, .N, by=nfcstatuscdnm]
           setnames(nfcondsampcnt, "N", "NBRCONDS")
         } else {
@@ -1178,7 +1178,10 @@ check.popdataVOL <-
     ## 13. Return data objects
     ######################################################################################
     returnlst$pop_datsource <- pop_datsource
-    if (popdatindb || savedata) {
+
+
+    ## if popdata is from a database
+    if (popdatindb || (savedata && !returndata)) {
       returnlst$popdbinfo <- list(popconn = popconn, 
                                   pop_dsn = pop_dsn,
                                   pop_schema = pop_schema,

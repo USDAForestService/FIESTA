@@ -1534,7 +1534,7 @@ check.popdataPLT <-
         expnwtqry <- paste0(
           " SELECT ", toString(paste0("plta.", expnwtvars)), ", pop.expns",
           "\n FROM ", SCHEMA., ppsanm, " plta",
-          "\n JOIN ", SCHEMA., pop_stratumnm, " pop ON(pop.CN = plta.STRATUM_CN)",
+          "\n JOIN ", SCHEMA., pop_stratumnm, " pop ON (pop.CN = plta.STRATUM_CN)",
           pwhereqry)
 
         if (pltaindb) {
