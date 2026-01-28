@@ -460,6 +460,7 @@ modGBarea <- function(GBpopdat,
   pseround <- estdat$pseround
   returntitle <- estdat$returntitle
   addtitle <- estdat$addtitle
+  pltcondx <- estdat$pltcondx
   
   pcwhereqry <- estdat$where.qry
   pltcondflds <- estdat$pltcondflds
@@ -482,6 +483,7 @@ modGBarea <- function(GBpopdat,
     append_layer = estdat$append_layer
     rawoutlst <- estdat$rawoutlst
   }
+
   
   ###################################################################################
   ### Check row and column data

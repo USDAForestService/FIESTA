@@ -439,6 +439,7 @@ modMAratio <- function(MApopdat,
   pseround <- estdat$pseround
   returntitle <- estdat$returntitle
   addtitle <- estdat$addtitle
+  pltcondx <- estdat$pltcondx
   
   pcwhereqry <- estdat$where.qry
   SCHEMA. <- estdat$SCHEMA.
