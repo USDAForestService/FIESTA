@@ -11,8 +11,10 @@ check.auxiliary <- function(pltx, puniqueid, module = "GB",
 	                          strwtvar = 'strwt', 
                             P2POINTCNT = NULL, npixelvar = NULL, 
                             stratcombine = FALSE,
-	                          minplotnum.unit = 10, unit.action = "keep", unitlevels = NULL, 
-	                          minplotnum.strat = 2, na.rm = TRUE, removeifnostrata = FALSE, 
+	                          minplotnum.unit = 10, minplotnum.unit.forest = FALSE,
+                            unit.action = "keep", unitlevels = NULL, 
+	                          minplotnum.strat = 2, minplotnum.strat.forest = FALSE,
+                            na.rm = TRUE, removeifnostrata = FALSE, 
  	                          auxtext = "auxlut", removetext = "unitarea",
 	                          pvars2keep = NULL, standardize = TRUE, 
                             AOI = FALSE, 
@@ -410,7 +412,9 @@ check.auxiliary <- function(pltx, puniqueid, module = "GB",
 		                      unitvars = unitvar, strvars = strvar,
 		                      stopiferror = FALSE, showwarnings = TRUE, 
 		                      minplotnum.unit = minplotnum.unit,
-		                      minplotnum.strat = minplotnum.strat)
+		                      minplotnum.unit.forest = minplotnum.unit.forest,
+		                      minplotnum.strat = minplotnum.strat,
+		                      minplotnum.strat.forest = minplotnum.strat.forest)
   auxlut <- pltcnts$unitlut
   errtab <- pltcnts$errtab
   nostrat <- pltcnts$nostrat
@@ -475,7 +479,6 @@ check.auxiliary <- function(pltx, puniqueid, module = "GB",
     if (minplotnum.strat > minplotnum.unit) {
       minplotnum.strat <- minplotnum.unit
     }
-
     unitcombine <- ifelse(unit.action == 'combine', TRUE, FALSE)
     collapse <- strat.collapse(stratacnt = auxlut, 
                                pltstratx = pltx, 

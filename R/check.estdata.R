@@ -249,7 +249,6 @@ check.estdata <-
     }
   }
 
-
   ## Update pltcondx or pltcondxqry to add where statement (pcwhereqry)
   #############################################################################
   pltcondxadjWITHqry=pltcondxWITHqry <- NULL
@@ -433,7 +432,6 @@ check.estdata <-
       warning("check pseround... very high number, setting to ", pseround)
     }
   }
-
 
   ## Set up list of variables to return
   ######################################################################################

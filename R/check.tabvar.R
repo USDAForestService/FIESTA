@@ -167,7 +167,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
       ## build tab fromqry
       tabfromqry <- paste0(
         "\nFROM ", tabnm, " pc")
-      
+     
     } else {
       tabvarchk <- findnm(tabvar, seedflds, returnNULL = TRUE)
       if (estseed == "only" && !is.null(tabvarchk)) {
@@ -394,7 +394,6 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
           message(uniquex.qry)
           stop()
         }
-
       } else {
         uniquex <- tryCatch(
           sqldf::sqldf(uniquex.qry, connection = NULL)[[1]],

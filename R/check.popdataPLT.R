@@ -10,6 +10,8 @@ check.popdataPLT <-
            strata = FALSE, stratalut = NULL, auxlut = NULL,
            strvar = NULL, stratcombine = TRUE, pivot = FALSE,
            strwtvar = "strwt",
+           minplotnum.unit.forest = FALSE,
+           minplotnum.strat.forest = FALSE,
            prednames = NULL, predfac = NULL,
            pvars2keep = NULL, pdoms2keep = NULL,
            unitlevels = NULL, defaultVars = FALSE,
@@ -409,7 +411,6 @@ check.popdataPLT <-
       pltidvars <- c(pltidvars, unitvars)
     }
 
-    
     ## 6.2. Check unitvar in auxlut
     #######################################################################
     if (is.null(auxlut)) {
@@ -489,6 +490,17 @@ check.popdataPLT <-
         
         strata <- TRUE
       }
+      
+      ## check minimum plot numbers based on forested plots
+      if (minplotnum.unit.forest || minplotnum.strat.forest) {
+        plot_status_cdnm <- findnm("PLOT_STATUS_CD", pltassgnflds, returnNULL = TRUE)
+        if (is.null(plot_status_cdnm)) {
+          stop("need PLOT_STATUS_CD in dataset to determine forested plots")
+        }
+        pltassgnvars <- unique(c(pltassgnvars, plot_status_cdnm))
+        plotstatuscd. <- ifelse (!is.null(plot_status_cdnm), pltassgn., plt.)
+      }
+      
     } else {
 
       ## Check predfac (if module != 'GB')
@@ -526,8 +538,8 @@ check.popdataPLT <-
         }
         pltassgnvars <- unique(c(pltassgnvars, prednames))
       }
+      
     }
-    
     
     ###############################################################################
     ## 7. Check and define all plot variables used for estimation (pvars)
