@@ -929,7 +929,7 @@ DBgetPlots <- function (states = NULL,
   PLOTe <- evalInfo$PLOT
   if (!is.null(schema)) SCHEMA. <- paste0(schema, ".")
 
-  if (savePOP) {
+  if (!is.null(POP_PLOT_STRATUM_ASSGNe) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
     if (!is.null(POP_PLOT_STRATUM_ASSGNe) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
       ppsaflds <- names(POP_PLOT_STRATUM_ASSGNe)
       statenm <- findnm("STATECD", ppsaflds)
@@ -1411,14 +1411,16 @@ DBgetPlots <- function (states = NULL,
 	  dbqueries[[state]] <- list()
 
     ## If POP_PLOT_STRATUM_ASSGNe from DBgetEvalid is a data.frame, subset to state
-    if (savePOP && !is.null(ppsanm) && is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
+    if (is.data.frame(POP_PLOT_STRATUM_ASSGNe)) {
       statenm <- findnm("STATECD", ppsaflds)
       POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGNe[POP_PLOT_STRATUM_ASSGNe[[statenm]] == stcd, ]
+      ppsanm <- "POP_PLOT_STRATUM_ASSGN"
     }
     ## If PLOTe from DBgetEvalid is a data.frame, subset to state
-    if (!is.null(plotnm) && is.data.frame(PLOTe)) {
+    if (is.data.frame(PLOTe)) {
       statenm <- findnm("STATECD", pltflds)
       PLOT <- PLOTe[PLOTe[[statenm]] == stcd, ]
+      plotnm <- "PLOT"
     }
 
     ## Get PLOT/COND data
