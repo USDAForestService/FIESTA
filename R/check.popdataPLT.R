@@ -491,6 +491,17 @@ check.popdataPLT <-
         strata <- TRUE
       }
       
+      
+      ## Check minplotnum.unit.forest and minplotnum.strat.forest
+      minplotnum.unit.forest <- pcheck.logical(minplotnum.unit.forest, 
+                                               varnm="minplotnum.unit.forest", 
+                                               title="minplotnum.unit.forest?", 
+                                               first="NO", gui=gui)
+      minplotnum.strat.forest <- pcheck.logical(minplotnum.strat.forest, 
+                                               varnm="minplotnum.strat.forest", 
+                                               title="minplotnum.strat.forest?", 
+                                               first="NO", gui=gui)
+      
       ## check minimum plot numbers based on forested plots
       if (minplotnum.unit.forest || minplotnum.strat.forest) {
         plot_status_cdnm <- findnm("PLOT_STATUS_CD", pltassgnflds, returnNULL = TRUE)

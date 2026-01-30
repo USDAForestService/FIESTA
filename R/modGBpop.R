@@ -361,6 +361,7 @@ modGBpop <- function(popType = "VOL",
     assign(names(savedata_opts)[[i]], savedata_opts[[i]])
   }
   
+ 
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -422,7 +423,8 @@ modGBpop <- function(popType = "VOL",
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", 
                   "CHNG", "GRM", "GROW", "MORT", "REMV")
   popType <- FIESTAutils::pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
-                                         checklst=evalTyplst, caption="popType", multiple=FALSE, stopifinvalid=FALSE)
+                                         checklst=evalTyplst, caption="popType", 
+                                         multiple=FALSE, stopifinvalid=FALSE)
   if (is.null(popType)) {
     message("popType is invalid... must be from following list:\n", toString(evalTyplst))
   }
@@ -696,7 +698,7 @@ modGBpop <- function(popType = "VOL",
                     unitarea = unitarea, 
                     areavar = areavar,
                     minplotnum.unit = unit_opts$minplotnum.unit, 
-                    minplotnum.unit.forest = strata_opts$minplotnum.unit.forest,
+                    minplotnum.unit.forest = unit_opts$minplotnum.unit.forest,
                     unit.action = unit.action,
                     unitlevels = unitlevels,
                     strata = strata, 
