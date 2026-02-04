@@ -34,7 +34,7 @@ check.tree <-
   } else {
     seedlings <- "N"
   }
-  
+
   ## Check estvarn.derive
   if (!is.null(estvarn.derive)) {
     if (!all(is.list(estvarn.derive), length(estvarn.derive) == 1, !is.null(names(estvarn.derive)))) {

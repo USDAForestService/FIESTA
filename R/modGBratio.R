@@ -59,7 +59,8 @@
 #' (numerator).  Must be R syntax (e.g., "STATUSCD == 1").
 #' @param estvarn.derive List. A derivation of a tree variable to estimate.
 #' (numerator). Must be a named list with one element (e.g., 
-#' list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.
+#' list(SDI = 'SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'), or 
+#' list(BA = 'SUM(DIA * DIA * 0.005454 * TPA_UNADJ)'). Set estvar = NULL.
 #' @param estvard String. Name of the tree estimate variable (denominator).
 #' @param estvard.filter String. A tree filter for the estimate variable
 #' (denominator).  Must be R syntax (e.g., "STATUSCD == 1").

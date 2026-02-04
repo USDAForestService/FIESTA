@@ -54,7 +54,8 @@
 #' syntax (e.g., 'STATUSCD == 1').
 #' @param estvar.derive List. A derivation of a tree variable to estimate.
 #' Must be a named list with one element (e.g., 
-#' list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.
+#' list(SDI = 'SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'), or 
+#' list(BA = 'SUM(DIA * DIA * 0.005454 * TPA_UNADJ)'). Set estvar = NULL.
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
 #' @param woodland String. If woodland = 'Y', include woodland tree species  
@@ -284,7 +285,7 @@
 #' }
 #' @export modGBtree
 modGBtree <- function(GBpopdat, 
-                      estvar, 
+                      estvar = NULL, 
                       estvar.filter = NULL, 
                       estvar.derive = NULL,
                       estseed = "none",
@@ -484,6 +485,7 @@ modGBtree <- function(GBpopdat,
                   savedata = savedata, 
                   savedata_opts = savedata_opts, 
                   gui = gui)
+
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   sumunits <- estdat$sumunits
@@ -519,7 +521,6 @@ modGBtree <- function(GBpopdat,
     rawoutlst <- estdat$rawoutlst
   }
   
-  
   ###################################################################################
   ## Check parameter inputs and tree filters
   ###################################################################################
@@ -539,7 +540,6 @@ modGBtree <- function(GBpopdat,
   woodland <- estdatVOL$woodland
   treeflds <- estdatVOL$treeflds
   seedflds <- estdatVOL$seedflds
-
 
   ###################################################################################
   ### Check row and column data
