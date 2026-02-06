@@ -50,9 +50,6 @@ getGBestimates <- function(esttype,
 
   message("generating post-stratified estimates using FIESTA...")
   
-  ## Check n.strata variable in stratalut
-  setnames(stratalut, names(stratalut)[grepl("n.strata", names(stratalut))], "n.strata")
-
   ## Get estimates for total
   if (is.null(rowvar)) rowvar <- "TOTAL"
   addtotal <- ifelse(rowvar %in% c("PREV_TOTAL", "TOTAL") ||
