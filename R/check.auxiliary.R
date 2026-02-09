@@ -430,7 +430,7 @@ check.auxiliary <- function(pltx, puniqueid, module = "GB",
 
   ## If unit.action="remove", remove estimation with less than minplotnum.unit plots
   ## If unit.action="keep", return estimation units with less than minplotnum.unit as NA
-  unitltmin <- 0
+  unitltmin <- NULL
   
   if (any(auxlut$n.total < minplotnum.unit)) {
     unitltmin <- unique(auxlut[[unitvar]][auxlut$n.total < minplotnum.unit])
@@ -659,6 +659,12 @@ check.auxiliary <- function(pltx, puniqueid, module = "GB",
 		                prednames = prednames, predfac = predfac)
 
   if (!is.null(unitarea)) {
+    
+    ## if unit.action = 'remove' and there are estimation units that have
+    ## less than the minumum number of plots, remove from unitarea
+    if (unit.action == "remove" && !is.null(unitltmin)) {
+      unitarea <- unitarea[!unitarea[[unitvar]] %in% unitltmin,]
+    }
     setkeyv(unitarea, unitvar)
     returnlst$unitarea <- data.table(unitarea)
   }

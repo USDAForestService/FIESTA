@@ -303,10 +303,10 @@ modGBtree <- function(GBpopdat,
                       savedata_opts = NULL, 
                       ...){
 
-  ##################################################################################
+  ##############################################################################
   ## DESCRIPTION:
   ## Generates estimates of trees by domain using non-ratio estimators.
-  ##################################################################################
+  ##############################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
@@ -458,10 +458,10 @@ modGBtree <- function(GBpopdat,
       stop("")
     }
   }
- 
-  ###################################################################################
-  ## Check parameter inputs and plot/condition filters
-  ###################################################################################
+
+  ##############################################################################
+  ## Check parameter inputs and build plot/condition filter (pcwhereqry).
+  ##############################################################################
   estdat <- 
     check.estdata(esttype = esttype, 
                   popType = popType,
@@ -499,7 +499,7 @@ modGBtree <- function(GBpopdat,
   addtitle <- estdat$addtitle
   pltcondx <- estdat$pltcondx
   
-  pcwhereqry <- estdat$where.qry
+  pcwhereqry <- estdat$pcwhereqry
   pltcondflds <- estdat$pltcondflds
   pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
   pltcondxWITHqry <- estdat$pltcondxWITHqry
@@ -750,6 +750,7 @@ modGBtree <- function(GBpopdat,
   rowunit <- estimates$rowunit
   totunit <- estimates$totunit
   unitvar <- estimates$unitvar
+  
 
   
   ###################################################################################
@@ -810,12 +811,14 @@ modGBtree <- function(GBpopdat,
   }
 
   if (rawdata) {
-    ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
-    UNITStot <- sort(unique(unit_totest[[unitvar]]))
-    NBRPLTtot <- stratalut[stratalut[[unitvar]] %in% UNITStot, list(NBRPLT = sum(n.strata, na.rm=TRUE)), 
-                           by=unitvars]
     
     if ("unit_totest" %in% names(tabs$rawdat)) {
+      
+      ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
+      UNITStot <- sort(unique(tabs$rawdat$unit_totest[[unitvar]]))
+      NBRPLTtot <- stratalut[stratalut[[unitvar]] %in% UNITStot, list(NBRPLT = sum(n.strata, na.rm=TRUE)), 
+                             by=unitvars]
+      
       tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
       tabs$rawdat$unit_totest <- setorderv(tabs$rawdat$unit_totest, unitvar)
     }

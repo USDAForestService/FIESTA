@@ -6,7 +6,7 @@
 \usage{
 modGBtree(
   GBpopdat,
-  estvar,
+  estvar = NULL,
   estvar.filter = NULL,
   estvar.derive = NULL,
   estseed = "none",
@@ -37,7 +37,8 @@ syntax (e.g., 'STATUSCD == 1').}
 
 \item{estvar.derive}{List. A derivation of a tree variable to estimate.
 Must be a named list with one element (e.g., 
-list(SDI='SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'). Set estvar = NULL.}
+list(SDI = 'SUM(POWER(DIA/10,1.605) * TPA_UNADJ)'), or 
+list(BA = 'SUM(DIA * DIA * 0.005454 * TPA_UNADJ)'). Set estvar = NULL.}
 
 \item{estseed}{String. Use seedling data only or add to tree data. Seedling
 estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').}

@@ -70,7 +70,6 @@ getGBestimates <- function(esttype,
   nbrunits <- length(estunits)
   domdatn <- pltassgnx[domdatn]
   
-  
   if (esttype == "RATIO") {
     ## Append TOTAL to domdatn
     if (addtotal && !"TOTAL" %in% names(domdatd)) {
@@ -84,7 +83,12 @@ getGBestimates <- function(esttype,
     domdatn <- chk$tab2
   }
   
-  ## Check datasets and subset using uniquerow and uniquecol
+  ## Create unitarea2 to use if need to add estimation units that have no data
+  ##  or an estimate of 0.
+  unitarea2 <- unitarea
+  if (!is.null(unitltmin)) {
+    unitarea2 <- unitarea[!unitarea[[unitvar]] %in% unitltmin,]
+  }
   
 
   ## Get total estimate
@@ -115,6 +119,8 @@ getGBestimates <- function(esttype,
                  unitvar = unitvar,
                  strvar = strvar,
                  domain = "TOTAL")
+    
+    ## merge unitarea
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -343,16 +349,6 @@ getGBestimates <- function(esttype,
                  strvar = strvar,
                  domain = colvar)
 
-    # if (unit.action %in% c("keep", "combine") && 
-    #     length(unique(unit_colest[[unitvar]])) < nbrunits) {
-    #   missunits <- estunits[!estunits %in% unique(unit_colest[[unitvar]])]
-    #   missunitsdf <- data.frame(missunits)
-    #   names(missunitsdf) <- unitvar
-    #   unit_colest <-rbindlist(list(unit_colest, missunitsdf), fill=TRUE)
-    #   unit_colest <- DT_NAto0(unit_colest, cols = c("nhat", "nhat.var", "NBRPLT.gt0"))
-    #   unit_colest <- setorderv(unit_colest, unitvar)
-    # } 
-    
     ## Get estimates for cell values (grpvar)
     #############################################################################
 
@@ -413,17 +409,6 @@ getGBestimates <- function(esttype,
                  unitvar = unitvar,
                  strvar = strvar,
                  domain = grpvar)
-    
-    # if (unit.action %in% c("keep", "combine") && 
-    #     length(unique(unit_grpest[[unitvar]])) < nbrunits) {
-    #   missunits <- estunits[!estunits %in% unique(unit_grpest[[unitvar]])]
-    #   missunitsdf <- data.frame(missunits)
-    #   names(missunitsdf) <- unitvar
-    #   unit_grpest <-rbindlist(list(unit_grpest, missunitsdf), fill=TRUE)
-    #   unit_grpest <- DT_NAto0(unit_grpest, cols = c("nhat", "nhat.var", "NBRPLT.gt0"))
-    #   unit_grpest <- setorderv(unit_grpest, unitvar)
-    # } 
-    
   }
 
   ###################################################################################

@@ -694,13 +694,15 @@ modGBarea <- function(GBpopdat,
   }
 
   if (rawdata) {
-    ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
-    UNITStot <- sort(unique(unit_totest[[unitvar]]))
-    NBRPLTtot <- stratalut[stratalut[[unitvar]] %in% UNITStot, list(NBRPLT = sum(n.strata, na.rm=TRUE)),
-	                  by=unitvars]
-
-	  if ("unit_totest" %in% names(tabs$rawdat)) {
-	    tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
+    
+    if ("unit_totest" %in% names(tabs$rawdat)) {
+      
+      ## Add total number of plots in population to unit_totest and totest (if sumunits=TRUE)
+      UNITStot <- sort(unique(tabs$rawdat$unit_totest[[unitvar]]))
+      NBRPLTtot <- stratalut[stratalut[[unitvar]] %in% UNITStot, list(NBRPLT = sum(n.strata, na.rm=TRUE)), 
+                             by=unitvars]
+      
+      tabs$rawdat$unit_totest <- merge(tabs$rawdat$unit_totest, NBRPLTtot, by=unitvars)
 	    tabs$rawdat$unit_totest <- setorderv(tabs$rawdat$unit_totest, unitvars)
 	  }
 	  if (sumunits && "totest" %in% names(tabs$rawdat)) {

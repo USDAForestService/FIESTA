@@ -138,10 +138,16 @@ check.tree <-
     classifynmlst <- treedata$classifynmlst
     tdomainlst <- treedata$tdomainlst
     pcdomainlst <- treedata$pcdomainlst
+    tsumuniqueid <- treedata$tsumuniqueid
   }
 
   unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
   estunitsn <- ref_units[ref_units$VARIABLE == estvarn, unitcol]
+  
+  
+  ## Set as data.table with key as tsumuniqueid
+  tdomdat <- data.table(tdomdat)
+  setkeyv(tdomdat, tsumuniqueid)
   
   #############################################################################
   ### GET ESTIMATION DATA (& TREE DOMAIN DATA) FROM TREE TABLE AND
@@ -209,6 +215,7 @@ check.tree <-
       tsumvard <- tdomdata$tsumvarnm
       tdomvarlstd <- tdomdata$tdomlst
       tdomtotdnm <- tdomdata$tdomtotnm
+      tsumuniqueid <- tdomdata$tsumuniqueid
 
       # if (!pivot) {
       #   tdomdatd <- tdomdatd[!is.na(tdomdatd[[tdomvar]]),]
@@ -274,6 +281,9 @@ check.tree <-
     unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
     estunitsd <- ref_units[ref_units$VARIABLE == estvard, unitcol]
   }
+  
+  ## change key to tuniqueid, to merge with pltassgnx in estimation
+  setkeyv(tdomdat, tuniqueid)
 
   
   if (esttype == "RATIO") {

@@ -719,10 +719,11 @@ modGBpop <- function(popType = "VOL",
   pltassgnx <- setDT(auxcheck$pltx)
   unitarea <- auxcheck$unitarea
   stratalut <- auxcheck$auxlut
-
+  unitltmin <- auxcheck$unitltmin
+  
   stratcombinelut <- auxcheck$stratcombinelut
   if (!is.null(stratcombinelut)) {
-    if (!is.null(auxcheck$unitltmin) && length(auxcheck$unitltmin) != 0) {
+    if (!is.null(unitltmin) && length(unitltmin) != 0) {
       classcols <- c(auxcheck$unitvars, auxcheck$strvar)
     } else {
       classcols <- auxcheck$strvar
@@ -755,8 +756,7 @@ modGBpop <- function(popType = "VOL",
   strvar <- auxcheck$strvar
   strwtvar <- auxcheck$strwtvar
   stratcombinelut <- auxcheck$stratcombinelut
-  unitltmin <- auxcheck$unitltmin
-  
+
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
   strunitvars <- c(unitvars, strvar)
 

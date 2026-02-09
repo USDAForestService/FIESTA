@@ -663,9 +663,9 @@ est.outtabs <- function(esttype,
     rawdat.tabs <- {}
     if (is.null(rawdat)) rawdat <- list()
     
-    if (raw.keep0) {
-      unitvalues <- unitarea[[unitvar]]
-    }
+    ## check estimation unit values... to make sure raw data has all included
+    ## Note: raw.keep0 = FALSE is not applicable for estimation units in unit_totest
+    unitvalues <- unitarea[[unitvar]]
 
     ## Append totest to rawdat
     if (!is.null(unit_totest)) {
@@ -676,6 +676,23 @@ est.outtabs <- function(esttype,
       if ("TOTAL" %in% names(unit_totest)) {
         unit_totest[, TOTAL := NULL]
       }
+
+      if (length(unique(unit_totest[[unitvar]])) < length(unitvalues)) {
+        missunits <- unitvalues[!unitvalues %in% unit_totest[[unitvar]]]
+        if (length(missunits) > 0) {
+          missunitdf <- data.frame(unitmiss[[unitvar]],
+                                    NBRPLT.gt0 = 0,
+                                    AREAUSED = unitmiss$AREAUSED)
+          names(missunitdf)[1] <- unitvar
+        
+          unit_totest <- rbindlist(list(unit_totest, totest.addrow), fill=TRUE)
+        }
+      }
+      
+      ## Set order of table by unitvar 
+      setorderv(unit_totest, unitvar)
+      unit_totest[is.na(unit_totest)] <- 0
+      
       ## Split columns if unitvars exists
       if (!is.null(unitvars) && length(unitvars) > 1) {
         suppressWarnings(unit_totest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)])
@@ -691,33 +708,43 @@ est.outtabs <- function(esttype,
         rawdat.tabs <- c(rawdat.tabs, "totest")
       }
     }
+    
+    ## rowvar
+    ####################################################
     if (!rowvar %in% c("NONE", "TOTAL")) {
       if (!is.null(unit_rowest)) {
 
+        ## if raw.keep0 = FALSE, remove all rows in unit_rowest where 
+        ## number of 
         if (!raw.keep0) {
           if ("NBRPLT.gt0" %in% names(unit_rowest)) {
             unit_rowest <- unit_rowest[unit_rowest[["NBRPLT.gt0"]] > 0,]
           }
+          
         } else if (!is.null(unitvalues) && length(unitvalues) > 0) {
-          rowunits <- unique(unit_rowest[[unitvar]])
-          missunits <- unitvalues[!unitvalues %in% rowunits]
+          missunits <- unitvalues[!unitvalues %in% unit_rowest[[unitvar]]]
           if (length(missunits) > 0) {
+            
+            missunitdf <- expand.grid(missunits, uniquerow[[rowvar]])
+            setnames(missunitdf, c(unitvar, rowvar))
+            
+            if (ncol(uniquerow) > 1) {
+              missunitdf <- merge(missunitdf, uniquerow, by=rowvar)
+            }
             if (!is.null(unitarea)) {
-              missunitsdf <- unitarea[unitarea[[unitvar]] %in% missunits,]
-            } else {
-              missunitsdf <- data.frame(missunits)
-              names(missunitsdf) <- unitvar
+              missunitdf <- merge(missunitdf, unitarea, by=unitvar)
             }
             if ("NBRPLT.gt0" %in% names(unit_rowest)) {
-              missunitsdf$NBRPLT.gt0 <- 0
+              missunitdf$NBRPLT.gt0 <- 0
             }
-            unit_rowest <- rbindlist(list(unit_rowest, missunitsdf), fill=TRUE)
+            unit_rowest <- rbindlist(list(unit_rowest, missunitdf), fill=TRUE)
           }
         }
- 
+
         ## Set order of table by unitvar and rowvar
         setorderv(unit_rowest, c(unitvar, rowvar))
         setnames(unit_rowest, rowvar, title.rowvar)
+        unit_rowest[is.na(unit_rowest)] <- 0
         
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
@@ -745,27 +772,33 @@ est.outtabs <- function(esttype,
           if ("NBRPLT.gt0" %in% names(unit_colest)) {
             unit_colest <- unit_colest[unit_colest[["NBRPLT.gt0"]] > 0,]
           }
+          
         } else if (!is.null(unitvalues) && length(unitvalues) > 0) {
-          colunits <- unique(unit_colest[[unitvar]])
-          missunits <- unitvalues[!unitvalues %in% colunits]
+          missunits <- unitvalues[!unitvalues %in% unit_colest[[unitvar]]]
           if (length(missunits) > 0) {
+            
+            missunitdf <- expand.grid(missunits, uniquecol[[colvar]])
+            setnames(missunitdf, c(unitvar, colvar))
+            
+            if (ncol(uniquecol) > 1) {
+              missunitdf <- merge(missunitdf, uniquecol, by=colvar)
+            }
             if (!is.null(unitarea)) {
-              missunitsdf <- unitarea[unitarea[[unitvar]] %in% missunits,]
-            } else {
-              missunitsdf <- data.frame(missunits)
-              names(missunitsdf) <- unitvar
+              missunitdf <- merge(missunitdf, unitarea, by=unitvar)
             }
             if ("NBRPLT.gt0" %in% names(unit_colest)) {
-              missunitsdf$NBRPLT.gt0 <- 0
+              missunitdf$NBRPLT.gt0 <- 0
             }
-            unit_colest <- rbindlist(list(unit_colest, missunitsdf), fill=TRUE)
+           
+            unit_colest <- rbindlist(list(unit_colest, missunitdf), fill=TRUE)
           }
         }
         
         ## Set order of table by unitvar and colvar
         setorderv(unit_colest, c(unitvar, colvar))
         setnames(unit_colest, colvar, title.colvar)
-
+        unit_colest[is.na(unit_colest)] <- 0
+        
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
           suppressWarnings(unit_colest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)])
@@ -791,20 +824,28 @@ est.outtabs <- function(esttype,
           if ("NBRPLT.gt0" %in% names(unit_grpest)) {
             unit_grpest <- unit_grpest[unit_grpest[["NBRPLT.gt0"]] > 0,]
           }
+          
         } else if (!is.null(unitvalues) && length(unitvalues) > 0) {
-          grpunits <- unique(unit_grpest[[unitvar]])
-          missunits <- unitvalues[!unitvalues %in% grpunits]
+          missunits <- unitvalues[!unitvalues %in% unit_grpest[[unitvar]]]
           if (length(missunits) > 0) {
+            
+            missunitdf <- expand.grid(missunits,  uniquerow[[rowvar]], uniquecol[[colvar]])
+            setnames(missunitdf, c(unitvar, rowvar, colvar))
+            
+            if (ncol(uniquerow) > 1) {
+              missunitdf <- merge(missunitdf, uniquerow, by=rowvar)
+            }
+            if (ncol(uniquecol) > 1) {
+              missunitdf <- merge(missunitdf, uniquecol, by=colvar)
+            }
             if (!is.null(unitarea)) {
-              missunitsdf <- unitarea[unitarea[[unitvar]] %in% missunits,]
-            } else {
-              missunitsdf <- data.frame(missunits)
-              names(missunitsdf) <- unitvar
+              missunitdf <- merge(missunitdf, unitarea, by=unitvar)
             }
             if ("NBRPLT.gt0" %in% names(unit_grpest)) {
-              missunitsdf$NBRPLT.gt0 <- 0
+              missunitdf$NBRPLT.gt0 <- 0
             }
-            unit_grpest <- rbindlist(list(unit_grpest, missunitsdf), fill=TRUE)
+            
+            unit_grpest <- rbindlist(list(unit_grpest, missunitdf), fill=TRUE)
           }
         }
         
@@ -812,6 +853,7 @@ est.outtabs <- function(esttype,
         setorderv(unit_grpest, c(unitvar, rowvar, colvar))
         setnames(unit_grpest, rowvar, title.rowvar)
         setnames(unit_grpest, colvar, title.colvar)
+        unit_grpest[is.na(unit_grpest)] <- 0
         
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {

@@ -21,7 +21,7 @@ check.estdata <-
 
   #############################################################################
   ## DESCRIPTION: Checks data inputs
-  ## Apply plot filter
+  ## Build plot / condtion filter
   ## - pcfilter (e.g., COUNTY == 3, FORTYPCD == 122)
   ## Check landarea ("FOREST", "ALL", "TIMBERLAND") and create landarea.filter
   ## - if landarea = FOREST, "COND_STATUS_CD == 1"
@@ -41,6 +41,10 @@ check.estdata <-
   ## - If rawdata, adds a folder named 'rawdata' to outfolder to add raw data
   ## - estround - round estimate values
   ## - pseround - round percent standard error values
+  ##
+  ## Note: the pcwhereqry is appended to the pltcondx when esttype != CHNG.
+  ##    In theory, to subset the pltcondx data WITH query first, before 
+  ##    getting other data.
   #############################################################################
 
   ## Set global variables
@@ -165,8 +169,10 @@ check.estdata <-
   ## Check landarea and add to pcwhereqry
   #############################################################################
   landarealst <- c("FOREST", "ALL", "TIMBERLAND")
-  landarea <- pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
-	                  checklst=landarealst, caption="Sample land area?")
+  landarea <- pcheck.varchar(var2check = landarea, 
+                             varnm = "landarea", gui=gui,
+	                           checklst = landarealst, 
+                             caption = "Sample land area?")
   
   
   ## if popType is GRM, we do not add landare to pcwhereqry
@@ -253,16 +259,16 @@ check.estdata <-
   #############################################################################
   pltcondxadjWITHqry=pltcondxWITHqry <- NULL
   
-  ## if pltcondx is a data.frame
+  # if pltcondx is a data.frame
   if ((!popdatindb && is.data.frame(pltcondx)) ||
       (popdatindb && "pltcondx" %in% poptablst)) {
-    
+
     if (!is.null(pcwhereqry)) {
       pcwhereqry <- gsub("p.", "pc.", pcwhereqry)
       pcwhereqry <- gsub("c.", "pc.", pcwhereqry)
-    
+
       pcfromqry <- "\nFROM pltcondx pc"
-      pcqry <- paste0("SELECT *", 
+      pcqry <- paste0("SELECT *",
                       pcfromqry,
                       pcwhereqry)
 
@@ -272,8 +278,8 @@ check.estdata <-
           error=function(e) {
             warning(e)
             return(NULL)})
-        
-      } else { 
+
+      } else {
         pcchk <- tryCatch(
           sqldf::sqldf(pcqry),
           error=function(e) {
@@ -286,9 +292,11 @@ check.estdata <-
         pltcondx <- pcchk
       }
     }
-    
+
   ## if pltcondx is in database
   } else if (popdatindb && !"pltcondx" %in% poptablst) {
+  
+  #if (popdatindb && !"pltcondx" %in% poptablst) {
 
     pltcondx.qry <- paste0(pltcondxqry,
                            pcwhereqry)
@@ -301,14 +309,14 @@ check.estdata <-
     #dbqueriesWITH$pltcondxWITH <- pltcondxWITHqry
     
     if (popType == "P2VEG") {
-      pltcondxP2VEG.qry <- paste0(pltcondxP2VEGqry,
-                                  pcwhereqry)
+      # pltcondxP2VEG.qry <- paste0(pltcondxP2VEGqry,
+      #                             pcwhereqry)
       
       ## Build WITH query for pltcondx, including pltidsadj WITH query
       pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
                                    "\n----- pltcondx",
                                    "\npltcondx AS",
-                                   "\n(", pltcondxP2VEG.qry, ")")
+                                   "\n(", pltcondxP2VEGqry, ")")
       #dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
       
     } else {
@@ -369,6 +377,8 @@ check.estdata <-
   #     }
   #   }
   # }
+  
+
  
   ## Check output info
   ########################################################
@@ -443,6 +453,7 @@ check.estdata <-
                     pltcondxWITHqry = pltcondxWITHqry,
                     pltcondxadjWITHqry = pltcondxadjWITHqry,
                     landarea = landarea, 
+                    pcwhereqry = NULL,
                     allin1 = allin1, 
                     divideby = divideby,
                     estround = estround, pseround = pseround, 
