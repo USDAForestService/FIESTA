@@ -83,13 +83,6 @@ getGBestimates <- function(esttype,
     domdatn <- chk$tab2
   }
   
-  ## Create unitarea2 to use if need to add estimation units that have no data
-  ##  or an estimate of 0.
-  unitarea2 <- unitarea
-  if (!is.null(unitltmin)) {
-    unitarea2 <- unitarea[!unitarea[[unitvar]] %in% unitltmin,]
-  }
-  
 
   ## Get total estimate
   #############################################################################

@@ -680,12 +680,12 @@ est.outtabs <- function(esttype,
       if (length(unique(unit_totest[[unitvar]])) < length(unitvalues)) {
         missunits <- unitvalues[!unitvalues %in% unit_totest[[unitvar]]]
         if (length(missunits) > 0) {
-          missunitdf <- data.frame(unitmiss[[unitvar]],
+          missunitdf <- data.frame(missunits[[unitvar]],
                                     NBRPLT.gt0 = 0,
-                                    AREAUSED = unitmiss$AREAUSED)
+                                    AREAUSED = missunits$AREAUSED)
           names(missunitdf)[1] <- unitvar
         
-          unit_totest <- rbindlist(list(unit_totest, totest.addrow), fill=TRUE)
+          unit_totest <- rbindlist(list(unit_totest, missunitdf), fill=TRUE)
         }
       }
       
