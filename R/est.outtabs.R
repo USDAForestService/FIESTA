@@ -578,6 +578,7 @@ est.outtabs <- function(esttype,
     ## Get cross tables
     ###############################################
     if (sumunits) {
+
 #      estunits <- unique(unit_grpest[[unitvar]])
 #      numunits <- length(estunits)
       numunits <- 1
@@ -605,6 +606,7 @@ est.outtabs <- function(esttype,
 		                 esttype = esttype, phototype = phototype,
 		                 rnames = rnames,
 		                 title.colvar = title.colvar, title.unitvar = title.unitvar)
+
       est2return <- tabs[[1]]
       if (length(tabs) == 2)
         pse2return <- tabs[[2]]
@@ -678,13 +680,12 @@ est.outtabs <- function(esttype,
       }
 
       if (length(unique(unit_totest[[unitvar]])) < length(unitvalues)) {
-        missunits <- unitvalues[!unitvalues %in% unit_totest[[unitvar]]]
+        missunits <- unitarea[!unitvalues %in% unit_totest[[unitvar]],]
         if (length(missunits) > 0) {
           missunitdf <- data.frame(missunits[[unitvar]],
                                     NBRPLT.gt0 = 0,
                                     AREAUSED = missunits$AREAUSED)
           names(missunitdf)[1] <- unitvar
-        
           unit_totest <- rbindlist(list(unit_totest, missunitdf), fill=TRUE)
         }
       }
@@ -708,7 +709,7 @@ est.outtabs <- function(esttype,
         rawdat.tabs <- c(rawdat.tabs, "totest")
       }
     }
-    
+
     ## rowvar
     ####################################################
     if (!rowvar %in% c("NONE", "TOTAL")) {
