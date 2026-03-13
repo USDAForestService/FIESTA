@@ -85,8 +85,9 @@ DBgetCSV <- function(DBtable,
   gettab <- function(stabbr = NULL, DBtable, stopifnull = FALSE) {
 
     if (is.null(stabbr)) {
-      fn <- paste0(downloadfn, toupper(DBtable), ".zip")
+      fn <- paste0(downloadfn, toupper(DBtable), ".csv")
       message(paste("downloading and extracting", DBtable, "..."))
+      ZIP <- FALSE
     } else {
       fn <- paste0(downloadfn, stabbr, "_", toupper(DBtable), ".zip")
       message(paste("downloading and extracting", DBtable, "for", stabbr, "..."))
@@ -112,9 +113,13 @@ DBgetCSV <- function(DBtable,
         return(NULL)
       }
     }
-
-    filenm <- utils::unzip(temp, exdir = tempdir)
-    tab_out <- fread(filenm, integer64 = "character")
+    
+    if (ZIP) {
+      filenm <- utils::unzip(temp, exdir = tempdir)
+      tab_out <- fread(filenm, integer64 = "character")
+    } else {
+      tab_out <- fread(fn, integer64 = "character")
+    }
 
     if (nrow(tab_out) == 0) {
       message("attempted download of ", DBtable, " returned zero rows")
@@ -127,9 +132,11 @@ DBgetCSV <- function(DBtable,
 
     tab_out <- changeclass(tab_out)
 
-    unlink(temp)
-    unlink(tempdir)
-    file.remove(filenm)
+    if (ZIP) {
+      unlink(temp)
+      unlink(tempdir)
+      file.remove(filenm)
+    }
 
     return(tab_out)
 
