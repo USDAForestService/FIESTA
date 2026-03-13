@@ -103,14 +103,14 @@ datSumCond <- function(cond,
   ##	variable is not CONDPROP_UNADJ the variable is multiplied by CONDPROP_UNADJ  
   ##	for weighted sum.
   #####################################################################################
-
+  
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   #gui <- ifelse(nargs() == 0, TRUE, FALSE)
   gui <- FALSE
-
+  
   ## If gui.. set variables to NULL
   if(gui){ puniqueid=cuniqueid=csumvarnm=savedata <- NULL }
-
+  
   ## Set global variables
   CONDPROP_ADJ=CONDPROP_UNADJ=NF_COND_STATUS_CD=propvars=pltflds <- NULL
   ACI <- FALSE
@@ -122,7 +122,7 @@ datSumCond <- function(cond,
   condid <- "CONDID"
   subpid <- "SUBP"
   
-
+  
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -142,20 +142,20 @@ datSumCond <- function(cond,
   
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-                         savedata_opts = savedata_opts,
-                         database_opts = database_opts,
-                         tabIDs = tabIDs))
+    savedata_opts = savedata_opts,
+    database_opts = database_opts,
+    tabIDs = tabIDs))
   savedata_opts <- optslst$savedata_opts
   database_opts <- optslst$database_opts
   tabIDs <- optslst$tabIDs
-
-    
+  
+  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
   noplt <- TRUE
   nocond=pltsp <- FALSE
-
+  
   
   ###############################################################################
   ## 1. Check datsource or database connection
@@ -179,22 +179,22 @@ datSumCond <- function(cond,
     dbconn <- dbinfo$dbconn
   }
   
-
+  
   ###############################################################################
   ## 2. Check parameters
   ###############################################################################
   
   ## Check bycond
   bycond <- pcheck.logical(bycond, varnm="bycond", title="By condition?", 
-		first="YES", gui=gui, stopifnull=TRUE)
-
+                           first="YES", gui=gui, stopifnull=TRUE)
+  
   ## Check bysubp
   bysubp <- pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
-		first="YES", gui=gui, stopifnull=TRUE)
-
+                           first="YES", gui=gui, stopifnull=TRUE)
+  
   ## Check checkNA
   NAto0 <- pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
-		first="YES", gui=gui)
+                          first="YES", gui=gui)
   if (is.null(NAto0)) NAto0 <- FALSE
   
   ## Check getadjplot
@@ -228,7 +228,6 @@ datSumCond <- function(cond,
     outlst$add_layer <- TRUE
     out_layer <- outlst$out_layer
   }
-  
   
   ###############################################################################
   ## 3. Check tables
@@ -450,20 +449,29 @@ datSumCond <- function(cond,
   
   ## Check csumvar
   csumvar <- pcheck.varchar(var2check = csumvar, varnm = "csumvar", 
-		                        checklst = condnmlst, 
-		                        caption = "csumvar(s)", 
-		                        multiple = TRUE,
-		                        stopifnull = TRUE, gui = gui)
-
+                            checklst = condnmlst, 
+                            caption = "csumvar(s)", 
+                            multiple = TRUE,
+                            stopifnull = TRUE, gui = gui)
+  
   ## Check csumvarnm
   if (is.null(csumvarnm)) csumvarnm <- paste(csumvar, "PLT", sep="_")
   condnmlst <- sapply(csumvarnm, checknm, condnmlst)
-
+  
   
   ###############################################################################
-  ## 7. Check pwhereqry and ACI
+  ## 12. Check pwhereqry and ACI
   ###############################################################################
   pwhereqry = cwhereqry <- NULL
+  
+  palias. <- "pc."
+  calias. <- "pc."
+  
+  if (!is.null(condnm) && condnm != "pltcondx") {
+    palias. <- "p."
+    calias. <- "c."
+  }
+  
   
   if (!is.null(pcwhereqry)) {
     if (is.null(pcflds)) {
@@ -479,8 +487,8 @@ datSumCond <- function(cond,
         if (!is.null(pwhereqry)) {
           pchkvars <- check.logic.vars(pltflds, pcwhereqry, returnVars = TRUE)
           for (pchkvar in pchkvars) {
-            if (!grepl(paste0("pc.", pchkvar), pcwhereqry)) {
-              pcwhereqry <- sub(pchkvar, paste0("pc.", pchkvar), pcwhereqry)
+            if (!grepl(paste0(palias., pchkvar), pcwhereqry)) {
+              pcwhereqry <- sub(pchkvar, paste0(palias., pchkvar), pcwhereqry)
             }
           }
           pvars <- c(pvars, pchkvars)
@@ -493,8 +501,8 @@ datSumCond <- function(cond,
         if (!is.null(cwhereqry)) {
           cchkvars <- check.logic.vars(condflds, pcwhereqry, returnVars = TRUE)
           for (cchkvar in cchkvars) {
-            if (!grepl(paste0("pc.", cchkvar), pcwhereqry)) {
-              pcwhereqry <- sub(cchkvar, paste0("pc.", cchkvar), pcwhereqry)
+            if (!grepl(paste0(calias., cchkvar), pcwhereqry)) {
+              pcwhereqry <- sub(cchkvar, paste0(calias., cchkvar), pcwhereqry)
             }
           }
           cvars <- c(cvars, cchkvars)
@@ -503,7 +511,7 @@ datSumCond <- function(cond,
       
       if (!(startsWith(gsub(" ", "", pcwhereqry), "\nWHERE"))) {
         if (startsWith(gsub(" ", "", pcwhereqry), "WHERE")) {
-          pcwhereqry <- paste0("\n ", pcwhereqry)
+          pcwhereqry <- paste0("\n", pcwhereqry)
         } else {
           pcwhereqry <- paste0("\nWHERE ", pcwhereqry)
         }
@@ -530,15 +538,15 @@ datSumCond <- function(cond,
         if (!(grepl("COND_STATUS_CD", pltidsWITHqry, ignore.case = TRUE) &&
               (grepl("COND_STATUS_CD=1", gsub(" ", "", pltidsWITHqry), ignore.case = TRUE) ||
                grepl("COND_STATUS_CDin(1)", gsub(" ", "", pltidsWITHqry), ignore.case = TRUE)))) {
-          cwhereqry <- pcwhereqry <- paste0("\n WHERE ", cond_status_cdnm, " = 1")
+          cwhereqry <- pcwhereqry <- paste0("\nWHERE ", cond_status_cdnm, " = 1")
         }
       } else {
-        cwhereqry <- pcwhereqry <- paste0("\n WHERE ", cond_status_cdnm, " = 1")
+        cwhereqry <- pcwhereqry <- paste0("\nWHERE ", cond_status_cdnm, " = 1")
       }
       cvars <- unique(c(cvars, cond_status_cdnm))
       
-      if (!is.null(pcwhereqry) && !grepl(paste0("pc.", cond_status_cdnm), pcwhereqry)) {
-        pcwhereqry <- sub(cond_status_cdnm, paste0("pc.", cond_status_cdnm), pcwhereqry)
+      if (!is.null(pcwhereqry) && !grepl(paste0(calias., cond_status_cdnm), pcwhereqry)) {
+        pcwhereqry <- sub(cond_status_cdnm, paste0(calias., cond_status_cdnm), pcwhereqry)
       }
     }
   }
@@ -734,14 +742,14 @@ datSumCond <- function(cond,
     adjjoinid <- pltidsid
   }
   
-
-
+  
+  
   ################################################################################  
   ### DO WORK
   ################################################################################  
-
+  
   if (getadjplot) {
-
+    
     if (bysubp) {
       ## Remove nonsampled conditions by subplot and summarize to condition-level
       subpcx <- subpsamp(cond = condx, 
@@ -749,18 +757,18 @@ datSumCond <- function(cond,
                          subplot = subplotx, 
                          subpuniqueid = subplotid, 
                          subpid = subpid)
-
+      
       adjfacdata <- getadjfactorPLOT(condx = subpcx, 
-		                          cuniqueid = c(subplotid, subpid), 
+                                     cuniqueid = c(subplotid, subpid), 
                                      areawt = csumvar)
       subpcx <- adjfacdata$condx
       mergecols <- unique(c(cuniqueid, condid, names(condx)[!names(condx) %in% names(subpcx)]))
       condx <- merge(condx[, mergecols, with=FALSE], subpcx, 
                      by.x=c(cuniqueid, condid), by.y=c(subplotid, condid))
       
-
+      
     } else {
-
+      
       ## Remove nonsampled conditions  
       if ("COND_STATUS_CD" %in% names(condx)) {
         cond.nonsamp.filter <- "COND_STATUS_CD != 5"
@@ -776,23 +784,23 @@ datSumCond <- function(cond,
       if (ACI && "NF_COND_STATUS_CD" %in% names(condx)) {
         cond.nonsamp.filter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
         message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE), 
-		" nonsampled nonforest conditions")
+                " nonsampled nonforest conditions")
         if (!is.null(cond.nonsamp.filter)) {
           cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.ACI)
         }
       }
       condx <- datFilter(x = condx, 
                          xfilter = cond.nonsamp.filter, 
-		              title.filter = "cond.nonsamp.filter")$xf
-
-
+                         title.filter = "cond.nonsamp.filter")$xf
+      
+      
       adjfacdata <- getadjfactorPLOT(condx = condx, 
                                      cuniqueid = cuniqueid, 
                                      areawt = csumvar)
       condx <- adjfacdata$condx
     }
   }
- 
+  
   ### Filter cond data 
   ###########################################################  
   cdat <- datFilter(x = condx, 
@@ -802,8 +810,8 @@ datSumCond <- function(cond,
                     gui = gui)
   condf <- cdat$xf
   cfilter <- cdat$xfilter
-
-
+  
+  
   if (getadjplot) {
     csumvaradj <- ifelse(csumvar == "CONDPROP_UNADJ", "CONDPROP_ADJ", paste0(csumvar, "_ADJ"))
     csumvarnm <- paste0(csumvarnm, "_ADJ")
@@ -812,11 +820,11 @@ datSumCond <- function(cond,
     condf.sum <- condf[, lapply(.SD, sum, na.rm=TRUE), by=csumuniqueid, .SDcols=csumvar]
   }
   names(condf.sum) <- c(csumuniqueid, csumvarnm)
-
-
+  
+  
   ######################################################################## 
   ######################################################################## 
- 
+  
   ## Merge to cond or plot
   ###################################
   if (bycond && !nocond) {
@@ -833,13 +841,13 @@ datSumCond <- function(cond,
   } else {
     sumdat <- condf.sum
   }
-
+  
   ## Change NA values TO 0
   if (NAto0) {
     for (col in csumvarnm) set(sumdat, which(is.na(sumdat[[col]])), col, 0)
   }
-
-
+  
+  
   #### WRITE TO FILE 
   #############################################################
   if (savedata) {
@@ -851,10 +859,10 @@ datSumCond <- function(cond,
                     savedata_opts = outlst) 
     }
   }  
-
+  
   ## Round values
   sumdat[,(csumvarnm) := lapply(.SD, round, cround), .SDcols=csumvarnm]
-
+  
   if (!returnDT) {     
     sumdat <- data.frame(sumdat)
   }

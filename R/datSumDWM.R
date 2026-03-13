@@ -24,13 +24,11 @@
 #' @param bycond Logical. If TRUE, the data are aggregated to the condition
 #' level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
 #' level (by: puniqueid). 
-#' @param bydomainlst String (vector). Categorical domain variables for
-#' summing tree data by (e.g., SPCD). Variables must be in tree table or
 #' plt/cond table if tables are provided.
+#' @param pcdomainlst vector of variable(s) in plot/cond table to summarize by
+#'    note: these variable must be included in the pltidsWITHqry
 #' @param getadjplot Logical. If TRUE, and adj='plot', adjfactors are
 #' calculated for nonsampled conditions at plot-level.
-#' @param domclassify List. List for classifying domain variables in bydomainlst
-#' (e.g., DIA = c(10,20,30)).
 #' @param pltidsWITHqry SQL query. A query identifying plots to sum (e.g.,
 #' 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')
 #' @param pltidsid Sting. Name of unique identifier in pltidsWITHqry.
@@ -66,9 +64,8 @@ datSumDWM <- function(dwm,
                       dbconn = NULL,
                       dsn = NULL,
                       bycond = FALSE,
-                      bydomainlst = NULL,
+                      pcdomainlst = NULL,
                       getadjplot = FALSE,
-                      domclassify = NULL,
                       pltidsWITHqry = NULL,
                       pltidsid = NULL,
                       pcwhereqry = NULL,
@@ -193,10 +190,6 @@ datSumDWM <- function(dwm,
   ## Check getadjplot
   getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot",
                                title="Get plot adjustment?", first="NO", gui=gui)
-  
-  ## Check adjtree
-  adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Adjust trees",
-                            first="NO", gui=gui)
   if (getadjplot) adjtree <- TRUE
   
   ## Check metric
@@ -469,51 +462,51 @@ datSumDWM <- function(dwm,
   }
 
   
-  ###############################################################################
-  ## 7. Check domclassify
-  ###############################################################################
-  if (!is.null(domclassify)) {
-    classifynmlst <- vector(mode = "list", length = length(domclassify))
-    names(classifynmlst) <- names(domclassify)
-    if (!is.list(domclassify) || is.null(names(domclassify))) {
-      stop(paste0("domclassify must be a named list object...\n",
-                  "e.g., domclassify = list(DIA = c(0, 20, 60))"))
-    }
-    if (!all(sapply(domclassify, function(x) is.vector(x) || is.data.frame(x)))) {
-      message("invalid domclassify... all elements of the domclassify list must be a vector of class breaks or a data.frame")
-      stop()
-    }
-    ## Check if variables in domclassify are in bydomainlst... if not, add them
-    classifyvars <- names(domclassify)
-    if (any(!classifyvars %in% bydomainlst)) {
-      classifymiss <- classifyvars[!classifyvars %in% bydomainlst]
-      message("names in domclassify must be in bydomainlst... adding ", toString(classifymiss))
-      bydomainlst <- c(bydomainlst, classifymiss)
-    }
-  }
+  # ###############################################################################
+  # ## 7. Check domclassify
+  # ###############################################################################
+  # if (!is.null(domclassify)) {
+  #   classifynmlst <- vector(mode = "list", length = length(domclassify))
+  #   names(classifynmlst) <- names(domclassify)
+  #   if (!is.list(domclassify) || is.null(names(domclassify))) {
+  #     stop(paste0("domclassify must be a named list object...\n",
+  #                 "e.g., domclassify = list(DIA = c(0, 20, 60))"))
+  #   }
+  #   if (!all(sapply(domclassify, function(x) is.vector(x) || is.data.frame(x)))) {
+  #     message("invalid domclassify... all elements of the domclassify list must be a vector of class breaks or a data.frame")
+  #     stop()
+  #   }
+  #   ## Check if variables in domclassify are in bydomainlst... if not, add them
+  #   classifyvars <- names(domclassify)
+  #   if (any(!classifyvars %in% bydomainlst)) {
+  #     classifymiss <- classifyvars[!classifyvars %in% bydomainlst]
+  #     message("names in domclassify must be in bydomainlst... adding ", toString(classifymiss))
+  #     bydomainlst <- c(bydomainlst, classifymiss)
+  #   }
+  # }
 
   
   ###############################################################################
   ## 8. Check bydomainlst
   ###############################################################################
   pdomainlst <- cdomainlst <- NULL
-  domainlst <- bydomainlst
+  domainlst <- pcdomainlst
   
   ## check if all variables in bydomainlst are in the input tables
-  if (!all(bydomainlst %in% c(dwmflds, pcflds))) {
-    missdomain <- bydomainlst[!bydomainlst %in% c(dwmflds, pcflds)]
-    stop("invalid variable in bydomainlst: ", toString(missdomain))
+  if (!all(domainlst %in% c(dwmflds, pcflds))) {
+    missdomain <- domainlst[!domainlst %in% c(dwmflds, pcflds)]
+    stop("invalid variable in pcdomainlst: ", toString(missdomain))
   }
   
   ## Check if domain variables are in tree or seedling table
-  if (!is.null(domainlst)) {
-    if (any(bydomainlst %in% dwmflds)) {
-      dwmdomain <- bydomainlst[bydomainlst %in% dwmflds]
-      pcdomainlst <- bydomainlst[!bydomainlst %in% dwmdomain]
-    } else {
-      pcdomainlst <- bydomainlst
-    }
-  }
+  # if (!is.null(domainlst)) {
+  #   if (any(bydomainlst %in% dwmflds)) {
+  #     dwmdomain <- bydomainlst[bydomainlst %in% dwmflds]
+  #     pcdomainlst <- bydomainlst[!bydomainlst %in% dwmdomain]
+  #   } else {
+  #     pcdomainlst <- bydomainlst
+  #   }
+  # }
   if (length(pcdomainlst) == 0) pcdomainlst <- NULL
   
   ## Check if domain variables are in the plot or cond table
@@ -749,7 +742,7 @@ datSumDWM <- function(dwm,
     ## SELECT statement for pltcondx WITH query
     ##################################################################
     if (pjoin || cjoin) {
-      pltcondxSELECTqry <- paste0("\n(SELECT")
+      pltcondxSELECTqry <- paste0("\n(SELECT ")
       
       if (pjoin) {
         pltcondxSELECTqry <- paste0(pltcondxSELECTqry, " ", toString(paste0("p.", c(pvars, pdomainlst))))
@@ -887,14 +880,14 @@ datSumDWM <- function(dwm,
   }
   
   
-  ## 14.2. SELECT statement for tdat WITH query
+  ## 14.2. SELECT statement for dwmdat WITH query
   #######################################################################
   
   ## SELECT variables
   dwmwithSelect <- paste0(dwmsumvar, " AS ", dwmsumvarnm)
   
   ## Build dwmwithqry
-  dwmwithqry <- paste0("SELECT")
+  dwmwithqry <- paste0("SELECT DISTINCT ")
   dwmwithvars <- c("CONDID")
   
   ## Build dwmwithSelect

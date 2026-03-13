@@ -408,8 +408,17 @@ datSumTreeDom <- function(tree = NULL,
                datSum_opts = datSum_opts,
                tabIDs = tabIDs,
                database_opts = database_opts)
-  tdomtree <- setDT(sumdat$treedat)
+  
+  pltsp <- sumdat$pltsp
   tsumvarnm <- sumdat$sumvars
+  if (pltsp) {
+    sppltx <- sumdat$treedat
+    sppltx <- sppltx[, names(sppltx)[!names(sppltx) %in% tsumvarnm], ]
+    tdomtree <- copy(sumdat$treedat)
+    tdomtree <- setDT(sf::st_drop_geometry(tdomtree))
+  } else {
+    tdomtree <- setDT(copy(sumdat$treedat))
+  }
   tsumuniqueid <- sumdat$tsumuniqueid
   treeqry <- sumdat$treeqry
   tdomainlst <- sumdat$tdomainlst   ## original tree variables
@@ -417,12 +426,7 @@ datSumTreeDom <- function(tree = NULL,
   classifynmlst <- sumdat$classifynmlst
   tround <- sumdat$tround
   domainlst <- c(pcdomainlst, tdomainlst)
-  pltsp <- sumdat$pltsp
   
-  if (pltsp) {
-    sppltx <- tdomtree[, names(tdomtree)[!names(tdomtree) %in% tsumvarnm], with = FALSE]
-    tdomtree <- setDT(sf::st_drop_geometry(tdomtree))
-  }
 
   ## get sum by fields in data table
   keepall <- datSum_opts$keepall
@@ -641,6 +645,7 @@ datSumTreeDom <- function(tree = NULL,
   tdomtreef <- tdomtree[, lapply(.SD, sum, na.rm=TRUE), by=sumbyvars, .SDcols=tsumvarnm]
   setkeyv(tdomtreef, tsumuniqueid)
 
+  
   ## Generate tree domain look-up table (tdomvarlut)
   #####################################################################
   nvar <- ifelse(bycond, "NBRCONDS", "NBRPLOTS")
@@ -913,11 +918,9 @@ datSumTreeDom <- function(tree = NULL,
   }
   if (proportion) {
     if (!returnDT) {
-      if (!returnDT) {
-        sumtreef.prop <- setDF(sumtreef.prop)
-      }
-      returnlst$tdomdat.prop <- sumtreef.prop
+      sumtreef.prop <- setDF(sumtreef.prop)
     }
+    returnlst$tdomdat.prop <- sumtreef.prop
   }
   if (presence) {
     if (!returnDT) {
@@ -952,6 +955,6 @@ datSumTreeDom <- function(tree = NULL,
   if (!dbconnopen && !is.null(dbconn)) {
     DBI::dbDisconnect(dbconn)
   }
- 
+
   return(returnlst)
 } 
