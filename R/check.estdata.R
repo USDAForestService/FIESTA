@@ -295,7 +295,7 @@ check.estdata <-
 
   ## if pltcondx is in database
   } else if (popdatindb && !"pltcondx" %in% poptablst) {
-  
+
   #if (popdatindb && !"pltcondx" %in% poptablst) {
 
     pltcondx.qry <- paste0(pltcondxqry,
@@ -329,7 +329,7 @@ check.estdata <-
       #dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
     }
   }
-  
+
 
   ## Check sumunits
   sumunits <- pcheck.logical(sumunits, varnm="sumunits",
@@ -445,6 +445,8 @@ check.estdata <-
 
   ## Set up list of variables to return
   ######################################################################################
+  ## note: pcwhereqry is already filtered in pltcondx (if data.frame)
+  ##         or it is in pltcondxWITHqry passed to other functions.
   returnlst <- list(esttype = esttype, 
                     sumunits = sumunits,
                     totals = totals,
@@ -453,7 +455,7 @@ check.estdata <-
                     pltcondxWITHqry = pltcondxWITHqry,
                     pltcondxadjWITHqry = pltcondxadjWITHqry,
                     landarea = landarea, 
-                    pcwhereqry = NULL,
+                    #pcwhereqry = pcwhereqry,  
                     allin1 = allin1, 
                     divideby = divideby,
                     estround = estround, pseround = pseround, 

@@ -174,7 +174,7 @@ getpopFilterqry <- function(popType,
       message("STATECD is not in pltassgn...  extracting data for all states in database...")
     }
   }
-  
+
   
   ##################################################################################
   ## 3. Check FIA Evaluation information using DBgetEvalid().
@@ -546,7 +546,7 @@ getpopFilterqry <- function(popType,
       }
     }
   }
-  
+
 
   ## 5.7. Check invyrs and add to where query.
   ############################################################################

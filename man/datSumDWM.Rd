@@ -13,9 +13,8 @@ datSumDWM(
   dbconn = NULL,
   dsn = NULL,
   bycond = FALSE,
-  bydomainlst = NULL,
+  pcdomainlst = NULL,
   getadjplot = FALSE,
-  domclassify = NULL,
   pltidsWITHqry = NULL,
   pltidsid = NULL,
   pcwhereqry = NULL,
@@ -50,17 +49,14 @@ adjstrata = TRUE (See details below).  This table is optional.}
 
 \item{bycond}{Logical. If TRUE, the data are aggregated to the condition
 level (by: cuniqueid, condid). If FALSE, the data are aggregated to the plot
-level (by: puniqueid).}
-
-\item{bydomainlst}{String (vector). Categorical domain variables for
-summing tree data by (e.g., SPCD). Variables must be in tree table or
+level (by: puniqueid). 
 plt/cond table if tables are provided.}
+
+\item{pcdomainlst}{vector of variable(s) in plot/cond table to summarize by
+note: these variable must be included in the pltidsWITHqry}
 
 \item{getadjplot}{Logical. If TRUE, and adj='plot', adjfactors are
 calculated for nonsampled conditions at plot-level.}
-
-\item{domclassify}{List. List for classifying domain variables in bydomainlst
-(e.g., DIA = c(10,20,30)).}
 
 \item{pltidsWITHqry}{SQL query. A query identifying plots to sum (e.g.,
 'WITH pltids AS (SELECT cn AS PLT_CN FROM plot WHERE statecd=49 and INVYR=2018)')}

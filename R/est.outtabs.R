@@ -187,6 +187,9 @@ est.outtabs <- function(esttype,
 		               unitvar = unitvar, areavar = areavar,
 		               phototype = phototype, photoratio = photoratio,
 		               percent = percent)
+      if (nrow(totest) > 1) {
+        totest <- totest[totest$TOTAL == 1,]
+      }
       if (esttype != "RATIO" && !is.null(dividebynum)) {
         totest[[estnmd]] <- totest[[estnm2]] / dividebynum
         totest[[senmd]] <- totest[[senm2]] / dividebynum
@@ -337,14 +340,16 @@ est.outtabs <- function(esttype,
           estpse <- data.frame(names(est), est, pse, stringsAsFactors=FALSE, row.names=NULL)
           names(estpse) <- c(rowvar, title.yhat, title.yhat.pse)
 
-          if (rowgrp)
+          if (rowgrp) {
             estpse <- addrowgrp(estpse, uniquerow, rowvar, rowgrpnm)
+          }
           names(estpse) <- c(title.rnames, title.yhat, title.yhat.pse)
 
           if (!is.null(totest)) {
-            for (rname in title.rnames)
+            for (rname in title.rnames) {
               estpse[[rname]] <- as.character(estpse[[rname]])
-
+            }
+            
             tottab <- c(totals, round(totest[[estnmd]], estround), round(totest[[psenm]], pseround))
             names(tottab) <- c(totals, title.yhat, title.yhat.pse)
             estpse <- rbind(estpse, tottab)
@@ -715,8 +720,8 @@ est.outtabs <- function(esttype,
     if (!rowvar %in% c("NONE", "TOTAL")) {
       if (!is.null(unit_rowest)) {
 
-        ## if raw.keep0 = FALSE, remove all rows in unit_rowest where 
-        ## number of 
+        ## if raw.keep0 = FALSE, remove all rows in unit_rowest with 
+        ## 0 values
         if (!raw.keep0) {
           if ("NBRPLT.gt0" %in% names(unit_rowest)) {
             unit_rowest <- unit_rowest[unit_rowest[["NBRPLT.gt0"]] > 0,]
@@ -746,7 +751,7 @@ est.outtabs <- function(esttype,
         setorderv(unit_rowest, c(unitvar, rowvar))
         setnames(unit_rowest, rowvar, title.rowvar)
         unit_rowest[is.na(unit_rowest)] <- 0
-        
+
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
           suppressWarnings(unit_rowest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)])

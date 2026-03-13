@@ -169,6 +169,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
         "\nFROM ", tabnm, " pc")
      
     } else {
+
       tabvarchk <- findnm(tabvar, seedflds, returnNULL = TRUE)
       if (estseed == "only" && !is.null(tabvarchk)) {
         tabvar <- tabvarchk
@@ -239,7 +240,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
         }
       }
     }  
-   
+  
     ## define where statement (if tab.add0, get all values in population)
     whereqry.tab <- whereqry
     if (tab.add0 && !is.null(whereqry)) {
@@ -330,7 +331,7 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
             uniquetabvar.qry <- paste0(withqry,
                                     "\n", uniquetabvar.qry)
           }
-         
+
           #message("getting unique values for ", tabvar, ":\n", uniquetab.qry, "\n")
           if (tabisdb) {
             uniquetabvar <- tryCatch(

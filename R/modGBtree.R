@@ -76,7 +76,7 @@
 #' an input data frame (i.e., plt, cond, tree).
 #' @param sumunits Logical. If TRUE, estimation units are summed and returned
 #' in one table.
-#' @param pltids Vector. String or numberic vector of FIA plot CN values that
+#' @param pltids Vector. String or numeric vector of FIA plot CN values that
 #' intesect an area of interest within the population. These values are used
 #' to filter the output table of estimates. 
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
@@ -541,6 +541,7 @@ modGBtree <- function(GBpopdat,
   treeflds <- estdatVOL$treeflds
   seedflds <- estdatVOL$seedflds
 
+  
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -567,6 +568,7 @@ modGBtree <- function(GBpopdat,
                  rowlut = rowlut, collut = collut, 
                  rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                  rowgrpord = rowgrpord, title.rowgrp = NULL)
+
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
   domainlst <- rowcolinfo$domainlst
@@ -620,7 +622,8 @@ modGBtree <- function(GBpopdat,
                estseed = estseed,
                bycond = TRUE, 
                condx = pltcondx, 
-               tuniqueid = tuniqueid, cuniqueid = cuniqueid, 
+               tuniqueid = tuniqueid, 
+               cuniqueid = cuniqueid, 
                esttype = esttype, 
                estvarn = estvar, 
                estvarn.filter = estvar.filter, 
@@ -711,16 +714,18 @@ modGBtree <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
-  
+
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
   estimates <- 
     getGBestimates(esttype = esttype,
                    domdatn = tdomdat,
-                   uniqueid = pltassgnid, condid = condid,
+                   uniqueid = tuniqueid, 
+                   condid = condid,
                    estvarn.name = estvar.name,
-                   rowvar = rowvar, colvar = colvar, 
+                   rowvar = rowvar, 
+                   colvar = colvar, 
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
                    pltassgnid = pltassgnid,

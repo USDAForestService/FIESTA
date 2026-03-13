@@ -293,6 +293,7 @@ check.tree <-
       tsumvard <- tsumvard[length(tsumvard)]
     }
     treedat <- list(tdomdat = tdomdat, 
+                    tsumuniqueid = tsumuniqueid,
                     estvarn = estvarn, 
                     estvarn.name = tsumvarn,
 		                estvarn.filter = estvarn.filter, 
@@ -314,6 +315,7 @@ check.tree <-
     }
     
     treedat <- list(tdomdat = tdomdat, 
+                    tsumuniqueid = tsumuniqueid,
                     estvar = estvarn, 
                     estvar.name = tsumvarn,
 		                estvar.filter = estvarn.filter, 

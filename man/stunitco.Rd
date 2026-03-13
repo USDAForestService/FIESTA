@@ -9,9 +9,9 @@ An object of class \code{sf} (inherits from \code{data.frame}) with 3233 rows an
 }
 \source{
 Downloaded from the United States Census Bureau on 2019 November 3,
-format Esri Shapefile
+format Esri Shapefile (tl_2018_us_county.shp)
 (https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html)
-Projection: Geographic (GCS_North_American_1983) EPSG: 4269
+Projection: Geographic (GCS_North_American_1983) EPSG:4269 transformed to EPSG:5070
 }
 \usage{
 stunitco

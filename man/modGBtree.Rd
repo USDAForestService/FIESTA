@@ -67,7 +67,7 @@ an input data frame (i.e., plt, cond, tree).}
 \item{sumunits}{Logical. If TRUE, estimation units are summed and returned
 in one table.}
 
-\item{pltids}{Vector. String or numberic vector of FIA plot CN values that
+\item{pltids}{Vector. String or numeric vector of FIA plot CN values that
 intesect an area of interest within the population. These values are used
 to filter the output table of estimates.}
 
