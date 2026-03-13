@@ -574,6 +574,8 @@ check.popdataVOL <-
     ###############################################################
     fortypgrpchk <- findnm("FORTYPGRPCD", condvars, returnNULL = TRUE)
     if (!is.null(fortypgrpchk)) addfortypgrp <- FALSE
+    fortypcdchk <- findnm("FORTYPCD", condvars, returnNULL = TRUE)
+    if (is.null(fortypcdchk)) addfortypgrp <- FALSE
     
     if (addfortypgrp) {
       ref_fortypgrp <- ref_codes[ref_codes$VARIABLE == "FORTYPCD", c("VALUE", "GROUPCD")]
@@ -863,7 +865,7 @@ check.popdataVOL <-
           
           ## Run final tree query, including pltidsqry
           if (datindb) {
-            message("query ", treenm, "...")
+            #message("query ", treenm, "...")
             treex <- tryCatch(
               DBI::dbGetQuery(dbconn, treeqry),
               error=function(e) {
@@ -1178,7 +1180,6 @@ check.popdataVOL <-
     ## 13. Return data objects
     ######################################################################################
     returnlst$pop_datsource <- pop_datsource
-
 
     ## if popdata is from a database
     if (popdatindb || (savedata && !returndata)) {

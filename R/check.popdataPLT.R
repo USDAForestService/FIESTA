@@ -56,7 +56,7 @@ check.popdataPLT <-
     ###############################################################################
     plotsampcnt=nonresplut=pfromqry=pltassgnqry=unitareaqry=auxlutqry=MATCH=
       pwhereqry=pltx=pltassgnx=pstratvars=getdataWITHqry=getdataCNs=
-      P2POINTCNT=POP_PLOT_STRATUM_ASSGN=PLOT=pstatuscdnm=expnwts <- NULL
+      P2POINTCNT=POP_PLOT_STRATUM_ASSGN=PLOT=pstatuscdnm=expnwts=invyrsx <- NULL
 
     datindb=pltaindb=stratindb=subcycle99=gui=nullcheck=nonresp <- FALSE
     unitvars <- unique(c(unitvar2, unitvar))
@@ -147,6 +147,12 @@ check.popdataPLT <-
       pltaindb <- FALSE
       pltassgnnm <- "pltassgnx"
       pltassgnflds <- names(pltassgnx)
+
+      ## check invyrs
+      invyrnm <- findnm("INVYR", names(pltassgnx), returnNULL =TRUE)
+      if (!is.null(invyrnm)) {
+        invyrsx <- sort(unique(pltassgnx[[invyrnm]]))
+      }
     }
 
     ## Check if pltassgn is in database
@@ -1702,7 +1708,9 @@ check.popdataPLT <-
     #   "\npltids AS",
     #   "\n(", pltidsqry, ")")
     # pltidsa. <- "pltids."
-    
+    if (is.null(invyrs) && !is.null(invyrsx)) {
+      invyrs <- invyrsx
+    }
 
 
     #############################################################################
