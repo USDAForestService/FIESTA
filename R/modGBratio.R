@@ -520,6 +520,7 @@ modGBratio <- function(GBpopdat,
   pseround <- estdat$pseround
   returntitle <- estdat$returntitle
   addtitle <- estdat$addtitle
+  pltcondx <- estdat$pltcondx
   
   pcwhereqry <- estdat$where.qry
   pltcondflds <- estdat$pltcondflds
@@ -612,7 +613,7 @@ modGBratio <- function(GBpopdat,
   classifycol <- rowcolinfo$classifycol
   #rm(rowcolinfo)
   
-  
+
   ## if classified columns, create domclassify list for summarizing tree data
   if (any(!is.null(classifyrow), !is.null(classifycol))) {
     domclassify <- list()
@@ -641,7 +642,8 @@ modGBratio <- function(GBpopdat,
                estseed = estseed,
                bycond = TRUE, 
                condx = pltcondx, 
-               tuniqueid = tuniqueid, cuniqueid = cuniqueid, 
+               tuniqueid = tuniqueid, 
+               cuniqueid = cuniqueid, 
                esttype = esttype, 
                ratiotype = ratiotype,
                estvarn = estvarn, 
@@ -773,7 +775,7 @@ modGBratio <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
-  
+ 
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
@@ -781,15 +783,19 @@ modGBratio <- function(GBpopdat,
     getGBestimates(esttype = esttype,
                    domdatn = tdomdat,
                    domdatd = cdomdat,
-                   uniqueid = pltassgnid, condid = condid,
+                   uniqueid = tuniqueid, 
+                   condid = condid,
                    estvarn.name = estvarn.name,
                    estvard.name = estvard.name,
-                   tdomvar = tdomvar, tdomvar2 = tdomvar2,
+                   tdomvar = tdomvar, 
+                   tdomvar2 = tdomvar2,
                    tdomvarlstn = tdomvarlstn,
                    tdomvarlstd = tdomvarlstd,
-                   rowvar = rowvar, colvar = colvar, 
+                   rowvar = rowvar, 
+                   colvar = colvar, 
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
+                   pltassgnid = pltassgnid,
                    unitarea = unitarea,
                    unitvar = unitvar,
                    areavar = areavar,
