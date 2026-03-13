@@ -518,8 +518,8 @@ testplt
 sum(testplt[testplt$STATUSCD == 1, "BA"], na.rm=TRUE)
 sum(testplt[testplt$STATUSCD == 1, "BA"] * testplt[testplt$STATUSCD == 1, "TPA_UNADJ"], na.rm=TRUE)
 
-treesum1[treesum1$CN == 40404758010690,]
-treesum2[treesum2$CN == 40404758010690,]
+treesum1[treesum1$PLT_CN == 40404758010690,]
+treesum2[treesum2$PLT_CN == 40404758010690,]
 ```
 
 </details>
@@ -619,8 +619,8 @@ treesum4c <- treesumdat4c$treedat
 
 cn <- 40407815010690
 WYcond[WYcond$PLT_CN == cn, ]
-treesum4b[treesum4b$CN == cn, ]
-treesum4c[treesum4c$CN == cn, ]
+treesum4b[treesum4b$PLT_CN == cn, ]
+treesum4c[treesum4c$PLT_CN == cn, ]
 ```
 
 </details>
@@ -646,7 +646,7 @@ names(treesumdat5a)
 treesum5a <- treesumdat5a$treedat
 head(treesum5a)
 
-treesum5a[treesum5a$CN %in% cn,]
+treesum5a[treesum5a$PLT_CN %in% cn,]
 WYseed[WYseed$PLT_CN == cn,]
 ```
 
@@ -675,8 +675,8 @@ names(treesumdat5b)
 treesum5b <- treesumdat5b$treedat
 head(treesum5b)
 
-treesum5a[treesum5a$CN %in% cn,]
-treesum5b[treesum5b$CN %in% cn,]
+treesum5a[treesum5a$PLT_CN %in% cn,]
+treesum5b[treesum5b$PLT_CN %in% cn,]
 WYcond[WYcond$PLT_CN %in% cn,]
 ```
 
@@ -912,11 +912,11 @@ tdomdat.pres <- treedomCNTs$tdomdat.pres
 tdomdat.prop <- treedomCNTs$tdomdat.prop
 
 cn=40404742010690
-tdomdat.tree[tdomdat.tree$CN == cn,]
-tdomdat.seed[tdomdat.seed$CN == cn,]
-tdomdat.treeseed[tdomdat.treeseed$CN == cn,]
-tdomdat.pres[tdomdat.pres$CN == cn,]
-tdomdat.prop[tdomdat.prop$CN == cn,]
+tdomdat.tree[tdomdat.tree$PLT_CN == cn,]
+tdomdat.seed[tdomdat.seed$PLT_CN == cn,]
+tdomdat.treeseed[tdomdat.treeseed$PLT_CN == cn,]
+tdomdat.pres[tdomdat.pres$PLT_CN == cn,]
+tdomdat.prop[tdomdat.prop$PLT_CN == cn,]
 
 ```
 
