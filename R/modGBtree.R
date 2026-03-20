@@ -367,12 +367,12 @@ modGBtree <- function(GBpopdat,
   for (i in 1:length(table_opts)) {
     assign(names(table_opts)[[i]], table_opts[[i]])
   }
-
+  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
   list.items <- c("pltcondx", "cuniqueid", "condid", 
-	                "treex", "tuniqueid", 
+                  "treex", "tuniqueid", 
                   "unitarea", "unitvar", "stratalut", "strvar",
                   "plotsampcnt", "condsampcnt")
   
@@ -413,7 +413,7 @@ modGBtree <- function(GBpopdat,
   pop_datsource <- GBpopdat$pop_datsource
   popdatindb <- GBpopdat$popdatindb
   popdbinfo <- GBpopdat$popdbinfo
-
+  
   treex <- GBpopdat$treex
   seedx <- GBpopdat$seedx
   if (is.null(treex) && is.null(seedx)) {
@@ -424,21 +424,21 @@ modGBtree <- function(GBpopdat,
   treeflds <- GBpopdat$treeflds
   seedflds <- GBpopdat$seedflds
   
-
+  
   ########################################
   ## Check area units
   ########################################
   unitchk <- pcheck.areaunits(unitarea=unitarea, areavar=areavar, 
-			areaunits=areaunits, metric=metric)
+                              areaunits=areaunits, metric=metric)
   unitarea <- unitchk$unitarea
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
-
+  
   if (is.null(key(unitarea))) {
     setkeyv(unitarea, unitvar)
   }
-
-
+  
+  
   ########################################
   ## Check pltids
   ########################################
@@ -458,7 +458,7 @@ modGBtree <- function(GBpopdat,
       stop("")
     }
   }
-
+  
   ##############################################################################
   ## Check parameter inputs and build plot/condition filter (pcwhereqry).
   ##############################################################################
@@ -485,7 +485,7 @@ modGBtree <- function(GBpopdat,
                   savedata = savedata, 
                   savedata_opts = savedata_opts, 
                   gui = gui)
-
+  
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   sumunits <- estdat$sumunits
