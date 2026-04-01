@@ -353,7 +353,7 @@ datSumTree <- function(tree = NULL,
     out_layer <- outlst$out_layer
   }
 
-  
+
   ###############################################################################
   ## 3. Check tables
   ###############################################################################
@@ -378,7 +378,7 @@ datSumTree <- function(tree = NULL,
       treenm <- treelst$tabnm
     }
   }
-  
+
   ## Check seed table
   if (!is.null(seed)) {
     seedlst <- datTabchk(tab = seed, tabtext = "seedling", 
@@ -417,7 +417,7 @@ datSumTree <- function(tree = NULL,
       stop()
     }
   }
-  
+
   
   ###############################################################################
   ## Check if plot/condition table is in WITH queries (e.g., pltcondx)
@@ -1996,7 +1996,7 @@ datSumTree <- function(tree = NULL,
   if (!seedonly) {
     
     ## Compile initial select variables
-    twithSelect <- paste0("SELECT DISTINCT 'TREE' src")
+    twithSelect <- paste0("SELECT DISTINCT 'TREETABLE' src")
     twithvars <- c("CONDID", "SUBP", "TREE")
     twithvarschk <- sapply(twithvars, findnm, treeflds, returnNULL = TRUE)
     if (all(is.null(twithvarschk))) {
@@ -2059,7 +2059,7 @@ datSumTree <- function(tree = NULL,
       ## Compile initial select variables
       nbrvar <- length(tsumvardf$TSUMVAR[tsumvardf$TABLE == "TREE"][
         !tsumvardf$TSUMVAR[tsumvardf$TABLE == "TREE" & !tsumvardf$DERIVE] %in% tpavarnm])
-      swithSelect <- paste0("\n SELECT DISTINCT 'SEED' src")
+      swithSelect <- paste0("\n SELECT DISTINCT 'SEEDTABLE' src")
       swithvars <- c(paste0(salias., c("CONDID", "SUBP")), 0)
       swithSelect <- paste0(swithSelect, ", ", 
                             toString(unique(c(paste0(salias., tsumuniqueid), swithvars))))
@@ -2136,7 +2136,7 @@ datSumTree <- function(tree = NULL,
     
     ## SELECT statement for sdat WITH query (seedonly = TRUE)
     #######################################################################
-    swithSelect <- "SELECT DISTINCT 'SEED' src,"
+    swithSelect <- "SELECT DISTINCT 'SEEDTABLE' src,"
     spcdnm <- findnm("SPCD", tdomainlst, returnNULL = TRUE)
     if (is.null(spcdnm) && !is.null(findnm("SPCD", seedflds, returnNULL = TRUE))) {
       tdomainlst <- c(spcdnm, tdomainlst)
@@ -2405,7 +2405,7 @@ datSumTree <- function(tree = NULL,
   #    pat <- paste0("(?<!['\"])", "\\b", s, "\\b", "(?!['\"])")
   #    tree.qry <- gsub(pat, paste0("\"", s, "\""), tree.qry, perl = TRUE)
   #  }
-
+  
   #cat(tree.qry, "\n")
   message("running query...")
   if (datindb) {
@@ -2418,7 +2418,7 @@ datSumTree <- function(tree = NULL,
     )
   } else {
     sumdat <- tryCatch(
-      sqldf::sqldf(tree.qry),
+      sqldf::sqldf(tree.qry, connection = NULL),
       error = function(e) {
         message(e, "\n")
         return(NULL)

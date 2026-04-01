@@ -96,11 +96,14 @@
 #' to outfolder for testing (pdomdat, dunitlut).
 #' @param ...  Parameters for modSApop() if SApopdat is NULL.
 #' 
-#' @return \item{est}{ Data frame. Tree estimates and percent sampling error by
+#' @return 
+#' \item{est}{ Data frame. Tree estimates and percent sampling error by
 #' domain.  Estimates are based on the SApackage and SAmethod parameters
-#' defined. } \item{titlelst}{ List. List of titles used for table output. }
+#' defined. } 
+#' \item{titlelst}{ List. List of titles used for table output. }
 #' \item{raw}{ List of raw data. If rawdata=TRUE, a list including raw data
-#' components used for calculating estimate. } \item{dunit.multest}{ Data
+#' components used for calculating estimate. } 
+#' \item{dunit.multest}{ Data
 #' frame. Table comparing different estimation strategies for SAE. }
 #' 
 #' Raw data
