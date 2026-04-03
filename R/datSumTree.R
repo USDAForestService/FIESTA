@@ -374,6 +374,7 @@ datSumTree <- function(tree = NULL,
     tvars <- c(tuniqueid, condid, propvars)
     if (is.data.frame(treex)) {
       treenm <- "treex"
+      rm(tree)
     } else {
       treenm <- treelst$tabnm
     }
@@ -393,6 +394,7 @@ datSumTree <- function(tree = NULL,
     svars <- c(suniqueid, condid, propvars)
     if (is.data.frame(seedx)) {
       seednm <- "seedx"
+      rm(seed)
     } else {
       seednm <- seedlst$tabnm
     }
@@ -2213,7 +2215,6 @@ datSumTree <- function(tree = NULL,
   #   tfromqry <- paste0(tfromqry,
   #                      "\nJOIN pltcondx pc ", tjoinqry)
   # }
-  
   
   ## 19.2 Build SELECT statement 
   ####################################################################
