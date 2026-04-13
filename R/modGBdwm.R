@@ -257,18 +257,7 @@ modGBdwm <- function(GBpopdat,
   ## Generates estimates of trees by domain using non-ratio estimators.
   ##################################################################################
 
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
-  gui <- FALSE
- 
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    landarea=strvar=areavar=sumunits=adjplot=strata=getwt=cuniqueid=ACI=
-      tuniqueid=savedata=addtitle=returntitle=rawdata=rawonly=unitvar <- NULL
-    #if (!row.FIAname) row.FIAname <- NULL 
-    #if (!col.FIAname) col.FIAname <- NULL 
-  }
-  
+
   ## Set parameter
   esttype <- "TREE"
   popType <- "DWM"
@@ -429,8 +418,7 @@ modGBdwm <- function(GBpopdat,
                   returntitle = returntitle, 
                   rawonly = rawonly, 
                   savedata = savedata, 
-                  savedata_opts = savedata_opts, 
-                  gui = gui)
+                  savedata_opts = savedata_opts)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   sumunits <- estdat$sumunits
@@ -477,8 +465,7 @@ modGBdwm <- function(GBpopdat,
                      dwmx = dwmx,
                      dwmtype = dwmtype,
                      estdwm = estdwm,
-                     adj = adj,
-                     gui = gui)
+                     adj = adj)
   dwmnm <- estdatDWM$dwmnm
   dwmtype <- estdatDWM$dwmtype
   estdwm <- estdatDWM$estdwm

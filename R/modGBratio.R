@@ -329,18 +329,7 @@ modGBratio <- function(GBpopdat,
   ## Generates per-acre or per-tree estimates by domain using ratio estimators
   ##################################################################################
   
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
-  gui <- FALSE 
-  
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    tree=landarea=strvar=areavar=sumunits=adj=strata=getwt=cuniqueid=ACI=
-      tuniqueid=savedata=addtitle=returntitle=rawdata=unitvar <- NULL
-    #if (!row.FIAname) row.FIAname <- NULL 
-    #if (!col.FIAname) col.FIAname <- NULL  
-  }
-  
+
   ## Set parameters
   esttype <- "RATIO"
   popType <- "VOL"
@@ -507,8 +496,7 @@ modGBratio <- function(GBpopdat,
                   returntitle = returntitle, 
                   rawonly = rawonly, 
                   savedata = savedata, 
-                  savedata_opts = savedata_opts, 
-                  gui = gui)
+                  savedata_opts = savedata_opts)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   sumunits <- estdat$sumunits
@@ -555,8 +543,7 @@ modGBratio <- function(GBpopdat,
                      treex = treex, seedx = seedx,
                      treeflds = treeflds, seedflds = seedflds,
                      estseed = estseed,
-                     woodland = woodland,
-                     gui = gui)
+                     woodland = woodland)
   estseed <- estdatVOL$estseed
   woodland <- estdatVOL$woodland
   treeflds <- estdatVOL$treeflds

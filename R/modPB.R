@@ -289,17 +289,6 @@ modPB <- function(PBpopdat = NULL,
   ## DESCRIPTION: 
   ## Generates percent or acre estimates by domain (and estimation unit)
   ###################################################################################
-  gui <- FALSE
-  
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  # if (nargs() == 0 && is.null(PBpopdat)) {
-  #   gui <- TRUE
-  # } 
-
-  ## If gui.. set variables to NULL
-  if (gui) {
-    pntid=plotid=puniqueid=landarea=strvar=areavar=PBvars2keep <- NULL
-  }
 
   ## Set parameters
   minplotnum <- 10
@@ -456,7 +445,7 @@ modPB <- function(PBpopdat = NULL,
                   savedata=savedata, outfolder=outfolder, 
                   overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
                   outfn.pre=outfn.pre, outfn.date=outfn.date, append_layer=append_layer, 
-                  raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+                  raw_fmt=raw_fmt, raw_dsn=raw_dsn)
   if (is.null(estdat)) return(NULL)
   PBx <- estdat$PBf	
   plotid <- estdat$plotid
@@ -490,7 +479,7 @@ modPB <- function(PBpopdat = NULL,
   ### GET ROW AND COLUMN INFO
   #################################################################################
   #if (!is.null(domlut)) domlut <- setDF(domlut) 
-  rowcolinfo <- check.rowcolPB(gui=gui, ratio=ratio, PBx=PBx, 
+  rowcolinfo <- check.rowcolPB(ratio=ratio, PBx=PBx, 
                     plotid=plotid, pntid=pntid, 
                     rowvar=rowvar, colvar=colvar, 
                     row.orderby=row.orderby, col.orderby=col.orderby, 

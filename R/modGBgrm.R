@@ -249,20 +249,6 @@ modGBgrm <- function(GBpopdat,
   ## DESCRIPTION: 
   ## Generates acre estimates by domain (and estimation unit)
   ###################################################################################
-  gui <- FALSE
-  
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
-  
-  
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    landarea=strvar=areavar=sumunits=adj=strata=getwt=cuniqueid=ACI=
-      puniqueid=savedata=addtitle=returntitle=rawdata=unitvar <- NULL
-    #if (!row.FIAname) row.FIAname <- NULL
-    #if (!col.FIAname) col.FIAname <- NULL
-  }
-  
   
   ## INITIALIZE SETTINGS
   esttype <- "TREE"
@@ -371,13 +357,13 @@ modGBgrm <- function(GBpopdat,
   
   ## check grmtype
   grmtypelst <- c('GROW', 'MORT', 'REMV')
-  grmtype <- pcheck.varchar(var2check = grmtype, varnm = "grmtype", gui = gui,
+  grmtype <- pcheck.varchar(var2check = grmtype, varnm = "grmtype",
                             checklst = grmtypelst, caption = "grmtype", 
                             multiple = FALSE, stopifnull = TRUE)
   
   ## check eststatus
   eststatuslst <- c('Sawtimber', 'Growing-stock', 'All live')
-  eststatus <- pcheck.varchar(var2check = eststatus, varnm = "eststatus", gui = gui,
+  eststatus <- pcheck.varchar(var2check = eststatus, varnm = "eststatus",
                               checklst = eststatuslst, caption = "eststatus", 
                               multiple = FALSE, stopifnull = TRUE)
   
@@ -442,8 +428,7 @@ modGBgrm <- function(GBpopdat,
                   returntitle = returntitle, 
                   rawonly = rawonly, 
                   savedata = savedata, 
-                  savedata_opts = savedata_opts, 
-                  gui = gui)
+                  savedata_opts = savedata_opts)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   sumunits <- estdat$sumunits
