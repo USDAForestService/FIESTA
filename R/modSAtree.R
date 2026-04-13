@@ -205,15 +205,6 @@ modSAtree <- function(SApopdatlst = NULL,
   ##			within the outfolder names as raw_dsn. 
   ######################################################################################
   
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- FALSE
-
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    tree=landarea <- NULL
-    if (!row.FIAname) row.FIAname <- NULL
-    if (!col.FIAname) col.FIAname <- NULL
-  }
 
   ## Set parameters
   esttype <- "TREE"
@@ -295,12 +286,12 @@ modSAtree <- function(SApopdatlst = NULL,
 
   ## Check SApackage 
   SApackagelst <- c("JoSAE", "sae", "hbsae", "spAbundance")
-  SApackage <- pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
+  SApackage <- pcheck.varchar(var2check=SApackage, varnm="SApackage", 
 		checklst=SApackagelst, caption="SApackage", multiple=FALSE, stopifnull=TRUE)
 
   ## Check SAmethod 
   SAmethodlst <- c("unit", "area")
-  SAmethod <- pcheck.varchar(var2check=SAmethod, varnm="SAmethod", gui=gui, 
+  SAmethod <- pcheck.varchar(var2check=SAmethod, varnm="SAmethod", 
 		checklst=SAmethodlst, caption="SAmethod", multiple=FALSE, stopifnull=TRUE)
 
   if (SApackage == "sae" && SAmethod == "unit") {
@@ -310,7 +301,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Check na.fill 
   na.filllst <- c("NONE", "DIR", estimatorlst)
   na.filllst <- na.filllst[na.filllst != SApackage]
-  na.fill <- pcheck.varchar(var2check=na.fill, varnm="na.fill", gui=gui, 
+  na.fill <- pcheck.varchar(var2check=na.fill, varnm="na.fill", 
                             checklst=na.filllst, caption="na.fill", 
                             multiple=FALSE, stopifnull=TRUE)
   
@@ -330,7 +321,7 @@ modSAtree <- function(SApopdatlst = NULL,
     list.items <- c("pltcondx", "dunitarea", "dunitvar", "dunitlut")
     returnSApopdat <- FALSE
   }
-
+print("XXX")
     
   ###################################################################################
   ## Check output parameters 
@@ -343,8 +334,7 @@ modSAtree <- function(SApopdatlst = NULL,
                     returntitle = returntitle, 
                     rawdata = rawdata, rawonly = rawonly, 
                     savedata = savedata, 
-                    savedata_opts = savedata_opts, 
-                    gui = gui)
+                    savedata_opts = savedata_opts)
   allin1 <- outparams$allin1
   estround <- outparams$estround
   pseround <- outparams$pseround
@@ -369,7 +359,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ########################################################
   multest <- pcheck.logical(multest,
                             varnm = "multest", title = "Multiple estimates?", 
-                            first = "YES", gui = gui, stopifnull= TRUE)
+                            first = "YES", stopifnull= TRUE)
   if (multest) {
     
     ## Define objects
@@ -384,7 +374,7 @@ modSAtree <- function(SApopdatlst = NULL,
     
     multest_estimators <- pcheck.varchar(var2check = estimatordf$estimator[-1], 
                                          varnm = "multest_estimators", checklst = c("all", estimatorlst), 
-                                         gui = gui, caption = "Output multest format?", multiple = TRUE) 
+                                         caption = "Output multest format?", multiple = TRUE) 
     
     if ("all" %in% multest_estimators) {
       multest_estimators <- c("DIR", "DIR.se", "JU.Synth", "JA.Synth", as.vector(t(estimatordf)))
@@ -420,13 +410,13 @@ modSAtree <- function(SApopdatlst = NULL,
       if (is.null(multest_outfolder)) {
         multest_outfolder <- rawfolder
       } else {
-        multest_outfolder <- pcheck.outfolder(multest_outfolder, gui)
+        multest_outfolder <- pcheck.outfolder(multest_outfolder)
       }
       multest.append <- pcheck.logical(multest.append, varnm="multest.append", 
-                                       title="Append multest data?", first="NO", gui=gui) 
+                                       title="Append multest data?", first="NO") 
       
       multest_fmt <- pcheck.varchar(var2check=multest_fmt, varnm="multest_fmt", 
-                                    checklst=fmtlst, gui=gui, caption="Output multest format?") 
+                                    checklst=fmtlst, caption="Output multest format?") 
       
       if (multest_fmt == "csv") {
         multest_dsn <- NULL
@@ -609,7 +599,7 @@ modSAtree <- function(SApopdatlst = NULL,
     if (is.null(key(dunitarea))) {
       setkeyv(dunitarea, dunitvar)
     }
-    
+print("TSET")    
     ###################################################################################
     ## Check parameters and apply plot and condition filters
     ###################################################################################
@@ -633,8 +623,7 @@ modSAtree <- function(SApopdatlst = NULL,
                     returntitle = returntitle,
                     rawonly = rawonly,
                     savedata = savedata,
-                    savedata_opts = savedata_opts, 
-                    gui = gui)
+                    savedata_opts = savedata_opts)
     if (is.null(estdat)) return(NULL)
     esttype <- estdat$esttype
     totals <- estdat$totals
@@ -681,8 +670,7 @@ modSAtree <- function(SApopdatlst = NULL,
                        treex = treex, seedx = seedx,
                        treeflds = treeflds, seedflds = seedflds,
                        estseed = estseed,
-                       woodland = woodland,
-                       gui = gui)
+                       woodland = woodland)
     estseed <- estdatVOL$estseed
     woodland <- estdatVOL$woodland
     treeflds <- estdatVOL$treeflds
@@ -784,8 +772,7 @@ modSAtree <- function(SApopdatlst = NULL,
                    pltidsWITHqry = pltcondxadjWITHqry,
                    pltidsid = pltidsid,
                    bytdom = bytdom,
-                   pcwhereqry = pcwhereqry,
-                   gui = gui)
+                   pcwhereqry = pcwhereqry)
     if (is.null(treedat)) stop(NULL) 
     tdomdat <- treedat$tdomdat
     estvar <- treedat$estvar
@@ -836,9 +823,10 @@ modSAtree <- function(SApopdatlst = NULL,
                      estvar.name = estvar.name,
                      domdat = tdomdat,
                      pltassgnx = pltassgnx,
+                     pltassgnid = pltassgnid,
                      dunitlut = dunitlut,
                      dunitvar = dunitvar,
-                     uniqueid = pltassgnid,
+                     uniqueid = tuniqueid,
                      prednames = prednames,
                      rowvar = rowvar,
                      SApopdatnm = SApopdatnm,

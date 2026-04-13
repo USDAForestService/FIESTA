@@ -6,18 +6,21 @@ check.estdata <-
            popdbinfo,
            pltcondx, totals,
            pltflds, condflds,
-           dbqueriesWITH = NULL, dbqueries = NULL,
+           dbqueriesWITH = NULL, 
+           dbqueries = NULL,
            sumunits = FALSE, 
-           landarea = NULL, landarea_both = TRUE, 
-           ACI = NULL, pcfilter = NULL, 
+           landarea = NULL, 
+           landarea_both = TRUE, 
+           ACI = NULL, 
+           pcfilter = NULL, 
            T1filter = NULL, T2filter = NULL,
-	         allin1 = FALSE, divideby = NULL, 
+	         allin1 = FALSE, 
+           divideby = NULL, 
            estround = 6, pseround = 3, 
 	         returntitle = TRUE, 
            rawonly = FALSE, 
 	         savedata = FALSE, 
-           savedata_opts, 
-           gui = FALSE){
+           savedata_opts){
 
   #############################################################################
   ## DESCRIPTION: Checks data inputs
@@ -58,13 +61,13 @@ check.estdata <-
   ## Check esttype
   #############################################################################
   esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC")
-  esttype <- pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
+  esttype <- pcheck.varchar(var2check=esttype, varnm="esttype",
 	checklst=esttypelst, caption="Esttype?")
 
   ## Check totals
   if (esttype %in% c("AREA", "TREE")) {
     totals <- pcheck.logical(totals, varnm="totals",
-		         title="Totals?", first="NO", gui=gui, stopifnull=TRUE)
+		         title="Totals?", first="NO", stopifnull=TRUE)
   }   
   
   ## Check pop_fmt and pop_dsn
@@ -170,7 +173,7 @@ check.estdata <-
   #############################################################################
   landarealst <- c("FOREST", "ALL", "TIMBERLAND")
   landarea <- pcheck.varchar(var2check = landarea, 
-                             varnm = "landarea", gui=gui,
+                             varnm = "landarea",
 	                           checklst = landarealst, 
                              caption = "Sample land area?")
   
@@ -333,59 +336,39 @@ check.estdata <-
 
   ## Check sumunits
   sumunits <- pcheck.logical(sumunits, varnm="sumunits",
-		title="Sum estimation units?", first="YES", gui=gui, stopifnull=TRUE)
+		title="Sum estimation units?", first="YES", stopifnull=TRUE)
 
   ## Check rawonly
   rawonly <- pcheck.logical(rawonly, varnm="rawonly", title="Raw data only?",
-		first="NO", gui=gui, stopifnull=TRUE)
+		first="NO", stopifnull=TRUE)
   if (rawonly) rawdata <- TRUE
 
 
   ## Check divideby
   dividebylst <- c("hundred", "thousand", "million")
-  if (!is.null(divideby) || gui) {
+  if (!is.null(divideby)) {
     divideby <- pcheck.varchar(var2check=divideby, varnm="divideby",
-		gui=gui, checklst=dividebylst, caption="Divide estimates?")
+		checklst=dividebylst, caption="Divide estimates?")
   }
 
   ## Check allin1
   allin1 <- pcheck.logical(allin1, varnm="allin1",
-		title="All 1 table - Est (%error)?", first="NO", gui=gui)
+		title="All 1 table - Est (%error)?", first="NO")
 
   ## Check returntitle
   returntitle <- pcheck.logical(returntitle, varnm="returntitle",
-		title="Save output titles?", first="YES", gui=gui, stopifnull=TRUE)
+		title="Save output titles?", first="YES", stopifnull=TRUE)
 
   ## Check savedata
   savedata <- pcheck.logical(savedata, varnm="savedata",
-		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+		title="Save data tables?", first="YES", stopifnull=TRUE)
 
-  
-  # ## Set savedata defaults
-  # savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  # for (i in 1:length(savedata_defaults_list)) {
-  #   assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  # }
-  # 
-  # ## Assign objects to savedata_opts
-  # if (length(savedata_opts) > 0) {
-  #   for (i in 1:length(savedata_opts)) {
-  #     if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-  #       assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-  #     } else {
-  #       stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-  #     }
-  #   }
-  # }
-  
 
- 
   ## Check output info
   ########################################################
   if (savedata) {
     
-    outlst <- pcheck.output(savedata_opts = savedata_opts,
-                            gui = gui)
+    outlst <- pcheck.output(savedata_opts = savedata_opts)
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer

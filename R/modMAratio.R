@@ -86,7 +86,6 @@
 #' @param title_opts List. See help(title_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
-#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param bootstrap Logical. If TRUE, returns bootstrap variance estimates,
 #' otherwise uses Horvitz-Thompson estimator under simple random sampling
 #' without replacement.
@@ -240,7 +239,6 @@ modMAratio <- function(MApopdat,
                        table_opts = NULL, 
                        title_opts = NULL, 
                        savedata_opts = NULL, 
-                       gui = FALSE, 
                        bootstrap = FALSE,
                        modelselect = FALSE,
                        ...){
@@ -250,16 +248,7 @@ modMAratio <- function(MApopdat,
   ## Generates per-acre ratio estimates
   ##################################################################################
   
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  #if (nargs() == 0 && is.null(MApopdat)) gui <- TRUE
-  gui <- FALSE 
-  
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    tree=landarea=areavar=sumunits=adj=getwt=cuniqueid=ACI=
-      tuniqueid=savedata=addtitle=returntitle=rawdata=unitvar <- NULL
-  }
-  
+
   ## Set parameters
   esttype <- "RATIO"
   popType <- "VOL"
@@ -427,8 +416,7 @@ modMAratio <- function(MApopdat,
                   returntitle = returntitle, 
                   rawonly = rawonly, 
                   savedata = savedata, 
-                  savedata_opts = savedata_opts, 
-                  gui = gui)
+                  savedata_opts = savedata_opts)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   totals <- estdat$totals
@@ -475,8 +463,7 @@ modMAratio <- function(MApopdat,
                      treex = treex, seedx = seedx,
                      treeflds = treeflds, seedflds = seedflds,
                      estseed = estseed,
-                     woodland = woodland,
-                     gui = gui)
+                     woodland = woodland)
   estseed <- estdatVOL$estseed
   woodland <- estdatVOL$woodland
   treeflds <- estdatVOL$treeflds
@@ -563,7 +550,8 @@ modMAratio <- function(MApopdat,
                estseed = estseed,
                bycond = TRUE, 
                condx = pltcondx, 
-               tuniqueid = tuniqueid, cuniqueid = cuniqueid, 
+               tuniqueid = tuniqueid, 
+               cuniqueid = cuniqueid, 
                esttype = esttype, 
                ratiotype = ratiotype,
                estvarn = estvarn, 
@@ -586,8 +574,7 @@ modMAratio <- function(MApopdat,
                pltidsWITHqry = pltcondxadjWITHqry,
                pltidsid = pltidsid,
                bytdom = bytdom,
-               pcwhereqry = pcwhereqry,
-               gui = gui)
+               pcwhereqry = pcwhereqry)
   if (is.null(treedat)) return(NULL) 
   tdomdat <- treedat$tdomdat
   estvarn <- treedat$estvarn
@@ -704,7 +691,7 @@ modMAratio <- function(MApopdat,
     getMAestimates(esttype = esttype,
                    domdatn = tdomdat,
                    domdatd = cdomdat,
-                   uniqueid = pltassgnid,
+                   uniqueid = tuniqueid,
                    estvarn.name = estvarn.name,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,

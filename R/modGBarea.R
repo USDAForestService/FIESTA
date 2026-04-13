@@ -276,19 +276,6 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
 
 
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  #if (nargs() == 0 && is.null(GBpopdat)) gui <- TRUE
-  gui <- FALSE
-
-  ## If gui.. set variables to NULL
-  if (gui) {
-    landarea=strvar=areavar=sumunits=adj=strata=getwt=cuniqueid=ACI=
-      puniqueid=savedata=addtitle=returntitle=rawdata=unitvar <- NULL
-    #if (!row.FIAname) row.FIAname <- NULL
-    #if (!col.FIAname) col.FIAname <- NULL
-  }
-
-
   ## INITIALIZE SETTINGS
   esttype <- "AREA"
   popType <- "CURR"
@@ -447,8 +434,7 @@ modGBarea <- function(GBpopdat,
                   returntitle = returntitle,
                   rawonly = rawonly,
                   savedata = savedata,
-                  savedata_opts = savedata_opts,
-                  gui = gui)
+                  savedata_opts = savedata_opts)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   sumunits <- estdat$sumunits
@@ -609,7 +595,7 @@ modGBarea <- function(GBpopdat,
   estdat <-
     getGBestimates(esttype = esttype,
                    domdatn = cdomdat,
-                   uniqueid = pltassgnid, 
+                   uniqueid = cuniqueid, 
                    condid = condid,
                    estvarn.name = estnm,
                    rowvar = rowvar, 

@@ -276,15 +276,7 @@ modMAtree <- function(MApopdat,
   ## Generates model-assisted estimates by domain (and estimation unit)
   ##################################################################################
 
-  gui <- FALSE
-  
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    tree=landarea=strvar=areavar <- NULL
-    if (!row.FIAname) row.FIAname <- NULL
-    if (!col.FIAname) col.FIAname <- NULL
-  }
-  
+
   ## Set parameters
   esttype <- "TREE"
   popType <- "VOL"
@@ -339,7 +331,7 @@ modMAtree <- function(MApopdat,
   
   ## Check MAmethod 
   MAmethodlst <- c("greg", "gregEN", "ratio")
-  MAmethod <- pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
+  MAmethod <- pcheck.varchar(var2check=MAmethod, varnm="MAmethod", 
 		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
   if (MAmethod %in% c("greg", "gregEN")) {
@@ -457,8 +449,7 @@ modMAtree <- function(MApopdat,
                   returntitle = returntitle,
                   rawonly = rawonly,
                   savedata = savedata,
-                  savedata_opts = savedata_opts, 
-                  gui = gui)
+                  savedata_opts = savedata_opts)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   totals <- estdat$totals
@@ -506,8 +497,7 @@ modMAtree <- function(MApopdat,
                      treex = treex, seedx = seedx,
                      treeflds = treeflds, seedflds = seedflds,
                      estseed = estseed,
-                     woodland = woodland,
-                     gui = gui)
+                     woodland = woodland)
   estseed <- estdatVOL$estseed
   woodland <- estdatVOL$woodland
   treeflds <- estdatVOL$treeflds
@@ -584,7 +574,8 @@ modMAtree <- function(MApopdat,
                estseed = estseed,
                bycond = TRUE, 
                condx = pltcondx, 
-               tuniqueid = tuniqueid, cuniqueid = cuniqueid, 
+               tuniqueid = tuniqueid, 
+               cuniqueid = cuniqueid, 
                esttype = esttype, 
                estvarn = estvar, 
                estvarn.filter = estvar.filter, 
@@ -603,8 +594,7 @@ modMAtree <- function(MApopdat,
                pltidsWITHqry = pltcondxadjWITHqry,
                pltidsid = pltidsid,
                bytdom = bytdom,
-               pcwhereqry = pcwhereqry,
-               gui = gui)
+               pcwhereqry = pcwhereqry)
   if (is.null(treedat)) stop(NULL) 
   tdomdat <- treedat$tdomdat
   estvar <- treedat$estvar
@@ -680,7 +670,7 @@ modMAtree <- function(MApopdat,
   estdat <- 
     getMAestimates(esttype = esttype,
                    domdatn = tdomdat,
-                   uniqueid = pltassgnid,
+                   uniqueid = tuniqueid,
                    estvarn.name = estvar.name,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,

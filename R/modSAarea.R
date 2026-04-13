@@ -184,14 +184,6 @@ modSAarea <- function(SApopdatlst = NULL,
   ##			within the outfolder names as raw_dsn. 
   ######################################################################################
 
-  gui <- FALSE
-
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    tree=landarea <- NULL
-    if (!row.FIAname) row.FIAname <- NULL
-    if (!col.FIAname) col.FIAname <- NULL
-  }
 
   ## Set parameters
   esttype <- "AREA"
@@ -199,16 +191,13 @@ modSAarea <- function(SApopdatlst = NULL,
   rawdata <- TRUE 
   vars2keep <- c("DOMAIN", "AOI")
   returnSApopdat <- TRUE
-  sumunits = addtitle <- FALSE
+  addtitle <- FALSE
   SAdomsdf=multestdf_row <- NULL
   colvar=NULL
   col.FIAname=FALSE
   col.orderby=NULL
   col.add0=FALSE
   collut=NULL
-  rowgrp=FALSE
-  rowgrpnm=NULL
-  rowgrpord=NULL 
   lt0 <- FALSE
   addSAdomsdf = FALSE 
   SAdomvars = NULL
@@ -275,13 +264,13 @@ modSAarea <- function(SApopdatlst = NULL,
   ## Check SApackage 
   SApackagelst <- c("JoSAE", "sae", "hbsae", "spAbundance")
   SApackage <- pcheck.varchar(var2check=SApackage, varnm="SApackage", 
-                  gui=gui, checklst=SApackagelst, caption="SApackage", 
+                  checklst=SApackagelst, caption="SApackage", 
 		          multiple=FALSE, stopifnull=TRUE)
 
   ## Check SAmethod 
   SAmethodlst <- c("unit", "area")
   SAmethod <- pcheck.varchar(var2check=SAmethod, varnm="SAmethod", 
-                 gui=gui, checklst=SAmethodlst, caption="SAmethod", 
+                 checklst=SAmethodlst, caption="SAmethod", 
 				 multiple=FALSE, stopifnull=TRUE)
 
   if (SApackage == "sae" && SAmethod == "unit") {
@@ -291,7 +280,7 @@ modSAarea <- function(SApopdatlst = NULL,
   ## Check na.fill 
   na.filllst <- c("NONE", "DIR", estimatorlst)
   na.filllst <- na.filllst[na.filllst != SApackage]
-  na.fill <- pcheck.varchar(var2check=na.fill, varnm="na.fill", gui=gui, 
+  na.fill <- pcheck.varchar(var2check=na.fill, varnm="na.fill", 
                               checklst=na.filllst, caption="na.fill", 
                               multiple=FALSE, stopifnull=TRUE)
   
@@ -323,8 +312,7 @@ modSAarea <- function(SApopdatlst = NULL,
 			              returntitle = returntitle, 
 			              rawdata = rawdata, rawonly = rawonly, 
 			              savedata = savedata, 
-	                  savedata_opts = savedata_opts, 
-			              gui = gui)
+	                  savedata_opts = savedata_opts)
   allin1 <- outparams$allin1
   estround <- outparams$estround
   pseround <- outparams$pseround
@@ -349,7 +337,7 @@ modSAarea <- function(SApopdatlst = NULL,
   ########################################################
   multest <- pcheck.logical(multest,
                             varnm = "multest", title = "Multiple estimates?", 
-                            first = "YES", gui = gui, stopifnull= TRUE)
+                            first = "YES", stopifnull= TRUE)
   if (multest) {
 
     ## Define objects
@@ -362,7 +350,7 @@ modSAarea <- function(SApopdatlst = NULL,
     estimatorSElst <- c('JU.GREG.se','JU.EBLUP.se.1','JFH.se','hbsaeU.se','hbsaeA.se')
     multest_estimators <- pcheck.varchar(var2check = estimatorlst, 
                                   varnm = "multest_estimators", checklst = c("all", estimatorlst), 
-                                  gui = gui, caption = "Output multest format?", multiple = TRUE) 
+                                  caption = "Output multest format?", multiple = TRUE) 
     multest_estimators <- sort(c(multest_estimators, estimatorSElst[which(estimatorlst %in% multest_estimators)]))
   } 
 
@@ -391,13 +379,13 @@ modSAarea <- function(SApopdatlst = NULL,
       if (is.null(multest_outfolder)) {
         multest_outfolder <- rawfolder
       } else {
-        multest_outfolder <- pcheck.outfolder(multest_outfolder, gui)
+        multest_outfolder <- pcheck.outfolder(multest_outfolder)
       }
       multest.append <- pcheck.logical(multest.append, varnm="multest.append", 
-                                       title="Append multest data?", first="NO", gui=gui) 
+                                       title="Append multest data?", first="NO") 
       
       multest_fmt <- pcheck.varchar(var2check=multest_fmt, varnm="multest_fmt", 
-                                    checklst=fmtlst, gui=gui, caption="Output multest format?") 
+                                    checklst=fmtlst, caption="Output multest format?") 
       
       if (multest_fmt == "csv") {
         multest_dsn <- NULL
@@ -596,8 +584,7 @@ modSAarea <- function(SApopdatlst = NULL,
                     returntitle = returntitle, 
                     rawonly = rawonly, 
                     savedata = savedata, 
-                    savedata_opts = savedata_opts, 
-                    gui = gui)
+                    savedata_opts = savedata_opts)
     if (is.null(estdat)) return(NULL)
     esttype <- estdat$esttype
     totals <- estdat$totals
@@ -653,9 +640,7 @@ modSAarea <- function(SApopdatlst = NULL,
                    row.classify = row.classify, col.classify = col.classify,
                    title.rowvar = title.rowvar, title.colvar = title.colvar,
                    whereqry = pcwhereqry,
-                   rowlut = rowlut, collut = collut, 
-                   rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
-                   rowgrpord = rowgrpord, title.rowgrp = NULL)
+                   rowlut = rowlut, collut = collut)
     uniquerow <- rowcolinfo$uniquerow
     uniquecol <- rowcolinfo$uniquecol
     bydomainlst <- rowcolinfo$domainlst
@@ -669,8 +654,6 @@ modSAarea <- function(SApopdatlst = NULL,
     col.add0 <- rowcolinfo$col.add0
     title.rowvar <- rowcolinfo$title.rowvar
     title.colvar <- rowcolinfo$title.colvar
-    rowgrpnm <- rowcolinfo$rowgrpnm
-    title.rowgrp <- rowcolinfo$title.rowgrp
     grpvar <- rowcolinfo$grpvar
     classifyrow <- rowcolinfo$classifyrow
     classifycol <- rowcolinfo$classifycol
@@ -727,9 +710,10 @@ modSAarea <- function(SApopdatlst = NULL,
                      estvar.name = estnm,
                      domdat = cdomdat,
                      pltassgnx = pltassgnx,
+                     pltassgnid = pltassgnid,
                      dunitlut = dunitlut,
                      dunitvar = dunitvar,
-                     uniqueid = pltassgnid,
+                     uniqueid = cuniqueid,
                      prednames = prednames,
                      rowvar = rowvar,
                      SApopdatnm = SApopdatnm,
@@ -1052,7 +1036,6 @@ modSAarea <- function(SApopdatlst = NULL,
                  title.main = title.main, 
                  title.ref = title.ref, 
                  title.rowvar = title.rowvar, 
-                 title.rowgrp = title.rowgrp, 
                  title.colvar = title.colvar, 
                  title.unitvar = title.unitvar, 
                  title.filter = title.filter, 
@@ -1089,7 +1072,6 @@ modSAarea <- function(SApopdatlst = NULL,
   estnm <- "est"
   tabs <- 
     est.outtabs(esttype = esttype, 
-                sumunits = sumunits, 
                 areavar = areavar, 
                 unitvar ="DOMAIN", 
                 unitarea = dunitarea,
@@ -1099,13 +1081,12 @@ modSAarea <- function(SApopdatlst = NULL,
                 unit_grpest = dunit_grpest, 
                 rowvar = rowvarnm, colvar = colvarnm, 
                 uniquerow = uniquerow, uniquecol = uniquecol, 
-                rowgrp = rowgrp, rowgrpnm = rowgrpnm, 
                 rowunit = rowunit, totunit = totunit, 
                 allin1 = allin1, 
                 savedata = savedata, addtitle = addtitle, 
                 title.ref= title.ref, 
                 title.colvar = title.colvar, title.rowvar = title.rowvar, 
-                title.rowgrp = title.rowgrp, title.unitvar = title.dunitvar, 
+                title.unitvar = title.dunitvar, 
                 title.estpse = title.estpse, 
                 title.est = title.est, title.pse = title.pse, 
                 rawdata = rawdata, rawonly = rawonly, 

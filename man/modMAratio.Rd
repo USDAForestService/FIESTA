@@ -26,7 +26,6 @@ modMAratio(
   table_opts = NULL,
   title_opts = NULL,
   savedata_opts = NULL,
-  gui = FALSE,
   bootstrap = FALSE,
   modelselect = FALSE,
   ...
@@ -97,8 +96,6 @@ options.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{bootstrap}{Logical. If TRUE, returns bootstrap variance estimates,
 otherwise uses Horvitz-Thompson estimator under simple random sampling

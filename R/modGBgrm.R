@@ -536,6 +536,7 @@ modGBgrm <- function(GBpopdat,
   ### Get estimation data from tree table
   ###############################################################################
   #adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
+source("C:/_tsf/_GitHub/FIESTA/R/datSumTreeGRM2.R")
   treedat <- 
     datSumTreeGRM(grmtables = list(cond = pltcondx,
                                    tree = treex,
@@ -543,6 +544,7 @@ modGBgrm <- function(GBpopdat,
                                    tree_grm_begin = beginx,
                                    tree_grm_midpt = midptx),
                   datsource = pop_datsource,
+                  dbconn = popconn,
                   bycond = TRUE,
                   landarea = landarea,
                   tstatus = eststatus,
@@ -550,6 +552,8 @@ modGBgrm <- function(GBpopdat,
                   tsumvar = estvar,
                   bydomainlst = domainlst,
                   pltcondx = pltcondx,
+                  pltidsWITHqry = pltcondxadjWITHqry,
+                  pltcondflds = pltcondflds,
                   pltidsadj = pltidsadj,
                   datSum_opts = datSum_options(adjtree = TRUE))
   

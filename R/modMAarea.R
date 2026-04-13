@@ -263,15 +263,7 @@ modMAarea <- function(MApopdat,
   ## Generates model-assisted estimates by domain (and estimation unit)
   ###################################################################################### 
 
-  gui <- FALSE
-  
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    landarea=strvar=areavar <- NULL
-    if (!row.FIAname) row.FIAname <- NULL
-    if (!col.FIAname) col.FIAname <- NULL
-  }
-  
+
   ## Set parameters
   esttype="AREA"
   popType <- "CURR"
@@ -325,7 +317,7 @@ modMAarea <- function(MApopdat,
 
   ## Check MAmethod 
   MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
-  MAmethod <- pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
+  MAmethod <- pcheck.varchar(var2check=MAmethod, varnm="MAmethod", 
 		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
   if (MAmethod %in% c("greg", "gregEN")) {
@@ -433,8 +425,7 @@ modMAarea <- function(MApopdat,
                   returntitle = returntitle,
                   rawonly = rawonly,
                   savedata = savedata,
-                  savedata_opts = savedata_opts, 
-                  gui = gui)
+                  savedata_opts = savedata_opts)
   if (is.null(estdat)) return(NULL)
   esttype <- estdat$esttype
   totals <- estdat$totals
@@ -469,7 +460,7 @@ modMAarea <- function(MApopdat,
     append_layer = estdat$append_layer
     rawoutlst <- estdat$rawoutlst
   }
-  
+
   
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
@@ -588,9 +579,11 @@ modMAarea <- function(MApopdat,
   estdat <- 
     getMAestimates(esttype = esttype,
                    domdatn = cdomdat,
-                   uniqueid = pltassgnid, condid = condid,
+                   uniqueid = cuniqueid, 
+                   condid = condid,
                    estvarn.name = estnm,
-                   rowvar = rowvar, colvar = colvar, 
+                   rowvar = rowvar, 
+                   colvar = colvar, 
                    grpvar = grpvar,
                    MAmethod = MAmethod,
                    modelselect = modelselect,
@@ -598,6 +591,7 @@ modMAarea <- function(MApopdat,
                    FIA = FIA,
                    bootstrap = bootstrap,
                    pltassgnx = pltassgnx,
+                   pltassgnid = pltassgnid,
                    unitarea = unitarea,
                    unitvar = unitvar,
                    areavar = areavar,

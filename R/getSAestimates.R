@@ -1,6 +1,7 @@
 getSAestimates <- function(esttype, i, largebnd.unique,
                            estvar.name, domdat,
                            pltassgnx,
+                           pltassgnid,
                            dunitlut,
                            dunitvar,
                            uniqueid,
@@ -64,18 +65,34 @@ getSAestimates <- function(esttype, i, largebnd.unique,
       domdat[[largebnd.unique]] <- NULL
     }
   }
-  ## Join domdat to pltassgnx using data.table key
-  domdat <- pltassgnx[domdat]
+  
+  
+  ## merge pltassgnx to domdatd, including all rows for pltassgnx
+  setkeyv(domdat, c(uniqueid, condid))
+  domdat <- domdat[pltassgnx]
+  
+  ## Append TOTAL to domdatn
+  if (!"TOTAL" %in% names(domdat)) {
+    domdat$TOTAL <- 1
+  }
+  
+  ## change column names
+  if (!"DOMAIN" %in% names(domdat)) {
+    setnames(domdat, "domain_unit", "DOMAIN")
+  }
+  if (!"DOMAIN" %in% names(dunitlut)) {
+    setnames(dunitlut, "domain_unit", "DOMAIN")
+    setnames(dunitlut, "pixel_count", "npixels")
+    setnames(dunitlut, "aoi", "AOI")
+  }
+  dunitvar <- "DOMAIN"
+  
   if (is.null(largebnd.unique)) {
     domdat$LARGEBND <- 1
     dunitlut$LARGEBND <- 1
     largebnd.unique <- "LARGEBND"
   }
-  ## Append TOTAL to domdatn
-  if (!"TOTAL" %in% names(domdat)) {
-    domdat$TOTAL <- 1
-  }
- 
+
   if (SApackage == "spAbundance") {
     bayes <- TRUE
   } else {
@@ -94,8 +111,8 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   }
   ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
   domdattot <- domdat[, lapply(.SD, sum, na.rm=TRUE), 
-                        by=byvars, 
-                        .SDcols=estvar.name]
+                        by = byvars, 
+                        .SDcols = estvar.name]
   
   
   ## get unique largebnd values
@@ -107,22 +124,32 @@ getSAestimates <- function(esttype, i, largebnd.unique,
 # dunitvar = "DOMAIN"
 # domain = "TOTAL"
 # largebnd.val = largebnd.vals[1]
-#   
+
 
   dunit_totestlst <- 
     tryCatch(
       {
         lapply(largebnd.vals, SAest.large, 
                dat = domdattot, 
-               cuniqueid = uniqueid, largebnd.unique = largebnd.unique, 
-               dunitlut = dunitlut, dunitvar = "DOMAIN", 
-               prednames = prednames, domain = "TOTAL", response = response, 
-               showsteps = showsteps, savesteps = savesteps, 
-               stepfolder = stepfolder, prior = prior, 
+               cuniqueid = uniqueid, 
+               largebnd.unique = largebnd.unique, 
+               dunitlut = dunitlut, 
+               dunitvar = "DOMAIN", 
+               prednames = prednames, 
+               domain = "TOTAL", 
+               response = response, 
+               showsteps = showsteps, 
+               savesteps = savesteps, 
+               stepfolder = stepfolder, 
+               prior = prior, 
                modelselect = modelselect, 
-               multest = multest, multest_estimators = multest_estimators,
-               SApackage = SApackage, SAmethod = SAmethod, bayes = bayes, 
-               save4testing = FALSE, vars2keep = vars2keep)
+               multest = multest, 
+               multest_estimators = multest_estimators,
+               SApackage = SApackage, 
+               SAmethod = SAmethod, 
+               bayes = bayes, 
+               save4testing = FALSE, 
+               vars2keep = vars2keep)
       },
       error = function(cond) {
         message("error with estimates of ", response, "...")

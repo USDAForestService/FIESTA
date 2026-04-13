@@ -60,7 +60,23 @@ getGBestimates <- function(esttype,
   if (addtotal && !"TOTAL" %in% names(domdatn)) {
     domdatn$TOTAL <- 1
   }
-  
+
+  ## check uniqueid
+  uniqueidchk <- findnm(uniqueid, names(domdatn), returnNULL = TRUE)
+  if (is.null(uniqueidchk)) {
+    uniqueidchk <- findnm("PLT_CN", names(domdatn), returnNULL = TRUE)
+    if (!is.null(uniqueidchk)) {
+      uniqueid <- uniqueidchk
+    } else { 
+      uniqueidchk <- findnm("CN", names(domdatn), returnNULL = TRUE)
+      if (!is.null(uniqueidchk)) {
+        uniqueid <- uniqueidchk
+      } else {
+        message(uniqueid, " not in dataset")
+      }
+    }
+  }
+
   ## Subset domdatn with pltids
   if (!is.null(pltids)) {
     domdatn <- domdatn[domdatn[[uniqueid]] %in% pltids, ]

@@ -14,6 +14,7 @@ getMAestimates <- function(esttype,
                            FIA = TRUE, 
                            bootstrap = FALSE,
                            pltassgnx, 
+                           pltassgnid,
                            unitarea, 
                            unitvar, 
                            areavar,
@@ -36,7 +37,7 @@ getMAestimates <- function(esttype,
   modelselect_bydomain <- FALSE
   response <- estvarn.name
   predselectlst <- list()
-  
+  strwtvar <- "Prop"
   
   ## Check column names
   prednames <- names(data.frame(matrix(NA,1,length(prednames), 
@@ -45,7 +46,20 @@ getMAestimates <- function(esttype,
   unitarea <- data.table(unitarea, check.names = TRUE)
   unitlut <- data.table(unitlut, check.names = TRUE)
   
+  ## check strwtvar
+  if (MAmethod == "PS") {
+    if (!strwtvar %in% names(unitlut)) {
+      if ("strwt" %in% names(unitlut)) {
+        setnames(unitlut, "strwt", strwtvar)
+      } else {
+        errmessage <- "error: Prop not in stratalut"
+        message(errmessage)
+        return(errmessage)
+      }
+    }
+  }
   
+  ## get method name for input to mase package
   masemethod <- switch(MAmethod,
                        PS = "postStrat",
                        greg = "greg",
@@ -56,28 +70,99 @@ getMAestimates <- function(esttype,
 
   message("generating estimates using mase::", masemethod, " function...\n")
   
+  if (esttype == "RATIO") {
+    if (MAmethod == "greg") {
+      MAmethod <- "gregRatio"
+    } else {
+      errmessage <- paste0("error: esttype = 'RATIO' not available for MAmethod: ", MAmethod)
+      message(errmessage)
+      return(errmessage)
+    }
+  }
+  
+  ## set key for unitarea
+  setkeyv(unitarea, unitvar)
+  
+  ## Get estimates for total
+  if (is.null(rowvar)) {
+    rowvar <- "TOTAL"
+  } else {
+    pcdomainlst <- rowvar
+    if (colvar != "NONE") {
+      pcdomainlst <- c(rowvar, colvar)
+    }
+  }
+  
+  
+  ## Get estimates for total
+  if (is.null(rowvar)) rowvar <- "TOTAL"
+  
+  if (esttype == "RATIO") {
+    
+    if (!is.null(tdomvar)) {
+      ## Concatenate multiple columns
+      if (!is.null(tdomvar2)) {
+        domdatn <- domdatn[!is.na(get(tdomvar)) & !is.na(get(tdomvar2)),]
+        domdatn[, tdomvarnm := do.call(paste, c(.SD, sep="|")), .SDcols=c(tdomvar,tdomvar2)]
+      } else {
+        domdatn <- domdatn[!is.na(get(tdomvar)),]
+        tdomvarnm <- tdomvar
+      }
+      
+      ## Concatenate multiple columns
+      xvar <- c(uniqueid, condid, pcdomainlst)
+      domdatn[, concatx := do.call(paste, c(.SD, sep="|")), .SDcols = xvar]
+      
+      ## pivot table
+      domdatn <- data.table::dcast(domdatn, concatx ~ get(tdomvarnm),
+                                   value.var = estvarn.name,
+                                   fun.aggregate = sum, na.rm = TRUE, pfill=0)
+      
+      ## sum tdomvar columns for a total
+      domdatn[, totn := apply(.SD, 1, sum), .SDcols=as.character(tdomvarlstn)]
+      estvarn.name <- "totn"
+      
+      ## Un-concatenate multiple columns
+      domdatn[, (xvar) := tstrsplit(concatx, "|", fixed=TRUE)][][, concatx :=NULL]
+    }
+  }
+  
   ## Append TOTAL to domdatn
   if (addtotal && !"TOTAL" %in% names(domdatn)) {
     domdatn$TOTAL <- 1
   }
   
+  
   ## Join domdat to pltassgnx using data.table key
-  domdatn <- pltassgnx[domdatn]
+  setkeyv(domdatn, c(uniqueid, condid))
+  domdatn <- domdatn[pltassgnx]
+  
+  
   if (esttype == "RATIO") {
+    
+    ## setkey
+    setkeyv(domdatd, c(uniqueid, condid))
+    
+    ## Append TOTAL to domdatn
     if (addtotal && !"TOTAL" %in% names(domdatd)) {
       domdatd$TOTAL <- 1
     }
-    domdatd <- pltassgnx[domdatd]
+    ## merge pltassgnx to domdatd, including all rows for pltassgnx
+    domdatd <- domdatd[pltassgnx]
     
     ## Check to make sure class of join variables match
-    chk <- FIESTAutils::check.matchclass(domdatd, domdatn, c(uniqueid, condid))
+    chk <- .check.matchclass(domdatd, domdatn, c(uniqueid, condid))
     domdatd <- chk$tab1
     domdatn <- chk$tab2
   }
   
-  ## Get unique estimation unit values
-  estunits <- sort(unique(domdatn[[unitvar]]))
   
+  ## Get unique estimation units
+  estunits <- sort(unique(domdatn[[unitvar]]))
+
+  
+  
+    
   predselect.overall <- NULL
   if (masemethod == "greg" && modelselect == T) {
     
@@ -137,24 +222,44 @@ getMAestimates <- function(esttype,
 
   if (addtotal) {
     
-    domdattot <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-                         by=c(unitvar, uniqueid, "TOTAL", prednames), .SDcols=response]
+    
+    ## sum condition/domain-level data to plot/domain-level
+    domdatplt <- domdatn[, lapply(.SD, sum, na.rm=TRUE),
+                         by=c(unitvar, prednames, uniqueid, "TOTAL"), .SDcols=response]
+    
+    if (esttype == "RATIO") {
+      ## denominator: sum condition/domain-level data to plot/domain-level
+      domdatdplt <- domdatd[, lapply(.SD, sum, na.rm=TRUE),
+                            by = c(unitvar, prednames, uniqueid, "TOTAL"), .SDcols=response_d]
+      ## merge denominator and numerator data keeping all denominator data (all.x=TRUE)
+      domdatplt <- merge(domdatdplt, domdatplt, by = c(unitvar, prednames, uniqueid, "TOTAL"))
+    }
+    domdatplt <- domdatplt[domdatplt$TOTAL == 1,]
+    
     unit_totestlst <- lapply(estunits, MAest.unit, 
-                             dat = domdattot, cuniqueid = uniqueid, 
-                             unitlut = unitlut, unitvar = unitvar, 
+                             dat = copy(domdatplt), 
+                             cuniqueid = uniqueid, 
+                             unitlut = unitlut, 
+                             unitvar = unitvar, 
                              esttype = esttype, 
                              MAmethod = MAmethod, 
-                             strvar = NULL, prednames = prednames, 
-                             domain = "TOTAL", response = response, 
+                             strvar = NULL, 
+                             prednames = prednames, 
+                             domain = "TOTAL", 
+                             response = response, 
+                             response_d = response_d,
                              npixels = npixels, 
                              FIA = FIA, 
                              modelselect = modelselect_bydomain, 
                              getweights = getweights,
                              var_method = var_method)
+    
+    
     unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
     unit_weights <- do.call(rbind, sapply(unit_totestlst, '[', "weights")) 
     unit_weights$areaweights <- unit_weights$weights * sum(unitarea[[areavar]])
-    if (MAmethod %in% c("greg", "gregEN")) {
+    
+    if (MAmethod != "PS") {
       predselectlst$totest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
     }
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
@@ -182,16 +287,23 @@ getMAestimates <- function(esttype,
                               xvar = rowvar, 
                               NAname = row.NAname)
     
-    domdattot <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
+    ## sum estimation variable to plot/domain-level by rowvar
+    ###########################################################################
+    domdatn <- domdatn[!is.na(domdatn[[rowvar]]),]
+    domdatplt <- domdatn[, lapply(.SD, sum, na.rm=TRUE),
                          by=c(unitvar, uniqueid, rowvar, prednames), .SDcols=response]
     
     unit_rowestlst <- lapply(estunits, MAest.unit, 
-                             dat = domdattot, cuniqueid = uniqueid, 
-                             unitlut = unitlut, unitvar = unitvar, 
+                             dat = domdatplt, 
+                             cuniqueid = uniqueid, 
+                             unitlut = unitlut, 
+                             unitvar = unitvar, 
                              esttype = esttype, 
                              MAmethod = MAmethod, 
-                             strvar = NULL, prednames = prednames, 
-                             domain = rowvar, response=response, 
+                             strvar = NULL, 
+                             prednames = prednames, 
+                             domain = rowvar, 
+                             response=response, 
                              npixels = npixels, 
                              FIA = FIA, 
                              modelselect = modelselect_bydomain, 
@@ -215,34 +327,63 @@ getMAestimates <- function(esttype,
                                 xvar = colvar, 
                                 NAname = col.NAname)
       
-      domdattot <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
-                            by=c(unitvar, uniqueid, colvar, prednames), .SDcols=response]
+      ## sum estimation variable to plot/domain-level by colvar
+      ###########################################################################
+      domdatn <- domdatn[!is.na(domdatn[[colvar]]),]
+      domdatplt <- domdatn[, lapply(.SD, sum, na.rm=TRUE),
+                           by=c(unitvar, uniqueid, colvar, prednames), .SDcols=response]
       
-      unit_colestlst <- lapply(estunits, MAest.unit, 
-                               dat=domdattot, cuniqueid=uniqueid, 
-                               unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
-                               MAmethod=MAmethod, strvar=NULL, prednames=prednames, 
-                               domain=colvar, response=response, npixels=npixels, 
-                               FIA=FIA, modelselect=modelselect_bydomain, var_method=var_method)
+      unit_colestlst <- lapply(estunits, .pbarMA.unit,
+                               MAmethod = MAmethod,
+                               esttype = esttype,
+                               dat = domdatplt,
+                               cuniqueid = uniqueid,
+                               unitlut = unitlut,
+                               unitarea = unitarea,
+                               npixels = npixels,
+                               unitvar = unitvar,
+                               areavar = areavar,
+                               prednames = prednames,
+                               strvar = strvar,
+                               domain = colvar,
+                               response = response,
+                               FIA = FIA,
+                               modelselect = modelselect_bydomain,
+                               getweights = getweights,
+                               var_method = var_method)
       unit_colest <- do.call(rbind, sapply(unit_colestlst, '[', "unitest"))
       if (MAmethod %in% c("greg", "gregEN")) {
         predselectlst$colest <- do.call(rbind, sapply(unit_colestlst, '[', "predselect"))
       }
       
-      domdatn <- domdatn[!is.na(domdatn[[rowvar]]) & domdatn[[rowvar]] != "NA",] 
-      domdatn <- domdatn[!is.na(domdatn[[colvar]]) & domdatn[[colvar]] != "NA",] 
       
-      domdattot <- domdatn[, lapply(.SD, sum, na.rm=TRUE), 
+      ############################################################################
+      ## get estimates for cell values (grpvar)
+      ############################################################################
+      domdatplt <- domdatn[, lapply(.SD, sum, na.rm=TRUE),
                            by=c(unitvar, uniqueid, grpvar, prednames), .SDcols=response]
       
-      domdattot[, grpvar := do.call(paste, c(.SD, sep="#")), .SDcols=grpvar]
+      domdatplt[, grpvar := do.call(paste, c(.SD, sep="#")), .SDcols=grpvar]
       
-      unit_grpestlst <- lapply(estunits, MAest.unit, 
-                               dat=domdattot, cuniqueid=uniqueid, 
-                               unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
-                               MAmethod=MAmethod, strvar=NULL, prednames=prednames, 
-                               domain="grpvar", response=response, npixels=npixels, 
-                               FIA=FIA, modelselect=modelselect_bydomain, var_method=var_method)
+
+      unit_grpestlst <- lapply(estunits, .pbarMA.unit,
+                               MAmethod = MAmethod,
+                               esttype = esttype,
+                               dat = domdatplt,
+                               cuniqueid = uniqueid,
+                               unitlut = unitlut,
+                               unitarea = unitarea,
+                               npixels = npixels,
+                               unitvar = unitvar,
+                               areavar = areavar,
+                               prednames = prednames,
+                               strvar = strvar,
+                               domain = "grpvar",
+                               response = response,
+                               FIA = FIA,
+                               modelselect = modelselect_bydomain,
+                               getweights = getweights,
+                               var_method = var_method)
       
       unit_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "unitest"))
       if (MAmethod %in% c("greg", "gregEN")) {
