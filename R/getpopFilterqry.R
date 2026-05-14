@@ -434,10 +434,10 @@ getpopFilterqry <- function(popType,
       }
     } else if (!is.null(stcntywhereqry) && !noplt) {
       if (is.null(pwhereqry)) {
-        pwhereqry <- paste0("\n WHERE ", stcntywhereqry)
+        pwhereqry <- paste0("\n WHERE (", stcntywhereqry, ")")
       } else {
         pwhereqry <- paste0(pwhereqry,
-                            "\n  AND ", stcntywhereqry)
+                            "\n  AND (", stcntywhereqry, ")")
       }
     }
 
@@ -833,7 +833,8 @@ getpopFilterqry <- function(popType,
     }
 
     ## Add an Endyr to where statement
-    if (!is.null(measEndyr)) {
+    measEndyr <- popFilter$measEndyr
+    if (!is.null(popFilter$measEndyr)) {
       if (chkvalues) {
         yrlst.qry <- paste0(
           "SELECT DISTINCT ", varCurnm,

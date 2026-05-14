@@ -103,7 +103,7 @@ check.popdataPLT <-
     ##############################################################################
     ## 3. Check database information
     ##############################################################################
-    dbinfo <- pcheck.datsource(dbconn, 
+    dbinfo <- FIESTAutils::pcheck.datsource(dbconn, 
                                datsource = datsource, 
                                dsn = dsn, 
                                database_opts = database_opts)
@@ -128,7 +128,7 @@ check.popdataPLT <-
     } else {
       tabnames <- c("plt", "plot")
     }
-    plotlst <- popTabchk(tabnames, tabtext = "plt",
+    plotlst <- FIESTAutils::popTabchk(tabnames, tabtext = "plt",
                          tabs, tabIDs, dbtablst, dbconn = dbconn, schema = schema)
     plotnm <- plotlst$tabnm
     puniqueid <- plotlst$tabid
@@ -141,7 +141,7 @@ check.popdataPLT <-
     #############################################################
 
     ## Check if pltassgn table is a data.frame object
-    pltassgnx <- pcheck.table(pltassgn, tabnm="pltassgn",
+    pltassgnx <- FIESTAutils::pcheck.table(pltassgn, tabnm="pltassgn",
                               caption="pltassgn table?", returnsf=FALSE)
     if (!is.null(pltassgnx)) {
       pltaindb <- FALSE
@@ -165,7 +165,8 @@ check.popdataPLT <-
         }
       } else {
         pltaindb <- TRUE
-        pltassgnflds <- dbgetflds(conn = dbconn, schema = schema, tabnm = pltassgnnm, upper = TRUE)
+        pltassgnflds <- FIESTAutils::dbgetflds(conn = dbconn, schema = schema, 
+                                               tabnm = pltassgnnm, upper = TRUE)
       }
     }
 
@@ -178,14 +179,14 @@ check.popdataPLT <-
 
     if (!is.null(plotnm)) {
       puniqueid <-
-        pcheck.varchar(var2check = puniqueid, varnm = "puniqueid", gui=gui,
+        FIESTAutils::pcheck.varchar(var2check = puniqueid, varnm = "puniqueid", gui=gui,
                        checklst = pltflds, caption = "UniqueID variable of plot",
                        warn = paste(puniqueid, "not in plt table"), stopifnull = TRUE)
 
       ## Build from query for plot
       ## If pltx is NULL and plotnm is not null, the assumption is that all plot data are a database
       if (popType %in% c("CHNG", "GRM")) {
-        prev_plt_cnnm <- findnm("PREV_PLT_CN", pltflds, returnNULL = TRUE)
+        prev_plt_cnnm <- FIESTAutils::findnm("PREV_PLT_CN", pltflds, returnNULL = TRUE)
         if (is.null(prev_plt_cnnm)) {
           stop("must include PREV_PLT_CN in plt table")
         }  
@@ -196,7 +197,7 @@ check.popdataPLT <-
         pfromqry <- paste0("\nFROM ", SCHEMA., plotnm, " p")
         
         if (popType %in% c("CHNG", "GRM")) {
-          pchgjoinqry <- getjoinqry(puniqueid, prev_plt_cnnm, "pplot.", "p.")
+          pchgjoinqry <- FIESTAutils::getjoinqry(puniqueid, prev_plt_cnnm, "pplot.", "p.")
           pfromqry <- paste0(pfromqry,
                              "\nJOIN ", SCHEMA., plotnm, " pplot ", pchgjoinqry)
         }
@@ -213,12 +214,12 @@ check.popdataPLT <-
       
       ## Check pjoinid and pltassgnid
       if (!is.null(pltassgnnm)) {
-        pltassgnchk <- unlist(sapply(pltassgnid, findnm, pltassgnflds, returnNULL=TRUE))
+        pltassgnchk <- unlist(sapply(pltassgnid, FIESTAutils::findnm, pltassgnflds, returnNULL=TRUE))
         if (is.null(pltassgnchk)) {
-          if (pltassgnid == "CN" && !is.null(findnm("PLT_CN", pltassgnflds, returnNULL=TRUE))) {
-            pltassgnid <- findnm("PLT_CN", pltassgnflds)
-          } else if (pltassgnid == "PLT_CN" && !is.null(findnm("CN", pltassgnflds, returnNULL=TRUE))) {
-            pltassgnid <- findnm("CN", pltassgnflds)
+          if (pltassgnid == "CN" && !is.null(FIESTAutils::findnm("PLT_CN", pltassgnflds, returnNULL=TRUE))) {
+            pltassgnid <- FIESTAutils::findnm("PLT_CN", pltassgnflds)
+          } else if (pltassgnid == "PLT_CN" && !is.null(FIESTAutils::findnm("CN", pltassgnflds, returnNULL=TRUE))) {
+            pltassgnid <- FIESTAutils::findnm("CN", pltassgnflds)
           } else {
             stop("pltassgnid is not in pltassgn")
           }
@@ -227,7 +228,7 @@ check.popdataPLT <-
         }
       }
       if (!is.null(pjoinid)) {
-        pjoinidchk <- unlist(sapply(pjoinid, findnm, pltflds, returnNULL=TRUE))
+        pjoinidchk <- unlist(sapply(pjoinid, FIESTAutils::findnm, pltflds, returnNULL=TRUE))
         if (is.null(pjoinidchk)) {
           stop("invalid pjoinid... must be in plot table")
         } else {
@@ -237,7 +238,7 @@ check.popdataPLT <-
         pjoinid <- puniqueid
       }
       if (length(pjoinid) != length(pltassgnid)) {
-        pltassgnchk <- unlist(sapply(pjoinidchk, findnm, pltassgnflds, returnNULL=TRUE))
+        pltassgnchk <- unlist(sapply(pjoinidchk, FIESTAutils::findnm, pltassgnflds, returnNULL=TRUE))
         if (is.null(pltassgnchk)) {
           message("pjoinid must be same number of variables as pltassgnid")
           stop()
@@ -306,7 +307,7 @@ check.popdataPLT <-
 
     ## Check adj
     adjlst <- c("samp", "plot", "none")
-    adj <- pcheck.varchar(var2check = adj, varnm = "adj", gui = gui,
+    adj <- FIESTAutils::pcheck.varchar(var2check = adj, varnm = "adj", gui = gui,
                           checklst = adjlst, caption = "adj", multiple = FALSE, 
                           stopifnull = TRUE)
     if (adj == "plot" && module == "GB") {
@@ -323,12 +324,12 @@ check.popdataPLT <-
     }
 
     ## Check defaultVars
-    defaultVars <- pcheck.logical(defaultVars, varnm="defaultVars",
+    defaultVars <- FIESTAutils::pcheck.logical(defaultVars, varnm="defaultVars",
                                   title="Default variables?", first="NO", gui=gui)
 
     ## heck unit.action
     unit.actionlst <- c("keep", "remove", "combine")
-    unit.action <- pcheck.varchar(var2check = unit.action, varnm = "unit.action", 
+    unit.action <- FIESTAutils::pcheck.varchar(var2check = unit.action, varnm = "unit.action", 
                                   checklst = unit.actionlst, 
                                   caption = "unit.action", 
                                   multiple = FALSE, stopifnull = TRUE, gui = gui)
@@ -340,24 +341,24 @@ check.popdataPLT <-
     if (module == "GB") {
       
       ## 5.5. Check strata and other strata parameters.
-      strata <- pcheck.logical(strata, varnm = "strata",
+      strata <- FIESTAutils::pcheck.logical(strata, varnm = "strata",
                                title = "Post stratify?", first = "YES", 
                                stopifnull = TRUE, gui = gui)
       
       if (strata) {
       
         ## Check pivot
-        pivot <- pcheck.logical(pivot, varnm="pivot",
+        pivot <- FIESTAutils::pcheck.logical(pivot, varnm="pivot",
                                 title="Pivot stratalut?", first="NO", gui=gui)
         ## Check nonresp
-        nonresp <- pcheck.logical(nonresp, varnm="nonresp",
+        nonresp <- FIESTAutils::pcheck.logical(nonresp, varnm="nonresp",
                                   title="Post stratify?", first="YES", gui=gui)
         if (nonresp) {
           pstratvars <- unique(c(pstratvars, c("PLOT_STATUS_CD", "SAMP_METHOD_CD")))
         }
         
         ## Check stratcombine
-        stratcombine <- pcheck.logical(stratcombine, 
+        stratcombine <- FIESTAutils::pcheck.logical(stratcombine, 
                                        varnm = "stratcombine",
                                        title = "Combine strata?", 
                                        first = "YES", 
@@ -499,18 +500,18 @@ check.popdataPLT <-
       
       
       ## Check minplotnum.unit.forest and minplotnum.strat.forest
-      minplotnum.unit.forest <- pcheck.logical(minplotnum.unit.forest, 
+      minplotnum.unit.forest <- FIESTAutils::pcheck.logical(minplotnum.unit.forest, 
                                                varnm="minplotnum.unit.forest", 
                                                title="minplotnum.unit.forest?", 
                                                first="NO", gui=gui)
-      minplotnum.strat.forest <- pcheck.logical(minplotnum.strat.forest, 
+      minplotnum.strat.forest <- FIESTAutils::pcheck.logical(minplotnum.strat.forest, 
                                                varnm="minplotnum.strat.forest", 
                                                title="minplotnum.strat.forest?", 
                                                first="NO", gui=gui)
       
       ## check minimum plot numbers based on forested plots
       if (minplotnum.unit.forest || minplotnum.strat.forest) {
-        plot_status_cdnm <- findnm("PLOT_STATUS_CD", pltassgnflds, returnNULL = TRUE)
+        plot_status_cdnm <- FIESTAutils::findnm("PLOT_STATUS_CD", pltassgnflds, returnNULL = TRUE)
         if (is.null(plot_status_cdnm)) {
           stop("need PLOT_STATUS_CD in dataset to determine forested plots")
         }
@@ -542,7 +543,7 @@ check.popdataPLT <-
       # Add prednames to pltassgnvars.
       #######################################################################
       if (!is.null(prednames)) {
-        prednameschk <- findnms(prednames, pltassgnflds)
+        prednameschk <- FIESTAutils::findnms(prednames, pltassgnflds)
         if (is.null(prednameschk)) {
           message("no prednames are not found in dataset")
           return(NULL)
@@ -565,7 +566,7 @@ check.popdataPLT <-
     ## 7.1. Check to make sure all pltvars2keep are in pltassgn or plt (pflds).
     if (!is.null(pltvars2keep)) {
       if (!is.null(pltvars2keep)) {
-        pvars2keepchk <- findnms(pltvars2keep, pflds)
+        pvars2keepchk <- FIESTAutils::findnms(pltvars2keep, pflds)
         if (length(pvars2keepchk) < length(pltvars2keep)) {
           pvars2keepmiss <- pltvars2keep[!pltvars2keep %in% pvars2keepchk]
           pvars2keepmiss <- pvars2keepmiss[pvars2keepmiss != "PSTATUSCD"]
@@ -604,7 +605,7 @@ check.popdataPLT <-
         #message("consider writing pltassgn to database or including dsnreadonly=TRUE, for more efficient queries...")
       } else {
         index <- NULL
-        pltassgnnm <- checknm("pltassgn", dbtablst)
+        pltassgnnm <- FIESTAutils::checknm("pltassgn", dbtablst)
         if (!identical(pltassgnid, pjoinid)) index <- pjoinid
         write2sqlite(pltassgnx[, pltassgnvars, with=FALSE],
                      dbconn = dbconn, out_name = pltassgnnm, index = index)
