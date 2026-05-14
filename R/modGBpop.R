@@ -335,7 +335,7 @@ modGBpop <- function(popType = "VOL",
                 database_opts = database_opts)
   
   ## Check parameter option lists
-  optslst <- pcheck.opts(optionlst = list(
+  optslst <- FIESTAutils::pcheck.opts(optionlst = list(
                          popFilter = popFilter,
                          popTabs = popTabs,
                          popTabIDs = popTabIDs,
@@ -386,7 +386,7 @@ modGBpop <- function(popType = "VOL",
   ## Check output
   ########################################################
   if (savedata || saveobj) {
-    outlst <- pcheck.output(savedata_opts = savedata_opts)
+    outlst <- FIESTAutils::pcheck.output(savedata_opts = savedata_opts)
     if (savedata) {
       if (outlst$out_fmt == "sqlite" && is.null(outlst$out_dsn)) {
         outlst$out_dsn <- "GBpopdat.db"
@@ -399,7 +399,7 @@ modGBpop <- function(popType = "VOL",
   
   if (saveobj) {
     outobj_fmtlst <- c('rds', 'rda')
-    outobj_fmt <- pcheck.varchar(var2check = outobj_fmt, varnm="outobj_fmt", 
+    outobj_fmt <- FIESTAutils::pcheck.varchar(var2check = outobj_fmt, varnm="outobj_fmt", 
                                  gui=gui, checklst = outobj_fmtlst, caption="outobj_fmt", 
                                  multiple = FALSE, stopifnull = TRUE)
     if (is.null(objnm)) {
@@ -407,7 +407,7 @@ modGBpop <- function(popType = "VOL",
     }
     #if (append_layer) overwrite_layer <- FALSE
     if (append_layer) message("currently cannot append to object lists")
-    objfn <- getoutfn(outfn = objnm, 
+    objfn <- FIESTAutils::getoutfn(outfn = objnm, 
                       ext = outobj_fmt, 
                       outfolder = outlst$outfolder, 
                       overwrite = outlst$overwrite_layer, 

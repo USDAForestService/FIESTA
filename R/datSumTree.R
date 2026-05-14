@@ -1342,13 +1342,16 @@ datSumTree <- function(tree = NULL,
       pltcondxSELECTqry <- paste0("\n(SELECT")
       
       if (pjoin) {
+        pdomainlst <- sprintf("[%s]", pdomainlst)
         pltcondxSELECTqry <- paste0(pltcondxSELECTqry, " ", toString(paste0("p.", c(pvars, pdomainlst))))
         
         if (cjoin) {
+          cdomainlst <- sprintf("[%s]", cdomainlst)
           pltcondxSELECTqry <- paste0(pltcondxSELECTqry, ", ", toString(paste0("c.", c(cvars, cdomainlst))))
         }
       } else {
         if (cjoin) {
+          cdomainlst <- sprintf("[%s]", cdomainlst)
           pltcondxSELECTqry <- paste0(pltcondxSELECTqry, " ", toString(paste0("c.", c(cvars, cdomainlst))))
         }
       }
@@ -2040,7 +2043,8 @@ datSumTree <- function(tree = NULL,
     
     ## Add any domains from plot / cond table
     if (length(pcdomainlst) > 0) {
-      twithSelect <- paste0(twithSelect, ", ", toString(paste0(pca., pcdomainlst)))
+      pcdomainlstqry <- sprintf("[%s]", pcdomainlst)
+      twithSelect <- paste0(twithSelect, ", ", toString(paste0(pca., pcdomainlstqry)))
     }
 
     ## Add adjustment variables
@@ -2109,7 +2113,7 @@ datSumTree <- function(tree = NULL,
 
       ## Add any domains from plot / cond table
       if (length(pcdomainlst) > 0) {
-        swithSelect <- paste0(swithSelect, ", ", toString(paste0(pca., pcdomainlst)))
+        swithSelect <- paste0(swithSelect, ", ", toString(paste0(pca., pcdomainlstqry)))
       }
       
       ## Add adjustment variables
@@ -2156,7 +2160,7 @@ datSumTree <- function(tree = NULL,
 
     ## Add any domains from plot / cond table
     if (length(pcdomainlst) > 0) {
-      swithSelect <- paste0(swithSelect, ", ", toString(paste0(pca., pcdomainlst)))
+      swithSelect <- paste0(swithSelect, ", ", toString(paste0(pca., pcdomainlstqry)))
     }
     
     if (adjtree) {
@@ -2350,8 +2354,8 @@ datSumTree <- function(tree = NULL,
       tgrpbyvars <- unique(c(tgrpbyvars, paste0("tdat.", tdomainlst)))
     }
     if (length(pcdomainlst) > 0) {
-      tselectqry <- paste0(tselectqry, ", ", toString(paste0("tdat.", pcdomainlst)))
-      tgrpbyvars <- unique(c(tgrpbyvars, paste0("tdat.", pcdomainlst)))
+      tselectqry <- paste0(tselectqry, ", ", toString(paste0("tdat.", pcdomainlstqry)))
+      tgrpbyvars <- unique(c(tgrpbyvars, paste0("tdat.", pcdomainlstqry)))
     }
   }
 

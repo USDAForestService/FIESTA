@@ -274,10 +274,10 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
         
         ## Build query for getting unique values within population
         uniquetabvar.qry <- 
-          paste0("SELECT DISTINCT ", toString(c(tab.orderby, tabvar)), 
+          paste0("SELECT DISTINCT ", toString(c(paste0("[", tab.orderby, "]"), paste0("[", tabvar, "]"))), 
                  tabfromqry,
                  whereqry.tab,
-                 "\nORDER BY ", toString(c(tab.orderby, tabvar)))
+                 "\nORDER BY ", toString(c(paste0("[", tab.orderby, "]"), paste0("[", tabvar, "]"))))
         if (!is.null(withqry)) {
           uniquetabvar.qry <- paste0(withqry,
                                   "\n", uniquetabvar.qry)
@@ -323,10 +323,10 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
           
           ## Build query for getting unique values within population
           uniquetabvar.qry <- 
-            paste0("SELECT DISTINCT ", toString(c(tab.orderby, tabvar)), 
+            paste0("SELECT DISTINCT ", toString(c(paste0("[", tab.orderby, "]"), paste0("[", tabvar, "]"))), 
                    seedfromqry,
                    whereqry.tab,
-                   "\nORDER BY ", toString(c(tab.orderby, tabvar)))
+                   "\nORDER BY ", toString(c(paste0("[", tab.orderby, "]"), paste0("[", tabvar, "]"))))
           if (!is.null(withqry)) {
             uniquetabvar.qry <- paste0(withqry,
                                     "\n", uniquetabvar.qry)
@@ -374,10 +374,10 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
 
       ## Build query for getting unique tabvar values within population
       uniquex.qry <- 
-        paste0("SELECT DISTINCT ", tabvar, 
+        paste0("SELECT DISTINCT [", tabvar, "]", 
                tabfromqry,
                whereqry.tab,
-               "\nORDER BY ", tabvar)
+               "\nORDER BY [", tabvar, "]")
 
       #message("getting unique values for ", tabvar, ":\n", cuniquex.qry, "\n")
       if (tabisdb) {
@@ -567,9 +567,9 @@ check.tabvar <- function(popType, tabvartype, tabvar, tab.orderby,
             
             ## Build query for getting unique seedling tabvar values within population
             suniquex.qry <- 
-              paste0("SELECT DISTINCT ", tabvar, 
+              paste0("SELECT DISTINCT [", tabvar, "]", 
                      seedfromqry,
-                     "\nORDER BY ", tabvar)
+                     "\nORDER BY [", tabvar, "]")
             if (estseed == "only") {
               #message("getting unique values for ", tabvar, ":\n", suniquex.qry, "\n")
             }
