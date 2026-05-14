@@ -681,8 +681,8 @@ spGetAuxiliary <- function(xyplt = NULL,
       ## Transform aspect 
       if (asptransform) {
         aspnm <- inputdf.cont$var.name[inputdf.cont$rasterfile == rast.aspfn]     
-        sppltx$asp_cos <- northness(sppltx[[aspnm]])
-        sppltx$asp_sin <- eastness(sppltx[[aspnm]])
+        sppltx$asp_cos <- gdalraster::northness(sppltx[[aspnm]])
+        sppltx$asp_sin <- gdalraster::eastness(sppltx[[aspnm]])
         prednames.cont <- c(prednames.cont[prednames.cont != aspnm], "asp_cos", "asp_sin")
       }
 
@@ -743,7 +743,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                         rastfn = rastfn, 
                         polyv.att = unitvar, 
                         zonalstat = zonalstat, 
-                        pixelfun = northness, 
+                        pixelfun = gdalraster::northness, 
                         rast.NODATA = rast.cont.NODATA),
                              error=function(e) {
                                message(e, "\n")
@@ -770,7 +770,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                        rast.NODATA = rast.cont.NODATA, 
                        polyv.att = unitvar, 
                        zonalstat = rastlst.cont.stat,
-                       pixelfun = eastness),
+                       pixelfun = gdalraster::eastness),
      	 	                      error=function(e) {
      	 	                        message(e, "\n")
 			                          return(NULL) })
