@@ -217,7 +217,7 @@ check.popdataVOL <-
     } else {
       condvars <- condflds
     }
-    
+
     ## Define SELECT variables for plot
     if (!is.null(plotnm)) {
       if (defaultVars) {
@@ -225,10 +225,16 @@ check.popdataVOL <-
       } else {
         pvars <- pltflds
       }
+      
+      ## check for condid
+      condidchk <- findnm(condid, pvars, returnNULL = TRUE)
+      if (!is.null(condidchk)) {
+        pvars <- pvars[!pvars %in% condid]
+      }
     } else {
       pvars <- NULL
     }
-    
+
     if (popType == "VOL") {
       
       ## Define SELECT variables for tree
@@ -537,7 +543,7 @@ check.popdataVOL <-
     }
     dbqueries$pltidsadj <- pltidsadj.qry
 
-
+    
     ##############################################################################
     ## 7. Build queries for PLOT/COND (pltcondx)
     ##############################################################################
@@ -654,6 +660,7 @@ check.popdataVOL <-
       setkeyv(setDT(pltcondx), pltcondkey)
     }
 
+    
     ##############################################################################
     ## 8. Build CASE statement for adding adjustment factors to SELECT
     ##############################################################################

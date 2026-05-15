@@ -1591,6 +1591,7 @@ check.popdataPLT <-
       }
     }
 
+
     ###############################################################################
     ## 18. Build query for pltassgnx and extract from database if pltaindb = TRUE. 
     ###############################################################################
@@ -1635,7 +1636,6 @@ check.popdataPLT <-
       pltassgnx <- setDT(pltassgnx)
       setkeyv(pltassgnx, pltassgnid)
     }
-    
 
     ## 18.3. Get unique identifiers of plots in pltassgnx (getdataCNs)
     ###############################################################################
