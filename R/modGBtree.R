@@ -508,7 +508,7 @@ modGBtree <- function(GBpopdat,
     append_layer = estdat$append_layer
     rawoutlst <- estdat$rawoutlst
   }
-  
+
   ###################################################################################
   ## Check parameter inputs and tree filters
   ###################################################################################
@@ -598,11 +598,12 @@ modGBtree <- function(GBpopdat,
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
 
+  
   ###############################################################################
   ### Get estimation data from tree table
   ###############################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-
+  
   treedat <- 
     check.tree(treex = treex, 
                seedx = seedx, 

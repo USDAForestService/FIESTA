@@ -605,17 +605,20 @@ modGBdwm <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
+  
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
   estdat <- 
     getGBestimates(esttype = esttype,
                    domdatn = dwmdomdat,
-                   uniqueid = pltassgnid, condid = condid,
+                   uniqueid = dwmuniqueid, 
+                   condid = condid,
                    estvarn.name = estvarn.name,
                    rowvar = rowvar, colvar = colvar, 
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
+                   pltassgnid = pltassgnid,
                    unitarea = unitarea,
                    unitvar = unitvar,
                    areavar = areavar,

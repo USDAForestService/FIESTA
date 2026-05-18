@@ -416,7 +416,7 @@ modGBp2veg <- function(GBpopdat,
   returntitle <- estdat$returntitle
   addtitle <- estdat$addtitle
   
-  pcwhereqry <- estdat$where.qry
+  pcwhereqry <- estdat$pcwhereqry
   pltcondflds <- estdat$pltcondflds
   pltcondxadjWITHqry <- estdat$pltcondxadjWITHqry
   pltcondxWITHqry <- estdat$pltcondxWITHqry
@@ -437,8 +437,6 @@ modGBp2veg <- function(GBpopdat,
     append_layer = estdat$append_layer
     rawoutlst <- estdat$rawoutlst
   }
-  
-  
   
   ###################################################################################
   ## Check parameter inputs and tables 
@@ -566,7 +564,8 @@ modGBp2veg <- function(GBpopdat,
                    datSum_opts = datSum_options(adjtree = adjtree,
                                                 adjvar = "vadjfac",
                                                 ACI = ACI),
-                   database_opts = database_options(schema = pop_schema))
+                   database_opts = database_options(schema = pop_schema),
+                   pcwhereqry = pcwhereqry)
   vdomdat <- p2vegdat$tsumdat
   estvarn <- p2vegdat$sumvar
   estvarn.name <- p2vegdat$sumvar
@@ -578,16 +577,6 @@ modGBp2veg <- function(GBpopdat,
   pcdomainlst <- p2vegdat$pcdomainlst
   vdomainlst <- p2vegdat$tdomainlst
   vdomtotnm <- p2vegdat$tdomtotnm
-  
-
-  ## change variable in query from tree variables to veg variables for display
-  p2vegqry2 <- gsub("tdat", "vdat", p2vegqry)
-  p2vegqry2 <- gsub("get tree data", "get p2veg data", p2vegqry2)
-  p2vegqry2 <- gsub("treex t", "p2vegx v", p2vegqry2)
-  p2vegqry2 <- gsub(" 'TREE' src,", "", p2vegqry2)
-  p2vegqry2 <- gsub(" t.", " v.", p2vegqry2)
-  p2vegqry2 <- gsub("\\(t.", "\\(v.", p2vegqry2)
-  #message(p2vegqry2)  
   
 
   ## If classified rowvar or colvar, get class names
@@ -603,7 +592,7 @@ modGBp2veg <- function(GBpopdat,
     }
   }
 
-  
+
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################
@@ -630,7 +619,7 @@ modGBp2veg <- function(GBpopdat,
     cdomdatqry <- conddat$cdomdatqry
     estvard.name <- conddat$estnm
   }
-  
+
   ###################################################################################
   ### Get titles for output tables
   ###################################################################################
@@ -682,6 +671,7 @@ modGBp2veg <- function(GBpopdat,
                    tdomvarlstd = NULL,
                    grpvar = grpvar,
                    pltassgnx = pltassgnx,
+                   pltassgnid = pltassgnid,
                    unitarea = unitarea,
                    unitvar = unitvar,
                    areavar = areavar,
@@ -789,7 +779,7 @@ modGBp2veg <- function(GBpopdat,
     
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(vdomdat) 
-    rawdat$domdatqry <- p2vegqry2
+    rawdat$domdatqry <- p2vegqry
     rawdat$estvarn <- estvarn.name
     rawdat$estvarn.filter <- estvarn.filter
     rawdat$estunits <- estunits
@@ -797,6 +787,7 @@ modGBp2veg <- function(GBpopdat,
     if (esttype == "RATIO") {
       rawdat$estvard <- estvard.name
       rawdat$areaunits <- areaunits
+      rawdata$domdatdqry <- cdomdatqry
     }
 
     if (savedata) {

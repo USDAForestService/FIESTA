@@ -462,7 +462,7 @@ modGBgrm <- function(GBpopdat,
     rawoutlst <- estdat$rawoutlst
   }
   
-  
+ print("TEST") 
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -520,8 +520,6 @@ modGBgrm <- function(GBpopdat,
   ###############################################################################
   ### Get estimation data from tree table
   ###############################################################################
-  #adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-source("C:/_tsf/_GitHub/FIESTA/R/datSumTreeGRM2.R")
   treedat <- 
     datSumTreeGRM(grmtables = list(cond = pltcondx,
                                    tree = treex,
@@ -538,6 +536,7 @@ source("C:/_tsf/_GitHub/FIESTA/R/datSumTreeGRM2.R")
                   bydomainlst = domainlst,
                   pltcondx = pltcondx,
                   pltidsWITHqry = pltcondxadjWITHqry,
+                  pltidsid = pltidsid,
                   pltcondflds = pltcondflds,
                   pltidsadj = pltidsadj,
                   datSum_opts = datSum_options(adjtree = TRUE))
@@ -548,7 +547,7 @@ source("C:/_tsf/_GitHub/FIESTA/R/datSumTreeGRM2.R")
   tdomvarlst <- treedat$tdomvarlst
   treeqry <- treedat$grmqry
   classifynmlst <- treedat$classifynmlst
-  
+print("TEST3")  
   if (sum(tdomdat[[estvar.name]], na.rm=TRUE) == 0) {
     stop("invalid estimate... no tree data returned...")
   }
