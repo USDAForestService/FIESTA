@@ -86,10 +86,10 @@ datSumDWM <- function(dwm,
   ## Set global variables
   pltx=tabx=pltidsnm=domainlst=classifyvars=propvars=tpcwhereqry=
     condx=pltx=sppltx=pcflds=tdomscols=tdomtotnm=classifynmlst=
-    pltflds=condflds <- NULL
+    pltflds=condflds=pvars <- NULL
   
   #ref_estvar <- FIESTAutils::ref_estvar
-  dwmwhereqry=dwmfromqry=pcfromqry=pcselectvars=tpavarnm=pcdomainlst=adjvar=
+  dwmwhereqry=dwmfromqry=pcfromqry=pcselectvars=tpavarnm=adjvar=
     dwmsumvarnm <- NULL
   
   datindb <- FALSE
@@ -526,7 +526,7 @@ datSumDWM <- function(dwm,
   ## Define variables to classify from domainlst or domclassify list
   pcclassifyvars <- classifyvars[classifyvars %in% pcdomainlst]
 
-  
+
   ###############################################################################
   ## 9. Check pwhereqry and ACI
   ###############################################################################
@@ -697,12 +697,12 @@ datSumDWM <- function(dwm,
   ## 12. Build WITH query to get cond data (pltcondx)
   #################################################################################
   message("building query for plot/cond data...")
-  
+
   
   pjoin <- ifelse((!is.null(pdomainlst) || !is.null(pwhereqry)), TRUE, FALSE)
   cjoin <- ifelse((!is.null(cdomainlst) || !is.null(cwhereqry) || getadjplot), TRUE, FALSE)
   
-  if (!condinWITHqry && condnm != "pltcondx") {
+  if (condinWITHqry && condnm != "pltcondx") {
 
     ## FROM statement for pltcondx WITH query
     ##################################################################
@@ -744,17 +744,18 @@ datSumDWM <- function(dwm,
     if (pjoin || cjoin) {
       pltcondxSELECTqry <- paste0("\n(SELECT ")
       
-      if (pjoin) {
-        pltcondxSELECTqry <- paste0(pltcondxSELECTqry, " ", toString(paste0("p.", c(pvars, pdomainlst))))
-        
-        if (cjoin) {
-          pltcondxSELECTqry <- paste0(pltcondxSELECTqry, ", ", toString(paste0("c.", c(cvars, cdomainlst))))
-        }
-      } else {
-        if (cjoin) {
-          pltcondxSELECTqry <- paste0(pltcondxSELECTqry, " ", toString(paste0("c.", c(cvars, cdomainlst))))
-        }
-      }
+      # if (pjoin) {
+      #   pltcondxSELECTqry <- paste0(pltcondxSELECTqry, " ", toString(paste0("p.", c(pvars, pdomainlst))))
+      #   
+      #   if (cjoin) {
+      #     pltcondxSELECTqry <- paste0(pltcondxSELECTqry, ", ", toString(paste0("c.", c(cvars, cdomainlst))))
+      #   }
+      # } else {
+      #   if (cjoin) {
+      #     pltcondxSELECTqry <- paste0(pltcondxSELECTqry, " ", toString(paste0("c.", c(cvars, cdomainlst))))
+      #   }
+      # }
+      pltcondxSELECTqry <- paste0(pltcondxSELECTqry, " ", toString(paste0("pc.", unique(c(pvars, cvars, pcdomainlst)))))
       
       ## Build final WITH query for pltcondx
       if (!is.null(pltidsWITHqry)) {
@@ -840,10 +841,9 @@ datSumDWM <- function(dwm,
     
     ## Define name - add _ADJ to name if adjusting
     dwmsumvarnm <- sub("_UNADJ", "_ADJ", dwmsumvar)
-    
   }  
   
-  
+
   #################################################################################
   #################################################################################
   ## 14. Build WITH query to get tree data (tdat)
@@ -858,23 +858,26 @@ datSumDWM <- function(dwm,
   
   ## 14.1. FROM statement for tdat WITH query
   ##########################################################################
-  if (dwmindb) {
-    dwmwithfromqry <- paste0("\n FROM ", SCHEMA., dwmnm, " dwm")
-  } else {
-    dwmwithfromqry <- paste0("\n FROM ", dwmnm, " dwm")
+  dwmWITHfromqry <- paste0(
+    "\n FROM ", SCHEMA., dwmnm, " dwm")
+  
+  if (pjoin || cjoin) {
+    dwmpcjoinqry <- getjoinqry(c(cuniqueid, condid), c(dwmuniqueid, condid), pca., dwmalias.)
+    dwmWITHfromqry <- paste0(dwmWITHfromqry,
+                             "\n JOIN ", SCHEMA., condnm, " pc ", dwmpcjoinqry)
   }
   
   if (adjtree) {
     if (is.null(adjvarchk)) {
       dwmadjjoinqry <- getjoinqry(adjjoinid, dwmuniqueid, adjalias., dwmalias.)
-      dwmwithfromqry <- paste0(dwmwithfromqry,
+      dwmWITHfromqry <- paste0(dwmWITHfromqry,
                                "\n JOIN pltidsadj adj ", dwmadjjoinqry)
     }
   } else {
     
     if (!is.null(pltidsWITHqry)) {
       dwmjoinqry <- getjoinqry(dwmuniqueid, pltidsid, dwmalias., "pltids.")
-      dwmwithfromqry <- paste0(dwmwithfromqry,
+      dwmWITHfromqry <- paste0(dwmWITHfromqry,
                                "\n JOIN pltids ", dwmjoinqry)
     }
   }
@@ -893,126 +896,6 @@ datSumDWM <- function(dwm,
   ## Build dwmwithSelect
   dwmwithSelect <- toString(paste0(dwmalias., c(dwmsumuniqueid, dwmsumvar)))
   
- 
-  ## Build final SELECT statement 
-  dwmwithqry <- paste(dwmwithqry, toString(dwmwithSelect))
-
-  ## Add adjustment variables
-  if (adjtree) {
-    dwmwithqry <- paste0(dwmwithqry, ", ", dwmadjcase)
-    
-    ## Define name - add _ADJ to name if adjusting
-    dwmsumvarnm <- sub("_UNADJ", "_ADJ", dwmsumvar)
-  }
-  
- 
-
-  ## WHERE statement
-  dwmwithwhereqry <- dwmwhereqry
-  
-  ## Build final WITH query
-  dwmwithqry <- paste0(dwmwithqry,
-                       dwmwithfromqry,
-                       dwmwithwhereqry)
-  
-  
-  ## Append dwmdat WITH query to pltidsWITHqry
-  ##########################################################################
-  if (!is.null(pltidsWITHqry)) {
-    if (!is.null(condnm)) {
-      uniqueid <- cuniqueid
-    } else {
-      uniqueid <- pltidsid
-    }
-    if (bycond) {
-      uniqueid <- c(uniqueid, condid)
-    }
-    pltidsWITHqry <- paste0(pltidsWITHqry, ", ",
-                            "\n----- get data",
-                            "\ndwmdat AS",
-                            "\n(", dwmwithqry, ")")
-  } else {
-    uniqueid <- dwmuniqueid
-    if (bycond) {
-      uniqueid <- c(uniqueid, condid)
-    }
-    
-    pltidsWITHqry <- paste0("WITH dwmdat AS",
-                            "\n(", dwmwithqry, ")")
-  }
-  uniqueid <- toupper(uniqueid)
-  
-  
-  #################################################################################
-  #################################################################################
-  ## 15. Build query for summarizing tree data
-  #################################################################################
-  #################################################################################
-  message("building query for summarizing tree data...\n")
-  
-  
-  ## 15.1. FROM statement 
-  ####################################################################
-  dwmfromqry <- paste0("\nFROM dwmdat")
-  
-  
-  ## Add pltcondx if pjoin or cjoin variables 
-  if (pjoin || cjoin) {
-    dwmjoinqry <- getjoinqry(c(cuniqueid, condid), c(dwmuniqueid, condid), "pc.", "dwmdat.")
-    dwmfromqry <- paste0(dwmfromqry,
-                       "\nJOIN pltcondx pc ", dwmjoinqry)
-  }
-  
-  
-  ## 15.2. SELECT statement for tab query
-  ###########################################################################
-  if (adjtree) {
-    dwmsumvarnew <- paste0("SUM(", dwmsumvarnew, " * dwmdat.", adjvar, ")")
-  } else {
-    dwmsumvarnew <- paste0("SUM(", dwmsumvarnew, ")")
-  }
-
-  
-  # ## Build FROM statement
-  # ################################################################
-  # 
-  # ## use LEFT JOIN for dwmdat to get all records, no data filled with 0
-  # dwmjointype <- ifelse((is.null(pcdomainlst) || length(pcdomainlst) == 0), "JOIN", "LEFT JOIN")
-  # 
-  # if (!is.null(condnm)) {
-  #   conda. <- "pc."
-  #   dwmfromqry <- paste0("\nFROM ", condnm, " pc")
-  #   dwmjoinid <- getjoinqry(c(dwmuniqueid, condid), c(cuniqueid, condid), "dwmdat.", conda.)
-  #   dwmfromqry <- paste0(dwmfromqry,
-  #                      "\n", dwmjointype, " dwmdat ", dwmjoinid)
-  #   
-  # } else if (!is.null(pltidsnm)) {
-  #   dwmfromqry <- paste0("\nFROM ", pltidsnm, " pltids")
-  #   dwmjoinid <- getjoinqry(dwmuniqueid, pltidsid, "dwmdat.", pltidsa.)
-  #   dwmfromqry <- paste0(dwmfromqry,
-  #                      "\n", dwmjointype, " dwmdat ", dwmjoinid)
-  #   
-  # } else if (!is.null(plotnm)) {
-  #   dwmfromqry <- paste0("\nFROM ", plotnm)
-  #   dwmjoinid <- getjoinqry(dwmuniqueid, pltidsid, "dwmdat.", pltidsa.)
-  #   dwmfromqry <- paste0(dwmfromqry,
-  #                      "\n", dwmjointype, " dwmdat ", dwmjoinid)
-  #   
-  # } else {
-  #   dwmfromqry <- paste0("\nFROM ", dwmwithalias)
-  # }
-  
-  ## Build SELECT statement
-  ####################################################################
-  
-  #define grpby variables
-  dwmgrpbyvars <- paste0("dwmdat.", uniqueid)
-  #tgrpbyvars <- paste0("dwmdat.", dwmsumuniqueid)
-  
-  ## add grpby variable to select qry query
-  dwmselectqry <- paste0("\nSELECT ", toString(dwmgrpbyvars))
-  
-
   ## Add classifications to select query
   domclassifyqry <- NULL
   
@@ -1071,7 +954,7 @@ datSumDWM <- function(dwm,
         pcdomainlst <- pcdomainlst[pcdomainlst != classifyvar]
         pcdomainlst <- c(pcdomainlst, classifynm)
       }
-
+      
       domclassifyqry <- paste0(domclassifyqry, "\n", domclassqry)
       if (length(domclassify) > 1 && i < length(domclassify)) {
         domclassifyqry <- paste0(domclassifyqry, ",")
@@ -1089,6 +972,91 @@ datSumDWM <- function(dwm,
     }
   }
   
+  
+  ## Add any domains from plot / cond table
+  if (length(pcdomainlst) > 0) {
+    dwmwithSelect <- paste0(dwmwithSelect, ", ", toString(paste0(pca., pcdomainlst)))
+  }
+  
+ 
+  ## Build final SELECT statement 
+  dwmwithqry <- paste0(dwmwithqry, toString(dwmwithSelect))
+
+  ## Add adjustment variables
+  if (adjtree) {
+    dwmwithqry <- paste0(dwmwithqry, ", ", dwmadjcase)
+    
+    ## Define name - add _ADJ to name if adjusting
+    dwmsumvarnm <- sub("_UNADJ", "_ADJ", dwmsumvar)
+  }
+  
+
+  ## Build final WITH query
+  dwmwithqry <- paste0(dwmwithqry,
+                       dwmWITHfromqry,
+                       pcwhereqry)
+  
+
+  ## Append dwmdat WITH query to pltidsWITHqry
+  ##########################################################################
+  if (!is.null(pltidsWITHqry)) {
+    if (!is.null(condnm)) {
+      uniqueid <- cuniqueid
+    } else {
+      uniqueid <- pltidsid
+    }
+    if (bycond) {
+      uniqueid <- c(uniqueid, condid)
+    }
+    pltidsWITHqry <- paste0(pltidsWITHqry, ", ",
+                            "\n----- get data",
+                            "\ndwmdat AS",
+                            "\n(", dwmwithqry, ")")
+  } else {
+    uniqueid <- dwmuniqueid
+    if (bycond) {
+      uniqueid <- c(uniqueid, condid)
+    }
+    
+    pltidsWITHqry <- paste0("WITH dwmdat AS",
+                            "\n(", dwmwithqry, ")")
+  }
+  uniqueid <- toupper(uniqueid)
+  
+  
+  #################################################################################
+  #################################################################################
+  ## 15. Build query for summarizing tree data
+  #################################################################################
+  #################################################################################
+  message("building query for summarizing tree data...\n")
+  
+  
+  ## 15.1. FROM statement 
+  ####################################################################
+  dwmfromqry <- paste0("\nFROM dwmdat")
+  
+  
+  ## 15.2. SELECT statement for tab query
+  ###########################################################################
+  if (adjtree) {
+    dwmsumvarnew <- paste0("SUM(", dwmsumvarnew, " * dwmdat.", adjvar, ")")
+  } else {
+    dwmsumvarnew <- paste0("SUM(", dwmsumvarnew, ")")
+  }
+
+  
+
+  ## Build SELECT statement
+  ####################################################################
+  
+  #define grpby variables
+  dwmgrpbyvars <- paste0("dwmdat.", c(uniqueid, pcdomainlst))
+  #tgrpbyvars <- paste0("dwmdat.", dwmsumuniqueid)
+  
+  ## add grpby variable to select qry query
+  dwmselectqry <- paste0("\nSELECT ", toString(dwmgrpbyvars))
+  
   ## Build select query
   dwmselectqry <- paste0(dwmselectqry,
                        ",\n   ", dwmsumvarnew, " AS ", dwmsumvarnm)
@@ -1098,7 +1066,6 @@ datSumDWM <- function(dwm,
   ################################################################
   dwmqry <- paste0(dwmselectqry,
                    dwmfromqry,
-                   pcwhereqry,
                    "\nGROUP BY ", toString(dwmgrpbyvars))
   
   ## Build final query to summarize data including WITH queries

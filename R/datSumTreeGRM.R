@@ -25,6 +25,7 @@
 #' "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
 #' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.
 #' @param grmtype String. Type of GRM to summarize ('GROW', 'MORT', 'REMV')
+#' @param grm_typ_cd Numeric Type of annual GRM code (1:Current annual; 2:A2A)
 #' @param tstatus String. The status type of GRM to summarize ('Sawtimber',
 #' 'Growing-stock', 'All live').
 #' @param tsumvar String. Tree-level variable to summarize (e.g., "VOLCFNET"). 
@@ -47,7 +48,6 @@
 #' @param bydomainlst String (vector). Categorical domain variables for
 #' summing tree data by (e.g., SPCD). Variables must be in tree table or
 #' plt/cond table if tables are provided.
-#' @param grm_typ_cd Integer Type of annual GRM code (1:Current annual; 2:A2A)
 #' @param pivot Logical. If TRUE, tdomvar data are transposed (pivoted) to
 #' separate columns.
 #' @param domclassify List. List for classifying domain variables in bydomainlst
@@ -85,6 +85,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
                           landarea,
                           tstatus,
                           grmtype,
+                          grm_typ_cd = 2,
                           tsumvar,
                           tsumvarnm = "ESTIMATED_VALUE",
                           tdomvar = NULL, 
@@ -94,12 +95,12 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
                           bycond = FALSE,
                           bysubp = FALSE,
                           bydomainlst = NULL,
-                          grm_typ_cd = 2,
                           pivot = TRUE,
                           domclassify = NULL,
                           pltidsWITHqry = NULL,
                           pltidsid = NULL,
                           pltcondx = NULL,
+                          pltcondflds = NULL,
                           pltidsadj = NULL,
                           savedata = FALSE,
                           dbconnopen = TRUE,
@@ -107,7 +108,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
                           datSum_opts = datSum_options(),
                           database_opts = NULL,
                           savedata_opts = NULL) {
-                       
+  
   
   ####################################################################################
   ## DESCRIPTION: Aggregates tab variable(s) to plot(/cond)-level,
@@ -119,7 +120,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   
   ## Set global variables
   pltx=tabx=pltidsnm=domainlst=classifyvars=propvars=tpcwhereqry=
-    condx=pltx=sppltx=pcflds=tdomscols=tdomtotnm=classifynmlst <- NULL
+    condx=pltx=sppltx=pcflds=tdomscols=tdomtotnm=classifynmlst=pltflds <- NULL
   
   #ref_estvar <- FIESTAutils::ref_estvar
   twhereqry=swhereqry=tfromqry=sfromqry=pcfromqry=pcselectvars=tpavarnm=pcdomainlst=
@@ -135,7 +136,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   getadjplot = FALSE
   condid <- "CONDID"
   subpid <- "SUBP"
-  
+
   ## Query alias.
   talias. <- "t."
   
@@ -168,10 +169,10 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   
   ## Check parameter option lists
   optslst <- pcheck.opts(optionlst = list(
-                         savedata_opts = savedata_opts,
-                         database_opts = database_opts,
-                         datSum_opts = datSum_opts,
-                         tabIDs = tabIDs))
+    savedata_opts = savedata_opts,
+    database_opts = database_opts,
+    datSum_opts = datSum_opts,
+    tabIDs = tabIDs))
   savedata_opts <- optslst$savedata_opts
   database_opts <- optslst$database_opts
   datSum_opts <- optslst$datSum_opts
@@ -187,11 +188,12 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   if (savedata) {
     outlst <- FIESTAutils::pcheck.output(savedata_opts)
   }
-
+  
   ###############################################################################
   ## 1. Check datsource or database connection
   ###############################################################################
   pltsp <- FALSE
+  adjtree <- TRUE
   
   ## Check database connection
   ######################################################
@@ -266,7 +268,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   if (length(grm_typ_cd) != 1 &&  grm_typ_cd %in% grm_typ_cdlst) {
     stop("grm_typ_cd must be 1 or 2")
   }
-     
+  
   ## get estn_type
   estn_type <- ifelse (tstatus == "Sawtimber", "SL", 
                        ifelse (tstatus == "Growing-stock", "GS",
@@ -300,7 +302,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
                             add_layer=add_layer, append_layer=append_layer, gui=gui)
     outlst$out_layer <- "tabsum"
   }
- 
+  
   
   ###############################################################################
   ## 3. Check tables
@@ -326,6 +328,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   indb <- grmlst$indb
   if (is.data.frame(grmx)) {
     grmnm <- "grmx"
+    rm(grm)
   } else {
     grmnm <- grmlst$tabnm
   }
@@ -335,10 +338,10 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     beginend <- data.frame(ONEORTWO = c(1,2))
   }
   beginendlst <- datTabchk(tab = beginend, tabtext = "beginend",
-                        tabid = "ONEORTWO",
-                        dbconn = dbconn, schema = schema, 
-                        dbtablst = dbtablst,
-                        bycond = FALSE)
+                           tabid = "ONEORTWO",
+                           dbconn = dbconn, schema = schema, 
+                           dbtablst = dbtablst,
+                           bycond = FALSE)
   beginendx <- beginendlst$tabx
   if (is.data.frame(beginendx)) {
     beginendnm <- "beginendx"
@@ -360,7 +363,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   } else {
     beginnm <- beginlst$tabnm
   }
- 
+  
   ## TREE_GRM_MIDPT
   midptlst <- datTabchk(tab = midpt, tabtext = "midpt",
                         tabid = "TRE_CN",
@@ -401,10 +404,10 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   ## Check for pltcondx table 
   ## (including both, plot and cond variables and with "PREV_* names for T1 variables)
   pltcondxlst <- datTabchk(tab = pltcondx, tabtext = "pltcondx",
-                       tabid = "PLT_CN",
-                       dbconn = dbconn, schema = schema, 
-                       dbtablst = dbtablst,
-                       bycond = TRUE)
+                           tabid = "PLT_CN",
+                           dbconn = dbconn, schema = schema, 
+                           dbtablst = dbtablst,
+                           bycond = TRUE)
   condflds <- pltcondxlst$tabflds
   pcxuniqueid <- pltcondxlst$uniqueid
   pltcondx <- pltcondxlst$tabx
@@ -414,7 +417,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     cuniqueid <- pcxuniqueid
     pltidsid <- cuniqueid
   } else {
-    condnm <- pltcondx$tabnm
+    condnm <- pltcondxlst$tabnm
   }  
   
   if (is.null(pltcondx)) {
@@ -613,7 +616,11 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   }
   
   ## list of plot and cond fields
-  pcflds <- toupper(c(pltflds, condflds))
+  if (is.null(pltcondflds)) {
+    pcflds <- tolower(c(pltflds, condflds))
+  } else {
+    pcflds <- tolower(pltcondflds)
+  }
   
   
   ###############################################################################
@@ -629,7 +636,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     }
     tsumuniqueid <- c(tsumuniqueid, subpid)
   }
- 
+  
   ## check if cond uniqueid is in tab... if it is not, append CONDID = 1
   if (bycond) {
     condidchk <- findnm(condid, treeflds, returnNULL = TRUE)
@@ -652,13 +659,13 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   pltidsid <- tolower(pltidsid)
   tuniqueid <- tolower(tuniqueid)
   
-
+  
   ###############################################################################
   ### 6. Check tsumvar
   ###############################################################################
   addtdat <- FALSE
   tsumvarnew <- NULL
-
+  
   if (is.null(tsumvar)) {
     stop("tsumvar is null")
   }
@@ -669,16 +676,16 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   if (length(tsumvars) == 0) {
     stop("invald tsumvar: ", tsumvar)
   }
- 
+  
   ## create variables for SELECT CASE statement
   tsumvar_t <- tsumvar_tmidpt <- tsumvar_tbegin <- tsumvar_ptree <- tsumvar
   for (i in 1:length(tsumvars)) {
-    tsumvar_t <- gsub(tsumvars[i], paste0(talias., tsumvars[i]), tsumvar_t)
+    tsumvar_t <- gsub(tsumvars[i], paste0("tdat.", tsumvars[i]), tsumvar_t)
     tsumvar_tmidpt <- gsub(tsumvars[i], paste0("tre_midpt.", tsumvars[i]), tsumvar_tmidpt)
     tsumvar_tbegin <- gsub(tsumvars[i], paste0("tre_begin.", tsumvars[i]), tsumvar_tbegin)
-    tsumvar_ptree <- gsub(tsumvars[i], paste0(talias., "prev_", tsumvars[i]), tsumvar_ptree)
+    tsumvar_ptree <- gsub(tsumvars[i], paste0("tdat.prev_", tsumvars[i]), tsumvar_ptree)
   }
-
+  
   ## build variables for subquery
   land_basis <- tolower(land_basis)
   estn_type <- tolower(estn_type)
@@ -691,7 +698,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   subp_component <- paste0("subp_component_", estn_type, "_", land_basis)
   subp_subptyp <- paste0("subp_subptyp_grm_", estn_type, "_", land_basis)
   subp_tpa <- paste0("subp_tpa", grmtype, "_unadj_", estn_type, "_", land_basis)
-
+  
   ## check if prev_'tsumvar' exists in the tree fields
   if (!tsumvar_ptree %in% treeflds) {
     addtdat <- TRUE
@@ -743,6 +750,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   
   
   ## check if all variables in bydomainlst are in the input tables
+  bydomainlst <- tolower(bydomainlst)
   if (!all(bydomainlst %in% c(treeflds, pcflds))) {
     missdomain <- bydomainlst[!bydomainlst %in% c(treeflds, pcflds)]
     stop("invalid variable in bydomainlst: ", toString(missdomain))
@@ -782,8 +790,8 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   ## Define variables to classify from domainlst or domclassify list
   tclassifyvars <- classifyvars[classifyvars %in% tdomainlst]
   pcclassifyvars <- classifyvars[classifyvars %in% pcdomainlst]
-
-    
+  
+  
   
   ###############################################################################
   ## 12. Check pwhereqry and ACI
@@ -885,7 +893,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     }
   }
   
-
+  
   ###############################################################################
   ## 14. Get plot and cond if keepall = TRUE
   ###############################################################################
@@ -1039,100 +1047,100 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   if (adjtree) {
     if (getadjplot) {
       stop("not available yet")
-    #   
-    #   message("building query for plot-level adjustments...")
-    #   adjjoinid <- cuniqueid
-    #   
-    #   ## Build FROM query including subplot and subp_cond
-    #   pcfromqry <- "\n FROM pltcondx pc"
-    #   
-    #   ## Build WHERE query to filter nonsampled plots
-    #   pcADJwhereqry <- getADJwherePLOT(condflds, conda. = pca.)
-    #   
-    #   
-    #   if (bysubp) {
-    #     adjjoinid <- subplotid
-    #     
-    #     ## Build WHERE query for removing nonsampled subplots
-    #     subpwhereqry <- getADJwhereSUBP(subplotflds, 
-    #                                     adjwhereqry = pcADJwhereqry)
-    #     
-    #     subpa. <- "subp."
-    #     subpca. <- "subpc."
-    #     subpjoinqry <- getjoinqry(subplotid, cuniqueid, subpa., pca.)
-    #     subpfromqry <- paste0(
-    #       pcfromqry,
-    #       "\n JOIN ", SCHEMA., subplotnm, " subp ", subpjoinqry,
-    #       "\n JOIN ", SCHEMA., subp_condnm, " subpc ON (", subpca., subplotid, " = ", pca., cuniqueid,
-    #       " AND ", subpca., condid, " = ", pca., condid,
-    #       " AND ", subpca., subpid, " = ", subpa., subpid, ")")
-    #     
-    #     
-    #     ## First, get query for summarizing subplot sampled proportions
-    #     sumpropqry <- sumpropSUBPqry(fromqry = subpfromqry,
-    #                                  whereqry = subpwhereqry,
-    #                                  ACI = ACI,
-    #                                  selectvars = NULL,
-    #                                  SCHEMA. = SCHEMA.)
-    #     ADJqrySUBP <-
-    #       getADJqry(popType = "VOL",
-    #                 adj = "plot",
-    #                 propvars = propvars,
-    #                 adjfromqry = "\n FROM subpcprop",
-    #                 pwhereqry = NULL,
-    #                 pltidsid = subplotid,
-    #                 pltassgnid = c(pltassgnid, subpid),
-    #                 pltidsa. = NULL)
-    #     #message(ADJqrySUBP)
-    #     
-    #     
-    #     ## Build final query for adjustment factors, including pltids WITH query
-    #     if (!is.null(pltidsWITHqry)) {
-    #       
-    #       pltidsWITHqry <- paste0(
-    #         pltidsWITHqry, ", ",
-    #         "\n----- sum sampled subplot proportions",
-    #         "\nsubpcprop AS ",
-    #         "\n(", sumpropqry, "),",
-    #         "\n----- adjustment factors",
-    #         "\npltidsadj AS ",
-    #         "\n(", ADJqrySUBP, ")")
-    #       #message(pltidsWITHqry)
-    #     } else {
-    #       
-    #       pltidsWITHqry <- paste0(
-    #         "\n----- sum sampled subplot proportions",
-    #         "\nsubpcprop AS ",
-    #         "\n(", sumpropqry, "),",
-    #         "\n----- adjustment factors",
-    #         "\npltidsadj AS ",
-    #         "\n(", ADJqrySUBP, ")")
-    #     }
-    #     
-    #   } else {   ## bysubp = FALSE
-    #     
-    #     ADJqry <-
-    #       getADJqry(popType = "VOL",
-    #                 adj = "plot",
-    #                 propvars = propvars,
-    #                 adjfromqry = pcfromqry,
-    #                 pwhereqry = pcADJwhereqry,
-    #                 pltidsid = cuniqueid,
-    #                 pltassgnid = pltassgnid,
-    #                 pltidsa. = "pc.")
-    #     #message(ADJqry)
-    #     
-    #     ## Build final query for adjustment factors, including pltids WITH query
-    #     if (!is.null(pltidsWITHqry)) {
-    #       
-    #       pltidsWITHqry <- paste0(
-    #         pltidsWITHqry, ", ",
-    #         "\n----- adjustment factors",
-    #         "\npltidsadj AS ",
-    #         "\n(", ADJqry, ")")
-    #       #message(pltidsWITHqry)
-    #     }
-    #   }
+      #   
+      #   message("building query for plot-level adjustments...")
+      #   adjjoinid <- cuniqueid
+      #   
+      #   ## Build FROM query including subplot and subp_cond
+      #   pcfromqry <- "\n FROM pltcondx pc"
+      #   
+      #   ## Build WHERE query to filter nonsampled plots
+      #   pcADJwhereqry <- getADJwherePLOT(condflds, conda. = pca.)
+      #   
+      #   
+      #   if (bysubp) {
+      #     adjjoinid <- subplotid
+      #     
+      #     ## Build WHERE query for removing nonsampled subplots
+      #     subpwhereqry <- getADJwhereSUBP(subplotflds, 
+      #                                     adjwhereqry = pcADJwhereqry)
+      #     
+      #     subpa. <- "subp."
+      #     subpca. <- "subpc."
+      #     subpjoinqry <- getjoinqry(subplotid, cuniqueid, subpa., pca.)
+      #     subpfromqry <- paste0(
+      #       pcfromqry,
+      #       "\n JOIN ", SCHEMA., subplotnm, " subp ", subpjoinqry,
+      #       "\n JOIN ", SCHEMA., subp_condnm, " subpc ON (", subpca., subplotid, " = ", pca., cuniqueid,
+      #       " AND ", subpca., condid, " = ", pca., condid,
+      #       " AND ", subpca., subpid, " = ", subpa., subpid, ")")
+      #     
+      #     
+      #     ## First, get query for summarizing subplot sampled proportions
+      #     sumpropqry <- sumpropSUBPqry(fromqry = subpfromqry,
+      #                                  whereqry = subpwhereqry,
+      #                                  ACI = ACI,
+      #                                  selectvars = NULL,
+      #                                  SCHEMA. = SCHEMA.)
+      #     ADJqrySUBP <-
+      #       getADJqry(popType = "VOL",
+      #                 adj = "plot",
+      #                 propvars = propvars,
+      #                 adjfromqry = "\n FROM subpcprop",
+      #                 pwhereqry = NULL,
+      #                 pltidsid = subplotid,
+      #                 pltassgnid = c(pltassgnid, subpid),
+      #                 pltidsa. = NULL)
+      #     #message(ADJqrySUBP)
+      #     
+      #     
+      #     ## Build final query for adjustment factors, including pltids WITH query
+      #     if (!is.null(pltidsWITHqry)) {
+      #       
+      #       pltidsWITHqry <- paste0(
+      #         pltidsWITHqry, ", ",
+      #         "\n----- sum sampled subplot proportions",
+      #         "\nsubpcprop AS ",
+      #         "\n(", sumpropqry, "),",
+      #         "\n----- adjustment factors",
+      #         "\npltidsadj AS ",
+      #         "\n(", ADJqrySUBP, ")")
+      #       #message(pltidsWITHqry)
+      #     } else {
+      #       
+      #       pltidsWITHqry <- paste0(
+      #         "\n----- sum sampled subplot proportions",
+      #         "\nsubpcprop AS ",
+      #         "\n(", sumpropqry, "),",
+      #         "\n----- adjustment factors",
+      #         "\npltidsadj AS ",
+      #         "\n(", ADJqrySUBP, ")")
+      #     }
+      #     
+      #   } else {   ## bysubp = FALSE
+      #     
+      #     ADJqry <-
+      #       getADJqry(popType = "VOL",
+      #                 adj = "plot",
+      #                 propvars = propvars,
+      #                 adjfromqry = pcfromqry,
+      #                 pwhereqry = pcADJwhereqry,
+      #                 pltidsid = cuniqueid,
+      #                 pltassgnid = pltassgnid,
+      #                 pltidsa. = "pc.")
+      #     #message(ADJqry)
+      #     
+      #     ## Build final query for adjustment factors, including pltids WITH query
+      #     if (!is.null(pltidsWITHqry)) {
+      #       
+      #       pltidsWITHqry <- paste0(
+      #         pltidsWITHqry, ", ",
+      #         "\n----- adjustment factors",
+      #         "\npltidsadj AS ",
+      #         "\n(", ADJqry, ")")
+      #       #message(pltidsWITHqry)
+      #     }
+      #   }
     } else { ## END getadjplot
       adjjoinid <- pltidsid
     }
@@ -1140,20 +1148,20 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     ## Build query for select CASE statement to add adjfactors
     ######################################################################################
     adjalias. <- NULL
-  
+    
     tadjcase <- paste0(
       "\n  (CASE WHEN COALESCE(grm.subptyp_grm, 0) = 0 THEN (0)",
       "\n        WHEN grm.subptyp_grm = 1 THEN padj.adj_factor_subp",
       "\n        WHEN grm.subptyp_grm = 2 THEN padj.adj_factor_micr",
       "\n        WHEN grm.subptyp_grm = 3 THEN padj.adj_factor_macr",
-      "\n   ELSE (0) END)")
-  
+      "\n   ELSE (0) END) AS tadjfac")
+    
   }
   
-
+  
   #################################################################################
   #################################################################################
-  ## 18. Build WITH query to get tree data (tdat)
+  ## 18. Build WITH query to get grm data (tdat)
   #################################################################################
   #################################################################################
   ## Note: only do this if you do not have prev_* columns in your tree data
@@ -1165,6 +1173,14 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     adjjoinid <- "cn"
     
     
+    ## build subquery
+    subqry <- paste0("(SELECT tre_cn, dia_begin, dia_midpt, dia_end,",
+                     "\n                         ", subp_component, " AS component,",
+                     "\n                         ", subp_subptyp, " AS subptyp_grm,",
+                     "\n                         ", subp_tpa, " AS ", tpavar,
+                     "\n                  FROM ", grmnm, ") grm ON (grm.tre_cn = t.cn)")
+    
+    
     ## 18.1. FROM statement for tdat WITH query
     ##########################################################################
     if (treeindb) {
@@ -1173,18 +1189,51 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
       twithfromqry <- paste0("\n FROM ", treenm, " t")
     }
     
+    ## Add table(s) for plot / cond (i.e., pltcondx) for current and previous data
+    if (condnm == "pltcondx") {
+      calias. <- "pc."
+      palias. <- "pc."
+      
+      prevcondnm <- findnm("prevcond", treeflds, returnNULL = TRUE)
+      if (is.null(prevcondnm)) stop("need prevcond variable in tree table")
+      prevpccondnm <- findnm("prev_condid", pcflds, returnNULL = TRUE)
+      if (is.null(prevpccondnm)) stop("need prev_condid variable in pltcond table")
+      
+      tjoinqry <- getjoinqry(c(cuniqueid, condid, prevpccondnm), c(tuniqueid, condid, prevcondnm), calias., talias.)
+      twithfromqry <- paste0(twithfromqry,
+                        "\n JOIN pltcondx pc ", tjoinqry)
+    } else {
+      palias. <- "p."
+      
+      tjoinqry <- getjoinqry(puniqueid, tuniqueid, palias., talias.)
+      twithfromqry <- paste0(twithfromqry,
+                        "\nJOIN ", SCHEMA., plotnm, " p ", tjoinqry,
+                        "\nJOIN ", SCHEMA., plotnm, " pplot ON (pplot.cn = p.prev_plt_cn)",
+                        "\nJOIN ", SCHEMA., condnm, " c ON (c.plt_cn = p.cn)",
+                        "\nJOIN ", SCHEMA., condnm, " pcond ON (pcond.plt_cn = p.prev_plt_cn)")
+    }
+    
+    
+    ## add previous tree
+    twithfromqry <- paste0(
+      twithfromqry,
+      "\n LEFT OUTER JOIN tree ptree ON (ptree.cn = t.prev_tre_cn)",
+      "\n LEFT OUTER JOIN ", subqry)
+    
+    
+    
     ## FROM statement - adjustment factors / pltidsWITHqry
     if (!is.null(pltidsWITHqry)) {
-      tjoinqry <- getjoinqry(tuniqueid, pltidsid, talias., pltidsa.)
+      tjoinqry <- getjoinqry(tuniqueid, pltidsid, talias., "padj.")
       twithfromqry <- paste0(twithfromqry,
-                             "\n JOIN ", pltidsnm, " ", pltidsa, " ", tjoinqry)
+                             "\n JOIN ", pltidsadjnm, " padj ", tjoinqry)
     }
-
-    ## Add previous tree data
-    prev_tre_cnnm <- findnm("PREV_TRE_CN", treeflds, returnNULL = TRUE)
-    prevtjoinqry <- getjoinqry("CN", prev_tre_cnnm, "ptree.", talias.)
-    twithfromqry <- paste0(twithfromqry,
-                           "\n LEFT OUTER JOIN ", SCHEMA., treenm, " ptree ", prevtjoinqry)
+    
+    # ## Add previous tree data
+    # prev_tre_cnnm <- findnm("PREV_TRE_CN", treeflds, returnNULL = TRUE)
+    # prevtjoinqry <- getjoinqry("CN", prev_tre_cnnm, "ptree.", talias.)
+    # twithfromqry <- paste0(twithfromqry,
+    #                        "\n LEFT OUTER JOIN ", SCHEMA., treenm, " ptree ", prevtjoinqry)
     
     
     ## 18.2. WHERE statement for tdat WITH query - tfilter
@@ -1196,6 +1245,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     #######################################################################
     ## Compile initial select variables
     twithvars <- c("CN", "CONDID", "PREVCOND", "SUBP", "TREE")
+    
     twithvarschk <- sapply(twithvars, findnm, treeflds, returnNULL = TRUE)
     if (all(is.null(twithvarschk))) {
       twithvars <- NULL
@@ -1209,13 +1259,150 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     twithqry <- paste0("SELECT ", toString(twithSelect))
     
     ## add sumvars with alias to SELECT statement
-    twithqry <- paste0(twithqry, ", ",
+    twithqry <- paste0(twithqry, ", pc.remper,",
                        "\n       ", toString(paste0(talias., tsumvars)))
     
     ## add sumvars and previous tsumvars with alias to SELECT statement 
     prev_tsumvars <- paste0(tsumvars, " AS prev_", tsumvars)
     twithqry <- paste0(twithqry,  ", ",
                        "\n       ", toString(paste0("ptree.", prev_tsumvars)))
+    
+    
+    ## add grm component variables
+    grmvarlst <- paste0("grm.", c("component", tpavar))
+    twithqry <- paste0(twithqry,  ", ",
+                       "\n       ", toString(grmvarlst))
+    
+    
+    ## Add classifications to SELECT statement
+    domclassifyqry <- NULL
+    
+    nbrclassify <- length(domclassify)
+    if (!is.null(domclassify)) {
+      classnames <- NULL
+      
+      ## keep track of classes in a list
+      classifylist <- list()
+      
+      ## loop through domclassify
+      for (j in 1:nbrclassify) {
+        
+        ## create a nested list for class info
+        classifylist[[j]] <- list()
+        
+        classifyvar <- names(domclassify)[j]
+        classifylut <- domclassify[[j]]
+        if (is.vector(classifylut)) {
+          classifynm <- paste0(classifyvar, "CL")
+          if (classifyvar %in% pcclassifyvars) {
+            classvar. <- "pc."
+            pcdomainlst[pcdomainlst == classifyvar] <- classifynm
+          } else {
+            classvar. <- "tdat."
+            tdomainlst[tdomainlst == classifyvar] <- classifynm
+          }
+          domainlst <- domainlst[domainlst != classifyvar]
+          
+          ## Get classification query
+          cutbreaks <- classifylut
+          fill <- NULL
+          
+          ## create labels for cutbreaks
+          cutlabels <- {}
+          for (i in 1:length(cutbreaks)) {
+            brk <- cutbreaks[i]
+            if (i == length(cutbreaks)) {
+              cutlabels <- c(cutlabels, paste0(brk, "+"))
+            } else {
+              cutlabels <- c(cutlabels, paste0(brk, "-", cutbreaks[i+1]))
+            }
+          }
+          
+          ## create class name
+          classifynm <- paste0(classifyvar, "CL")
+          classifynm <- checknm(classifynm, classnames)
+          classnames <- unique(c(classnames, classifynm))
+          classifylist[[j]]$classifynm <- classifynm
+          tgrpbyvars <- c(tgrpbyvars, classifynm)
+          
+          ## define factor levels for new class
+          classifylist[[j]]$factorlevels <- cutlabels
+          
+          domclassqry <- classifyqry(classcol = classifyvar,
+                                     cutbreaks = cutbreaks,
+                                     cutlabels = cutlabels,
+                                     classnm = classifynm,
+                                     class. = classvar.,
+                                     fill = fill)
+          
+        } else if (is.data.frame(classifylut)) {
+          if (ncol(classifylut) != 2) {
+            message("invalid number of columns for ", classifyvar,
+                    "... must be a vector of class breaks or a data.frame with 2 columns")
+            stop()
+          }
+          
+          ## get class name
+          classifynm <- names(classifylut)[!names(classifylut) %in% classifyvar]
+          classifynm <- checknm(classifynm, classnames)
+          classnames <- unique(c(classnames, classifynm))
+          classifylist[[j]]$classifynm <- classifynm
+
+          
+          ## define factor levels for new class
+          classifylist[[j]]$factorlevels <- unique(classifylut[[classifynm]])
+          
+          if (length(classifynm) != 1) {
+            message("invalid column names for ", classifyvar,
+                    "... the data.frame must include name of variable to domclassify: ", classifyvar)
+            stop()
+          }
+          fromval <- classifylut[[classifyvar]]
+          toval <- classifylut[[classifynm]]
+          if (classifyvar %in% pcclassifyvars) {
+            classvar. <- "pc."
+            pcdomainlst[pcdomainlst == classifyvar] <- classifynm
+          } else {
+            classvar. <- "tdat."
+            tdomainlst[tdomainlst == classifyvar] <- classifynm
+          }
+          domainlst <- domainlst[domainlst != classifyvar]
+          
+          ## Get classification query
+          domclassqry <- classqry(classifyvar, fromval, toval,
+                                  classnm = classifynm,
+                                  class. = classvar.,
+                                  fill = NULL)
+        }
+        classifynmlst[[classifyvar]] <- classifynm
+        
+        domclassifyqry <- paste0(domclassifyqry, "\n", domclassqry)
+        if (nbrclassify > 1 && j < nbrclassify) {
+          domclassifyqry <- paste0(domclassifyqry, ",")
+        }
+      }
+
+      if (length(domainlst) > 0) {
+        twithqry <- paste0(twithqry, ", ", toString(domainlst), ", ", domclassifyqry)
+      } else {
+        twithqry <- paste0(twithqry, ", ", domclassifyqry)
+      }
+    } else if (!is.null(domainlst) && length(domainlst) > 0) {
+      
+      if (length(tdomainlst) > 0) {
+        tdomainlst <- tolower(tdomainlst)
+        twithqry <- paste0(twithqry, ", ", toString(paste0("tdat.", tdomainlst)))
+      } 
+      if (length(pcdomainlst) > 0) {
+        pcdomainlst <- tolower(pcdomainlst)
+        twithqry <- paste0(twithqry, ", ", toString(paste0(pca., pcdomainlst)))
+      }
+    }
+    
+    
+    ## add totals
+    twithqry <- paste0(twithqry, ", ",
+                       tadjcase)
     
     
     ## Build final tree WITH query
@@ -1249,73 +1436,18 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   ## 19.1. FROM statement 
   ####################################################################
   uniqueid <- tuniqueid
-  adjalias. <- "padj."
-  calias. <- "c."
-  palias. <- "p."
-  
+ 
   ## Start FROM statement with beginend and tree tables
   fromqry <- paste0(
     "\nFROM ", SCHEMA., "beginend be,",
-    "\n", treenm, " t")
+    "\n tdat")
   
-  
-  ## Now, build the rest of the FROM statement
-  if (adjtree) {
-    if (getadjplot) {
-      ## add query for calculating adjustment factors
-    } else {
-      tadjjoinqry <- getjoinqry(adjjoinid, tuniqueid, adjalias., talias.)
-      fromqry <- paste0(fromqry,
-                        "\nJOIN pltidsadj padj ", tadjjoinqry)
-    }
-  }
-
-  
-  ## Add table(s) for plot / cond (i.e., pltcondx) for current and previous data
-  if (condnm == "pltcondx") {
-    calias. <- "pc."
-    palias. <- "pc."
-    
-    prevcondnm <- findnm("prevcond", treeflds, returnNULL = TRUE)
-    if (is.null(prevcondnm)) stop("need prevcond variable in tree table")
-    prevpccondnm <- findnm("prev_condid", pcflds, returnNULL = TRUE)
-    if (is.null(prevpccondnm)) stop("need prev_condid variable in pltcond table")
-    
-    tjoinqry <- getjoinqry(c(cuniqueid, condid, prevpccondnm), c(tuniqueid, condid, prevcondnm), calias., talias.)
-    fromqry <- paste0(fromqry,
-                       "\nJOIN pltcondx pc ", tjoinqry)
-  } else {
-    palias. <- "p."
-    
-    tjoinqry <- getjoinqry(puniqueid, tuniqueid, palias., talias.)
-    fromqry <- paste0(fromqry,
-                      "\nJOIN ", SCHEMA., plotnm, " p ", tjoinqry,
-                      "\nJOIN ", SCHEMA., plotnm, " pplot ON (pplot.cn = p.prev_plt_cn)",
-                      "\nJOIN ", SCHEMA., condnm, " c ON (c.plt_cn = p.cn)",
-                      "\nJOIN ", SCHEMA., condnm, " pcond ON (pcond.plt_cn = p.prev_plt_cn)")
-  }
-  
-
-  ## Next, build subquery to query grm table based on tpavar
-  grm_subqry_select.qry <- paste0(
-    "SELECT tre_cn, dia_begin, dia_midpt, dia_end,", 
-    "\n                        ", subp_component, " AS component,", 
-    "\n                        ", subp_subptyp, " AS subptyp_grm,", 
-    "\n                        ", subp_tpa, " AS ", tpavar)
-  
-  grm_subqry_from.qry <- paste0(
-    "\n                 FROM ", SCHEMA., grmnm)
-  
-  grm_subqry.qry <- paste0(grm_subqry_select.qry,
-                           grm_subqry_from.qry)
-  
-  
+ 
   ## And finally, add tree table for previous data, grm tables (begin, midpt), and the grm subquery
   tfromqry <- paste0(fromqry,
-                     "\nLEFT OUTER JOIN ", SCHEMA., beginnm, " tre_begin ON (tre_begin.tre_cn = ", talias., "cn)",
-                     "\nLEFT OUTER JOIN ", SCHEMA., midptnm, " tre_midpt ON (tre_midpt.tre_cn = ", talias., "cn)",
-                     "\nLEFT OUTER JOIN (", grm_subqry.qry, ") grm ON (grm.tre_cn = ", talias., "cn)")
-
+                     "\nLEFT OUTER JOIN ", SCHEMA., beginnm, " tre_begin ON (tre_begin.tre_cn = tdat.cn)",
+                     "\nLEFT OUTER JOIN ", SCHEMA., midptnm, " tre_midpt ON (tre_midpt.tre_cn = tdat.cn)")
+  
   
   ## 19.2 Build SELECT statement 
   ####################################################################
@@ -1326,159 +1458,31 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   
   
   #define grpby variables
-  tgrpbyvars <- paste0(talias., tsumuniqueid)
+  tgrpbyvars <- paste0("tdat.", c(tsumuniqueid, pcdomainlst))
   
   ## add grpby variable to SELECT statement
   tselectqry <- paste0("\nSELECT ", toString(tgrpbyvars))
   
-  ## Add classifications to SELECT statement
-  domclassifyqry <- NULL
-  
-  nbrclassify <- length(domclassify)
-  if (!is.null(domclassify)) {
-    classnames <- NULL
-    
-    ## keep track of classes in a list
-    classifylist <- list()
-    
-    ## loop through domclassify
-    for (j in 1:nbrclassify) {
-      
-      ## create a nested list for class info
-      classifylist[[j]] <- list()
-      
-      classifyvar <- names(domclassify)[j]
-      classifylut <- domclassify[[j]]
-      if (is.vector(classifylut)) {
-        classifynm <- paste0(classifyvar, "CL")
-        if (classifyvar %in% pcclassifyvars) {
-          classvar. <- "pc."
-          pcdomainlst[pcdomainlst == classifyvar] <- classifynm
-        } else {
-          classvar. <- "tdat."
-          tdomainlst[tdomainlst == classifyvar] <- classifynm
-        }
-        domainlst <- domainlst[domainlst != classifyvar]
-        
-        ## Get classification query
-        cutbreaks <- classifylut
-        fill <- NULL
-
-        ## create labels for cutbreaks
-        cutlabels <- {}
-        for (i in 1:length(cutbreaks)) {
-          brk <- cutbreaks[i]
-          if (i == length(cutbreaks)) {
-            cutlabels <- c(cutlabels, paste0(brk, "+"))
-          } else {
-            cutlabels <- c(cutlabels, paste0(brk, "-", cutbreaks[i+1]))
-          }
-        }
-        
-        ## create class name
-        classifynm <- paste0(classifyvar, "CL")
-        classifynm <- checknm(classifynm, classnames)
-        classnames <- unique(c(classnames, classifynm))
-        classifylist[[j]]$classifynm <- classifynm
-        tgrpbyvars <- c(tgrpbyvars, classifynm)
-        
-        ## define factor levels for new class
-        classifylist[[j]]$factorlevels <- cutlabels
-        
-        domclassqry <- classifyqry(classcol = classifyvar,
-                                   cutbreaks = cutbreaks,
-                                   cutlabels = cutlabels,
-                                   classnm = classifynm,
-                                   class. = classvar.,
-                                   fill = fill)
-        
-      } else if (is.data.frame(classifylut)) {
-        if (ncol(classifylut) != 2) {
-          message("invalid number of columns for ", classifyvar,
-                  "... must be a vector of class breaks or a data.frame with 2 columns")
-          stop()
-        }
-        
-        ## get class name
-        classifynm <- names(classifylut)[!names(classifylut) %in% classifyvar]
-        classifynm <- checknm(classifynm, classnames)
-        classnames <- unique(c(classnames, classifynm))
-        classifylist[[j]]$classifynm <- classifynm
-        tgrpbyvars <- c(tgrpbyvars, classifynm)
-        
-        
-        ## define factor levels for new class
-        classifylist[[j]]$factorlevels <- unique(classifylut[[classifynm]])
-        
-        if (length(classifynm) != 1) {
-          message("invalid column names for ", classifyvar,
-                  "... the data.frame must include name of variable to domclassify: ", classifyvar)
-          stop()
-        }
-        fromval <- classifylut[[classifyvar]]
-        toval <- classifylut[[classifynm]]
-        if (classifyvar %in% pcclassifyvars) {
-          classvar. <- "pc."
-          pcdomainlst[pcdomainlst == classifyvar] <- classifynm
-        } else {
-          classvar. <- "tdat."
-          tdomainlst[tdomainlst == classifyvar] <- classifynm
-        }
-        domainlst <- domainlst[domainlst != classifyvar]
-        
-        ## Get classification query
-        domclassqry <- classqry(classifyvar, fromval, toval,
-                                classnm = classifynm,
-                                class. = classvar.,
-                                fill = NULL)
-      }
-      classifynmlst[[classifyvar]] <- classifynm
-      
-      domclassifyqry <- paste0(domclassifyqry, "\n", domclassqry)
-      if (nbrclassify > 1 && j < nbrclassify) {
-        domclassifyqry <- paste0(domclassifyqry, ",")
-      }
-    }
-    tgrpbyvars <- tolower(c(domainlst, tgrpbyvars))
-    
-    if (length(domainlst) > 0) {
-      tselectqry <- paste0(tselectqry, ", ", toString(domainlst), ", ", domclassifyqry)
-    } else {
-      tselectqry <- paste0(tselectqry, ", ", domclassifyqry)
-    }
-  } else if (!is.null(domainlst) && length(domainlst) > 0) {
-    
-    if (length(tdomainlst) > 0) {
-      tdomainlst <- tolower(tdomainlst)
-      tselectqry <- paste0(tselectqry, ", ", toString(paste0("tdat.", tdomainlst)))
-      tgrpbyvars <- unique(c(tgrpbyvars, paste0("tdat.", tdomainlst)))
-    } 
-    if (length(pcdomainlst) > 0) {
-      pcdomainlst <- tolower(pcdomainlst)
-      tselectqry <- paste0(tselectqry, ", ", toString(paste0(pca., pcdomainlst)))
-      tgrpbyvars <- unique(c(tgrpbyvars, paste0(pca., pcdomainlst)))
-    }
-  }
   
   ## Add tpavar and adjustment factors to SELECT statement
   tselectqry <- paste0(tselectqry, ", ",
-                       "\nSUM(grm.", tpavar)
+                       "\nSUM(tdat.", tpavar)
   if (adjtree) {
-    tselectqry <- paste0(tselectqry, " * ",
-                         tadjcase)
+    tselectqry <- paste0(tselectqry, " * tdat.tadjfac")
   }
   
+
   
   ## build case query for SELECT statement
   if (grmtype == 'mort') {
     
     grm_case.qry <- paste0(
-      "\n  (CASE WHEN grm.component LIKE 'MORTALITY%'",
+      "\n  (CASE WHEN tdat.component LIKE 'MORTALITY%'",
       "\n      THEN ", tsumvar_tmidpt, " ELSE (0) END)") 
     
   } else if (grmtype == 'remv') {
     grm_case.qry <- paste0(
-      "\n  (CASE WHEN (grm.component LIKE 'CUT%' OR grm.component LIKE 'DIVERSION%')", 
+      "\n  (CASE WHEN (tdat.component LIKE 'CUT%' OR tdat.component LIKE 'DIVERSION%')", 
       "\n      THEN ", tsumvar_tmidpt, " ELSE (0) END)")
     
   } else if (grmtype == 'grow') {
@@ -1487,31 +1491,31 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     if (all(grm_typ_cd == 2)) {
       grm_case.qry <- paste0(
         "\n  (CASE WHEN be.oneortwo = 2 THEN",
-        "\n     (CASE WHEN (grm.component = 'SURVIVOR' OR grm.component = 'INGROWTH' OR grm.component LIKE 'REVERSION%')",
-        "\n              THEN ((", tsumvar_t, ") / ", palias., "remper)", 
-        "\n           WHEN (grm.component LIKE 'CUT%' OR grm.component LIKE 'DIVERSION%')",
-        "\n              THEN ((", tsumvar_tmidpt, ") / ", palias., "remper)",
+        "\n     (CASE WHEN (tdat.component = 'SURVIVOR' OR tdat.component = 'INGROWTH' OR tdat.component LIKE 'REVERSION%')",
+        "\n              THEN ((", tsumvar_t, ") / tdat.remper)", 
+        "\n           WHEN (tdat.component LIKE 'CUT%' OR tdat.component LIKE 'DIVERSION%')",
+        "\n              THEN ((", tsumvar_tmidpt, ") / tdat.remper)",
         "\n      ELSE (0) END)", 
         "\n   ELSE",
-        "\n     (CASE WHEN (grm.component = 'SURVIVOR' OR grm.component = 'CUT1' 
-                            OR grm.component = 'DIVERSION1' OR grm.component = 'MORTALITY1')", 
-        "\n              THEN CASE WHEN tre_begin.tre_cn IS NOT NULL THEN - ((", tsumvar_tbegin, ") / ", palias., "remper)",
-        "\n                        ELSE - ((", tsumvar_ptree, ") / ", palias., "remper)",
+        "\n     (CASE WHEN (tdat.component = 'SURVIVOR' OR tdat.component = 'CUT1' 
+                            OR tdat.component = 'DIVERSION1' OR tdat.component = 'MORTALITY1')", 
+        "\n              THEN CASE WHEN tre_begin.tre_cn IS NOT NULL THEN - ((", tsumvar_tbegin, ") / tdat.remper)",
+        "\n                        ELSE - ((", tsumvar_ptree, ") / tdat.remper)",
         "\n                   END",
         "\n      ELSE (0) END)",
         "\n   END)) AS ", tsumvarnm) 
       
     } else {
-      grm_case.qry <- "grm.ann_net_growth"
+      grm_case.qry <- "tdat.ann_net_growth"
     }
   }
-
+  
   
   ## Build final SELECT statement
   tselectqry <- paste0(tselectqry, " * ",
                        grm_case.qry)
   
- 
+  
   ## Build query to summarize tree data, including pcwhereqry
   ################################################################
   grm.qry <- paste0(tselectqry,
@@ -1522,10 +1526,10 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   ################################################################
   if (!is.null(pltidsWITHqry)) {
     grm.qry <- paste0(pltidsWITHqry,
-                       "\n-------------------------------------------",
+                      "\n-------------------------------------------",
                       grm.qry)
   }
-
+  
   
   message("running query...")
   if (datindb) {
@@ -1900,7 +1904,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
                     tsumuniqueid = uniqueid,
                     pltsp = pltsp)
   
-
+  
   if (!is.null(pcdomainlst)) {
     returnlst$pcdomainlst <- pcdomainlst
   }
