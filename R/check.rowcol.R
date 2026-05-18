@@ -182,7 +182,7 @@ check.rowcol <-
 
     ## if popType == "CHNG" and no colvar is defined...
     ## assume rowvar is previous rowvar and colvar is current rowvar 
-    if (popType == "CHNG" && (is.null(colvar) || colvar == "NONE")) {
+    if (popType %in% c("CHNG", "GRM") && (is.null(colvar) || colvar == "NONE")) {
       colvar <- rowvar
       col.orderby <- row.orderby
       title.colvar <- title.rowvar

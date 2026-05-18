@@ -38,6 +38,7 @@ getMAestimates <- function(esttype,
   response <- estvarn.name
   predselectlst <- list()
   strwtvar <- "Prop"
+  strvar <- NULL
   
   ## Check column names
   prednames <- names(data.frame(matrix(NA,1,length(prednames), 
@@ -333,7 +334,7 @@ getMAestimates <- function(esttype,
       domdatplt <- domdatn[, lapply(.SD, sum, na.rm=TRUE),
                            by=c(unitvar, uniqueid, colvar, prednames), .SDcols=response]
       
-      unit_colestlst <- lapply(estunits, .pbarMA.unit,
+      unit_colestlst <- lapply(estunits, MAest.unit,
                                MAmethod = MAmethod,
                                esttype = esttype,
                                dat = domdatplt,
@@ -366,7 +367,7 @@ getMAestimates <- function(esttype,
       domdatplt[, grpvar := do.call(paste, c(.SD, sep="#")), .SDcols=grpvar]
       
 
-      unit_grpestlst <- lapply(estunits, .pbarMA.unit,
+      unit_grpestlst <- lapply(estunits, MAest.unit,
                                MAmethod = MAmethod,
                                esttype = esttype,
                                dat = domdatplt,

@@ -44,6 +44,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
   addSAdomsdf <- FALSE
   SAdomsdf <- NULL
   save4testing <- FALSE
+  condid <- "CONDID"
   
   if (i == 1) {
     message("getting estimates for ", response, "...")
@@ -132,7 +133,7 @@ getSAestimates <- function(esttype, i, largebnd.unique,
         lapply(largebnd.vals, SAest.large, 
                dat = domdattot, 
                cuniqueid = uniqueid, 
-               largebnd.unique = largebnd.unique, 
+               largebnd.unique = largebnd.unique,
                dunitlut = dunitlut, 
                dunitvar = "DOMAIN", 
                prednames = prednames, 

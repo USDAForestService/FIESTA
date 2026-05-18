@@ -73,7 +73,7 @@ check.outparams <- function(esttype, totals = TRUE,
     if (!rawonly) {
       outlst <- pcheck.output(out_fmt="csv", outfolder=outfolder,
 		         outfn.pre=outfn.pre, outfn.date=outfn.date,
-		         overwrite_layer=overwrite_layer, append_layer=append_layer, gui=gui)
+		         overwrite_layer=overwrite_layer, append_layer=append_layer)
              outfolder <- outlst$outfolder
       overwrite_layer <- outlst$overwrite_layer
       outfn.pre <- outfn.pre
@@ -89,7 +89,7 @@ check.outparams <- function(esttype, totals = TRUE,
         outlst <- pcheck.output(out_dsn=raw_dsn, out_fmt=raw_fmt,
 		           outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date,
 		           overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-		           append_layer=append_layer, gui=gui)
+		           append_layer=append_layer)
         rawfolder <- outlst$outfolder
         raw_fmt <- outlst$out_fmt
         raw_dsn <- outlst$out_dsn

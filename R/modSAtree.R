@@ -321,7 +321,7 @@ modSAtree <- function(SApopdatlst = NULL,
     list.items <- c("pltcondx", "dunitarea", "dunitvar", "dunitlut")
     returnSApopdat <- FALSE
   }
-print("XXX")
+
     
   ###################################################################################
   ## Check output parameters 
@@ -599,7 +599,7 @@ print("XXX")
     if (is.null(key(dunitarea))) {
       setkeyv(dunitarea, dunitvar)
     }
-print("TSET")    
+    
     ###################################################################################
     ## Check parameters and apply plot and condition filters
     ###################################################################################

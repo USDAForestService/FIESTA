@@ -1,4 +1,4 @@
-check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
+check.rowcolPB <- function(esttype, ratio=FALSE, PBx, plotid="PLT_CN",
 	condid="CONDID", pntid=NULL, rowvar=NULL, rowvar.filter=NULL, colvar=NULL,
 	colvar.filter=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL,
 	col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, domvarlst=NULL,
@@ -27,7 +27,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   ## 8. Define domain.
   ## 9. Define PBvars2keep
   ####################################################################################
-
+  
   ## Set global variables
   domainlst=PBx.d <- NULL
 
@@ -44,7 +44,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   ## DEFINE DOMAIN VARIABLES LISTS (VARIABLES TO KEEP AND EXCLUDE)
 
   ## CHECK domlut
-  domlut <- pcheck.table(domlut, tabnm="domlut", nullcheck=TRUE, gui=gui)
+  domlut <- pcheck.table(domlut, tabnm="domlut", nullcheck=TRUE)
 
   if (!is.null(domlut)) {
     domlutvars <- c("DOMCODE", "DOMNAME")
@@ -70,15 +70,15 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   ## Check row.add0 and col.add0
   ########################################################
   row.add0 <- pcheck.logical(row.add0, varnm="row.add0",
-		title="Add 0 for row?", first="NO", gui=gui)
+		title="Add 0 for row?", first="NO")
   col.add0 <- pcheck.logical(col.add0, varnm="col.add0",
-		title="Add 0 for column?", first="NO", gui=gui)
+		title="Add 0 for column?", first="NO")
 
   ##############################################################
   ### ROW VARIABLE
   ##############################################################
   uniquerow <- NULL
-  rowvar <- pcheck.varchar(var2check=rowvar, varnm="rowvar", gui=gui,
+  rowvar <- pcheck.varchar(var2check=rowvar, varnm="rowvar",
 		checklst=c("NONE", varlst), caption="Row variable",
 		warn=paste(rowvar, "not found"))
   if (is.null(rowvar)) rowvar <- "NONE"
@@ -114,7 +114,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
         rowlut <- data.table(rowlut)
         setnames(rowlut, rowvar)
       } else {
-        rowlut <- pcheck.table(rowlut, gui=gui, tabnm=rowlut, caption="Row look up?")
+        rowlut <- pcheck.table(rowlut, tabnm=rowlut, caption="Row look up?")
       }
     }
 
@@ -185,7 +185,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   ##############################################################
   uniquecol <- NULL
   varlst <- varlst[which(!varlst %in% rowvar)]
-  colvar <- pcheck.varchar(var2check=colvar, varnm="colvar", gui=gui,
+  colvar <- pcheck.varchar(var2check=colvar, varnm="colvar",
 		checklst=c("NONE", varlst), caption="Column variable",
 		warn=paste(colvar, "not found"))
   if (is.null(colvar)) colvar <- "NONE"
@@ -201,7 +201,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
         collut <- data.table(collut)
         setnames(collut, colvar)
       } else {
-        collut <- pcheck.table(collut, gui=gui, tabnm=collut, caption="Column look up?")
+        collut <- pcheck.table(collut, tabnm=collut, caption="Column look up?")
       }
     }
 
