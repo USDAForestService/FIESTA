@@ -248,13 +248,15 @@ check.estdata <-
   
   ## Add ACI.filter to pcwhereqry
   #############################################################################
-  if (esttype %in% c("TREE", "RATIO") && !ACI && landarea != "FOREST") {
-    ACI.filter <- "c.COND_STATUS_CD = 1"
-    if (!is.null(pcwhereqry)) {
-      pcwhereqry <- paste0(pcwhereqry,
-                          "\n  AND ", ACI.filter)
-    } else {
-      pcwhereqry <- paste0("\n WHERE ", ACI.filter)
+  if (esttype %in% c("TREE", "RATIO", "P2VEG")) {
+    if (!ACI && landarea != "FOREST") {
+      ACI.filter <- "c.COND_STATUS_CD = 1"
+      if (!is.null(pcwhereqry)) {
+        pcwhereqry <- paste0(pcwhereqry,
+                             "\n  AND ", ACI.filter)
+      } else {
+        pcwhereqry <- paste0("\n WHERE ", ACI.filter)
+      }
     }
   }
 
@@ -312,14 +314,21 @@ check.estdata <-
     #dbqueriesWITH$pltcondxWITH <- pltcondxWITHqry
     
     if (popType == "P2VEG") {
-      # pltcondxP2VEG.qry <- paste0(pltcondxP2VEGqry,
-      #                             pcwhereqry)
+      pltcondxP2VEG.qry <- paste0(pltcondxP2VEGqry,
+                                  pcwhereqry)
+      
+      ## Build WITH query for pltcondx, including pltids WITH query
+      pltcondxWITHqry <- paste0(pltidsadjWITHqry, ", ",
+                                "\n----- pltcondx",
+                                "\npltcondx AS",
+                                "\n(", pltcondxP2VEG.qry, ")")
+      
       
       ## Build WITH query for pltcondx, including pltidsadj WITH query
       pltcondxadjWITHqry <- paste0(pltidsadjWITHqry, ", ",
                                    "\n----- pltcondx",
                                    "\npltcondx AS",
-                                   "\n(", pltcondxP2VEGqry, ")")
+                                   "\n(", pltcondxP2VEG.qry, ")")
       #dbqueriesWITH$pltcondxadjWITH <- pltcondxadjWITHqry
       
     } else {

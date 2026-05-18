@@ -1136,10 +1136,10 @@ datSumCoverDom <- function(tab = NULL,
   
   #################################################################################
   #################################################################################
-  ## 15. Build query for summarizing tree data
+  ## 15. Build query for summarizing understory vegetation data
   #################################################################################
   #################################################################################
-  message("building query for summarizing tree data...\n")
+  message("building query for summarizing understory vegetation data...\n")
   
   
   ## 15.1. FROM statement 
