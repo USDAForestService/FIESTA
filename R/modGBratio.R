@@ -661,13 +661,16 @@ modGBratio <- function(GBpopdat,
   estvarn.filter <- treedat$estvarn.filter
   tdomvarlstn <- treedat$tdomvarlstn
   estunitsn <- treedat$estunitsn
-  treeqry <- treedat$treeqry
+  treeqryn <- treedat$treeqryn
   classifynmlst <- treedat$classifynmlst
 
   if (ratiotype == "PERTREE") {
+    tdomdatd <- treedat$tdomdat
     estvard <- treedat$estvard
     estvard.name <- treedat$estvard.name
     tdomvarlstd <- treedat$tdomvarlstd
+    estunitsd <- treedat$estunitsd
+    treeqryd <- treedat$treeqryd
   } else {
     estvard <- treedat$estvard
     tdomvarlstd <- NULL
@@ -691,7 +694,7 @@ modGBratio <- function(GBpopdat,
   ###################################################################################
   ### Get condition-level domain data
   ###################################################################################
-  cdomdat=estvard.name <- NULL
+  cdomdat <- NULL
   if (ratiotype == "PERACRE") {
     conddat <- 
       check.cond(areawt = areawt,
@@ -716,7 +719,6 @@ modGBratio <- function(GBpopdat,
     estvard.name <- conddat$estnm
   } 
   
-
   ###############################################################################
   ### Get titles for output tables
   ###############################################################################
@@ -762,14 +764,21 @@ modGBratio <- function(GBpopdat,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
- 
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
+  if (ratiotype == "PERTREE") {
+    domdatd <- tdomdatd
+    domdatdqry <- treeqryd
+  } else {
+    domdatd <- cdomdat
+    domdatdqry <- cdomdatqry
+  }
+
   estdat <- 
     getGBestimates(esttype = esttype,
                    domdatn = tdomdat,
-                   domdatd = cdomdat,
+                   domdatd = domdatd,
                    uniqueid = tuniqueid, 
                    condid = condid,
                    estvarn.name = estvarn.name,
@@ -887,9 +896,9 @@ modGBratio <- function(GBpopdat,
 
     rawdat <- tabs$rawdat
     rawdat$domdatn <- setDF(tdomdat) 
-    rawdat$domdatd <- setDF(cdomdat) 
-    rawdat$domdatnqry <- treeqry
-    rawdat$domdatdqry <- cdomdatqry
+    rawdat$domdatd <- setDF(domdatd) 
+    rawdat$domdatnqry <- treeqryn
+    rawdat$domdatdqry <- domdatdqry
     rawdat$estvarn <- estvarn.name
     rawdat$estvarn.filter <- estvarn.filter
     if (ratiotype == "PERACRE") {

@@ -1881,7 +1881,7 @@ datSumTree <- function(tree = NULL,
     if (condinWITHqry) {
       pctjoinqry <- getjoinqry(c(cuniqueid, condid), c(tuniqueid, condid), "pc.", "t.")
       twithfromqry <- paste0(twithfromqry,
-                             "\n JOIN pltcondx pc ", pctjoinqry)
+                             "\n LEFT JOIN pltcondx pc ", pctjoinqry)
     }
   }
   if (seedonly || addseed) {
@@ -1889,7 +1889,7 @@ datSumTree <- function(tree = NULL,
     if (condinWITHqry) {
         pcsjoinqry <- getjoinqry(c(cuniqueid, condid), c(tuniqueid, condid), "pc.", "s.")
       swithfromqry <- paste0(swithfromqry,
-                             "\n JOIN pltcondx pc ", pcsjoinqry)
+                             "\n LEFT JOIN pltcondx pc ", pcsjoinqry)
     }
   }
 
@@ -1900,7 +1900,7 @@ datSumTree <- function(tree = NULL,
       if (is.null(adjvarchk)) {
         tadjjoinqry <- getjoinqry(adjjoinid, cuniqueid, adjalias., talias.)
         twithfromqry <- paste0(twithfromqry,
-                               "\n JOIN pltidsadj adj ", tadjjoinqry)
+                               "\n LEFT JOIN pltidsadj adj ", tadjjoinqry)
       }
     # } else {
     #   
@@ -1950,12 +1950,12 @@ datSumTree <- function(tree = NULL,
         }
       }
     }
-    
+ 
     if (addseed || seedonly) {
       sfilter <- suppressMessages(check.logic(seedflds,
                                               statement=tfilter, stopifinvalid=FALSE))
       if (!is.null(sfilter)) {
-        swhereqry <- paste0("\n WHERE ", RtoSQL(tfilter))
+        swhereqry <- paste0("\n WHERE ", RtoSQL(sfilter))
         
         ## Add alias to seedling filters
         schkvars <- check.logic.vars(seedflds, swhereqry, returnVars = TRUE)
@@ -2453,6 +2453,7 @@ datSumTree <- function(tree = NULL,
     sumdat[, (tcols) := round(.SD, tround), .SDcols=tcols]
   }
 
+
   ## Join tables
   #############################################################
   if (keepall) {
@@ -2477,14 +2478,14 @@ datSumTree <- function(tree = NULL,
       #}
     }
     if (bycond && !is.null(condx)) {
-      sumdat <- sumdat[condx]
+      condcols <- pcdomainlst[pcdomainlst %in% names(condx)]
+      sumdat <- merge(condx, sumdat, by = c(tsumuniqueid, condcols), all.x = TRUE)
       if (NAto0) {
         sumdat <- DT_NAto0(sumdat, cols=tcols)
       }
     }
     setcolorder(sumdat, c(names(sumdat)[!names(sumdat) %in% tcols], tcols))
   }
-
 
   ## Get metadata
   #############################################################

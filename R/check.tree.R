@@ -23,6 +23,8 @@ check.tree <-
   ###################################################################################
   ### GETS ESTIMATION DATA FROM TREE TABLE
   ###################################################################################
+  keepall <- ifelse (esttype == "RATIO" && ratiotype == "PERTREE", TRUE, FALSE)
+  #keepall <- FALSE
 
   ## Set global variables
   tdomvarlstn=tdomtotnm=estunitsd=variable=tsumvard=tdomvarlstd=tdomtotdnm <- NULL  
@@ -77,7 +79,8 @@ check.tree <-
                                                  adjTPA = adjTPA,
                                                  TPA = estvarn.TPA,
                                                  metric = metric,
-                                                 ACI = ACI),
+                                                 ACI = ACI,
+                                                 keepall = keepall),
                     tabIDs = list(plt = puniqueid),
                     database_opts = database_options(schema = schema))
 
@@ -127,7 +130,8 @@ check.tree <-
                                               adjTPA = adjTPA,
                                               TPA = estvarn.TPA,
                                               metric = metric,
-                                              ACI = ACI),
+                                              ACI = ACI,
+                                              keepall = keepall),
                  tabIDs = list(plt = puniqueid),
                  database_opts = database_options(schema = schema))
 
@@ -202,7 +206,8 @@ check.tree <-
                                                    adjTPA = adjTPA,
                                                    TPA = estvarn.TPA,
                                                    metric = metric,
-                                                   ACI = ACI),
+                                                   ACI = ACI,
+                                                   keepall = keepall),
                       tabIDs = list(plt = puniqueid),
                       database_opts = database_options(schema = schema))
       
@@ -217,6 +222,10 @@ check.tree <-
       tdomtotdnm <- tdomdata$tdomtotnm
       tsumuniqueid <- tdomdata$tsumuniqueid
 
+      ## Set as data.table with key as tsumuniqueid
+      tdomdatd <- data.table(tdomdatd)
+      setkeyv(tdomdatd, tsumuniqueid)
+      
       # if (!pivot) {
       #   tdomdatd <- tdomdatd[!is.na(tdomdatd[[tdomvar]]),]
       # }
@@ -257,7 +266,8 @@ check.tree <-
                                                 adjTPA = adjTPA,
                                                 TPA = estvarn.TPA,
                                                 metric = metric,
-                                                ACI = ACI),
+                                                ACI = ACI,
+                                                keepall = keepall),
                    tabIDs = list(plt = puniqueid),
                    database_opts = database_options(schema = schema))
       if (is.null(treedata)) {
@@ -269,13 +279,20 @@ check.tree <-
       treeqryd <- treedata$treeqry
       tsumuniqueid <- treedata$tsumuniqueid
       
+      ## Set as data.table with key as tsumuniqueid
+      tdomdatd <- data.table(tdomdatd)
+      setkeyv(tdomdatd, tsumuniqueid)
+  
+      
       names(tdomdatd)[names(tdomdatd) == tsumvard] <- paste(tsumvard, "d", sep=".")
       tsumvard <- paste(tsumvard, "d", sep=".")
       tdomvarlstd <- NULL
     }
     
     ## Merge table with denominator to table with numerator
-    tdomdat <- merge(tdomdat, tdomdatd, by=tsumuniqueid)
+    tdomdat <- merge(tdomdat[, c(tsumuniqueid, bydomainlst, tsumvarn), with = FALSE], 
+                     tdomdatd[, c(tsumuniqueid, bydomainlst, tsumvard), with = FALSE], 
+                     by = c(tsumuniqueid, bydomainlst))
     setkeyv(tdomdat, tsumuniqueid)
     
     unitcol <- ifelse (metric, "METRICUNITS", "UNITS")
@@ -292,7 +309,7 @@ check.tree <-
     if (seedlings == "Y" && length(tsumvard) > 1) {
       tsumvard <- tsumvard[length(tsumvard)]
     }
-    treedat <- list(tdomdat = tdomdat, 
+    treedat <- list(tdomdat = tdomdat,
                     tsumuniqueid = tsumuniqueid,
                     estvarn = estvarn, 
                     estvarn.name = tsumvarn,
@@ -308,6 +325,15 @@ check.tree <-
 		                estunitsd = estunitsd,
 		                tdomainlst = tdomainlst,
 		                pcdomainlst = pcdomainlst)
+    
+    if (ratiotype == "PERTREE") {
+      treedat$tdomdatd <- tdomdatd
+      treedat$estvard <- estvard
+      treedat$estvard.name <- tsumvard
+      treedat$estvard.filter <- estvard.filter
+      treedat$treeqryd <- treeqryd
+    }
+    
   } else {
     
     if (seedlings == "Y" && length(tsumvarn) > 1) {

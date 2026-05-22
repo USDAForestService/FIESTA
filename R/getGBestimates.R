@@ -92,10 +92,12 @@ getGBestimates <- function(esttype,
   ## Join domdat to pltassgnx using data.table key and all.y=TRUE
   estunits <- unique(pltassgnx[[unitvar]])
   nbrunits <- length(estunits)
+  
+  setkeyv(pltassgnx, pltassgnid)
+  setkeyv(domdatn, uniqueid)
   domdatn <- pltassgnx[domdatn]
-  #uniqueid <- pltassgnid
-  #domdatn <- domdatn[pltassgnx]
- 
+
+  
   if (esttype == "RATIO") {
     
     ## Append TOTAL to domdatn
@@ -116,7 +118,6 @@ getGBestimates <- function(esttype,
     domdatn <- chk$tab2
   }
   uniqueid <- pltassgnid
-
 
 
   ## Sum data to condition/domain-level
@@ -163,6 +164,7 @@ getGBestimates <- function(esttype,
       domdatcond <- domdattmp[, c(byvarsd, estvard.name, estvarn.name), with = FALSE]
 
     } else {
+      
       ## merge denominator and numerator data keeping rows in denominator (all.x=TRUE)
       domdatcond <- merge(domdatdcond, domdatn, by = byvarsd, all.x = TRUE)
     }
@@ -174,6 +176,7 @@ getGBestimates <- function(esttype,
 
     domdatcond <- domdatn[, lapply(.SD, sum, na.rm=TRUE),
                           by = c(byvarsn, "TOTAL"), .SDcols = estvarn.name]
+    
   }
 
 
@@ -207,7 +210,6 @@ getGBestimates <- function(esttype,
         domdattot <- domdattot[!is.na(domdattot[["TOTAL"]]),]
       }
     }
-    
 
     ## generate estimates by estimation unit
     unit_totest <-
