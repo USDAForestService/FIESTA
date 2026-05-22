@@ -280,7 +280,7 @@ datSumCoverDom <- function(tab = NULL,
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn,
                             out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date,
                             overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-                            add_layer=add_layer, append_layer=append_layer, gui=gui)
+                            add_layer=add_layer, append_layer=append_layer)
     outlst$out_layer <- "tabsum"
   }
   

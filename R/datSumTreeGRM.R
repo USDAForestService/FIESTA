@@ -297,9 +297,11 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   ## Check output parameters
   if (savedata) {
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn,
-                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date,
-                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-                            add_layer=add_layer, append_layer=append_layer, gui=gui)
+                            out_fmt=out_fmt, outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date,
+                            overwrite_dsn=overwrite_dsn, 
+                            overwrite_layer=overwrite_layer,
+                            add_layer=add_layer, append_layer=append_layer)
     outlst$out_layer <- "tabsum"
   }
   
@@ -513,7 +515,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
       pltidsadjnm <- pltadjlst$tabnm
     }  
   }  
-  
+
   
   ###############################################################################
   ## 4. Check if condition table is in WITH queries (e.g., pltcondx)
@@ -616,11 +618,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   }
   
   ## list of plot and cond fields
-  if (is.null(pltcondflds)) {
-    pcflds <- tolower(c(pltflds, condflds))
-  } else {
-    pcflds <- tolower(pltcondflds)
-  }
+  pcflds <- toupper(c(pltflds, condflds))
   
   
   ###############################################################################
@@ -748,14 +746,13 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   tdomainlst <- pdomainlst <- cdomainlst <- NULL
   domainlst <- bydomainlst
   
-  
   ## check if all variables in bydomainlst are in the input tables
-  bydomainlst <- tolower(bydomainlst)
-  if (!all(bydomainlst %in% c(treeflds, pcflds))) {
-    missdomain <- bydomainlst[!bydomainlst %in% c(treeflds, pcflds)]
+  bydomainchk <- sapply(bydomainlst, findnm, c(treeflds, pltcondflds), returnNULL = TRUE)
+  missdomain <- names(bydomainchk)[unlist(lapply(bydomainchk, is.null))]
+  if (length(missdomain) > 0) {
     stop("invalid variable in bydomainlst: ", toString(missdomain))
   }
-  
+
   ## Check if domain variables are in tree or seedling table
   ## Check if domain variables are in tree or seedling table
   if (!is.null(domainlst)) {
@@ -876,7 +873,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
   #   }
   # }
   
-  
+
   ###############################################################################
   ## 13. Check if adjustment variable is in tab
   ###############################################################################
@@ -887,12 +884,13 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     if (!is.null(pltidsWITHqry) && check.logic.vars("pltidsadj", pltidsWITHqry)) {
       getadjplot <- FALSE
     } else if (datsource == "obj" && exists("pltidsadj") && is.data.frame(pltidsadj)) {
+      pltidsadjnm <- "pltidsadj"
       getadjplot <- FALSE
     } else {
       getadjplot <- TRUE
     }
   }
-  
+
   
   ###############################################################################
   ## 14. Get plot and cond if keepall = TRUE
@@ -1219,16 +1217,14 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
       twithfromqry,
       "\n LEFT OUTER JOIN tree ptree ON (ptree.cn = t.prev_tre_cn)",
       "\n LEFT OUTER JOIN ", subqry)
-    
-    
-    
+
     ## FROM statement - adjustment factors / pltidsWITHqry
-    if (!is.null(pltidsWITHqry)) {
+    if (adjtree) {
       tjoinqry <- getjoinqry(tuniqueid, pltidsid, talias., "padj.")
       twithfromqry <- paste0(twithfromqry,
                              "\n JOIN ", pltidsadjnm, " padj ", tjoinqry)
     }
-    
+   
     # ## Add previous tree data
     # prev_tre_cnnm <- findnm("PREV_TRE_CN", treeflds, returnNULL = TRUE)
     # prevtjoinqry <- getjoinqry("CN", prev_tre_cnnm, "ptree.", talias.)
@@ -1478,12 +1474,12 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
     
     grm_case.qry <- paste0(
       "\n  (CASE WHEN tdat.component LIKE 'MORTALITY%'",
-      "\n      THEN ", tsumvar_tmidpt, " ELSE (0) END)") 
+      "\n      THEN ", tsumvar_tmidpt, " ELSE (0) END)) AS ", tsumvarnm) 
     
   } else if (grmtype == 'remv') {
     grm_case.qry <- paste0(
       "\n  (CASE WHEN (tdat.component LIKE 'CUT%' OR tdat.component LIKE 'DIVERSION%')", 
-      "\n      THEN ", tsumvar_tmidpt, " ELSE (0) END)")
+      "\n      THEN ", tsumvar_tmidpt, " ELSE (0) END)) AS ", tsumvarnm)
     
   } else if (grmtype == 'grow') {
     
@@ -1506,7 +1502,7 @@ datSumTreeGRM <- function(grmtables = list(plt = "plot",
         "\n   END)) AS ", tsumvarnm) 
       
     } else {
-      grm_case.qry <- "tdat.ann_net_growth"
+      grm_case.qry <- paste0("tdat.ann_net_growth AS ", tsumvarnm)
     }
   }
   

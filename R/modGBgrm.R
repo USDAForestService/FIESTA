@@ -462,7 +462,6 @@ modGBgrm <- function(GBpopdat,
     rawoutlst <- estdat$rawoutlst
   }
   
- print("TEST") 
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -515,7 +514,7 @@ modGBgrm <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-  
+
 
   ###############################################################################
   ### Get estimation data from tree table
@@ -533,7 +532,7 @@ modGBgrm <- function(GBpopdat,
                   tstatus = eststatus,
                   grmtype = grmtype,
                   tsumvar = estvar,
-                  bydomainlst = domainlst,
+                  bydomainlst = domainlst[domainlst != "TOTAL"],
                   pltcondx = pltcondx,
                   pltidsWITHqry = pltcondxadjWITHqry,
                   pltidsid = pltidsid,
@@ -547,7 +546,7 @@ modGBgrm <- function(GBpopdat,
   tdomvarlst <- treedat$tdomvarlst
   treeqry <- treedat$grmqry
   classifynmlst <- treedat$classifynmlst
-print("TEST3")  
+
   if (sum(tdomdat[[estvar.name]], na.rm=TRUE) == 0) {
     stop("invalid estimate... no tree data returned...")
   }

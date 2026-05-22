@@ -903,7 +903,7 @@ modGBpop <- function(popType = "VOL",
     ACI.filter <- popcheck$ACI.filter
     adjcase <- popcheck$adjcase
     areawt <- popcheck$areawt
-    
+
     sccmx <- popcheck$sccmx
     if (is.null(sccmx) ) {
       stop("must include sccmx data")
